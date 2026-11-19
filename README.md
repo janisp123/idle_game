@@ -1,31 +1,31 @@
-# Idle Game + Browser Game Engineering Library
+# Idle Game — Browser Game Engineering Library
 
-A public hobby project with **two parallel goals**:
+A public hobby project with **two parallel purposes**:
 
-1. **Build an original grimdark fantasy idle browser RPG**, prioritizing mobile portrait usability, atmospheric static artwork, automated mining/hunting, fair cooperative play and unlimited offline progress.
-2. **Create a freely readable, growing research library** on how browser/idle games are implemented — including techniques we may never choose for our own game. Study systems in games such as Idle Clans, Legends of IdleOn, Melvor Idle and open-source implementations without pretending their internal code is public.
+1. **Build an original idle fantasy browser RPG** with mobile portrait controls, atmospheric static illustrations, automated activities, cooperative play and unlimited offline progression.
+2. **Maintain a public learning library** explaining practical browser-game mechanics and engineering techniques, including approaches we will never use ourselves.
 
-This repository is currently primarily **planning and technical research**. The game itself is not yet implemented.
+This repository is currently primarily design documentation and engineering research. **The game is not yet implemented.**
 
-## Start here
+## Explore
 
 | Resource | Purpose |
 | --- | --- |
-| [Public research library](docs/RESEARCH_LIBRARY.md) | Mission, topic catalog, evidence standards, relevance labels and contribution format |
-| [Useful GitHub examples](docs/USEFUL_EXAMPLES.md) | Source-linked examples, real implementation patterns, risks and licensing |
-| [Technical article template](docs/library/ENTRY_TEMPLATE.md) | How to contribute a reusable technical explanation |
-| [Our game's brainstorm](docs/BRAINSTORM.md) | Gameplay possibilities, design direction and open questions; **not a task list** |
-| [Approved decisions](docs/DECISIONS.md) | Durable, owner-approved choices |
-| [Development tasks](docs/TD_LIST.md) | Only actual authorized implementation work |
+| [Research library](docs/RESEARCH_LIBRARY.md) | Purpose, topic index, article standards and relevance labels |
+| [Useful implementation examples](docs/USEFUL_EXAMPLES.md) | Standalone algorithms, tradeoffs and implementation sketches |
+| [Technical article template](docs/library/ENTRY_TEMPLATE.md) | Consistent format for future educational guides |
+| [Game brainstorm](docs/BRAINSTORM.md) | Design possibilities, directions, rejected ideas and open questions |
+| [Durable decisions](docs/DECISIONS.md) | Owner-approved project decisions |
+| [Development tasks](docs/TD_LIST.md) | Actual authorized implementation tasks |
 
-### How we label research
+## Two different kinds of relevance
 
-A technique gets a separate **fit-for-our-game** label (`FIT`, `ADAPT`, `NOT-FIT`, `UNDECIDED`) and an **evidence** label (`CODE-READ`, `DOCS`, `OBSERVED`, `TESTED`, `HYPOTHESIS`). Even `NOT-FIT` examples stay in the library because other developers may benefit.
+A technique can be valuable to browser-game developers **even when it doesn't suit our own game**. Entries use `FIT`, `ADAPT`, `NOT-FIT` and `UNDECIDED` tags **only to assess our game**. Evidence labels distinguish untested design notes, prototypes, executed tests and benchmarks.
 
-Research describes outside projects in our own words with exact source links and license checks; a link or open source claim does not mean code or artwork has been incorporated into this project.
+## Documentation principles
 
-## For Chat / ChatGPT Work / Codex
+The public guides are independently written explanations and original illustrative examples. They do not name particular games consulted while researching, link to outside research repositories, or reproduce third-party code/artwork. No claims of testing are made without real test results. If third-party software is ever integrated into the game, applicable copyright licenses and mandatory notices must be respected.
 
-Before project actions, follow [AGENTS.md](AGENTS.md) and the [agent protocol](docs/AGENT_PROTOCOL.md), starting with the current remote `main:docs/TD_LIST.md`. The human owner approves changes, and research does **not** authorize implementation. Preserve the common project template workflow and PR review policy.
+## Chat / CW / Codex coordination
 
-**License note:** Referenced repositories keep their own licenses. This repository does not automatically grant permission to reuse third-party code or assets.
+Read [AGENTS.md](AGENTS.md) and the [agent protocol](docs/AGENT_PROTOCOL.md) before taking project actions, beginning with current remote `main:docs/TD_LIST.md`. The owner approves changes. Brainstorming and library materials **do not** authorize gameplay implementation.
