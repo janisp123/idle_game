@@ -37,15 +37,15 @@ Avoid ambiguous names such as `time`, `rate` or `delta` at boundaries between mo
 
 For one resource while rates remain constant:
 
-\[
+$
 \Delta stock = (P-C)\frac{\Delta t_{ms}}{1000}
-\]
+$
 
 If `C > P` and `stock > 0`, the resource reaches zero after:
 
-\[
+$
 t_{empty,ms}=\frac{1000\cdot stock}{C-P}
-\]
+$
 
 **Dimensional check:** stock is units, `C-P` is units/second; their quotient is **seconds**, so multiplication by 1,000 converts the result to milliseconds.
 
