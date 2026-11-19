@@ -1,49 +1,44 @@
-# [Technique / pattern] — technical reference
+# [Technical pattern] — Engineering guide
 
-> Copy this template when creating a substantial entry under `docs/library/`. Remove fields that are truly inapplicable, but never omit provenance, evidence limits or license status.
+> Template for original, standalone technical explanations under `docs/library/`. Do not include names or URLs of games or outside repositories consulted. Do not copy third-party code or artwork.
 
-**Category:** (engine / offline / combat / loot / multiplayer / backend / UI / performance / operations / other)  
-**General purpose:** What problem does this solve for browser-game developers?  
-**Our game:** `[OUR-GAME: FIT | ADAPT | NOT-FIT | UNDECIDED]` — one sentence explaining why  
-**Evidence:** `[EVIDENCE: CODE-READ | DOCS | OBSERVED | TESTED | HYPOTHESIS]`  
-**Checked:** YYYY-MM-DD
+**Category:** Engine / offline / combat / loot / multiplayer / server / UI / performance / operations / other  
+**General-purpose benefit:** Who would find this useful and why?  
+**Our-game fit:** `[OUR-GAME: FIT | ADAPT | NOT-FIT | UNDECIDED]` and explanation  
+**Evidence:** `[EVIDENCE: DESIGN-NOTE | PROTOTYPED | TESTED | BENCHMARKED]`  
+**Reviewed:** YYYY-MM-DD
 
-## What it does
+## Problem and intended use
 
-Explain the actual behavior without assuming undocumented internals.
-
-## Sources and permission
-
-| Project | Relevant exact source link | License file or UNVERIFIED | Verified how/when |
-| --- | --- | --- | --- |
-| Name + URL | File URL, optionally pinned to commit | Link/status; check assets separately | Code/docs/test/observation |
+Define the problem without implying this is the only solution.
 
 ## How it works
 
-Explain the algorithm, data flow, authoritative state, events and boundaries in your own words. Use brief original pseudocode where useful; do not paste substantial third-party code.
+Explain data models, algorithms, event ordering, authoritative state, failure handling and timing. Use **independently written, original** pseudocode if needed. Distinguish facts, estimates and hypotheses.
 
-## Why it works / tradeoffs
+## Implementation sketch
 
-- Advantages
-- Disadvantages and failure modes
-- Performance and storage cost (measured vs estimated)
-- Security, anti-cheat and correctness considerations
-- Player experience consequences
+Give a concise, reusable interface or example. Do not paste or adapt copyrighted third-party source code.
 
-## Alternative implementations
+## Tradeoffs and alternatives
 
-Describe competing solutions, including why another type of game might reasonably choose differently.
+- CPU/memory/network/database costs and how they scale
+- Strengths and weaknesses
+- Race conditions, cheat prevention, security and correctness
+- When another design is preferable
 
-## Reusing the idea
+## Test or performance evidence
 
-Design sketch, interface, adaptation notes, tests and edge cases. No assumption that a GitHub README makes a pattern production-ready.
+Include a reproducible command and results **only if actually executed on our own code or prototype**. Otherwise provide a test plan and mark the entry `DESIGN-NOTE`.
 
 ## Our-game assessment
 
-- `[OUR-GAME: ...]` What fits, if anything?
-- Which parts **do not** fit our uncapped offline / low-cost / mobile / minimal scope?
-- Owner decision if approved, or explicitly **NOT APPROVED**.
+Keep general educational value distinct from our design. Explain what fits our low-cost, mobile-first, uncapped idle game and what doesn't. A `NOT-FIT` entry can still be valuable to other developers.
 
-## Unknowns and follow-up verification
+## Open questions
 
-List unknowns honestly. Distinguish plans from completed experiments.
+List uncertainties honestly. This article is not an authorized development task.
+
+## Rights and originality
+
+Do not include identifiable outside project names, source destinations, copied code, or borrowed artwork. Explain concepts independently. If integrating third-party software into the actual game, honor all applicable licenses and mandatory notices rather than concealing them.
