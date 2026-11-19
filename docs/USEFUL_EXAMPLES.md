@@ -1,236 +1,302 @@
-# Useful Examples — Idle Game Implementation Reference
+# Useful Examples — Browser Game Engineering Patterns
 
-**Project:** `janisp123/idle_game`  
-**Research date:** 2026-11-19  
-**Type:** Research/reference library — **NOT** a to-do list, approved dependencies, or an instruction to copy code.  
-**Review status:** GitHub READMEs, licenses (where found), and selected implementation files inspected remotely; **no repositories cloned, built, executed or benchmarked yet.**
+**Purpose:** Public educational reference for implementing browser and idle games.  
+**Last edited:** 2026-11-19  
+**Status:** Conceptual engineering guidance. Examples below are original explanatory sketches; they are **not copied source code**, audited software components, or guarantees of production performance.  
+**Scope:** General browser-game techniques, **including features we might never use**. The fit tag is specific to our game and does not indicate whether a technique is valuable to someone else.
 
-## Why this file exists
+See [RESEARCH_LIBRARY.md](RESEARCH_LIBRARY.md) for the library's purpose and [ENTRY_TEMPLATE.md](library/ENTRY_TEMPLATE.md) for longer technical entries. No entry here is an approved implementation task.
 
-Save time for future Chat / CW / Codex research. Before choosing an implementation for idle activities, content modules, saves, combat, dice, server state or mobile UI, check the verified references and pitfalls below instead of searching from zero.
+## Quick index
 
-**Project constraints to protect:** two-activity MVP (stone mining, bunny hunting); beautiful static illustrations; portrait, one-hand mobile UI; 5-task queue; 3d7 encounter dice and one shared group roll; no mana or potions; healing only between battles; 20-member groups with at-most-7-day offline membership; **unlimited solo offline progression even after decades**; no continuous server simulation per dormant account; simple, inexpensive, testable code.
-
-## Quick lookup — where to look first
-
-| Need | Start with | What is actually reusable | Avoid |
+| ID | Technique | General-purpose use | Our-game fit |
 | --- | --- | --- | --- |
-| Modular game engine | [ciefa/idle-game-template](https://github.com/ciefa/idle-game-template) | Pure time-driven systems and event types; engine/UI separation | Its 8-hour offline cap, offline combat freeze, desktop window system |
-| Accurate, testable dice | [ciefa RNG](https://github.com/ciefa/idle-game-template/blob/main/src/game/engine/rng.ts) | Explicit seed + counter + deterministic tests | Trusting a browser to award its own multiplayer loot |
-| Modular resources/zones | [ciefa data schemas](https://github.com/ciefa/idle-game-template/blob/main/src/game/data/schemas.ts) and [iMMO action definitions](https://github.com/luizantoniona/idle-mmorpg/blob/main/idle-mmorpg-data/idle-mmorpg-action/README.md) | IDs, JSON definitions, schema validation | Hardcoding every mine/enemy/zone separately |
-| Minimal mining and XP | [alperiox/skills.ts](https://github.com/alperiox/melvor-clone/blob/main/src/game/skills.ts) | Simple action rules, requirements, XP, input/output handling | Unbounded per-action loops, 24-hour cap, combat paused offline |
-| Save format evolution | [ciefa migrations](https://github.com/ciefa/idle-game-template/blob/main/src/save/migrations/index.ts) | Schema versions and migration concept | Assuming save schemas never change |
-| Multiplayer server boundaries | [iMMO overview](https://github.com/luizantoniona/idle-mmorpg/blob/main/README.md) | Server owns state; client renders; game content separated | Copying a C++/Angular stack just because it exists |
-| Quests / future activity logs | [iMMO event bus](https://github.com/luizantoniona/idle-mmorpg/blob/main/documentation/CharacterEventBus.md) | Publish `item_gained` / `skill_leveled` once, subscribe in other modules | Unvalidated, unbounded event history |
-| Feature-based UI folders | [Skill Issue Chronicles development guide](https://github.com/GylanSalih/Skill-Issue-Chronicles/blob/main/docs/showcase/DEVELOPMENT_GUIDE.md) | Separation of features, shared components and style modules | Heavy 3D/animation stack and daily-login features |
+| P01 | Pure simulation core | Testable gameplay without UI dependencies | `[OUR-GAME: FIT]` |
+| P02 | Event-based offline catch-up | Progress while a user is absent | `[OUR-GAME: ADAPT]` |
+| P03 | Bulk random rewards | Efficient, statistically sound long-term idle loot | `[OUR-GAME: FIT]` |
+| P04 | Configured activities and entities | Expand content without rewriting core logic | `[OUR-GAME: FIT]` |
+| P05 | Versioned saves and migrations | Keep old accounts working after updates | `[OUR-GAME: FIT]` |
+| P06 | Typed event stream | Connect combat, quests, UI logs and statistics | `[OUR-GAME: ADAPT]` |
+| P07 | Server-authoritative multiplayer | Prevent client-side reward forgery | `[OUR-GAME: FIT]` |
+| P08 | Cooperative reward settlement | Distribute group outcomes fairly and exactly once | `[OUR-GAME: ADAPT]` |
+| P09 | Feature-based mobile interface | Responsive navigation and reduced UI complexity | `[OUR-GAME: FIT]` |
+| P10 | Real-time ticking / server loops | Fast-paced continuous multiplayer worlds | `[OUR-GAME: NOT-FIT]` for dormant character simulation |
+| P11 | Offline progression caps | Bound computational or economy exposure | `[OUR-GAME: NOT-FIT]` |
+| P12 | Daily rewards and login streaks | Encourage short repeat sessions | `[OUR-GAME: NOT-FIT]` |
+| P13 | Transactional inventory accounting | Avoid duplication, negative stacks and lost claims | `[OUR-GAME: FIT]` |
+| P14 | Automated testing and observability | Catch errors and measure cost before release | `[OUR-GAME: FIT]` |
 
-**Important:** There is **no verified, ready-made source here** that solves our combination of unlimited 20-year offline calculation **and** synchronized shared multiplayer group rewards. That architecture must be designed and tested specifically for this project.
-
----
-
-## EX-01 — Idle Game Template (highest-priority architecture example)
-
-**Repository:** https://github.com/ciefa/idle-game-template  
-**License checked:** [MIT LICENSE](https://github.com/ciefa/idle-game-template/blob/main/LICENSE) (copyright 2026 ciefa); preserve notices if reusing code. Verify any third-party art separately.  
-**Stack:** TypeScript, React, Vite, Vitest, Zod, Zustand, Tauri/Rust desktop shell.  
-**Confidence:** HIGH for the cited implementation files, NOT for claims of production readiness.
-
-### Relevant inspected source
-
-- [`src/game/engine/tick.ts`](https://github.com/ciefa/idle-game-template/blob/main/src/game/engine/tick.ts): time (`currentTime`, `deltaMs`) is passed in; ordered systems; player action phase; event emission.
-- [`src/game/engine/rng.ts`](https://github.com/ciefa/idle-game-template/blob/main/src/game/engine/rng.ts): seeded random values and a saved counter for reproducibility.
-- [`src/game/engine/offline.ts`](https://github.com/ciefa/idle-game-template/blob/main/src/game/engine/offline.ts): adaptive chunking at nearest meaningful event; **hard cap of 8h**, 60% offline efficiency, and most combat disabled.
-- [`src/game/systems/mining.ts`](https://github.com/ciefa/idle-game-template/blob/main/src/game/systems/mining.ts): compute cycle time/yield separately; start/advance/stop mining; emit completion events.
-- [`src/game/events/types.ts`](https://github.com/ciefa/idle-game-template/blob/main/src/game/events/types.ts): typed event union, including mining completed and XP changes.
-- [`src/game/data/schemas.ts`](https://github.com/ciefa/idle-game-template/blob/main/src/game/data/schemas.ts): structured Zod schemas for ore, locations, modules, NPCs, recipes.
-- [`src/save/schema.ts`](https://github.com/ciefa/idle-game-template/blob/main/src/save/schema.ts) + [`src/save/migrations/index.ts`](https://github.com/ciefa/idle-game-template/blob/main/src/save/migrations/index.ts): save version declaration and version-to-version migration registry.
-- [`CLAUDE.md`](https://github.com/ciefa/idle-game-template/blob/main/CLAUDE.md): developer layout, testing commands and architectural rules.
-
-### What we could adapt
-
-1. **Pure gameplay core:** pass clock and RNG in as explicit inputs, independent of React or any UI.
-2. **Plug-in systems:** add `mining` and `hunting` modules to one ordered engine, not separate incompatible loops.
-3. **Data-driven content:** create Stone Mine / Bunny Hunting Area as JSON with validated IDs, requirements, reward tables and image IDs.
-4. **Typed events:** an encounter can publish `mining_completed`, `bunny_defeated`, `skill_used`, `loot_awarded`; future quests/stats can listen.
-5. **Versioned, validated state:** save migrations before real players accumulate years of progress.
-6. **Determinism:** replay the same inputs/seed in tests and compare exact results, including dice probability.
-
-### What we must NOT copy
-
-- An 8-hour offline cap, reduced offline efficiency, or pausing combat: all contradict our core promise.
-- `simulateOffline` loops up to each event and uses chunks of at most 60 seconds: **cannot simply run that for decades**; requires aggregate math / jumping across state changes.
-- Its cargo capacity, ship mechanics, desktop floating windows, and Tauri save-to-local-file authority.
-- Generated events for every one of millions of historical actions: keep compact aggregates and a bounded recent event log.
-- RNG code **as-is** for server security: deterministic tests are helpful, but server-controlled outcomes must also be protected from prediction/forgery.
-
-**Fit:** learn core structure and patterns; **not** a drop-in online multiplayer backend.
+Tags apply to **our design**, not to technical merit. Each technique remains documented for other developers.
 
 ---
 
-## EX-02 — Melvor Clone (small idle skill implementation)
+## P01 — Pure gameplay simulation
 
-**Repository:** https://github.com/alperiox/melvor-clone  
-**License status:** README says **MIT**, but `LICENSE`, `LICENSE.md`, and `COPYING` were **not found at the paths checked**. **Do not directly copy code until the actual licensing terms are confirmed** (or author grants permission).
-**Stack:** Vanilla TypeScript, Vite, Vitest, Tauri for desktop.
+`[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
 
-### Inspected source
+**Problem:** Mixing timers, UI rendering, inventory changes and network calls makes gameplay unpredictable and hard to test.
 
-- [`src/game/types.ts`](https://github.com/alperiox/melvor-clone/blob/main/src/game/types.ts): compact action, monster, loot, inventory, equipment and game-state interfaces.
-- [`src/game/skills.ts`](https://github.com/alperiox/melvor-clone/blob/main/src/game/skills.ts): requirements, timers, input consumption, reward/XP updates.
-- [`src/game/engine.ts`](https://github.com/alperiox/melvor-clone/blob/main/src/game/engine.ts): active action dispatch, skill/combat tick.
-- [`src/game/offline.ts`](https://github.com/alperiox/melvor-clone/blob/main/src/game/offline.ts): elapsed-time catch-up, rewards and input exhaustion.
+**Pattern:** A simulation function receives a known prior state and explicit inputs: elapsed time, player commands and a source of random outcomes. It produces a new state and a compact list of meaningful events. It should not read the device clock or render a UI itself.
 
-### Useful patterns
+**Illustrative pseudocode (not library code):**
 
-- A tiny MVP can use clear TypeScript domain types for `SkillActionDef`, `MonsterDef`, `LootDrop`, `GameState`.
-- Separate activity **definitions** from activity **execution**.
-- Make minimum skill/tool requirements explicit and rewards/XP easy to audit.
-- The `bank` is a mapping of item ID to item count — close to our unlimited stack concept.
-- Its README states 45 tests; **we have not run them**.
+```text
+advance(state, elapsed, commands, randomSource):
+    state = applyAllowedCommands(state, commands)
+    state = settleCompletedActivities(state, elapsed, randomSource)
+    events = summarizeImportantChanges(state)
+    return state, events
+```
 
-### Cautions
+**Benefits:** Repeatable tests, one ruleset used by online and offline logic, and a UI that can be replaced without altering combat formulas.
 
-- Offline is capped at **86,400 seconds = 24 hours**.
-- Offline calculation loops **once for every action**, so a 20-year absence could be expensive.
-- **Combat does not progress offline**.
-- Live engine uses `requestAnimationFrame`; our static mobile UI should not need a frame-rate-driven gameplay engine.
-- Includes food auto-healing, equipment food slot, selling and town systems: not our design.
-- Its simple local-state save model does not solve anti-cheat or synchronized 20-player groups.
+**Tradeoffs:** The inputs need validation; multiple systems must use a deliberate, documented processing order. Never let an untrusted browser select authoritative rewards.
 
-**Fit:** an understandable learning example for our first mining encounter and XP, not the server/offline engine.
+**Tests:** Same starting state + seed + inputs should yield the same final state; edge cases include zero elapsed time, negative time, duplicate commands and incompatible task configurations.
 
 ---
 
-## EX-03 — iMMO / idle-mmorpg (multiplayer separation and JSON content)
+## P02 — Efficient offline catch-up for very long absences
 
-**Repository:** https://github.com/luizantoniona/idle-mmorpg  
-**License checked:** [MIT LICENSE](https://github.com/luizantoniona/idle-mmorpg/blob/main/LICENSE); preserve copyright notice if reusing software code.  
-**Stack:** C++ backend, Angular/TypeScript web client, JSON content files.
+`[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`
 
-### Inspected source and documentation
+**Problem:** Replaying every action of a character absent for years is expensive. An idle loop performing one encounter per minute would require millions of simulated encounters over long periods.
 
-- [Architecture README](https://github.com/luizantoniona/idle-mmorpg/blob/main/README.md): separate `idle-mmorpg-server/`, `idle-mmorpg-client/`, `idle-mmorpg-data/`.
-- [Data README](https://github.com/luizantoniona/idle-mmorpg/blob/main/idle-mmorpg-data/README.md): creature, item, action, skill, spell and world modules.
-- [Action README](https://github.com/luizantoniona/idle-mmorpg/blob/main/idle-mmorpg-data/idle-mmorpg-action/README.md): `duration`, `skill`, `experience`, `item`, required world `stage` defined in JSON.
-- [Character Event Bus](https://github.com/luizantoniona/idle-mmorpg/blob/main/documentation/CharacterEventBus.md): controllers send internal events when experience, equipment, health or inventory changes.
+**Two approaches:**
+- **Small-step replay:** advance a timer a few seconds or one action at a time. Straightforward but cost grows with time absent.
+- **Boundary-based aggregation:** jump to the next meaningful change (level threshold, resource depletion, queued task end, group membership transition, rule-version change), then calculate many identical actions as one segment.
 
-### Useful patterns
+**Illustrative outline:**
 
-- **Server authority / client presentation split**: server validates and updates actual rewards; phone renders artwork and estimates.
-- World/zone/resource/skill definitions are data rather than hardcoded UI behaviors.
-- Internal events decouple core activity calculations from later feature modules.
-- Its folder boundaries are valuable even if we choose a different implementation language.
+```text
+settleUntil(character, targetTime):
+    while character.time < targetTime:
+        boundary = earliestRelevantChange(character, targetTime)
+        segment = boundary - character.time
+        applyAggregatedActions(character, segment)
+        applyBoundaryTransition(character)
+    return character
+```
 
-### Cautions
+The number of loop iterations should depend mostly on **meaningful state changes**, not elapsed seconds or total mining swings.
 
-- The documented server setup process is unfinished; not verified runnable.
-- JSON validation is described as minimal; our implementation should validate references/types robustly and fail loudly.
-- Using C++ plus Angular would add build complexity; **study the architectural boundaries, not necessarily the stack**.
-- No evidence that it handles dormant group participation or decades of lazy offline reward settlement.
+**Important:** A five-task repeating queue can still introduce many boundaries. Repeated deterministic cycles may need fast-forward mathematics; a naive loop over cycles is not automatically scalable. Bulk reward sampling must preserve rarity. Round quantities carefully and use safe integers or a deliberate large-number representation.
 
-**Fit:** multiplayer/server organizational reference.
+**Our-game restriction:** Solo progression must continue indefinitely, including combat and rare loot. Multiplayer group membership lasts at most seven days offline, then deterministic solo fallback applies. Unlike some valid game designs, a one-day or one-week offline cap is incompatible with our promise.
 
----
-
-## EX-04 — Skill Issue Chronicles (frontend feature organization)
-
-**Repository:** https://github.com/GylanSalih/Skill-Issue-Chronicles  
-**License checked:** [MIT LICENSE](https://github.com/GylanSalih/Skill-Issue-Chronicles/blob/main/LICENSE) (copyright 2025 Gylan Salih).  
-**Stack:** React, TypeScript, Vite, SCSS Modules, Three.js/React Three Fiber, GSAP, React Spring.
-
-### Inspected sources
-
-- [README](https://github.com/GylanSalih/Skill-Issue-Chronicles/blob/main/README.md): activity manager, saves, stats, equipment and UI scope; labeled alpha.
-- [Development guide](https://github.com/GylanSalih/Skill-Issue-Chronicles/blob/main/docs/showcase/DEVELOPMENT_GUIDE.md): shows `src/core/`, `src/features/pages/`, `src/shared/`, local components and styles.
-- [`package.json`](https://github.com/GylanSalih/Skill-Issue-Chronicles/blob/main/package.json): `test` script merely echoes “No tests specified”, then exits 0.
-
-### What to learn
-
-- Feature-based screen folders; shared UI components; gameplay code separate from page components.
-- Consistent type/style/testing conventions and concise developer documentation.
-
-### Reasons **not** to adopt wholesale
-
-- Heavy visual/animation dependencies are unnecessary for our static illustrated portrait UI.
-- The development guide says actual unit/E2E test setups are planned; package script confirms there is no real automated test suite configured.
-- Some paths stated in the README (`src/contexts/ActivityManager.tsx`, `src/lib/saveManager.ts`) could not be fetched; guide lists different `src/core/` paths. **Docs and live file layout may diverge**.
-- Daily reward mechanics and wide class trees conflict with our low-pressure small MVP.
-
-**Fit:** frontend folder layout ideas only; verify exact paths before looking for source implementations.
+**Tests:** 1 hour, 24 hours, 7-day transition, 1 year and 20 years; zero resources, skill thresholds, old rule versions, chained tasks, and extremely large totals.
 
 ---
 
-## EX-05 — IdleLands (older online idle server; cautionary reference)
+## P03 — Randomness, loot and bulk sampling
 
-**Repository:** https://github.com/IdleLands/IdleLands  
-**License checked:** [GPL-3.0 LICENSE](https://github.com/IdleLands/IdleLands/blob/master/LICENSE). **Do not incorporate code without explicitly reviewing GPL obligations and our project's licensing plan.**  
-**Inspected:** [README](https://github.com/IdleLands/IdleLands/blob/master/README.md) and [package.json](https://github.com/IdleLands/IdleLands/blob/master/package.json).
+`[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
 
-### Potential lessons
+**Problem:** Long offline periods may contain millions of independent loot checks. Recording a random roll per encounter is wasteful.
 
-- An actual client/server idle MMO structure and operational concerns (database, player sessions, server tick interval, save interval, optional Redis).
-- Its README documents environment variables such as `GAME_DELAY` and `SAVE_DELAY`, which demonstrate what server loops and write frequency can cost.
-- Can use as a **design comparison** to think critically about servers, connections, and database load.
+**Simple statistical model:** If a reward has probability `p` for each of `n` independent eligible encounters under unchanged conditions, the number of drops follows a binomial distribution, `X ~ Binomial(n,p)`. For distinct mutually exclusive outcomes, use an appropriate multinomial model.
 
-### Why this is not our foundation
+**Example:** One special outcome in 343 equiprobable 3d7 results has `p = 1/343`. This is a dice-event probability, **not** a guarantee of a legendary item. An additional independent drop chance must be included if there is a second check.
 
-- The README targets Node 10 and older Angular/MongoDB tooling; not a good modern stack to adopt uncritically.
-- It describes a repeating server loop; we want **zero continuous per-character simulation for years-dormant accounts**.
-- GPL-3.0 has materially different reuse obligations from MIT.
+**Caution:** Do not award `ceil(n*p)` drops. That guarantees at least one even when the correct probability is small. Likewise, using the expected count `n*p` as an exact result removes variation.
 
-**Fit:** learning and cautionary comparison, not code candidate.
+**Design tradeoff:** Deterministic seeded RNG supports testing and replay. For a multiplayer game, the authoritative server must control/commit outcomes and not expose exploitable random-state predictions.
+
+**Tests:** Sample-distribution means, zero/one-probability cases, large `n`, very small `p`, stable results after save/load, no double-awards.
 
 ---
 
-## Recommended architecture ideas for OUR game (derived from examples, not yet owner-approved)
+## P04 — Data-driven activities and entities
 
-A possible minimal repository layout. **Do not create these folders without implementation authorization.**
+`[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**Problem:** Adding one enemy or activity should not require editing the combat engine.
+
+**Pattern:** Define zones, enemies, tools, loot tables and skills as validated content records with stable IDs. The engine interprets the records and reports missing references clearly.
+
+**Original illustrative content:**
+
+```json
+{
+  "id": "stone_mine",
+  "activityKind": "mining",
+  "requiredSkillLevel": 1,
+  "baseEncounterSeconds": 40,
+  "outputItemId": "stone",
+  "sceneId": "mine_activity"
+}
+```
+
+**Why:** Balancing a duration or reward becomes a content update instead of a structural rewrite.
+
+**Warnings:** Schema validation must reject unknown IDs, invalid probabilities, missing images and impossible requirements. Content data must be versioned for long-term offline settlement, or a returning player could receive rewards using rules from a later era.
+
+---
+
+## P05 — Save versions and migrations
+
+`[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**Problem:** Game state inevitably changes. Old accounts must not break when a new field appears.
+
+**Pattern:** Every saved state has a numeric schema version. When loading, apply explicit migrations, one version at a time, and validate the final state.
+
+```text
+load(record):
+    while record.version < CURRENT_VERSION:
+        record = migrateOneVersion(record)
+    validate(record)
+    return record
+```
+
+**Storage:** Prefer transactional/atomic writes and reliable backups or recovery. Long-absent accounts may need both save-schema migrations and **ruleset-time** handling for historical progression; those are different problems.
+
+**Tests:** Every supported old version, failed migrations, interrupted writes, corrupt data and repeated load-save cycles.
+
+---
+
+## P06 — Domain events and bounded activity logs
+
+`[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**Problem:** A quest, notification and statistics panel should not all need custom changes inside the mining function.
+
+**Pattern:** Gameplay emits typed events such as `encounter_completed`, `item_gained`, `skill_used` or `skill_level_changed`. Other systems consume the events without rewriting the core action.
+
+**Important distinction:** A domain event is not automatically a durable network message or database transaction. Determine what needs persistence, ordering, retries and deduplication.
+
+**For multi-year idle:** Record aggregate gains and a bounded list of significant recent events, not one log line for every historical swing. An illustrated “welcome back” summary can be generated from aggregates.
+
+---
+
+## P07 — Authoritative server and inexpensive browser client
+
+`[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**Problem:** Browser code is editable by the player; a client-provided `+1000000 legendary items` message must not be accepted.
+
+**Pattern:** Browser sends allowed intents, such as “set mining activity” or “join group.” Server validates the request, records trusted timestamps and settles results. Browser displays cached artwork, local progress estimates, and authoritative returned values.
+
+**Cost-control principle:** A dormant account should not consume ongoing per-character CPU. Store state and timestamps, then settle on demand or at meaningful group/shared-world events.
+
+**Tests:** Tampered requests, replayed submissions, concurrent logins, timestamp manipulation, session expiry, stale-version responses and rate limits.
+
+---
+
+## P08 — Shared group rewards and membership windows
+
+`[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**Problem:** Cooperative rewards must be fair, resistant to duplicates, and consistent if some members are offline.
+
+**Pattern:** Treat a group encounter as **one** authoritative resolution with one shared outcome and reward pool. Then allocate resources using an explicit policy.
+
+**Two distributions:**
+- **Equal:** Divide among eligible members; define what happens to remainders.
+- **Weighted:** For weights `w_i`, assign shares proportional to `w_i / sum(w)` while ensuring the sum of integer shares equals the actual pool.
+
+**Correctness:** Lock or transactionally serialize reward settlement. Use stable encounter/claim IDs so retries don't award twice.
+
+**Our-game boundary:** Offline group participation expires seven days after the last login; afterwards the character continues solo. Nobody joins another group while offline. Record member joins/leaves/kicks as timestamped boundaries instead of simulating an always-active process for each absent player.
+
+**Tests:** 1 to 20 members, zero/negative weights, leader departure, changing equipment, last-member exit, exact remainders, duplicate claims and logout near the eligibility boundary.
+
+---
+
+## P09 — Mobile-first illustrated interface
+
+`[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**Problem:** Desktop-style multi-panel RPG layouts are difficult to use one-handed on a phone.
+
+**Pattern:** Make a large static activity scene the focus, with short text describing the current action; keep the main controls in easy thumb reach. Separate navigation, dialogs and gameplay calculations.
+
+**Optimization:** Serve artwork at practical display size, use modern image formats and lazy loading, cache where possible, and handle eviction gracefully. Do not re-render the entire UI at frame rate when the artwork is static.
+
+**Tests:** Narrow portrait screens, touch targets, text scaling, slow networks, reduced-motion preferences and low-memory mobile devices.
+
+---
+
+## P10 — Continuous ticking, polling and WebSockets
+
+`[OUR-GAME: NOT-FIT]` for dormant-character simulation; `[EVIDENCE: DESIGN-NOTE]`
+
+**Where useful generally:** Fast-paced shared worlds, real-time PvP, simulations requiring continuous physics, or immediate chat and presence updates.
+
+**Options:** Fixed-step server tick; event scheduling; request/response polling; pushed events over persistent connections. Choose based on responsiveness, concurrency and actual server costs.
+
+**Costs:** Always-on actors, high-frequency database writes, many sockets and per-player timers can become expensive even if almost nobody is actively watching. Our idle game should primarily settle dormant characters from timestamps; chat and active group presence can use separate, limited real-time mechanisms.
+
+---
+
+## P11 — Offline time caps
+
+`[OUR-GAME: NOT-FIT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**Where useful generally:** Games balancing a limited daily economy, requiring recurring player engagement, or using expensive per-action replay without efficient aggregation.
+
+**Typical options:** Absolute cap, reduced offline efficiency, or allowing only certain activities while offline.
+
+**Our reason not to use them:** They contradict the deliberate goal that a character can be absent for decades and still accumulate their intended progress. Solve the computation problem rather than shifting the penalty onto the player.
+
+---
+
+## P12 — Daily rewards and streaks
+
+`[OUR-GAME: NOT-FIT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**Where useful generally:** Session-based games that reward frequent return visits. Evaluate both engagement and pressure on the player; consider time zones and accessibility.
+
+**Our reason not to use them:** We want voluntary returns without missed-day penalties, fear of lost progress or routine obligations. Any return celebration should depend on progress made, **not** an attendance streak.
+
+---
+
+## P13 — Inventory and exactly-once transactions
+
+`[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**Problem:** Concurrent reward claims, retries or disconnects can duplicate rare items or lose resources.
+
+**Pattern:** Give each settlement a unique idempotency key. In a database transaction: check if already applied, validate the change, update balances, record the key, then commit once.
+
+**Stack quantity:** Stacking item types avoids weight/slot complexity, but “unlimited” item counts still require explicit numeric storage choices and overflow testing. If using very large integers, serialize them safely over JSON (often as strings).
+
+**Tests:** Retry same claim ten times, simultaneous claims, server crash between steps, split of odd-sized loot pools and negative/overflow cases.
+
+---
+
+## P14 — Project structure, testing and performance
+
+`[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**Illustrative modular layout (not a required scaffold):**
 
 ```text
 src/
-  core/          # Pure time/RNG/encounter/XP/reward/queue logic; no UI or DB
-  content/       # Validated zone, activity, item, enemy, skill, art-ID definitions
-  server/        # Authoritative accounts, groups, timestamps, claims, persistence
-  ui/            # Portrait pages, static artwork, text logs, thumb navigation
-  assets/        # Optimized original illustrations, not third-party game art
-  tests/         # Engine, offline equivalence, probability, group invariants
-docs/
-  BRAINSTORM.md
-  USEFUL_EXAMPLES.md
-  DECISIONS.md
-  TD_LIST.md
+  core/            # Pure game rules and offline calculations
+  content/         # Validated zones, activities, items and image IDs
+  server/          # Authoritative accounts, groups and persistence
+  ui/              # Mobile browser views and presentation
+  tests/           # Unit, integration, probability, load and offline tests
+assets/            # Original, optimized artwork
+docs/              # Research, brainstorm, decisions, tasks and guides
 ```
 
-What all these examples *suggest*, not what they prove:
-- Make simulation deterministic and independent of rendering.
-- Content and game logic should be separated.
-- Track rules/state versions; never rely on rewriting history from volatile current definitions.
-- Emit meaningful **bounded** events; do not store millions of rendered logs per offline player.
-- Design an **event-driven, server-authoritative, lazy settlement** mechanism for group membership, with a 7-day cutoff and solo fallback.
-- Need mathematically efficient catch-up (bulk success/dice/rare-drop sampling) at skill and queue boundaries, **not a 20-year per-tick or per-encounter loop**.
-- Do not use JavaScript `Number` for unbounded item totals without safe-integer limits or a deliberate BigInt/large-number strategy.
-- Cache mobile image assets, but avoid relying on permanent browser cache persistence.
-- License code, libraries and artwork independently.
+**Testing pyramid:** Many deterministic unit tests; a smaller number of database/HTTP integration tests; targeted multi-user and mobile browser tests. Add benchmarks for 1-, 7-, 365- and 7,300-day offline gaps. Measure CPU, storage writes, bandwidth and memory instead of guessing.
 
-## Method for extending this reference file (research plan)
+**Important:** “Tests passed” means the actual tests ran successfully; a script that merely prints a success message proves nothing. Record the exact commands, environment and outcome.
 
-1. **Choose one problem only.** Example: offline batching, group loot transactions, 3d7 RNG, data schema, portrait UI, server persistence, etc.
-2. **Find 2–4 repositories** with public code and a usable license; prefer maintained projects with tests and clear boundaries.
-3. **Inspect real source files, not just README claims**; save repo URL, exact relevant file URL, tech stack, license link, actual behavior, and date checked.
-4. **Write a tiny summary per reference**: “reuse this pattern”, “do not copy this”, “what is unverified”, and whether it requires adaptation.
-5. **Check legal compatibility first** before reusing code or assets. No LICENSE file is **not** permission to copy. Preserve applicable notices.
-6. **When implementation is approved, run the candidate locally** and its real tests; compare complexity, correctness, mobile rendering and resource usage. Record results separately.
-7. **Test our difficult edge cases**, not just simple hourly idle:
-   - Online vs offline-equivalent outcomes with identical state and random inputs.
-   - 24h, 7-day group cutoff, 1-year, and 20-year absences.
-   - 5-task loops, impossible activities, depletion, skill level boundaries and cooldowns.
-   - 3d7 rare-drop probabilities; identical seed deterministic verification; statistically correct large-run behavior.
-   - 1–20 player groups, fair shared loot splits, leader departure, kicking, and exactly-once claims.
-   - Mobile portrait touch usability and memory/bandwidth on a modest Android phone.
-8. **Promote only a validated pattern**, not an entire dependency blindly. Actual implementation tasks belong in `docs/TD_LIST.md` only with owner approval.
+---
 
-### Provenance and honesty
+## How to extend this public library
 
-All links above are to **public GitHub sources inspected on 2026-11-19**. Some descriptions are derived from README or development documentation and are marked accordingly. Selected code files were read remotely, but there has been **no runtime testing, no security audit, no license counsel, and no performance benchmarking** in this research pass. Repository contents may change. The references are meant to accelerate a future investigation, not substitute for testing.
+1. Pick a reusable browser-game technique, whether or not it fits our game.
+2. Investigate it and form an accurate, **independently written** explanation that readers can understand without following external references.
+3. Describe its algorithm, state flow, failure cases, performance costs, security tradeoffs and alternatives.
+4. Include a small original example or pseudocode, and distinguish tested results from conceptual recommendations.
+5. Add both a general usefulness description and a **separate** our-game fit tag. Preserve `NOT-FIT` topics for other developers.
+6. Move substantial guides into `docs/library/` using the article template; update this index with a brief entry.
+7. Never copy third-party code or assets into this library. If code is ever incorporated into the game, honor the applicable license and mandatory notices; those obligations cannot be bypassed by omitting attribution.
+8. Never convert an informational entry into `docs/TD_LIST.md` without explicit owner authorization.
 
-**Our default choice:** use the *smallest* reusable concept that solves the current problem, keep the game visually beautiful and mechanically simple, and avoid unnecessary dependencies, background server loops or processing costs.
+**Research and testing honesty:** These entries explain common design patterns; they do **not** certify that an unnamed outside project implements them, or that they have been benchmarked. Cite concrete **internal test evidence** only when the tests actually exist in this repository.

@@ -1,4 +1,4 @@
-# Agent instructions — customize for this project
+# Agent instructions — Idle Game and public research library
 
 ## Project protocol v1.0 — read before any project action
 
@@ -19,4 +19,14 @@ This applies to project work by **chat**, **cw** and **codex**, including after 
 
 ## Project-specific rules
 
-**Owner: replace this paragraph before beginning implementation.** Write project purpose, core constraints, user privacy and safety rules, platform/release gates, and how to test real behavior. These project-specific rules remain binding and must never be overwritten by a generic template upgrade.
+**Dual purpose (approved by Owner, 2026-11-19):** The public repository is both our original idle browser-game project and a broadly useful engineering library about browser games, including techniques we will not use ourselves.
+
+**Public research privacy and independence:** Before research work, read `docs/RESEARCH_LIBRARY.md`, `docs/USEFUL_EXAMPLES.md` and relevant `docs/library/` pages after the mandatory TD preflight. **Do not publish the names of reference games, external research destinations, or URLs identifying repositories or sites consulted.** Present accurate, independently authored descriptions of general engineering techniques, alternatives, costs and risks; use original pseudocode rather than copied third-party code. Never claim the internals of any outside game are verified from gameplay alone, and never invent results or provenance.
+
+**Copyright boundary:** No third-party source code or artwork may be copied into this repo merely to avoid attribution. If actual third-party components are ever incorporated, the project must follow applicable licenses and retain all legally required notices. Either attribute as required for incorporated material or avoid incorporating it; never misrepresent copied work as independently created.
+
+**Public library tags:** The general educational usefulness of an approach is **independent** of its fit for our own design. Use `[OUR-GAME: FIT]`, `[OUR-GAME: ADAPT]`, `[OUR-GAME: NOT-FIT]` or `[OUR-GAME: UNDECIDED]`; mark design-only versus prototyped/tested/benchmarked claims accurately. Preserve valuable patterns even when `NOT-FIT` for us.
+
+**Game boundaries (design, not coding authorization):** Our planned game prioritizes original grimdark static artwork, mobile portrait UX, stone mining and bunny hunting initially, a small task queue, no offline time cap or daily-login pressure, low-cost dormant-account settlement, and optional asynchronous groups. `docs/BRAINSTORM.md` contains the living design notes.
+
+**Scope and release:** Research and brainstorming do not authorize code. Keep actual authorized tasks only in `docs/TD_LIST.md`; use branches and pull requests, tests, owner review and approval for implementation and releases. Before gameplay launches, plan authentication, authoritative server state, data safety, anti-cheat, migration, long-term offline correctness, group settlement and mobile performance. Protect user data and secrets in this public repository.
