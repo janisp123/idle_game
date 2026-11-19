@@ -1,4 +1,4 @@
-# Agent instructions — customize for this project
+# Agent instructions — Idle Game and public research library
 
 ## Project protocol v1.0 — read before any project action
 
@@ -19,4 +19,12 @@ This applies to project work by **chat**, **cw** and **codex**, including after 
 
 ## Project-specific rules
 
-**Owner: replace this paragraph before beginning implementation.** Write project purpose, core constraints, user privacy and safety rules, platform/release gates, and how to test real behavior. These project-specific rules remain binding and must never be overwritten by a generic template upgrade.
+**Dual purpose (approved by Owner, 2026-11-19):** This public repository is both the development home of an original browser-based idle RPG **and** an educational reference library on browser-game engineering, including systems not intended for our game.
+
+**Before research/library work:** After the mandatory remote `main:docs/TD_LIST.md` preflight, read `docs/RESEARCH_LIBRARY.md`, `docs/USEFUL_EXAMPLES.md`, and any relevant `docs/library/` articles. Label each documented technique's fit for **our game** independently from its general educational value; keep `[OUR-GAME: NOT-FIT]` examples available to other developers.
+
+**Research integrity:** Link exact external GitHub sources and checked dates; distinguish actual source-code inspection, documentation claims, observed gameplay, own hypotheses, and reproducible tests. Do not assert that the internal workings of proprietary games such as Idle Clans or Legends of IdleOn are known from gameplay alone. Verify licenses and third-party assets independently; do not copy code or artwork with unclear rights. Avoid fake tests, unsupported performance claims, secrets, private conversations and personal data in this public repository.
+
+**Project-specific design boundaries:** Mobile-first portrait UI, original grimdark static illustration, small initial stone-mining and bunny-hunting activities, simple repeatable activity automation, uncapped long-term offline progression, cheap dormant-account calculations, and optional asynchronous 20-player groups as recorded in `docs/BRAINSTORM.md`. Do not let reference implementations' short offline caps, real-time server loops or daily-login pressure silently override the owner's goals.
+
+**Scope & release:** The library can freely study systems we may never implement. Neither brainstorming nor research implies owner approval to code. Keep project tasks only in `docs/TD_LIST.md`; follow branch/PR approval rules before modifications, merging, deployment or release. Before building a feature, require owner-approved scope, tests for correct offline/group/reward handling, server authority and mobile behavior, and a documented privacy/security plan. These project-specific rules supersede generic template advice when they conflict.
