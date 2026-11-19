@@ -30,11 +30,11 @@ When new ideas emerge, append or revise the relevant section with a date and cla
 - Simple, readable, mobile-first UI; performance and reliability are priorities.
 - Core engineering design rule: **always look first for the easier, cheaper-to-calculate, lower-lag, lower-bug approach**. Challenge complexity that doesn't improve the player's experience.
 
-**Inspiration (not material to copy)**
-- Gameplay reference points: Idle Clans, Melvor Idle, Legends of IdleOn, Milky Way Idle.
-- Presentation reference: Pit of War's large dramatic action illustrations, narration and reward screens.
-- Desired atmosphere: brutal grimdark gothic/industrial fantasy with the oppressive scale and mood associated with grimdark sci-fi.
-- **Original IP only**: do not reproduce Warhammer-specific symbols, factions, iconic armor/weapon silhouettes, names, lore or copyrighted artwork. The mood is inspiration, not permission to copy identifiable features. Any real legal clearance remains a separate issue.
+**Visual and gameplay principles**
+- Use familiar, approachable idle-RPG loops but remove arbitrary offline limits and forced daily attention.
+- Present activities using large dramatic illustrations, compact narration, and clear reward screens.
+- Desired atmosphere: brutal grimdark gothic/industrial fantasy with an oppressive, mysterious mood.
+- **Original IP only**: create our own visual designs, factions, equipment silhouettes, names, lore, interfaces and artwork; avoid reproducing identifiable copyrighted elements of other entertainment properties.
 
 ## 2. Smallest playable experience
 
