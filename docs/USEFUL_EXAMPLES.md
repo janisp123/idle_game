@@ -1,15 +1,31 @@
-# Useful Examples — Idle Game Implementation Reference
+# Useful Examples — Browser Game Implementation Reference
 
 **Project:** `janisp123/idle_game`  
 **Research date:** 2026-11-19  
-**Type:** Research/reference library — **NOT** a to-do list, approved dependencies, or an instruction to copy code.  
+**Type:** Broad, public browser-game implementation reference — **NOT** a to-do list, approved dependencies, or an instruction to copy code.  
 **Review status:** GitHub READMEs, licenses (where found), and selected implementation files inspected remotely; **no repositories cloned, built, executed or benchmarked yet.**
 
 ## Why this file exists
 
-Save time for future Chat / CW / Codex research. Before choosing an implementation for idle activities, content modules, saves, combat, dice, server state or mobile UI, check the verified references and pitfalls below instead of searching from zero.
+**For everyone:** This is a practical index of existing implementations, even when their mechanics or architecture do not fit our game. Each example should teach reusable ideas, tradeoffs, source paths and what still needs testing. Developers building a different kind of browser game may reasonably choose techniques we reject for ours.
+
+**For our project:** Save time for future Chat / CW / Codex research. Before choosing an implementation for idle activities, content modules, saves, combat, dice, server state or mobile UI, check these verified references and pitfalls instead of searching from zero. For the growing library charter, topic index, and tagging rules, see [RESEARCH_LIBRARY.md](RESEARCH_LIBRARY.md). Detailed independent how-to articles belong under [`docs/library/`](library/ENTRY_TEMPLATE.md).
 
 **Project constraints to protect:** two-activity MVP (stone mining, bunny hunting); beautiful static illustrations; portrait, one-hand mobile UI; 5-task queue; 3d7 encounter dice and one shared group roll; no mana or potions; healing only between battles; 20-member groups with at-most-7-day offline membership; **unlimited solo offline progression even after decades**; no continuous server simulation per dormant account; simple, inexpensive, testable code.
+
+## Relevance and evidence tags
+
+These ratings concern **separate techniques**, not whether the repository is “good” or “bad.” We retain *all* useful examples for public learning, including features irrelevant or inappropriate for our particular idle game.
+
+| Example | Generally useful to learn | Our game — reusable parts | Our game — incompatible parts | Evidence of documented claims |
+| --- | --- | --- | --- | --- |
+| EX-01 Idle Game Template | Engine boundaries, deterministic RNG, versioned saves, systems and events | `[OUR-GAME: FIT]` pure engine / validated data; `[OUR-GAME: ADAPT]` event-driven simulation | `[OUR-GAME: NOT-FIT]` 8h offline cap, offline combat freeze, desktop floating windows | `[EVIDENCE: CODE-READ]` |
+| EX-02 Melvor Clone | Compact idle action, XP, inventory and combat types | `[OUR-GAME: ADAPT]` XP/action definition | `[OUR-GAME: NOT-FIT]` 24h offline cap, per-action 20-year loop, paused offline combat | `[EVIDENCE: CODE-READ]`; license `UNVERIFIED` |
+| EX-03 iMMO | Separating server, web client, content and events | `[OUR-GAME: ADAPT]` data and backend boundaries | `[OUR-GAME: UNDECIDED]` C++/Angular implementation | `[EVIDENCE: DOCS]` |
+| EX-04 Skill Issue Chronicles | Feature folders, component conventions, equipment UI | `[OUR-GAME: ADAPT]` frontend organization | `[OUR-GAME: NOT-FIT]` heavy 3D/animation stack and daily-login rewards | `[EVIDENCE: DOCS]` plus package script inspection |
+| EX-05 IdleLands | Client/server operation, ticks, persistence, deployment tradeoffs | `[OUR-GAME: ADAPT]` operational lessons only | `[OUR-GAME: NOT-FIT]` perpetual dormant-player ticks and legacy stack | `[EVIDENCE: DOCS]`; GPL-3.0 |
+
+For every future reference, give the **general** benefit first and tag our-game fit **per component**; a technique incompatible with our low-pressure design can still be valuable for other games.
 
 ## Quick lookup — where to look first
 
@@ -212,12 +228,12 @@ What all these examples *suggest*, not what they prove:
 - Cache mobile image assets, but avoid relying on permanent browser cache persistence.
 - License code, libraries and artwork independently.
 
-## Method for extending this reference file (research plan)
+## Method for expanding the public library (research plan)
 
-1. **Choose one problem only.** Example: offline batching, group loot transactions, 3d7 RNG, data schema, portrait UI, server persistence, etc.
+1. **Choose one problem or feature per research article.** There is **no requirement** that it serve our own game: study daily-reward systems, crafting, trading, PvP, multiplayer synchronization, offline batching, group loot transactions, RNG, data schemas, responsive UI, server persistence or any other useful browser-game mechanic.
 2. **Find 2–4 repositories** with public code and a usable license; prefer maintained projects with tests and clear boundaries.
 3. **Inspect real source files, not just README claims**; save repo URL, exact relevant file URL, tech stack, license link, actual behavior, and date checked.
-4. **Write a tiny summary per reference**: “reuse this pattern”, “do not copy this”, “what is unverified”, and whether it requires adaptation.
+4. **Write a short catalog summary per repository** here, then a **useful how-it-works article** using [ENTRY_TEMPLATE.md](library/ENTRY_TEMPLATE.md) for substantial techniques. Cover algorithms, state flow, tests, performance, and security in original explanations. Include general usefulness plus separate our-game fit/evidence tags.
 5. **Check legal compatibility first** before reusing code or assets. No LICENSE file is **not** permission to copy. Preserve applicable notices.
 6. **When implementation is approved, run the candidate locally** and its real tests; compare complexity, correctness, mobile rendering and resource usage. Record results separately.
 7. **Test our difficult edge cases**, not just simple hourly idle:
@@ -227,10 +243,10 @@ What all these examples *suggest*, not what they prove:
    - 3d7 rare-drop probabilities; identical seed deterministic verification; statistically correct large-run behavior.
    - 1–20 player groups, fair shared loot splits, leader departure, kicking, and exactly-once claims.
    - Mobile portrait touch usability and memory/bandwidth on a modest Android phone.
-8. **Promote only a validated pattern**, not an entire dependency blindly. Actual implementation tasks belong in `docs/TD_LIST.md` only with owner approval.
+8. **Expand the public index**, even for approaches unsuitable for our design; clearly distinguish their general merits from our-game fit. Promote only validated patterns into our gameplay implementation. Actual implementation tasks belong in `docs/TD_LIST.md` only with owner approval.
 
 ### Provenance and honesty
 
-All links above are to **public GitHub sources inspected on 2026-11-19**. Some descriptions are derived from README or development documentation and are marked accordingly. Selected code files were read remotely, but there has been **no runtime testing, no security audit, no license counsel, and no performance benchmarking** in this research pass. Repository contents may change. The references are meant to accelerate a future investigation, not substitute for testing.
+All links above are to **public GitHub sources inspected on 2026-11-19**. Some descriptions are derived from README or development documentation and are marked accordingly. Selected code files were read remotely, but there has been **no runtime testing, no security audit, no license counsel, and no performance benchmarking** in this research pass. Repository contents may change. The references are meant to accelerate future research **for anyone**, not substitute for testing.
 
-**Our default choice:** use the *smallest* reusable concept that solves the current problem, keep the game visually beautiful and mechanically simple, and avoid unnecessary dependencies, background server loops or processing costs.
+**For our game only:** use the *smallest* reusable concept that solves the current problem, keep the game visually beautiful and mechanically simple, and avoid unnecessary dependencies, background server loops or processing costs. **For the public library:** document other valid engineering choices too.
