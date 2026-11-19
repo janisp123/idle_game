@@ -25,6 +25,7 @@ See [RESEARCH_LIBRARY.md](RESEARCH_LIBRARY.md) for the library's purpose and [EN
 | P12 | Daily rewards and login streaks | Encourage short repeat sessions | `[OUR-GAME: NOT-FIT]` |
 | P13 | Transactional inventory accounting | Avoid duplication, negative stacks and lost claims | `[OUR-GAME: FIT]` |
 | P14 | Automated testing and observability | Catch errors and measure cost before release | `[OUR-GAME: FIT]` |
+| P15 | [Time-safe offline simulation](library/offline-time-units-and-boundaries.md) | Correct seconds/milliseconds, stock exhaustion, and constant-cost fast-forward where valid | `[OUR-GAME: FIT]` |
 
 Tags apply to **our design**, not to technical merit. Each technique remains documented for other developers.
 
@@ -285,6 +286,16 @@ docs/              # Research, brainstorm, decisions, tasks and guides
 **Testing pyramid:** Many deterministic unit tests; a smaller number of database/HTTP integration tests; targeted multi-user and mobile browser tests. Add benchmarks for 1-, 7-, 365- and 7,300-day offline gaps. Measure CPU, storage writes, bandwidth and memory instead of guessing.
 
 **Important:** “Tests passed” means the actual tests ran successfully; a script that merely prints a success message proves nothing. Record the exact commands, environment and outcome.
+
+---
+
+## P15 — Time-safe resource exhaustion and boundary calculations
+
+`[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**New deep dive:** [Time-Safe Offline Simulation and Resource-Depletion Boundaries](library/offline-time-units-and-boundaries.md).
+
+Why it matters: A time-to-depletion value computed in seconds must not be treated as milliseconds. A correct offline solver advances to the next meaningful change, recomputes rates after depletion, and never silently discards leftover time because of an iteration guard. The guide includes dimensional analysis, original pseudocode, starvation policies, deterministic vs probabilistic bulk processing, a test matrix and performance alternatives.
 
 ---
 
