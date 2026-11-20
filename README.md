@@ -29,6 +29,9 @@ Original third-party materials, if added later, remain subject to their own lice
 | [Game brainstorm](docs/BRAINSTORM.md) | Design possibilities, directions, rejected ideas and open questions |
 | [Durable decisions](docs/DECISIONS.md) | Owner-approved project decisions |
 | [Development tasks](docs/TD_LIST.md) | Actual authorized implementation tasks |
+| [Working checkpoint](docs/WORK_CHECKPOINT.md) | Verified current status, limits and handoff for chat/CW/Codex |
+| [Completed milestones](docs/CHANGELOG.md) | Merged repository work, with PRs and evidence |
+| [Security policy](SECURITY.md) | Public site security boundary and responsible reporting guidance |
 
 ## Two different kinds of relevance
 
