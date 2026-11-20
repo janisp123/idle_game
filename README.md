@@ -7,6 +7,12 @@ A public hobby project with **two parallel purposes**:
 
 This repository is currently primarily design documentation and engineering research. **The game is not yet implemented.**
 
+## Project website
+
+The [Idle Game landing page](https://janisp123.github.io/idle_game/) introduces the game concept and public engineering library. It is **not a playable game** yet.
+
+The source lives in `site/`. The [Pages workflow](.github/workflows/pages.yml) validates it on pull requests and publishes that folder after approved changes are merged into `main` (when GitHub Pages is configured to use GitHub Actions). No external site generator or paid hosting is required.
+
 ## License
 
 This project is **open-source software** under the [MIT License](LICENSE.md). Feel free to read, use, modify, and share the code, including in commercial projects, as long as you keep the required copyright and license notice.
