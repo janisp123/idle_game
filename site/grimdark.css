@@ -1,0 +1,260 @@
+/* Grimdark landing page theme — original CSS artwork, no external assets.
+   Layered after styles.css so the mobile layout and Play Now contract remain intact. */
+:root {
+  --background: #090807;
+  --surface: #161210;
+  --surface-raised: #241a16;
+  --ink: #eee0ca;
+  --soft: #cbb89d;
+  --muted: #ac9a83;
+  --hairline: #49382d;
+  --gold: #ac8656;
+  --gold-light: #ddbd8a;
+  --blood: #87332b;
+  --blood-light: #ba604d;
+}
+body {
+  background:
+    radial-gradient(ellipse 52% 23% at 75% 8%, rgba(123,40,30,.16), transparent 78%),
+    repeating-linear-gradient(0deg, rgba(255,233,191,.006) 0 2px, transparent 2px 6px),
+    var(--background);
+}
+body::before {
+  background: radial-gradient(ellipse 65% 43% at 75% 27%, rgba(122,36,27,.16), transparent 76%);
+}
+.grain { opacity: .09; }
+::selection { background: #a44e3c; color: #fff4df; }
+a:focus-visible, button:focus-visible { outline-color: #e5b483; }
+.site-header {
+  position: relative;
+  z-index: 11;
+  border-bottom: 1px solid #493026;
+  background: linear-gradient(180deg, rgba(30,21,17,.99), rgba(11,10,9,.98));
+  box-shadow: 0 10px 37px rgba(0,0,0,.38);
+}
+.site-header::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 4%, #672e27 20%, #99734b 50%, #672e27 80%, transparent 96%);
+  opacity: .68;
+  pointer-events: none;
+}
+.brand-mark span {
+  background: linear-gradient(180deg, #ae6044, #682d28);
+  box-shadow: 1px 1px 0 #0e0908;
+}
+.brand-name, .footer-brand { letter-spacing: .19em; }
+.brand-divider, .footer-brand span { color: #b75c48; }
+.navigation { letter-spacing: .07em; text-transform: uppercase; }
+.navigation a { color: #cbb59a; }
+.navigation .nav-github { color: #e3d1b6; }
+.nav-github span { color: var(--blood-light); }
+
+.hero {
+  position: relative;
+  border-bottom: 1px solid rgba(137,71,53,.35);
+  background: radial-gradient(ellipse 55% 70% at 87% 49%, rgba(112,43,31,.12), transparent 90%);
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(161,85,63,.32), transparent);
+  pointer-events: none;
+}
+.hero-grid { min-height: 702px; padding-block: 83px 76px; }
+.eyebrow, .section-kicker { color: #c59b70; font-weight: 800; letter-spacing: .22em; }
+.small-sigil { color: #b65c46; }
+.eyebrow-rule { background: #934a3a; }
+.hero h1 {
+  margin: 30px 0 27px;
+  font-size: clamp(56px, 5.65vw, 84px);
+  line-height: 1.05;
+  letter-spacing: -.055em;
+  text-wrap: balance;
+  text-shadow: 0 4px 24px rgba(0,0,0,.6);
+}
+.hero h1 em, .closing h2 em { color: #cfa479; }
+.hero-lead { color: #e6d9c5; }
+.hero-subtext { color: #b6a38d; }
+.hero-oath {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 13px;
+  max-width: 540px;
+  margin-top: 29px;
+  color: #cdb391;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+.hero-oath span:nth-child(even) { color: #b04f3b; }
+.hero-actions { margin-top: 26px; }
+.button {
+  border-radius: 1px;
+  text-transform: uppercase;
+  letter-spacing: .065em;
+  box-shadow: inset 0 1px rgba(239,193,147,.08);
+}
+.button-primary {
+  color: #f9e7d1;
+  border-color: #b46048;
+  background: linear-gradient(165deg, #ac503e, #702a25 75%);
+  text-shadow: 0 1px rgba(0,0,0,.48);
+  box-shadow: inset 0 1px rgba(254,210,159,.24), 0 6px 20px rgba(0,0,0,.23);
+}
+.button-primary:hover {
+  background: linear-gradient(165deg, #c0694f, #883428 75%);
+  border-color: #d08864;
+}
+.button-play:disabled {
+  color: #c5ab91;
+  background: linear-gradient(165deg, #472a25, #291b18);
+  border-color: rgba(166,81,60,.8);
+  opacity: .91;
+  cursor: not-allowed;
+  text-shadow: none;
+  box-shadow: inset 0 1px rgba(207,146,114,.12);
+}
+.button-play:disabled:hover {
+  transform: none;
+  background: linear-gradient(165deg, #472a25, #291b18);
+}
+.button-outline {
+  color: #e5d5c0;
+  border-color: #715341;
+  background: linear-gradient(165deg, rgba(79,55,39,.33), rgba(21,17,15,.8));
+}
+.button-outline:hover { border-color: #bd9b73; background: rgba(129,80,50,.23); }
+.hero-note {
+  margin-top: 32px;
+  padding-left: 12px;
+  border-left: 2px solid #8c4337;
+  color: #b3a18c;
+}
+.hero-note strong { color: #d8c2a7; }
+.note-spark { background: #ab4e3c; box-shadow: 0 0 14px rgba(165,53,43,.35); }
+
+/* The gothic gateway remains handcrafted CSS rather than an external image. */
+.hero-art {
+  border-color: #68503d;
+  background:
+    radial-gradient(ellipse 39% 45% at 50% 43%, rgba(176,55,35,.28), transparent 81%),
+    radial-gradient(ellipse 75% 48% at 50% 105%, rgba(115,30,26,.16), transparent 71%),
+    linear-gradient(180deg, #34251f 0%, #1b1716 48%, #080908 100%);
+  box-shadow: 0 28px 90px rgba(0,0,0,.63), inset 0 0 111px rgba(0,0,0,.62), 0 0 0 6px rgba(55,32,24,.26);
+}
+.hero-art::before { border-color: rgba(199,148,101,.36); }
+.hero-art::after {
+  background:
+    linear-gradient(90deg, rgba(5,5,5,.5), transparent 28%, transparent 72%, rgba(5,5,5,.5)),
+    linear-gradient(0deg, #070706, transparent 26%);
+}
+.art-halo {
+  box-shadow: 0 0 0 1px rgba(164,80,52,.35), 0 0 0 25px rgba(180,73,51,.022), 0 0 0 51px rgba(185,98,53,.036);
+  background: radial-gradient(circle, rgba(187,59,37,.34), rgba(124,35,27,.15) 39%, transparent 72%);
+}
+.art-mountains-back { background: #291e1b; }
+.art-mountains-front { background: #141110; }
+.gate-arch {
+  border-color: #41372f;
+  background: radial-gradient(ellipse at 50% 68%, rgba(151,34,27,.22), rgba(5,5,5,.99) 62%);
+  box-shadow: inset 0 0 0 7px #171310, inset 0 0 55px rgba(144,42,28,.2), 0 0 0 4px #191412;
+}
+.gate-void { border-color: rgba(165,70,47,.28); box-shadow: 0 0 58px rgba(160,48,31,.18); }
+.gate-pillar {
+  border-color: #17120f;
+  background: repeating-linear-gradient(180deg, #504235 0 18px, #211b18 18px 22px, #332c26 22px 44px);
+}
+.gate-crown {
+  background: linear-gradient(180deg, #65513e, #28211b 80%);
+  border-color: #18110f;
+}
+.art-ground { background: linear-gradient(180deg, #1e1612, #080807); }
+.fate-emblem {
+  border-color: rgba(167,81,59,.6);
+  background: rgba(11,9,8,.95);
+}
+.fate-emblem span {
+  color: #eacaa0;
+  border-color: #93613f;
+  background: linear-gradient(135deg, #3b2b23, #15100e);
+}
+.art-inscription {
+  position: absolute;
+  z-index: 8;
+  top: 30px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font: 700 10px Georgia, "Times New Roman", serif;
+  letter-spacing: .31em;
+  color: rgba(226,186,133,.49);
+  text-shadow: 0 2px 9px #000;
+}
+.art-caption { color: #c5a588; }
+.hero-lower { color: #b9a088; }
+.hero-lower-line { background: rgba(169,100,69,.33); }
+
+.principles {
+  padding-block: 108px 118px;
+  background: radial-gradient(ellipse 70% 50% at 23% 103%, rgba(99,35,28,.10), transparent 80%);
+}
+.section-heading h2 span, .library-intro h2 span { color: #cba477; }
+.principles-grid { box-shadow: 0 18px 48px rgba(0,0,0,.27); }
+.principle-card {
+  position: relative;
+  background: radial-gradient(circle at 90% 0, rgba(121,65,38,.09), transparent 67%), linear-gradient(180deg, #241b17, #110e0d);
+}
+.principle-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 48px;
+  height: 2px;
+  background: #99503b;
+}
+.card-number { color: #a97963; }
+.card-glyph { color: #ae7157; }
+.principle-card h3 { color: #ead7be; }
+.status-indicator > span:first-child { border-color: #ae5746; background: #692f27; }
+.status-strip a { color: #dfb48d; }
+
+.library-section {
+  border-block-color: rgba(173,103,66,.3);
+  background:
+    radial-gradient(circle at 80% 34%, rgba(115,45,28,.14), transparent 48%),
+    linear-gradient(130deg, #241a14, #0f0d0b 74%);
+}
+.library-list { border-top-color: #775240; }
+.library-row { border-bottom-color: #493429; }
+.library-index, .library-row > span:last-child { color: #b67e65; }
+.library-all { color: #ddae83; }
+.closing {
+  background: radial-gradient(ellipse 50% 52% at 50% 49%, rgba(120,42,31,.15), transparent 79%);
+}
+.closing-symbol { color: #b15945; }
+.site-footer { background: #080707; }
+.footer-brand { color: #eee0ca; }
+
+@media (max-width: 850px) {
+  .hero-grid { padding-top: 74px; }
+  .hero h1 { font-size: clamp(58px, 8vw, 78px); }
+}
+@media (max-width: 560px) {
+  .hero-grid { padding-top: 54px; }
+  .hero h1 { font-size: clamp(46px, 11.1vw, 64px); }
+  .hero-oath { font-size: 9px; gap: 7px 9px; letter-spacing: .065em; }
+  .art-inscription { top: 24px; font-size: 9px; letter-spacing: .19em; }
+  .hero-actions { margin-top: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-art * { animation: none; }
+}
