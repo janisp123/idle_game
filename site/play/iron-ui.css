@@ -110,7 +110,7 @@ body {
 }
 .portrait::before{
   content:"";position:absolute;inset:0;
-  background-image:url("./assets/hunting.svg");
+  background-image:url("./assets/hunting.webp");
   background-position:8% 44%;
   background-size:auto 118%;
   filter:brightness(.88) contrast(1.15) saturate(.7);
