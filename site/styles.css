@@ -158,6 +158,14 @@ button:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 5px
 .button:hover { transform: translateY(-2px); }
 .button-primary { background: var(--gold); border-color: var(--gold); color: #14130f; }
 .button-primary:hover { background: var(--gold-light); border-color: var(--gold-light); }
+.button-play:disabled {
+  background: rgba(214, 184, 130, .10);
+  border-color: rgba(214, 184, 130, .45);
+  color: var(--gold-light);
+  cursor: not-allowed;
+  opacity: .8;
+}
+.button-play:disabled:hover { transform: none; background: rgba(214, 184, 130, .10); }
 .button-outline { border-color: #66645a; color: var(--ink); background: rgba(255,255,255,.015); }
 .button-outline:hover { border-color: var(--gold-light); background: rgba(214,184,130,.09); }
 .hero-note { display: flex; align-items: baseline; gap: 6px; max-width: 490px; margin-top: 36px; color: var(--muted); font-size: 12px; line-height: 1.5; }
