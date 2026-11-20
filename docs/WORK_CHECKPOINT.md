@@ -6,6 +6,8 @@
 
 **In progress:** No approved product implementation task. Research notes are **reference material only**, not selected equations or implementation requirements.
 
+**Owner-approved rule (OFF-001):** **Offline earns XP/rewards with a frozen logout build; levels, skills and stats only increase when the player returns to the game.** Do not add XP-level boundary stepping to the offline estimator. See `docs/DECISIONS.md` and the architecture handoff; this rule overrides older research assumptions.
+
 **Verified research scope:** Small separated RPG combat functions; online attack timing; comparative offline approaches (short seeded headless tests, direct statistical rates, slow full tick replay); reward/loot boundaries, long-duration settlement and idempotence concerns. Each approach has limitations and is **not proven in our own game**.
 
 **Fast next reading step for combat/offline:** Follow `AGENTS.md` preflight, then the concise **Combat/offline handoff** in `docs/brainstorm/ARCHITECTURE_AND_BALANCING.md`. Consult the P17/P18 entries in `docs/USEFUL_EXAMPLES.md` selectively; do not reread or implement the full library. Exact external code locations are **not** in this public repository and must be supplied from the owner's separate private research index if needed.

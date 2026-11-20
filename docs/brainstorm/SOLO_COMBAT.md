@@ -2,6 +2,11 @@
 
 **Status:** Living brainstorm — no implementation approved. Updated 2026-11-20.
 
+## Owner-approved advancement timing (OFF-001; 2026-11-20)
+
+- The two equipped skills **earn XP** during offline combat but their **levels, success chances, damage improvements and perk unlocks do not change while the player is away**. Combat calculations use the frozen pre-logout skill levels, stats and equipment for the entire interval.
+- When the player **returns to the game**, settle offline combat using the frozen build, then apply earned XP/skill-level increases and their effects for future fights. See `docs/DECISIONS.md` OFF-001.
+
 ## Latest clarification: simple autonomous combat, offline-friendly (2026-11-20)
 
 **Direction:** Do not design combat around intelligent, situational decisions that require a character to be simulated continuously while offline. The player equips **two skills** before leaving; their automatic use must be governed by known timing/probability rules so the combat module can calculate win/loss rates and fight duration efficiently. Exact skill priority and damage equations are **not yet chosen**. Borrow the established simplicity of attack timers, accuracy, defence and health; preserve special effects only where they can be accounted for in the statistical model.

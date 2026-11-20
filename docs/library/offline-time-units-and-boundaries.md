@@ -67,7 +67,7 @@ An event-boundary simulation advances directly to the earliest moment when the r
 - Resource stock reaches zero.
 - A timed action/crafting encounter completes.
 - A production modifier begins or expires.
-- An upgrade/skill threshold is reached.
+- In games that support automatic offline advancement, an upgrade/skill threshold is reached. **Not an offline boundary for our game:** see OFF-001; player/skill levels and effective combat stats stay frozen until login.
 - An activity queue changes steps.
 - An asynchronous group membership interval begins or ends.
 - A stored ruleset changes effective version.
@@ -140,7 +140,7 @@ completed = floor(totalTime / encounterDurationMs)
 newPartialProgressMs = totalTime mod encounterDurationMs
 ```
 
-But these counts must be clipped at the earliest relevant boundary: input-resource exhaustion, skill-level change affecting duration/yield, activity-queue rule, combat viability, cooldown or group expiration.
+But these counts must be clipped at the earliest relevant boundary: input-resource exhaustion, activity-queue rule, combat viability, cooldown or group expiration. A skill-level change can be a boundary **only for games where levelling is permitted during offline simulation**; our game freezes combat/activity levels until login (OFF-001).
 
 For huge repeating schedules, repeatedly walking a five-task cycle could still require millions of iterations. Consider mathematically fast-forwarding identical full cycles, then processing the partial final cycle. This is valid only when none of the skipped cycles changes the parameters used to compute them.
 
@@ -189,7 +189,7 @@ Also use randomized **property-based tests**: generate nonnegative stock, produc
 | Per-frame updates | Proportional to frames/time | Easy live rendering | Too costly for long absences |
 | Per-encounter replay | Proportional to encounters | Exact sequence in simple games | May be millions/billions of actions |
 | Event-boundary integration | Proportional mainly to meaningful rule changes | Accurate depletion timing | Competing resources complicate state transitions |
-| Closed-form whole cycles | Approximately constant cost within a fixed regime | Extremely cheap for long identical loops | Invalid if levels, rates or resources change inside the skipped interval |
+| Closed-form whole cycles | Approximately constant cost within a fixed regime | Extremely cheap for long identical loops | Invalid if effective rates or resources change inside the skipped interval; for our game XP does **not** change effective levels during absence |
 | Aggregate probabilistic rewards | Depends on sampler rather than number of encounters | Preserves distributions without per-roll loops | Requires carefully defined RNG and outcome correlations |
 
 The best approach is often **hybrid**: a small event-driven scheduler that uses closed-form arithmetic for stable intervals, discrete processing for genuine transitions, and statistically correct bulk reward sampling where exact per-action replay is unnecessary.
@@ -201,14 +201,14 @@ Avoid claims such as “20 years always settles instantly” until the implement
 `[OUR-GAME: FIT]`
 
 - Use consistent time units and explicit rules for every task's stop condition.
-- Mine stone and hunt enemies as **discrete encounters**; do not apply continuous production maths where skill level or combat state changes during an encounter.
+- Mine stone and hunt enemies as **discrete encounters**; don't pretend distinct events or combat-state changes are continuous. **Skill level and effective combat stats are frozen for the whole offline interval in our game**; accumulated XP can only level the player after login (OFF-001).
 - Keep the five-task automation running without a forced offline cap, but compress repeated cycles only when mathematically valid.
 - Respect the **seven-day offline group participation** boundary: after it, switch to solo settlement even if the player remains away for years.
 - Compute 3d7 outcomes and rare rewards with correct probabilities, without issuing a separate serialized server event for every historical encounter.
 - Build golden tests for the exact timestamp at which input stock, cooldowns and group membership expire.
 - Optimize for **low server CPU, low database write volume, predictable memory and resumability**, not for ticking every character continuously.
 
-**What does not fit:** Limiting rewards to an arbitrary offline window, stopping combat while absent, or silently skipping a remainder when a solver's iteration guard is reached.
+**What does not fit:** Limiting rewards to an arbitrary offline window, stopping combat while absent, silently skipping a remainder when a solver's iteration guard is reached, or applying **XP-driven skill/stat gains during absence** despite the frozen-build rule OFF-001. This article also describes other game designs where mid-offline levelling is possible; those are general examples, not our requirements.
 
 ## Open questions
 
