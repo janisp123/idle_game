@@ -16,6 +16,7 @@
 
 | MVP-001 | 2026-11-20 | Owner | First playable test uses **one character, two selectable automatic activities (hunting wolves and mining stone)** and original static grimdark scenes instead of animations. Browser-playable under the landing page's Play Now button, with local saves and offline catch-up. This is a narrow prototype: no accounts, multiplayer, full hit/damage/HP/death combat or equipment yet. Exact reward rates and artwork can be improved after testing; OFF-001 and SITE-001 remain binding. | Active |
 
+| SITE-002 | 2026-11-20 | Owner | All **GitHub and Discord links** on the landing and playable game pages open in a **new browser tab** with `target="_blank"` and `rel="noopener noreferrer"`; internal navigation such as Home, Play Now, and page sections stays in the current tab. Apply this convention to future website and game UI revisions. | Active |
 | VIS-001 | 2026-11-20 | Owner | Use a **consistent, detailed, original painted grimdark visual direction** for all action scenes and the actual gameplay UI: dark distressed iron/stone, oxblood cloth, worn parchment, grounded armour, harsh cinematic lighting, atmospheric environments, and matching character identity. The approved interface mockup is a **reference**, not a substitute for responsive HTML/CSS or functional controls. Avoid simplistic vector placeholder images as the finished visual direction. | Active |
 
 Add project-specific decisions only when explicitly approved; date and link superseding decisions. Avoid copying private conversations.
