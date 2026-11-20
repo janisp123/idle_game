@@ -1,16 +1,25 @@
-# Noncommercial Software License with Steam Distribution Restriction
+# Noncommercial Software License with Public Game Release Restriction
 
-**Custom license terms for original software in this repository.** This is a **modified licensing arrangement**, based on PolyForm Noncommercial License 1.0.0, with the additional restriction below. **It is not the unmodified, official PolyForm Noncommercial License** and is not an OSI-approved open-source license.
+**Custom source-available license for original software in this repository.** This license incorporates the PolyForm Noncommercial License 1.0.0 below but adds an overriding restriction on **all public game releases and public game hosting**. It is **not** the official, unmodified PolyForm license and is **not** an OSI-approved open-source license.
 
-## Additional Steam Distribution Restriction
+## Additional Public Game Release and Hosting Restriction
 
-As an express condition of the permissions granted for the licensed Software under the PolyForm Noncommercial License 1.0.0 reproduced below, **no permission is granted to submit, publish, release, distribute, or make available any game or other software containing or derived from the licensed Software through Valve's Steam platform without prior written permission from the licensor**, **even if that Steam release is completely free, has no advertising, and earns no revenue**.
+As an express condition on the permissions granted under the PolyForm Noncommercial License 1.0.0 reproduced below, the licensor **does not grant permission to publish, release, submit, distribute, deploy, publicly host, operate for public access, or otherwise make available to the public any playable game incorporating, copying, or derived from the licensed Software**, unless the licensor grants **prior written permission**.
 
-This condition applies to the Steam Store, Steam Early Access, and other Steam game-release or game-distribution channels. It does not prohibit personal study, private hobby projects, or noncommercial sharing outside Steam that otherwise complies with the license. It does not grant control over independent code that does not copy or derive from the licensed Software, or override rights that applicable law provides without a license.
+This restriction applies **whether the game is free or paid, with or without advertisements, donations, subscriptions, in-app purchases, or other monetization, and regardless of the size or popularity of the distribution platform**. Examples include, without limitation:
 
-**Conflict rule:** Where the PolyForm Noncommercial License 1.0.0 would otherwise allow Steam distribution, this additional restriction controls. All other provisions of the PolyForm Noncommercial License 1.0.0 continue to apply. Distributors must pass along this **entire license document, including this additional condition**, to recipients.
+- **Mobile stores**: Google Play, Apple's App Store, and other app stores.
+- **PC/console storefronts and game portals**: Steam, Epic Games Store, itch.io, and other distribution services.
+- **Browser games and web hosting**: publicly accessible websites, self-hosted browser games, game portals, hosted web applications, and progressive web apps.
+- **Other public releases**: downloadable game builds, installers, or releases made available through public file hosts, repositories, or other channels.
 
-The copyright holder may separately grant written commercial or Steam-distribution permission. This custom arrangement applies only to original Software the licensor has the right to license; third-party code or assets retain their respective licenses and restrictions.
+**Private use stays permitted** under the underlying license: a person may study, experiment with, modify, and run the Software privately as a noncommercial hobby project without distributing or publicly hosting a playable game. Noncommercial redistribution of **source code as source code** (such as source-only forks, educational examples, and source patches) remains subject to the underlying PolyForm Noncommercial terms, including its notice requirements. Such redistribution is **not** permission to release or publicly host a playable game.
+
+**Conflict and scope:** If the underlying PolyForm terms would otherwise permit a public game release or public game hosting, **this additional restriction controls**. All other underlying terms remain in effect. Anyone redistributing the licensed Software must pass along **this entire custom license including this restriction**, not just the incorporated PolyForm text.
+
+The restriction applies only to Software the licensor owns or has authority to license, and to copying or derivative uses requiring permission under copyright law. It does **not** grant exclusive rights over general ideas, game mechanics, independently written implementations, third-party code, or uses permitted by applicable law without a license. Third-party materials retain their applicable licenses.
+
+For commercial exploitation **or** any public game release using the licensed Software, request a separate written license or permission from the relevant rights holder.
 
 ---
 
