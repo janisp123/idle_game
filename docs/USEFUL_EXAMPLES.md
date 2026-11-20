@@ -19,7 +19,7 @@ See [RESEARCH_LIBRARY.md](RESEARCH_LIBRARY.md) for the library's purpose and [EN
 | Duplicate claims, saves, large time gaps | P16, P15, then P05/P07 as needed | The project already has production-grade persistence or security |
 | UI, events, groups, operations, monetisation | Relevant P06–P14 entries only | These features are in the first prototype scope |
 
-**Evidence and priority:** Entries are original explanatory **DESIGN-NOTEs**, not proven code in our project. An entry's usefulness tag does not override `docs/DECISIONS.md` or authorise implementation. Older brainstorm variants and external examples have lower priority than the latest explicitly supported direction. Unresolved choices go back to the owner. Detailed third-party source locations are in a separate private index and are not automatically available to Codex.
+**Evidence and priority:** Entries are original explanatory **DESIGN-NOTEs**, not proven code in our project. **OFF-001 overrides generic research examples for our own game: XP accrues offline, but no skill levels, stats, perks or effective gear are upgraded until the player returns.** An entry's usefulness tag does not override `docs/DECISIONS.md` or authorise implementation. Older brainstorm variants and external examples have lower priority than the latest explicitly supported direction. Unresolved choices go back to the owner. Detailed third-party source locations are in a separate private index and are not automatically available to Codex.
 
 ## Quick index
 
@@ -369,10 +369,11 @@ finishEncounter(state):
 estimateOffline(segment, combatModel):
     rates = estimateVictoryDeathAndDurationRates(combatModel, segment.startStats)
     applyStatisticallySampledRewardsAndTimeCosts(segment, rates)
-    // Recompute when skill/equipment progression significantly changes rates.
+    // OUR GAME: do NOT change skill/level/effective-equipment stats during absence.
+    // Recompute only at non-advancement boundaries, e.g. activity or rule changes.
 ```
 
-**Important boundaries:** The probability formula above is just one simple candidate—not an endorsement of any game's exact algorithm. The offline function is a *placeholder for a future validated statistical model*, not an implementation or guarantee of equivalence. Don't use per-battle simulation for multi-year catch-up. Preserve separate fixed-zone and resurrection downtime rules.
+**Important boundaries:** The probability formula above is just one simple candidate—not an endorsement of any game's exact algorithm. The offline function is a *placeholder for a future validated statistical model*, not an implementation or guarantee of equivalence. Don't use per-battle simulation for multi-year catch-up. Preserve separate fixed-zone and resurrection downtime rules. **For our game specifically, use the frozen logout build throughout; earned XP is applied to levels only on return (OFF-001).**
 
 **Practical tests before adopting any formula:** compare average win rate, damage, fight duration, deaths/hour and rewards/hour from seeded encounter sampling against the aggregate estimator; test extremes (zero attack/defense, near-certain hit/miss, long absences, skill-level thresholds), and verify the UI/animation cannot change progression.
 
@@ -402,7 +403,7 @@ estimateOffline(segment, combatModel):
 
 **2. Combat evaluation:** Use (A) short seeded real combats to sample win probability, duration by outcome, wounds, skill usage and recovery needs. Cache this estimate by a versioned fingerprint of the **complete inputs**, not only character level. Use (B) as a cheap cross-check or early prototype when effects are simple; do not let two independent sets of damage formulas drift apart.
 
-**3. Offline settlement:** Given elapsed real time and saved fixed-zone/build configuration, calculate completed activity, expected wins/losses, resurrection+return travel downtime, skill XP and loot. Handle progression boundaries by recomputing rates only when relevant inputs change. Do not tick individual absent characters on a running server. Allow absences of years or decades without artificial time caps.
+**3. Offline settlement (OFF-001):** Given elapsed time and the **unchanged logout build**, calculate completed activities, expected wins/losses, resurrection/return downtime, accumulated XP and loot. **Offline XP cannot level up skills, raise stats or improve combat efficiency during the interval.** Grant/apply XP and resulting level-ups **on login after settling the full interval**. Re-evaluate only at non-advancement boundaries (different queued activity, exhausted resources, expired group membership, dated world/rule changes). Do not tick absent actors. Allow years or decades without a cap.
 
 The UI only displays returned results and battle narratives; it never chooses or forges rewards. Death handling and reward tables are separate from combat damage formulas.
 
@@ -431,7 +432,8 @@ expectedWins   = segmentSeconds * winRatePerSecond
 expectedDeaths = segmentSeconds * lossRatePerSecond
 # Draw plausible integer outcomes from a suitable, tested distribution.
 # Award base resources from sampled wins, not invented guaranteed rare drops.
-# Cross skill-level/rule boundaries and recalculate rates when necessary.
+# OUR GAME: do not cross skill/XP thresholds during absence; the build is frozen.
+# Only apply legitimate activity, resource, group or time-varying rule boundaries.
 ```
 
 **This example has assumptions:** start travel, recovery after a loss, partial intervals, persistent injuries and whether the character can fight again immediately need explicit policies. Win/loss times are conditional averages, not the same as one average fight duration. No specific number of deaths or loot items should be guaranteed by floating-point rounding. Treat totally unwinnable encounters without inventing a tiny nonzero damage floor. Large-time aggregation can be efficient but is not automatically an identical replay of RNG events. Cache invalidation must reflect balance patches and all changed inputs.
@@ -443,7 +445,7 @@ Test these in an independently authored small prototype **before claiming correc
 1. Run at least thousands of seeded encounters per representative build/monster/environment; estimate uncertainty for very rare deaths instead of trusting three samples. Compare win chance, mean win/loss time, hit/damage distribution, interrupts and skill experience.
 2. Run a batched estimator over many shorter windows with the same starting build; compare distributions of victories, deaths, time wasted, XP and resources against sampled active fights. Check **online/offline statistical fairness**, not exact matching of every random roll.
 3. Test repeated graveyard → resurrection → return to the **same zone** (no automatic easier-zone switch). Recovering and packing/travel time count against farming time, including when survival chance is low.
-4. Test meaningful progression milestones and historical rule changes during 1 hour, 1 week, 1 year and 20 years. Ensure execution cost grows with **actual boundaries**, not offline seconds or battle count; repeated task-queue loops require their own aggregation.
+4. Test XP totals spanning many theoretical level thresholds after 1 hour, 1 week, 1 year and 20 years: **all offline fights must still use the same frozen logout levels and stats**. Check application of all earned levels on return, without retroactive gain changes. Also test non-advancement boundaries, historical rules and repeating task queues. Execution cost should grow with **actual activity/world boundaries**, not offline seconds, battle count or earned XP level crossings.
 5. Test impossible damage, no kills, nearly certain death, mixed enemies, overlapping attack timers, skill interrupts and recovery. Do not silently switch activities or grant loot from a fight the character could never win.
 6. Test probabilistic rare rewards over a huge number of independent sessions; no `ceil(p*n)` or fixed expected counts that make rare drops guaranteed. Save/claim must be server-authoritative and idempotent.
 7. The **one three-skull-dice roll when returning** is a separate claim/bonus presentation mechanic, not a requirement to generate a dice event for each offline combat. Prevent frequent logins from multiplying lucky chances; the exact bonus formula remains **open**, not a solved design decision.
