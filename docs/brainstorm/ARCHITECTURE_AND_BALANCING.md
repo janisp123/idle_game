@@ -2,6 +2,24 @@
 
 **Status:** Brainstorming, not approved implementation tasks. Updated 2026-11-20.
 
+## Combat/offline handoff — concise context for Codex (2026-11-20)
+
+**Status: design direction and research only; no approved gameplay task or fixed equations.** Read this section, not the entire research archive, after the required `main:docs/TD_LIST.md`, `AGENTS.md`, `docs/WORK_CHECKPOINT.md` and `docs/DECISIONS.md` preflight. The owner must approve a **specific prototype scope** before coding.
+
+**Keep these constraints together:**
+
+- **Isolated combat-rules module:** a character + up to two pre-equipped automatic skills versus a monster, using explicit stats, environment, time and randomness. The module reports fight events/outcomes; it must not depend on UI, narration, networking, persistence, inventory rewards or real-time browser clocks.
+- **Online:** a straightforward, automatically timed fight; display its outcomes without changing attack clocks or granting extra progress through animations. The initial model should be simple (attack timing, hit/miss, damage, HP, win/loss); special effects can wait until defined.
+- **Offline:** save configuration and elapsed time; calculate aggregate farming using the **same combat rules**, preferably a calibrated estimator for win/loss rates and durations. No constantly running actors and **no offline duration cap**. Account for recovery, graveyard resurrection and return travel; an absent character never silently switches the selected hunting zone. Cross skill/other meaningful rule boundaries without replaying millions of attacks.
+- **Separate responsibilities:** combat rules ≠ fight presentation ≠ death/return time ≠ loot tables ≠ offline settlement ≠ save/claim authority. Test that modules share mechanics without duplicating incompatible damage formulas.
+- **Reward presentation:** one three-skull-dice roll on offline return for an optional bonus tier, **not** a required per-encounter animation. Its fairness and coexistence with older per-combat dice proposals are **unresolved**.
+
+**Research lookup only when the work calls for it:** [P17](../USEFUL_EXAMPLES.md#p17--small-independent-rpg-combat-and-reward-modules) (separated hit/damage/timers/loot); [P18](../USEFUL_EXAMPLES.md#p18--offline-combat-research-comparison-choose-algorithms-not-foreign-gameplay) (seeded headless sampling versus direct rates versus slow tick replay); [P01/P02/P03](../USEFUL_EXAMPLES.md#quick-index) (pure engine, offline boundaries, random rewards); [P15/P16](../USEFUL_EXAMPLES.md#quick-index) (time correctness, idempotent claims). **These are alternatives and test ideas, not instructions to implement every pattern.** The more detailed notes below are historical research, not a ranked implementation plan.
+
+**Owner decisions still needed:** first prototype content (mining/hunting versus solo duel), numerical hit/damage formulas, two-skill timing/priority, injury/interrupt mechanics, return-time balance, dice/drop probabilities, offline estimator calibration and progression policy. Read [Open questions](OPEN_QUESTIONS.md) for further alternatives. If a task depends on an unanswered choice, request it rather than guessing.
+
+**Suggested validation order, not an approved backlog:** tiny pure online encounter → seeded test runs → separate bulk estimator calibrated against active fight statistics → long-absence boundaries and exactly-once rewards. Resume broad external research only when a specific test failure or missing mechanism justifies it.
+
 ## Current direction
 - Keep the prototype tiny, but make the engine **modular and data-driven** so adding new skills, monsters, equipment slots, races or terrains doesn't require rewriting the game.
 - **One shared combat engine** powers live gameplay and the **headless combat simulator**. Never maintain separate combat formulas.
