@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-20 — First playable prototype and public site (chat)
+
+- **Merged:** [PR #20](https://github.com/janisp123/idle_game/pull/20), commit `5ddebb0aaa35a8c30d61970240e95d1b7140f899`.
+- **Implemented:** browser-accessible `site/play/` with one character, automatic Hunting (wolves) and Mining (stone), localStorage state, O(1) offline catch-up, return-only character level-ups, original prototype SVG action scenes, basic game UI and a one-day simulation button.
+- **Verification:** Pull-request protocol and static-site/Node tests passed. Following merge, main checks and GitHub Pages deployment succeeded. Gameplay has not had exhaustive cross-device, balance or security testing; no real wolf combat, accounts or server state yet.
+- **Limitation:** GAME-001 remains an early prototype, not a finished RPG.
+
+
 This is a record of **merged repository work**, not a promise that game mechanics are implemented. The actual playable game has **not** been built. Current approved tasks remain exclusively in [TD_LIST.md](TD_LIST.md).
 
 ## 2026-11-20 — Public landing page and automatic deployment (chat)
