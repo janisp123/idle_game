@@ -28,6 +28,7 @@ See [RESEARCH_LIBRARY.md](RESEARCH_LIBRARY.md) for the library's purpose and [EN
 | P15 | [Time-safe offline simulation](library/offline-time-units-and-boundaries.md) | Correct seconds/milliseconds, stock exhaustion, and constant-cost fast-forward where valid | `[OUR-GAME: FIT]` |
 | P16 | [Idempotent reward settlement](library/idempotent-reward-settlement.md) | Atomic catch-up cursors, safe retries, concurrent claims and crash recovery | `[OUR-GAME: FIT]` |
 | P17 | Simple separated RPG combat calculations | Independent hit/damage calculation, attack scheduling, defeat and reward handling | `[OUR-GAME: FIT]` |
+| P18 | Offline combat estimators compared | Seeded encounter sampling, closed-form rates, tick replay and modular settlement tradeoffs | `[OUR-GAME: ADAPT]` |
 
 Tags apply to **our design**, not to technical merit. Each technique remains documented for other developers.
 
@@ -362,6 +363,86 @@ estimateOffline(segment, combatModel):
 **Practical tests before adopting any formula:** compare average win rate, damage, fight duration, deaths/hour and rewards/hour from seeded encounter sampling against the aggregate estimator; test extremes (zero attack/defense, near-certain hit/miss, long absences, skill-level thresholds), and verify the UI/animation cannot change progression.
 
 **Use/rights note:** Reading source is not permission to paste it into our MIT project. At least one examined recreation declares a strong copyleft license; preserve legally required attribution for any approved integration, or write independent code. Nothing above is copied from an outside repository.
+
+---
+
+## P18 — Offline combat research comparison: choose algorithms, not foreign gameplay
+
+`[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`  
+**Reviewed:** 2026-11-20. **Evidence:** Publicly readable implementations and documentation in several browser/mobile idle RPGs and an open source MMORPG-style server. The code was **inspected**, not executed, benchmarked or validated in our repository. Under our publication rules, do not publish the outside project names, source paths or URLs in this public document. The owner keeps the separate source-location index for future research handoffs.
+
+### What we actually inspected
+
+| Pattern | Observed code or design | General merit | Our-game fit and caution |
+| --- | --- | --- | --- |
+| **A. Seeded headless encounter estimator** | Runs a small fixed set of actual battles using normal content, actor statistics and combat rules without rendering; aggregates average damage, duration and failure rate; caches by content/build/settings fingerprint. An offline module reads these rates and converts time into rewards. | Useful whenever combat includes skills, interrupts and effects that resist simple algebra. One combat model for active play and estimation. | **FIT after adaptation.** A default of only three seeded battles is too small for dependable rare losses. The inspected implementation also used heuristic multipliers and loot quantity caps; none is automatically correct for us. The absence-duration calculation itself had no global time cap. |
+| **B. Direct expected-value combat calculator** | Computes hit chance, effective damage per second, estimated kill time, enemy damage per second, time until injury, approximate win chance, expected kills and expected drops. Uses expected rates rather than replaying every fight. | Cheap, understandable mathematical baseline; aggregate work need not scale with number of virtual encounters. | **ADAPT.** An observed version capped offline time at eight hours, used a coarse survival-to-win heuristic and did not implement repeated graveyard/return cycles. Its named "O(1)" approach is only constant for unchanged statistics. |
+| **C. Time-step offline replay** | Reuses online update logic in half-second steps, optionally yielding to the browser so it stays responsive. | Simple consistency with live rules; suitable for short absences and testing. | **NOT-FIT as our final offline engine.** CPU work grows roughly with elapsed seconds; one year would entail tens of millions of steps. The inspected version enforces an offline cap. Keep step replay as an **independent test oracle**, not a decades-long settlement algorithm. |
+| **D. Separated combat and offline services** | Distinct files/services for combat, group encounters, loot, offline rewards, configuration and UI. Offline rewards calculated from saved activity snapshots and configured intervals. | Clear organizational boundary and options for future features. | **ADAPT.** One inspected implementation still imported many global stores directly into its combat service, making the module less isolated than we want. Its settings included a 12-hour starting cap and 80% offline efficiency, both incompatible with our goal. |
+| **E. Server-side combat with small exported maths functions** | Separate hit chance, damage, defense/status effects, encounter resolution and rewards; game server owns authoritative state. | Good base for eventual multiplayer anti-cheat. | **ADAPT.** Browser-only reward authority is not sufficient for a public multiplayer game. One examined server was noncommercial-licensed; visible source does not imply permission to reuse it. |
+| **F. A larger modular engine with parity tests** | Engine/game-content separation plus regression tests comparing extracted pure algorithms against frozen historical outputs, including time and randomness behavior. | A way to safely refactor mechanics without accidental balance changes. | **FUTURE CANDIDATE.** Do not import a huge framework into our small solo prototype. Reuse the principle of explicit interfaces and parity/regression tests. |
+
+### Three independent responsibilities, one ruleset
+
+**1. Pure combat rules:** Given an immutable player snapshot (including **two equipped skills**), enemy statistics, environment, fixed automatic skill rules, explicit elapsed time and RNG, resolve a live encounter. Output a result and typed events; do **not** read browser UI, clocks, databases, remote state, artwork or save files.
+
+**2. Combat evaluation:** Use (A) short seeded real combats to sample win probability, duration by outcome, wounds, skill usage and recovery needs. Cache this estimate by a versioned fingerprint of the **complete inputs**, not only character level. Use (B) as a cheap cross-check or early prototype when effects are simple; do not let two independent sets of damage formulas drift apart.
+
+**3. Offline settlement:** Given elapsed real time and saved fixed-zone/build configuration, calculate completed activity, expected wins/losses, resurrection+return travel downtime, skill XP and loot. Handle progression boundaries by recomputing rates only when relevant inputs change. Do not tick individual absent characters on a running server. Allow absences of years or decades without artificial time caps.
+
+The UI only displays returned results and battle narratives; it never chooses or forges rewards. Death handling and reward tables are separate from combat damage formulas.
+
+### Original example: convert encounter estimates to farming rates
+
+This is **new illustrative pseudocode**, not an extracted formula or validated estimator.
+
+```text
+combatModel = evaluateCombat(build, monster, environment, fixedSkills, rulesVersion)
+# Estimated from sampled encounters:
+pWin             = combatModel.winProbability            # 0..1
+meanWinSeconds   = combatModel.meanDurationIfWin
+meanLossSeconds  = combatModel.meanDurationIfLoss
+recoverySeconds  = combatModel.expectedRecoveryAfterWin
+graveyardSeconds = reviveTime + returnToSameZoneTravelTime
+
+expectedCycleSeconds =
+    pWin     * (meanWinSeconds  + recoverySeconds) +
+    (1-pWin) * (meanLossSeconds + graveyardSeconds)
+
+winRatePerSecond  = pWin     / expectedCycleSeconds
+lossRatePerSecond = (1-pWin) / expectedCycleSeconds
+
+# For a segment with unchanged stats/rules:
+expectedWins   = segmentSeconds * winRatePerSecond
+expectedDeaths = segmentSeconds * lossRatePerSecond
+# Draw plausible integer outcomes from a suitable, tested distribution.
+# Award base resources from sampled wins, not invented guaranteed rare drops.
+# Cross skill-level/rule boundaries and recalculate rates when necessary.
+```
+
+**This example has assumptions:** start travel, recovery after a loss, partial intervals, persistent injuries and whether the character can fight again immediately need explicit policies. Win/loss times are conditional averages, not the same as one average fight duration. No specific number of deaths or loot items should be guaranteed by floating-point rounding. Treat totally unwinnable encounters without inventing a tiny nonzero damage floor. Large-time aggregation can be efficient but is not automatically an identical replay of RNG events. Cache invalidation must reflect balance patches and all changed inputs.
+
+### Compare offline outcomes against active battle simulation
+
+Test these in an independently authored small prototype **before claiming correctness**:
+
+1. Run at least thousands of seeded encounters per representative build/monster/environment; estimate uncertainty for very rare deaths instead of trusting three samples. Compare win chance, mean win/loss time, hit/damage distribution, interrupts and skill experience.
+2. Run a batched estimator over many shorter windows with the same starting build; compare distributions of victories, deaths, time wasted, XP and resources against sampled active fights. Check **online/offline statistical fairness**, not exact matching of every random roll.
+3. Test repeated graveyard → resurrection → return to the **same zone** (no automatic easier-zone switch). Recovering and packing/travel time count against farming time, including when survival chance is low.
+4. Test meaningful progression milestones and historical rule changes during 1 hour, 1 week, 1 year and 20 years. Ensure execution cost grows with **actual boundaries**, not offline seconds or battle count; repeated task-queue loops require their own aggregation.
+5. Test impossible damage, no kills, nearly certain death, mixed enemies, overlapping attack timers, skill interrupts and recovery. Do not silently switch activities or grant loot from a fight the character could never win.
+6. Test probabilistic rare rewards over a huge number of independent sessions; no `ceil(p*n)` or fixed expected counts that make rare drops guaranteed. Save/claim must be server-authoritative and idempotent.
+7. The **one three-skull-dice roll when returning** is a separate claim/bonus presentation mechanic, not a requirement to generate a dice event for each offline combat. Prevent frequent logins from multiplying lucky chances; the exact bonus formula remains **open**, not a solved design decision.
+
+### Cost, limitations and next research targets
+
+- **Direct rate formulas:** near-constant work in a stable segment, easy to inspect, but often miss interrupts, burst damage, injury/death correlations and timing variance.
+- **Seeded short simulations:** greater fidelity to real rules, cost proportional to sample count and average encounter length; cache responsibly, invalidate on rule/build changes. Too few samples may completely miss infrequent fatalities.
+- **Full per-tick catch-up:** excellent short-period reference for parity; catastrophic for unbounded offline time (tens of millions or more ticks), even if browser processing is chunked.
+- **Future investigation:** calibration methods for rare losses, first-passage/survival estimation, distribution-preserving aggregate loot, skill XP milestone stepping, stable versioned saves and exactly-once reward settlement. Research these without promising untested accuracy.
+- **Security and rights:** public third-party code is a technical reference, not our implementation. An absent licence is **not** an open-source licence. Future integration requires separate authorization and compliance with whatever licence applies; original algorithms/formulas should be independently designed and tested.
+
+**Status:** Research documented only. No game code, third-party dependencies, combat equations or coding tasks were approved by this review.
 
 ---
 

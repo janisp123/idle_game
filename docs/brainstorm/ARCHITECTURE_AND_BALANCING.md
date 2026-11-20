@@ -40,6 +40,12 @@ A larger independently written server framework illustrates a further separation
 
 **Implementation reference for future chat/cw/codex work:** See [P17 — Small independent RPG combat and reward modules](../USEFUL_EXAMPLES.md#p17--small-independent-rpg-combat-and-reward-modules) for the examined responsibilities, original pseudocode, constraints, tests and rights warning. **Study the separation of functions; do not copy foreign formulas or source.**
 
+### Additional cross-language idle-game code review (2026-11-20)
+
+A later source inspection compared six implementations: (a) short seeded combat runs feeding cached offline rates, (b) direct DPS/survival/win-probability formulas, (c) half-second offline combat replay, (d) independent combat/loot/offline services, (e) server-side combat functions, and (f) larger engines with parity tests. Their limitations included **small sample sizes**, guessed rates, real-time replay over very long absences, capped/offline-penalized gains and modules that import global game state directly. No inspected source is a proven turnkey solution to our unlimited-offline/death/return-to-zone design.
+
+**Next-step engineering reference:** [P18 — Offline combat research comparison](../USEFUL_EXAMPLES.md#p18--offline-combat-research-comparison-choose-algorithms-not-foreign-gameplay) has a comparison matrix, original estimator pseudocode, performance implications, legal boundaries, suggested calibration tests and deferred questions. It supplements P17's small combat-maths design without replacing it.
+
 ### Practical implication for our own design — candidate, not implementation approval
 
 1. **One isolated combat-rules module** accepts a character/stat snapshot, two pre-equipped skills, enemy and environment data, and explicit time/randomness inputs. It returns outcome information (win/loss probabilities or sampled outcomes, fight duration, damage, effects), without importing UI, artwork, inventory persistence, accounts or server code.
