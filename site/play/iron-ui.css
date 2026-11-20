@@ -1,0 +1,320 @@
+/* The Long Vigil — original, responsive dark-fantasy UI treatment.
+   Decorative, no external fonts/images/libraries. All active game controls remain HTML. */
+:root {
+  --night:#090807; --stone:#181310; --panel:#1b1512; --iron:#3e3025;
+  --border:#70533c; --line:#4b3629; --blood:#822b22; --blood-hot:#bd653c;
+  --gold:#bb925d; --parchment:#efdec4; --muted:#b5a088;
+}
+body {
+  min-width:280px;
+  color:#e8d3b7;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% -10%,rgba(111,44,30,.16),transparent 65%),
+    repeating-linear-gradient(116deg,rgba(255,231,187,.012) 0 1px,transparent 1px 4px),
+    repeating-linear-gradient(15deg,transparent 0 22px,rgba(0,0,0,.15) 23px 26px),
+    #0a0807;
+  font-family:Georgia, "Times New Roman",serif;
+}
+.topbar {
+  position:relative;
+  min-height:84px;
+  border-bottom:3px ridge #66533c;
+  background:
+    linear-gradient(90deg,rgba(91,26,21,.18),transparent 30%,rgba(91,26,21,.16) 87%),
+    radial-gradient(ellipse at 50% 15%,#2a2520,#100d0b 76%);
+  box-shadow:0 7px 27px #000, inset 0 -2px #17110c;
+}
+.topbar::before{
+  content:"";
+  position:absolute;left:0;right:0;bottom:4px;height:1px;
+  background:linear-gradient(90deg,transparent,#95714d,transparent);
+  opacity:.76;
+}
+.wordmark{color:#f0d3a6;text-shadow:0 2px 4px #000,0 0 14px #493121;letter-spacing:.11em;font-size:clamp(17px,2vw,25px)}
+.crest {
+  font-size:32px;
+  color:#ae7050;
+  text-shadow:2px 3px #120a09;
+  padding:3px 12px;
+  background:linear-gradient(165deg,#65271f,#210d0b);
+  border:1px solid #7c4e33;
+  box-shadow:inset 0 0 0 3px #28150f;
+  clip-path:polygon(12% 0,88% 0,100% 10%,100% 78%,50% 100%,0 78%,0 10%);
+}
+.topbar nav a{color:#dbc5a9;text-shadow:0 2px #080606}
+.topbar nav a:hover{color:#ffe3ac}
+.shell{width:min(1600px,calc(100% - 34px));padding-top:25px}
+.page-heading {margin-bottom:18px}
+.page-heading h1 {font-size:clamp(27px,3vw,39px);letter-spacing:.09em;color:#ead3b1;text-shadow:0 2px 10px #000}
+.page-heading h1 em {color:#b36a52;font-style:normal}
+.page-heading p:not(.eyebrow){color:#ac997f}
+.status-pill{border:1px solid #66513a;color:#c2ab86;box-shadow:inset 0 0 5px #000;letter-spacing:.08em;background:#18120e}
+
+/* Three-panel iron-and-stone console. */
+.game-grid{
+  display:grid;
+  grid-template-columns:minmax(215px,280px) minmax(0,1fr) minmax(210px,275px);
+  gap:14px;
+  align-items:start;
+}
+.sidebar,.main-column,.right-rail{display:flex;flex-direction:column;gap:15px;min-width:0}
+.panel,.scene-panel {
+  position:relative;
+  border:4px double #6f523a;
+  outline:1px solid #18100c;
+  background:
+    radial-gradient(ellipse at 80% 0,rgba(147,101,62,.08),transparent 70%),
+    repeating-linear-gradient(112deg,rgba(242,205,155,.017) 0 2px,transparent 3px 9px),
+    linear-gradient(145deg,#26201b,#12100e 75%);
+  box-shadow:
+    inset 0 0 0 1px rgba(187,133,83,.17),
+    inset 0 0 22px rgba(0,0,0,.65),
+    0 7px 23px rgba(0,0,0,.65);
+}
+.panel::before,.scene-panel::before {
+  inset:5px;
+  border:1px solid rgba(168,120,76,.19);
+}
+.panel::after{
+  content:"✣";
+  position:absolute;right:8px;top:6px;color:#875c40;font-size:14px;line-height:1;
+  text-shadow:0 1px #000;
+  pointer-events:none;
+}
+.panel{padding:17px 14px}
+.section-index{color:#c59d72;letter-spacing:.14em;font-size:9px}
+.panel h2{color:#ecd2b0;text-shadow:0 2px #000}
+.engraved-title{
+  text-align:center;
+  padding:5px 8px 8px;
+  border-block:1px solid rgba(160,113,68,.25);
+  background:linear-gradient(90deg,transparent,rgba(121,79,47,.21),transparent);
+  color:#f1d7ad;
+  letter-spacing:.055em;
+  font-size:clamp(18px,2vw,23px)!important;
+}
+.character{padding:15px 12px 18px}
+.character-top {gap:10px;margin-top:13px;align-items:flex-start}
+.character-top h2{font-size:22px;margin:0 0 2px}
+.level-label {font-size:17px;color:#f2cc90;text-shadow:0 1px #000}
+.attribute{color:#bfa992;font-size:11px}
+.portrait{
+  position:relative;overflow:hidden;
+  width:88px;height:109px;flex:0 0 88px;
+  border:3px ridge #8e6a49;
+  color:#e3c08b;
+  background:
+    linear-gradient(0deg,rgba(17,10,7,.75),transparent 40%),
+    radial-gradient(circle at 48% 32%,#987c5d,#35261c 48%,#130f0c 78%);
+  box-shadow:0 0 0 2px #251a12,inset 0 0 19px #000;
+}
+.portrait::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("./assets/hunting.webp");
+  background-position:8% 44%;
+  background-size:auto 118%;
+  filter:brightness(.88) contrast(1.15) saturate(.7);
+}
+.portrait-emblem{position:absolute;right:4px;bottom:0;z-index:1;font-size:20px;color:#af7955;text-shadow:0 2px #000}
+.xp-meta{margin-top:16px}
+.xp-meta strong{color:#dfbd88}
+.meter{
+  height:12px;
+  border:2px ridge #6c4d33;
+  background:linear-gradient(#100c09,#050505);
+  box-shadow:inset 0 1px 4px #000, 0 1px rgba(230,177,110,.15);
+}
+.meter > span{
+  background:linear-gradient(90deg,#7c422b,#bf8744,#ebae53);
+  box-shadow:inset 0 1px #f0c489;
+}
+.hint{font-size:11px;color:#b9a18a}
+.actions {padding:15px 10px}
+.actions h2 {margin:12px 0 17px}
+.activity{
+  min-height:91px;
+  margin-bottom:12px;padding:8px;
+  border:3px ridge #705035;
+  outline:1px solid #100c0a;
+  background:
+    radial-gradient(ellipse at 10% 30%,rgba(142,101,63,.12),transparent 62%),
+    linear-gradient(160deg,#372c23,#130f0d);
+  box-shadow:inset 0 0 0 2px #1d1510,inset 0 0 19px #100b09,0 4px 9px #0b0806;
+  transition:border-color .12s,background-color .12s,box-shadow .12s;
+}
+.activity strong{font-size:clamp(18px,1.55vw,22px);text-shadow:0 2px #080604;color:#e8cc9f}
+.activity small{color:#c4ad91}
+.activity-symbol{
+  flex:0 0 56px;height:68px;
+  color:#dbb17a;font-size:33px;text-shadow:0 3px #0a0706;
+  border:1px solid #5e4631;
+  background:linear-gradient(115deg,#5b4230,#1b1510);
+  box-shadow:inset 0 0 18px #18100e;
+}
+.activity.active{
+  border-color:#e6a35f;
+  color:#f7ddae;
+  background:linear-gradient(150deg,#70301d,#331814 75%);
+  box-shadow:inset 0 0 0 2px #53261b,0 0 0 1px #bd683c,0 0 18px rgba(200,95,39,.26);
+}
+.activity.active::before{
+  content:"";position:absolute;inset:-5px;pointer-events:none;
+  border:1px solid #ad6b3f;filter:drop-shadow(0 0 3px #c17033);
+}
+.activity.active .selection{color:#efbb72}
+.activity:hover{border-color:#cc8b58}
+.activity:focus-visible{outline:2px solid #eac087;outline-offset:4px}
+.inventory,.progress-panel{padding:14px 12px}
+.item{border-bottom:1px solid #5e4332;align-items:center;gap:6px;color:#d8bf9d;font-size:15px}
+.item span{display:flex;align-items:center;gap:8px}
+.item strong{color:#f0d5ac;font-size:17px;font-variant-numeric:tabular-nums}
+.item-symbol{display:inline-grid;place-items:center;flex:0 0 25px;height:25px;color:#b79062;font-size:18px;font-weight:400}
+.item.total{color:#bda98e}
+.inventory h2,.progress-panel h2{margin:13px 0 8px}
+
+/* Hero painting, a rich border and a torn heraldic banner. */
+.scene-panel {overflow:visible;padding:0 0 16px}
+.scene-head{
+  min-height:43px;padding:10px 18px;
+  border-bottom:3px ridge #685036;
+  background:linear-gradient(180deg,#30251d,#16100c);
+}
+.scene-head > span:last-child{color:#d0a47b}
+.scene-banner{
+  position:absolute;z-index:6;pointer-events:none;
+  top:30px;left:50%;transform:translateX(-50%);
+  min-width:38%;max-width:75%;height:73px;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  padding:4px 26px 15px;
+  color:#f1d7b2;
+  font-size:clamp(19px,2.25vw,31px);
+  text-shadow:0 2px 4px #000,0 0 10px #080504;
+  border:2px solid #7c4636;
+  background:
+    linear-gradient(180deg,rgba(164,76,47,.18),transparent 65%),
+    repeating-linear-gradient(27deg,transparent 0 7px,rgba(0,0,0,.08) 8px 10px),
+    linear-gradient(120deg,#64271f,#8d3729 43%,#531d18);
+  clip-path:polygon(2% 0,98% 0,100% 16%,95% 79%,83% 89%,62% 83%,50% 100%,38% 83%,17% 90%,5% 79%,0 16%);
+  box-shadow:0 9px 15px #000;
+}
+.banner-mark{font-size:21px;color:#deab79}
+.illustration{
+  border:3px ridge #826145;
+  outline:1px solid #21150e;
+  aspect-ratio:16/9;
+  background:#15100d;
+}
+.illustration img{filter:saturate(.82) contrast(1.1) brightness(.89)}
+.image-veil{
+  background:
+    linear-gradient(0deg,rgba(6,4,3,.9),transparent 22%,transparent 76%,rgba(11,6,5,.2)),
+    linear-gradient(90deg,rgba(7,5,4,.24),transparent 29%,transparent 73%,rgba(7,5,4,.26));
+}
+.image-caption{
+  bottom:14px;left:17px;
+  color:#f6d6a8;
+  letter-spacing:.17em;
+}
+.scene-bottom{
+  background:linear-gradient(180deg,#241710,#100c0b);
+  border-top:1px solid #715039;
+  padding-top:15px;
+}
+.scene-bottom h2 {color:#eed8b6;text-shadow:0 1px #000}
+.scene-bottom p{color:#bd9f85}
+.rate{color:#e6b67c}
+.progress-info{gap:10px}
+.progress-info span:last-child{color:#d4a166}
+.endless-symbol{font:28px/16px Georgia,serif}
+.activity-meter {height:15px;border:3px ridge #936a43}
+.activity-meter > span{background:linear-gradient(90deg,#72321f,#c27439,#f1ba61)}
+
+/* Reports and the hand-inscribed chronicle. */
+.chronicle h2{margin:5px 0 0}
+.chronicle ul{min-height:120px;max-height:240px;overflow:auto}
+.chronicle li{color:#e1c6a1;font-size:14px;border-top:1px solid #493326;padding:8px 0 8px 19px}
+.chronicle li::before{content:"◆";font-size:9px;top:13px;color:#aa784b}
+.log-mark{color:#bd8061}
+.return-panel{
+  border-color:#bc895c;
+  background:radial-gradient(ellipse at 60% 0,rgba(158,90,47,.2),transparent),linear-gradient(145deg,#492f23,#1b120e);
+}
+.tester{
+  display:block;padding:14px 12px;
+  background:linear-gradient(155deg,#33231a,#150e0b);
+  border:3px ridge #9e7750;
+}
+.tester strong{display:block;text-align:center;color:#ecd0a3;font:750 15px Georgia,serif;letter-spacing:.08em}
+.tester p{font-size:11px;color:#c8ac8d;text-align:center;margin:12px 0}
+.tester .small-button{
+  display:block;width:100%;min-height:53px;
+  background:linear-gradient(#e0b78b,#ae8159);
+  color:#24170d;font-size:12px;font-weight:800;
+  border:4px ridge #d1a478;box-shadow:inset 0 1px #f2ddbc,0 2px 9px #000;
+}
+.tester .small-button:not(:disabled):hover{background:#f0c997}
+.tester .small-button:disabled{background:#6c5744;color:#b7a18a}
+footer{border-top-color:#6d4934}
+footer p{color:#aa9680}
+
+/* Tablet layout: keep the huge illustration prominent. */
+@media (max-width:1180px){
+  .game-grid{grid-template-columns:minmax(205px,250px) minmax(0,1fr)}
+  .right-rail{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .scene-banner{min-width:40%;height:62px;top:33px}
+  .scene-banner span:last-child{font-size:clamp(18px,2.4vw,25px)}
+}
+@media (max-width:750px){
+  .game-grid{grid-template-columns:minmax(0,1fr)}
+  .sidebar{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .right-rail{grid-column:auto;grid-template-columns:1fr 1fr}
+  .tester{grid-column:1/-1}
+  .main-column{grid-row:2}
+  .page-heading h1{font-size:33px}
+  .portrait{width:69px;height:82px;flex-basis:69px}
+  .character-top h2{font-size:19px}
+  .game-grid .actions{padding:12px 8px}
+  .activity{min-height:69px;margin-bottom:8px}
+  .activity-symbol{flex-basis:35px;height:46px;font-size:24px}
+  .activity strong{font-size:17px}
+  .activity small{font-size:10px}
+}
+@media (max-width:520px){
+  .shell{width:calc(100% - 20px);padding-top:19px}
+  .topbar{padding:12px 13px}
+  .crest{font-size:22px;padding:2px 8px}
+  .wordmark{font-size:18px}
+  .page-heading h1{font-size:27px}
+  .sidebar{display:flex;flex-direction:column}
+  .right-rail{grid-template-columns:1fr;gap:12px}
+  .scene-banner{
+    height:52px;top:35px;min-width:46%;padding:2px 15px 12px;
+    gap:6px;
+  }
+  .scene-banner span:last-child{font-size:19px}
+  .banner-mark{font-size:16px}
+  .scene-head{min-height:38px}
+  .image-caption{font-size:8px;left:10px;bottom:9px}
+  .scene-bottom{padding:14px}
+  .scene-bottom h2{font-size:22px}
+  .scene-bottom p{font-size:12px}
+  .rate{font-size:10px}
+  .character-top{gap:16px}
+  .portrait{width:82px;height:102px;flex-basis:82px}
+  .activity{min-height:76px}
+  .activity-symbol{flex-basis:57px;height:55px}
+  .activity strong{font-size:20px}
+  .right-rail{display:grid;grid-template-columns:1fr 1fr}
+  .right-rail .tester{grid-column:1/-1}
+  .right-rail .item{font-size:12px}
+  .right-rail .item strong{font-size:13px}
+  .right-rail .item-symbol{display:none}
+}
+@media (max-width:370px){
+  .right-rail{grid-template-columns:1fr}
+  .page-heading h1{font-size:24px}
+  .scene-banner{top:36px}
+}
+@media (prefers-reduced-motion:reduce){
+  .activity,.meter>span{transition:none}
+}
