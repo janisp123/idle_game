@@ -90,6 +90,17 @@ def check():
     assert ".hero-art.hero-art-painted img" in theme
     assert "object-fit: contain" in theme, "Keep the complete painting visible"
 
+    # The old CSS cache could leave the original high-resolution painting at
+    # natural dimensions, cropped within a fixed-height decorative container.
+    # Changing the CSS URLs refreshes the styles; the inline sizing fallback
+    # protects the image if an older stylesheet is served.
+    assert 'href="./styles.css?v=20261121-gate-fix"' in html
+    assert 'href="./grimdark.css?v=20261121-gate-fix"' in html
+    assert ".hero-art.hero-art-painted > img" in html
+    assert "max-width: 100%" in html and "height: auto" in html
+    assert ".hero-art.hero-art-painted::before" in html
+    assert "content: none !important" in html, "Old decorative overlays must be hidden"
+
     def verify_links(page_parser, root):
         for attrs in page_parser.anchors:
             href = attrs.get("href", "")
