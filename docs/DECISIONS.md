@@ -14,4 +14,6 @@
 
 | SITE-001 | 2026-11-20 | Owner | **Every playable build must be accessible directly from the project's GitHub Pages landing page through a prominent `Play Now` button.** After the owner approves and merges a playable build, its HTML/JS/CSS must be deployed with `site/` and be testable immediately in-browser without downloading or opening HTML files locally. The button must lead to the actual deployed game. Before any playable build exists, it must remain visibly disabled and clearly labelled not yet playable; never ship a dead or misleading Play Now link. | Active |
 
+| MVP-001 | 2026-11-20 | Owner | First playable test uses **one character, two selectable automatic activities (hunting wolves and mining stone)** and original static grimdark scenes instead of animations. Browser-playable under the landing page's Play Now button, with local saves and offline catch-up. This is a narrow prototype: no accounts, multiplayer, full hit/damage/HP/death combat or equipment yet. Exact reward rates and artwork can be improved after testing; OFF-001 and SITE-001 remain binding. | Active |
+
 Add project-specific decisions only when explicitly approved; date and link superseding decisions. Avoid copying private conversations.

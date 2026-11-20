@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d0908">
+  <meta name="description" content="An early, playable grimdark idle RPG prototype. Hunt wolves or mine stone; your activity continues while you are away.">
+  <title>Play — Idle Game</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./game.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <a class="skip-link" href="#game">Skip to game</a>
+  <header class="topbar">
+    <a class="wordmark" href="../" aria-label="Back to Idle Game home">✣ <span>IDLE / GAME</span></a>
+    <nav aria-label="Game navigation">
+      <a href="../">Home</a>
+      <a href="https://github.com/janisp123/idle_game">GitHub ↗</a>
+      <a href="https://discord.gg/uuZut99uQ4">Discord ↗</a>
+    </nav>
+  </header>
+  <main id="game" class="shell">
+    <div class="page-heading">
+      <div>
+        <p class="eyebrow">✣ THE FIRST EMBER · PLAYABLE PROTOTYPE</p>
+        <h1>A life in the <em>long dark.</em></h1>
+        <p>Choose your labour. The hours will not be wasted, even when this page is closed.</p>
+      </div>
+      <div class="status-pill" id="saveStatus" role="status">Local save</div>
+    </div>
+
+    <div class="game-grid">
+      <aside class="sidebar">
+        <section class="panel character" aria-labelledby="character-heading">
+          <p class="section-index">I · THE WANDERER</p>
+          <div class="character-top">
+            <div class="portrait" aria-hidden="true">♜</div>
+            <div>
+              <h2 id="character-heading">Wanderer</h2>
+              <p class="level-label">Level <span id="level">1</span></p>
+              <p class="attribute">No class · No equipment</p>
+            </div>
+          </div>
+          <div class="xp-meta"><span>Experience</span><strong id="xpText">0 / 40 XP</strong></div>
+          <div class="meter" aria-label="XP towards next level"><span id="xpFill"></span></div>
+          <p class="hint">Earn experience while away. Levels activate when you return.</p>
+        </section>
+
+        <section class="panel actions" aria-labelledby="actions-heading">
+          <p class="section-index">II · CHOOSE YOUR PATH</p>
+          <h2 id="actions-heading">Your next labour</h2>
+          <button type="button" class="activity" id="huntButton" data-activity="hunting" aria-pressed="false">
+            <span class="activity-symbol" aria-hidden="true">♞</span>
+            <span><strong>Hunting</strong><small>Wolves · Wolf hides · 7s per action</small></span>
+            <span class="selection" aria-hidden="true">✣</span>
+          </button>
+          <button type="button" class="activity" id="mineButton" data-activity="mining" aria-pressed="false">
+            <span class="activity-symbol" aria-hidden="true">⚒</span>
+            <span><strong>Mining</strong><small>Stone vein · Stone · 5s per action</small></span>
+            <span class="selection" aria-hidden="true">✣</span>
+          </button>
+          <p class="hint">Selecting an activity starts it immediately and repeats it until you choose another.</p>
+        </section>
+
+        <section class="panel inventory" aria-labelledby="inventory-heading">
+          <p class="section-index">III · YOUR SPOILS</p>
+          <h2 id="inventory-heading">Satchel</h2>
+          <div class="item"><span>Wolf hides</span><strong id="hideCount">0</strong></div>
+          <div class="item"><span>Stone</span><strong id="stoneCount">0</strong></div>
+          <div class="item total"><span>Lifetime XP</span><strong id="lifetimeXp">0</strong></div>
+        </section>
+      </aside>
+
+      <div class="main-column">
+        <section class="scene-panel" aria-labelledby="scene-heading">
+          <div class="scene-head"><span class="section-index">IV · THE WILDS</span><span id="sceneTag">WAITING FOR ORDERS</span></div>
+          <div class="illustration">
+            <img id="sceneImage" src="./assets/hunting.svg" alt="A grim warrior facing wolves in a dark forest" width="1200" height="675">
+            <div class="image-veil" aria-hidden="true"></div>
+            <div class="image-caption" id="sceneCaption">THE WOLF ROAD</div>
+          </div>
+          <div class="scene-bottom">
+            <div>
+              <h2 id="scene-heading">Choose an activity</h2>
+              <p id="activityDescription">A wolf prowls the treeline. Stone lies buried beneath the hills. Your journey begins with one decision.</p>
+            </div>
+            <div class="rate" id="rateText">IDLE</div>
+          </div>
+          <div class="progress-info"><span id="progressDescription">Awaiting your orders</span><span id="countdown">—</span></div>
+          <div class="meter activity-meter"><span id="actionFill"></span></div>
+        </section>
+
+        <section class="panel return-panel" id="returnPanel" hidden aria-labelledby="returnHeading">
+          <p class="section-index">✣ WHILE YOU WERE AWAY</p>
+          <h2 id="returnHeading">The work continued.</h2>
+          <p id="returnMessage"></p>
+          <button type="button" id="dismissReturn" class="small-button">Dismiss report</button>
+        </section>
+
+        <section class="panel chronicle" aria-labelledby="logHeading">
+          <div class="log-header">
+            <div>
+              <p class="section-index">V · THE CHRONICLE</p>
+              <h2 id="logHeading">Activity log</h2>
+            </div>
+            <span class="log-mark" aria-hidden="true">✣</span>
+          </div>
+          <ul id="logList" aria-live="polite"><li>Choose Hunting or Mining to begin your journey.</li></ul>
+        </section>
+
+        <section class="tester" aria-label="Prototype testing tools">
+          <div>
+            <strong>Prototype tools</strong>
+            <p>Test an offline day instantly. This shortcut is only for this local test build.</p>
+          </div>
+          <button type="button" id="testDay" class="small-button" disabled>Test 1 day away</button>
+        </section>
+      </div>
+    </div>
+    <footer>
+      <p><strong>Early prototype.</strong> Wolf hunting currently uses a simple timed reward, not full combat or death mechanics. Levels apply when you enter or return, never mid-absence.</p>
+      <p>All progress is stored in this browser only. Clearing site data or switching devices will lose this character. No account or server save yet.</p>
+    </footer>
+  </main>
+</body>
+</html>

@@ -6,12 +6,14 @@ on:
     paths:
       - "site/**"
       - "tools/check_pages_site.py"
+      - "tools/test_game_engine.mjs"
       - ".github/workflows/pages.yml"
   pull_request:
     branches: [main]
     paths:
       - "site/**"
       - "tools/check_pages_site.py"
+      - "tools/test_game_engine.mjs"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -29,6 +31,11 @@ jobs:
           python-version: "3.12"
       - name: Check site structure and local links
         run: python tools/check_pages_site.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Test offline engine and frozen-level rules
+        run: node --test tools/test_game_engine.mjs
 
   deploy:
     name: Publish to GitHub Pages

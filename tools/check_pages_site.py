@@ -2,6 +2,7 @@
 
 from html.parser import HTMLParser
 from pathlib import Path
+from xml.etree import ElementTree
 from urllib.parse import unquote, urlsplit
 
 
@@ -73,22 +74,49 @@ def check():
     assert "prefers-reduced-motion" in css, "Respect reduced-motion settings"
     assert "<svg " in icon and "</svg>" in icon, "Favicon must be valid-looking SVG"
 
-    for link in parser.links:
-        parsed = urlsplit(link)
-        if parsed.scheme in ("https", "http", "mailto"):
-            continue
-        if parsed.scheme or parsed.netloc:
-            raise AssertionError(f"Unsupported link: {link}")
-        if parsed.path:
-            target = (SITE / unquote(parsed.path)).resolve()
-            assert target.is_relative_to(SITE.resolve()), f"Link escapes site: {link}"
-            assert target.exists(), f"Broken local link: {link}"
-            if target.is_dir():
-                assert (target / "index.html").is_file(), f"Directory link lacks index.html: {link}"
-        if parsed.fragment:
-            assert unquote(parsed.fragment) in parser.ids, f"Missing anchor: {link}"
+    def verify_links(page_parser, root):
+        for link in page_parser.links:
+            parsed = urlsplit(link)
+            if parsed.scheme in ("https", "http", "mailto"):
+                continue
+            if parsed.scheme or parsed.netloc:
+                raise AssertionError(f"Unsupported link: {link}")
+            if parsed.path:
+                target = (root / unquote(parsed.path)).resolve()
+                assert target.is_relative_to(SITE.resolve()), f"Link escapes site: {link}"
+                assert target.exists(), f"Broken local link: {link}"
+                if target.is_dir():
+                    assert (target / "index.html").is_file(), f"Directory link lacks index.html: {link}"
+            if parsed.fragment and not parsed.path:
+                assert unquote(parsed.fragment) in page_parser.ids, f"Missing anchor: {link}"
 
-    print(f"PASS: static landing page structure, local assets and {len(parser.links)} links")
+    verify_links(parser, SITE)
+    checked_links = len(parser.links)
+
+    if play_entry.is_file():
+        play_root = SITE / "play"
+        required_game = ("index.html", "app.mjs", "engine.mjs", "game.css",
+                         "assets/hunting.svg", "assets/mining.svg")
+        for name in required_game:
+            asset = play_root / name
+            assert asset.is_file() and asset.stat().st_size, f"Missing game asset: {name}"
+        game_html = play_entry.read_text(encoding="utf-8")
+        game_parser = SiteParser()
+        game_parser.feed(game_html)
+        game_parser.close()
+        assert game_parser.lang == "en", "Game must declare English document language"
+        assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
+        assert {"game", "huntButton", "mineButton", "sceneImage", "returnPanel",
+                "testDay", "logList"}.issubset(game_parser.ids), "Missing essential gameplay UI"
+        verify_links(game_parser, play_root)
+        checked_links += len(game_parser.links)
+        for name in ("hunting.svg", "mining.svg"):
+            picture = play_root / "assets" / name
+            root = ElementTree.fromstring(picture.read_text(encoding="utf-8"))
+            assert root.tag == "{http://www.w3.org/2000/svg}svg", f"Invalid SVG: {name}"
+        assert "prefers-reduced-motion" in (play_root / "game.css").read_text(encoding="utf-8")
+
+    print(f"PASS: landing page, Play Now contract, game assets and {checked_links} local/external links")
 
 
 if __name__ == "__main__":

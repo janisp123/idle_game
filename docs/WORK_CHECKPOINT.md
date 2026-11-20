@@ -1,6 +1,6 @@
 # Current working checkpoint
 
-**Verified status (2026-11-20):** Repository hosts a static public project landing page and a browser-game engineering research library. **There is no playable game, running combat engine, calibrated offline estimator, account backend or game database.** Nothing in the library should be represented as implemented gameplay.
+**Branch checkpoint (2026-11-20):** The public `main` repository is a landing page and research library. **The GAME-001 implementation branch adds an early playable Hunting Wolves / Mining Stone prototype** (local-only saves, simple timed actions, uncapped timestamp catch-up); it is **not yet on `main` or deployed until owner-approved PR merge**. No actual combat engine, server-authoritative settlement, account backend or game database exists. Do not present the research library as tested gameplay.
 
 **Canonical source:** Always fetch current remote `main:docs/TD_LIST.md` first. Then read `AGENTS.md`, this checkpoint, `docs/DECISIONS.md`, the protocol, current main and open PRs; this page is a snapshot, not authority.
 
@@ -15,8 +15,8 @@
 ## Approved versus unresolved game design
 
 - **Approved decision OFF-001:** The exact effective level, skill, stats and equipment snapshot at logout remains frozen through the absence. Offline activity earns XP/rewards; resulting progression is applied **only upon return**, never during settlement. No XP-level threshold stepping in the offline estimator.
-- **Living, not approved for coding:** small isolated combat rules, online timing, possible statistical offline estimators, idempotent claim models, static illustrated narration and future systems. See the topical brainstorm documents.
-- **Explicit conflicts awaiting owner choice:** first prototype scope (stone mining + bunny hunting vs solo human/monster combat), and dice timing/type (older 3d7 proposals vs newer combat-turn skull dice vs one offline-return bonus roll). Do not reconcile these by guessing.
+- **Owner-approved MVP-001 / GAME-001:** One locally saved character; automatic wolf hunting and stone mining; two original static SVG action scenes; offline timestamp catch-up; return-only level-ups; a one-day test shortcut. Placeholder reward rates, not real combat. Further rules and features remain brainstorms only.
+- **Later conflicts awaiting owner choice:** Full combat and dice timing/type (older 3d7 proposals vs newer combat-turn skull dice vs one offline-return bonus roll). The first prototype scope is now explicitly decided as **wolves + stone**. Do not infer an implementation choice for later mechanics.
 - **Unselected technical details:** combat formulas, skill priorities, casting interruption, death/return duration, loot and offline bonus fairness. These questions do not authorize new tasks.
 
 ## Research handoff — selective reading
@@ -25,9 +25,16 @@ For future combat/offline work, start with the concise **Combat/offline handoff*
 
 ## Immediate next steps
 
-- **Current owner-approved activity:** lightweight repository, website and documentation improvements; do not begin gameplay coding or expand the engine merely because research is ready.
-- **No approved gameplay task is recorded** in `main:docs/TD_LIST.md` at this snapshot. A specific prototype will need separate explicit owner approval later.
+- **Current owner-approved task:** GAME-001 first playable wolf hunting/stone mining prototype. Implement in a small PR, run site validation and Node offline-engine tests, request owner review/merge. Do not expand into advanced combat or multiplayer without approval.
+- **Task tracking:** `docs/TD_LIST.md` on this branch records GAME-001 as IN_REVIEW. Do not call it merged/deployed until the PR and public Pages deployment are verified.
 - **Manual GitHub settings opportunity:** consider setting the repository homepage to the Pages URL and enabling deletion of merged source branches. Both are optional; never delete unmerged work or change owner settings by assumption.
 - **Security boundary:** the website is static. Read `SECURITY.md` before adding accounts, third-party dependencies or new API workflows.
 
-**One next development action when the owner wants it:** propose a narrowly scoped first prototype, identify its unresolved design choices, and define tests; ask the owner before adding any implementation task. Do not use this checkpoint to pressure immediate gameplay development.
+**Next step:** finish source+CI verification, open the GAME-001 PR, then request the owner's explicit merge approval. After merge, verify the deployed Play Now route and update the changelog/task completion. No gameplay additions beyond MVP-001 without new approval.
+
+## First browser prototype handoff (GAME-001)
+
+- Public game route **after merge**: `https://janisp123.github.io/idle_game/play/`, entered from the landing page's `Play Now` button.
+- Files: `site/play/index.html`, `game.css`, `engine.mjs`, `app.mjs`, `assets/hunting.svg` and `assets/mining.svg`. Offline model tests: `tools/test_game_engine.mjs`.
+- Currently simulated wolf hunting grants 1 hide and 3 XP per 7s, mining 1 stone and 2 XP per 5s; the numbers are prototypes, **not approved final balance**.
+- A returning player settles the full elapsed interval first with unchanged action rules (no XP-threshold stepping), then activates level-ups. No internet sync or true combat; do not imply either exists.
