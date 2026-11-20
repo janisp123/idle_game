@@ -123,7 +123,7 @@ function tick() {
   if (result.report.completed) {
     const n = result.report.completed;
     message(state.activity === "hunting"
-      ? number(n) + " wolf" + (n === 1 ? "" : "s") + " hunted. +" + number(result.report.gainedItems) + " hides, +" + number(result.report.gainedXP) + " XP."
+      ? number(n) + (n === 1 ? " wolf" : " wolves") + " hunted. +" + number(result.report.gainedItems) + " hides, +" + number(result.report.gainedXP) + " XP."
       : number(n) + " rock deposit" + (n === 1 ? "" : "s") + " mined. +" + number(result.report.gainedItems) + " stone, +" + number(result.report.gainedXP) + " XP.");
     writeSave();
   } else if (Date.now() - lastSavedAt > 3000) {
