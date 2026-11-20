@@ -1,0 +1,32 @@
+# Local configuration and credentials: never commit secrets.
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.key
+
+# Local editor and operating-system files.
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Python local and test artifacts.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# JavaScript dependencies and local build output.
+node_modules/
+dist/
+build/
+coverage/
+
+# Logs and temporary files.
+*.log
+*.tmp
+*.swp
