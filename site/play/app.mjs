@@ -12,6 +12,7 @@ const ui = {
   heading: $("scene-heading"), description: $("activityDescription"), rate: $("rateText"),
   progressDescription: $("progressDescription"), countdown: $("countdown"), actionFill: $("actionFill"),
   logList: $("logList"), returnPanel: $("returnPanel"), returnMessage: $("returnMessage"),
+  banner: $("sceneBanner"), actionCount: $("actionCount"), timeInvested: $("timeInvested"), experienceCount: $("experienceCount"),
   dismissReturn: $("dismissReturn"), testDay: $("testDay"), saveStatus: $("saveStatus")
 };
 const number = value => new Intl.NumberFormat("en-GB").format(value);
@@ -34,7 +35,7 @@ function writeSave() {
 }
 
 function message(text) {
-  messages.unshift(text);
+  messages.unshift("[" + new Date().toLocaleTimeString("en-GB", { hour12: false }) + "]  " + text);
   if (messages.length > 7) messages.length = 7;
   ui.logList.replaceChildren(...messages.map(line => {
     const item = document.createElement("li");
@@ -81,6 +82,10 @@ function render() {
   ui.hide.textContent = number(state.items.hide);
   ui.stone.textContent = number(state.items.stone);
   ui.totalXP.textContent = number(state.totalXP);
+  ui.experienceCount.textContent = number(state.totalXP);
+  const completed = state.items.hide + state.items.stone;
+  ui.actionCount.textContent = number(completed);
+  ui.timeInvested.textContent = duration(state.items.hide * ACTIVITIES.hunting.durationMs + state.items.stone * ACTIVITIES.mining.durationMs);
   ui.hunt.classList.toggle("active", state.activity === "hunting");
   ui.mine.classList.toggle("active", state.activity === "mining");
   ui.hunt.setAttribute("aria-pressed", String(state.activity === "hunting"));
@@ -89,6 +94,7 @@ function render() {
 
   if (!current) {
     ui.sceneTag.textContent = "WAITING FOR ORDERS";
+    ui.banner.textContent = "THE LONG VIGIL";
     ui.heading.textContent = "Choose an activity";
     ui.description.textContent = "The wolf road and the stone mine await. Select your first task.";
     ui.rate.textContent = "IDLE";
@@ -98,11 +104,12 @@ function render() {
   } else {
     const isHunt = state.activity === "hunting";
     ui.sceneTag.textContent = isHunt ? "THE WOLF ROAD" : "THE STONE MINE";
+    ui.banner.textContent = isHunt ? "HUNTING" : "MINING";
     ui.heading.textContent = isHunt ? "Hunting wolves" : "Mining stone";
     ui.description.textContent = isHunt
       ? "Beyond the ruined watchtower, wolves stalk the dead forest. The hunt goes on without your command."
       : "Under the old mountain, stone is split from the cold rock. Every strike brings another fragment home.";
-    const file = isHunt ? "hunting.svg" : "mining.svg";
+    const file = isHunt ? "hunting.webp" : "mining.webp";
     const desiredImage = "./assets/" + file;
     if (ui.sceneImage.getAttribute("src") !== desiredImage) ui.sceneImage.setAttribute("src", desiredImage);
     ui.sceneImage.alt = isHunt
