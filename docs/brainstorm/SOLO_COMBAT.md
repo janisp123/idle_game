@@ -2,6 +2,16 @@
 
 **Status:** Living brainstorm — no implementation approved. Updated 2026-11-20.
 
+## Latest clarification: simple autonomous combat, offline-friendly (2026-11-20)
+
+**Direction:** Do not design combat around intelligent, situational decisions that require a character to be simulated continuously while offline. The player equips **two skills** before leaving; their automatic use must be governed by known timing/probability rules so the combat module can calculate win/loss rates and fight duration efficiently. Exact skill priority and damage equations are **not yet chosen**. Borrow the established simplicity of attack timers, accuracy, defence and health; preserve special effects only where they can be accounted for in the statistical model.
+
+**Death and recovery direction:** losing a fight leads to the graveyard and resurrection (magic/runes discussed), followed by time spent returning to the **same selected hunting zone**. About five minutes' return travel and a visible "packing bags" timer were discussed as **examples, not fixed balance values**. Repeated deaths reduce effective farming time, rather than ending offline progress or automatically relocating the character. Separate death/return rules from the combat calculation itself.
+
+**Three-dice clarification:** when returning from an offline session, present **one three-skull-dice roll for the entire accumulated session** to classify an extra reward as normal, better or awesome. The player specifically does **not** want to replay or display dice for every battle while claiming offline gains. The older per-combat-turn 3d6 presentation below remains as historical brainstorming; how online combat dice coexist with the single offline claim roll, the bonus table and protection against frequent-login farming are **open**. Standard XP/materials must still reflect elapsed farming activity.
+
+For inspected code patterns and their limitations, see [Architecture and balancing](ARCHITECTURE_AND_BALANCING.md#research-findings-to-reuse-without-repeating-the-investigation-2026-11-20).
+
 ## Newer direction: decisive, timed combat
 - **Solo first:** one player character versus one monster, automatically fighting.
 - Ordinary encounters should generally resolve in **two to five decisive landed hits**, rather than twenty tiny damage ticks. A giant axe or wolf bite that lands cleanly may cripple or kill. Don't enforce an arbitrary five-turn limit; misses and dodges extend combat naturally.

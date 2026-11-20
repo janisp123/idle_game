@@ -2,6 +2,15 @@
 
 **Status:** Living brainstorm — not approved implementation tasks. Updated 2026-11-20.
 
+## Latest offline-combat settlement clarification (2026-11-20)
+
+- An offline character is **not** an always-running server actor. On logout, save selected zone, skills, equipment, character state and timestamp; on return, calculate the elapsed farming outcome.
+- **Never change the selected farming zone while the player is offline.** The character keeps trying that zone, even if frequent deaths make its rewards poor. The player changes zones when online.
+- Factor into offline rates: expected battle wins and losses, resurrection and return-to-zone downtime, and actual farming time. Death is a **time-efficiency penalty**, not a reason to stop offline farming.
+- Use the combat module's statistical model and aggregate rates; recalculate at **meaningful skill/stat progression thresholds** rather than applying the initial low-level rate to years of gameplay. Do not loop through millions of individual battle ticks.
+- Standard XP/resources should reflect time and survival. Show **one three-skull-dice roll when the player returns** for an additional normal/better/awesome reward grade; don't require a dice animation for each offline fight. Exact scaling and fairness across different absence durations are still open.
+- The game and combat module must share consistent rules; **offline calculation, UI display and persistence are separate modules**. A statistically calibrated aggregate is not guaranteed to be the identical sequence of random events as fully simulated combat.
+
 ## Newer directions (2026-11-20)
 - Character development and activities proceed without manual fighting or frequent logins.
 - A battle's duration is determined by its real attack, casting, dodge and recovery timeline. **Instantly viewing the result never starts the next battle early.**
