@@ -12,8 +12,32 @@
   <meta property="og:url" content="https://janisp123.github.io/idle_game/">
   <title>Idle Game — The World Is Cruel. Time Is Not.</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./grimdark.css">
+  <link rel="stylesheet" href="./styles.css?v=20261121-gate-fix">
+  <link rel="stylesheet" href="./grimdark.css?v=20261121-gate-fix">
+  <!-- Keep the approved artwork contained even if a visitor has old CSS cached.
+       Other page styles remain in the external stylesheets. -->
+  <style>
+    .hero-art.hero-art-painted {
+      width: 100%;
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 1163 / 1352;
+      overflow: hidden;
+      background: transparent;
+    }
+    .hero-art.hero-art-painted::before,
+    .hero-art.hero-art-painted::after {
+      content: none !important;
+      display: none !important;
+    }
+    .hero-art.hero-art-painted > img {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
