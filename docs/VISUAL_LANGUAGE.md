@@ -27,7 +27,7 @@ These tableaux are **static**; activity timing/progress stays in accessible HTML
 - Two contrasting selectable activities, each with a clear state and keyboard `aria-pressed` value. The active state uses a restrained warm metal/red glow.
 - The game is the player's project, not a marketing page. Use authentic descriptions and live stats; **do not fake HP, kill/death statistics, equipment or multiplayer features** in the first prototype.
 - Never hide a necessary function behind an illustration. **Play Now** must continue to work from the landing page.
-- Keep theme code easy to adjust: `site/play/game.css` holds baseline layout, and `site/play/iron-ui.css` holds the visual skin. Two action images are under `site/play/assets/`.
+- Keep theme code easy to adjust: `site/play/game.css` holds baseline layout, and `site/play/iron-ui.css` holds the visual skin. Two original approved paintings are stored locally as `site/play/assets/hunting.webp` and `site/play/assets/mining.webp` (960×540 each). They are static image assets, not entire UI screenshots.
 - Treat generated artwork and design prototypes as **assets to implement**, not screenshots to embed as the whole interactive UI. A generated mockup cannot replace real HTML buttons, responsive layout or accessibility.
 
 ## Next visual QA before integration
