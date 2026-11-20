@@ -2,7 +2,6 @@
 
 from html.parser import HTMLParser
 from pathlib import Path
-from xml.etree import ElementTree
 from urllib.parse import unquote, urlsplit
 
 
@@ -96,7 +95,7 @@ def check():
     if play_entry.is_file():
         play_root = SITE / "play"
         required_game = ("index.html", "app.mjs", "engine.mjs", "game.css", "iron-ui.css",
-                         "assets/hunting.svg", "assets/mining.svg")
+                         "assets/hunting.webp", "assets/mining.webp")
         for name in required_game:
             asset = play_root / name
             assert asset.is_file() and asset.stat().st_size, f"Missing game asset: {name}"
@@ -113,10 +112,11 @@ def check():
         assert 'class="right-rail"' in game_html, "Resource/progress panel must exist"
         verify_links(game_parser, play_root)
         checked_links += len(game_parser.links)
-        for name in ("hunting.svg", "mining.svg"):
+        for name in ("hunting.webp", "mining.webp"):
             picture = play_root / "assets" / name
-            root = ElementTree.fromstring(picture.read_text(encoding="utf-8"))
-            assert root.tag == "{http://www.w3.org/2000/svg}svg", f"Invalid SVG: {name}"
+            raw = picture.read_bytes()
+            assert len(raw) > 30_000, f"Activity painting suspiciously small: {name}"
+            assert raw[:4] == b"RIFF" and raw[8:12] == b"WEBP", f"Invalid WebP: {name}"
         assert "prefers-reduced-motion" in (play_root / "game.css").read_text(encoding="utf-8")
         theme = (play_root / "iron-ui.css").read_text(encoding="utf-8")
         assert "prefers-reduced-motion" in theme, "Respect reduced-motion users"
