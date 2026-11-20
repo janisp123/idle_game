@@ -7,6 +7,20 @@
 
 See [RESEARCH_LIBRARY.md](RESEARCH_LIBRARY.md) for the library's purpose and [ENTRY_TEMPLATE.md](library/ENTRY_TEMPLATE.md) for longer technical entries. No entry here is an approved implementation task.
 
+## Read selectively — agents and implementers
+
+**This file is a catalogue, not a second requirements document.** For a concrete game task, start from the [short combat/offline handoff](brainstorm/ARCHITECTURE_AND_BALANCING.md#combatoffline-handoff--concise-context-for-codex-2026-11-20), the current decision/task files and its relevant topic notes. Open **only the entry that answers a question**; never treat the P01–P18 list as a collection of features to build.
+
+| When the task concerns... | Start with | Do not assume |
+| --- | --- | --- |
+| Hit/miss, damage, attack timers, combat/death/loot boundaries | [P17](#p17--small-independent-rpg-combat-and-reward-modules), then P01 as needed | The illustrative formula has been selected or tested |
+| Online fights versus years of offline gains | [P18](#p18--offline-combat-research-comparison-choose-algorithms-not-foreign-gameplay), then P02/P15 as needed | Every approach is suitable; in particular, full tick replay and capped time are **not** our intended offline model |
+| Lucky drops, resource statistics, large stack quantities | P03, P13 | Expected values are exact outcomes or rounding can guarantee rare drops |
+| Duplicate claims, saves, large time gaps | P16, P15, then P05/P07 as needed | The project already has production-grade persistence or security |
+| UI, events, groups, operations, monetisation | Relevant P06–P14 entries only | These features are in the first prototype scope |
+
+**Evidence and priority:** Entries are original explanatory **DESIGN-NOTEs**, not proven code in our project. An entry's usefulness tag does not override `docs/DECISIONS.md` or authorise implementation. Older brainstorm variants and external examples have lower priority than the latest explicitly supported direction. Unresolved choices go back to the owner. Detailed third-party source locations are in a separate private index and are not automatically available to Codex.
+
 ## Quick index
 
 | ID | Technique | General-purpose use | Our-game fit |
