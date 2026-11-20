@@ -9,14 +9,14 @@ This repository is currently primarily design documentation and engineering rese
 
 ## Software license and reuse
 
-**The original software code in this repository** (including future game code and original code examples), unless a file says otherwise, is offered under the [PolyForm Noncommercial License 1.0.0](LICENSE.md).
+**The original software code in this repository** (including future original game code and original code examples), unless an individual file says otherwise, is offered under a **[custom noncommercial software license with an additional Steam distribution restriction](LICENSE.md)**. It incorporates PolyForm Noncommercial License 1.0.0, but is **not the unmodified standard license**.
 
-- **Allowed under that license:** personal learning, hobby projects, experimentation, and other permitted noncommercial use, modification, and sharing, subject to its full terms.
-- **Not granted:** commercial use of this code to develop or distribute a product, such as a paid or monetized game released on Steam, without a separate written commercial license from the relevant rights holder.
-- **Commercial licensing requests:** contact the repository owner, for example by opening a GitHub issue. The owner may separately authorize commercial use.
-- **Scope:** a software license does not automatically grant reuse rights to unrelated artwork, writing, names, branding, or third-party dependencies. Follow any separate notices and licenses. Only work that the licensor has rights to license is covered.
+- **Allowed (subject to the full license):** personal learning, private hobby games, experimentation, and noncommercial use, modifications, and noncommercial distribution outside Steam.
+- **Not allowed without prior written permission:** commercial exploitation of the licensed code **or releasing/distributing a game made from this code on Steam, even if the Steam game is completely free and has no monetization**.
+- **Seeking permission:** contact the repository owner through a GitHub issue to request a separate commercial license or Steam release permission.
+- **Scope:** this covers only software code the licensor owns the rights to license. Original art, stories, names and branding may have separate restrictions; third-party dependencies retain their own licenses. Independent code that doesn't copy or derive from this project's code is not controlled by these terms.
 
-**Publicly viewable does not mean unrestricted commercial reuse.** This is a *source-available, noncommercial* software license, **not** an OSI-approved open-source license. Noncommercial distribution is allowed by the license; whether a particular free public game release qualifies as noncommercial depends on the circumstances.
+**Publicly viewable does not mean commercially reusable.** This is a *source-available* arrangement, **not an OSI-approved open-source license**. The Steam restriction makes it more restrictive than standard PolyForm Noncommercial.
 
 ## Explore
 
