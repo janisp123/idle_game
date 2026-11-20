@@ -2,6 +2,12 @@
 
 **Status:** Living brainstorm — not approved implementation tasks. Updated 2026-11-20.
 
+## Owner-approved visual update (2026-11-21)
+
+- The landing page's former flat, CSS-drawn gateway is superseded by the **original painted Gate of the Long Absent**: brutal architecture, weathered iron, crimson cloth, skulls, distant ruins and three skull dice showing **6–6–6**. Keep the full image visible at mobile and desktop sizes.
+- **DICE-001:** The maximum on each of the three skull dice is now **6**, not **7**. Historical 3d7/7–7–7 brainstorming below is superseded for our own game; when/how dice influence combat or offline bonuses remains undecided.
+- Future illustrations should use consistent painterly detail and physical materials rather than low-budget vector scene art. This is an art direction, not authorization to add mechanics.
+
 ## Newer directions (2026-11-20)
 - Original **grimdark fantasy** paintings: detailed, brutal, bloody, scarred, dark-metal and low-lit, inspired by the *mood* of classic fantasy combat art without copying protected artwork.
 - Desktop combat shows **two large static illustrations facing one another**, with three skull dice between them and text beneath; mobile adapts to portrait format.
