@@ -1,7 +1,7 @@
 # Useful Examples — Browser Game Engineering Patterns
 
 **Purpose:** Public educational reference for implementing browser and idle games.  
-**Last edited:** 2026-11-19  
+**Last edited:** 2026-11-20  
 **Status:** Conceptual engineering guidance. Examples below are original explanatory sketches; they are **not copied source code**, audited software components, or guarantees of production performance.  
 **Scope:** General browser-game techniques, **including features we might never use**. The fit tag is specific to our game and does not indicate whether a technique is valuable to someone else.
 
@@ -26,6 +26,7 @@ See [RESEARCH_LIBRARY.md](RESEARCH_LIBRARY.md) for the library's purpose and [EN
 | P13 | Transactional inventory accounting | Avoid duplication, negative stacks and lost claims | `[OUR-GAME: FIT]` |
 | P14 | Automated testing and observability | Catch errors and measure cost before release | `[OUR-GAME: FIT]` |
 | P15 | [Time-safe offline simulation](library/offline-time-units-and-boundaries.md) | Correct seconds/milliseconds, stock exhaustion, and constant-cost fast-forward where valid | `[OUR-GAME: FIT]` |
+| P16 | [Idempotent reward settlement](library/idempotent-reward-settlement.md) | Atomic catch-up cursors, safe retries, concurrent claims and crash recovery | `[OUR-GAME: FIT]` |
 
 Tags apply to **our design**, not to technical merit. Each technique remains documented for other developers.
 
@@ -296,6 +297,16 @@ docs/              # Research, brainstorm, decisions, tasks and guides
 **New deep dive:** [Time-Safe Offline Simulation and Resource-Depletion Boundaries](library/offline-time-units-and-boundaries.md).
 
 Why it matters: A time-to-depletion value computed in seconds must not be treated as milliseconds. A correct offline solver advances to the next meaningful change, recomputes rates after depletion, and never silently discards leftover time because of an iteration guard. The guide includes dimensional analysis, original pseudocode, starvation policies, deterministic vs probabilistic bulk processing, a test matrix and performance alternatives.
+
+---
+
+## P16 — Idempotent rewards and durable settlement cursors
+
+`[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**New deep dive:** [Idempotent Reward Settlement and Crash-Safe Progress Cursors](library/idempotent-reward-settlement.md).
+
+A returning player can trigger the same catch-up from two tabs, or retry after the server committed but failed to reply. Persist the exact interval cursor, inventory, skill XP and RNG/queue state in one atomic transition. For one-time group grants and crafting commands, use stable event or request identities, database uniqueness and payload binding. A transactionally committed outbox is useful only when a durable external notification or message must follow. The guide compares row locks, optimistic versions, receipts and event grants, with failure-injection tests.
 
 ---
 
