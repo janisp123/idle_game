@@ -123,7 +123,7 @@ function tick() {
   if (result.report.completed) {
     const n = result.report.completed;
     message(state.activity === "hunting"
-      ? number(n) + " wolf" + (n === 1 ? "" : "ves") + " hunted. +" + number(result.report.gainedItems) + " hides, +" + number(result.report.gainedXP) + " XP."
+      ? number(n) + " wolf" + (n === 1 ? "" : "s") + " hunted. +" + number(result.report.gainedItems) + " hides, +" + number(result.report.gainedXP) + " XP."
       : number(n) + " rock deposit" + (n === 1 ? "" : "s") + " mined. +" + number(result.report.gainedItems) + " stone, +" + number(result.report.gainedXP) + " XP.");
     writeSave();
   } else if (Date.now() - lastSavedAt > 3000) {
@@ -133,7 +133,6 @@ function tick() {
 }
 
 function returnToGame() {
-  const start = state.settledAtMs;
   const result = enterGame(state, Date.now());
   state = result.state;
   if (result.report.completed && (result.report.elapsedMs > 8000 || result.levelsGained)) {
@@ -193,7 +192,7 @@ function start() {
   window.addEventListener("storage", event => {
     if (event.key === SAVE_KEY) {
       const newer = readSave(event.newValue);
-      if (newer) { state = newer; returnToGame(); message("Save updated from another tab."); }
+      if (newer) { state = newer; render(); message("Save updated from another tab."); }
     }
   });
   render();
