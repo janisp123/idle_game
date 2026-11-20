@@ -27,6 +27,7 @@ See [RESEARCH_LIBRARY.md](RESEARCH_LIBRARY.md) for the library's purpose and [EN
 | P14 | Automated testing and observability | Catch errors and measure cost before release | `[OUR-GAME: FIT]` |
 | P15 | [Time-safe offline simulation](library/offline-time-units-and-boundaries.md) | Correct seconds/milliseconds, stock exhaustion, and constant-cost fast-forward where valid | `[OUR-GAME: FIT]` |
 | P16 | [Idempotent reward settlement](library/idempotent-reward-settlement.md) | Atomic catch-up cursors, safe retries, concurrent claims and crash recovery | `[OUR-GAME: FIT]` |
+| P17 | Simple separated RPG combat calculations | Independent hit/damage calculation, attack scheduling, defeat and reward handling | `[OUR-GAME: FIT]` |
 
 Tags apply to **our design**, not to technical merit. Each technique remains documented for other developers.
 
@@ -307,6 +308,60 @@ Why it matters: A time-to-depletion value computed in seconds must not be treate
 **New deep dive:** [Idempotent Reward Settlement and Crash-Safe Progress Cursors](library/idempotent-reward-settlement.md).
 
 A returning player can trigger the same catch-up from two tabs, or retry after the server committed but failed to reply. Persist the exact interval cursor, inventory, skill XP and RNG/queue state in one atomic transition. For one-time group grants and crafting commands, use stable event or request identities, database uniqueness and payload binding. A transactionally committed outbox is useful only when a durable external notification or message must follow. The guide compares row locks, optimistic versions, receipts and event grants, with failure-injection tests.
+
+---
+
+## P17 — Small independent RPG combat and reward modules
+
+`[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
+
+**Evidence examined:** publicly readable code from a classic MMORPG-style server recreation, plus a larger modular server framework. We inspected actual combat damage calculations, player/NPC fighting loops and a separate loot-roll function in the former, and the latter's high-level engine/content separation. These are **readable implementations**, not verified formulas from the proprietary original games. Source names and URLs are not published under this repository's standing rule.
+
+**Observed boundaries and reusable lessons:**
+
+1. **Combat maths module:** receive player/enemy attributes and equipment bonuses; calculate accuracy, defensive protection, potential maximum damage and sampled damage. The inspected example separates calculations from world/character entities.
+2. **Combat scheduler:** player and enemy models independently call the damage calculation at eligible attack stages/timers. Apply resulting damage to HP and resolve victory/defeat. Keeping this outside the maths function makes formulas replaceable.
+3. **Loot roller:** use configured weighted drop tables, independent of the damage formula. Victory processing grants resources/XP through a separate state update. This makes drop rates editable without rewriting combat.
+4. **Modular game architecture:** prefer separate engine, content definitions and UI/presentation; do not bind combat logic to scene drawing, network handling or persistence.
+5. **Our extra requirement:** adapt the same rules for an **offline estimator**. The examined servers run live game loops; they **do not provide a verified unlimited-offline combat solution**. Do not copy their real-time ticking into a server actor for dormant players.
+
+**Original illustrative pseudocode (not extracted from other projects or intended as our final formula):**
+
+```text
+resolveHit(attacker, defender, random):
+    attackScore = computeAttackScore(attacker.stats, attacker.equipment)
+    defenseScore = computeDefenseScore(defender.stats, defender.equipment)
+    chanceToHit = bounded(attackScore / (attackScore + defenseScore), 0, 1)
+    if random.draw() >= chanceToHit:
+        return { hit: false, damage: 0 }
+    damage = sampleDamage(attacker.damageRange, random)
+    return { hit: true, damage: max(0, damage) }
+
+advanceCombat(state, elapsed, random):
+    advanceAttackTimers(state, elapsed)
+    for every attack becoming ready, in a defined order:
+        result = resolveHit(currentAttacker, currentDefender, random)
+        applyDamageAndCombatEffects(state, result)
+        if either combatant has zero HP: finishEncounter(state); stop
+    return summaryOfResultAndTime(state)
+
+finishEncounter(state):
+    if won:
+        return { outcome: "win", xpEarned: xpRule(state),
+                 dropChances: lootTableForDefeatedEnemy(state) }
+    return { outcome: "loss", downtime: revivalAndReturnTime(state) }
+
+estimateOffline(segment, combatModel):
+    rates = estimateVictoryDeathAndDurationRates(combatModel, segment.startStats)
+    applyStatisticallySampledRewardsAndTimeCosts(segment, rates)
+    // Recompute when skill/equipment progression significantly changes rates.
+```
+
+**Important boundaries:** The probability formula above is just one simple candidate—not an endorsement of any game's exact algorithm. The offline function is a *placeholder for a future validated statistical model*, not an implementation or guarantee of equivalence. Don't use per-battle simulation for multi-year catch-up. Preserve separate fixed-zone and resurrection downtime rules.
+
+**Practical tests before adopting any formula:** compare average win rate, damage, fight duration, deaths/hour and rewards/hour from seeded encounter sampling against the aggregate estimator; test extremes (zero attack/defense, near-certain hit/miss, long absences, skill-level thresholds), and verify the UI/animation cannot change progression.
+
+**Use/rights note:** Reading source is not permission to paste it into our MIT project. At least one examined recreation declares a strong copyleft license; preserve legally required attribution for any approved integration, or write independent code. Nothing above is copied from an outside repository.
 
 ---
 
