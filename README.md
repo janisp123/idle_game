@@ -7,19 +7,11 @@ A public hobby project with **two parallel purposes**:
 
 This repository is currently primarily design documentation and engineering research. **The game is not yet implemented.**
 
-## Software license and reuse
+## License
 
-The **original software code** in this repository (including future original game code and original code examples), unless individual files state otherwise, is licensed under the **[custom Noncommercial Software License with Public Game Release Restriction](LICENSE.md)**. It incorporates PolyForm Noncommercial License 1.0.0 with an additional restriction; it is **not** the official unmodified PolyForm license.
+This project is **open-source software** under the [MIT License](LICENSE.md). Feel free to read, use, modify, and share the code, including in commercial projects, as long as you keep the required copyright and license notice.
 
-- **Personal use is allowed:** study the source, learn from it, experiment, modify it, and run private noncommercial hobby projects.
-- **Noncommercial source-only sharing is allowed** under the license's full terms, including required notices.
-- **Public playable games require prior written permission:** no releasing, distributing, deploying, or publicly hosting a game incorporating or derived from our code—**even if completely free**—on **Google Play, Apple's App Store, Steam, Epic Games Store, itch.io, any other marketplace, or any public browser-game website/self-hosted website**.
-- **Commercial uses require prior written permission** regardless of platform.
-- **Permission requests:** contact the repository owner through a GitHub issue to discuss a separate license.
-
-**Scope:** This license covers only original software the licensor has the right to license. Third-party dependencies retain their own terms; artwork, stories and branding may have separate terms. The license cannot restrict independently written games that only use similar ideas or mechanics and do not copy protected code.
-
-This project is **publicly viewable and source-available**, but **not OSI-approved open-source software**.
+Original third-party materials, if added later, remain subject to their own licenses.
 
 ## Explore
 
