@@ -109,7 +109,7 @@ function render() {
     ui.description.textContent = isHunt
       ? "Beyond the ruined watchtower, wolves stalk the dead forest. The hunt goes on without your command."
       : "Under the old mountain, stone is split from the cold rock. Every strike brings another fragment home.";
-    const file = isHunt ? "hunting.svg" : "mining.svg";
+    const file = isHunt ? "hunting.webp" : "mining.webp";
     const desiredImage = "./assets/" + file;
     if (ui.sceneImage.getAttribute("src") !== desiredImage) ui.sceneImage.setAttribute("src", desiredImage);
     ui.sceneImage.alt = isHunt
