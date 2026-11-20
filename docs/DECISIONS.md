@@ -19,4 +19,6 @@
 | SITE-002 | 2026-11-20 | Owner | All **GitHub and Discord links** on the landing and playable game pages open in a **new browser tab** with `target="_blank"` and `rel="noopener noreferrer"`; internal navigation such as Home, Play Now, and page sections stays in the current tab. Apply this convention to future website and game UI revisions. | Active |
 | VIS-001 | 2026-11-20 | Owner | Use a **consistent, detailed, original painted grimdark visual direction** for all action scenes and the actual gameplay UI: dark distressed iron/stone, oxblood cloth, worn parchment, grounded armour, harsh cinematic lighting, atmospheric environments, and matching character identity. The approved interface mockup is a **reference**, not a substitute for responsive HTML/CSS or functional controls. Avoid simplistic vector placeholder images as the finished visual direction. | Active |
 
+| DICE-001 | 2026-11-21 | Owner | The three skull dice have a **maximum face value of 6 each**, making **6–6–6** the maximum combination and the visual motif. Earlier 7–7–7 / 3d7 concepts are superseded. Exact timing, reward mechanics and probabilities remain undecided until separately approved. | Active |
+
 Add project-specific decisions only when explicitly approved; date and link superseding decisions. Avoid copying private conversations.

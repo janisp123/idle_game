@@ -258,3 +258,33 @@ a:focus-visible, button:focus-visible { outline-color: #e5b483; }
 @media (prefers-reduced-motion: reduce) {
   .hero-art * { animation: none; }
 }
+
+
+/* Painted gate (owner-approved 6·6·6 concept). Keep the entire artwork visible:
+   the previous CSS monument is removed, not layered beneath the painting. */
+.hero-art.hero-art-painted {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 1163 / 1352;
+  overflow: hidden;
+  isolation: auto;
+  background: transparent;
+  border: 1px solid #684a38;
+  box-shadow: 0 26px 72px rgba(0, 0, 0, .58), 0 0 0 5px rgba(73, 37, 27, .14);
+}
+.hero-art.hero-art-painted::before,
+.hero-art.hero-art-painted::after { content: none; display: none; }
+.hero-art.hero-art-painted img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+@media (max-width: 560px) {
+  .hero-art.hero-art-painted {
+    margin-inline: auto;
+    min-height: 0;
+    max-width: min(100%, 540px);
+  }
+}
