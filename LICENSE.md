@@ -1,3 +1,23 @@
+# Noncommercial Software License with Steam Distribution Restriction
+
+**Custom license terms for original software in this repository.** This is a **modified licensing arrangement**, based on PolyForm Noncommercial License 1.0.0, with the additional restriction below. **It is not the unmodified, official PolyForm Noncommercial License** and is not an OSI-approved open-source license.
+
+## Additional Steam Distribution Restriction
+
+As an express condition of the permissions granted for the licensed Software under the PolyForm Noncommercial License 1.0.0 reproduced below, **no permission is granted to submit, publish, release, distribute, or make available any game or other software containing or derived from the licensed Software through Valve's Steam platform without prior written permission from the licensor**, **even if that Steam release is completely free, has no advertising, and earns no revenue**.
+
+This condition applies to the Steam Store, Steam Early Access, and other Steam game-release or game-distribution channels. It does not prohibit personal study, private hobby projects, or noncommercial sharing outside Steam that otherwise complies with the license. It does not grant control over independent code that does not copy or derive from the licensed Software, or override rights that applicable law provides without a license.
+
+**Conflict rule:** Where the PolyForm Noncommercial License 1.0.0 would otherwise allow Steam distribution, this additional restriction controls. All other provisions of the PolyForm Noncommercial License 1.0.0 continue to apply. Distributors must pass along this **entire license document, including this additional condition**, to recipients.
+
+The copyright holder may separately grant written commercial or Steam-distribution permission. This custom arrangement applies only to original Software the licensor has the right to license; third-party code or assets retain their respective licenses and restrictions.
+
+---
+
+## Incorporated Standard Terms (unaltered)
+
+The following is the unmodified text of PolyForm Noncommercial License 1.0.0, incorporated subject to the additional restriction above:
+
 # PolyForm Noncommercial License 1.0.0
 
 <https://polyformproject.org/licenses/noncommercial/1.0.0>
