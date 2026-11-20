@@ -15,3 +15,12 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-20).
 - **Implemented by:** Not yet (branch work pending full verification and integration).
+
+## SITE-003 — Painted 6–6–6 gate on landing page
+- **Goal:** Replace the flat CSS-drawn hero with the owner-selected grimdark gate painting, retaining all website/game navigation.
+- **Acceptance criteria:** Original approved image is included as a self-hosted asset, shown uncropped on desktop and phone, with meaningful alt text reflecting skulls and three sixes; no broken links; GitHub Pages validation passes; preserve the working Play Now and new-tab GitHub/Discord links.
+- **Status:** IN_REVIEW (PR pending; not yet deployed).
+- **Dependencies:** SITE-001, SITE-002, DICE-001.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet (pending verified integration into main).
