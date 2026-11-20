@@ -13,6 +13,12 @@ The [Idle Game landing page](https://janisp123.github.io/idle_game/) introduces 
 
 The source lives in `site/`. The [Pages workflow](.github/workflows/pages.yml) validates it on pull requests and publishes that folder after approved changes are merged into `main` (when GitHub Pages is configured to use GitHub Actions). No external site generator or paid hosting is required.
 
+## Test every playable build in the browser
+
+The public landing page will always have a prominent **Play Now** control. **It stays disabled until a real playable build exists.** When the owner approves and merges the first playable prototype, the game must be served at `site/play/index.html` (future public route: `https://janisp123.github.io/idle_game/play/` (not live yet)), and the landing page must link to `./play/` in the same PR. Future playable changes must also update this served game rather than asking testers to download and open HTML files.
+
+The GitHub Pages workflow deploys all of `site/` after approved merges to `main`, and the site checker enforces that the button points to a real local entrypoint when present. The owner should be told that deployment can take a short time after merge, and the live link should be verified before claiming it works. No game has been implemented yet. This is a **delivery requirement**, not authorization to start gameplay development (see `docs/DECISIONS.md` SITE-001).
+
 ## License
 
 This project is **open-source software** under the [MIT License](LICENSE.md). Feel free to read, use, modify, and share the code, including in commercial projects, as long as you keep the required copyright and license notice.
