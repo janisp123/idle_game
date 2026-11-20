@@ -375,7 +375,7 @@ estimateOffline(segment, combatModel):
 
 **Important boundaries:** The probability formula above is just one simple candidate—not an endorsement of any game's exact algorithm. The offline function is a *placeholder for a future validated statistical model*, not an implementation or guarantee of equivalence. Don't use per-battle simulation for multi-year catch-up. Preserve separate fixed-zone and resurrection downtime rules. **For our game specifically, use the frozen logout build throughout; earned XP is applied to levels only on return (OFF-001).**
 
-**Practical tests before adopting any formula:** compare average win rate, damage, fight duration, deaths/hour and rewards/hour from seeded encounter sampling against the aggregate estimator; test extremes (zero attack/defense, near-certain hit/miss, long absences, skill-level thresholds), and verify the UI/animation cannot change progression.
+**Practical tests before adopting any formula:** compare average win rate, damage, fight duration, deaths/hour and rewards/hour from seeded encounter sampling against the aggregate estimator; test extremes (zero attack/defense, near-certain hit/miss, long absences and **separate fixed builds at different skill levels**, without levelling during the absence), and verify the UI/animation cannot change progression.
 
 **Use/rights note:** Reading source is not permission to paste it into our MIT project. At least one examined recreation declares a strong copyleft license; preserve legally required attribution for any approved integration, or write independent code. Nothing above is copied from an outside repository.
 
