@@ -18,10 +18,13 @@ class SiteParser(HTMLParser):
         self.stylesheet = False
         self.favicon = False
         self.play_controls = []
+        self.anchors = []
 
     def handle_starttag(self, tag, attrs):
         values = dict(attrs)
         self.tags.add(tag)
+        if tag == "a":
+            self.anchors.append(values)
         if tag in ("a", "button") and "button-play" in values.get("class", "").split():
             self.play_controls.append((tag, values))
         if tag == "html":
@@ -74,6 +77,15 @@ def check():
     assert "<svg " in icon and "</svg>" in icon, "Favicon must be valid-looking SVG"
 
     def verify_links(page_parser, root):
+        for attrs in page_parser.anchors:
+            href = attrs.get("href", "")
+            host = urlsplit(href).hostname
+            if host in ("github.com", "discord.gg"):
+                assert attrs.get("target") == "_blank", f"External community link must open a new tab: {href}"
+                rel = set(attrs.get("rel", "").split())
+                assert {"noopener", "noreferrer"}.issubset(rel), f"Missing secure new-tab rel: {href}"
+            elif href.startswith(("#", "./", "../")):
+                assert attrs.get("target") != "_blank", f"Internal site link must stay in same tab: {href}"
         for link in page_parser.links:
             parsed = urlsplit(link)
             if parsed.scheme in ("https", "http", "mailto"):
