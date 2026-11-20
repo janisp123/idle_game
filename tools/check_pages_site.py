@@ -79,12 +79,12 @@ def check():
 
     # The owner-approved hero is a real, self-hosted painting, not the old flat
     # CSS gateway. Its dice depict 6-6-6 and should not be cropped by the CSS.
-    gate_path = SITE / "assets" / "long-absent-gate.avif"
+    gate_path = SITE / "assets" / "long-absent-gate.webp"
     assert gate_path.is_file(), "Missing painted landing-page gate"
     gate_data = gate_path.read_bytes()
-    assert len(gate_data) >= 10_000, "The gate painting appears incomplete"
-    assert b"ftypavif" in gate_data[:32], "The hero asset must be a valid AVIF container"
-    assert 'src="./assets/long-absent-gate.avif"' in html
+    assert len(gate_data) >= 60_000, "The gate painting appears incomplete"
+    assert gate_data[:4] == b"RIFF" and gate_data[8:12] == b"WEBP", "The hero asset must be a valid WebP container"
+    assert 'src="./assets/long-absent-gate.webp"' in html
     assert "hero-art-painted" in html and "fate-emblem" not in html
     assert "6, 6 and 6" in html, "Document the maximum face values in the hero alt text"
     theme = (SITE / "grimdark.css").read_text(encoding="utf-8")
