@@ -17,10 +17,13 @@ class SiteParser(HTMLParser):
         self.lang = None
         self.stylesheet = False
         self.favicon = False
+        self.play_controls = []
 
     def handle_starttag(self, tag, attrs):
         values = dict(attrs)
         self.tags.add(tag)
+        if tag in ("a", "button") and "button-play" in values.get("class", "").split():
+            self.play_controls.append((tag, values))
         if tag == "html":
             self.lang = values.get("lang")
         if values.get("id"):
@@ -52,7 +55,20 @@ def check():
     assert parser.stylesheet and parser.favicon, "Stylesheet and icon are required"
     assert {"header", "nav", "main", "footer", "h1", "h2"}.issubset(parser.tags)
     assert {"main", "vision", "library"}.issubset(parser.ids)
-    assert "No playable build yet" in html, "Do not claim the game is playable"
+    # Keep a single stable Play Now entry on the landing page.
+    assert len(parser.play_controls) == 1, "Landing page needs exactly one Play Now control"
+    play_tag, play_attrs = parser.play_controls[0]
+    play_entry = SITE / "play" / "index.html"
+    if play_entry.is_file():
+        assert play_entry.stat().st_size > 0, "Playable entrypoint is empty"
+        assert play_tag == "a", "When playable, Play Now must be a real link"
+        assert play_attrs.get("href") == "./play/", "Play Now must point to the deployed local game route"
+        assert "disabled" not in play_attrs, "A playable link must be enabled"
+        assert "No playable build yet" not in html, "Remove the not-yet-playable message when game ships"
+    else:
+        assert play_tag == "button", "Before gameplay exists, Play Now must not be a dead link"
+        assert "disabled" in play_attrs, "Before gameplay exists, Play Now must be disabled"
+        assert "No playable build yet" in html, "State clearly that no game is playable"
     assert "@media (max-width: 560px)" in css, "Phone layout rules are required"
     assert "prefers-reduced-motion" in css, "Respect reduced-motion settings"
     assert "<svg " in icon and "</svg>" in icon, "Favicon must be valid-looking SVG"
@@ -67,6 +83,8 @@ def check():
             target = (SITE / unquote(parsed.path)).resolve()
             assert target.is_relative_to(SITE.resolve()), f"Link escapes site: {link}"
             assert target.exists(), f"Broken local link: {link}"
+            if target.is_dir():
+                assert (target / "index.html").is_file(), f"Directory link lacks index.html: {link}"
         if parsed.fragment:
             assert unquote(parsed.fragment) in parser.ids, f"Missing anchor: {link}"
 
