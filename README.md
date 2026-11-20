@@ -7,6 +7,17 @@ A public hobby project with **two parallel purposes**:
 
 This repository is currently primarily design documentation and engineering research. **The game is not yet implemented.**
 
+## Software license and reuse
+
+**The original software code in this repository** (including future original game code and original code examples), unless an individual file says otherwise, is offered under a **[custom noncommercial software license with an additional Steam distribution restriction](LICENSE.md)**. It incorporates PolyForm Noncommercial License 1.0.0, but is **not the unmodified standard license**.
+
+- **Allowed (subject to the full license):** personal learning, private hobby games, experimentation, and noncommercial use, modifications, and noncommercial distribution outside Steam.
+- **Not allowed without prior written permission:** commercial exploitation of the licensed code **or releasing/distributing a game made from this code on Steam, even if the Steam game is completely free and has no monetization**.
+- **Seeking permission:** contact the repository owner through a GitHub issue to request a separate commercial license or Steam release permission.
+- **Scope:** this covers only software code the licensor owns the rights to license. Original art, stories, names and branding may have separate restrictions; third-party dependencies retain their own licenses. Independent code that doesn't copy or derive from this project's code is not controlled by these terms.
+
+**Publicly viewable does not mean commercially reusable.** This is a *source-available* arrangement, **not an OSI-approved open-source license**. The Steam restriction makes it more restrictive than standard PolyForm Noncommercial.
+
 ## Explore
 
 | Resource | Purpose |
