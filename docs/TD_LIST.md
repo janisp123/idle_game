@@ -9,7 +9,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## GAME-002 — Painted grimdark game interface
 - **Goal:** Implement the owner-approved dark-fantasy interface direction in real responsive HTML/CSS rather than baking a screenshot into the UI.
 - **Acceptance criteria:** preserve Hunting, Mining, browser saves, unlimited offline catch-up, Play Now, accessibility and existing game-engine behaviour; use an ornate, consistent iron/parchment/crimson skin with central artwork, character and action controls, resources and progress rail, and a readable chronicle. Register a durable visual language guide for future art and UI updates.
-- **Art dependencies:** The owner-approved high-quality hunting and mining paintings were generated in chat and remain available as separate source assets, but the repo's earlier placeholder SVGs are not replaced by this HTML/CSS-only PR until the binary paintings can be uploaded. Never claim the art swap is complete without a verified repo asset.
+- **Art:** The owner-approved grimdark paintings have been uploaded to the branch as original, local 960×540 WebP assets (`hunting.webp`, `mining.webp`), with matching verified Git blob checksums; the poor-quality SVG placeholders were removed. Both assets are served locally by the game and verified by the site workflow.
 - **Status:** IN_REVIEW (branch; awaiting checks and owner merge approval).
 - **Dependencies:** SITE-001, OFF-001, MVP-001.
 - **Added by:** chat
