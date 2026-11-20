@@ -1,6 +1,6 @@
 # Current working checkpoint
 
-**Verified main status (2026-11-20):** GAME-001 was merged as PR #20 and deployed on GitHub Pages: a **playable but simple** automatic Hunting/Mining browser prototype with local saves, no offline cap and login-only level increases. No true wolf combat engine, server-authoritative settlement, account backend or game database. **Branch work GAME-002** changes the HTML/CSS design only and is not live until separately approved, merged and deployed. The painted chat-generated scene images are not yet integrated as repo binaries.
+**Verified main status (2026-11-20):** GAME-001 was merged as PR #20 and deployed on GitHub Pages: a **playable but simple** automatic Hunting/Mining browser prototype with local saves, no offline cap and login-only level increases. No true wolf combat engine, server-authoritative settlement, account backend or game database. **Branch work GAME-002** replaces the interface HTML/CSS and both static activity paintings with approved 960×540 WebP imagery; it is **not live until separately approved, merged and deployed**.
 
 **Canonical source:** Always fetch current remote `main:docs/TD_LIST.md` first. Then read `AGENTS.md`, this checkpoint, `docs/DECISIONS.md`, the protocol, current main and open PRs; this page is a snapshot, not authority.
 
@@ -30,11 +30,11 @@ For future combat/offline work, start with the concise **Combat/offline handoff*
 - **Manual GitHub settings opportunity:** consider setting the repository homepage to the Pages URL and enabling deletion of merged source branches. Both are optional; never delete unmerged work or change owner settings by assumption.
 - **Security boundary:** the website is static. Read `SECURITY.md` before adding accounts, third-party dependencies or new API workflows.
 
-**Next step:** verify GAME-002 stylesheet/UI and PR CI, obtain owner approval before merge, verify the live Pages deployment. Follow up with a **separate binary-art integration** once the approved painted hunting/mining image files can be added to the repository; do not silently retain flat placeholders as final art.
+**Next step:** verify GAME-002 HTML/CSS, painted WebP assets, game behaviour and PR CI; obtain owner approval before merging, then verify live GitHub Pages deployment and visual quality. The binary artwork is already present on the branch.
 
 ## First browser prototype handoff (GAME-001)
 
 - Public game route **after merge**: `https://janisp123.github.io/idle_game/play/`, entered from the landing page's `Play Now` button.
-- Files: `site/play/index.html`, `game.css`, `engine.mjs`, `app.mjs`, `assets/hunting.svg` and `assets/mining.svg`. Offline model tests: `tools/test_game_engine.mjs`.
+- Files on `main`: `site/play/index.html`, `game.css`, `engine.mjs`, `app.mjs`, original initial SVGs. GAME-002 branch adds `iron-ui.css` and replaces the two SVG scenes with `assets/hunting.webp` and `assets/mining.webp`. Offline model tests: `tools/test_game_engine.mjs`.
 - Currently simulated wolf hunting grants 1 hide and 3 XP per 7s, mining 1 stone and 2 XP per 5s; the numbers are prototypes, **not approved final balance**.
 - A returning player settles the full elapsed interval first with unchanged action rules (no XP-threshold stepping), then activates level-ups. No internet sync or true combat; do not imply either exists.
