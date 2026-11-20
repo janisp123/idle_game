@@ -26,6 +26,20 @@
 - **MIT-licensed modular idle-game example:** combat and death are separate systems inside a UI-independent game core; game time and random outcomes can be passed into the engine rather than read directly from UI/browser globals. However, its combat explicitly **does not progress offline**. Reuse the architectural idea, not its offline policy.
 - **More advanced readable combat simulator:** demonstrates deterministic expected-value resolution and optional random testing, action priorities and separated combat maths. It is much more complicated than our initial solo combat needs, and the inspected example is **not licensed for reuse**. Do not copy its source.
 
+### Examined compact RPG combat code — reusable implementation boundaries (2026-11-20)
+
+A readable classic-RPG server implementation confirms that the **actual hit/damage formula can be a small standalone module**, called by separate player/NPC fight loops. Its pattern was:
+
+- Calculate attack accuracy from attacker stats and weapon bonuses.
+- Calculate defensive protection from defender stats and armour bonuses.
+- Use those scores to decide whether an attack lands, then sample damage up to an attacker-dependent maximum.
+- Player/NPC fight loops advance attack stages, apply HP damage and determine death; the maths file does not own the surrounding world.
+- A **separate weighted-loot module** resolves item rewards. XP distribution belongs to completion handling rather than the damage formula.
+
+A larger independently written server framework illustrates a further separation between engine and game content, although it is too broad for our first prototype. **Neither implementation supplies our unlimited-offline combat estimator**. Specific calculations may differ from their original inspiration and we have not verified either by executing the projects.
+
+**Implementation reference for future chat/cw/codex work:** See [P17 — Small independent RPG combat and reward modules](../USEFUL_EXAMPLES.md#p17--small-independent-rpg-combat-and-reward-modules) for the examined responsibilities, original pseudocode, constraints, tests and rights warning. **Study the separation of functions; do not copy foreign formulas or source.**
+
 ### Practical implication for our own design — candidate, not implementation approval
 
 1. **One isolated combat-rules module** accepts a character/stat snapshot, two pre-equipped skills, enemy and environment data, and explicit time/randomness inputs. It returns outcome information (win/loss probabilities or sampled outcomes, fight duration, damage, effects), without importing UI, artwork, inventory persistence, accounts or server code.
