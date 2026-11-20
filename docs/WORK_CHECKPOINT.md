@@ -1,17 +1,32 @@
 # Current working checkpoint
 
-**Status:** Documentation/research project with an organized browser-game reference library and brainstorm. **No gameplay engine or running prototype is verified.**
+**Verified status (2026-11-20):** Repository hosts a static public project landing page and a browser-game engineering research library. **There is no playable game, running combat engine, calibrated offline estimator, account backend or game database.** Nothing in the library should be represented as implemented gameplay.
 
-**Current source:** Always inspect the current remote `main` revision and open PRs; this checkpoint is not a substitute for the canonical `main:docs/TD_LIST.md`.
+**Canonical source:** Always fetch current remote `main:docs/TD_LIST.md` first. Then read `AGENTS.md`, this checkpoint, `docs/DECISIONS.md`, the protocol, current main and open PRs; this page is a snapshot, not authority.
 
-**In progress:** No approved product implementation task. Research notes are **reference material only**, not selected equations or implementation requirements.
+## Confirmed repository infrastructure
 
-**Owner-approved rule (OFF-001):** **Offline earns XP/rewards with a frozen logout build; levels, skills and stats only increase when the player returns to the game.** Do not add XP-level boundary stepping to the offline estimator. See `docs/DECISIONS.md` and the architecture handoff; this rule overrides older research assumptions.
+- **GitHub Pages:** `site/` builds and deploys from the `main` branch through `.github/workflows/pages.yml`. [PR #15](https://github.com/janisp123/idle_game/pull/15) merged; the [main deployment succeeded](https://github.com/janisp123/idle_game/actions/runs/44787499595). Public entry: https://janisp123.github.io/idle_game/.
+- **Branch governance:** GitHub ruleset `Protect main` is active on the default branch, requiring a PR and passing `protocol` status check; deletion and force-push restrictions are active. Zero approving reviews are required for the owner's solo workflow. The ruleset does not require branches to be up to date before merging.
+- **Validation reality:** `protocol` checks only mandatory agent/project file structure. Site workflow checks basic static-page structure and local links; **neither verifies gameplay mechanics or full application security**.
+- **Project and licensing:** public MIT-licensed code and docs; the library may cover useful techniques not selected for our game. Public research documents must not identify outside reference games/repositories. `docs/CHANGELOG.md` records completed merged milestones.
 
-**Verified research scope:** Small separated RPG combat functions; online attack timing; comparative offline approaches (short seeded headless tests, direct statistical rates, slow full tick replay); reward/loot boundaries, long-duration settlement and idempotence concerns. Each approach has limitations and is **not proven in our own game**.
+## Approved versus unresolved game design
 
-**Fast next reading step for combat/offline:** Follow `AGENTS.md` preflight, then the concise **Combat/offline handoff** in `docs/brainstorm/ARCHITECTURE_AND_BALANCING.md`. Consult the P17/P18 entries in `docs/USEFUL_EXAMPLES.md` selectively; do not reread or implement the full library. Exact external code locations are **not** in this public repository and must be supplied from the owner's separate private research index if needed.
+- **Approved decision OFF-001:** The exact effective level, skill, stats and equipment snapshot at logout remains frozen through the absence. Offline activity earns XP/rewards; resulting progression is applied **only upon return**, never during settlement. No XP-level threshold stepping in the offline estimator.
+- **Living, not approved for coding:** small isolated combat rules, online timing, possible statistical offline estimators, idempotent claim models, static illustrated narration and future systems. See the topical brainstorm documents.
+- **Explicit conflicts awaiting owner choice:** first prototype scope (stone mining + bunny hunting vs solo human/monster combat), and dice timing/type (older 3d7 proposals vs newer combat-turn skull dice vs one offline-return bonus roll). Do not reconcile these by guessing.
+- **Unselected technical details:** combat formulas, skill priorities, casting interruption, death/return duration, loot and offline bonus fairness. These questions do not authorize new tasks.
 
-**Blockers before coding:** Owner approval of a narrow first prototype and unresolved choices such as initial content scope, hit/damage formulas and skill rules. No task has been approved for execution in `docs/TD_LIST.md` as of the latest checked preflight; re-check rather than relying on this snapshot.
+## Research handoff — selective reading
 
-**One next action:** Propose the smallest self-contained combat prototype and its verification criteria to the owner; if approved, record a precise task in the canonical TD list and follow the branch/PR/test protocol. Do not start coding on the strength of research alone.
+For future combat/offline work, start with the concise **Combat/offline handoff** in `docs/brainstorm/ARCHITECTURE_AND_BALANCING.md`. Read only the relevant parts of `docs/brainstorm/SOLO_COMBAT.md`, `docs/brainstorm/AUTOMATION_AND_OFFLINE.md` and `docs/brainstorm/OPEN_QUESTIONS.md` as needed. Use library indices P17/P18 and supporting articles on demand. The research compares separated combat functions, seeded tests, aggregate estimators, time units and idempotent reward settlement; **none has been validated in our own game**.
+
+## Immediate next steps
+
+- **Current owner-approved activity:** lightweight repository, website and documentation improvements; do not begin gameplay coding or expand the engine merely because research is ready.
+- **No approved gameplay task is recorded** in `main:docs/TD_LIST.md` at this snapshot. A specific prototype will need separate explicit owner approval later.
+- **Manual GitHub settings opportunity:** consider setting the repository homepage to the Pages URL and enabling deletion of merged source branches. Both are optional; never delete unmerged work or change owner settings by assumption.
+- **Security boundary:** the website is static. Read `SECURITY.md` before adding accounts, third-party dependencies or new API workflows.
+
+**One next development action when the owner wants it:** propose a narrowly scoped first prototype, identify its unresolved design choices, and define tests; ask the owner before adding any implementation task. Do not use this checkpoint to pressure immediate gameplay development.
