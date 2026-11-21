@@ -645,10 +645,11 @@ function render() {
       : sceneActivity.description;
     // Reuse the existing painted scene for the selected destination.
     const sceneId = transition ? transition.targetActivity : state.activity;
-    // Fighting uses its own confrontation tableau. Later a real combat
+    // Temporary existing confrontation art for Fighting until the generated
+    // duel image is added to the repository. Later a real combat
     // event stream will choose strike/block/retreat images by event type.
     // Do not rotate unrelated images: the picture must match the event.
-    const sceneAsset = sceneId === "fighting" ? "fighting" :
+    const sceneAsset = sceneId === "fighting" ? "bandit_raiding" :
       sceneActivity.item === null
         ? (sceneActivity.category === "training" ? "masonry" : "cooking")
         : sceneId;
