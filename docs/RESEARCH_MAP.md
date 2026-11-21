@@ -14,6 +14,8 @@
 | Testing and operations | Test structure, observability, cost measurement (P14) | [P14 overview](USEFUL_EXAMPLES.md#p14--project-structure-testing-and-performance) |
 | Alternatives that may not fit | Offline caps (P11), daily streaks (P12) | [P11](USEFUL_EXAMPLES.md#p11--offline-time-caps), [P12](USEFUL_EXAMPLES.md#p12--daily-rewards-and-streaks) |
 
+For documented traps and project-specific conflicts, see [bad examples](BAD_EXAMPLES.md) **only if the current task needs that warning**.
+
 For additional detail, use the [full research catalogue](USEFUL_EXAMPLES.md#quick-index) or [library index](RESEARCH_LIBRARY.md#reading-order), but **never load the entire collection automatically**. Fit tags mean potential suitability, not owner approval. These entries are design notes unless independently proven and tagged otherwise.
 
 **Maintenance:** Update a row only when a substantive new topic or better guide changes the lookup path. Keep this file short (under 3.5 KB); do not duplicate article explanations or add unapproved tasks.
