@@ -1,0 +1,32 @@
+name: Import approved activity art
+on:
+  push:
+    branches: [feat/activity-art-20261121]
+    paths:
+      - "art-import/activity-art.zip"
+permissions:
+  contents: write
+jobs:
+  import-art:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Unpack and validate all ten activity images
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -o art-import/activity-art.zip -d .
+          for name in hunting mining woodcutting gathering fishing smelting alchemy carpentry masonry cooking; do
+            test -s "site/play/assets/$name.webp"
+            file "site/play/assets/$name.webp" | grep -q 'Web/P'
+          done
+          rm art-import/activity-art.zip .github/workflows/import-activity-art.yml
+          rmdir art-import || true
+      - name: Commit self-hosted images to pull request branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || (git commit -m "art: import ten approved activity WebP paintings" && git push)
