@@ -8,7 +8,7 @@
 | Years of offline progress | Event-boundary catch-up (P02), time units, resource depletion, fast-forward (P15) | [Time-safe offline simulation](library/offline-time-units-and-boundaries.md) |
 | Combat design | Independent damage/timers/rewards (P17); sampling, rate estimation, replay (P18) | [Combat modules](library/combat-module-boundaries.md), [offline combat choices](library/offline-combat-estimation.md) |
 | RNG and rare drops | Independent binomial counts, exclusive tables, rare-tail tests (P03) | [Bulk loot sampling guide](library/bulk-random-loot-sampling.md) |
-| Saves and reward safety | Save migration (P05), inventory accounting (P13), atomic settlement/idempotency (P16) | [Reward settlement](library/idempotent-reward-settlement.md), [P05 overview](USEFUL_EXAMPLES.md#p05--save-versions-and-migrations) |
+| Saves and reward safety | Save migration (P05), atomic settlement (P16), local recovery | [Reward settlement](library/idempotent-reward-settlement.md), [browser save recovery](library/crash-recoverable-browser-saves.md) |
 | Multiplayer/group systems | Server authority (P07), cooperative reward allocation (P08), live transport tradeoffs (P10) | [P08 overview](USEFUL_EXAMPLES.md#p08--shared-group-rewards-and-membership-windows) |
 | Mobile UI and updates | Responsive layout (P09), cache versioning, PWA lifecycle, save compatibility | [Browser release guide](library/coherent-browser-game-releases.md), [P09 overview](USEFUL_EXAMPLES.md#p09--mobile-first-illustrated-interface) |
 | Testing and operations | Test structure, observability, cost measurement (P14) | [P14 overview](USEFUL_EXAMPLES.md#p14--project-structure-testing-and-performance) |
