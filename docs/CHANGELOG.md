@@ -1,5 +1,14 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Owner-approved auto-merge, skill-weighted loot and inventory-limited smelting (chat)
+
+- **Governance:** [PR #42](https://github.com/janisp123/idle_game/pull/42), commit `5a6b1fcd246d166b80a6eb4141f97fd185c85dc5`, recorded AUTO-MERGE-001. Already-agreed PR work may merge automatically after final-head tests, review for conflicts/risk and no remaining owner decisions; the old bare `Continue` remains read-only.
+- **GAME-006A:** [PR #43](https://github.com/janisp123/idle_game/pull/43), main commit `4e98d7488795e47ef5b3ea901dc7603f21ab22c6`, added configurable weighted loot to Hunting, Mining, Gathering, Woodcutting and Fishing. Higher skill unlocks additional resource types without separate activity buttons; their shares remain probabilistic. Batch allocation is bounded for decades-long absences, with offline skill levels frozen. Rare goods use new saved inventory keys, with old V2 local saves read safely.
+- **GAME-006B:** [PR #44](https://github.com/janisp123/idle_game/pull/44), main commit `7f2c2efa1cb505f076831d0df708560c2844ad74`, added ingredient-consuming Smelting: copper, iron and silver ingots chosen automatically among currently unlocked recipes and real available ores; one ore is consumed per ingot. Optional Protected toggles prevent automatic consumption. No ingredient means no crafted resource or XP. No timers or cycle rates reintroduced.
+- **Validation:** Both PR-head website and protocol CI checks **passed** for #43 and #44. Main workflow for `7f2c2efa1cb505f076831d0df708560c2844ad74` completed successfully, including **GitHub Pages publication** (run `44885082719`). Engine regressions test tier thresholds, 100-year offline batch, protection, smelting depletion and saved-state compatibility. UI smoke tests exercise inventory resource protection and time-free displays.
+- **Remaining limitations:** Rarity calculations use a bounded binomial approximation on large offline batches; these are provisional balance weights, not calibrated drop rates. Loot from harder hunting encounters is placeholder spoils only; no actual combat, wounds or guards. Alchemy, carpentry, masonry and cooking still use prototype outputs without input consumption; this is tracked by GAME-006. Zone travel and task queue remain GAME-004.
+
+
 ## 2026-11-21 — Twenty activities, skill progression, artwork and timer-free play (chat)
 
 - **Merged:** [PR #40](https://github.com/janisp123/idle_game/pull/40), main commit `058bef74b5397b405bbe7f7dfff8ef22b8893972`. The older overlapping [PR #38](https://github.com/janisp123/idle_game/pull/38) and [PR #39](https://github.com/janisp123/idle_game/pull/39) were **closed as superseded, not individually merged**; their functionality and all ten outlaw scenes were integrated into #40 before merging.
