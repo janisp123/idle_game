@@ -283,7 +283,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
 
     // Removing the final future wagon does not interrupt the current activity.
     const finalCard = elements.get("wagonList").children[2];
-    finalCard.children[finalCard.children.length - 1].children[0].fire("click");
+    finalCard.children[finalCard.children.length - 1].children[1].fire("click"); // Remove (after move-left)
     state = JSON.parse(store.get(SAVE_KEY));
     assert.deepEqual(state.wagons.map(w => w.activity), ["meditation", "masonry"]);
     assert.equal(state.wagons[1].plannedMs, null);
