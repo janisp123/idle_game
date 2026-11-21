@@ -1,8 +1,8 @@
 # Activity switching — three-phase transition specification (GAME-004)
 
-**Status:** **Manual switching implemented and deployed in PR #60** (main Pages run 44901535752); the three-wagon queue remains unimplemented.
-**Recorded:** 2026-11-21 by chat. Applies to manual activity selection. The latest three-wagon Forever-last queue behavior is specified in [ACTIVITY_QUEUE_SPEC.md](ACTIVITY_QUEUE_SPEC.md); manual switching is implemented; queued execution is not yet implemented.
-**Source of truth:** `docs/DECISIONS.md` ACT-SWITCH-001, SWITCH-TIMING-001, QUEUE-002, ZONE-001, WORK-001, OFF-001, UI-TIME-001 and this task's entry in `docs/TD_LIST.md`.
+**Status:** **Manual switching and the three-wagon queue are implemented and deployed** (PRs #60, #64 and #65; current Pages run 44905877943).
+**Recorded:** 2026-11-21 by chat. Applies to manual activity selection. The latest three-wagon Forever-last queue behavior is specified in [ACTIVITY_QUEUE_SPEC.md](ACTIVITY_QUEUE_SPEC.md); manual switching and bounded scheduled queue execution are implemented.
+**Source of truth:** `docs/DECISIONS.md` ACT-SWITCH-001, SWITCH-TIMING-001, QUEUE-002, ZONE-001, WORK-001, OFF-001, UI-TIME-001 and completed GAME-004 work in `docs/CHANGELOG.md` / `docs/WORK_CHECKPOINT.md`.
 
 ## Temporary alpha tuning (ALPHA-TIME-001; reversible)
 
@@ -59,7 +59,7 @@ No extra location object is needed initially: the existing `ACTIVITIES[id].zone`
 
 ## Exact engine behavior and integration points
 
-Current code switches instantly in `site/play/engine.mjs:chooseActivity` by resetting work progress. The future patch must **not** call that instant-switch path on Start.
+The public UI now uses `queueStartActivity()` with saved transitions rather than the legacy instant `chooseActivity()` helper retained for older engine fixtures. The three-phase transition is real work-state, not a cosmetic progress animation.
 
 - Introduce a pure `requestActivityChange(state, targetId, now)` (name illustrative), settling completed old work up to the click and then registering one pending target.
 - Advance through phase boundaries inside `settle` (or a pure, tested transition-settlement helper). Split large elapsed intervals **at most once per pending transition**, then resolve the long remainder in the target activity with the existing bounded arithmetic. Do not run a timer per action or replay 20 years of cycles.
@@ -77,11 +77,11 @@ Current code switches instantly in `site/play/engine.mjs:chooseActivity` by rese
 - During a transition, wagon 1 displays the **chosen destination** and a clear **Changing to** status until the new activity is actually working. **Wagon 1 can be swapped even during a transition**: finish the original old work cycle once, then restart movement and the 2-minute preparation for the new destination. If already moving/preparing, discard only unfinished transition-time progress. Future-wagon swaps do not affect current movement. Selecting the unchanged first wagon is a no-op.
 - Chronicle displays completed work and the completed switch, without a modal or duplicated welcome-back report.
 
-## Small implementation patches (future coding — each separately verified)
+## Implemented patches (each verified by automated checks)
 
-1. **Engine + tests:** transition state, safe persistence/migration, request and deterministic phase advancement, same-zone 1-minute/cross-zone 5-minute movement and 2-minute preparation, bounded long-absence settlement, wagon-1 retargeting and idempotency.
-2. **UI + smoke tests:** Start beside activity name, phase text and distinct bar, mobile/keyboard/ARIA support, no time labels or surprise row-click switch.
-3. **Integration + release:** full game/Pages CI; tests across resource exhaustion, same/different zone, no active task, logout mid-phase, 20-year absence, skill threshold crossing, multiple tabs, backward time and repeated settlements. Verify deployed page separately, then mark this subtask implemented; keep queue execution open until independently implemented and verified.
+1. **Engine + tests:** [PR #60](https://github.com/janisp123/idle_game/pull/60) added the core persisted transition state; [PR #64](https://github.com/janisp123/idle_game/pull/64) added the finite-wagon scheduler and settled wagons chronologically while keeping levels frozen. Normal profile uses 1/5-minute movement and 2-minute preparation; the active temporary alpha override is described above.
+2. **UI + smoke tests:** [PR #60](https://github.com/janisp123/idle_game/pull/60) added separate Start and grey phase bar; [PR #65](https://github.com/janisp123/idle_game/pull/65) added visible duration planning and CSS wagon controls with arrow swaps. No countdowns or surprise row-click switches.
+3. **Integration + release:** Final-head browser/engine and protocol checks passed for the queue PRs. Main Pages run 44905877943 deployed successfully; public readback confirmed current script and wagon markup. Automated tests cover cross-zone/same-zone transitions, depleted inputs, 20-year absences, level freezing, rollback and repeat settlement. **Live multi-tab race hardening and manual mobile UX inspection remain separate QA considerations** and were not claimed as complete.
 
 ## Confirmed switching values and remaining UI details
 
@@ -89,6 +89,6 @@ Current code switches instantly in `site/play/engine.mjs:chooseActivity` by rese
 - **Preparation:** 2 minutes, including first Start (no inferred initial travel location).
 - **Scheduled duration:** productive work begins after readiness, so travel/preparation are outside the configured 1–8-hour/day interval. If a player sets a new duration on an already-running activity, count that interval from the edit.
 - **Wagon swaps:** moving a different wagon into slot 1 restarts movement/readiness while preserving the old finishing cycle and all previously earned progress; future-only reorder is free.
-- Deleting a wagon/clearing a whole queue still requires a safe, non-destructive UI treatment; do not add an instant reset shortcut.
+- The current UI offers a safe **Remove** control only for the final **future** wagon; there is no destructive clear-all/reset shortcut. Removing the active wagon is not implemented.
 
-**Implementation status:** The manual Start → finishing/moving/preparing flow and dedicated progress bar are deployed in [PR #60](https://github.com/janisp123/idle_game/pull/60), verified by successful CI and live HTML readback. Queue/wagon sections describe later work, **not deployed wagon behavior**. UI-TIME-001 still forbids visible live clocks and countdowns.
+**Implementation status:** Manual switching, queued scheduling and the wagon UI are deployed as PRs #60, #64 and #65, verified by CI and independent public HTML readback. The current alpha preset is intentionally 10-second work cycles plus 5+5-second movement/preparation; the normal values above are retained for restoration. UI-TIME-001 still forbids visible live clocks and countdowns.
