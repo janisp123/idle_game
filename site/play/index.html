@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css">
-  <script type="module" src="./app.mjs?v=20261121-three-wagons1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261121-hourglasses1">
+  <script type="module" src="./app.mjs?v=20261121-hourglasses1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -82,20 +82,20 @@
             <p class="activity-nav-label" id="queuePlannerTitle">Do it for</p>
             <div class="planner-fields">
               <label for="queueAmount">Do it for</label>
-              <select id="queueAmount" aria-label="Number of hours or days">
+              <select id="queueAmount" aria-label="Number of minutes, hours or days">
                 <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
                 <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
               </select>
-              <select id="queueUnit" aria-label="Hours or days">
-                <option value="hours">Hours</option><option value="days">Days</option>
+              <select id="queueUnit" aria-label="Minutes, hours or days">
+                <option value="minutes">Minutes</option><option value="hours">Hours</option><option value="days">Days</option>
               </select>
             </div>
             <div class="planner-actions">
-              <button type="button" id="queueConfirm" class="activity-start">Add wagon</button>
+              <button type="button" id="queueConfirm" class="activity-start">Add hourglass</button>
               <button type="button" id="queueCancel" class="activity-start">Cancel</button>
             </div>
           </div>
-          <p class="hint">Start your first activity, then add up to two more wagons. Choose how long each earlier wagon works; the last one works forever.</p>
+          <p class="hint">Start your first activity, then add up to two more hourglasses. For alpha testing, choose minutes; the final activity works forever.</p>
         </section>
 
 
@@ -111,8 +111,8 @@
             <div class="image-caption" id="sceneCaption">THE WOLF ROAD</div>
           </div>
           <section id="wagonQueue" class="wagon-queue" hidden aria-label="Your activity route">
-            <p class="wagon-queue-heading">YOUR ROUTE · UP TO THREE WAGONS</p>
-            <div id="wagonList" class="wagon-list" aria-label="Ordered activity wagons"></div>
+            <p class="wagon-queue-heading">YOUR ROUTE · THREE HOURGLASSES</p>
+            <div id="wagonList" class="wagon-list" aria-label="Ordered activity hourglasses"></div>
           </section>
           <div class="scene-bottom">
             <div>
