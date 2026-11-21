@@ -12,14 +12,9 @@ The public repository should **not identify or link to games used for inspiratio
 
 ## How Codex should consume this library
 
-This is a **reference library, not a design specification or a to-do list**. Reading more entries does not grant authority to implement their ideas.
+**Optional, task-specific reference only.** Approved work lives in `docs/TD_LIST.md`; `AGENTS.md` and `docs/DECISIONS.md` govern implementation. Never treat a fit tag as authorization or require Codex to read the whole library.
 
-- **Mandatory governance first:** fetch current remote `main:docs/TD_LIST.md`, then read `AGENTS.md`, `docs/WORK_CHECKPOINT.md`, `docs/DECISIONS.md`, and the protocol/relevant project instructions.
-- **For combat/offline development:** read the **short handoff** at [Architecture and balancing](brainstorm/ARCHITECTURE_AND_BALANCING.md#combatoffline-handoff--concise-context-for-codex-2026-11-20). Look up latest applicable parts of [Solo combat](brainstorm/SOLO_COMBAT.md), [Automation and offline](brainstorm/AUTOMATION_AND_OFFLINE.md), and [Open questions](brainstorm/OPEN_QUESTIONS.md) only as needed.
-- **Consult on demand:** the [Useful Examples index](USEFUL_EXAMPLES.md#quick-index) points to small, specific research entries. Start with **P17** for combat module boundaries or **P18** for offline estimation; don't load P01–P18 as one giant input. Research marked `[OUR-GAME: FIT]` is still **not** an approved design decision.
-- **External source provenance:** names, source URLs, commit revisions and licence notes are held separately in the owner's private source index, not this public repository. Codex must ask for that index if it needs to examine original external code; it is **not automatically present** in the GitHub checkout.
-
-**Stop researching when there is a plausible method and a testable next step.** Resume investigation on a specific failure, accuracy gap, security issue or owner-approved question, not to accumulate examples. Preserve alternatives in the library for other developers without making Codex weigh them all each task.
+Start with the [Useful Examples index](USEFUL_EXAMPLES.md#quick-index), then open **only** a relevant guide. For combat/offline tasks, first consult the [short project handoff](brainstorm/ARCHITECTURE_AND_BALANCING.md#combatoffline-handoff--concise-context-for-codex-2026-11-20). External source provenance belongs to the owner's separate private source index, not this public library.
 
 ## Reading order
 
@@ -27,6 +22,8 @@ This is a **reference library, not a design specification or a to-do list**. Rea
 - [Time-safe offline simulation](library/offline-time-units-and-boundaries.md): consistent time units, exact resource-depletion boundaries, aggregate processing and proposed equivalence tests. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Idempotent reward settlement](library/idempotent-reward-settlement.md): atomic progress cursors, retry-safe grants, concurrency control and crash recovery. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Coherent browser game releases](library/coherent-browser-game-releases.md): content-versioned assets, safe PWA updates, stale-cache recovery and save-schema compatibility. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
+- [Combat module boundaries](library/combat-module-boundaries.md): isolated math, scheduling, encounter outcomes and reward handling. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
+- [Offline combat estimation](library/offline-combat-estimation.md): encounter sampling, mathematical rates, replay tradeoffs and validation. `[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Article Template](library/ENTRY_TEMPLATE.md): format for longer, original technical guides.
 - [Our Game Brainstorm](BRAINSTORM.md): our ideas, design directions, alternative concepts and open questions. Not a task list.
 - [Decisions](DECISIONS.md): actual owner-approved decisions.
