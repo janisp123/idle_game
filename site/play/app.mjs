@@ -217,16 +217,6 @@ function renderWagons() {
   const cards = wagons.map((wagon, i) => {
     const card = document.createElement("article");
     card.className = "wagon";
-    const picture = document.createElement("div");
-    picture.className = "wagon-hourglass";
-    picture.setAttribute("aria-hidden", "true");
-    const art = document.createElement("img");
-    art.src = "./assets/hourglass-amber.webp?v=20261121-hourglasses1";
-    art.alt = "";
-    art.width = 96;
-    art.height = 96;
-    art.decoding = "async";
-    picture.append(art);
     const label = document.createElement("strong");
     label.className = "wagon-name";
     label.textContent = ACTIVITIES[wagon.activity].title;
@@ -235,7 +225,7 @@ function renderWagons() {
     position.textContent = i === 0
       ? (state.transition?.targetActivity === wagon.activity ? "Changing to…" : "Current activity")
       : i === wagons.length - 1 ? "Final destination" : "Next activity";
-    card.append(picture, label, position);
+    card.append(label, position);
 
     // Only the running finite activity needs an in-card progress bar.
     // Scheduled future slots show their chosen duration; Forever has no bar.
