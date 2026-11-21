@@ -1,5 +1,14 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Real slow Fighting duel prototype (chat; PR #94)
+
+- **Merged:** [PR #94](https://github.com/janisp123/idle_game/pull/94), commit `bb61a3ea9de7c48ec732b42a0779ab1b196f09af`. Pure duel rules in `site/play/combat.mjs`: actual misses, dodges, blocks, wounds, HP, defeat/victory, named rivals and vulnerability-triggered three six-sided skull dice. A 6–6–6 roll yields a rare weapon-specific finishing event. Balance is provisional.
+- **Playable:** A new combat-only, mobile-friendly Chronicle panel shows a genuine narrative event every 20 seconds, with visible skull dice only when rolled. Existing Fighting image is currently a generic **arena background**, not a misleading depiction of each strike.
+- **Offline/save guarantees:** V6 migration preserves skills, items, name, schedule and attribute effort. Combat session snapshots effective power, accumulates productive Fighting time and reconstructs only the observable bout in bounded time, even after decades offline. No permanent character death, fabricated historical kill totals or automatic skill level-ups.
+- **Evidence:** Final-head [Pages CI 44954330571](https://github.com/janisp123/idle_game/actions/runs/44954330571) and [protocol 44954330570](https://github.com/janisp123/idle_game/actions/runs/44954330570) both passed. Main [Pages deployment 44954385283](https://github.com/janisp123/idle_game/actions/runs/44954385283) succeeded, and a fresh live HTTP 200 readback confirmed `20261121-combat-v1` and the combat panel.
+- **Still pending:** Unique matching event paintings, real raid/clan/revival logic, gear and cooldown abilities, persistent injury consequences and aggregated offline combat outcome records.
+
+
 ## 2026-11-21 — Fighting first in the activities menu (chat; PR #93)
 
 - **Fighting added as a distinct activity:** First category is now **Fighting**; it has independent skill progress and time-based attribute weights STR 30%, DEX 35%, END 25%, WIL 10%. Hunting and outlaw raids remain separate. New Fighting skill migrates safely into existing V5 saves; current inventory and queue are preserved.

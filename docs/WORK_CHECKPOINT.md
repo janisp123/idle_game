@@ -1,5 +1,15 @@
 # Current working checkpoint
 
+## Latest verified — PR #94 slow combat alpha (2026-11-21)
+
+- **Main:** `bb61a3ea9de7c48ec732b42a0779ab1b196f09af`, merged [PR #94](https://github.com/janisp123/idle_game/pull/94); this supersedes the old PR #85 head described below.
+- **Validation:** PR head `6f0b6e8c30bafc52a3b67cfe849bfe22c1144a0d` passed [Idle Game website 44954330571](https://github.com/janisp123/idle_game/actions/runs/44954330571) and [Project Protocol Preflight 44954330570](https://github.com/janisp123/idle_game/actions/runs/44954330570). Main Pages [44954385283](https://github.com/janisp123/idle_game/actions/runs/44954385283) deployed successfully.
+- **Public readback:** Fresh `/play/` HTTP 200 and `app.mjs?v=20261121-combat-v1` with `combatPanel` and `combatDice` elements verified. Physical Android interaction still needs owner review.
+- **Gameplay:** Fighting now produces real deterministic solo attack/block/dodge/wound/finisher/defeat/victory outcomes on an automatic twenty-second event rhythm, with vulnerability-gated 6–6–6 skull dice and skill/attribute power frozen at the start of the Fighting session. Existing skill XP and offline progress remain unchanged.
+- **Caveats:** The scene painting is still a generic Fighting arena background. Exact-event artwork, clan/raid combat, persistent injuries/loot and bounded summaries of all offline fights are **not implemented**. Do not present the textual event panel as a completed picture-per-strike gallery. Combat formulas are provisional alpha values.
+- **Next smallest task:** Commission exact-matching original paintings for attack, block, dodge, wound and finisher; attach only event-appropriate scenes, verify mobile loading. Raids and clan rescue require separate simulation rules.
+
+
 **Verified 2026-11-21 after PR #85.** The playable game is deployed at https://janisp123.github.io/idle_game/play/ . This is a browser-local prototype, not a released server-backed RPG.
 
 ## Last confirmed merge, CI and deployment
