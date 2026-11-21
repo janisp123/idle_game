@@ -92,11 +92,14 @@ const MAX = Number.MAX_SAFE_INTEGER;
 const isCount = value => Number.isSafeInteger(value) && value >= 0;
 const validTime = value => Number.isSafeInteger(value) && value >= 0;
 export const MAX_WAGONS = 3;
-export const HOUR_MS = 60 * 60_000;
+export const MINUTE_MS = 60_000;
+export const HOUR_MS = 60 * MINUTE_MS;
 export const DAY_MS = 24 * HOUR_MS;
+// Minutes are an alpha testing option; accept them in existing saves even
+// after restoring normal timings, so switching profiles never deletes a route.
 export const validPlannedDuration = ms => Number.isSafeInteger(ms) &&
   Array.from({ length: 8 }, (_, i) => i + 1)
-    .some(n => ms === n * HOUR_MS || ms === n * DAY_MS);
+    .some(n => ms === n * MINUTE_MS || ms === n * HOUR_MS || ms === n * DAY_MS);
 
 
 export function newGame(now = Date.now()) {
