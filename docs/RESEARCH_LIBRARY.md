@@ -20,6 +20,7 @@ For technical design choices, start with the compact [Research map](RESEARCH_MAP
 
 - [Research map](RESEARCH_MAP.md): tiny topic overview for on-demand Codex discovery; not required on routine tasks.
 - [Useful Examples](USEFUL_EXAMPLES.md): short, generic, independent implementation patterns and tradeoffs.
+- [Bulk random loot sampling](library/bulk-random-loot-sampling.md): independent and mutually exclusive reward counts, rare-event tails, RNG versioning and tests. `[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Time-safe offline simulation](library/offline-time-units-and-boundaries.md): consistent time units, exact resource-depletion boundaries, aggregate processing and proposed equivalence tests. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Idempotent reward settlement](library/idempotent-reward-settlement.md): atomic progress cursors, retry-safe grants, concurrency control and crash recovery. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Coherent browser game releases](library/coherent-browser-game-releases.md): content-versioned assets, safe PWA updates, stale-cache recovery and save-schema compatibility. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
