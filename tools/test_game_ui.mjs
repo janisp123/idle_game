@@ -27,6 +27,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   assert.match(queueCss, /\.wagon-hourglass img/);
+  assert.match(queueCss, /\.hourglass-schedule-progress/);
+  assert.match(queueCss, /\.wagon-hourglass\s*\{[^}]*overflow:hidden/s,
+    "sandglass art must stay clipped inside a separate box to avoid covering text");
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
   const elements = new Map(ids.map(id => [id, new FakeElement()]));
   const originalNow = Date.now;
@@ -51,7 +54,13 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     getItem: key => store.get(key) ?? null,
     setItem: (key, value) => store.set(key, String(value))
   };
-  globalThis.window = { addEventListener() {}, setInterval(handler) { tick = handler; } };
+  let allowRouteOverride = false;
+  let overrideConfirmations = 0;
+  globalThis.window = {
+    addEventListener() {},
+    setInterval(handler) { tick = handler; },
+    confirm() { overrideConfirmations++; return allowRouteOverride; }
+  };
   Date.now = () => now;
   try {
     await import("../site/play/app.mjs?smoke-test");
@@ -113,8 +122,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     elements.get("backToCategories").fire("click");
     assert.equal(categoryScreen.hidden, false);
     categories[0].fire("click");
-    const miningStart = mining.children[0].children[0].children[1];
-    assert.equal(miningStart.textContent, "Start");
+    const miningStart = mining.children[0].children[0].children[1].children[0];
+    assert.equal(miningStart.textContent, "Start now");
+    assert.equal(mining.children[0].children[0].children[1].children[1].textContent, "Schedule");
     mining.fire("click");
     assert.equal(JSON.parse(store.get(SAVE_KEY)).activity, null,
       "clicking activity card alone never starts work");
@@ -203,87 +213,140 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(chronicle.every(line => !/Welcome back|seconds|hours|XP|actions|cycles/i.test(line)),
       "no duplicated welcome messages or timers");
 
+    // The chosen activity receives the requested duration, not Mining.
     openActivities.fire("click");
     categories[2].fire("click");
     const meditation = elements.get("activityChoices").children.find(
       b => b.children[0]?.children[0]?.children[0]?.textContent === "Meditation");
-    const meditationStart = meditation.children[0].children[0].children[1];
-    meditationStart.fire("click");
+    const meditationActions = meditation.children[0].children[0].children[1];
+    const meditationStart = meditationActions.children[0];
+    const meditationSchedule = meditationActions.children[1];
+    assert.equal(meditationStart.textContent, "Start now");
+    assert.equal(meditationSchedule.textContent, "Schedule");
+    meditationSchedule.fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "mining");
-    assert.equal(state.transition, null, "adding a future wagon does not abandon current work");
+    assert.equal(state.transition, null, "planning alone does not interrupt mining");
     assert.equal(elements.get("queuePlanner").hidden, false);
-    assert.match(elements.get("queuePlannerTitle").textContent, /how long should Mining work/);
+    assert.match(elements.get("queuePlannerTitle").textContent,
+      /how long should Meditation run/i, "new duration is for selected task");
+    assert.match(elements.get("queuePlannerHint").textContent,
+      /Mining resumes Forever/);
     elements.get("queueAmount").value = "1";
     elements.get("queueUnit").value = "minutes";
     elements.get("queueConfirm").fire("click");
-    assert.equal(elements.get("queuePlanner").hidden, true);
     state = JSON.parse(store.get(SAVE_KEY));
     assert.deepEqual(state.wagons, [
-      { activity: "mining", plannedMs: MINUTE_MS },
-      { activity: "meditation", plannedMs: null }
+      { activity: "meditation", plannedMs: MINUTE_MS },
+      { activity: "mining", plannedMs: null }
     ]);
+    assert.equal(state.transition.targetActivity, "meditation");
+    assert.equal(elements.get("queuePlanner").hidden, true);
     assert.equal(elements.get("wagonList").children.length, 2);
-    assert.equal(elements.get("wagonList").children[1].children[3].textContent, "FOREVER");
-    const previousStone = state.items.stone;
-    const previousMiningXP = state.skills.mining.xp;
-    now += MINUTE_MS;
+    const changingCard = elements.get("wagonList").children[0];
+    const pendingMeter = changingCard.children.find(child =>
+      child.className === "hourglass-schedule-progress");
+    assert.ok(pendingMeter, "only current finite activity has a progress meter");
+    assert.equal(pendingMeter.hidden, true, "do not show work progress while travelling");
+    assert.ok(!elements.get("wagonList").children[1].children.some(child =>
+      child.className === "hourglass-schedule-progress"), "Forever has no meter");
+
+    now += ACTIVITIES.mining.durationMs;
     tick();
-    state = JSON.parse(store.get(SAVE_KEY));
-    assert.ok(state.items.stone >= previousStone, "scheduled mining never removes previous stone");
-    assert.equal(state.skills.mining.xp - previousMiningXP,
-      MINUTE_MS / ACTIVITIES.mining.durationMs * ACTIVITIES.mining.xp,
-      "finite mining performs exactly the configured number of full work cycles");
-    assert.equal(state.transition.phase, "moving");
     assert.equal(elements.get("transitionPhase").textContent, "Moving to new location");
-    assert.deepEqual(state.wagons, [{ activity: "meditation", plannedMs: null }]);
-    now += ZONE_TRAVEL_MS;
-    tick();
-    assert.equal(elements.get("transitionPhase").textContent, "Getting ready to start new activity");
-    now += PREPARATION_MS;
+    now += ZONE_TRAVEL_MS + PREPARATION_MS;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "meditation");
-    assert.equal(state.transition, null);
-    const stoneAfterTravel = state.items.stone;
-    now += ACTIVITIES.meditation.durationMs * 2;
+    assert.equal(state.productiveElapsedMs, 0);
+    assert.equal(pendingMeter.hidden, false);
+    now += MINUTE_MS / 2;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.productiveElapsedMs, MINUTE_MS / 2);
+    assert.equal(pendingMeter.getAttribute("aria-valuenow"), "50");
+    assert.equal(pendingMeter.children[0].style.width, "50.00%");
+    now += MINUTE_MS / 2;
+    tick();
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.deepEqual(state.wagons, [{ activity: "mining", plannedMs: null }]);
+    assert.equal(state.transition.phase, "moving");
     assert.ok(state.skills.meditation.xp > 0);
-    assert.equal(state.items.stone, stoneAfterTravel, "meditation does not create resources");
-    assert.ok(elements.get("logList").children.some(x => x.textContent === "Practised meditation."));
+    now += ZONE_TRAVEL_MS + PREPARATION_MS;
+    tick();
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.activity, "mining", "Mining resumes Forever only after Meditation's minute");
+    assert.equal(state.transition, null);
+    assert.ok(elements.get("logList").children.some(x => x.textContent ===
+      "Practised meditation."));
 
-    // Add a third wagon, reorder only future wagons, and edit a finite slot.
+    // Build a three-hourglass route: Hunting now (1 minute), Masonry next
+    // (2 minutes), Mining Forever. Future schedule must not stop Hunting.
     openActivities.fire("click");
     categories[0].fire("click");
     const hunting = elements.get("activityChoices").children.find(
       b => b.children[0]?.children[0]?.children[0]?.textContent === "Hunting");
-    hunting.children[0].children[0].children[1].fire("click");
+    hunting.children[0].children[0].children[1].children[1].fire("click");
     elements.get("queueConfirm").fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.deepEqual(state.wagons.map(w => w.activity), ["hunting", "mining"]);
+    now += ACTIVITIES.mining.durationMs + ZONE_TRAVEL_MS + PREPARATION_MS;
+    tick();
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.activity, "hunting");
+    assert.equal(state.transition, null);
+
     openActivities.fire("click");
     categories[0].fire("click");
     const masonry = elements.get("activityChoices").children.find(
       b => b.children[0]?.children[0]?.children[0]?.textContent === "Masonry");
-    masonry.children[0].children[0].children[1].fire("click");
+    const masonryActions = masonry.children[0].children[0].children[1];
+    masonryActions.children[1].fire("click");
+    assert.match(elements.get("queuePlannerTitle").textContent, /Masonry run/);
+    assert.match(elements.get("queuePlannerHint").textContent,
+      /after Hunting finishes/);
+    elements.get("queueAmount").value = "2";
+    elements.get("queueUnit").value = "minutes";
     elements.get("queueConfirm").fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.equal(state.wagons.length, 3);
-    assert.equal(elements.get("wagonList").children.length, 3);
+    assert.deepEqual(state.wagons, [
+      { activity: "hunting", plannedMs: MINUTE_MS },
+      { activity: "masonry", plannedMs: 2 * MINUTE_MS },
+      { activity: "mining", plannedMs: null }
+    ]);
+    assert.equal(state.activity, "hunting", "adding future task does not stop current work");
+    assert.equal(state.transition, null);
     assert.equal(elements.get("wagonList").style.gridTemplateColumns,
-      "repeat(3, minmax(0, 1fr))", "all 3 hourglasses render side by side");
-    assert.equal(hunting.children[0].children[0].children[1].textContent, "Queued");
-    assert.equal(masonry.children[0].children[0].children[1].textContent, "Queued");
+      "repeat(3, minmax(0, 1fr))", "all three hourglasses fit in the same row");
+    const rendered = elements.get("wagonList").children;
+    assert.ok(rendered[0].children.some(c => c.className === "hourglass-schedule-progress"));
+    assert.ok(!rendered[1].children.some(c => c.className === "hourglass-schedule-progress"));
+    assert.ok(!rendered[2].children.some(c => c.className === "hourglass-schedule-progress"));
+    assert.equal(masonryActions.children[1].textContent, "Queued");
+
+    now += MINUTE_MS / 2;
+    tick();
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.activity, "hunting");
+    assert.equal(state.productiveElapsedMs, MINUTE_MS / 2);
+    const activeMeter = elements.get("wagonList").children[0].children.find(
+      c => c.className === "hourglass-schedule-progress");
+    assert.equal(activeMeter.getAttribute("aria-valuenow"), "50");
+
+    // Only future slots swap freely and inherit the destination's slot length.
     const secondCard = elements.get("wagonList").children[1];
     const secondControls = secondCard.children[secondCard.children.length - 1];
-    secondControls.children[1].fire("click"); // move hunting later (future-only swap)
+    secondControls.children[1].fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.deepEqual(state.wagons.map(w => w.activity), ["meditation", "masonry", "hunting"]);
-    assert.equal(state.activity, "meditation");
-    assert.equal(state.transition, null, "future-only swap does not restart travel");
+    assert.deepEqual(state.wagons.map(w => w.activity), ["hunting", "mining", "masonry"]);
+    assert.equal(state.wagons[1].plannedMs, 2 * MINUTE_MS);
+    assert.equal(state.activity, "hunting");
+    assert.equal(state.transition, null);
+    assert.equal(state.productiveElapsedMs, MINUTE_MS / 2);
 
-    // The first visible finite slot can be edited via touch-friendly selects.
+    // Editing current duration resets its *planned* window from the edit.
     const firstCard = elements.get("wagonList").children[0];
-    const durationControls = firstCard.children[3];
+    const durationControls = firstCard.children.find(c => c.className === "wagon-duration");
     durationControls.children[1].value = "2";
     durationControls.children[1].fire("change");
     state = JSON.parse(store.get(SAVE_KEY));
@@ -291,13 +354,31 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(state.productiveElapsedMs, 0);
     assert.equal(elements.get("wagonList").children.length, 3);
 
-    // Removing the final future wagon does not interrupt the current activity.
+    // Removing only the last future task leaves the current one untouched.
     const finalCard = elements.get("wagonList").children[2];
-    finalCard.children[finalCard.children.length - 1].children[1].fire("click"); // Remove (after move-left)
+    finalCard.children[finalCard.children.length - 1].children[1].fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.deepEqual(state.wagons.map(w => w.activity), ["meditation", "masonry"]);
+    assert.deepEqual(state.wagons.map(w => w.activity), ["hunting", "mining"]);
     assert.equal(state.wagons[1].plannedMs, null);
-    assert.equal(state.activity, "meditation");
+    assert.equal(state.activity, "hunting");
+
+    // Start now is available even when a route exists. Declining the explicit
+    // replacement confirmation keeps the whole schedule intact.
+    openActivities.fire("click");
+    categories[0].fire("click");
+    const savedRoute = JSON.stringify(state.wagons);
+    masonryActions.children[0].fire("click");
+    assert.equal(overrideConfirmations, 1);
+    assert.equal(JSON.stringify(JSON.parse(store.get(SAVE_KEY)).wagons), savedRoute);
+    const earnedHuntingXP = state.skills.hunting.xp;
+    const previousItems = { ...state.items };
+    allowRouteOverride = true;
+    masonryActions.children[0].fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.deepEqual(state.wagons, [{ activity: "masonry", plannedMs: null }]);
+    assert.equal(state.transition.targetActivity, "masonry");
+    assert.equal(state.skills.hunting.xp, earnedHuntingXP);
+    assert.deepEqual(state.items, previousItems);
     elements.get("nameInput").value = "The Black Rider";
     elements.get("saveName").fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
