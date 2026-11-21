@@ -27,7 +27,7 @@ See [RESEARCH_LIBRARY.md](RESEARCH_LIBRARY.md) for the library's purpose and [EN
 | --- | --- | --- | --- |
 | P01 | Pure simulation core | Testable gameplay without UI dependencies | `[OUR-GAME: FIT]` |
 | P02 | Event-based offline catch-up | Progress while a user is absent | `[OUR-GAME: ADAPT]` |
-| P03 | Bulk random rewards | Efficient, statistically sound long-term idle loot | `[OUR-GAME: FIT]` |
+| P03 | [Bulk random loot](library/bulk-random-loot-sampling.md) | Efficient independent and exclusive loot sampling and rare-tail correctness | `[OUR-GAME: FIT]` |
 | P04 | Configured activities and entities | Expand content without rewriting core logic | `[OUR-GAME: FIT]` |
 | P05 | Versioned saves and migrations | Keep old accounts working after updates | `[OUR-GAME: FIT]` |
 | P06 | Typed event stream | Connect combat, quests, UI logs and statistics | `[OUR-GAME: ADAPT]` |
@@ -110,17 +110,7 @@ The number of loop iterations should depend mostly on **meaningful state changes
 
 `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
 
-**Problem:** Long offline periods may contain millions of independent loot checks. Recording a random roll per encounter is wasteful.
-
-**Simple statistical model:** If a reward has probability `p` for each of `n` independent eligible encounters under unchanged conditions, the number of drops follows a binomial distribution, `X ~ Binomial(n,p)`. For distinct mutually exclusive outcomes, use an appropriate multinomial model.
-
-**Example:** One special outcome in 343 equiprobable 3d7 results has `p = 1/343`. This is a dice-event probability, **not** a guarantee of a legendary item. An additional independent drop chance must be included if there is a second check.
-
-**Caution:** Do not award `ceil(n*p)` drops. That guarantees at least one even when the correct probability is small. Likewise, using the expected count `n*p` as an exact result removes variation.
-
-**Design tradeoff:** Deterministic seeded RNG supports testing and replay. For a multiplayer game, the authoritative server must control/commit outcomes and not expose exploitable random-state predictions.
-
-**Tests:** Sample-distribution means, zero/one-probability cases, large `n`, very small `p`, stable results after save/load, no double-awards.
+**Guide:** [Bulk random loot without per-encounter rolls](library/bulk-random-loot-sampling.md). Compare exact independent binomial counts, mutually exclusive outcomes, geometric skipping, tail tests and RNG versioning. The guide is educational; no reward rules are approved or tested for our game.
 
 ---
 

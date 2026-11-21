@@ -16,7 +16,7 @@
 
 | ID | Priority | Area | Unanswered question / useful evidence to seek | Existing coverage | Status |
 | --- | --- | --- | --- | --- | --- |
-| RQ-001 | H | Randomness | How can billions of rare loot rolls be sampled efficiently while preserving distributions and correlations? Compare samplers and statistical tests. | [P03](USEFUL_EXAMPLES.md#p03--randomness-loot-and-bulk-sampling) | OPEN |
+| RQ-001 | M | Randomness | How should **stateful** pity, chained drops and other dependent rare outcomes be aggregated without losing ordering or changing the distribution? Independent and exclusive fixed odds are covered. | [Bulk loot guide](library/bulk-random-loot-sampling.md) | OPEN |
 | RQ-002 | H | Scheduling | When can repeating multi-task queues be fast-forwarded without iterating over years of cycles, especially with depletion and remainders? | [Time-safe offline simulation](library/offline-time-units-and-boundaries.md) | OPEN |
 | RQ-003 | H | Combat | How can sampled combat rates capture rare losses, recovery time and mixed encounter lengths without creating biased offline rewards? | [Offline combat estimators](library/offline-combat-estimation.md) | OPEN |
 | RQ-004 | H | Persistence | How should very old saves and historically changing rules be migrated or replayed without granting incorrect retroactive outcomes? | [P05](USEFUL_EXAMPLES.md#p05--save-versions-and-migrations) | OPEN |
