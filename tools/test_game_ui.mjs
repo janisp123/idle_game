@@ -25,6 +25,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
   const elements = new Map(ids.map(id => [id, new FakeElement()]));
   const originalNow = Date.now;
+  const originalRandom = Math.random;
+  Math.random = () => 0.5; // avoid stochastic 0-item single-cycle rewards in UI assertions
   let now = 2_000_000_000_000;
   let tick = null;
   const store = new Map([[SAVE_KEY, JSON.stringify({
@@ -226,6 +228,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("character-heading").textContent, "The Black Rider");
   } finally {
     Date.now = originalNow;
+    Math.random = originalRandom;
     delete globalThis.document;
     delete globalThis.localStorage;
     delete globalThis.window;
