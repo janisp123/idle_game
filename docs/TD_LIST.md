@@ -33,3 +33,13 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** Not yet (pending verified merge).
+
+## GAME-008 — Training and tavern activities; forty independent skills
+- **Goal:** Add ten personal training/knowledge activities and ten social/leisure activities without forcing mastery of every skill.
+- **Acceptance criteria:** Forty independent skill tracks, no global character level or competitive ranking; ten Training & Knowledge and ten Tavern & Leisure actions, selectable in the nested mobile menu; these actions award skill XP only and never fabricate physical inventory; offline progression remains unlimited with frozen effective levels until return; old saves gain missing skills safely; no player-facing timers; top-left cross replaced by a grimdark skull crest.
+- **Status:** IN_REVIEW (owner-approved feature branch; PR checks pending).
+- **Dependencies:** GAME-005, UI-002, OFF-001.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet (pending verified merge).
+- **Art note:** Existing scene paintings reused for new training/leisure tasks temporarily; dedicated 20 illustrations not yet created.
