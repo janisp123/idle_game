@@ -143,7 +143,7 @@ def check():
         game_parser.close()
         assert game_parser.lang == "en", "Game must declare English document language"
         assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
-        assert {"game", "activityChoices", "resourceList", "sceneImage", "returnPanel",
+        assert {"game", "activityChoices", "resourceList", "sceneImage", "logList",
                 "activityProgress", "actionFill", "logList", "sceneBanner", "character-heading",
                 "skillTitle", "skillLevel", "skillXp", "skillFill", "nameInput", "saveName"}.issubset(game_parser.ids), "Missing essential gameplay UI"
         assert not ({"level", "xpText", "xpFill", "lifetimeXp"} & game_parser.ids), (
