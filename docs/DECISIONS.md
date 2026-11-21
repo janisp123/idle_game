@@ -27,3 +27,5 @@ Add project-specific decisions only when explicitly approved; date and link supe
 
 | WORK-001 | 2026-11-21 | Owner | Work activities represent full cycles (preparation, labour, loading/transport), not single tool swings; durations must be adjustable via configuration and speed multipliers, including 20×. Initial ten-task prototype is slower; balancing values are provisional. | Active |
 | ZONE-001 | 2026-11-21 | Owner | Changing zones takes five real minutes. Actual travel and five-task repeating queue are deferred to a later implementation phase. | Active |
+
+| UI-TIME-001 | 2026-11-21 | Owner | **Never expose real-time duration, per-cycle rates, countdowns, activity timing, elapsed absence, timestamps, action totals, or time-based testing controls in the player interface.** Show activity names, possible rewards and an unlabeled visual progress bar. On return, display only a simple welcome and the amount/types of resources gathered. Keep internal durations, uncapped offline settlement and XP/progression logic intact; this UI rule applies to all present and future paths including outlaw activities. | Active |
