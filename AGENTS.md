@@ -10,7 +10,19 @@
 
 Names: **Owner** is the final approver; **chat** is regular ChatGPT; **cw** is ChatGPT Work; **codex** is Codex. “I'll ask chat to do it” means regular ChatGPT, not CW or Codex. Do not infer cross-agent handoffs from conversations. Follow `docs/AGENT_PROTOCOL.md`.
 
-A task list entry is not authorization to implement it. For approved changes use small branches and checked PRs; do not merge or publish without owner authorization **except for the owner's narrowly scoped standing research-docs authorization below**. Record actual evidence and a durable next step. If files or tools are unavailable, say so rather than guessing.
+A task list entry is not authorization to implement it. For approved changes use small branches and checked PRs. **Owner-approved AUTO-MERGE-001 authorizes merging already-agreed work once objectively ready**, subject to the conditions below. New work, risky exceptions and scope changes still require owner decisions. Record actual evidence and a durable next step. If files or tools are unavailable, say so rather than guessing.
+
+## Owner-approved autonomous merge gate — AUTO-MERGE-001 (2026-11-21)
+
+When the Owner and agent have **already agreed on the specific work to implement**, completing it also grants standing permission to merge the resulting PR **without a separate “merge” message** after *all* of these are verified:
+
+1. Scope is unambiguous and matches the prior owner agreement; changed files, behavior and side effects are reviewed. A task entry, brainstorm, research finding, unattended automation or a lone “continue” is **not** owner agreement.
+2. Relevant tests/required branch checks **pass on the final PR head**. Do not skip failing, pending, missing or insufficient checks; add targeted checks when needed. Confirm no data-loss, security, licensing or other material quality issue.
+3. Check current remote `main`, open PRs and deployment expectations immediately before merging. Reconcile overlaps or dependencies and re-run checks after revisions. Never merge stale overlapping PRs that would undo merged changes.
+4. There is **no unresolved conflict, important trade-off, risky/destructive change, new design choice, governance/policy change beyond explicitly requested scope, or other decision requiring the Owner**. If any exists, **stop and ask**. Preserve existing OFF-001, privacy, user-save and release requirements.
+5. Merge through the protected-branch PR flow, verify merge SHA and source on `main`, and verify GitHub Pages deployment separately for playable changes. Record what merged versus what was only validated or deployed, update the backlog/checkpoint, and close clearly superseded PRs with explanations.
+
+This authorization covers ordinary agreed gameplay, fixes, documentation and art PRs when the gate passes; it does **not** grant permission to start unapproved tasks, modify third-party accounts, delete data, deploy unrelated services, or perform a risky release. It complements, rather than weakens, QUAL-001. The existing **research-only** auto-merge allowlist remains a separate, narrower standing authorization for hourly unattended research.
 
 ## Owner command convention — "continue" (2026-11-18)
 
