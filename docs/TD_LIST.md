@@ -24,3 +24,21 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** Not yet (pending verified integration into main).
+
+## GAME-003 — Slower full-cycle work and ten foundational activities
+- **Goal:** Replace implausibly fast single-strike rewards with complete work cycles; expose ten manually selectable basic activities using data-driven timing.
+- **Acceptance criteria:** hunting, mining, woodcutting, gathering, fishing, smelting, potion making, carpentry, masonry and cooking; adjustable base durations and speed multipliers; old local saves preserved; offline settlement remains O(1), uncapped, and levels activate on return; no fabricated crafting input consumption.
+- **Status:** IN_REVIEW (PR pending checks and owner merge approval).
+- **Dependencies:** OFF-001, MVP-001, SITE-001.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet (pending verified integration).
+
+## GAME-004 — Zone travel and five-task repeating queue
+- **Goal:** Add actual zones, five-minute zone changes, and up to five configurable repeating activities.
+- **Acceptance criteria:** each zone change costs five real minutes; queue can loop or end in ongoing work; offline calculations handle zone travel and queued transitions without an offline cap; work stops appropriately on unavailable ingredients; test with long absences.
+- **Status:** TODO (explicitly deferred by Owner until after the ten-task prototype).
+- **Dependencies:** GAME-003.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet.

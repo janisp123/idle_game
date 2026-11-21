@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0c0807">
-  <meta name="description" content="An early, playable grimdark idle RPG prototype. Hunt wolves or mine stone; your activity continues while you are away.">
+  <meta name="description" content="An early, playable grimdark idle RPG prototype. Choose from ten slow-paced work cycles; your activity continues while you are away.">
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
@@ -51,16 +51,7 @@
         <section class="panel actions" aria-labelledby="actions-heading">
           <p class="section-index">II · CHOOSE YOUR PATH</p>
           <h2 id="actions-heading" class="engraved-title">ACTIVITIES</h2>
-          <button type="button" class="activity" id="huntButton" data-activity="hunting" aria-pressed="false">
-            <span class="activity-symbol wolf-mark" aria-hidden="true">♞</span>
-            <span><strong>Hunting</strong><small>Wolves · Wolf hides · 7s per action</small></span>
-            <span class="selection" aria-hidden="true">✣</span>
-          </button>
-          <button type="button" class="activity" id="mineButton" data-activity="mining" aria-pressed="false">
-            <span class="activity-symbol pick-mark" aria-hidden="true">⚒</span>
-            <span><strong>Mining</strong><small>Stone vein · Stone · 5s per action</small></span>
-            <span class="selection" aria-hidden="true">✣</span>
-          </button>
+          <div id="activityChoices" class="activity-choices" aria-label="Choose work"></div>
           <p class="hint">Selecting an activity starts it immediately and repeats it until you choose another.</p>
         </section>
 
@@ -102,7 +93,7 @@
             </div>
             <span class="log-mark" aria-hidden="true">✣</span>
           </div>
-          <ul id="logList" aria-live="polite"><li>Choose Hunting or Mining to begin your journey.</li></ul>
+          <ul id="logList" aria-live="polite"><li>Choose a work activity to begin your journey.</li></ul>
         </section>
 
 
@@ -111,8 +102,7 @@
         <section class="panel inventory" aria-labelledby="inventory-heading">
           <p class="section-index">III · THE SPOILS</p>
           <h2 id="inventory-heading" class="engraved-title">RESOURCES</h2>
-          <div class="item"><span><b class="item-symbol" aria-hidden="true">♞</b> Wolf hides</span><strong id="hideCount">0</strong></div>
-          <div class="item"><span><b class="item-symbol" aria-hidden="true">◆</b> Stone</span><strong id="stoneCount">0</strong></div>
+          <div id="resourceList"></div>
           <div class="item total"><span>Lifetime XP</span><strong id="lifetimeXp">0</strong></div>
         </section>
         <section class="panel progress-panel" aria-labelledby="history-heading">
@@ -132,7 +122,7 @@
       </aside>
     </div>
     <footer>
-      <p><strong>Early prototype.</strong> Wolf hunting is a timed activity, not simulated combat. No HP, death, equipment or multiplayer yet. Levels apply only on return.</p>
+      <p><strong>Early prototype.</strong> Activities are timed full work cycles, not simulated combat or resource-consuming recipes yet. No HP, death, equipment or multiplayer yet. Levels apply only on return.</p>
       <p>All progress is stored in this browser only. Clearing site data or switching devices will lose this character. No account or server save yet.</p>
     </footer>
   </main>

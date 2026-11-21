@@ -142,7 +142,7 @@ def check():
         game_parser.close()
         assert game_parser.lang == "en", "Game must declare English document language"
         assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
-        assert {"game", "huntButton", "mineButton", "sceneImage", "returnPanel",
+        assert {"game", "activityChoices", "resourceList", "sceneImage", "returnPanel",
                 "testDay", "logList", "sceneBanner", "actionCount", "timeInvested",
                 "experienceCount"}.issubset(game_parser.ids), "Missing essential gameplay UI"
         assert "./iron-ui.css" in game_html, "The shared dark-fantasy theme must be active"
