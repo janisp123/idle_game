@@ -98,7 +98,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   let allowMasterTribute = false;
   let masterConfirmations = 0;
   globalThis.window = {
-    addEventListener() {},
+    addEventListener(event, handler) { handlers.set("window:" + event, handler); },
     setInterval(handler) { tick = handler; },
     confirm(prompt) {
       if (prompt.startsWith("THE MASTER'S DUE")) {
@@ -617,7 +617,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     fighting.wagons = [{ activity: "fighting", plannedMs: null }];
     const json = JSON.stringify(fighting);
     store.set(SAVE_KEY, json);
-    handlers.get("storage")({ key: SAVE_KEY, newValue: json });
+    handlers.get("window:storage")({ key: SAVE_KEY, newValue: json });
     assert.equal(elements.get("combatPanel").hidden, true,
       "no combat events are shown before the first fighting interval");
     now += 20_000;
