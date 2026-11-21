@@ -166,7 +166,7 @@ def check():
         verify_links(game_parser, play_root)
         checked_links += len(game_parser.links)
         engine_source = (play_root / "engine.mjs").read_text(encoding="utf-8")
-        activity_ids = re.findall(r"^\\s*([a-z_]+): task\\(", engine_source, re.MULTILINE)
+        activity_ids = re.findall(r"^\s*([a-z_]+): task\(", engine_source, re.MULTILINE)
         assert len(activity_ids) >= 10 and len(set(activity_ids)) == len(activity_ids), "Invalid activity list"
         for activity_id in activity_ids:
             name = activity_id + ".webp"
