@@ -318,3 +318,22 @@ footer p{color:#aa9680}
 @media (prefers-reduced-motion:reduce){
   .activity,.meter>span{transition:none}
 }
+
+/* Character identity, independent skill mastery, no overall player level. */
+.player-name-edit { margin-top:14px; }
+.player-name-edit label { display:block; margin-bottom:6px; color:#c4ac89; font-size:12px; }
+.name-row { display:flex; gap:6px; }
+.name-row input { width:100%; min-width:0; padding:9px 8px; border:2px ridge #72543a; background:#130e0c; color:#f0d5ac; font:15px Georgia,serif; }
+.name-row input:focus-visible { outline:2px solid #eac087; outline-offset:2px; }
+.name-row .small-button { flex:0 0 auto; padding:6px 12px; background:#aa825e; color:#24170e; font-weight:bold; border:2px ridge #d2a579; cursor:pointer; }
+.skill-focus { padding:14px 12px; }
+.skill-focus h2 { margin:10px 0 12px; }
+.skill-meta { display:flex; justify-content:space-between; align-items:center; gap:8px; color:#dac19c; font-size:14px; }
+.skill-meta strong { color:#f3c88f; white-space:nowrap; }
+.skill-meter { margin-top:10px; }
+.skill-focus .hint { margin-top:10px; }
+.activity .skill-rank { display:block; margin-top:3px; color:#d6a474; font:11px Georgia,serif; }
+@media (max-width:750px) {
+  .sidebar .skill-focus { grid-column:1/-1; }
+  .sidebar .actions { grid-column:1/-1; }
+}
