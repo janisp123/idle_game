@@ -91,6 +91,13 @@ export const activityDuration = (id, speedMultiplier = 1) => {
 const MAX = Number.MAX_SAFE_INTEGER;
 const isCount = value => Number.isSafeInteger(value) && value >= 0;
 const validTime = value => Number.isSafeInteger(value) && value >= 0;
+export const MAX_WAGONS = 3;
+export const HOUR_MS = 60 * 60_000;
+export const DAY_MS = 24 * HOUR_MS;
+export const validPlannedDuration = ms => Number.isSafeInteger(ms) &&
+  Array.from({ length: 8 }, (_, i) => i + 1)
+    .some(n => ms === n * HOUR_MS || ms === n * DAY_MS);
+
 
 export function newGame(now = Date.now()) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
@@ -106,6 +113,7 @@ export function newGame(now = Date.now()) {
     activity: null,
     progressMs: 0,
     transition: null,
+    wagons: [], productiveElapsedMs: 0,
     settledAtMs: now
   };
 }
@@ -157,6 +165,25 @@ export function readSave(value) {
         return null;
     }
 
+    // Old V1–V3 single-activity saves become a one-wagon Forever queue.
+    // A saved transition already points at the intended first wagon.
+    const wagons = s.wagons === undefined
+      ? (transition ? [{ activity: transition.targetActivity, plannedMs: null }]
+        : s.activity ? [{ activity: s.activity, plannedMs: null }] : [])
+      : s.wagons;
+    if (!Array.isArray(wagons) || wagons.length > MAX_WAGONS ||
+        wagons.some((wagon, i) => !wagon || typeof wagon !== "object" ||
+          Array.isArray(wagon) || !Object.hasOwn(ACTIVITIES, wagon.activity) ||
+          (i === wagons.length - 1 ? wagon.plannedMs !== null :
+            !validPlannedDuration(wagon.plannedMs))) ||
+        new Set(wagons.map(w => w.activity)).size !== wagons.length ||
+        !isCount(s.productiveElapsedMs ?? 0) ||
+        (!wagons.length && (s.activity || transition || (s.productiveElapsedMs ?? 0) !== 0)) ||
+        (wagons.length && wagons[0].activity !== (transition?.targetActivity ?? s.activity)) ||
+        (wagons.length && wagons[0].plannedMs === null && (s.productiveElapsedMs ?? 0) !== 0) ||
+        (wagons.length && wagons[0].plannedMs !== null &&
+          (s.productiveElapsedMs ?? 0) > wagons[0].plannedMs)) return null;
+
     const oldVersion = s.version === 1;
     if (oldVersion) {
       if (!isCount(s.level) || s.level < 1 || !isCount(s.totalXP) ||
@@ -196,6 +223,8 @@ export function readSave(value) {
       unattributedXP: oldVersion ? s.totalXP : s.unattributedXP,
       items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
       activity: s.activity, progressMs: newProgressMs, transition: newTransition,
+      wagons: wagons.map(w => ({ activity: w.activity, plannedMs: w.plannedMs })),
+      productiveElapsedMs: s.productiveElapsedMs ?? 0,
       settledAtMs: s.settledAtMs
     };
   } catch {
@@ -293,7 +322,7 @@ function settleWork(state, now, random) {
  * At most three transition phases and one old/full new-work batch are resolved,
  * regardless of whether the absence was minutes or decades.
  */
-export function settle(state, now = Date.now(), random = Math.random) {
+function settleTransition(state, now, random) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
   if (!state.transition) return settleWork(state, now, random);
   const end = Math.max(now, state.settledAtMs);
@@ -345,19 +374,161 @@ export function settle(state, now = Date.now(), random = Math.random) {
   return { state: next, report, reports };
 }
 
+
+/** Remaining transition time, bounded regardless of absent years. */
+function remainingTransitionMs(state) {
+  const t = state.transition;
+  if (!t) return 0;
+  const movement = state.activity && ACTIVITIES[state.activity].zone ===
+    ACTIVITIES[t.targetActivity].zone ? SAME_ZONE_TRAVEL_MS : ZONE_TRAVEL_MS;
+  const preparation = state.activity ? PREPARATION_MS : INITIAL_PREPARATION_MS;
+  if (t.phase === "finishing") return ACTIVITIES[state.activity].durationMs -
+    state.progressMs + movement + preparation;
+  if (t.phase === "moving") return movement - t.phaseProgressMs + preparation;
+  return preparation - t.phaseProgressMs;
+}
+
+const emptyReport = (state, elapsedMs) => ({
+  activity: state.activity, elapsedMs, completed: 0, gainedXP: 0,
+  item: null, gainedItems: 0, items: {}, consumed: {}
+});
+
+/**
+ * Settle at most three finite wagons chronologically, then the Forever wagon.
+ * No per-cycle replay; material from mining can feed subsequent masonry even
+ * after a hundred years offline. Level activation remains only in enterGame().
+ */
+export function settle(state, now = Date.now(), random = Math.random) {
+  if (!validTime(now)) throw new RangeError("Invalid clock");
+  if (!state.wagons?.length) return settleTransition(state, now, random);
+  const end = Math.max(now, state.settledAtMs);
+  let next = state;
+  const reports = [];
+  const addReports = outcome => {
+    for (const report of outcome.reports ?? [outcome.report]) {
+      if (report?.completed) reports.push(report);
+    }
+  };
+  // Three productive segments + at most three transitions; the loop is
+  // bounded by queue length and independent of how long the player was away.
+  for (let step = 0; step < 10; step++) {
+    if (next.transition) {
+      const untilReady = remainingTransitionMs(next);
+      const result = settleTransition(next, Math.min(end, next.settledAtMs + untilReady), random);
+      next = result.state;
+      addReports(result);
+      if (next.transition) break;
+      continue;
+    }
+    const first = next.wagons[0];
+    if (!first || first.plannedMs === null) {
+      const result = settleWork(next, end, random);
+      next = result.state;
+      addReports(result);
+      break;
+    }
+    if (next.productiveElapsedMs < first.plannedMs) {
+      const available = Math.min(end - next.settledAtMs, first.plannedMs - next.productiveElapsedMs);
+      const result = settleWork(next, next.settledAtMs + available, random);
+      next = { ...result.state, productiveElapsedMs: next.productiveElapsedMs + available };
+      addReports(result);
+      if (next.productiveElapsedMs < first.plannedMs) break;
+    }
+    // The finite interval ended; do not grant a new old-work cycle at an exact
+    // cycle boundary. Otherwise complete only its unfinished cycle once.
+    const future = next.wagons.slice(1);
+    if (!future.length) throw new RangeError("Finite final wagon");
+    const targetActivity = future[0].activity;
+    next = { ...next, wagons: future, productiveElapsedMs: 0,
+      transition: targetActivity === next.activity ? null : {
+        targetActivity, phase: next.progressMs > 0 ? "finishing" : "moving",
+        phaseProgressMs: 0
+      } };
+    if (!next.transition && next.settledAtMs === end) break;
+  }
+  return { state: next, reports, report: reports.at(-1) ?? emptyReport(next, end - state.settledAtMs) };
+}
+
+function retargetSettled(current, targetActivity) {
+  if (current.transition?.targetActivity === targetActivity ||
+      (!current.transition && current.activity === targetActivity)) return current;
+  const phase = !current.activity ? "preparing" :
+    current.transition?.phase === "finishing" ? "finishing" :
+    current.transition ? "moving" : "finishing";
+  return { ...current, transition: { targetActivity, phase, phaseProgressMs: 0 } };
+}
+
+/** Start first job or append a future one. Previous Forever job becomes timed. */
+export function queueStartActivity(state, activity, previousLastDurationMs = null,
+  now = Date.now(), random = Math.random) {
+  if (!Object.hasOwn(ACTIVITIES, activity)) throw new RangeError("Unknown activity");
+  const result = settle(state, now, random);
+  const current = result.state;
+  if (current.wagons.some(w => w.activity === activity) || current.wagons.length >= MAX_WAGONS)
+    throw new RangeError("Activity already queued or all wagons occupied");
+  if (!current.wagons.length) {
+    const queued = { ...current, wagons: [{ activity, plannedMs: null }], productiveElapsedMs: 0 };
+    return { ...result, state: retargetSettled(queued, activity) };
+  }
+  if (!validPlannedDuration(previousLastDurationMs)) throw new RangeError("Choose 1–8 hours or days");
+  const prior = current.wagons.at(-1);
+  const wagons = [
+    ...current.wagons.slice(0, -1),
+    { ...prior, plannedMs: previousLastDurationMs },
+    { activity, plannedMs: null }
+  ];
+  const productiveElapsedMs = current.wagons.length === 1 ? 0 : current.productiveElapsedMs;
+  return { ...result, state: { ...current, wagons, productiveElapsedMs } };
+}
+
+/** Do it for: edits to the current wagon begin counting from this edit. */
+export function queueSetDuration(state, index, plannedMs, now = Date.now(), random = Math.random) {
+  if (!validPlannedDuration(plannedMs)) throw new RangeError("Choose 1–8 hours or days");
+  const result = settle(state, now, random);
+  const current = result.state;
+  if (!Number.isInteger(index) || index < 0 || index >= current.wagons.length - 1)
+    throw new RangeError("Final wagon must be Forever");
+  const wagons = current.wagons.map((w, i) => i === index ? { ...w, plannedMs } : { ...w });
+  return { ...result, state: { ...current, wagons,
+    productiveElapsedMs: index === 0 ? 0 : current.productiveElapsedMs } };
+}
+
+/** Adjacent swap: duration belongs to the slot, final slot always Forever. */
+export function queueSwap(state, leftIndex, now = Date.now(), random = Math.random) {
+  const result = settle(state, now, random);
+  const current = result.state;
+  if (!Number.isInteger(leftIndex) || leftIndex < 0 || leftIndex >= current.wagons.length - 1)
+    throw new RangeError("Invalid wagon swap");
+  const wagons = current.wagons.map(w => ({ ...w }));
+  const name = wagons[leftIndex].activity;
+  wagons[leftIndex].activity = wagons[leftIndex + 1].activity;
+  wagons[leftIndex + 1].activity = name;
+  const changedFirst = leftIndex === 0;
+  let next = { ...current, wagons,
+    productiveElapsedMs: changedFirst ? 0 : current.productiveElapsedMs };
+  if (changedFirst) next = retargetSettled(next, wagons[0].activity);
+  return { ...result, state: next };
+}
+
+/** Remove only the last *future* wagon; current work and rewards are untouched. */
+export function queueRemoveLast(state, now = Date.now(), random = Math.random) {
+  const result = settle(state, now, random);
+  const current = result.state;
+  if (current.wagons.length < 2) throw new RangeError("Cannot remove the current wagon");
+  const wagons = current.wagons.slice(0, -1).map((w, i, list) => ({
+    activity: w.activity, plannedMs: i === list.length - 1 ? null : w.plannedMs
+  }));
+  return { ...result, state: { ...current, wagons, productiveElapsedMs: 0 } };
+}
+
 /** Start or retarget a manual transition; never grant travel rewards or skip a work cycle. */
 export function requestActivityChange(state, targetActivity, now = Date.now(), random = Math.random) {
   if (!Object.hasOwn(ACTIVITIES, targetActivity)) throw new RangeError("Unknown activity");
   const outcome = settle(state, now, random);
   const current = outcome.state;
-  if (current.transition?.targetActivity === targetActivity ||
-      (!current.transition && current.activity === targetActivity)) return outcome;
-  const phase = !current.activity ? "preparing" :
-    current.transition?.phase === "finishing" ? "finishing" :
-    current.transition ? "moving" : "finishing";
-  return { ...outcome, state: {
-    ...current, transition: { targetActivity, phase, phaseProgressMs: 0 }
-  } };
+  const wagons = [{ activity: targetActivity, plannedMs: null }];
+  return { ...outcome, state: retargetSettled(
+    { ...current, wagons, productiveElapsedMs: 0 }, targetActivity) };
 }
 
 /** Called only when the user ENTERS/RETURNS to the game, after full catch-up. */
@@ -381,7 +552,8 @@ export function chooseActivity(state, activity, now = Date.now(), random = Math.
   if (!Object.hasOwn(ACTIVITIES, activity)) throw new RangeError("Unknown activity");
   const settled = settle(state, now, random);
   if (settled.state.activity === activity && !settled.state.transition) return settled;
-  return { state: { ...settled.state, activity, progressMs: 0, transition: null }, report: settled.report };
+  return { state: { ...settled.state, activity, progressMs: 0, transition: null,
+    wagons: [{ activity, plannedMs: null }], productiveElapsedMs: 0 }, report: settled.report };
 }
 
 export function testOfflineDay(state, now = Date.now(), random = Math.random) {
