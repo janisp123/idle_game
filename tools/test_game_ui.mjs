@@ -23,12 +23,15 @@ class FakeElement {
 test("real browser-app entrypoint renders skill UI and migrates old saved character", async () => {
   const html = readFileSync(new URL("../site/play/index.html", import.meta.url), "utf8");
   const queueCss = readFileSync(new URL("../site/play/iron-ui.css", import.meta.url), "utf8");
+  assert.match(html, /id="characterAttributes"/, "five visible stats belong to the character panel");
+  assert.match(queueCss, /\.character-attributes\s*\{[^}]*display:grid/s);
+  assert.match(queueCss, /\.activity-choices \.activity-stat-gains/);
   assert.match(queueCss, /\.wagon-list\s*\{[^}]*display:grid/s,
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261121-planner-dropdown6/,
-    "planner control removal must invalidate cached app JavaScript");
+  assert.match(html, /app\.mjs\?v=20261121-attributes1/,
+    "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
   assert.doesNotMatch(appSource, /wagon-hourglass|hourglass-amber\.webp/,
@@ -52,8 +55,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261121-planner-dropdown5/,
-    "stylesheet cache version is changed");
+  assert.match(html, /iron-ui\.css\?v=20261121-attributes1/,
+    "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
   assert.doesNotMatch(html, /id="queueMasteryMode"/,
@@ -152,6 +155,18 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(alchemy.children[0].children[1].textContent.includes("Potions (uses Herbs)"));
     assert.ok(cooking.children[0].children[1].textContent.includes("Meals (uses Fish)"));
     assert.equal(elements.get("character-heading").textContent, "Marauder");
+    const statRows = elements.get("characterAttributes").children;
+    assert.equal(statRows.length, 5, "all five attributes render on the character");
+    assert.deepEqual(statRows.map(row => row.children[0].textContent),
+      ["STR · Strength", "DEX · Dexterity", "END · Endurance",
+        "INT · Intelligence", "WIL · Willpower"]);
+    assert.deepEqual(statRows.map(row => row.children[1].textContent),
+      ["10", "10", "10", "10", "10"], "old save starts at baseline stats");
+    assert.ok(buttons.every(b => b.children[0].children[3].className === "activity-stat-gains"),
+      "every activity displays attribute rewards");
+    assert.match(buttons.find(b => b.children[0].children[0].children[0].textContent === "Mining")
+      .children[0].children[3].textContent, /STR\+\+.*END\+/,
+      "mining displays its configured stat distribution");
     let state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.unattributedXP, 85);
     assert.equal(state.items.hide, 8);
