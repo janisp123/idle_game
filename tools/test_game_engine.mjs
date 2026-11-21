@@ -24,7 +24,7 @@ test("only individual activities have levels; character has a name but no level"
   for (const id of SKILL_IDS) assert.deepEqual(state.skills[id], { level: 1, xp: 0 });
 });
 
-test("twenty activities retain independently configurable full work-cycle times", () => {
+test("forty activities retain independently configurable full work-cycle times", () => {
   assert.ok(Object.keys(ACTIVITIES).length >= 10);
   for (const activity of Object.values(ACTIVITIES)) {
     assert.ok(activity.durationMs >= 8 * BASE_CYCLE_MS);
@@ -35,10 +35,11 @@ test("twenty activities retain independently configurable full work-cycle times"
   assert.throws(() => activityDuration("mining", 0), RangeError);
 });
 
-test("every activity earns its own skill XP and own resource", () => {
+test("every activity independently earns XP and only produces material when allowed", () => {
   for (const [id, activity] of Object.entries(ACTIVITIES)) {
     const start = newGame(0);
-    if (id === "smelting") start.items.copper_ore = 1;
+    const ingredient = PRODUCTION_RECIPES[id]?.[0]?.input;
+    if (ingredient) start.items[ingredient] = 1;
     const chosen = choose(start, id, 0).state;
     assert.equal(finish(chosen, activity.durationMs - 1000).report.completed, 0);
     const result = finish(chosen, activity.durationMs);
