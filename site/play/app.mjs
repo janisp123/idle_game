@@ -1,7 +1,7 @@
 import {
-  SAVE_KEY, ACTIVITIES, ITEM_KEYS, newGame, readSave, settle,
+  SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, newGame, readSave, settle,
   enterGame, chooseActivity, xpForLevel
-} from "./engine.mjs?v=20261121-skills-outlaws-v3";
+} from "./engine.mjs?v=20261121-weighted-loot1";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -22,7 +22,9 @@ let storageWorks = true;
 
 const activityButtons = new Map();
 const activityLevelLabels = new Map();
+const activityRewardLabels = new Map();
 const resourceValues = {};
+const resourceRows = new Map();
 let previousCategory = null;
 for (const [id, task] of Object.entries(ACTIVITIES)) {
   if (task.category && task.category !== previousCategory) {
@@ -44,21 +46,29 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   const rank = document.createElement("small");
   rank.className = "skill-rank";
   body.append(name, detail, rank);
+  activityRewardLabels.set(id, detail);
   button.append(body);
   activityLevelLabels.set(id, rank);
   button.addEventListener("click", () => beginActivity(id));
   ui.choices.append(button);
   activityButtons.set(id, button);
+}
+for (const item of ITEM_KEYS) {
   const row = document.createElement("div");
   row.className = "item";
   const label = document.createElement("span");
-  label.textContent = task.itemLabel;
+  label.textContent = ITEM_LABELS[item];
   const count = document.createElement("strong");
   count.textContent = "0";
   row.append(label, count);
   ui.resourceList.append(row);
-  resourceValues[task.item] = count;
+  resourceValues[item] = count;
+  resourceRows.set(item, row);
 }
+const emptyInventory = document.createElement("p");
+emptyInventory.className = "hint";
+emptyInventory.textContent = "No resources collected yet.";
+ui.resourceList.append(emptyInventory);
 
 function writeSave() {
   if (!storageWorks) return;
@@ -85,8 +95,11 @@ function message(text) {
 
 function lootSummary(report) {
   if (!report || !report.activity || !report.gainedItems) return "No new resources collected.";
-  return "You gathered " + number(report.gainedItems) + " " +
-    ACTIVITIES[report.activity].itemLabel.toLowerCase() + ".";
+  const amounts = report.items ?? { [report.item]: report.gainedItems };
+  const found = Object.entries(amounts)
+    .filter(([, amount]) => amount > 0)
+    .map(([item, amount]) => number(amount) + " " + ITEM_LABELS[item].toLowerCase());
+  return found.length ? "You gathered " + found.join(", ") + "." : "No new resources collected.";
 }
 
 function reportProgress(report) {
@@ -101,10 +114,19 @@ function render() {
   const current = state.activity ? ACTIVITIES[state.activity] : null;
   ui.playerName.textContent = state.name;
   if (document.activeElement !== ui.nameInput) ui.nameInput.value = state.name;
-  for (const key of ITEM_KEYS) resourceValues[key].textContent = number(state.items[key]);
+  for (const key of ITEM_KEYS) {
+    const qty = state.items[key];
+    resourceValues[key].textContent = number(qty);
+    resourceRows.get(key).hidden = qty === 0;
+  }
+  emptyInventory.hidden = ITEM_KEYS.some(key => state.items[key] > 0);
   for (const [id, button] of activityButtons) {
     const skill = state.skills[id];
     activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level);
+    const available = lootChances(id, skill.level);
+    activityRewardLabels.get(id).textContent = available.length
+      ? available.map(t => t.label).join(" · ")
+      : ACTIVITIES[id].itemLabel;
     button.classList.toggle("active", state.activity === id);
     button.setAttribute("aria-pressed", String(state.activity === id));
   }
@@ -164,8 +186,7 @@ function tick() {
   const result = settle(state, Date.now());
   state = result.state;
   if (result.report.completed) {
-    message("Collected " + number(result.report.gainedItems) + " " +
-      ACTIVITIES[state.activity].itemLabel.toLowerCase() + ".");
+    message(lootSummary(result.report));
     writeSave();
   } else if (Date.now() - lastSavedAt > 3000) {
     writeSave();
@@ -185,7 +206,7 @@ function beginActivity(kind) {
   const result = chooseActivity(state, kind, Date.now());
   const changed = state.activity !== kind;
   state = result.state;
-  if (result.report.gainedItems) message("Collected " + number(result.report.gainedItems) + " " + ACTIVITIES[result.report.activity].itemLabel.toLowerCase() + ".");
+  if (result.report.gainedItems) message(lootSummary(result.report));
   if (changed) message("You begin " + ACTIVITIES[kind].title.toLowerCase() + ".");
   ui.returnPanel.hidden = true;
   writeSave();
