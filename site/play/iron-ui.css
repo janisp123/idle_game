@@ -318,3 +318,7 @@ footer p{color:#aa9680}
 @media (prefers-reduced-motion:reduce){
   .activity,.meter>span{transition:none}
 }
+
+/* Two paths, one shared activity engine. */
+.activity-group-title { margin:18px 5px 10px; padding:8px 5px; border-bottom:1px solid #6b4935; color:#d6a77d; font:700 12px Georgia,serif; letter-spacing:.15em; }
+.activity-group-title:not(:first-child){color:#b76b60;border-bottom-color:#733d38}
