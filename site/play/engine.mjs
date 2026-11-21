@@ -92,6 +92,14 @@ const MAX = Number.MAX_SAFE_INTEGER;
 const isCount = value => Number.isSafeInteger(value) && value >= 0;
 const validTime = value => Number.isSafeInteger(value) && value >= 0;
 export const MAX_WAGONS = 3;
+/** This is a scheduled STOP condition, not an automatic Skill Master visit. */
+export const UNTIL_LEVEL_UP = "untilLevelUp";
+export const MASTER_RESOURCE_MINIMUM = Object.freeze(Object.fromEntries(
+  SKILL_IDS.map(id => [id, ACTIVITIES[id].item === null ? 0 : 1])
+));
+// Per-skill resource minima are centralised here: later balance changes do not
+// require changing the scheduler, inventory rules or Skill Master UI.
+export const validQueuePlan = plan => plan === UNTIL_LEVEL_UP || validPlannedDuration(plan);
 export const MINUTE_MS = 60_000;
 export const HOUR_MS = 60 * MINUTE_MS;
 export const DAY_MS = 24 * HOUR_MS;
@@ -177,13 +185,14 @@ export function readSave(value) {
         wagons.some((wagon, i) => !wagon || typeof wagon !== "object" ||
           Array.isArray(wagon) || !Object.hasOwn(ACTIVITIES, wagon.activity) ||
           (i === wagons.length - 1 ? wagon.plannedMs !== null :
-            !validPlannedDuration(wagon.plannedMs))) ||
+            !validQueuePlan(wagon.plannedMs))) ||
         new Set(wagons.map(w => w.activity)).size !== wagons.length ||
         !isCount(s.productiveElapsedMs ?? 0) ||
         (!wagons.length && (s.activity || transition || (s.productiveElapsedMs ?? 0) !== 0)) ||
         (wagons.length && wagons[0].activity !== (transition?.targetActivity ?? s.activity)) ||
-        (wagons.length && wagons[0].plannedMs === null && (s.productiveElapsedMs ?? 0) !== 0) ||
-        (wagons.length && wagons[0].plannedMs !== null &&
+        (wagons.length && (wagons[0].plannedMs === null ||
+          wagons[0].plannedMs === UNTIL_LEVEL_UP) && (s.productiveElapsedMs ?? 0) !== 0) ||
+        (wagons.length && typeof wagons[0].plannedMs === "number" &&
           (s.productiveElapsedMs ?? 0) > wagons[0].plannedMs)) return null;
 
     const oldVersion = s.version === 1;
@@ -421,6 +430,39 @@ const emptyReport = (state, elapsedMs) => ({
   item: null, gainedItems: 0, items: {}, consumed: {}
 });
 
+
+/** Consistent random stream for bounded probes of the same offline interval.
+ * Replaying the same seed makes a binary search for the first ready work
+ * cycle independent of how many probes are needed (no per-cycle replay).
+ */
+function seededRoll(seed) {
+  let value = seed >>> 0;
+  return () => {
+    value = (Math.imul(value, 1664525) + 1013904223) >>> 0;
+    return value / 0x100000000;
+  };
+}
+
+/** Pure readiness shared by Skill Master and the queue's level-up stop.
+ * The resource minimum currently defaults to one eligible spoil per
+ * resource-producing skill; XP-only skills require zero materials.
+ */
+export function skillMasterReadiness(state, skillId) {
+  if (!Object.hasOwn(ACTIVITIES, skillId)) throw new RangeError("Unknown skill");
+  const skill = state.skills[skillId];
+  const requiredXP = xpToNextLevel(skill.level);
+  const requiredItems = MASTER_RESOURCE_MINIMUM[skillId];
+  let availableItems = 0;
+  for (const key of skillSpoils(skillId)) {
+    availableItems = Math.min(requiredItems, availableItems +
+      Math.min(requiredItems, state.items[key] ?? 0));
+  }
+  const xpReady = skill.xp >= requiredXP;
+  const resourcesReady = availableItems >= requiredItems;
+  return { ready: xpReady && resourcesReady, xpReady, resourcesReady,
+    requiredXP, requiredItems, availableItems };
+}
+
 /**
  * Settle at most three finite wagons chronologically, then the Forever wagon.
  * No per-cycle replay; material from mining can feed subsequent masonry even
@@ -455,15 +497,56 @@ export function settle(state, now = Date.now(), random = Math.random) {
       addReports(result);
       break;
     }
-    if (next.productiveElapsedMs < first.plannedMs) {
+    if (first.plannedMs === UNTIL_LEVEL_UP) {
+      // No surprise extra work when the character is already ready. We still
+      // finish a previously begun work cycle through the usual transition.
+      if (!skillMasterReadiness(next, first.activity).ready) {
+        const task = ACTIVITIES[first.activity];
+        const possibleCycles = Math.floor((next.progressMs + end - next.settledAtMs) / task.durationMs);
+        if (possibleCycles === 0) {
+          next = settleWork(next, end, random).state;
+          break;
+        }
+        const originalRoll = random();
+        if (!Number.isFinite(originalRoll) || originalRoll < 0 || originalRoll >= 1)
+          throw new RangeError("Invalid random roll");
+        const seed = Math.floor(originalRoll * 0x100000000);
+        const atCycle = count => next.settledAtMs + count * task.durationMs - next.progressMs;
+        const probe = count => settleWork(next, atCycle(count), seededRoll(seed));
+        const finalResult = probe(possibleCycles);
+        if (!skillMasterReadiness(finalResult.state, first.activity).ready) {
+          // No crafting inputs or not enough loot/XP: stay on this task until
+          // the condition really becomes true. Do not skip to Forever.
+          const tail = settleWork(finalResult.state, end, random);
+          next = tail.state;
+          addReports(finalResult);
+          addReports(tail);
+          break;
+        }
+        // Binary-search the first FULL work cycle satisfying both the XP and
+        // resource requirements. Probe randomness is identical every time;
+        // complexity is O(log completed cycles), even after decades away.
+        let low = 1, high = possibleCycles;
+        while (low < high) {
+          const middle = low + Math.floor((high - low) / 2);
+          if (skillMasterReadiness(probe(middle).state, first.activity).ready)
+            high = middle;
+          else low = middle + 1;
+        }
+        const ready = probe(low);
+        next = ready.state;
+        addReports(ready);
+      }
+    } else if (next.productiveElapsedMs < first.plannedMs) {
       const available = Math.min(end - next.settledAtMs, first.plannedMs - next.productiveElapsedMs);
       const result = settleWork(next, next.settledAtMs + available, random);
       next = { ...result.state, productiveElapsedMs: next.productiveElapsedMs + available };
       addReports(result);
       if (next.productiveElapsedMs < first.plannedMs) break;
     }
-    // The finite interval ended; do not grant a new old-work cycle at an exact
-    // cycle boundary. Otherwise complete only its unfinished cycle once.
+    // The finite interval ended or the Skill Master condition is fulfilled;
+    // do not create an extra old-work cycle at an exact cycle boundary.
+    // An unfinished cycle is completed by the existing transition.
     const future = next.wagons.slice(1);
     if (!future.length) throw new RangeError("Finite final wagon");
     const targetActivity = future[0].activity;
@@ -498,7 +581,7 @@ export function queueStartActivity(state, activity, previousLastDurationMs = nul
     const queued = { ...current, wagons: [{ activity, plannedMs: null }], productiveElapsedMs: 0 };
     return { ...result, state: retargetSettled(queued, activity) };
   }
-  if (!validPlannedDuration(previousLastDurationMs)) throw new RangeError("Choose 1–8 hours or days");
+  if (!validQueuePlan(previousLastDurationMs)) throw new RangeError("Choose a finite duration or level-up readiness");
   const prior = current.wagons.at(-1);
   const wagons = [
     ...current.wagons.slice(0, -1),
@@ -522,7 +605,7 @@ export function queueStartActivity(state, activity, previousLastDurationMs = nul
 export function queueInsertTimedActivity(state, activity, plannedMs,
   now = Date.now(), random = Math.random) {
   if (!Object.hasOwn(ACTIVITIES, activity)) throw new RangeError("Unknown activity");
-  if (!validPlannedDuration(plannedMs)) throw new RangeError("Choose 1–8 minutes, hours or days");
+  if (!validQueuePlan(plannedMs)) throw new RangeError("Choose a duration or level-up readiness");
   const result = settle(state, now, random);
   const current = result.state;
   if (!current.wagons.length) throw new RangeError("Choose Start now for the first activity");
@@ -544,7 +627,7 @@ export function queueInsertTimedActivity(state, activity, plannedMs,
 
 /** Do it for: edits to the current wagon begin counting from this edit. */
 export function queueSetDuration(state, index, plannedMs, now = Date.now(), random = Math.random) {
-  if (!validPlannedDuration(plannedMs)) throw new RangeError("Choose 1–8 hours or days");
+  if (!validQueuePlan(plannedMs)) throw new RangeError("Choose a duration or level-up readiness");
   const result = settle(state, now, random);
   const current = result.state;
   if (!Number.isInteger(index) || index < 0 || index >= current.wagons.length - 1)
@@ -613,11 +696,10 @@ export function skillMasterOffer(state) {
   const ready = [], blocked = [], tribute = {};
   for (const skillId of SKILL_IDS) {
     const skill = state.skills[skillId];
-    if (skill.xp < xpToNextLevel(skill.level)) continue;
+    const readiness = skillMasterReadiness(state, skillId);
+    if (!readiness.xpReady) continue;
     const spoils = skillSpoils(skillId);
-    // XP-only practice/leisure skills have no loot to surrender. For skills
-    // producing materials, the hidden minimum is one owned item of that skill.
-    if (spoils.length && !spoils.some(key => state.items[key] > 0)) {
+    if (!readiness.resourcesReady) {
       blocked.push(skillId);
       continue;
     }
