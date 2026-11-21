@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
-  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
+  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, HOUR_MS, DAY_MS, validPlannedDuration, queueStartActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
   enterGame, testOfflineDay, xpForLevel, levelFromXP
 } from "../site/play/engine.mjs";
 
@@ -738,4 +738,168 @@ test("unmodified character save keeps its alpha profile and rejects invalid prof
   assert.deepEqual(readSave(JSON.stringify(start)), start);
   assert.equal(readSave({ ...start, timingProfile: "invalid" }), null);
   assert.equal(readSave({ ...start, timingProfile: undefined }), null);
+});
+
+const queueStart = (state, id, duration, now = state.settledAtMs) =>
+  queueStartActivity(state, id, duration, now, midpoint);
+const queueDuration = (state, index, duration, now = state.settledAtMs) =>
+  queueSetDuration(state, index, duration, now, midpoint);
+const queueReorder = (state, index, now = state.settledAtMs) =>
+  queueSwap(state, index, now, midpoint);
+
+test("three wagon invariants: one Forever last, explicit previous slot duration, no fourth", () => {
+  assert.equal(MAX_WAGONS, 3);
+  for (let i = 1; i <= 8; i++) {
+    assert.equal(validPlannedDuration(i * HOUR_MS), true);
+    assert.equal(validPlannedDuration(i * DAY_MS), true);
+  }
+  for (const n of [0, 500, 9 * HOUR_MS, 9 * DAY_MS, 10_000]) {
+    assert.equal(validPlannedDuration(n), false);
+  }
+  const first = queueStart(newGame(0), "mining", null).state;
+  assert.deepEqual(first.wagons, [{ activity: "mining", plannedMs: null }]);
+  assert.equal(first.transition.phase, "preparing");
+  assert.equal(first.activity, null);
+  assert.throws(() => queueStart(first, "hunting", null), RangeError);
+  const second = queueStart(first, "hunting", HOUR_MS).state;
+  assert.deepEqual(second.wagons, [
+    { activity: "mining", plannedMs: HOUR_MS },
+    { activity: "hunting", plannedMs: null }
+  ]);
+  const third = queueStart(second, "masonry", DAY_MS).state;
+  assert.deepEqual(third.wagons, [
+    { activity: "mining", plannedMs: HOUR_MS },
+    { activity: "hunting", plannedMs: DAY_MS },
+    { activity: "masonry", plannedMs: null }
+  ]);
+  assert.throws(() => queueStart(third, "gathering", HOUR_MS), RangeError);
+  assert.throws(() => queueStart(third, "mining", HOUR_MS), RangeError);
+  assert.throws(() => queueDuration(third, 2, HOUR_MS), RangeError);
+  assert.deepEqual(readSave(JSON.stringify(third)), third);
+});
+
+test("one and two wagon queue correctly settle a 20-year absence without daily checks", () => {
+  const initial = queueStart(newGame(0), "mining", null).state;
+  const queued = queueStart(initial, "hunting", HOUR_MS).state;
+  let rolls = 0;
+  const result = settle(queued, YEAR * 20, () => { rolls++; return 0.5; });
+  assert.ok(rolls < 25, "no per-cycle or per-day loop");
+  assert.deepEqual(result.state.wagons, [{ activity: "hunting", plannedMs: null }]);
+  assert.equal(result.state.transition, null);
+  assert.equal(result.state.productiveElapsedMs, 0);
+  assert.equal(result.state.items.stone, HOUR_MS / ACTIVITIES.mining.durationMs);
+  assert.ok(result.state.items.hide > 100_000);
+  assert.equal(result.state.skills.hunting.level, 1);
+  assert.equal(result.state.skills.mining.level, 1);
+  assert.equal(result.reports.length, 2);
+  assert.equal(settle(result.state, YEAR * 20, midpoint).report.completed, 0);
+  assert.deepEqual(readSave(JSON.stringify(result.state)), result.state);
+  const returned = enter(queued, YEAR * 20);
+  assert.ok(returned.state.skills.hunting.level > 1);
+});
+
+test("three wagons consume prior gathering in chronological order and then work forever", () => {
+  let state = queueStart(newGame(0), "mining", null).state;
+  state = queueStart(state, "masonry", HOUR_MS).state;
+  state = queueStart(state, "hunting", HOUR_MS).state;
+  const result = finish(state, 20 * YEAR);
+  assert.equal(result.state.items.stone, 0, "masonry uses previously mined stone");
+  assert.equal(result.state.items.block, HOUR_MS / ACTIVITIES.masonry.durationMs);
+  assert.ok(result.state.items.hide > 1_000);
+  assert.equal(result.state.skills.mining.xp, HOUR_MS / 10_000 * ACTIVITIES.mining.xp);
+  assert.equal(result.state.skills.masonry.xp, HOUR_MS / 10_000 * ACTIVITIES.masonry.xp);
+  assert.deepEqual(result.state.wagons, [{ activity: "hunting", plannedMs: null }]);
+  assert.equal(result.reports.length, 3);
+  assert.deepEqual(result.reports.map(r => r.activity), ["mining", "masonry", "hunting"]);
+});
+
+test("queue works with a partially finished last cycle, with no extra reward at a boundary", () => {
+  let state = queueStart(newGame(0), "mining", null).state;
+  state = queueStart(state, "hunting", HOUR_MS).state;
+  const exact = finish(state, INITIAL_PREPARATION_MS + HOUR_MS).state;
+  assert.equal(exact.items.stone, HOUR_MS / 10_000);
+  assert.equal(exact.transition.phase, "moving");
+  assert.equal(exact.progressMs, 0);
+  const ready = finish(exact, exact.settledAtMs + ZONE_TRAVEL_MS + PREPARATION_MS).state;
+  assert.equal(ready.items.stone, HOUR_MS / 10_000, "no phantom extra finishing cycle");
+  assert.equal(ready.activity, "hunting");
+  assert.equal(ready.items.hide, 0);
+
+  // An explicit running-duration edit starts its new window now, not back
+  // at the first productive instant. The last cycle still finishes once.
+  const started = queueStart(newGame(0), "mining", null).state;
+  let second = queueStart(started, "hunting", HOUR_MS).state;
+  second = finish(second, INITIAL_PREPARATION_MS + 3_000).state;
+  const edited = queueDuration(second, 0, HOUR_MS, second.settledAtMs).state;
+  assert.equal(edited.productiveElapsedMs, 0);
+  assert.equal(edited.progressMs, 3_000);
+  const expiry = finish(edited, edited.settledAtMs + HOUR_MS).state;
+  assert.equal(expiry.transition.phase, "finishing");
+  assert.equal(expiry.items.stone, HOUR_MS / 10_000);
+  const boundary = finish(expiry, expiry.settledAtMs + 7_000).state;
+  assert.equal(boundary.items.stone, HOUR_MS / 10_000 + 1);
+  assert.equal(boundary.transition.phase, "moving");
+});
+
+test("future swap is free, current swap restarts travel without losing old cycle rewards", () => {
+  let state = queueStart(newGame(0), "mining", null).state;
+  state = queueStart(state, "hunting", HOUR_MS).state;
+  state = queueStart(state, "masonry", HOUR_MS).state;
+  const ready = finish(state, INITIAL_PREPARATION_MS + 4_000).state;
+  const futureSwap = queueReorder(ready, 1).state;
+  assert.equal(futureSwap.activity, "mining");
+  assert.equal(futureSwap.transition, null);
+  assert.equal(futureSwap.progressMs, 4_000);
+  assert.deepEqual(futureSwap.wagons.map(w => w.activity), ["mining", "masonry", "hunting"]);
+  const activeSwap = queueReorder(futureSwap, 0).state;
+  assert.equal(activeSwap.wagons[0].activity, "masonry");
+  assert.equal(activeSwap.transition.phase, "finishing");
+  assert.equal(activeSwap.progressMs, 4_000);
+  const finishing = finish(activeSwap, activeSwap.settledAtMs + 6_000).state;
+  assert.equal(finishing.items.stone, 1);
+  assert.equal(finishing.transition.phase, "moving");
+  const halfway = finish(finishing, finishing.settledAtMs + ZONE_TRAVEL_MS / 2).state;
+  const redirect = queueReorder(halfway, 0).state;
+  assert.equal(redirect.transition.phase, "moving");
+  assert.equal(redirect.transition.phaseProgressMs, 0);
+  assert.equal(redirect.items.stone, 1);
+  assert.equal(redirect.skills.mining.xp, ACTIVITIES.mining.xp);
+  assert.deepEqual(redirect.wagons.map(w => w.activity), ["mining", "masonry", "hunting"]);
+  assert.equal(settle(redirect, redirect.settledAtMs, midpoint).report.completed, 0);
+});
+
+test("future wagon can be removed without losing current progress; final becomes Forever", () => {
+  let state = queueStart(newGame(0), "mining", null).state;
+  state = queueStart(state, "hunting", HOUR_MS).state;
+  state = queueStart(state, "masonry", HOUR_MS).state;
+  state = finish(state, INITIAL_PREPARATION_MS + 5_000).state;
+  const prior = state.items.stone;
+  const reduced = queueRemoveLast(state, state.settledAtMs, midpoint).state;
+  assert.equal(reduced.items.stone, prior);
+  assert.equal(reduced.progressMs, 5_000);
+  assert.deepEqual(reduced.wagons, [
+    { activity: "mining", plannedMs: HOUR_MS },
+    { activity: "hunting", plannedMs: null }
+  ]);
+  const solo = queueRemoveLast(reduced, reduced.settledAtMs, midpoint).state;
+  assert.deepEqual(solo.wagons, [{ activity: "mining", plannedMs: null }]);
+  assert.equal(solo.progressMs, 5_000);
+  assert.throws(() => queueRemoveLast(solo, solo.settledAtMs, midpoint), RangeError);
+});
+
+test("old V3 saves without wagons become one Forever wagon, including a pending target", () => {
+  const current = choose(newGame(0), "mining", 0).state;
+  delete current.wagons;
+  delete current.productiveElapsedMs;
+  assert.deepEqual(readSave(current).wagons, [{ activity: "mining", plannedMs: null }]);
+  const pending = switchTo(current, "hunting", 0).state;
+  delete pending.wagons;
+  delete pending.productiveElapsedMs;
+  assert.deepEqual(readSave(pending).wagons, [{ activity: "hunting", plannedMs: null }]);
+  for (const wrong of [
+    { wagons: [{activity:"hunting",plannedMs:null}],productiveElapsedMs:0 },
+    { wagons: [{activity:"mining",plannedMs:HOUR_MS}],productiveElapsedMs:0 },
+    { wagons: [{activity:"mining",plannedMs:null},{activity:"hunting",plannedMs:null}],productiveElapsedMs:0 },
+    { wagons: [{activity:"mining",plannedMs:HOUR_MS},{activity:"hunting",plannedMs:null}],productiveElapsedMs:HOUR_MS+1 }
+  ]) assert.equal(readSave({...current,...wrong}),null);
 });
