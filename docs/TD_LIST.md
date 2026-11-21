@@ -60,3 +60,21 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** Not yet.
+
+## UI-001 — Hide all in-game timing and return metrics
+- **Goal:** Players see activity names, possible rewards and a progress bar, without durations, actions-per-time estimates or a timer.
+- **Acceptance criteria:** no visible cycle duration, countdown, timestamp, rates, elapsed absence, test-day control, time-at-work counters or action totals. Return summary reports only gathered resources. Internal settlement continues indefinitely.
+- **Status:** IN_REVIEW (consolidated into PR #40; earlier PR #38 overlaps).
+- **Dependencies:** OFF-001.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet (pending verified integration).
+
+## GAME-007 — Ten outlaw activities and their illustrations
+- **Goal:** Add ten optional grimdark outlaw jobs with their own full-length cycles and original self-hosted paintings.
+- **Acceptance criteria:** highway robbery, burglary, bandit raiding, grave robbing, kidnapping, extortion, caravan plundering, cattle rustling, assassination and slave raiding; separate honest/outlaw categories, distinct placeholder loot and independent skill tracks; old saves, long-term offline work and speed configuration preserved; no fabricated guards, fights or ransom payouts.
+- **Status:** IN_REVIEW (consolidated into PR #40; earlier PR #39 overlaps).
+- **Dependencies:** GAME-005, VIS-001, OFF-001.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet (pending verified integration).
