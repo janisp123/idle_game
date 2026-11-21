@@ -155,8 +155,11 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     const miningActions = mining.children[0].children[0].children[1];
     assert.deepEqual(miningActions.children.map(button => button.textContent), ["▶","↻","↑"]);
     assert.match(miningStart.getAttribute("aria-label"), /^Start Mining now/);
-    assert.match(miningActions.children[1].getAttribute("aria-label"), /Schedule Mining for a chosen duration/);
-    assert.match(miningActions.children[2].getAttribute("aria-label"), /Schedule Mining until ready to level up/);
+    assert.match(miningActions.children[1].getAttribute("aria-label"), /Cannot schedule Mining/);
+    assert.equal(miningActions.children[1].disabled, true,
+      "the first activity must start before future scheduling is available");
+    assert.match(miningActions.children[2].getAttribute("aria-label"), /Cannot schedule Mining until level-up readiness/);
+    assert.equal(miningActions.children[2].disabled, true);
     assert.equal(mining.children[0].children[0].children[0].textContent, "Mining",
       "full skill name stays in a separate text element");
     assert.equal(mining.children[0].children[2].textContent, "Skill level 1");
