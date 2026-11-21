@@ -1,6 +1,6 @@
 # [Technical pattern] — Engineering guide
 
-> Template for original, standalone technical explanations under `docs/library/`. Do not include names or URLs of games or outside repositories consulted. Do not copy third-party code or artwork.
+> Template for original, standalone technical explanations under `docs/library/`. Cite relevant external primary sources transparently; never copy or run third-party code or artwork.
 
 **Category:** Engine / offline / combat / loot / multiplayer / server / UI / performance / operations / other  
 **General-purpose benefit:** Who would find this useful and why?  
@@ -39,6 +39,10 @@ Keep general educational value distinct from our design. Explain what fits our l
 
 List uncertainties honestly. This article is not an authorized development task.
 
+## Sources and evidence
+
+List precise external references supporting technical claims (official docs, versioned code or tests). Identify what was inspected and what remains inferred. If no external sources were used, say so; never invent citations.
+
 ## Rights and originality
 
-Do not include identifiable outside project names, source destinations, copied code, or borrowed artwork. Explain concepts independently. If integrating third-party software into the actual game, honor all applicable licenses and mandatory notices rather than concealing them.
+Explain concepts independently; never copy or execute third-party code or assets. A citation does not grant reuse rights. Honor all applicable licenses and mandatory notices if separately approved for actual integration.
