@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261121-hourglasses1">
-  <script type="module" src="./app.mjs?v=20261121-hourglasses1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261121-hourglass-fixes1">
+  <script type="module" src="./app.mjs?v=20261121-hourglass-fixes1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -79,7 +79,8 @@
           </div>
 
           <div id="queuePlanner" class="queue-planner" hidden>
-            <p class="activity-nav-label" id="queuePlannerTitle">Do it for</p>
+            <p class="activity-nav-label" id="queuePlannerTitle">How long should the selected activity run?</p>
+            <p class="hint" id="queuePlannerHint"></p>
             <div class="planner-fields">
               <label for="queueAmount">Do it for</label>
               <select id="queueAmount" aria-label="Number of minutes, hours or days">
@@ -91,11 +92,11 @@
               </select>
             </div>
             <div class="planner-actions">
-              <button type="button" id="queueConfirm" class="activity-start">Add hourglass</button>
+              <button type="button" id="queueConfirm" class="activity-start">Add timed task</button>
               <button type="button" id="queueCancel" class="activity-start">Cancel</button>
             </div>
           </div>
-          <p class="hint">Start your first activity, then add up to two more hourglasses. For alpha testing, choose minutes; the final activity works forever.</p>
+          <p class="hint">Use Start now to switch immediately, or Schedule to give the chosen activity a duration. The final hourglass works forever. Minutes are available for alpha testing.</p>
         </section>
 
 

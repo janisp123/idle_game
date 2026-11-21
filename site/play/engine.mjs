@@ -484,6 +484,39 @@ export function queueStartActivity(state, activity, previousLastDurationMs = nul
   return { ...result, state: { ...current, wagons, productiveElapsedMs } };
 }
 
+/**
+ * Add a finite task immediately BEFORE the existing Forever destination.
+ * The selected task owns its chosen duration; never silently assign that
+ * duration to the activity the player is leaving.
+ *
+ * A single Forever activity becomes the return destination: the new finite
+ * task starts after finishing the old full cycle and switching normally.
+ * With two wagons, the new task waits after the current finite one.
+ * All previously earned work and the old Forever task survive this edit.
+ */
+export function queueInsertTimedActivity(state, activity, plannedMs,
+  now = Date.now(), random = Math.random) {
+  if (!Object.hasOwn(ACTIVITIES, activity)) throw new RangeError("Unknown activity");
+  if (!validPlannedDuration(plannedMs)) throw new RangeError("Choose 1–8 minutes, hours or days");
+  const result = settle(state, now, random);
+  const current = result.state;
+  if (!current.wagons.length) throw new RangeError("Choose Start now for the first activity");
+  if (current.wagons.length >= MAX_WAGONS)
+    throw new RangeError("All three hourglasses are occupied");
+  if (current.wagons.some(w => w.activity === activity))
+    throw new RangeError("Activity already in the route");
+  const wagons = [
+    ...current.wagons.slice(0, -1).map(w => ({ ...w })),
+    { activity, plannedMs },
+    { ...current.wagons.at(-1) }
+  ];
+  const startsNow = current.wagons.length === 1;
+  let next = { ...current, wagons,
+    productiveElapsedMs: startsNow ? 0 : current.productiveElapsedMs };
+  if (startsNow) next = retargetSettled(next, activity);
+  return { ...result, state: next };
+}
+
 /** Do it for: edits to the current wagon begin counting from this edit. */
 export function queueSetDuration(state, index, plannedMs, now = Date.now(), random = Math.random) {
   if (!validPlannedDuration(plannedMs)) throw new RangeError("Choose 1–8 hours or days");

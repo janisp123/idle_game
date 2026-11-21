@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
-  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, validPlannedDuration, queueStartActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
+  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, validPlannedDuration, queueStartActivity, queueInsertTimedActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
   enterGame, testOfflineDay, xpForLevel, levelFromXP
 } from "../site/play/engine.mjs";
 
@@ -746,6 +746,78 @@ const queueDuration = (state, index, duration, now = state.settledAtMs) =>
   queueSetDuration(state, index, duration, now, midpoint);
 const queueReorder = (state, index, now = state.settledAtMs) =>
   queueSwap(state, index, now, midpoint);
+
+const queueTimed = (state, id, duration, now = state.settledAtMs) =>
+  queueInsertTimedActivity(state, id, duration, now, midpoint);
+
+test("new selected task owns four-hour duration; original work remains Forever fallback", () => {
+  let state = queueStart(newGame(0), "mining", null).state;
+  state = finish(state, INITIAL_PREPARATION_MS + 4_000).state;
+  const priorXP = state.skills.mining.xp;
+  const previousItems = { ...state.items };
+  const planned = queueTimed(state, "hunting", 4 * HOUR_MS).state;
+  assert.deepEqual(planned.wagons, [
+    { activity: "hunting", plannedMs: 4 * HOUR_MS },
+    { activity: "mining", plannedMs: null }
+  ], "four hours must belong to the activity selected, not mining");
+  assert.equal(planned.activity, "mining");
+  assert.equal(planned.progressMs, 4_000);
+  assert.equal(planned.transition.phase, "finishing");
+  assert.equal(planned.skills.mining.xp, priorXP);
+  assert.deepEqual(planned.items, previousItems);
+  const readyAt = planned.settledAtMs + 6_000 + ZONE_TRAVEL_MS + PREPARATION_MS;
+  const working = finish(planned, readyAt).state;
+  assert.equal(working.activity, "hunting");
+  assert.equal(working.productiveElapsedMs, 0);
+  assert.equal(working.items.stone, previousItems.stone + 1);
+  const halfway = finish(working, readyAt + 2 * HOUR_MS).state;
+  assert.equal(halfway.activity, "hunting");
+  assert.equal(halfway.productiveElapsedMs, 2 * HOUR_MS);
+  assert.equal(halfway.wagons[0].plannedMs, 4 * HOUR_MS);
+  assert.equal(halfway.skills.mining.xp, priorXP + ACTIVITIES.mining.xp);
+  const ended = finish(halfway, readyAt + 4 * HOUR_MS).state;
+  assert.deepEqual(ended.wagons, [{ activity: "mining", plannedMs: null }]);
+  const returned = finish(ended, readyAt + 4 * HOUR_MS +
+    ZONE_TRAVEL_MS + PREPARATION_MS).state;
+  assert.equal(returned.activity, "mining");
+  assert.equal(returned.transition, null);
+  assert.deepEqual(readSave(JSON.stringify(returned)), returned);
+});
+
+test("selected second task is finite, while existing current duration and Forever are preserved", () => {
+  let state = queueStart(newGame(0), "mining", null).state;
+  state = queueStart(state, "masonry", 2 * HOUR_MS).state;
+  state = finish(state, INITIAL_PREPARATION_MS + 5_000).state;
+  const prior = { ...state, wagons: state.wagons.map(w => ({ ...w })) };
+  const next = queueTimed(state, "hunting", 4 * HOUR_MS).state;
+  assert.deepEqual(next.wagons, [
+    { activity: "mining", plannedMs: 2 * HOUR_MS },
+    { activity: "hunting", plannedMs: 4 * HOUR_MS },
+    { activity: "masonry", plannedMs: null }
+  ]);
+  assert.equal(next.transition, null);
+  assert.equal(next.progressMs, prior.progressMs);
+  assert.equal(next.productiveElapsedMs, prior.productiveElapsedMs);
+  assert.equal(next.skills.mining.xp, prior.skills.mining.xp);
+  assert.throws(() => queueTimed(next, "cooking", HOUR_MS), RangeError);
+  assert.throws(() => queueTimed(next, "hunting", HOUR_MS), RangeError);
+  assert.throws(() => queueTimed(newGame(0), "hunting", HOUR_MS), RangeError);
+  assert.equal(settle(next, next.settledAtMs, midpoint).report.completed, 0);
+});
+
+test("Start now explicitly replaces only unfinished plans, preserving completed rewards", () => {
+  let state = queueStart(newGame(0), "mining", null).state;
+  state = queueTimed(state, "hunting", MINUTE_MS).state;
+  state = finish(state, INITIAL_PREPARATION_MS + 30_000).state;
+  const earnedXP = state.skills.hunting.xp;
+  const earnedItems = { ...state.items };
+  const result = requestActivityChange(state, "masonry", state.settledAtMs, midpoint);
+  assert.deepEqual(result.state.wagons, [{ activity: "masonry", plannedMs: null }]);
+  assert.equal(result.state.transition.targetActivity, "masonry");
+  assert.equal(result.state.skills.hunting.xp, earnedXP);
+  assert.deepEqual(result.state.items, earnedItems);
+  assert.equal(settle(result.state, result.state.settledAtMs, midpoint).report.completed, 0);
+});
 
 test("three wagon invariants: one Forever last, explicit previous slot duration, no fourth", () => {
   assert.equal(MAX_WAGONS, 3);
