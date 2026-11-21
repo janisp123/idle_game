@@ -32,8 +32,8 @@ Returning after 20 years should account for Mining, Alchemy, their switching pha
 
 ## Transition and time budget semantics
 
-- **Activity duration measures productive work time starting when that activity actually begins**. Finishing the previous task, travel and preparation are **outside** that new activity's configured duration. A 2-hour Mining task means a 2-hour productive Mining window, not 2 hours that include a trip.
-- At the end of a finite productive interval, **finish the currently running full work cycle** before departing, as required by ACT-SWITCH-001. This can make the actual handoff slightly later than the planned window. Award the final eligible completed cycle at most once.
+- **Proposed implementation policy (needs final owner confirmation):** a configured duration measures productive work time starting when that activity begins. Finishing the previous task, travel and preparation would be outside that window. A 2-hour Mining task would mean 2 hours of productive Mining, not 2 hours including a trip.
+- At the end of a finite productive interval, **finish the currently running full work cycle** before departing, as required by ACT-SWITCH-001. This can make the actual handoff slightly later than the planned window. Award the final eligible completed cycle at most once (subject to the duration-policy confirmation above).
 - Next, apply **Moving to new location** and **Getting ready to start new activity** with no XP or materials from travel/preparation. Preserve the approved **five-minute cross-zone travel**; same-zone movement and preparation durations are still undecided (do not fill with zero or arbitrary guessed values in code).
 - Once ready, set the next activity active and start its finite work interval. Advance until the forever final activity, then batch-settle all remaining elapsed time there.
 - While a finite crafting job has **no unprotected ingredients**, its scheduled time still advances, but it generates **no fabricated output or XP**. It then moves to the next step normally. A final forever craft with no ingredients remains selected indefinitely without falsely granting products or resetting the queue.
@@ -87,6 +87,7 @@ No player-to-player trading, server-scheduled job, network polling, global accou
 
 ## Outstanding owner decisions (do not silently guess)
 
+- Whether the configured interval measures productive work only (recommended) or includes transition time; and if **Do it for** is set on an already-running activity, whether its duration starts at that edit or includes time worked before it.
 - Same-zone movement time, nonzero preparation duration and whether a first-ever Start requires the same preparation.
 - Queue edit/reorder/cancel policy after it has already started; transition-target change policy from ACTIVITY_SWITCH_SPEC.
 
