@@ -26,6 +26,7 @@ This is a **reference library, not a design specification or a to-do list**. Rea
 - [Useful Examples](USEFUL_EXAMPLES.md): short, generic, independent implementation patterns and tradeoffs.
 - [Time-safe offline simulation](library/offline-time-units-and-boundaries.md): consistent time units, exact resource-depletion boundaries, aggregate processing and proposed equivalence tests. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Idempotent reward settlement](library/idempotent-reward-settlement.md): atomic progress cursors, retry-safe grants, concurrency control and crash recovery. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
+- [Coherent browser game releases](library/coherent-browser-game-releases.md): content-versioned assets, safe PWA updates, stale-cache recovery and save-schema compatibility. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Article Template](library/ENTRY_TEMPLATE.md): format for longer, original technical guides.
 - [Our Game Brainstorm](BRAINSTORM.md): our ideas, design directions, alternative concepts and open questions. Not a task list.
 - [Decisions](DECISIONS.md): actual owner-approved decisions.
