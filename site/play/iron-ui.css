@@ -398,75 +398,80 @@ footer p{color:#aa9680}
   .transition-phase { margin:14px 14px 5px; font-size:13px; }
 }
 
-/* QUEUE-002: three connected antique wagons above the active scene.
-   CSS-drawn timber cart + two wheels keep the feature self-contained and fast. */
+/* QUEUE-002: grimdark sandglass route. Exactly three across, never sideways
+   scrolling, even on narrow phone screens. The icon is a real game illustration. */
 .wagon-queue {
-  padding:15px 16px 11px;
-  background:linear-gradient(180deg,#201914,#110d0a);
+  min-width:0;padding:12px clamp(5px,1.4vw,16px) 8px;
+  background:linear-gradient(180deg,#211a16,#100c0a);
   border-bottom:2px ridge #71543b;
 }
 .wagon-queue[hidden],.queue-planner[hidden] {display:none !important}
 .wagon-queue-heading {
-  margin:0 0 13px;color:#bfa27f;font:700 10px Georgia,serif;
-  letter-spacing:.15em;
+  margin:0 0 10px;color:#bda17c;font:700 10px Georgia,serif;
+  letter-spacing:.11em;
 }
 .wagon-list {
-  display:flex;align-items:stretch;gap:13px;
-  overflow-x:auto;overflow-y:hidden;padding:3px 3px 13px;
-  scrollbar-color:#745038 #160f0b;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  width:100%;min-width:0;gap:clamp(4px,0.7vw,10px);
+  overflow:visible;padding:2px 0 8px;box-sizing:border-box;
 }
 .wagon {
-  position:relative;flex:1 0 144px;min-width:144px;min-height:160px;
-  padding:13px 10px 8px;border:2px ridge #7e5838;
-  color:#edcfaa;text-align:center;
-  background:
-    repeating-linear-gradient(0deg,transparent 0 12px,rgba(0,0,0,.22) 13px 14px),
-    linear-gradient(130deg,#5b3d28 0%,#372518 49%,#221810 100%);
-  box-shadow:inset 0 0 0 2px #24170e,inset 0 9px 18px rgba(0,0,0,.25),0 3px 9px #090706;
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;box-sizing:border-box;
+  min-width:0;width:100%;padding:8px 5px 7px;
+  border:1px solid #735338;border-radius:4px;color:#edcfaa;text-align:center;
+  background:radial-gradient(ellipse at 50% 15%,#4b3325 0,transparent 58%),
+    linear-gradient(160deg,#30231c,#15100d 85%);
+  box-shadow:inset 0 0 0 1px rgba(192,138,82,.10),0 3px 11px #080504;
 }
-.wagon:not(:last-child)::after {
-  content:"";position:absolute;left:calc(100% + 2px);top:43px;
-  width:14px;height:5px;border-top:2px solid #8f7150;border-bottom:1px solid #372719;
+.wagon:first-child {
+  border-color:#bd8a57;
+  background:radial-gradient(ellipse at 50% 14%,#5f3e26,transparent 67%),
+    linear-gradient(160deg,#39271d,#1b120e);
+  box-shadow:inset 0 0 0 1px rgba(237,173,105,.15),0 0 9px rgba(173,107,50,.18);
 }
-.wagon-cart {
-  position:relative;margin:0 auto 14px;
-  width:82%;max-width:130px;height:23px;
-  border:2px ridge #b08c60;border-radius:3px 3px 8px 8px;
-  background:repeating-linear-gradient(0deg,#68472e 0 5px,#4b301d 6px 8px);
-  box-shadow:0 -4px 0 #352313,inset 0 1px #b48d5c;
+.wagon-hourglass {
+  flex:0 0 auto;display:grid;place-items:center;
+  width:min(88px,95%);height:clamp(58px,8vw,90px);min-width:0;
+  margin:0 auto 5px;
 }
-.wagon-cart::before,.wagon-cart::after {
-  content:"";position:absolute;bottom:-12px;width:16px;height:16px;
-  border-radius:50%;border:3px double #ac895b;
-  background:radial-gradient(circle,#2c211a 0 3px,#614328 4px 5px,#211810 6px);
-  box-shadow:0 2px 3px #0d0806;
+.wagon-hourglass img {
+  display:block;width:100%;height:100%;object-fit:contain;
+  filter:drop-shadow(0 2px 5px #080504);
 }
-.wagon-cart::before {left:13%}
-.wagon-cart::after {right:13%}
-.wagon-name {display:block;font:700 15px/1.22 Georgia,serif;text-shadow:0 1px 2px #090706}
+.wagon-name {
+  display:block;width:100%;min-width:0;overflow-wrap:anywhere;
+  font:700 clamp(11px,1.4vw,15px)/1.2 Georgia,serif;
+  text-shadow:0 1px 2px #090706;
+}
 .wagon-position {
-  display:block;margin-top:5px;color:#d1b391;
-  font:11px Georgia,serif;
+  display:block;margin-top:5px;color:#bea184;
+  font:clamp(9px,1.1vw,11px)/1.2 Georgia,serif;
 }
 .wagon-forever {
-  display:block;margin-top:12px;color:#f5c584;
-  font:700 12px Georgia,serif;letter-spacing:.09em;
+  display:block;margin-top:12px;color:#f4c88e;
+  font:700 clamp(9px,1.2vw,12px) Georgia,serif;letter-spacing:.05em;
 }
 .wagon-duration {
-  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
-  gap:4px;margin-top:9px;font:11px Georgia,serif;
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:center;width:100%;gap:4px;margin-top:8px;
+  font:11px Georgia,serif;
 }
-.wagon-duration span {flex:1 0 100%;color:#e1c5a0}
+.wagon-duration span {grid-column:1/-1;color:#dbc3a4}
 .wagon-duration select,.planner-fields select {
-  min-height:34px;max-width:100%;padding:3px;
-  color:#f3d6ae;background:#281b13;border:1px solid #a27c55;
+  display:block;width:100%;min-width:0;min-height:34px;padding:4px 1px;
+  color:#f3d6ae;background:#281b13;border:1px solid #997453;
   font:12px Georgia,serif;
 }
-.wagon-controls {display:flex;justify-content:center;gap:7px;margin-top:9px}
+.wagon-controls {
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+  width:100%;min-width:0;gap:4px;margin-top:auto;padding-top:8px;
+}
 .wagon-control {
-  min-width:35px;min-height:38px;padding:4px 9px;
-  color:#e8c89e;background:#34261a;border:1px solid #ad8257;
-  font:700 12px Georgia,serif;cursor:pointer;
+  flex:0 1 auto;min-width:32px;min-height:36px;padding:3px 7px;
+  color:#e8c89e;background:linear-gradient(#413025,#271a13);
+  border:1px solid #a47d55;border-radius:2px;
+  font:700 13px Georgia,serif;cursor:pointer;
 }
 .wagon-control:hover,.wagon-control:focus-visible {border-color:#ebbd82}
 .wagon-control:focus-visible,.wagon-duration select:focus-visible,.planner-fields select:focus-visible {
@@ -484,7 +489,20 @@ footer p{color:#aa9680}
 .planner-actions {display:flex;gap:8px;margin-top:12px}
 .planner-actions .activity-start {flex:1 1 50%;min-width:0}
 @media(max-width:520px) {
-  .wagon-queue {padding:12px 9px}
-  .wagon-list {gap:12px}
-  .wagon {flex-basis:150px}
+  .wagon-queue {padding:10px 5px 7px}
+  .wagon-list {gap:4px}
+  .wagon {padding:6px 3px 7px}
+  .wagon-hourglass {width:min(67px,94%);height:66px}
+  .wagon-name {font-size:11px}
+  .wagon-position {font-size:9px}
+  .wagon-duration {grid-template-columns:minmax(0,1fr);gap:3px}
+  .wagon-duration span {font-size:10px}
+  .wagon-duration select {min-height:32px;padding:2px 1px;font-size:11px}
+  .wagon-control {min-width:31px;min-height:36px;font-size:12px;padding:2px 5px}
+}
+@media(max-width:370px) {
+  .wagon-hourglass {height:54px}
+  .wagon-name {font-size:10px}
+  .wagon-position {font-size:9px}
+  .wagon-control {min-width:29px;padding:2px 4px}
 }
