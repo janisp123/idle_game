@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
-  ZONE_TRAVEL_MS, activityDuration, newGame, readSave, settle, chooseActivity,
+  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
   enterGame, testOfflineDay, xpForLevel, levelFromXP
 } from "../site/play/engine.mjs";
 
@@ -534,3 +534,140 @@ test("new XP-only skills remain offline-safe for decades and old saves migrate",
   assert.equal(back.state.skills.meditation.level, 1);
   assert.deepEqual(readSave(JSON.stringify(back.state)), back.state);
 });
+
+const switchTo = (state, id, now) => requestActivityChange(state, id, now, midpoint);
+
+test("initial Start requires preparation but no imagined origin travel", () => {
+  const initial = newGame(0);
+  const requested = switchTo(initial, "mining", 0).state;
+  assert.equal(requested.activity, null);
+  assert.deepEqual(requested.transition, {
+    targetActivity: "mining", phase: "preparing", phaseProgressMs: 0
+  });
+  const partial = finish(requested, PREPARATION_MS / 2).state;
+  assert.equal(partial.activity, null);
+  assert.equal(partial.transition.phaseProgressMs, PREPARATION_MS / 2);
+  assert.deepEqual(readSave(JSON.stringify(partial)), partial);
+  const ready = finish(partial, PREPARATION_MS).state;
+  assert.equal(ready.activity, "mining");
+  assert.equal(ready.transition, null);
+  assert.equal(ready.items.stone, 0);
+  const mined = finish(ready, PREPARATION_MS + ACTIVITIES.mining.durationMs).state;
+  assert.equal(mined.items.stone, 1);
+});
+
+test("changing zones finishes old work, moves five minutes and prepares two", () => {
+  const mined = choose(newGame(0), "mining", 0).state;
+  const when = ACTIVITIES.mining.durationMs / 2;
+  const partial = finish(mined, when).state;
+  const request = switchTo(partial, "hunting", when).state;
+  assert.equal(request.activity, "mining", "target is not active until ready");
+  assert.equal(request.progressMs, when);
+  assert.equal(request.transition.phase, "finishing");
+  const finished = finish(request, ACTIVITIES.mining.durationMs);
+  assert.equal(finished.state.items.stone, 1);
+  assert.equal(finished.state.skills.mining.xp, 2);
+  assert.equal(finished.state.transition.phase, "moving");
+  assert.equal(finished.state.progressMs, 0);
+  const halfway = finish(finished.state, ACTIVITIES.mining.durationMs + 2 * 60_000).state;
+  assert.equal(halfway.transition.phase, "moving");
+  assert.equal(halfway.transition.phaseProgressMs, 2 * 60_000);
+  const arrivedAt = ACTIVITIES.mining.durationMs + ZONE_TRAVEL_MS;
+  const arrived = finish(halfway, arrivedAt).state;
+  assert.equal(arrived.transition.phase, "preparing");
+  const startedAt = arrivedAt + PREPARATION_MS;
+  const ready = finish(arrived, startedAt).state;
+  assert.equal(ready.activity, "hunting");
+  assert.equal(ready.progressMs, 0);
+  assert.equal(ready.transition, null);
+  assert.equal(ready.items.hide, 0);
+  assert.equal(finish(ready, startedAt + ACTIVITIES.hunting.durationMs).state.items.hide, 1);
+  assert.equal(finish(ready, startedAt).report.completed, 0);
+});
+
+test("same-zone changes travel only one minute, no extra five minutes", () => {
+  const initial = choose(newGame(0), "hunting", 0).state;
+  const request = switchTo(initial, "gathering", 0).state;
+  const finishedAt = ACTIVITIES.hunting.durationMs;
+  const moving = finish(request, finishedAt).state;
+  assert.equal(moving.transition.phase, "moving");
+  const preparing = finish(moving, finishedAt + SAME_ZONE_TRAVEL_MS).state;
+  assert.equal(preparing.transition.phase, "preparing");
+  const working = finish(preparing, finishedAt + SAME_ZONE_TRAVEL_MS + PREPARATION_MS).state;
+  assert.equal(working.activity, "gathering");
+  assert.equal(working.items.hide, 1);
+  assert.equal(working.items.herb, 0);
+});
+
+test("retarget in transit resets only movement and preparation, never old rewards", () => {
+  let state = choose(newGame(0), "mining", 0).state;
+  state = switchTo(state, "hunting", 0).state;
+  const finishedAt = ACTIVITIES.mining.durationMs;
+  state = finish(state, finishedAt + ZONE_TRAVEL_MS / 2).state;
+  assert.equal(state.items.stone, 1);
+  assert.equal(state.transition.phase, "moving");
+  const retarget = switchTo(state, "carpentry", state.settledAtMs).state;
+  assert.equal(retarget.transition.phase, "moving");
+  assert.equal(retarget.transition.phaseProgressMs, 0);
+  const noChange = switchTo(retarget, "carpentry", retarget.settledAtMs).state;
+  assert.deepEqual(noChange, retarget, "same-target Start must not reset progress");
+  const next = finish(retarget, retarget.settledAtMs + ZONE_TRAVEL_MS + PREPARATION_MS).state;
+  assert.equal(next.activity, "carpentry");
+  assert.equal(next.items.stone, 1);
+  assert.equal(next.items.hide, 0);
+  assert.equal(next.skills.mining.xp, 2);
+  const after = finish(next, next.settledAtMs + ACTIVITIES.carpentry.durationMs).state;
+  assert.equal(after.items.plank, 0, "no free crafted output");
+  assert.equal(after.skills.carpentry.xp, 0);
+});
+
+test("retarget while preparing restarts movement from the old zone", () => {
+  const start = choose(newGame(0), "mining", 0).state;
+  const requested = switchTo(start, "hunting", 0).state;
+  const preparingAt = ACTIVITIES.mining.durationMs + ZONE_TRAVEL_MS;
+  const preparing = finish(requested, preparingAt + 60_000).state;
+  assert.equal(preparing.transition.phase, "preparing");
+  const redirect = switchTo(preparing, "masonry", preparing.settledAtMs).state;
+  assert.equal(redirect.transition.phase, "moving");
+  assert.equal(redirect.transition.phaseProgressMs, 0);
+  const newTargetAt = redirect.settledAtMs + ZONE_TRAVEL_MS + PREPARATION_MS;
+  assert.equal(finish(redirect, newTargetAt).state.activity, "masonry");
+  assert.equal(finish(redirect, newTargetAt).state.items.stone, 1);
+});
+
+test("offline twenty years spans both activities exactly once without advancing effective levels", () => {
+  const start = choose(newGame(0), "mining", 0).state;
+  start.skills.hunting = { level: 1, xp: xpForLevel(10) - 1 };
+  const request = switchTo(start, "hunting", 0).state;
+  let rolls = 0;
+  const after = settle(request, 20 * YEAR, () => { rolls++; return 0.5; });
+  assert.ok(rolls < 30, "do not replay individual offline activities");
+  assert.equal(after.state.items.stone, 1);
+  assert.ok(after.state.items.hide > 1000);
+  assert.equal(after.state.skills.hunting.level, 1);
+  assert.equal(after.state.transition, null);
+  assert.equal(after.state.activity, "hunting");
+  assert.equal(after.reports.length, 2, "report old and new batches separately");
+  assert.equal(settle(after.state, 20 * YEAR, midpoint).report.completed, 0);
+  assert.deepEqual(readSave(JSON.stringify(after.state)), after.state);
+  const returned = enter(request, 20 * YEAR);
+  assert.ok(returned.state.skills.hunting.level >= 10);
+});
+
+test("malformed transition saves are rejected and old saves retain current work", () => {
+  const initial = choose(newGame(0), "mining", 0).state;
+  const legacy = { ...initial };
+  delete legacy.transition;
+  const recovered = readSave(legacy);
+  assert.ok(recovered);
+  assert.equal(recovered.activity, "mining");
+  assert.equal(recovered.transition, null);
+  for (const invalid of [
+    { targetActivity: "__missing__", phase: "moving", phaseProgressMs: 0 },
+    { targetActivity: "hunting", phase: "moving", phaseProgressMs: ZONE_TRAVEL_MS },
+    { targetActivity: "hunting", phase: "preparing", phaseProgressMs: PREPARATION_MS },
+    { targetActivity: "hunting", phase: "bogus", phaseProgressMs: 0 },
+    { targetActivity: "hunting", phase: "moving", phaseProgressMs: -1 }
+  ]) assert.equal(readSave({ ...initial, transition: invalid }), null);
+});
+
