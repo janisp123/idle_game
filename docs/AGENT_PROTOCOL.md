@@ -17,7 +17,7 @@
 1. Identify repository/branch and **fetch current remote `main:docs/TD_LIST.md` first**, including before task edits, status checks, implementation, publication or delegation. If unavailable, report this; do not act from a stale backlog.
 2. Read `AGENTS.md`, checkpoint, decisions, relevant project rules, latest main revision, implementation and overlapping PRs. Unmerged work is **PENDING PR**, not a completed task on main.
 3. Confirm task ID, authorization, dependencies and conflicts. A listed task or discussion does not authorize implementation; the Owner decides direction and approvals.
-4. For approved writes, use a fresh main-based branch, a small testable scope and checked PR. Never bypass protection or merge/publish without authorization.
+4. For approved writes, use a fresh main-based branch, a small testable scope and checked PR. Never bypass protection or merge/publish without authorization; the narrowly scoped standing research-docs approval in `AGENTS.md` counts only for its explicit paths and gates.
 5. After verification, record exact files, branch, commit/PR, checks (PASS/FAIL/NOT RUN), blockers and one next action. Change TD completion state only after integration and main readback. Keep local, PR, merged and deployed states distinct.
 
 Read-only queries do not need a new branch. Never claim an unavailable action happened or another agent is working in the background.

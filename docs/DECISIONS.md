@@ -23,3 +23,4 @@
 
 Add project-specific decisions only when explicitly approved; date and link superseding decisions. Avoid copying private conversations.
 | QUAL-001 | 2026-11-21 | Owner | **Quality and security over quantity** across game code, research and automation. Prefer correct, safe, maintainable, tested and useful outcomes to feature count, commit volume or research frequency. Reject duplicate, unsafe, superficial or insufficiently verified work; it is acceptable to make no change. Respect existing approvals, security and license checks. | Active |
+| GOV-001 | 2026-11-21 | Owner | Standing auto-merge authorization applies only to checked, nonduplicative research-docs PRs within the exact `AGENTS.md` allowlist. Public research may cite inspectable external HTTPS sources; no third-party code/assets copied or executed. | Active |

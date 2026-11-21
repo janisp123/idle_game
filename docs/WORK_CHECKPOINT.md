@@ -1,6 +1,6 @@
 # Current working checkpoint
 
-**Verified main status (2026-11-20):** GAME-001 was merged as PR #20 and deployed on GitHub Pages: a **playable but simple** automatic Hunting/Mining browser prototype with local saves, no offline cap and login-only level increases. No true wolf combat engine, server-authoritative settlement, account backend or game database. **Branch work GAME-002** replaces the interface HTML/CSS and both static activity paintings with approved 960×540 WebP imagery; it is **not live until separately approved, merged and deployed**.
+**Gameplay checkpoint (last verified 2026-11-20; recheck current main and PRs):** GAME-001 was merged as PR #20 and deployed on GitHub Pages: a **playable but simple** automatic Hunting/Mining browser prototype with local saves, no offline cap and login-only level increases. No true wolf combat engine, server-authoritative settlement, account backend or game database. **Branch work GAME-002** replaces the interface HTML/CSS and both static activity paintings with approved 960×540 WebP imagery; it is **not live until separately approved, merged and deployed**.
 
 **Canonical source:** Always fetch current remote `main:docs/TD_LIST.md` first. Then read `AGENTS.md`, this checkpoint, `docs/DECISIONS.md`, the protocol, current main and open PRs; this page is a snapshot, not authority.
 
