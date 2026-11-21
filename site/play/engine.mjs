@@ -1,3 +1,5 @@
+import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
+export { LOOT_TABLES, lootChances } from "./loot.mjs?v=20261121-loot1";
 /**
  * Tiny offline-capable prototype engine.
  * No DOM, storage, network, accounts or combat simulation dependencies.
@@ -34,7 +36,11 @@ export const ACTIVITIES = Object.freeze({
   assassination: task("Assassination", "Contract targets", "contract_seal", "Contract seals", 90, 5, "Fulfil a ruthless contract and collect its proof.", "Stronghold", 1, "outlaw"),
   slave_raiding: task("Slave raiding", "Villages", "faction_tribute", "Faction tribute", 90, 5, "Raid settlements to seize captives for a cruel faction; collect tribute for the deed.", "Borderlands", 1, "outlaw")
 });
-export const ITEM_KEYS = Object.freeze([...new Set(Object.values(ACTIVITIES).map(a => a.item))]);
+export const ITEM_LABELS = Object.freeze({
+  ...Object.fromEntries(Object.values(ACTIVITIES).map(a => [a.item, a.itemLabel])),
+  ...EXTRA_LOOT_LABELS
+});
+export const ITEM_KEYS = Object.freeze(Object.keys(ITEM_LABELS));
 export const SKILL_IDS = Object.freeze(Object.keys(ACTIVITIES));
 const blankSkills = () => Object.fromEntries(SKILL_IDS.map(id => [id, { level: 1, xp: 0 }]));
 export const activityDuration = (id, speedMultiplier = 1) => {
@@ -148,7 +154,7 @@ export function settle(state, now = Date.now(), random = Math.random) {
   const end = Math.max(state.settledAtMs, now);
   const elapsedMs = end - state.settledAtMs;
   const next = { ...state, skills: { ...state.skills }, items: { ...state.items }, settledAtMs: end };
-  const report = { activity: state.activity, elapsedMs, completed: 0, gainedXP: 0, item: null, gainedItems: 0 };
+  const report = { activity: state.activity, elapsedMs, completed: 0, gainedXP: 0, item: null, gainedItems: 0, items: {} };
   if (!state.activity || elapsedMs === 0) return { state: next, report };
 
   const rules = ACTIVITIES[state.activity]; // snapshot at start of this whole settlement
@@ -160,7 +166,12 @@ export function settle(state, now = Date.now(), random = Math.random) {
     report.item = rules.item;
     report.gainedItems = variedTotal(count * rules.yield, random);
     report.gainedXP = variedTotal(count * rules.xp, random);
-    next.items[rules.item] = safeAdd(state.items[rules.item], report.gainedItems);
+    report.items = LOOT_TABLES[state.activity]
+      ? allocateLoot(state.activity, state.skills[state.activity].level, report.gainedItems, random)
+      : { [rules.item]: report.gainedItems };
+    for (const [item, amount] of Object.entries(report.items)) {
+      next.items[item] = safeAdd(next.items[item], amount);
+    }
     const prior = state.skills[state.activity];
     next.skills[state.activity] = { ...prior, xp: safeAdd(prior.xp, report.gainedXP) };
     // Offline skill effectiveness stays frozen at the last activated level.
