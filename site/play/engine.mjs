@@ -12,7 +12,9 @@ export const GAME_VERSION = 2;
 // A completed action represents an entire work cycle, not one swing or strike.
 // Adjust BASE_CYCLE_MS or a single activity's speed multiplier to rebalance.
 export const BASE_CYCLE_MS = 60_000;
-export const ZONE_TRAVEL_MS = 5 * 60_000; // reserved for future zone-change mechanic
+export const ZONE_TRAVEL_MS = 5 * 60_000;
+export const SAME_ZONE_TRAVEL_MS = 60_000;
+export const PREPARATION_MS = 2 * 60_000;
 const task = (title, subject, item, itemLabel, minutes, xp, description, zone, speed = 1, category = "craft") =>
   Object.freeze({ title, subject, item, itemLabel, durationMs: Math.round(minutes * BASE_CYCLE_MS / speed),
     baseMinutes: minutes, speed, xp, yield: 1, description, zone, category });
@@ -87,6 +89,7 @@ export function newGame(now = Date.now()) {
     items: Object.fromEntries(ITEM_KEYS.map(key => [key, 0])),
     activity: null,
     progressMs: 0,
+    transition: null,
     settledAtMs: now
   };
 }
@@ -105,6 +108,22 @@ export function readSave(value) {
         !isCount(s.progressMs) || !validTime(s.settledAtMs)) return null;
     if (s.activity && s.progressMs >= ACTIVITIES[s.activity].durationMs) return null;
     if (!s.activity && s.progressMs !== 0) return null;
+    // Older saves omit the transition object; continue their existing work.
+    const transition = s.transition ?? null;
+    if (s.transition !== undefined && s.transition !== null && !transition) return null;
+    if (transition !== null) {
+      if (typeof transition !== "object" || Array.isArray(transition) ||
+          !Object.hasOwn(ACTIVITIES, transition.targetActivity) ||
+          !["finishing", "moving", "preparing"].includes(transition.phase) ||
+          !isCount(transition.phaseProgressMs) ||
+          (transition.phase === "finishing" && (!s.activity || transition.phaseProgressMs !== 0)) ||
+          (transition.phase === "moving" && (!s.activity || s.progressMs !== 0 ||
+            transition.phaseProgressMs >= (ACTIVITIES[s.activity].zone ===
+              ACTIVITIES[transition.targetActivity].zone ? SAME_ZONE_TRAVEL_MS : ZONE_TRAVEL_MS))) ||
+          (transition.phase === "preparing" &&
+            (transition.phaseProgressMs >= PREPARATION_MS || s.progressMs !== 0)))
+        return null;
+    }
 
     const oldVersion = s.version === 1;
     if (oldVersion) {
@@ -130,7 +149,8 @@ export function readSave(value) {
       protectedItems: [...new Set(s.protectedItems ?? [])],
       unattributedXP: oldVersion ? s.totalXP : s.unattributedXP,
       items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
-      activity: s.activity, progressMs: s.progressMs, settledAtMs: s.settledAtMs
+      activity: s.activity, progressMs: s.progressMs, transition: transition && { ...transition },
+      settledAtMs: s.settledAtMs
     };
   } catch {
     return null;
@@ -176,7 +196,7 @@ function variedTotal(base, random) {
   return whole + (fraction > 0 && roll() < fraction ? 1 : 0);
 }
 
-export function settle(state, now = Date.now(), random = Math.random) {
+function settleWork(state, now, random) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
   const end = Math.max(state.settledAtMs, now);
   const elapsedMs = end - state.settledAtMs;
@@ -221,6 +241,79 @@ export function settle(state, now = Date.now(), random = Math.random) {
   return { state: next, report };
 }
 
+
+/**
+ * Travel and preparation are real elapsed time, even with the page closed.
+ * At most three transition phases and one old/full new-work batch are resolved,
+ * regardless of whether the absence was minutes or decades.
+ */
+export function settle(state, now = Date.now(), random = Math.random) {
+  if (!validTime(now)) throw new RangeError("Invalid clock");
+  if (!state.transition) return settleWork(state, now, random);
+  const end = Math.max(now, state.settledAtMs);
+  let next = state;
+  const reports = [];
+  const pushReport = report => { if (report.completed) reports.push(report); };
+  let remaining = end - next.settledAtMs;
+
+  // Each iteration completes a different phase or exhausts available time.
+  for (let i = 0; i < 3 && next.transition; i++) {
+    const transition = next.transition;
+    if (transition.phase === "finishing") {
+      const needed = ACTIVITIES[next.activity].durationMs - next.progressMs;
+      const take = Math.min(remaining, needed);
+      const work = settleWork(next, next.settledAtMs + take, random);
+      next = work.state;
+      pushReport(work.report);
+      remaining -= take;
+      if (take < needed) break;
+      next = { ...next, transition: { ...transition, phase: "moving", phaseProgressMs: 0 } };
+    } else {
+      const phaseDuration = transition.phase === "moving"
+        ? (ACTIVITIES[next.activity].zone === ACTIVITIES[transition.targetActivity].zone
+          ? SAME_ZONE_TRAVEL_MS : ZONE_TRAVEL_MS)
+        : PREPARATION_MS;
+      const take = Math.min(remaining, phaseDuration - transition.phaseProgressMs);
+      remaining -= take;
+      const phaseProgressMs = transition.phaseProgressMs + take;
+      next = { ...next, settledAtMs: next.settledAtMs + take,
+        transition: { ...transition, phaseProgressMs } };
+      if (phaseProgressMs < phaseDuration) break;
+      if (transition.phase === "moving") {
+        next = { ...next, transition: { ...transition, phase: "preparing", phaseProgressMs: 0 } };
+      } else {
+        next = { ...next, activity: transition.targetActivity, progressMs: 0, transition: null };
+      }
+    }
+  }
+
+  if (!next.transition) {
+    const work = settleWork(next, end, random);
+    next = work.state;
+    pushReport(work.report);
+  }
+  const report = reports.at(-1) ?? {
+    activity: next.activity, elapsedMs: end - state.settledAtMs, completed: 0,
+    gainedXP: 0, item: null, gainedItems: 0, items: {}, consumed: {}
+  };
+  return { state: next, report, reports };
+}
+
+/** Start or retarget a manual transition; never grant travel rewards or skip a work cycle. */
+export function requestActivityChange(state, targetActivity, now = Date.now(), random = Math.random) {
+  if (!Object.hasOwn(ACTIVITIES, targetActivity)) throw new RangeError("Unknown activity");
+  const outcome = settle(state, now, random);
+  const current = outcome.state;
+  if (current.transition?.targetActivity === targetActivity ||
+      (!current.transition && current.activity === targetActivity)) return outcome;
+  const phase = !current.activity ? "preparing" :
+    current.transition?.phase === "finishing" ? "finishing" :
+    current.transition ? "moving" : "finishing";
+  return { ...outcome, state: {
+    ...current, transition: { targetActivity, phase, phaseProgressMs: 0 }
+  } };
+}
+
 /** Called only when the user ENTERS/RETURNS to the game, after full catch-up. */
 /** Apply all skill level-ups ONLY when the player returns, after offline settlement. */
 export function enterGame(state, now = Date.now(), random = Math.random) {
@@ -233,14 +326,16 @@ export function enterGame(state, now = Date.now(), random = Math.random) {
     skills[id] = { ...prior, level };
     if (level > prior.level) levelsGained[id] = level - prior.level;
   }
-  return { state: { ...outcome.state, skills }, report: outcome.report, levelsGained };
+  return { state: { ...outcome.state, skills }, report: outcome.report,
+    ...(outcome.reports ? { reports: outcome.reports } : {}), levelsGained };
 }
 
+/** Legacy instant selection helper retained for historical engine fixtures only; the UI uses requestActivityChange. */
 export function chooseActivity(state, activity, now = Date.now(), random = Math.random) {
   if (!Object.hasOwn(ACTIVITIES, activity)) throw new RangeError("Unknown activity");
   const settled = settle(state, now, random);
-  if (settled.state.activity === activity) return settled;
-  return { state: { ...settled.state, activity, progressMs: 0 }, report: settled.report };
+  if (settled.state.activity === activity && !settled.state.transition) return settled;
+  return { state: { ...settled.state, activity, progressMs: 0, transition: null }, report: settled.report };
 }
 
 export function testOfflineDay(state, now = Date.now(), random = Math.random) {
