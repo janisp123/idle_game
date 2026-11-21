@@ -48,9 +48,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261121-desktop-icons3/,
+  assert.match(html, /iron-ui\.css\?v=20261121-mastery-queue4/,
     "stylesheet cache version is changed");
-  assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:anywhere/s,
+  assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
   assert.match(html, /id="queueMasteryMode"[^>]*aria-pressed="false"/,
     "the level-up stop is a visible separate planner button");
@@ -473,6 +473,21 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(masteryDuration.children[1].hidden, true);
     assert.equal(masteryDuration.children[2].value, UNTIL_LEVEL_UP);
     assert.equal(masteryDuration.children[0].textContent, "Until");
+    // A timed slot can be corrected to readiness directly in its queue card,
+    // and its persisted plan is the readiness sentinel (never a time estimate).
+    const masteryChoice = elements.get("wagonList").children[1].children[3];
+    masteryChoice.children[2].value = "minutes";
+    masteryChoice.children[2].fire("change");
+    const timedChoice = elements.get("wagonList").children[1].children[3];
+    assert.equal(timedChoice.children[0].children[0].hidden, false);
+    timedChoice.children[0].children[0].fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.wagons[1].plannedMs, UNTIL_LEVEL_UP);
+    const updatedMastery = elements.get("wagonList").children[1].children[3];
+    assert.equal(updatedMastery.children[0].textContent, "Until");
+    assert.equal(updatedMastery.children[0].children[0].hidden, true);
+    assert.equal(updatedMastery.children[1].hidden, true);
+    assert.equal(updatedMastery.children[2].value, UNTIL_LEVEL_UP);
     // Return the future task to its original two-minute duration for regression coverage.
     masteryDuration.children[2].value = "minutes";
     masteryDuration.children[2].fire("change");
