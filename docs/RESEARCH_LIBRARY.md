@@ -24,6 +24,7 @@ For technical design choices, start with the compact [Research map](RESEARCH_MAP
 - [Bulk random loot sampling](library/bulk-random-loot-sampling.md): independent and mutually exclusive reward counts, rare-event tails, RNG versioning and tests. `[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Time-safe offline simulation](library/offline-time-units-and-boundaries.md): consistent time units, exact resource-depletion boundaries, aggregate processing and proposed equivalence tests. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Idempotent reward settlement](library/idempotent-reward-settlement.md): atomic progress cursors, retry-safe grants, concurrency control and crash recovery. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
+- [Crash-recoverable browser saves](library/crash-recoverable-browser-saves.md): two-generation atomic commits, cross-tab revision checks, corruption recovery and eviction limits. `[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Coherent browser game releases](library/coherent-browser-game-releases.md): content-versioned assets, safe PWA updates, stale-cache recovery and save-schema compatibility. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Combat module boundaries](library/combat-module-boundaries.md): isolated math, scheduling, encounter outcomes and reward handling. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Offline combat estimation](library/offline-combat-estimation.md): encounter sampling, mathematical rates, replay tradeoffs and validation. `[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`.
