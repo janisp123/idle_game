@@ -1,5 +1,12 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Manual activity-change design/specification (chat; documentation only)
+
+- **Owner-approved UX:** An individual **Start** button after each activity name triggers three visible stages before work changes: **Finishing current activity**, **Moving to new location**, **Getting ready to start new activity**. Activity switching takes real time and displays a dedicated transition progress bar instead of instantly switching.
+- **Specification:** [ACTIVITY_SWITCH_SPEC.md](ACTIVITY_SWITCH_SPEC.md) includes a small patch sequence, phase/save contract, offline boundaries, preservation of old-cycle rewards, migration and test cases. [GAME-004](TD_LIST.md) is still **TODO**, with the future five-task queue deferred.
+- **Unresolved parameters:** Same-zone movement, preparation duration, initial start and pending-target change/cancel policy. The existing five-minute zone change is retained.
+- **Scope:** **Documentation only; no live gameplay/UI behavior changed.** Changes must not be presented as a playable feature until implemented, tested and deployed.
+
 ## 2026-11-21 — Inventory-consuming basic crafts for all production professions (chat)
 
 - **Merged:** [PR #54](https://github.com/janisp123/idle_game/pull/54), main commit `d2bc350794ef0eb6b1c460b71d6268fb2012e170`.
