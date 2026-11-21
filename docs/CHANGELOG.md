@@ -1,5 +1,11 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Forever-last activity queue specification (chat; documentation only)
+
+- **QUEUE-001:** Owner approved a linear queue of up to five activities: each nonfinal activity is configured for 1–8 hours or 1–8 days, and the final activity continues **forever**. This replaces earlier loop-to-first brainstorming and removes the earlier general deferral for queue design.
+- **Efficiency:** [ACTIVITY_QUEUE_SPEC.md](ACTIVITY_QUEUE_SPEC.md) documents segment-by-segment chronological offline catch-up: process finite activity windows and three-phase switches, then batch-resolve the remaining (potentially 20-year) time in the final activity. Frozen offline skill effectiveness (OFF-001), chronological inventory dependencies and idempotency are required; processing cost is bounded by five tasks, not elapsed days. Numerical travel/readiness parameters remain open.
+- **Scope:** No queue gameplay or new UI was implemented or deployed; GAME-004 remains TODO until coded, tested and published.
+
 ## 2026-11-21 — Manual activity-change design/specification (chat; documentation only)
 
 - **Owner-approved UX:** An individual **Start** button after each activity name triggers three visible stages before work changes: **Finishing current activity**, **Moving to new location**, **Getting ready to start new activity**. Activity switching takes real time and displays a dedicated transition progress bar instead of instantly switching.

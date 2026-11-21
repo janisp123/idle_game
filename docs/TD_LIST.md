@@ -6,17 +6,16 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
-## GAME-004 — Activity switching, zone travel and five-task repeating queue
-- **Goal:** Add manual, non-instant activity changes first: each activity lists a distinct **Start** button; after pressing it, the character finishes the current full work cycle, moves to the next location and prepares before starting the new task. Later add actual zones and up to five configurable repeating activities.
-- **Acceptance criteria (manual switching):** visibly distinct transition progress bar with phase text **Finishing current activity**, **Moving to new location**, **Getting ready to start new activity**; no player-facing countdowns or numeric durations; preserve the remaining work cycle reward exactly once; no production during travel/preparation; save/restore transitions and settle even decades offline without an offline cap, preserving OFF-001 effective-level freezing and protected inventory. Respect existing five-minute cross-zone travel.
-- **Acceptance criteria (later queue):** up to five configurable tasks can loop or end in ongoing work; real zone changes cost five minutes; transitions and resource depletion remain safe under unlimited offline settlement.
-- **Spec:** [ACTIVITY_SWITCH_SPEC.md](ACTIVITY_SWITCH_SPEC.md) records approved behavior, a small-patch implementation plan, and still-open timing/retargeting choices. The manual switch feature is **not implemented**.
-- **Status:** TODO (manual switch behavior/spec approved; exact same-zone travel, preparation durations and retargeting policy still open. Five-task automation remains explicitly deferred).
-- **Dependencies:** GAME-003, OFF-001, ZONE-001, UI-TIME-001.
+## GAME-004 — Three-phase activity switching and bounded five-slot queue
+- **Goal:** Each activity has an explicit Start button. After a current full work cycle finishes, the character moves and prepares before starting the next activity. Players may schedule up to **five activities total**: each nonfinal task runs for **1–8 hours or 1–8 days**; **the final task always runs forever**, without queue looping or offline expiry.
+- **Acceptance criteria (switching):** Show a distinct transition progress bar and phase labels **Finishing current activity → Moving to new location → Getting ready to start new activity**. Existing work finishes once; travel/preparation grant no production; five-minute cross-zone travel remains binding; all transitions persist and settle offline without per-action replay. Do not show time countdowns.
+- **Acceptance criteria (queue):** A finite linear queue, at most five positions including the final indefinite task; Start → Do it for supports discrete 1–8 Hours / Days or Forever on the final task. Other tasks automatically advance after their planned window and after completing any required final full work cycle; whether the planned window excludes travel/preparation still needs explicit confirmation. No end-of-queue stop, login requirement, or resource fabrication. Process all elapsed offline segments in bounded time using the last saved effective skill snapshot (OFF-001), preserving current save data, inventory protection, and reward idempotency. Explicit duration configuration is allowed; live timers remain prohibited.
+- **Specs:** [ACTIVITY_SWITCH_SPEC.md](ACTIVITY_SWITCH_SPEC.md) and [ACTIVITY_QUEUE_SPEC.md](ACTIVITY_QUEUE_SPEC.md). **Design/specification only: neither feature is yet implemented.** Earlier looping queue ideas are superseded by the Forever-last rule.
+- **Status:** TODO (owner-approved behavior/specs. Blocked on exact same-zone travel, preparation duration and queue/pending-target edit rules before complete playable integration).
+- **Dependencies:** GAME-003, OFF-001, ZONE-001, UI-TIME-001, ACT-SWITCH-001, QUEUE-001.
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** Not yet.
-
 
 ## GAME-006 — Skill-gated probabilistic encounters and resources
 - **Goal:** Progress hunting, mining, gathering and processing outcomes within a single activity; players never manually choose creature, vein or ore quality.
