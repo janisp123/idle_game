@@ -2,10 +2,10 @@ import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, recipeOptions, newGame, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
-  MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE,
+  MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
-  xpToNextLevel, skillMasterOffer, learnFromMaster
-} from "./engine.mjs?v=20261121-no-resource-locks1";
+  xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster
+} from "./engine.mjs?v=20261121-until-levelup1";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -25,7 +25,7 @@ const ui = {
   transitionPhase: $("transitionPhase"), transitionProgress: $("transitionProgress"), transitionFill: $("transitionFill"),
   wagonQueue: $("wagonQueue"), wagonList: $("wagonList"),
   queuePlanner: $("queuePlanner"), queuePlannerTitle: $("queuePlannerTitle"),
-  queuePlannerHint: $("queuePlannerHint"),
+  queuePlannerHint: $("queuePlannerHint"), queueAmountLabel: $("queueAmountLabel"),
   queueAmount: $("queueAmount"), queueUnit: $("queueUnit"),
   queueConfirm: $("queueConfirm"), queueCancel: $("queueCancel"),
   logList: $("logList"),
@@ -37,6 +37,7 @@ let state;
 let lastSavedAt = 0;
 let storageWorks = true;
 let planningActivity = null;
+let planningHint = "";
 let lastWagonSignature = null;
 const wagonSkillLabels = new Map();
 let currentScheduledMeter = null;
@@ -244,7 +245,9 @@ function renderWagons() {
       const meter = document.createElement("div");
       meter.className = "hourglass-schedule-progress";
       meter.setAttribute("role", "progressbar");
-      meter.setAttribute("aria-label", ACTIVITIES[wagon.activity].title + " work period progress");
+      meter.setAttribute("aria-label", ACTIVITIES[wagon.activity].title +
+        (wagon.plannedMs === UNTIL_LEVEL_UP
+          ? " progress toward Skill Master readiness" : " work period progress"));
       meter.setAttribute("aria-valuemin", "0");
       meter.setAttribute("aria-valuemax", "100");
       meter.setAttribute("aria-valuenow", "0");
@@ -273,7 +276,7 @@ function renderWagons() {
       const duration = document.createElement("div");
       duration.className = "wagon-duration";
       const heading = document.createElement("span");
-      heading.textContent = "Scheduled for";
+      heading.textContent = wagon.plannedMs === UNTIL_LEVEL_UP ? "Until" : "Scheduled for";
       const amount = document.createElement("select");
       amount.setAttribute("aria-label", "Duration for " + ACTIVITIES[wagon.activity].title);
       const unit = document.createElement("select");
@@ -284,7 +287,7 @@ function renderWagons() {
         option.textContent = String(n);
         amount.append(option);
       }
-      for (const [value, label] of [["minutes", "Min"], ["hours", "Hours"], ["days", "Days"]]
+      for (const [value, label] of [["minutes", "Min"], ["hours", "Hours"], ["days", "Days"], [UNTIL_LEVEL_UP, "↑ LvL up"]]
         .filter(([value]) => value !== "minutes" || TIMING_PROFILE === "alpha" ||
           wagon.plannedMs < HOUR_MS)) {
         const option = document.createElement("option");
@@ -292,13 +295,18 @@ function renderWagons() {
         option.textContent = label;
         unit.append(option);
       }
-      const selectedUnit = wagon.plannedMs % DAY_MS === 0 ? "days" :
+      const selectedUnit = wagon.plannedMs === UNTIL_LEVEL_UP ? UNTIL_LEVEL_UP :
+        wagon.plannedMs % DAY_MS === 0 ? "days" :
         wagon.plannedMs % HOUR_MS === 0 ? "hours" : "minutes";
-      amount.value = String(wagon.plannedMs / durationUnitMs(selectedUnit));
+      amount.value = selectedUnit === UNTIL_LEVEL_UP ? "1" :
+        String(wagon.plannedMs / durationUnitMs(selectedUnit));
+      amount.hidden = selectedUnit === UNTIL_LEVEL_UP;
       unit.value = selectedUnit;
       const apply = () => {
-        const ms = Number(amount.value) * durationUnitMs(unit.value);
-        applyQueueChange(queueSetDuration(state, i, ms, Date.now()), "Hourglass duration updated.");
+        const plan = unit.value === UNTIL_LEVEL_UP ? UNTIL_LEVEL_UP :
+          Number(amount.value) * durationUnitMs(unit.value);
+        applyQueueChange(queueSetDuration(state, i, plan, Date.now()),
+          "Hourglass stop condition updated.");
       };
       amount.addEventListener("change", apply);
       unit.addEventListener("change", apply);
@@ -345,20 +353,35 @@ function hideQueuePlanner() {
   ui.queuePlanner.hidden = true;
 }
 
+function updatePlanningMode() {
+  const untilReady = ui.queueUnit.value === UNTIL_LEVEL_UP;
+  ui.queueAmount.hidden = untilReady;
+  ui.queueAmountLabel.hidden = untilReady;
+  ui.queuePlannerHint.textContent = planningHint +
+    (untilReady
+      ? " Stops only when both XP and Skill Master resources are ready. This does not level up automatically."
+      : "");
+  ui.queueConfirm.textContent = untilReady
+    ? (state.wagons.length === 1 ? "Start until ↑ LvL Up" : "Add until ↑ LvL Up")
+    : (state.wagons.length === 1 ? "Start for this time" : "Add timed task");
+}
+ui.queueUnit.addEventListener("change", updatePlanningMode);
 ui.queueCancel.addEventListener("click", () => hideQueuePlanner());
 ui.queueConfirm.addEventListener("click", () => {
   if (!planningActivity) return;
-  const ms = Number(ui.queueAmount.value) * durationUnitMs(ui.queueUnit.value);
+  const plan = ui.queueUnit.value === UNTIL_LEVEL_UP ? UNTIL_LEVEL_UP :
+    Number(ui.queueAmount.value) * durationUnitMs(ui.queueUnit.value);
   const task = planningActivity;
   hideQueuePlanner();
   const startsImmediately = state.wagons.length === 1;
-  applyQueueChange(queueInsertTimedActivity(state, task, ms, Date.now()),
+  applyQueueChange(queueInsertTimedActivity(state, task, plan, Date.now()),
     startsImmediately
       ? "Starting " + ACTIVITIES[task].title.toLowerCase() +
-        " for the selected period, then returning to " +
+        (plan === UNTIL_LEVEL_UP ? " until ready to level up, then returning to " :
+          " for the selected period, then returning to ") +
         ACTIVITIES[state.wagons.at(-1).activity].title.toLowerCase() + "."
       : "Scheduled " + ACTIVITIES[task].title.toLowerCase() +
-        " for the selected period.");
+        (plan === UNTIL_LEVEL_UP ? " until level-up readiness." : " for the selected period."));
 });
 
 function renderMaster() {
@@ -459,10 +482,18 @@ function render() {
   const transition = state.transition;
   renderWagons();
   if (currentScheduledMeter && currentScheduledFill && state.wagons[0]?.plannedMs) {
-    const progress = Math.max(0, Math.min(100,
-      100 * state.productiveElapsedMs / state.wagons[0].plannedMs));
-    currentScheduledFill.style.width = progress.toFixed(2) + "%";
-    currentScheduledMeter.setAttribute("aria-valuenow", String(Math.round(progress)));
+    const wagon = state.wagons[0];
+    const progress = wagon.plannedMs === UNTIL_LEVEL_UP
+      ? (() => {
+          const readiness = skillMasterReadiness(state, wagon.activity);
+          const ratio = 100 * state.skills[wagon.activity].xp / readiness.requiredXP;
+          // Full XP alone is not finished if the Skill Master still lacks spoils.
+          return readiness.ready ? 100 : Math.min(99, ratio);
+        })()
+      : 100 * state.productiveElapsedMs / wagon.plannedMs;
+    const clamped = Math.max(0, Math.min(100, progress));
+    currentScheduledFill.style.width = clamped.toFixed(2) + "%";
+    currentScheduledMeter.setAttribute("aria-valuenow", String(Math.round(clamped)));
     currentScheduledMeter.hidden = Boolean(state.transition);
   }
   for (const [id, { row, startButton, queueButton }] of activityButtons) {
@@ -617,13 +648,13 @@ function planActivity(kind) {
   ui.queueUnit.value = TIMING_PROFILE === "alpha" ? "minutes" : "hours";
   const previous = ACTIVITIES[state.wagons.at(-1).activity].title;
   ui.queuePlannerTitle.textContent = "How long should " + ACTIVITIES[kind].title + " run?";
-  ui.queuePlannerHint.textContent = state.wagons.length === 1
+  planningHint = state.wagons.length === 1
     ? ACTIVITIES[kind].title + " starts after the current work cycle and travel. " +
       previous + " resumes Forever afterwards."
     : ACTIVITIES[kind].title + " runs after " +
       ACTIVITIES[state.wagons[0].activity].title +
       " finishes. " + previous + " remains Forever.";
-  ui.queueConfirm.textContent = state.wagons.length === 1 ? "Start for this time" : "Add timed task";
+  updatePlanningMode();
   ui.queuePlanner.hidden = false;
 }
 

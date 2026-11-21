@@ -568,3 +568,5 @@ footer p{color:#aa9680}
   .wagon-name {font-size:10px}
   .wagon-control {font-size:10px;padding:2px 3px;min-width:26px}
 }
+/* The mastery plan has no numeric amount; preserve compact mobile layout. */
+.planner-fields select[hidden], .planner-fields label[hidden], .wagon-duration select[hidden] { display:none !important; }

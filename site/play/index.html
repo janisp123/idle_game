@@ -9,7 +9,7 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css?v=20261121-skill-master1">
-  <script type="module" src="./app.mjs?v=20261121-no-resource-locks1"></script>
+  <script type="module" src="./app.mjs?v=20261121-until-levelup1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -101,13 +101,14 @@
             <p class="activity-nav-label" id="queuePlannerTitle">How long should the selected activity run?</p>
             <p class="hint" id="queuePlannerHint"></p>
             <div class="planner-fields">
-              <label for="queueAmount">Do it for</label>
+              <label id="queueAmountLabel" for="queueAmount">Do it for</label>
               <select id="queueAmount" aria-label="Number of minutes, hours or days">
                 <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
                 <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
               </select>
               <select id="queueUnit" aria-label="Minutes, hours or days">
                 <option value="minutes">Minutes</option><option value="hours">Hours</option><option value="days">Days</option>
+                <option value="untilLevelUp">↑ Until LvL Up!</option>
               </select>
             </div>
             <div class="planner-actions">
@@ -115,7 +116,7 @@
               <button type="button" id="queueCancel" class="activity-start">Cancel</button>
             </div>
           </div>
-          <p class="hint">Use Start now to switch immediately, or Schedule to give the chosen activity a duration. The final hourglass works forever. Minutes are available for alpha testing.</p>
+          <p class="hint">Use Start now to switch immediately, or Schedule to give the chosen activity a duration. The final hourglass works forever. Choose ↑ Until LvL Up! to stop when XP and required resources are ready for the Skill Master; training is never automatic. Minutes are available for alpha testing.</p>
         </section>
 
 

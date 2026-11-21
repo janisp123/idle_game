@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
-  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, validPlannedDuration, queueStartActivity, queueInsertTimedActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
+  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, UNTIL_LEVEL_UP, MASTER_RESOURCE_MINIMUM, skillMasterReadiness, validQueuePlan, validPlannedDuration, queueStartActivity, queueInsertTimedActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
   enterGame, testOfflineDay, xpForLevel, levelFromXP, xpToNextLevel, skillSpoils, skillMasterOffer, learnFromMaster
 } from "../site/play/engine.mjs";
 
@@ -1152,4 +1152,126 @@ test("old V3 saves without wagons become one Forever wagon, including a pending 
     { wagons: [{activity:"mining",plannedMs:null},{activity:"hunting",plannedMs:null}],productiveElapsedMs:0 },
     { wagons: [{activity:"mining",plannedMs:HOUR_MS},{activity:"hunting",plannedMs:null}],productiveElapsedMs:HOUR_MS+1 }
   ]) assert.equal(readSave({...current,...wrong}),null);
+});
+
+test("Skill Master and queue share centrally configured material thresholds", () => {
+  assert.equal(UNTIL_LEVEL_UP, "untilLevelUp");
+  assert.equal(validQueuePlan(UNTIL_LEVEL_UP), true);
+  assert.equal(validQueuePlan(MINUTE_MS), true);
+  assert.equal(validQueuePlan("other"), false);
+  assert.equal(MASTER_RESOURCE_MINIMUM.mining, 1);
+  assert.equal(MASTER_RESOURCE_MINIMUM.smelting, 1);
+  assert.equal(MASTER_RESOURCE_MINIMUM.meditation, 0);
+  const s = newGame(0);
+  s.skills.mining.xp = xpToNextLevel(1);
+  let ready = skillMasterReadiness(s, "mining");
+  assert.equal(ready.xpReady, true);
+  assert.equal(ready.resourcesReady, false);
+  assert.equal(ready.requiredItems, 1);
+  assert.equal(ready.ready, false);
+  assert.deepEqual(skillMasterOffer(s).blocked, ["mining"]);
+  s.items.stone = 1;
+  ready = skillMasterReadiness(s, "mining");
+  assert.equal(ready.ready, true);
+  assert.deepEqual(skillMasterOffer(s).ready, ["mining"]);
+  s.items.stone = 0;
+  s.items.copper_ore = 1;
+  assert.equal(skillMasterReadiness(s, "mining").ready, true,
+    "higher-tier spoils from the same skill also count toward its Master eligibility");
+  s.skills.meditation.xp = xpToNextLevel(1);
+  assert.equal(skillMasterReadiness(s, "meditation").ready, true,
+    "XP-only skills have no material requirement");
+});
+
+test("Until LvL Up scheduled XP-only activity stops at mastery readiness without auto-leveling", () => {
+  let state = queueStart(newGame(0), "hunting", null).state;
+  state = queueTimed(state, "meditation", UNTIL_LEVEL_UP).state;
+  assert.deepEqual(state.wagons, [
+    {activity:"meditation", plannedMs:UNTIL_LEVEL_UP},
+    {activity:"hunting", plannedMs:null}
+  ]);
+  assert.deepEqual(readSave(JSON.stringify(state)), state);
+  let calls = 0;
+  const result = settle(state, 20 * YEAR, () => { calls++; return 0.5; });
+  assert.ok(calls < 30, "even decades of offline work do not run per-cycle loops");
+  assert.deepEqual(result.state.wagons, [{activity:"hunting", plannedMs:null}]);
+  assert.equal(result.state.transition, null);
+  assert.equal(result.state.activity, "hunting");
+  assert.equal(result.state.skills.meditation.level, 1);
+  assert.equal(result.state.skills.meditation.xp, xpToNextLevel(1));
+  assert.equal(skillMasterReadiness(result.state, "meditation").ready, true);
+  assert.ok(result.state.items.hide > 0, "Forever job continues after readiness");
+  assert.equal(settle(result.state, 20 * YEAR, midpoint).report.completed, 0,
+    "repeated settlement never grants duplicate rewards");
+  assert.deepEqual(readSave(JSON.stringify(result.state)), result.state);
+});
+
+test("Until LvL Up requires actual owned resources, not only a full XP bar", () => {
+  let state = queueStart(newGame(0), "hunting", null).state;
+  state.skills.mining.xp = xpToNextLevel(1);
+  state = queueTimed(state, "mining", UNTIL_LEVEL_UP).state;
+  // The initial character has never worked: switching its pending Start goes
+  // straight to preparation, with no invented hunting cycle or travel.
+  const arrivedAt = INITIAL_PREPARATION_MS;
+  const arriving = finish(state, arrivedAt).state;
+  assert.equal(arriving.activity, "mining");
+  assert.equal(arriving.skills.mining.xp, xpToNextLevel(1));
+  assert.equal(skillMasterReadiness(arriving, "mining").ready, false,
+    "full XP but no material does not switch activities");
+  const oneCycle = finish(arriving, arrivedAt + ACTIVITIES.mining.durationMs).state;
+  if (oneCycle.wagons[0].activity === "mining") {
+    assert.equal(skillMasterReadiness(oneCycle, "mining").ready, false);
+  }
+  const enoughCycles = finish(oneCycle, arrivedAt + 2 * ACTIVITIES.mining.durationMs).state;
+  assert.deepEqual(enoughCycles.wagons, [{activity:"hunting", plannedMs:null}]);
+  assert.equal(enoughCycles.skills.mining.level, 1, "the queue does not visit the Master");
+  assert.equal(skillMasterReadiness(enoughCycles, "mining").ready, true);
+  assert.ok(enoughCycles.items.stone + enoughCycles.items.copper_ore > 0);
+});
+
+test("blocked crafting with XP full cannot escape mastery schedule until actual inputs arrive", () => {
+  let state = queueStart(newGame(0), "hunting", null).state;
+  state.skills.alchemy.xp = xpToNextLevel(1);
+  state = queueTimed(state, "alchemy", UNTIL_LEVEL_UP).state;
+  const blocked = finish(state, 20 * YEAR).state;
+  assert.equal(blocked.activity, "alchemy");
+  assert.deepEqual(blocked.wagons, [
+    {activity:"alchemy", plannedMs:UNTIL_LEVEL_UP},
+    {activity:"hunting", plannedMs:null}
+  ]);
+  assert.equal(blocked.items.potion, 0);
+  assert.equal(blocked.skills.alchemy.level, 1);
+  assert.equal(skillMasterReadiness(blocked, "alchemy").ready, false);
+  const supplied = {...blocked, items:{...blocked.items, herb:2}};
+  const progressed = finish(supplied, blocked.settledAtMs + 2 * ACTIVITIES.alchemy.durationMs).state;
+  assert.deepEqual(progressed.wagons, [{activity:"hunting",plannedMs:null}]);
+  assert.ok(progressed.items.potion > 0);
+  assert.equal(progressed.skills.alchemy.level, 1);
+  assert.equal(skillMasterReadiness(progressed, "alchemy").ready, true);
+  assert.equal(finish(progressed, progressed.settledAtMs).report.completed, 0);
+});
+
+test("editing and reordering Until LvL Up schedule preserve other jobs and saved progress", () => {
+  let state = queueStart(newGame(0), "mining", null).state;
+  state = queueTimed(state, "hunting", MINUTE_MS).state;
+  state = queueTimed(state, "meditation", UNTIL_LEVEL_UP).state;
+  assert.deepEqual(state.wagons.map(w=>w.plannedMs), [MINUTE_MS, UNTIL_LEVEL_UP, null]);
+  assert.deepEqual(readSave(JSON.stringify(state)), state);
+  const futureSwap = queueReorder(state, 1).state;
+  assert.deepEqual(futureSwap.wagons.map(w=>w.plannedMs), [MINUTE_MS, UNTIL_LEVEL_UP, null],
+    "swap exchanges activity names, not slot stop conditions");
+  assert.deepEqual(futureSwap.wagons.map(w=>w.activity), ["hunting","mining","meditation"]);
+  const edited = queueDuration(futureSwap, 0, UNTIL_LEVEL_UP).state;
+  assert.equal(edited.wagons[0].plannedMs, UNTIL_LEVEL_UP);
+  assert.equal(edited.productiveElapsedMs, 0);
+  assert.deepEqual(readSave(JSON.stringify(edited)), edited);
+  assert.equal(readSave({...edited, wagons: [
+    {activity:"hunting",plannedMs:"bogus"},
+    {activity:"mining",plannedMs:UNTIL_LEVEL_UP},
+    {activity:"meditation",plannedMs:null}]}), null);
+  assert.equal(readSave({...edited, wagons: [
+    {activity:"hunting",plannedMs:UNTIL_LEVEL_UP},
+    {activity:"mining",plannedMs:UNTIL_LEVEL_UP},
+    {activity:"meditation",plannedMs:UNTIL_LEVEL_UP}]}), null,
+    "last wagon must remain Forever");
 });
