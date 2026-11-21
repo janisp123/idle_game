@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { ACTIVITIES, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, HOUR_MS } from "../site/play/engine.mjs";
+import { ACTIVITIES, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS } from "../site/play/engine.mjs";
 
 class FakeElement {
   children = [];
@@ -22,6 +22,11 @@ class FakeElement {
 
 test("real browser-app entrypoint renders skill UI and migrates old saved character", async () => {
   const html = readFileSync(new URL("../site/play/index.html", import.meta.url), "utf8");
+  const queueCss = readFileSync(new URL("../site/play/iron-ui.css", import.meta.url), "utf8");
+  assert.match(queueCss, /\.wagon-list\s*\{[^}]*display:grid/s,
+    "the hourglass strip must be a grid, not a horizontally scrolling row");
+  assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
+  assert.match(queueCss, /\.wagon-hourglass img/);
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
   const elements = new Map(ids.map(id => [id, new FakeElement()]));
   const originalNow = Date.now;
@@ -127,6 +132,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("wagonQueue").hidden, false);
     assert.equal(elements.get("wagonList").children.length, 1);
     assert.equal(elements.get("wagonList").children[0].children[3].textContent, "FOREVER");
+    assert.equal(elements.get("wagonList").children[0].children[0].className, "wagon-hourglass");
+    assert.match(elements.get("wagonList").children[0].children[0].children[0].src,
+      /hourglass-amber\.webp/);
     now += INITIAL_PREPARATION_MS;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
@@ -207,24 +215,24 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("queuePlanner").hidden, false);
     assert.match(elements.get("queuePlannerTitle").textContent, /how long should Mining work/);
     elements.get("queueAmount").value = "1";
-    elements.get("queueUnit").value = "hours";
+    elements.get("queueUnit").value = "minutes";
     elements.get("queueConfirm").fire("click");
     assert.equal(elements.get("queuePlanner").hidden, true);
     state = JSON.parse(store.get(SAVE_KEY));
     assert.deepEqual(state.wagons, [
-      { activity: "mining", plannedMs: HOUR_MS },
+      { activity: "mining", plannedMs: MINUTE_MS },
       { activity: "meditation", plannedMs: null }
     ]);
     assert.equal(elements.get("wagonList").children.length, 2);
     assert.equal(elements.get("wagonList").children[1].children[3].textContent, "FOREVER");
     const previousStone = state.items.stone;
     const previousMiningXP = state.skills.mining.xp;
-    now += HOUR_MS;
+    now += MINUTE_MS;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
     assert.ok(state.items.stone >= previousStone, "scheduled mining never removes previous stone");
     assert.equal(state.skills.mining.xp - previousMiningXP,
-      HOUR_MS / ACTIVITIES.mining.durationMs * ACTIVITIES.mining.xp,
+      MINUTE_MS / ACTIVITIES.mining.durationMs * ACTIVITIES.mining.xp,
       "finite mining performs exactly the configured number of full work cycles");
     assert.equal(state.transition.phase, "moving");
     assert.equal(elements.get("transitionPhase").textContent, "Moving to new location");
@@ -261,6 +269,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.wagons.length, 3);
     assert.equal(elements.get("wagonList").children.length, 3);
+    assert.equal(elements.get("wagonList").style.gridTemplateColumns,
+      "repeat(3, minmax(0, 1fr))", "all 3 hourglasses render side by side");
     assert.equal(hunting.children[0].children[0].children[1].textContent, "Queued");
     assert.equal(masonry.children[0].children[0].children[1].textContent, "Queued");
     const secondCard = elements.get("wagonList").children[1];
@@ -277,7 +287,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     durationControls.children[1].value = "2";
     durationControls.children[1].fire("change");
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.equal(state.wagons[0].plannedMs, 2 * HOUR_MS);
+    assert.equal(state.wagons[0].plannedMs, 2 * MINUTE_MS);
     assert.equal(state.productiveElapsedMs, 0);
     assert.equal(elements.get("wagonList").children.length, 3);
 
