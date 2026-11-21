@@ -259,13 +259,15 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "meditation");
     assert.equal(state.productiveElapsedMs, 0);
-    assert.equal(pendingMeter.hidden, false);
+    const activeMeditationMeter = elements.get("wagonList").children[0].children.find(
+      c => c.className === "hourglass-schedule-progress");
+    assert.equal(activeMeditationMeter.hidden, false);
     now += MINUTE_MS / 2;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.productiveElapsedMs, MINUTE_MS / 2);
-    assert.equal(pendingMeter.getAttribute("aria-valuenow"), "50");
-    assert.equal(pendingMeter.children[0].style.width, "50.00%");
+    assert.equal(activeMeditationMeter.getAttribute("aria-valuenow"), "50");
+    assert.equal(activeMeditationMeter.children[0].style.width, "50.00%");
     now += MINUTE_MS / 2;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
