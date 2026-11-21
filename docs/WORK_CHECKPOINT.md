@@ -20,7 +20,7 @@
 ## Next approved work and boundaries
 
 1. **GAME-006 remains PARTIAL:** Initial ingredient-consuming crafting is merged and deployed. Next unfinished scope: actual combat/encounter risk and difficulty gating, plus balance calibration. Follow the combat/offline handoff and get owner decisions before selecting unapproved combat mechanics. Preserve protected inventory, frozen effective levels and uncapped time jumps.
-2. **GAME-004 TODO / deferred:** Five-minute zone travel and five-task repeating queue, following the existing task backlog and explicit owner sequencing.
+2. **GAME-004 TODO (design approved, gameplay not implemented):** Manual three-phase switching with Start buttons is specified in `docs/ACTIVITY_SWITCH_SPEC.md`. QUEUE-001 supersedes the old looping design: a linear queue of at most five activities with finite 1–8-hour/day entries and a final activity that runs forever. See `docs/ACTIVITY_QUEUE_SPEC.md`. Missing same-zone movement, preparation and queue-edit timings/policy require owner decisions before deployment. Existing five-minute cross-zone travel is binding.
 3. **GAME-009 BLOCKED:** Human/Undead reversible cumulative ritual is design-only pending exact costs, effects, persistence and other choices.
 4. Keep documentation, user-facing UI and release notes consistent with actual features. Do not equate a merged PR or a passing CI run with a verified public deployment.
 
