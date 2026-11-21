@@ -169,7 +169,13 @@ def check():
         engine_source = (play_root / "engine.mjs").read_text(encoding="utf-8")
         activity_ids = re.findall(r"^\s*([a-z_]+): task\(", engine_source, re.MULTILINE)
         assert len(activity_ids) >= 10 and len(set(activity_ids)) == len(activity_ids), "Invalid activity list"
+        # XP-only training/leisure activities use an existing painted scene until
+        # dedicated artwork is commissioned; all resource tasks retain their own art.
+        xp_only_ids = set(re.findall(r'^\s*([a-z_]+): task\([^\n]+, null, "Skill practice', engine_source, re.MULTILINE))
+        assert len(xp_only_ids) == 20, "Expected twenty XP-only activities"
         for activity_id in activity_ids:
+            if activity_id in xp_only_ids:
+                continue
             name = activity_id + ".webp"
             picture = play_root / "assets" / name
             raw = picture.read_bytes()

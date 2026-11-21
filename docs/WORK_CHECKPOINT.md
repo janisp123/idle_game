@@ -1,5 +1,14 @@
 # Current working checkpoint
 
+## In review — forty skills and skull crest (2026-11-21)
+
+- Owner requested ten training/knowledge activities, ten tavern/social activities, and replacement of the top-left cross.
+- Branch `feat/training-tavern-activities-20261121` adds 20 independently leveled XP-only activities (10 per new category) on top of the existing 20; no global character level, no forced universal specialization, no new loot. All use frozen effective levels during uncapped offline settlement.
+- Mobile activity categories now include Training & Knowledge and Tavern & Leisure. Top-left cross becomes skull crest. New categories currently reuse existing paintings instead of claiming 20 original scenes.
+- Existing V2 saves migrate missing skill keys. Engine/browser tests updated for 40 skills, XP-only inventory safety, navigation and decades offline.
+- Pending final-head CI and conflict review before automatic merge.
+
+
 ## In review — chronicle-only return reporting (2026-11-21)
 
 - Owner explicitly requested removal of the redundant "Welcome back" report and unnecessary pop-ups because return loot already appears in the Chronicle.

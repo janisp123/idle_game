@@ -1,7 +1,7 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, PRODUCTION_INPUTS, recipeOptions, newGame, readSave, settle,
   enterGame, chooseActivity, xpForLevel
-} from "./engine.mjs?v=20261121-production1";
+} from "./engine.mjs?v=20261121-forty-activities1";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -25,7 +25,7 @@ let lastSavedAt = 0;
 let storageWorks = true;
 
 const CATEGORY_LABELS = Object.freeze({
-  craft: "Honest Work", outlaw: "Outlaw Path", clan: "Clan Activities", other: "Other Activities"
+  craft: "Honest Work", outlaw: "Outlaw Path", training: "Training & Knowledge", leisure: "Tavern & Leisure", clan: "Clan Activities", other: "Other Activities"
 });
 const categoryActivities = new Map(Object.keys(CATEGORY_LABELS).map(id => [id, []]));
 let selectedCategory = null;
@@ -142,7 +142,10 @@ function message(text) {
 }
 
 function lootSummary(report) {
-  if (!report || !report.activity || !report.gainedItems) return "No new resources collected.";
+  if (!report || !report.activity) return "No new resources collected.";
+  if (ACTIVITIES[report.activity].item === null)
+    return report.completed ? "Practised " + ACTIVITIES[report.activity].title.toLowerCase() + "." : "";
+  if (!report.gainedItems) return "No new resources collected.";
   const amounts = report.items ?? { [report.item]: report.gainedItems };
   const found = Object.entries(amounts)
     .filter(([, amount]) => amount > 0)
@@ -153,7 +156,7 @@ function lootSummary(report) {
 function reportProgress(report) {
   if (!report || !report.activity) return;
   const summary = lootSummary(report);
-  message(summary);
+  if (summary) message(summary);
 }
 
 function render() {
@@ -220,7 +223,10 @@ function render() {
     ui.description.textContent = current.description;
     // Each activity has its own painted scene. Existing paintings remain fallbacks
     // until the new self-hosted WebP assets are uploaded alongside this change.
-    const desiredImage = "./assets/" + state.activity + ".webp?v=20261121-skills-outlaws-v3";
+    const sceneAsset = current.item === null
+      ? (current.category === "training" ? "masonry" : "cooking")
+      : state.activity;
+    const desiredImage = "./assets/" + sceneAsset + ".webp?v=20261121-skills-outlaws-v3";
     if (ui.sceneImage.getAttribute("src") !== desiredImage) {
       ui.sceneImage.onerror = () => {
         ui.sceneImage.onerror = null;
@@ -241,7 +247,8 @@ function tick() {
   const result = settle(state, Date.now());
   state = result.state;
   if (result.report.completed) {
-    message(lootSummary(result.report));
+    const summary = lootSummary(result.report);
+    if (summary) message(summary);
     writeSave();
   } else if (Date.now() - lastSavedAt > 3000) {
     writeSave();
@@ -262,7 +269,10 @@ function beginActivity(kind) {
   const result = chooseActivity(state, kind, Date.now());
   const changed = state.activity !== kind;
   state = result.state;
-  if (result.report.gainedItems) message(lootSummary(result.report));
+  if (result.report.completed) {
+    const summary = lootSummary(result.report);
+    if (summary) message(summary);
+  }
   if (changed) message("You begin " + ACTIVITIES[kind].title.toLowerCase() + ".");
   writeSave();
   render();

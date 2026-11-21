@@ -20,7 +20,7 @@ test("only individual activities have levels; character has a name but no level"
   assert.equal(Object.hasOwn(state, "level"), false);
   assert.equal(Object.hasOwn(state, "totalXP"), false);
   assert.ok(SKILL_IDS.length >= 10);
-  assert.ok(ITEM_KEYS.length > SKILL_IDS.length, "rare resources have separate stack keys");
+  assert.ok(ITEM_KEYS.length > 20, "rare resources have separate stack keys");
   for (const id of SKILL_IDS) assert.deepEqual(state.skills[id], { level: 1, xp: 0 });
 });
 
@@ -43,7 +43,10 @@ test("every activity earns its own skill XP and own resource", () => {
     assert.equal(finish(chosen, activity.durationMs - 1000).report.completed, 0);
     const result = finish(chosen, activity.durationMs);
     assert.equal(result.report.completed, 1);
-    assert.equal(result.state.items[activity.item], 1);
+    if (activity.item === null) {
+      assert.equal(result.report.gainedItems, 0);
+      assert.deepEqual(result.report.items, {});
+    } else assert.equal(result.state.items[activity.item], 1);
     assert.equal(result.state.skills[id].xp, activity.xp);
     assert.equal(result.state.skills[id].level, 1);
     for (const other of SKILL_IDS.filter(other => other !== id)) {
@@ -198,8 +201,7 @@ test("ten outlaw skills are independent, with their own spoils and long work cyc
   const honest = Object.entries(ACTIVITIES).filter(([, a]) => a.category === "craft");
   assert.equal(outlaws.length, 10);
   assert.equal(honest.length, 10);
-  assert.equal(SKILL_IDS.length, 20);
-  assert.equal(SKILL_IDS.length, 20);
+  assert.equal(SKILL_IDS.length, 40);
   assert.ok(ITEM_KEYS.length > 20);
   for (const [id, task] of outlaws) {
     assert.ok(task.durationMs >= 25 * BASE_CYCLE_MS, id);
@@ -232,7 +234,7 @@ test("old 10-skill saves load all ten new outlaw skills and resources safely", (
   assert.equal(loaded.items.stolen_purse, 0);
   assert.deepEqual(loaded.skills.highway_robbery, { xp: 0, level: 1 });
   assert.equal(Object.keys(loaded.items).length, ITEM_KEYS.length);
-  assert.equal(Object.keys(loaded.skills).length, 20);
+  assert.equal(Object.keys(loaded.skills).length, 40);
 });
 
 test("outlaw offline work has no time cap and only activates skills on return", () => {
@@ -426,4 +428,45 @@ test("old save without protection field migrates safely and invalid locks are re
   assert.equal(readSave(forged),null);
   const safeguarded = { ...old, protectedItems:["iron_ore"] };
   assert.deepEqual(readSave(safeguarded).protectedItems,["iron_ore"]);
+});
+
+test("twenty new personal activities offer ten training and ten leisure skills without loot", () => {
+  const training = Object.entries(ACTIVITIES).filter(([,a]) => a.category === "training");
+  const leisure = Object.entries(ACTIVITIES).filter(([,a]) => a.category === "leisure");
+  assert.equal(training.length, 10);
+  assert.equal(leisure.length, 10);
+  assert.equal(SKILL_IDS.length, 40);
+  assert.equal(new Set(SKILL_IDS).size, 40);
+  for (const [id, task] of [...training, ...leisure]) {
+    assert.equal(task.item, null);
+    const start = choose(newGame(0), id, 0).state;
+    const out = finish(start, task.durationMs * 10);
+    assert.equal(out.report.completed, 10);
+    assert.equal(out.report.gainedItems, 0);
+    assert.deepEqual(out.report.items, {});
+    assert.deepEqual(out.state.items, newGame(0).items);
+    assert.ok(out.state.skills[id].xp > 0);
+    assert.equal(out.state.skills[id].level, 1);
+    assert.ok(SKILL_IDS.filter(x => x !== id).every(x => out.state.skills[x].xp === 0));
+  }
+});
+
+test("new XP-only skills remain offline-safe for decades and old saves migrate", () => {
+  const old = newGame(0);
+  for (const [id, a] of Object.entries(ACTIVITIES)) {
+    if (a.item === null) delete old.skills[id];
+  }
+  const restored = readSave(JSON.stringify(old));
+  assert.ok(restored);
+  assert.deepEqual(restored.skills.meditation, {level: 1, xp: 0});
+  const away = choose(restored, "ale_with_friends", 0).state;
+  const result = finish(away, 20 * YEAR);
+  assert.ok(result.state.skills.ale_with_friends.xp > 0);
+  assert.equal(result.state.skills.ale_with_friends.level, 1);
+  assert.deepEqual(result.report.items, {});
+  assert.deepEqual(result.state.items, restored.items);
+  const back = enter(away, 20 * YEAR);
+  assert.ok(back.state.skills.ale_with_friends.level > 1);
+  assert.equal(back.state.skills.meditation.level, 1);
+  assert.deepEqual(readSave(JSON.stringify(back.state)), back.state);
 });

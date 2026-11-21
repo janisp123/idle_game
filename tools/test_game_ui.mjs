@@ -57,11 +57,21 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(categoryScreen.hidden, true);
     assert.equal(listScreen.hidden, true);
     assert.deepEqual(categories.map(b => b.textContent),
-      ["Honest Work", "Outlaw Path", "Clan Activities", "Other Activities"]);
+      ["Honest Work", "Outlaw Path", "Training & Knowledge", "Tavern & Leisure", "Clan Activities", "Other Activities"]);
     openActivities.fire("click");
     assert.equal(openActivities.hidden, true);
     assert.equal(categoryScreen.hidden, false);
     categories[2].fire("click");
+    assert.equal(elements.get("activityCategoryTitle").textContent, "Training & Knowledge");
+    assert.equal(elements.get("activityChoices").children.length, 10);
+    assert.ok(elements.get("activityChoices").children.some(b => b.children[0]?.children[0]?.textContent === "Meditation"));
+    elements.get("backToCategories").fire("click");
+    categories[3].fire("click");
+    assert.equal(elements.get("activityCategoryTitle").textContent, "Tavern & Leisure");
+    assert.equal(elements.get("activityChoices").children.length, 10);
+    assert.ok(elements.get("activityChoices").children.some(b => b.children[0]?.children[0]?.textContent === "Drinking ale with friends"));
+    elements.get("backToCategories").fire("click");
+    categories[4].fire("click");
     assert.equal(elements.get("activityCategoryTitle").textContent, "Clan Activities");
     assert.equal(elements.get("activityChoices").children[0].textContent, "No activities here yet.");
     elements.get("backToCategories").fire("click");
@@ -146,6 +156,19 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(chronicle.every(line => !/Welcome back|seconds|hours|XP|actions|cycles/i.test(line)),
       "no duplicated welcome messages or timers");
 
+    openActivities.fire("click");
+    categories[2].fire("click");
+    const meditation = elements.get("activityChoices").children.find(b => b.children[0]?.children[0]?.textContent === "Meditation");
+    meditation.fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.activity, "meditation");
+    const previousStone = state.items.stone;
+    now += ACTIVITIES.meditation.durationMs * 2;
+    tick();
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.ok(state.skills.meditation.xp > 0);
+    assert.equal(state.items.stone, previousStone, "meditation does not create resources");
+    assert.ok(elements.get("logList").children.some(x => x.textContent === "Practised meditation."));
     elements.get("nameInput").value = "The Black Rider";
     elements.get("saveName").fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
