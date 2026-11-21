@@ -17,7 +17,7 @@
 1. Identify repository/branch and **fetch current remote `main:docs/TD_LIST.md` first**, including before task edits, status checks, implementation, publication or delegation. If unavailable, report this; do not act from a stale backlog.
 2. Read `AGENTS.md`, checkpoint, decisions, relevant project rules, latest main revision, implementation and overlapping PRs. Unmerged work is **PENDING PR**, not a completed task on main.
 3. Confirm task ID, authorization, dependencies and conflicts. A listed task or discussion does not authorize implementation; the Owner decides direction and approvals.
-4. For approved writes, use a fresh main-based branch, a small testable scope and checked PR. Never bypass protection or merge/publish without authorization; the narrowly scoped standing research-docs approval in `AGENTS.md` counts only for its explicit paths and gates.
+4. For approved writes, use a fresh main-based branch, a small testable scope and checked PR. Owner authorization may be either explicit per-PR approval **or** standing AUTO-MERGE-001 approval for already-agreed scope once all readiness gates pass. Do not bypass branch protection or treat a task list item as authorization; the separate unattended research auto-merge allowlist remains narrow.
 5. After verification, record exact files, branch, commit/PR, checks (PASS/FAIL/NOT RUN), blockers and one next action. Change TD completion state only after integration and main readback. Keep local, PR, merged and deployed states distinct.
 
 Read-only queries do not need a new branch. Never claim an unavailable action happened or another agent is working in the background.
@@ -33,6 +33,10 @@ These commands apply to project work across **chat**, **cw** and **codex**. A lo
 | **Check status** | Read-only facts; do not implement or prompt for execution approval unless clarification is needed to identify the project. |
 
 If multiple repositories/tasks could match, identify the ambiguity instead of guessing. A usage-limit reset does not create a background job or authorize an agent to resume automatically. These meanings apply to project coordination; ordinary requests to continue writing non-project text are unaffected.
+
+## AUTO-MERGE-001 — agreed work may merge when verified
+
+The Owner granted standing approval on 2026-11-21: if the specific work was agreed, fully completed and tested, the PR is ready on the final head, and there is no conflict or decision requiring the Owner, merge without asking again. Read the full five-gate checklist in `AGENTS.md` first. If any gate fails, stop and request the needed decision. Confirm merged source on `main` and live deployment separately. This rule **does not** change the read-only semantics of a bare `Continue`.
 
 ## Agent names and task attribution
 
