@@ -96,6 +96,17 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       row.children[0]?.textContent === "Copper ore");
     assert.ok(copperRow, "rare resources must have inventory rows");
     assert.equal(copperRow.hidden, true, "zero inventory quantities remain hidden");
+    const reserve = copperRow.children[2];
+    assert.ok(reserve, "smelting inputs must have a protection toggle");
+    assert.equal(reserve.textContent, "Auto use");
+    reserve.fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.deepEqual(state.protectedItems, ["copper_ore"]);
+    assert.equal(reserve.textContent, "Protected");
+    reserve.fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.deepEqual(state.protectedItems, []);
+    assert.equal(reserve.textContent, "Auto use");
     assert.match(elements.get("returnMessage").textContent, /^You gathered \d+ stone\.$/);
     assert.doesNotMatch(elements.get("returnMessage").textContent, /seconds|hours|XP|actions|cycles/i);
 
