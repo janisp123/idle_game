@@ -5,7 +5,7 @@ import {
   MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster
-} from "./engine.mjs?v=20261121-no-resource-locks1";
+} from "./engine.mjs?v=20261121-until-levelup1";
 
 const $ = id => document.getElementById(id);
 const ui = {
