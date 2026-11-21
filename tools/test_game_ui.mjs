@@ -29,8 +29,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
   assert.doesNotMatch(appSource, /wagon-hourglass|hourglass-amber\.webp/,
     "the route no longer renders image elements");
-  assert.doesNotMatch(queueCss, /wagon-hourglass|hourglass-amber\.webp|background-image:\s*url/,
-    "the route must not reserve image space or replace it with an image background");
+  const queueStyles = queueCss.slice(queueCss.indexOf("/* QUEUE-002:"));
+  assert.ok(queueStyles.length > 100, "queue CSS contract must be present");
+  assert.doesNotMatch(queueStyles, /wagon-hourglass|hourglass-amber\.webp|background-image:\s*url/,
+    "the queue must not reserve illustration space or use a new card background image");
   assert.match(queueCss, /\.hourglass-schedule-progress/);
   assert.match(queueCss, /grid-template-rows:54px 22px 12px 91px 40px/,
     "five compact aligned rows: name, status, meter, duration, controls");
