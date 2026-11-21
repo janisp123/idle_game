@@ -143,8 +143,18 @@ def check():
         assert game_parser.lang == "en", "Game must declare English document language"
         assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
         assert {"game", "activityChoices", "resourceList", "sceneImage", "returnPanel",
-                "testDay", "logList", "sceneBanner", "actionCount", "timeInvested",
-                "experienceCount"}.issubset(game_parser.ids), "Missing essential gameplay UI"
+                "activityProgress", "actionFill", "logList", "sceneBanner",
+                "lifetimeXp"}.issubset(game_parser.ids), "Missing essential gameplay UI"
+        assert not ({"rateText", "countdown", "timeInvested", "testDay", "actionCount"} & game_parser.ids), (
+            "Time, action counts, and testing controls must not be exposed to players"
+        )
+        app_js = (play_root / "app.mjs").read_text(encoding="utf-8")
+        for leak in ("baseMinutes", "SEC / ACTION", "toLocaleTimeString", "elapsedMs",
+                     "timeInvested", "testDay", "gainedXP", "per cycle"):
+            assert leak not in app_js, f"Player-facing time/action detail leaked: {leak}"
+        assert "lootSummary(report)" in app_js and "aria-valuenow" in app_js
+        assert 'role="progressbar"' in game_html
+        assert "Welcome back." in game_html
         assert "./iron-ui.css" in game_html, "The shared dark-fantasy theme must be active"
         assert 'class="right-rail"' in game_html, "Resource/progress panel must exist"
         verify_links(game_parser, play_root)
