@@ -1,5 +1,13 @@
 # Current working checkpoint
 
+## In review — UI-002 mobile activity categories (2026-11-21)
+
+- Owner requested a short three-step picker: Activities → Honest Work / Outlaw Path / Clan Activities / Other Activities → matching activity. Back is always available at both nested levels.
+- Implemented in feature branch `feat/mobile-activity-category-navigation-20261121`: one compact entrypoint, 4 categories, 10 honest and 10 outlaw buttons, empty future categories explicitly labeled rather than inventing activities. Selecting an activity closes the picker; navigating Back does not alter current work, inventory, XP or save.
+- CSS enforces hidden screens, mobile-friendly full-width buttons and touch targets; smoke tests cover categories, empty states, navigation and uninterrupted work.
+- Pending PR CI, owner-approved AUTO-MERGE-001 readiness and main Pages verification.
+
+
 **Latest verified game deployment — 2026-11-21.** Main commit `7f2c2efa1cb505f076831d0df708560c2844ad74` merged PR #44 after successful final-head checks. Main GitHub Pages workflow run `44885082719` completed **successfully**, including Validate static site and Publish to GitHub Pages jobs. Public game: https://janisp123.github.io/idle_game/play/
 
 ## Merged game functionality
