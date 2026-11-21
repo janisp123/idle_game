@@ -90,10 +90,22 @@ function sentence(actor, text) {
   return actor.id === "player" ? "You " + text : actor.name + " " + text;
 }
 const finishers = Object.freeze({
-  hammer: "brings the hammer down in a crushing final blow",
-  axe: "tears through the broken guard with a savage axe blow",
-  sword: "finds the opening and drives the sword home",
-  spear: "pins the fallen opponent with a decisive spear thrust"
+  hammer: {
+    player: "You bring the warhammer down and crush the fallen enemy's skull.",
+    enemy: "The enemy smashes your helm with a savage hammer blow."
+  },
+  axe: {
+    player: "Your axe tears through the enemy's broken guard, severing an arm before the final strike.",
+    enemy: "The enemy hacks through your guard with a devastating axe blow."
+  },
+  sword: {
+    player: "Your sword cuts through the exposed throat in one terrible finishing stroke.",
+    enemy: "The enemy drives a sword into your unguarded chest."
+  },
+  spear: {
+    player: "You pin the fallen enemy to the ground with a final spear thrust.",
+    enemy: "The enemy runs you through with a brutal spear thrust."
+  }
 });
 function normalized(f, id) {
   const maxHP = Math.max(1, Math.round(COMBAT_BALANCE.startingHP +
@@ -120,15 +132,19 @@ export function simulateDuel(player, opponent, random) {
       (a.opening ? 0.1 : 0), COMBAT_BALANCE.minHitChance, COMBAT_BALANCE.maxHitChance);
     a.opening = false;
     if (roll(random) >= hit) {
-      a.opening = true;
+      // Missing opens the attacker to the opponent's next counter, not
+      // an accidental hit bonus on the attacker's own following swing.
+      d.opening = true;
       events.push({ type: "miss", actor: a.id, target: d.id, damage: 0,
-        text: sentence(a, "overreach" + (a.id === "player" ? " and leave an opening." :
-          "es and leave an opening.")) });
+        text: sentence(a, a.id === "player"
+          ? "overreach and leave yourself exposed."
+          : "overreaches and leaves an opening.") });
       continue;
     }
     const defense = roll(random);
     const dodge = bounded(COMBAT_BALANCE.dodgeChance + (d.dex - a.dex) * 0.006, 0.03, 0.42);
     if (defense < dodge) {
+      d.opening = true;
       events.push({ type: "dodge", actor: d.id, target: a.id, damage: 0,
         text: sentence(d, d.id === "player" ? "slip aside as the blade cuts empty air." :
           "slips aside as the blow passes.") });
@@ -147,11 +163,10 @@ export function simulateDuel(player, opponent, random) {
       d.hp = 0;
       events.push({ type: "finisher", actor: a.id, target: d.id, dice,
         damage: null, hpAfter: 0,
-        text: "6–6–6! " + sentence(a, a.id === "player"
-          ? finishers[a.weapon] + ". The enemy falls and does not rise."
-          : finishers[a.weapon].replace("brings", "bring").replace("tears", "tear")
-            .replace("finds", "find").replace("pins", "pin") +
-            ". You fall, and the pit wardens carry you clear.") });
+        text: "6–6–6! " + (a.id === "player"
+          ? finishers[a.weapon].player + " The fight is over."
+          : a.name + " strikes decisively. " + finishers[a.weapon].enemy +
+            " You fall, and the pit wardens carry you clear.") });
       break;
     }
     const damage = Math.max(1, Math.round(COMBAT_BALANCE.baseDamage +
