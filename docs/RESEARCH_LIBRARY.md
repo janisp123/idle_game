@@ -6,7 +6,7 @@
 
 Original, self-contained technical explanations of mechanics and implementation patterns: algorithms, data models, architectural tradeoffs, pseudocode, testing approaches, scalability, browser performance, security and practical failure cases.
 
-The public repository should **not identify or link to games used for inspiration, outside projects consulted while researching, or places information was gathered from.** Never imply that a concept was invented here merely because its background research is not listed. Research is synthesis and analysis, not proof of originality.
+**Verifiable sourcing:** Name and link relevant external primary sources, official documentation, specifications, source files or tests when they support a claim. Identify exactly what was inspected and distinguish evidence from inference. Prefer stable versioned links. A citation is not permission to copy code or art.
 
 **No third-party code or artwork is copied into the library.** If future actual code integration requires retaining license notices or third-party attributions, the legal requirement takes priority; either comply transparently or use independently implemented code instead. Never present copied third-party code as original.
 
@@ -14,7 +14,7 @@ The public repository should **not identify or link to games used for inspiratio
 
 **Optional, task-specific reference only.** Approved work lives in `docs/TD_LIST.md`; `AGENTS.md` and `docs/DECISIONS.md` govern implementation. Never treat a fit tag as authorization or require Codex to read the whole library.
 
-For technical design choices, start with the compact [Research map](RESEARCH_MAP.md); then open **only** a relevant guide. Skip library reading on unrelated tasks. For combat/offline tasks, first consult the [short project handoff](brainstorm/ARCHITECTURE_AND_BALANCING.md#combatoffline-handoff--concise-context-for-codex-2026-11-20). External source provenance belongs to the owner's separate private source index, not this public library.
+For technical design choices, start with the compact [Research map](RESEARCH_MAP.md); then open **only** a relevant guide. Skip library reading on unrelated tasks. For combat/offline tasks, first consult the [short project handoff](brainstorm/ARCHITECTURE_AND_BALANCING.md#combatoffline-handoff--concise-context-for-codex-2026-11-20). Cite inspectable public evidence in technical articles; private logs can track search queries and rejected leads.
 
 ## Reading order
 
@@ -86,7 +86,7 @@ Keep evidence-backed failure patterns in the short [Bad examples](BAD_EXAMPLES.m
 5. Compare realistic alternative implementations and the circumstances in which each makes sense.
 6. Include a practical test plan or reproducible results if available.
 7. Tag **our-game fit**, independently of general merit.
-8. Link to **our own** prototypes or verification results if they exist; avoid external names, attribution claims and source URLs in public research notes.
+8. Link to **our own** prototypes or verification results if they exist; include targeted citations for externally researched claims.
 
 Good documentation should help a reader implement something correctly, not merely name a pattern.
 
@@ -108,6 +108,6 @@ These constraints govern **our product**, not what the broader public library is
 
 ## Public repository hygiene
 
-Do not publish personal conversations, secrets, credentials, personal data, identifiable names of reference games, external research destinations, copied code or unlicensed artwork. Keep any mandatory attribution associated with licensed third-party contributions if such contributions are ever allowed; the simplest way to avoid conflicting requirements is to use our own explanations and implementations.
+Do not publish personal conversations, secrets, credentials, personal data, copied code or unlicensed artwork. Cite relevant public sources accurately. Keep any mandatory attribution associated with licensed third-party contributions if such contributions are ever allowed; the simplest way to avoid conflicting requirements is to use our own explanations and implementations.
 
 **Purpose: make a genuinely useful library of how-to knowledge, while keeping our actual game's requirements and development backlog separate.**
