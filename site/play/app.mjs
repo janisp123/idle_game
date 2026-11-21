@@ -649,7 +649,7 @@ function render() {
     // duel image is added to the repository. Later a real combat
     // event stream will choose strike/block/retreat images by event type.
     // Do not rotate unrelated images: the picture must match the event.
-    const sceneAsset = sceneId === "fighting" ? "bandit_raiding" :
+    const sceneAsset = sceneId === "fighting" ? "fighting" :
       sceneActivity.item === null
         ? (sceneActivity.category === "training" ? "masonry" : "cooking")
         : sceneId;
