@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Three-across hourglass vertical alignment (chat; PR #71)
+
+- **Owner screenshot/approval:** The Owner reported that images and controls across the three hourglass schedule cards were vertically staggered and explicitly approved implementing and merging the layout correction.
+- **Implemented:** [PR #71](https://github.com/janisp123/idle_game/pull/71) merged on main as `46a6e8a387176e35d2f89f6855146787523aeeb1`. All cards now use six identical grid row slots: art, title, activity status, progress placeholder, scheduled duration/Forever, reorder/remove controls. Non-running cards reserve an invisible, noninteractive progress slot instead of showing a false progressbar; the running finite card retains its real accessible productive-time percentage bar. Fixed phone row heights and script/CSS cache-busting protect the three-across layout without sideways scrolling.
+- **Scope/security:** Only browser app markup, CSS, cache-version tags and browser smoke tests changed. Engine, existing saves, XP/items, chosen-task duration semantics, offline progression and original artwork are unchanged.
+- **Verified:** Final PR-head [Idle Game website run 44912553825](https://github.com/janisp123/idle_game/actions/runs/44912553825) and [Project Protocol Preflight 44912553923](https://github.com/janisp123/idle_game/actions/runs/44912553923) passed. Main Pages [run 44912604747](https://github.com/janisp123/idle_game/actions/runs/44912604747) passed validation/deployment. Public `/play/` returned HTTP 200 with both updated CSS and JS `20261121-hourglass-align1` references. This confirms release and automated contracts, not a physical-phone visual screenshot.
+- **Next:** Owner can visually inspect three activity cards with short/long names in Chrome on Android; report any residual clipping.
+
 ## 2026-11-21 — Android screenshot-informed hourglass queue UX repairs (chat; PR #69)
 
 - **Evidence:** The Owner supplied Android browser screenshots showing the sandglass image overlapping the task title, inaccessible **Start now** on a populated route, and a four-hour duration selected for a new task instead being assigned to the previous task.
