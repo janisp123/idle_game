@@ -70,7 +70,26 @@ export function levelFromXP(xp) {
   return result;
 }
 
-export function settle(state, now = Date.now()) {
+/**
+ * One independent +/-10% roll for each reward TOTAL per settlement batch.
+ * Stochastic rounding keeps integer rewards unbiased, including single actions.
+ * Constant work regardless of the number of offline actions.
+ * This intentionally is not equivalent to rolling separately for every action.
+ */
+function variedTotal(base, random) {
+  const roll = () => {
+    const value = random();
+    if (!Number.isFinite(value) || value < 0 || value >= 1) throw new RangeError("Invalid random roll");
+    return value;
+  };
+  const scaled = base * (0.9 + 0.2 * roll());
+  if (!Number.isSafeInteger(Math.ceil(scaled))) throw new RangeError("Reward exceeds safe numeric range");
+  const whole = Math.floor(scaled);
+  const fraction = scaled - whole;
+  return whole + (fraction > 0 && roll() < fraction ? 1 : 0);
+}
+
+export function settle(state, now = Date.now(), random = Math.random) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
   const end = Math.max(state.settledAtMs, now);
   const elapsedMs = end - state.settledAtMs;
@@ -85,8 +104,8 @@ export function settle(state, now = Date.now()) {
   if (count > 0) {
     report.completed = count;
     report.item = rules.item;
-    report.gainedItems = count * rules.yield;
-    report.gainedXP = count * rules.xp;
+    report.gainedItems = variedTotal(count * rules.yield, random);
+    report.gainedXP = variedTotal(count * rules.xp, random);
     next.items[rules.item] = safeAdd(state.items[rules.item], report.gainedItems);
     next.totalXP = safeAdd(state.totalXP, report.gainedXP);
   }
@@ -95,24 +114,24 @@ export function settle(state, now = Date.now()) {
 }
 
 /** Called only when the user ENTERS/RETURNS to the game, after full catch-up. */
-export function enterGame(state, now = Date.now()) {
-  const outcome = settle(state, now);
+export function enterGame(state, now = Date.now(), random = Math.random) {
+  const outcome = settle(state, now, random);
   const earnedLevel = levelFromXP(outcome.state.totalXP);
   const levelsGained = earnedLevel - outcome.state.level;
   return { state: { ...outcome.state, level: Math.max(1, earnedLevel) },
     report: outcome.report, levelsGained };
 }
 
-export function chooseActivity(state, activity, now = Date.now()) {
+export function chooseActivity(state, activity, now = Date.now(), random = Math.random) {
   if (!Object.hasOwn(ACTIVITIES, activity)) throw new RangeError("Unknown activity");
-  const settled = settle(state, now);
+  const settled = settle(state, now, random);
   if (settled.state.activity === activity) return settled;
   return { state: { ...settled.state, activity, progressMs: 0 }, report: settled.report };
 }
 
-export function testOfflineDay(state, now = Date.now()) {
+export function testOfflineDay(state, now = Date.now(), random = Math.random) {
   if (!state.activity) return { state, report: null, levelsGained: 0 };
   // A transparent, local-only testing shortcut. No hidden duration cap.
   const simulated = { ...state, settledAtMs: state.settledAtMs - 86400000 };
-  return enterGame(simulated, now);
+  return enterGame(simulated, now, random);
 }
