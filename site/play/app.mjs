@@ -4,7 +4,7 @@ import {
   queueSetDuration, queueSwap, queueRemoveLast,
   MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, xpForLevel
-} from "./engine.mjs?v=20261121-hourglass-fixes1";
+} from "./engine.mjs?v=20261121-resource-protection1";
 
 const $ = id => document.getElementById(id);
 const ui = {
