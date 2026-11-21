@@ -26,6 +26,7 @@ const ui = {
   wagonQueue: $("wagonQueue"), wagonList: $("wagonList"),
   queuePlanner: $("queuePlanner"), queuePlannerTitle: $("queuePlannerTitle"),
   queuePlannerHint: $("queuePlannerHint"), queueAmountLabel: $("queueAmountLabel"),
+  queueMasteryMode: $("queueMasteryMode"),
   queueAmount: $("queueAmount"), queueUnit: $("queueUnit"),
   queueConfirm: $("queueConfirm"), queueCancel: $("queueCancel"),
   logList: $("logList"),
@@ -95,19 +96,28 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   name.textContent = task.title;
   const startButton = document.createElement("button");
   startButton.type = "button";
-  startButton.className = "activity-start";
-  startButton.textContent = "Start now";
+  startButton.className = "activity-start activity-icon-button";
+  startButton.textContent = "▶";
   startButton.setAttribute("aria-label", "Start " + task.title + " now");
+  startButton.title = "Start " + task.title + " now";
   startButton.addEventListener("click", () => startActivityNow(id));
   const queueButton = document.createElement("button");
   queueButton.type = "button";
-  queueButton.className = "activity-start activity-queue-button";
-  queueButton.textContent = "Schedule";
+  queueButton.className = "activity-start activity-queue-button activity-icon-button";
+  queueButton.textContent = "↻";
   queueButton.setAttribute("aria-label", "Schedule " + task.title + " for a chosen duration");
+  queueButton.title = "Schedule " + task.title + " for a chosen duration";
   queueButton.addEventListener("click", () => planActivity(id));
+  const levelButton = document.createElement("button");
+  levelButton.type = "button";
+  levelButton.className = "activity-start activity-icon-button activity-levelup-button";
+  levelButton.textContent = "↑";
+  levelButton.setAttribute("aria-label", "Schedule " + task.title + " until ready to level up");
+  levelButton.title = "Schedule " + task.title + " until ready to level up";
+  levelButton.addEventListener("click", () => planActivity(id, true));
   const actions = document.createElement("span");
   actions.className = "activity-actions";
-  actions.append(startButton, queueButton);
+  actions.append(startButton, queueButton, levelButton);
   titleRow.append(name, actions);
   const detail = document.createElement("small");
   detail.textContent = task.itemLabel;
@@ -118,7 +128,7 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   activityRewardLabels.set(id, detail);
   activityLevelLabels.set(id, rank);
   categoryActivities.get(task.category in CATEGORY_LABELS ? task.category : "other").push(row);
-  activityButtons.set(id, { row, startButton, queueButton });
+  activityButtons.set(id, { row, startButton, queueButton, levelButton });
 }
 for (const item of ITEM_KEYS) {
   const row = document.createElement("div");
@@ -364,8 +374,15 @@ function updatePlanningMode() {
   ui.queueConfirm.textContent = untilReady
     ? (state.wagons.length === 1 ? "Start until ↑ LvL Up" : "Add until ↑ LvL Up")
     : (state.wagons.length === 1 ? "Start for this time" : "Add timed task");
+  ui.queueMasteryMode.setAttribute("aria-pressed", String(untilReady));
+  ui.queueMasteryMode.classList.toggle("selected", untilReady);
 }
 ui.queueUnit.addEventListener("change", updatePlanningMode);
+ui.queueMasteryMode.addEventListener("click", () => {
+  const selected = ui.queueUnit.value === UNTIL_LEVEL_UP;
+  ui.queueUnit.value = selected ? (TIMING_PROFILE === "alpha" ? "minutes" : "hours") : UNTIL_LEVEL_UP;
+  updatePlanningMode();
+});
 ui.queueCancel.addEventListener("click", () => hideQueuePlanner());
 ui.queueConfirm.addEventListener("click", () => {
   if (!planningActivity) return;
@@ -496,7 +513,7 @@ function render() {
     currentScheduledMeter.setAttribute("aria-valuenow", String(Math.round(clamped)));
     currentScheduledMeter.hidden = Boolean(state.transition);
   }
-  for (const [id, { row, startButton, queueButton }] of activityButtons) {
+  for (const [id, { row, startButton, queueButton, levelButton }] of activityButtons) {
     const skill = state.skills[id];
     activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level) +
       (skill.xp >= xpToNextLevel(skill.level) ? " · Master ready" : "");
@@ -513,16 +530,27 @@ function render() {
     const queuedIndex = state.wagons.findIndex(w => w.activity === id);
     const queueFull = state.wagons.length >= MAX_WAGONS;
     startButton.disabled = queuedIndex === 0;
-    startButton.textContent = destination ? "Changing" : queuedIndex === 0
-      ? "Current" : "Start now";
-    startButton.setAttribute("aria-label", queuedIndex === 0
+    startButton.textContent = "▶";
+    const startLabel = queuedIndex === 0
       ? "Current route destination: " + ACTIVITIES[id].title
-      : "Start " + ACTIVITIES[id].title + " now, replacing the current route");
-    queueButton.disabled = !state.wagons.length || queuedIndex !== -1 || queueFull;
-    queueButton.textContent = queuedIndex > 0 ? "Queued" : queueFull ? "Full" : "Schedule";
-    queueButton.setAttribute("aria-label", queueButton.disabled
-      ? "Cannot schedule " + ACTIVITIES[id].title
-      : "Schedule " + ACTIVITIES[id].title + " for a selected duration");
+      : "Start " + ACTIVITIES[id].title + " now, replacing the current route";
+    startButton.setAttribute("aria-label", startLabel);
+    startButton.title = startLabel;
+    const canSchedule = Boolean(state.wagons.length) && queuedIndex === -1 && !queueFull;
+    queueButton.disabled = !canSchedule;
+    queueButton.textContent = "↻";
+    const queueLabel = canSchedule
+      ? "Schedule " + ACTIVITIES[id].title + " for a selected duration"
+      : "Cannot schedule " + ACTIVITIES[id].title;
+    queueButton.setAttribute("aria-label", queueLabel);
+    queueButton.title = queueLabel;
+    levelButton.disabled = !canSchedule;
+    levelButton.textContent = "↑";
+    const levelLabel = canSchedule
+      ? "Schedule " + ACTIVITIES[id].title + " until ready to level up"
+      : "Cannot schedule " + ACTIVITIES[id].title + " until level-up readiness";
+    levelButton.setAttribute("aria-label", levelLabel);
+    levelButton.title = levelLabel;
   }
 
   const selectedSkill = state.activity ? state.skills[state.activity] : null;
@@ -639,13 +667,14 @@ function startActivityNow(kind) {
   applyQueueChange(result, "Changing to " + ACTIVITIES[kind].title.toLowerCase() + " now.");
 }
 
-function planActivity(kind) {
+function planActivity(kind, untilLevelUp = false) {
   if (!state.wagons.length || state.wagons.some(w => w.activity === kind) ||
       state.wagons.length >= MAX_WAGONS) return;
   showActivityScreen("root", null);
   planningActivity = kind;
   ui.queueAmount.value = "1";
-  ui.queueUnit.value = TIMING_PROFILE === "alpha" ? "minutes" : "hours";
+  ui.queueUnit.value = untilLevelUp ? UNTIL_LEVEL_UP :
+    (TIMING_PROFILE === "alpha" ? "minutes" : "hours");
   const previous = ACTIVITIES[state.wagons.at(-1).activity].title;
   ui.queuePlannerTitle.textContent = "How long should " + ACTIVITIES[kind].title + " run?";
   planningHint = state.wagons.length === 1
