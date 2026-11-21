@@ -41,20 +41,19 @@ export function recipeOptions(activity, level) {
 
 /**
  * Compute batch output using the full saved inventory available at settlement,
- * honoring protected ingredients. A depleted input cannot be fabricated.
+ * with no protection flags. A depleted input cannot be fabricated.
  *
  * Quotas are drawn from eligible recipe weights, capped to available input,
  * then unused work capacity is filled from remaining available eligible inputs.
  * Individual single-action choices are weighted; large batches use bounded
  * binomial approximations. All counts stay integer and nonnegative.
  */
-export function produce(activity, level, workCycles, inventory, protectedItems = [], random = Math.random) {
+export function produce(activity, level, workCycles, inventory, random = Math.random) {
   if (!Number.isSafeInteger(workCycles) || workCycles < 0 ||
-      !inventory || typeof inventory !== "object" || !Array.isArray(protectedItems))
+      !inventory || typeof inventory !== "object")
     throw new RangeError("Invalid production request");
-  const excluded = new Set(protectedItems);
   const options = recipeOptions(activity, level).filter(r =>
-    !excluded.has(r.input) && Number.isSafeInteger(inventory[r.input]) && inventory[r.input] > 0
+    Number.isSafeInteger(inventory[r.input]) && inventory[r.input] > 0
   );
   const consumed = {}, created = {};
   if (!workCycles || !options.length) return { completed: 0, consumed, created };
