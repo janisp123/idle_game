@@ -92,8 +92,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(buttons.every(b => b.children[0].children[2].textContent === "Skill level 1"));
     const alchemy = buttons.find(b => b.children[0].children[0].textContent === "Potion making");
     const cooking = buttons.find(b => b.children[0].children[0].textContent === "Cooking");
-    assert.match(alchemy.children[0].children[1].textContent, /Potions \\(uses Herbs\\)/);
-    assert.match(cooking.children[0].children[1].textContent, /Meals \\(uses Fish\\)/);
+    assert.ok(alchemy.children[0].children[1].textContent.includes("Potions (uses Herbs)"));
+    assert.ok(cooking.children[0].children[1].textContent.includes("Meals (uses Fish)"));
     assert.equal(elements.get("character-heading").textContent, "Marauder");
     let state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.unattributedXP, 85);
