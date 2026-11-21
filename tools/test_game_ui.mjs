@@ -162,6 +162,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.deepEqual(state.wagons, [{ activity: "mining", plannedMs: null }]);
     assert.equal(elements.get("wagonQueue").hidden, false);
     assert.equal(elements.get("wagonList").children.length, 1);
+    const miningQueueLabel = elements.get("wagonList").children[0].children[0];
+    assert.equal(miningQueueLabel.textContent, "Mining LvL 1,00",
+      "each queue title includes the current skill level and XP percent");
+    assert.match(miningQueueLabel.getAttribute("aria-label"), /skill level 1, 0% toward/);
     assert.equal(elements.get("wagonList").children[0].children[3].textContent, "FOREVER");
     assert.deepEqual(elements.get("wagonList").children[0].children.map(c => c.className), [
       "wagon-name", "wagon-position", "hourglass-progress-spacer",
@@ -183,12 +187,21 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(JSON.parse(store.get(SAVE_KEY)).activity, "mining",
       "back navigation must not interrupt the active task");
 
-    now += 30 * ACTIVITIES.mining.durationMs;
+    now += 4 * ACTIVITIES.mining.durationMs;
+    tick();
+    assert.equal(miningQueueLabel.textContent, "Mining LvL 1,20",
+      "queue skill progress updates on every ordinary work tick");
+    assert.equal(elements.get("wagonList").children[0].children[0], miningQueueLabel,
+      "refresh the title in-place, not the entire card or its focused controls");
+    now += 26 * ACTIVITIES.mining.durationMs;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.skills.mining.xp, 40, "the XP bar stops at one level");
     assert.equal(state.skills.mining.level, 1);
     assert.equal(elements.get("skillXp").textContent, "XP full · Seek the Skill Master to advance");
+    assert.equal(miningQueueLabel.textContent, "Mining LvL 1,100",
+      "at the Master gate show 100% rather than hiding or exceeding the cap");
+    assert.match(miningQueueLabel.getAttribute("aria-label"), /visit the Skill Master to advance/);
 
     document.visibilityState = "hidden";
     handlers.get("visibilitychange")();
@@ -221,6 +234,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(masterConfirmations, 2);
     assert.deepEqual(state.skills.mining, {level:2,xp:0});
+    assert.equal(miningQueueLabel.textContent, "Mining LvL 2,00",
+      "Master advancement updates the queue level and clears percent without rebuilding");
     assert.equal(state.items.stone, 0, "Master takes every stone");
     assert.equal(state.items.hide, 8, "hunting resources stay untouched");
     assert.equal(elements.get("masterAudience").hidden, true);
@@ -408,6 +423,12 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.deepEqual(rendered.map(card => card.children[0].className),
       ["wagon-name", "wagon-name", "wagon-name"],
       "titles start together without a blank image area");
+    assert.deepEqual(rendered.map(card => card.children[0].textContent.replace(/ LvL .*/, "")),
+      ["Hunting", "Masonry", "Mining"]);
+    for (const card of rendered) {
+      assert.match(card.children[0].textContent, / LvL [1-9]\d*,(?:\d{2}|100)$/,
+        "all three cards show the current XP fraction, even queued and Forever slots");
+    }
     assert.deepEqual(rendered.map(card => card.children[2].className),
       ["hourglass-schedule-progress", "hourglass-progress-spacer", "hourglass-progress-spacer"],
       "only the running finite task has a real meter");
