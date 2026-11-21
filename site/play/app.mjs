@@ -15,8 +15,8 @@ const ui = {
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
   heading: $("scene-heading"), description: $("activityDescription"), actionFill: $("actionFill"),
   activityProgress: $("activityProgress"),
-  logList: $("logList"), returnPanel: $("returnPanel"), returnMessage: $("returnMessage"),
-  banner: $("sceneBanner"), dismissReturn: $("dismissReturn"), saveStatus: $("saveStatus")
+  logList: $("logList"),
+  banner: $("sceneBanner"), saveStatus: $("saveStatus")
 };
 const number = value => new Intl.NumberFormat("en-GB").format(value);
 const messages = [];
@@ -153,9 +153,7 @@ function lootSummary(report) {
 function reportProgress(report) {
   if (!report || !report.activity) return;
   const summary = lootSummary(report);
-  ui.returnMessage.textContent = summary;
-  ui.returnPanel.hidden = false;
-  message("Welcome back. " + summary);
+  message(summary);
 }
 
 function render() {
@@ -266,7 +264,6 @@ function beginActivity(kind) {
   state = result.state;
   if (result.report.gainedItems) message(lootSummary(result.report));
   if (changed) message("You begin " + ACTIVITIES[kind].title.toLowerCase() + ".");
-  ui.returnPanel.hidden = true;
   writeSave();
   render();
 }
@@ -287,7 +284,6 @@ function start() {
     writeSave();
   }
 
-  ui.dismissReturn.addEventListener("click", () => { ui.returnPanel.hidden = true; });
   ui.saveName.addEventListener("click", () => {
     const chosen = ui.nameInput.value.trim().replace(/\s+/g, " ");
     if (!chosen || chosen.length > 40) {
