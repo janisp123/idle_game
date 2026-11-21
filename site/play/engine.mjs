@@ -4,7 +4,7 @@
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 1;
+export const GAME_VERSION = 2;
 // A completed action represents an entire work cycle, not one swing or strike.
 // Adjust BASE_CYCLE_MS or a single activity's speed multiplier to rebalance.
 export const BASE_CYCLE_MS = 60_000;
@@ -25,6 +25,8 @@ export const ACTIVITIES = Object.freeze({
   cooking: task("Cooking", "Meals", "meal", "Meals", 12, 2, "Prepare fuel, cook food and pack rations.", "Camp")
 });
 export const ITEM_KEYS = Object.freeze([...new Set(Object.values(ACTIVITIES).map(a => a.item))]);
+export const SKILL_IDS = Object.freeze(Object.keys(ACTIVITIES));
+const blankSkills = () => Object.fromEntries(SKILL_IDS.map(id => [id, { level: 1, xp: 0 }]));
 export const activityDuration = (id, speedMultiplier = 1) => {
   if (!Object.hasOwn(ACTIVITIES, id) || !Number.isFinite(speedMultiplier) || speedMultiplier <= 0)
     throw new RangeError("Invalid activity or speed");
@@ -39,8 +41,9 @@ export function newGame(now = Date.now()) {
   return {
     version: GAME_VERSION,
     name: "Wanderer",
-    level: 1,
-    totalXP: 0,
+    skills: blankSkills(),
+    // V1 global XP cannot be assigned to individual activities reliably.
+    unattributedXP: 0,
     items: Object.fromEntries(ITEM_KEYS.map(key => [key, 0])),
     activity: null,
     progressMs: 0,
@@ -48,22 +51,42 @@ export function newGame(now = Date.now()) {
   };
 }
 
-/** Accept only the expected save schema; never trust old/corrupt local data. */
+/** Read previous V1 browser saves without losing inventory, unfinished work or XP. */
 export function readSave(value) {
   try {
     const s = typeof value === "string" ? JSON.parse(value) : value;
-    if (!s || s.version !== GAME_VERSION ||
-      typeof s.name !== "string" || s.name.length > 40 ||
-      !isCount(s.level) || s.level < 1 || !isCount(s.totalXP) ||
-      !s.items || typeof s.items !== "object" || !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
-      (s.activity !== null && !Object.hasOwn(ACTIVITIES, s.activity)) ||
-      !isCount(s.progressMs) || !validTime(s.settledAtMs)) return null;
+    if (!s || (s.version !== 1 && s.version !== GAME_VERSION) ||
+        typeof s.name !== "string" || s.name.length > 40 ||
+        !s.items || typeof s.items !== "object" ||
+        !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
+        (s.activity !== null && !Object.hasOwn(ACTIVITIES, s.activity)) ||
+        !isCount(s.progressMs) || !validTime(s.settledAtMs)) return null;
     if (s.activity && s.progressMs >= ACTIVITIES[s.activity].durationMs) return null;
     if (!s.activity && s.progressMs !== 0) return null;
-    if (s.level > levelFromXP(s.totalXP)) return null;
+
+    const oldVersion = s.version === 1;
+    if (oldVersion) {
+      if (!isCount(s.level) || s.level < 1 || !isCount(s.totalXP) ||
+          s.level > levelFromXP(s.totalXP)) return null;
+    } else {
+      if (!isCount(s.unattributedXP) || !s.skills || typeof s.skills !== "object" ||
+          !SKILL_IDS.every(id => {
+            const skill = s.skills[id];
+            return skill === undefined || (skill && typeof skill === "object" &&
+              isCount(skill.xp) && isCount(skill.level) && skill.level >= 1 &&
+              skill.level <= levelFromXP(skill.xp));
+          })) return null;
+    }
+    const skills = blankSkills();
+    if (!oldVersion) {
+      for (const id of SKILL_IDS) {
+        if (s.skills[id]) skills[id] = { xp: s.skills[id].xp, level: s.skills[id].level };
+      }
+    }
     return {
-      version: GAME_VERSION, name: s.name, level: s.level,
-      totalXP: s.totalXP, items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
+      version: GAME_VERSION, name: s.name, skills,
+      unattributedXP: oldVersion ? s.totalXP : s.unattributedXP,
+      items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
       activity: s.activity, progressMs: s.progressMs, settledAtMs: s.settledAtMs
     };
   } catch {
@@ -114,7 +137,7 @@ export function settle(state, now = Date.now(), random = Math.random) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
   const end = Math.max(state.settledAtMs, now);
   const elapsedMs = end - state.settledAtMs;
-  const next = { ...state, items: { ...state.items }, settledAtMs: end };
+  const next = { ...state, skills: { ...state.skills }, items: { ...state.items }, settledAtMs: end };
   const report = { activity: state.activity, elapsedMs, completed: 0, gainedXP: 0, item: null, gainedItems: 0 };
   if (!state.activity || elapsedMs === 0) return { state: next, report };
 
@@ -128,19 +151,27 @@ export function settle(state, now = Date.now(), random = Math.random) {
     report.gainedItems = variedTotal(count * rules.yield, random);
     report.gainedXP = variedTotal(count * rules.xp, random);
     next.items[rules.item] = safeAdd(state.items[rules.item], report.gainedItems);
-    next.totalXP = safeAdd(state.totalXP, report.gainedXP);
+    const prior = state.skills[state.activity];
+    next.skills[state.activity] = { ...prior, xp: safeAdd(prior.xp, report.gainedXP) };
+    // Offline skill effectiveness stays frozen at the last activated level.
   }
   // Intentionally DO NOT modify next.level here, regardless of XP thresholds.
   return { state: next, report };
 }
 
 /** Called only when the user ENTERS/RETURNS to the game, after full catch-up. */
+/** Apply all skill level-ups ONLY when the player returns, after offline settlement. */
 export function enterGame(state, now = Date.now(), random = Math.random) {
   const outcome = settle(state, now, random);
-  const earnedLevel = levelFromXP(outcome.state.totalXP);
-  const levelsGained = earnedLevel - outcome.state.level;
-  return { state: { ...outcome.state, level: Math.max(1, earnedLevel) },
-    report: outcome.report, levelsGained };
+  const skills = {};
+  const levelsGained = {};
+  for (const id of SKILL_IDS) {
+    const prior = outcome.state.skills[id];
+    const level = levelFromXP(prior.xp);
+    skills[id] = { ...prior, level };
+    if (level > prior.level) levelsGained[id] = level - prior.level;
+  }
+  return { state: { ...outcome.state, skills }, report: outcome.report, levelsGained };
 }
 
 export function chooseActivity(state, activity, now = Date.now(), random = Math.random) {
