@@ -66,10 +66,19 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   };
   let allowRouteOverride = false;
   let overrideConfirmations = 0;
+  let allowMasterTribute = false;
+  let masterConfirmations = 0;
   globalThis.window = {
     addEventListener() {},
     setInterval(handler) { tick = handler; },
-    confirm() { overrideConfirmations++; return allowRouteOverride; }
+    confirm(prompt) {
+      if (prompt.startsWith("THE MASTER'S DUE")) {
+        masterConfirmations++;
+        return allowMasterTribute;
+      }
+      overrideConfirmations++;
+      return allowRouteOverride;
+    }
   };
   Date.now = () => now;
   try {
@@ -175,9 +184,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     now += 30 * ACTIVITIES.mining.durationMs;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.ok(state.skills.mining.xp >= 40);
-    assert.equal(state.skills.mining.level, 1, "ordinary ticks must not activate new levels");
-    assert.equal(elements.get("skillXp").textContent, "Level-up ready on return");
+    assert.equal(state.skills.mining.xp, 40, "the XP bar stops at one level");
+    assert.equal(state.skills.mining.level, 1);
+    assert.equal(elements.get("skillXp").textContent, "XP full · Seek the Skill Master to advance");
 
     document.visibilityState = "hidden";
     handlers.get("visibilitychange")();
@@ -185,10 +194,36 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     document.visibilityState = "visible";
     handlers.get("visibilitychange")();
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.ok(state.skills.mining.level > 1, "return activates skill levels");
+    assert.equal(state.skills.mining.level, 1, "returning never upgrades skills automatically");
+    assert.equal(state.skills.mining.xp, 40);
     assert.equal(state.skills.hunting.level, 1);
+    assert.doesNotMatch(mining.children[0].children[1].textContent, /Copper ore/,
+      "rarer ore must remain locked until the Master teaches the new level");
+    const visitMaster = elements.get("visitMaster");
+    assert.match(visitMaster.textContent, /1 ready/);
+    visitMaster.fire("click");
+    assert.equal(elements.get("masterAudience").hidden, false);
+    assert.equal(visitMaster.getAttribute("aria-expanded"), "true");
+    assert.ok(elements.get("masterSkills").children.some(row => /Mining: Level 1/.test(row.textContent)));
+    const originalStone = state.items.stone;
+    assert.ok(elements.get("masterTribute").children.some(row =>
+      row.textContent === originalStone.toLocaleString("en-GB") + " Stone"),
+      "trainer previews exact material cost before irreversible sacrifice");
+    elements.get("masterConfirm").fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(masterConfirmations, 1);
+    assert.equal(state.skills.mining.level, 1, "declining must not sacrifice inventory");
+    assert.equal(state.items.stone, originalStone);
+    allowMasterTribute = true;
+    elements.get("masterConfirm").fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(masterConfirmations, 2);
+    assert.deepEqual(state.skills.mining, {level:2,xp:0});
+    assert.equal(state.items.stone, 0, "Master takes every stone");
+    assert.equal(state.items.hide, 8, "hunting resources stay untouched");
+    assert.equal(elements.get("masterAudience").hidden, true);
     assert.match(mining.children[0].children[1].textContent, /Copper ore/,
-      "rare ores become visible only after a skill unlocks them");
+      "the Master's lesson activates new mineral types");
     const rows = elements.get("resourceList").children.filter(row => row.className === "item");
     assert.equal(rows.length, ITEM_KEYS.length);
     assert.ok(rows.every(row => row.children.length === 3 &&
