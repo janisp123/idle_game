@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Compact image-free three-column queue (chat; PR #73)
+
+- **Owner refinement:** After seeing the six-row UI on phone, the Owner asked to **remove the hourglass illustration** and reduce the large empty spaces, rather than placing the picture in the card background.
+- **Implementation:** [PR #73](https://github.com/janisp123/idle_game/pull/73) merged as `5b5ddb7151404190a4b66de0bf9cb01376600491`: stop creating image markup inside queue cards; remove obsolete illustration-specific CSS and replace six oversized rows with five compact aligned rows (task, status, small active-only progress, duration/Forever, buttons). Keep three columns visible with no horizontal scrollbar and preserve dark fantasy metal/parchment styling. No additional background-image substitution; the original asset is retained but unused.
+- **Scope:** Browser UI and UI tests only. Existing Start now/Schedule semantics, alpha minute settings, serverless offline engine, local saves, XP/items and the main activity tableau are unchanged.
+- **Validation:** Final-head [Idle Game website tests 44914293654](https://github.com/janisp123/idle_game/actions/runs/44914293654) and [Project Protocol Preflight 44914293649](https://github.com/janisp123/idle_game/actions/runs/44914293649) passed. Main GitHub Pages [run 44914366122](https://github.com/janisp123/idle_game/actions/runs/44914366122) passed validation and deployment; public `/play/` HTTP 200 readback included both CSS and JS `20261121-compact-route1`. No post-deployment Android screenshot inspected.
+- **Follow-up:** Verify three card columns and readability on the Owner's phone; further alterations require an explicit new owner request.
+
 ## 2026-11-21 — Three-across hourglass vertical alignment (chat; PR #71)
 
 - **Owner screenshot/approval:** The Owner reported that images and controls across the three hourglass schedule cards were vertically staggered and explicitly approved implementing and merging the layout correction.
