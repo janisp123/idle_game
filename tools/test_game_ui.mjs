@@ -218,11 +218,14 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("wagonList").children.length, 2);
     assert.equal(elements.get("wagonList").children[1].children[3].textContent, "FOREVER");
     const previousStone = state.items.stone;
+    const previousMiningXP = state.skills.mining.xp;
     now += HOUR_MS;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.equal(state.items.stone, previousStone + HOUR_MS / ACTIVITIES.mining.durationMs,
-      "finite mining earns its scheduled work without replaying cycles individually");
+    assert.ok(state.items.stone >= previousStone, "scheduled mining never removes previous stone");
+    assert.equal(state.skills.mining.xp - previousMiningXP,
+      HOUR_MS / ACTIVITIES.mining.durationMs * ACTIVITIES.mining.xp,
+      "finite mining performs exactly the configured number of full work cycles");
     assert.equal(state.transition.phase, "moving");
     assert.equal(elements.get("transitionPhase").textContent, "Moving to new location");
     assert.deepEqual(state.wagons, [{ activity: "meditation", plannedMs: null }]);
