@@ -495,6 +495,17 @@ footer p{color:#aa9680}
   font:11px Georgia,serif;
 }
 .wagon-duration span {font-size:10px;color:#dbc3a4}
+.wagon-duration > span:first-child {
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.wagon-mastery-shortcut {
+  min-width:24px;min-height:22px;padding:0 5px;
+  color:#f4ce91;background:#3b2819;border:1px solid #ab8050;
+  font:700 15px/1 Georgia,serif;cursor:pointer;
+}
+.wagon-mastery-shortcut[hidden] {display:none !important}
+.wagon-mastery-shortcut:focus-visible {outline:2px solid #ffcf81;outline-offset:2px}
+
 .wagon-duration select,.planner-fields select {
   display:block;width:100%;min-width:0;
   min-height:31px;padding:3px 2px;
