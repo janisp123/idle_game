@@ -5,7 +5,7 @@ import {
   MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterOffer, learnFromMaster
-} from "./engine.mjs?v=20261121-skill-master1";
+} from "./engine.mjs?v=20261121-no-resource-locks1";
 
 const $ = id => document.getElementById(id);
 const ui = {
