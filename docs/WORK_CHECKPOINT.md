@@ -1,5 +1,15 @@
 # Current working checkpoint
 
+## Current work — skill-weighted raw resource rewards, GAME-006A (2026-11-21)
+
+- Owner-approved AUTO-MERGE-001 merged via PR #42; agreed, passing, non-conflicting gameplay PRs may merge automatically.
+- This in-review branch adds `site/play/loot.mjs`: level-gated weighted tables for five raw-gathering activities, rare resources as separate unlimited inventory stacks, and bounded-cost stochastic allocation over large offline intervals. High-tier drops replace (do not add to) the settled batch. Skill levels remain frozen throughout each interval under OFF-001.
+- Hunting loot represents **placeholder spoils only**, not implemented combat. Rare encounters, HP, injury, protective ingredient settings and input-consuming smelting/crafting are still pending GAME-006 follow-ups.
+- New resource labels in the UI show only tiers unlocked at the currently effective skill level. Uncollected inventory stacks stay hidden. No activity timers or return-time metrics return.
+- New and legacy game saves remain under V2 format and the same localStorage key; missing new rare resource keys default to 0.
+- **Next:** confirm PR CI (engine+browser smoke+site checks), auto-merge if all gates pass, verify main and Pages deployment, then continue with inventory-respecting production as a separate small PR.
+
+
 **Verified after merge on 2026-11-21.** Source of truth is remote `main:docs/TD_LIST.md`; read it first. Latest combined game commit: `058bef74b5397b405bbe7f7dfff8ef22b8893972`, from merged [PR #40](https://github.com/janisp123/idle_game/pull/40). Both PR validation workflows **passed** on its final head `a231c95fd413dd273b8024ef320ee3db10cd4607`.
 
 ## Current playable code in main
