@@ -143,7 +143,7 @@ def check():
         game_parser.close()
         assert game_parser.lang == "en", "Game must declare English document language"
         assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
-        assert {"game", "activityChoices", "resourceList", "sceneImage", "returnPanel",
+        assert {"game", "activityChoices", "resourceList", "sceneImage", "logList",
                 "activityProgress", "actionFill", "logList", "sceneBanner", "character-heading",
                 "skillTitle", "skillLevel", "skillXp", "skillFill", "nameInput", "saveName"}.issubset(game_parser.ids), "Missing essential gameplay UI"
         assert not ({"level", "xpText", "xpFill", "lifetimeXp"} & game_parser.ids), (
@@ -160,7 +160,8 @@ def check():
         assert "state.skills[id]" in app_js and "skillFill" in app_js
         assert "state.totalXP" not in app_js and "state.level" not in app_js
         assert 'role="progressbar"' in game_html
-        assert "Welcome back." in game_html
+        assert "Welcome back." not in game_html
+        assert "returnPanel" not in game_html
         assert "./iron-ui.css" in game_html, "The shared dark-fantasy theme must be active"
         assert 'class="right-rail"' in game_html, "Resource/progress panel must exist"
         verify_links(game_parser, play_root)
