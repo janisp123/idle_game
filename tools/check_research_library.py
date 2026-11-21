@@ -10,8 +10,9 @@ ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "docs" / "RESEARCH_LIBRARY.md"
 CATALOG = ROOT / "docs" / "USEFUL_EXAMPLES.md"
 MAP = ROOT / "docs" / "RESEARCH_MAP.md"
+QUEUE = ROOT / "docs" / "RESEARCH_QUEUE.md"
 ARTICLES = sorted((ROOT / "docs" / "library").glob("*.md"))
-DOCUMENTS = [INDEX, CATALOG, MAP, *ARTICLES]
+DOCUMENTS = [INDEX, CATALOG, MAP, QUEUE, *ARTICLES]
 
 # External source provenance belongs in the private daily report, not these files.
 SOURCE_URL = re.compile(r"https?://|www\.|(?:github|gitlab|reddit)\.com/", re.I)
@@ -20,6 +21,7 @@ HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$")
 FENCE = re.compile(r"^\s*((?:\x60){3,}|~{3,})")
 SECTION_ID = re.compile(r"^## (P\d{2})\s+[—-]", re.M)
 ROW_ID = re.compile(r"^\|\s*(P\d{2})\s*\|", re.M)
+QUESTION_ID = re.compile(r"^\|\s*(RQ-\d{3})\s*\|", re.M)
 
 
 def prose_lines(content):
@@ -68,7 +70,7 @@ def main():
         else:
             contents[path] = path.read_text(encoding="utf-8")
 
-    if INDEX not in contents or CATALOG not in contents or MAP not in contents:
+    if INDEX not in contents or CATALOG not in contents or MAP not in contents or QUEUE not in contents:
         return errors
 
     if len(contents[MAP].encode("utf-8")) > 3500:
@@ -112,6 +114,15 @@ def main():
                 errors.append(f"Duplicate {label} ID: {key} ({count})")
     if set(sections) != set(rows):
         errors.append("Catalog quick-index IDs differ from article section IDs")
+    questions = QUESTION_ID.findall(contents[QUEUE])
+    if len(questions) > 12:
+        errors.append("Research queue exceeds 12 active questions")
+    for key, count in Counter(questions).items():
+        if count != 1:
+            errors.append(f"Duplicate research question ID: {key} ({count})")
+    if len(contents[QUEUE].encode("utf-8")) > 6500:
+        errors.append("Research queue exceeds 6.5 KB; prune or consolidate questions")
+
     for article in ARTICLES:
         if article.name != "ENTRY_TEMPLATE.md":
             if article.name not in contents[INDEX] and article.name not in catalog:
@@ -126,4 +137,4 @@ if __name__ == "__main__":
         for problem in problems:
             print("FAIL:", problem, file=sys.stderr)
         sys.exit(1)
-    print("PASS: research links, index IDs, article titles and source-neutrality")
+    print("PASS: research links, index IDs, active queue IDs, article titles and source-neutrality")
