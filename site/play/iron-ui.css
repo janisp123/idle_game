@@ -648,3 +648,39 @@ footer p{color:#aa9680}
   .character-attributes {grid-template-columns:1fr 1fr;gap:5px}
   .character-attribute-row {font-size:11px;padding:4px}
 }
+
+/* GAME-011 — slow combat: one truthful narrative event per simulation beat. */
+.combat-panel {
+  margin:0;padding:13px 15px 14px;
+  border-top:2px ridge #956846;
+  background:linear-gradient(145deg,#2a1714,#120d0b 86%);
+  color:#e8d0b3;
+}
+.combat-panel[hidden],.combat-dice[hidden] {display:none !important}
+.combat-event-title {
+  margin:0 0 7px;color:#e0ae75;
+  font:700 12px/1.35 Georgia,serif;letter-spacing:.11em;
+}
+.combat-event-text {
+  margin:0;color:#f2dec4;font:16px/1.48 Georgia,serif;
+}
+.combat-dice {
+  margin-top:10px;padding:10px 12px;
+  border:2px ridge #b28854;
+  background:linear-gradient(145deg,#422119,#20120f);
+  font:700 clamp(26px,5vw,44px)/1 Georgia,serif;
+  color:#ffe2aa;text-shadow:0 2px 4px #100806;
+  text-align:center;font-variant-numeric:tabular-nums;
+  letter-spacing:.10em;
+}
+.combat-panel.finisher .combat-dice {
+  border-color:#e5ad61;background:linear-gradient(145deg,#69241c,#2b1110);
+  box-shadow:inset 0 0 0 1px #f2bb6c,0 0 15px #641b14;
+}
+.combat-art-hint {
+  margin:8px 0 0;color:#b79a7f;font:11px/1.5 Georgia,serif;
+}
+@media(max-width:520px) {
+  .combat-panel {padding:12px 11px}
+  .combat-event-text {font-size:15px}
+}

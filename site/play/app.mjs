@@ -6,8 +6,9 @@ import {
   MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster
-} from "./engine.mjs?v=20261121-attributes1";
+} from "./engine.mjs?v=20261121-combat-v1";
 
+import { combatAtTime, COMBAT_ART } from "./combat.mjs?v=20261121-combat-v1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -22,6 +23,8 @@ const ui = {
   masterSkills: $("masterSkills"), masterTribute: $("masterTribute"), masterWarning: $("masterWarning"),
   masterConfirm: $("masterConfirm"), masterCancel: $("masterCancel"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
+  combatPanel: $("combatPanel"), combatEventTitle: $("combatEventTitle"),
+  combatEventText: $("combatEventText"), combatDice: $("combatDice"),
   heading: $("scene-heading"), description: $("activityDescription"), actionFill: $("actionFill"),
   activityProgress: $("activityProgress"), transitionStatus: $("transitionStatus"),
   transitionPhase: $("transitionPhase"), transitionProgress: $("transitionProgress"), transitionFill: $("transitionFill"),
@@ -44,6 +47,7 @@ let lastWagonSignature = null;
 const wagonSkillLabels = new Map();
 let currentScheduledMeter = null;
 let currentScheduledFill = null;
+let lastCombatEventKey = null;
 
 const CATEGORY_LABELS = Object.freeze({
   combat: "Fighting", craft: "Honest Work", outlaw: "Outlaw Path", training: "Training & Knowledge", leisure: "Tavern & Leisure", clan: "Clan Activities", other: "Other Activities"
@@ -193,6 +197,7 @@ function message(text) {
 
 function lootSummary(report) {
   if (!report || !report.activity) return "No new resources collected.";
+  if (report.activity === "fighting") return ""; // Real combat steps own the chronicle.
   if (ACTIVITIES[report.activity].item === null)
     return report.completed ? "Practised " + ACTIVITIES[report.activity].title.toLowerCase() + "." : "";
   if (!report.gainedItems) return "No new resources collected.";
@@ -627,6 +632,28 @@ function render() {
     ui.transitionProgress.setAttribute("aria-valuenow", String(Math.round(percent)));
     ui.transitionProgress.setAttribute("aria-label", phaseName);
   }
+  // The simulator returns one real typed event every 20 seconds. We present
+  // only that event, never invented victory/kill counts for long offline gaps.
+  const combat = current?.category === "combat" && !transition
+    ? combatAtTime(state.combatSession) : null;
+  ui.combatPanel.hidden = !combat;
+  ui.combatDice.hidden = !combat || !combat.event.dice;
+  if (combat) {
+    const event = combat.event;
+    const key = state.combatSession.seed + ":" + combat.bout + ":" + combat.step;
+    ui.combatEventTitle.textContent = "DUEL " + number(combat.bout) +
+      " · " + event.type.toUpperCase();
+    ui.combatEventText.textContent = event.text;
+    ui.combatDice.hidden = !event.dice;
+    ui.combatDice.textContent = event.dice ? event.dice.join(" · ") : "";
+    ui.combatPanel.classList.toggle("finisher", event.type === "finisher");
+    if (key !== lastCombatEventKey) {
+      message(event.text);
+      lastCombatEventKey = key;
+    }
+  } else {
+    lastCombatEventKey = null;
+  }
   const sceneActivity = transition ? ACTIVITIES[transition.targetActivity] : current;
   if (!sceneActivity) {
     ui.sceneTag.textContent = "WAITING FOR ORDERS";
@@ -649,20 +676,26 @@ function render() {
     // duel image is added to the repository. Later a real combat
     // event stream will choose strike/block/retreat images by event type.
     // Do not rotate unrelated images: the picture must match the event.
-    const sceneAsset = sceneId === "fighting" ? "fighting" :
+    // Exact-match image registry is intentionally sparse until unique art
+    // exists. The permanent arena tableau remains a *backdrop*, never a
+    // fabricated picture of a hit/block/finisher that was not illustrated.
+    const combatArt = combat && COMBAT_ART[combat.event.type];
+    const sceneAsset = sceneId === "fighting" ? (combatArt ?? "fighting") :
       sceneActivity.item === null
         ? (sceneActivity.category === "training" ? "masonry" : "cooking")
         : sceneId;
-    const desiredImage = "./assets/" + sceneAsset + ".webp?v=20261121-fighting-intro1";
+    const desiredImage = "./assets/" + sceneAsset + ".webp?v=20261121-combat-v1";
     if (ui.sceneImage.getAttribute("src") !== desiredImage) {
       ui.sceneImage.onerror = () => {
         ui.sceneImage.onerror = null;
-        ui.sceneImage.src = "./assets/" + (isHunt ? "hunting.webp" : "mining.webp") + "?v=20261121-fighting-intro1";
+        ui.sceneImage.src = "./assets/" + (isHunt ? "hunting.webp" : "mining.webp") + "?v=20261121-combat-v1";
       };
       ui.sceneImage.src = desiredImage;
     }
     ui.sceneImage.alt = "Dark fantasy illustration of " + sceneActivity.title.toLowerCase();
-    ui.sceneCaption.textContent = sceneActivity.zone.toUpperCase();
+    ui.sceneCaption.textContent = combat
+      ? (combatArt ? "THE FIGHTING PIT" : "ARENA BACKDROP · EVENT ART COMING")
+      : sceneActivity.zone.toUpperCase();
     if (!transition) {
       const percentage = Math.min(100, 100 * state.progressMs / sceneActivity.durationMs);
       ui.actionFill.style.width = percentage.toFixed(2) + "%";

@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261121-attributes1">
-  <script type="module" src="./app.mjs?v=20261121-fighting-first1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261121-combat-v1">
+  <script type="module" src="./app.mjs?v=20261121-combat-v1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -142,6 +142,12 @@
               <p id="activityDescription">A wolf prowls the treeline. Stone lies buried beneath the hills. Your journey begins with one decision.</p>
             </div>
           </div>
+          <section id="combatPanel" class="combat-panel" hidden aria-label="Live combat event">
+            <p id="combatEventTitle" class="combat-event-title">THE FIGHTING PIT</p>
+            <p id="combatEventText" class="combat-event-text">Two fighters face each other.</p>
+            <div id="combatDice" class="combat-dice" hidden aria-label="Three skull dice"></div>
+            <p class="combat-art-hint">Event-specific illustrations are being commissioned. The current painting is an arena backdrop.</p>
+          </section>
           <div id="transitionStatus" class="transition-status" hidden>
             <p id="transitionPhase" class="transition-phase" role="status" aria-live="polite">Getting ready to start new activity</p>
             <div class="meter activity-meter transition-meter" id="transitionProgress" role="progressbar" aria-label="Changing activity" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="transitionFill"></span></div>
