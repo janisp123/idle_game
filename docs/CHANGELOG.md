@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Inventory-consuming basic crafts for all production professions (chat)
+
+- **Merged:** [PR #54](https://github.com/janisp123/idle_game/pull/54), main commit `d2bc350794ef0eb6b1c460b71d6268fb2012e170`.
+- **GAME-006 crafting subset:** Alchemy now consumes one herb per potion, Carpentry one log per plank, Masonry one stone per block and Cooking one fish per meal. This extends the pre-existing protected-input and no-material/no-output/no-XP behavior of Smelting. Activity menu labels show input requirements. Only basic prototype recipes were added, not advanced tiers or arbitrary ingredient formulas.
+- **Compatibility:** No new save schema or inventory key. `PRODUCTION_INPUTS` also exposes ingredient protection for herbs, logs, stone and fish. The unchanged bounded production settlement handles 20-year absences without replaying each action; effective skills remain frozen until return per OFF-001. Previously earned items are retained.
+- **Tests and release:** Final PR-head [Project Protocol Preflight #128](https://github.com/janisp123/idle_game/actions/runs/44895472261) and [website #78](https://github.com/janisp123/idle_game/actions/runs/44895472306) passed after an initial outdated regression assertion was corrected. Main [Pages workflow #79](https://github.com/janisp123/idle_game/actions/runs/44895513098) passed validation and publishing. Public `/play/` returned HTTP 200 and served `20261121-ingredient-crafting1`; this verifies deployed HTML, not exhaustive playtesting.
+- **Still incomplete:** No actual combat, encounter wounds/risks, combat-stat gating or calibrated rarity balance. GAME-006 stays PARTIAL. GAME-004 and GAME-009 remain deferred/blocked.
+
 ## 2026-11-21 — Forty-skill UI, chronicle-only returns and Pages recovery (chat)
 
 - **UI-002:** [PR #46](https://github.com/janisp123/idle_game/pull/46) merged mobile-first nested activity navigation with category Back controls and empty Clan/Other placeholders.
