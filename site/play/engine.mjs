@@ -167,7 +167,7 @@ export function readSave(value) {
 
     // Old V1–V3 single-activity saves become a one-wagon Forever queue.
     // A saved transition already points at the intended first wagon.
-    const wagons = s.wagons === undefined
+    const wagons = s.version !== GAME_VERSION || s.wagons === undefined
       ? (transition ? [{ activity: transition.targetActivity, plannedMs: null }]
         : s.activity ? [{ activity: s.activity, plannedMs: null }] : [])
       : s.wagons;
