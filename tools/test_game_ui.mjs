@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS } from "../site/play/engine.mjs";
+import { ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP } from "../site/play/engine.mjs";
 
 class FakeElement {
   children = [];
@@ -286,8 +286,18 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       /how long should Meditation run/i, "new duration is for selected task");
     assert.match(elements.get("queuePlannerHint").textContent,
       /Mining resumes Forever/);
-    elements.get("queueAmount").value = "1";
+    // Planner offers mastery readiness without a meaningless numeric count.
+    elements.get("queueUnit").value = UNTIL_LEVEL_UP;
+    elements.get("queueUnit").fire("change");
+    assert.equal(elements.get("queueAmount").hidden, true);
+    assert.equal(elements.get("queueAmountLabel").hidden, true);
+    assert.match(elements.get("queuePlannerHint").textContent, /both XP and Skill Master resources/);
+    assert.match(elements.get("queueConfirm").textContent, /LvL Up/);
     elements.get("queueUnit").value = "minutes";
+    elements.get("queueUnit").fire("change");
+    assert.equal(elements.get("queueAmount").hidden, false);
+    assert.equal(elements.get("queueAmountLabel").hidden, false);
+    elements.get("queueAmount").value = "1";
     elements.get("queueConfirm").fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
     assert.deepEqual(state.wagons, [
@@ -404,6 +414,25 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       "all bottom controls remain aligned");
     assert.equal(masonryActions.children[1].textContent, "Queued");
 
+    // Mastery condition is selectable directly on a future compact queue card.
+    const futureDuration = elements.get("wagonList").children[1].children[3];
+    futureDuration.children[2].value = UNTIL_LEVEL_UP;
+    futureDuration.children[2].fire("change");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.wagons[1].plannedMs, UNTIL_LEVEL_UP);
+    const masteryDuration = elements.get("wagonList").children[1].children[3];
+    assert.equal(masteryDuration.children[1].hidden, true);
+    assert.equal(masteryDuration.children[2].value, UNTIL_LEVEL_UP);
+    assert.equal(masteryDuration.children[0].textContent, "Until");
+    // Return the future task to its original two-minute duration for regression coverage.
+    masteryDuration.children[2].value = "minutes";
+    masteryDuration.children[2].fire("change");
+    const restoredDuration = elements.get("wagonList").children[1].children[3];
+    restoredDuration.children[1].value = "2";
+    restoredDuration.children[1].fire("change");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.wagons[1].plannedMs, 2 * MINUTE_MS);
+
     now += MINUTE_MS / 2;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
@@ -427,8 +456,20 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     // Editing current duration resets its *planned* window from the edit.
     const firstCard = elements.get("wagonList").children[0];
     const durationControls = firstCard.children.find(c => c.className === "wagon-duration");
-    durationControls.children[1].value = "2";
-    durationControls.children[1].fire("change");
+    durationControls.children[2].value = UNTIL_LEVEL_UP;
+    durationControls.children[2].fire("change");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.wagons[0].plannedMs, UNTIL_LEVEL_UP);
+    const masteryMeter = elements.get("wagonList").children[0].children[2];
+    assert.match(masteryMeter.getAttribute("aria-label"), /Skill Master readiness/);
+    assert.equal(state.productiveElapsedMs, 0);
+    // Restore a finite window: changing the stop type takes effect immediately.
+    const afterMastery = elements.get("wagonList").children[0].children[3];
+    afterMastery.children[2].value = "minutes";
+    afterMastery.children[2].fire("change");
+    const afterMinutes = elements.get("wagonList").children[0].children[3];
+    afterMinutes.children[1].value = "2";
+    afterMinutes.children[1].fire("change");
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.wagons[0].plannedMs, 2 * MINUTE_MS);
     assert.equal(state.productiveElapsedMs, 0);
