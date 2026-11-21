@@ -9,7 +9,7 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css">
-  <script type="module" src="./app.mjs?v=20261121-no-time-info-v2"></script>
+  <script type="module" src="./app.mjs?v=20261121-skills-v2"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -39,13 +39,26 @@
             <div class="portrait" aria-hidden="true"><span class="portrait-emblem">✥</span></div>
             <div>
               <h2 id="character-heading">Wanderer</h2>
-              <p class="level-label">Level <span id="level">1</span></p>
-              <p class="attribute">The nameless wanderer</p>
+              <p class="attribute">Your name, your path.</p>
             </div>
           </div>
-          <div class="xp-meta"><span>Experience</span><strong id="xpText">0 / 40 XP</strong></div>
-          <div class="meter" aria-label="XP towards next level"><span id="xpFill"></span></div>
-          <p class="hint">Earn experience while away. Levels activate when you return.</p>
+          <div class="player-name-edit">
+            <label for="nameInput">Character name</label>
+            <div class="name-row">
+              <input id="nameInput" type="text" maxlength="40" value="Wanderer" autocomplete="off" aria-label="Character name">
+              <button id="saveName" type="button" class="small-button">Save</button>
+            </div>
+          </div>
+          <p class="hint">Your character has no overall level. Only skills improve.</p>
+        </section>
+
+        <section class="panel skill-focus" aria-labelledby="skill-heading">
+          <p class="section-index">THE PATH OF MASTERY</p>
+          <h2 id="skill-heading" class="engraved-title">SKILL PROGRESS</h2>
+          <div class="skill-meta"><span id="skillTitle">Choose an activity</span><strong id="skillLevel">—</strong></div>
+          <div class="meter skill-meter" aria-label="XP toward next skill level"><span id="skillFill"></span></div>
+          <p class="hint" id="skillXp">Each activity has independent XP.</p>
+          <p class="hint">Skill improvements activate when you return.</p>
         </section>
 
         <section class="panel actions" aria-labelledby="actions-heading">
@@ -101,12 +114,11 @@
           <p class="section-index">III · THE SPOILS</p>
           <h2 id="inventory-heading" class="engraved-title">RESOURCES</h2>
           <div id="resourceList"></div>
-          <div class="item total"><span>Lifetime XP</span><strong id="lifetimeXp">0</strong></div>
         </section>
       </aside>
     </div>
     <footer>
-      <p><strong>Early prototype.</strong> Activities repeat automatically, not simulated combat or resource-consuming recipes yet. No HP, death, equipment or multiplayer yet. Levels apply only on return.</p>
+      <p><strong>Early prototype.</strong> Activities repeat automatically. Each activity earns its own skill XP, and new skill levels activate when you return. Detailed encounters, recipe inputs and combat are not yet simulated.</p>
       <p>All progress is stored in this browser only. Clearing site data or switching devices will lose this character. No account or server save yet.</p>
     </footer>
   </main>
