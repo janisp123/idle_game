@@ -38,6 +38,7 @@ let lastSavedAt = 0;
 let storageWorks = true;
 let planningActivity = null;
 let lastWagonSignature = null;
+const wagonSkillLabels = new Map();
 let currentScheduledMeter = null;
 let currentScheduledFill = null;
 
@@ -206,6 +207,24 @@ function announceArrival(priorTransition) {
 }
 
 
+/** Queue-card skill values must refresh while their DOM controls stay mounted.
+ * Recreating all three cards every tick would lose focus on duration selects.
+ * The comma separates the actual level from XP progress toward its next one:
+ * LvL 31,28 means skill level 31 with its current XP bar 28% complete.
+ */
+function updateWagonSkillLabels() {
+  for (const [activity, label] of wagonSkillLabels) {
+    const skill = state.skills[activity];
+    const percent = Math.min(100, Math.floor(skill.xp / xpToNextLevel(skill.level) * 100));
+    const value = ACTIVITIES[activity].title + " LvL " + number(skill.level) +
+      "," + String(percent).padStart(2, "0");
+    if (label.textContent !== value) label.textContent = value;
+    label.setAttribute("aria-label", ACTIVITIES[activity].title + ", skill level " +
+      number(skill.level) + ", " + percent + "% toward the next level" +
+      (percent === 100 ? "; visit the Skill Master to advance" : ""));
+  }
+}
+
 /** Keep all queued jobs visible; focused controls are rebuilt only on queue edits. */
 const durationUnitMs = unit => unit === "days" ? DAY_MS :
   unit === "hours" ? HOUR_MS : MINUTE_MS;
@@ -213,8 +232,12 @@ function renderWagons() {
   const wagons = state.wagons ?? [];
   ui.wagonQueue.hidden = wagons.length === 0;
   const signature = JSON.stringify([wagons, state.transition?.targetActivity, state.activity]);
-  if (signature === lastWagonSignature) return;
+  if (signature === lastWagonSignature) {
+    updateWagonSkillLabels();
+    return;
+  }
   lastWagonSignature = signature;
+  wagonSkillLabels.clear();
   currentScheduledMeter = null;
   currentScheduledFill = null;
   // Unlike the previous scrolling wagon strip, every hourglass fits in view.
@@ -225,7 +248,7 @@ function renderWagons() {
     card.className = "wagon";
     const label = document.createElement("strong");
     label.className = "wagon-name";
-    label.textContent = ACTIVITIES[wagon.activity].title;
+    wagonSkillLabels.set(wagon.activity, label);
     const position = document.createElement("small");
     position.className = "wagon-position";
     position.textContent = i === 0
@@ -322,6 +345,7 @@ function renderWagons() {
     return card;
   });
   ui.wagonList.replaceChildren(...cards);
+  updateWagonSkillLabels();
 }
 
 function applyQueueChange(result, description) {
