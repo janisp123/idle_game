@@ -36,10 +36,30 @@ export const ACTIVITIES = Object.freeze({
   caravan_plundering: task("Caravan plundering", "Caravans", "trade_goods", "Plundered goods", 70, 4, "Overwhelm a caravan and haul off its cargo.", "Trade road", 1, "outlaw"),
   cattle_rustling: task("Cattle rustling", "Livestock", "stolen_cattle", "Stolen cattle", 45, 3, "Drive stolen livestock away from its owners.", "Pastures", 1, "outlaw"),
   assassination: task("Assassination", "Contract targets", "contract_seal", "Contract seals", 90, 5, "Fulfil a ruthless contract and collect its proof.", "Stronghold", 1, "outlaw"),
-  slave_raiding: task("Slave raiding", "Villages", "faction_tribute", "Faction tribute", 90, 5, "Raid settlements to seize captives for a cruel faction; collect tribute for the deed.", "Borderlands", 1, "outlaw")
+  slave_raiding: task("Slave raiding", "Villages", "faction_tribute", "Faction tribute", 90, 5, "Raid settlements to seize captives for a cruel faction; collect tribute for the deed.", "Borderlands", 1, "outlaw"),
+  meditation: task("Meditation", "Inner silence", null, "Skill practice · no resources", 12, 2, "Sit in stillness and cultivate discipline amid the world's cruelty.", "Sanctuary", 1, "training"),
+  weapons_training: task("Weapons training", "Blades and stances", null, "Skill practice · no resources", 20, 3, "Repeat cuts, parries and footwork until the movements become instinct.", "Training yard", 1, "training"),
+  body_training: task("Body training", "Strength and endurance", null, "Skill practice · no resources", 25, 3, "Lift stones, run hills and harden the body through deliberate practice.", "Training yard", 1, "training"),
+  ancient_texts: task("Reading ancient texts", "Forgotten lore", null, "Skill practice · no resources", 30, 3, "Study old manuscripts and wrest meaning from fading script.", "Library", 1, "training"),
+  archery_practice: task("Archery practice", "Bowmanship", null, "Skill practice · no resources", 20, 3, "Loose arrow after arrow and learn patience, aim and control.", "Range", 1, "training"),
+  shield_drills: task("Shield drills", "Guard and defence", null, "Skill practice · no resources", 20, 3, "Hold the line, practise blocks and strengthen the shield arm.", "Training yard", 1, "training"),
+  herbal_study: task("Herbal study", "Botanical knowledge", null, "Skill practice · no resources", 25, 3, "Compare dried specimens and learn the virtues and dangers of wild plants.", "Study", 1, "training"),
+  map_study: task("Studying maps", "Navigation", null, "Skill practice · no resources", 25, 3, "Trace old roads, passes and rivers across battered maps.", "Study", 1, "training"),
+  rune_study: task("Studying runes", "Runic lore", null, "Skill practice · no resources", 35, 3, "Copy weathered glyphs and decipher the marks of forgotten peoples.", "Library", 1, "training"),
+  breathing_exercises: task("Breathing exercises", "Composure", null, "Skill practice · no resources", 12, 2, "Steady the breath and practise calm before hardship.", "Sanctuary", 1, "training"),
+  ale_with_friends: task("Drinking ale with friends", "Companionship", null, "Skill practice · no resources", 20, 2, "Share a rough table, cheap ale and familiar company.", "Tavern", 1, "leisure"),
+  laughing_at_misery: task("Laughing at life's misery", "Dark humour", null, "Skill practice · no resources", 15, 2, "Laugh together at how thoroughly the world has gone to ruin.", "Tavern", 1, "leisure"),
+  tavern_stories: task("Telling tavern stories", "Storytelling", null, "Skill practice · no resources", 25, 2, "Trade unlikely tales of lost fortunes and narrow escapes.", "Tavern", 1, "leisure"),
+  listening_to_bards: task("Listening to bards", "Music appreciation", null, "Skill practice · no resources", 25, 2, "Listen to old ballads and remember that beauty survives.", "Tavern", 1, "leisure"),
+  dice_with_friends: task("Playing dice with friends", "Gamesmanship", null, "Skill practice · no resources", 20, 2, "Roll harmless dice for bragging rights and enjoy the company.", "Tavern", 1, "leisure"),
+  sharing_a_meal: task("Sharing a meal", "Fellowship", null, "Skill practice · no resources", 25, 2, "Pass bread around the fire and talk until the night grows quiet.", "Camp", 1, "leisure"),
+  stargazing: task("Stargazing", "Contemplation", null, "Skill practice · no resources", 30, 2, "Watch cold stars above the ruins and wonder at the world.", "Hills", 1, "leisure"),
+  campfire_talk: task("Talking by the fire", "Conversation", null, "Skill practice · no resources", 20, 2, "Sit close to the flames and speak of ordinary troubles.", "Camp", 1, "leisure"),
+  singing_old_songs: task("Singing old songs", "Singing", null, "Skill practice · no resources", 25, 2, "Raise a rough voice with others in songs no kingdom remembers.", "Tavern", 1, "leisure"),
+  quiet_wandering: task("Wandering without purpose", "Solitude", null, "Skill practice · no resources", 30, 2, "Walk empty lanes without an errand, a prize or a destination.", "Outskirts", 1, "leisure")
 });
 export const ITEM_LABELS = Object.freeze({
-  ...Object.fromEntries(Object.values(ACTIVITIES).map(a => [a.item, a.itemLabel])),
+  ...Object.fromEntries(Object.values(ACTIVITIES).filter(a => a.item !== null).map(a => [a.item, a.itemLabel])),
   ...EXTRA_LOOT_LABELS,
   ...PRODUCTION_LABELS
 });
@@ -178,9 +198,11 @@ export function settle(state, now = Date.now(), random = Math.random) {
     if (productive > 0) {
       report.completed = productive;
       report.item = rules.item;
-      report.gainedItems = crafted ? productive : variedTotal(count * rules.yield, random);
+      report.gainedItems = rules.item === null ? 0 :
+        crafted ? productive : variedTotal(count * rules.yield, random);
       report.gainedXP = variedTotal(productive * rules.xp, random);
-      report.items = crafted ? crafted.created : LOOT_TABLES[state.activity]
+      report.items = rules.item === null ? {} :
+        crafted ? crafted.created : LOOT_TABLES[state.activity]
         ? allocateLoot(state.activity, prior.level, report.gainedItems, random)
         : { [rules.item]: report.gainedItems };
       report.consumed = crafted?.consumed ?? {};
