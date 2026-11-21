@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
   ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, validPlannedDuration, queueStartActivity, queueInsertTimedActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
-  enterGame, testOfflineDay, xpForLevel, levelFromXP
+  enterGame, testOfflineDay, xpForLevel, levelFromXP, xpToNextLevel, skillSpoils, skillMasterOffer, learnFromMaster
 } from "../site/play/engine.mjs";
 
 const midpoint = () => 0.5;
@@ -60,56 +60,69 @@ test("every activity independently earns XP and only produces material when allo
   }
 });
 
-test("skill threshold earns XP but DOES NOT activate a level during settlement", () => {
+test("one full skill XP bar never grants levels until the Master sacrifices all spoils", () => {
   const chosen = choose(newGame(0), "mining", 0).state;
-  const amount = Math.ceil(xpForLevel(2) / ACTIVITIES.mining.xp) + 2;
+  const amount = 200;
   const result = finish(chosen, amount * ACTIVITIES.mining.durationMs);
-  assert.ok(result.state.skills.mining.xp >= xpForLevel(2));
+  assert.equal(result.state.skills.mining.xp, xpToNextLevel(1), "XP stops at one threshold");
   assert.equal(result.state.skills.mining.level, 1);
-  assert.equal(result.state.skills.hunting.level, 1);
+  assert.equal(result.state.items.stone, amount, "loot continues after the XP cap");
   const returned = enter(chosen, amount * ACTIVITIES.mining.durationMs);
-  assert.equal(returned.state.skills.mining.level, levelFromXP(returned.state.skills.mining.xp));
-  assert.equal(returned.levelsGained.mining, returned.state.skills.mining.level - 1);
-  assert.equal(returned.state.skills.hunting.level, 1);
+  assert.equal(returned.state.skills.mining.level, 1, "return never auto-levels");
+  assert.deepEqual(returned.levelsGained, {});
+  const offer = skillMasterOffer(returned.state);
+  assert.deepEqual(offer.ready, ["mining"]);
+  assert.deepEqual(offer.tribute, { stone: amount });
+  const trained = learnFromMaster(returned.state, returned.state.settledAtMs);
+  assert.deepEqual(trained.state.skills.mining, { level: 2, xp: 0 });
+  assert.equal(trained.state.items.stone, 0);
+  assert.equal(trained.state.items.hide, 0);
+  assert.equal(trained.mastery.ready[0], "mining");
+  assert.deepEqual(readSave(trained.state), trained.state);
 });
-
-test("switching activities accumulates XP independently without applying levels", () => {
+test("switching activities caps each level's XP separately and returns without leveling", () => {
   let state = choose(newGame(0), "mining", 0).state;
   const miningCount = 30;
   const switched = choose(state, "hunting", miningCount * ACTIVITIES.mining.durationMs + 1000);
   state = switched.state;
   assert.equal(state.progressMs, 0);
   assert.equal(state.items.stone, miningCount);
-  assert.equal(state.skills.mining.xp, miningCount * ACTIVITIES.mining.xp);
+  assert.equal(state.skills.mining.xp, xpToNextLevel(1));
   assert.equal(state.skills.mining.level, 1);
   const huntingCount = 30;
   state = finish(state, state.settledAtMs + huntingCount * ACTIVITIES.hunting.durationMs).state;
-  assert.equal(state.skills.hunting.xp, huntingCount * ACTIVITIES.hunting.xp);
+  assert.equal(state.skills.hunting.xp, xpToNextLevel(1));
   assert.equal(state.skills.hunting.level, 1);
   const returned = enter(state, state.settledAtMs);
-  assert.equal(returned.state.skills.mining.level, levelFromXP(state.skills.mining.xp));
-  assert.equal(returned.state.skills.hunting.level, levelFromXP(state.skills.hunting.xp));
-  assert.ok(returned.levelsGained.mining);
-  assert.ok(returned.levelsGained.hunting);
+  assert.deepEqual(returned.levelsGained, {});
+  assert.equal(returned.state.skills.mining.level, 1);
+  assert.equal(returned.state.skills.hunting.level, 1);
+  const trained = learnFromMaster(returned.state, returned.state.settledAtMs);
+  assert.deepEqual(trained.mastery.ready.sort(), ["hunting", "mining"]);
+  assert.deepEqual(trained.state.skills.hunting, {level:2,xp:0});
+  assert.deepEqual(trained.state.skills.mining, {level:2,xp:0});
+  assert.equal(trained.state.items.stone, 0);
+  assert.equal(trained.state.items.hide, 0);
 });
-
-test("offline time remains unlimited and skill levels remain frozen for 50 years", () => {
+test("50 offline years still gather every resource but XP caps at one skill level", () => {
   const start = 1_600_000_000_000;
   const elapsed = YEAR * 50;
   const away = choose(newGame(start), "hunting", start).state;
   const out = finish(away, start + elapsed);
   const actions = Math.floor(elapsed / ACTIVITIES.hunting.durationMs);
   assert.equal(out.report.completed, actions);
-  assert.equal(out.state.skills.hunting.xp, actions * ACTIVITIES.hunting.xp);
+  assert.equal(out.state.skills.hunting.xp, xpToNextLevel(1));
   assert.equal(out.state.skills.hunting.level, 1);
   assert.equal(out.state.skills.mining.level, 1);
   assert.equal(out.state.items.hide, actions);
   const home = enter(away, start + elapsed);
-  assert.equal(home.state.skills.hunting.level, levelFromXP(actions * ACTIVITIES.hunting.xp));
-  assert.equal(home.state.skills.mining.level, 1);
-  assert.ok(home.levelsGained.hunting > 100);
+  assert.equal(home.state.skills.hunting.level, 1);
+  assert.equal(home.state.items.hide, actions);
+  const taught = learnFromMaster(home.state, start + elapsed);
+  assert.equal(taught.state.skills.hunting.level, 2);
+  assert.equal(taught.state.items.hide, 0);
+  assert.equal(taught.state.skills.hunting.xp, 0);
 });
-
 test("no duplicate reward for same timestamp or clock moving backwards", () => {
   assert.equal(finish(newGame(0), YEAR * 20).report.completed, 0);
   const start = 10_000, duration = ACTIVITIES.mining.durationMs;
@@ -154,7 +167,7 @@ test("V2 missing newly introduced skill/resource keys defaults safely", () => {
   const load = readSave(saved);
   assert.deepEqual(load.skills.carpentry, { xp: 0, level: 1 });
   assert.equal(load.items.plank, 0);
-  assert.deepEqual(load.skills.mining, { xp: 115, level: 2 });
+  assert.deepEqual(load.skills.mining, { xp: 75, level: 2 }, "legacy lifetime XP becomes capped current-level progress");
 });
 
 test("corrupted, incompatible or forged skill levels are rejected", () => {
@@ -163,7 +176,7 @@ test("corrupted, incompatible or forged skill levels are rejected", () => {
   assert.equal(readSave({ ...original, version: 99 }), null);
   assert.equal(readSave({ ...original, items: { stone: -1 } }), null);
   assert.equal(readSave({ ...original, activity: "unknown" }), null);
-  assert.equal(readSave({ ...original, skills: { mining: { xp: 0, level: 99 } } }), null);
+  assert.equal(readSave({ ...original, skills: { mining: { xp: 41, level: 1 } } }), null);
   assert.equal(readSave({ ...original, skills: { mining: { xp: -1, level: 1 } } }), null);
   assert.equal(readSave({ ...original, unattributedXP: -2 }), null);
   assert.equal(readSave({ version: 1, name: "Old", level: 8, totalXP: 0, items: {},
@@ -178,8 +191,8 @@ test("reward total variance stays independent and within +/-10%", () => {
   const high = settle(chosen, time, () => rolls.shift());
   assert.equal(low.report.gainedItems, 90);
   assert.equal(high.report.gainedItems, 110);
-  assert.equal(low.state.skills.mining.xp, 180);
-  assert.equal(high.state.skills.mining.xp, 220);
+  assert.equal(low.state.skills.mining.xp, 40);
+  assert.equal(high.state.skills.mining.xp, 40);
   assert.equal(low.state.skills.mining.level, 1);
   assert.equal(high.state.skills.mining.level, 1);
 });
@@ -190,7 +203,8 @@ test("20 years settle with constant number of random rolls", () => {
   let rolls = 0;
   const out = enterGame(chosen, start + YEAR * 20, () => { rolls++; return 0.5; });
   assert.equal(rolls, 2);
-  assert.ok(out.state.skills.gathering.level > 1);
+  assert.equal(out.state.skills.gathering.level, 1);
+  assert.equal(out.state.skills.gathering.xp, 40);
   assert.equal(out.state.skills.mining.level, 1);
 });
 
@@ -199,7 +213,8 @@ test("one-day testing shortcut internally respects frozen skill levels", () => {
   const chosen = choose(newGame(start), "gathering", start).state;
   const out = testOfflineDay(chosen, start, midpoint);
   assert.equal(out.report.completed, Math.floor(86400000 / ACTIVITIES.gathering.durationMs));
-  assert.equal(out.state.skills.gathering.level, levelFromXP(out.state.skills.gathering.xp));
+  assert.equal(out.state.skills.gathering.level, 1);
+  assert.equal(out.state.skills.gathering.xp, xpToNextLevel(1));
   assert.deepEqual(readSave(JSON.stringify(out.state)), out.state);
 });
 
@@ -244,7 +259,7 @@ test("old 10-skill saves load all ten new outlaw skills and resources safely", (
   assert.equal(Object.keys(loaded.skills).length, 40);
 });
 
-test("outlaw offline work has no time cap and only activates skills on return", () => {
+test("outlaw offline loot is unlimited but XP is capped and only the Master levels", () => {
   const start = 1_600_000_000_000;
   const years = 20 * YEAR;
   const task = ACTIVITIES.highway_robbery;
@@ -253,13 +268,14 @@ test("outlaw offline work has no time cap and only activates skills on return", 
   const amount = Math.floor(years / task.durationMs);
   assert.equal(result.report.completed, amount);
   assert.equal(result.state.items.stolen_purse, amount);
-  assert.equal(result.state.skills.highway_robbery.xp, amount * task.xp);
+  assert.equal(result.state.skills.highway_robbery.xp, 40);
   assert.equal(result.state.skills.highway_robbery.level, 1);
   const home = enter(away, start + years);
-  assert.equal(home.state.skills.highway_robbery.level, levelFromXP(amount * task.xp));
-  assert.equal(home.state.skills.mining.level, 1);
+  assert.equal(home.state.skills.highway_robbery.level, 1);
+  const taught = learnFromMaster(home.state, start + years);
+  assert.equal(taught.state.items.stolen_purse, 0);
+  assert.deepEqual(taught.state.skills.highway_robbery, {level:2,xp:0});
 });
-
 test("five basic activities have skill-gated loot tiers, other activities retain default resources", () => {
   assert.deepEqual(Object.keys(LOOT_TABLES).sort(),
     ["fishing", "gathering", "hunting", "mining", "woodcutting"].sort());
@@ -285,18 +301,18 @@ test("five basic activities have skill-gated loot tiers, other activities retain
 
 test("higher skill occasionally yields different ores without a second activity button", () => {
   const state = choose(newGame(0), "mining", 0).state;
-  state.skills.mining = { level: 25, xp: xpForLevel(25) };
+  state.skills.mining = { level: 25, xp: 0 };
   const out = settle(state, ACTIVITIES.mining.durationMs, () => 0);
-  assert.equal(out.report.gainedItems, 1);
-  assert.equal(out.report.items.silver_ore, 1);
-  assert.equal(out.state.items.silver_ore, 1);
+  assert.ok(out.report.gainedItems >= 1, "trained miners yield more material");
+  assert.equal(out.report.items.silver_ore, out.report.gainedItems);
+  assert.equal(out.state.items.silver_ore, out.report.gainedItems);
   assert.equal(out.state.items.stone, 0);
   assert.equal(out.state.skills.mining.level, 25);
-  assert.equal(out.state.skills.mining.xp, xpForLevel(25) + 2);
+  assert.ok(out.state.skills.mining.xp > 0 && out.state.skills.mining.xp <= xpToNextLevel(25));
   assert.equal(Object.values(out.report.items).reduce((a, b) => a + b, 0), out.report.gainedItems);
 });
 
-test("offline skill upgrades never change ore chances mid-absence", () => {
+test("no mining rarity upgrade happens offline or on return without a sacrifice", () => {
   const state = choose(newGame(0), "mining", 0).state;
   const cycles = 90000;
   const out = settle(state, cycles * ACTIVITIES.mining.durationMs, () => 0.5);
@@ -305,15 +321,21 @@ test("offline skill upgrades never change ore chances mid-absence", () => {
   assert.equal(out.state.items.stone, out.report.gainedItems);
   assert.equal(out.state.skills.mining.level, 1);
   const home = enter(state, cycles * ACTIVITIES.mining.durationMs);
-  assert.ok(home.state.skills.mining.level > 25);
-  const after = settle(home.state, (cycles + 10000) * ACTIVITIES.mining.durationMs, () => 0.5);
-  assert.ok(after.state.items.copper_ore > 0);
-  assert.ok(after.state.items.silver_ore > 0);
+  assert.equal(home.state.skills.mining.level, 1);
+  assert.equal(home.state.skills.mining.xp, 40);
+  const before = home.state.items.stone;
+  const trained = learnFromMaster(home.state, home.state.settledAtMs);
+  assert.equal(trained.state.skills.mining.level, 2);
+  assert.equal(trained.state.items.stone, 0);
+  const after = settle(trained.state, trained.state.settledAtMs +
+    10000 * ACTIVITIES.mining.durationMs, () => 0.5);
+  assert.ok(after.state.items.copper_ore > 0, "training unlocks copper");
+  assert.ok(after.state.items.stone > 0);
+  assert.ok(before > 0);
 });
-
 test("century-scale tier allocation takes bounded RNG draws and keeps total exact", () => {
   const state = choose(newGame(0), "mining", 0).state;
-  state.skills.mining = { level: 100, xp: xpForLevel(100) };
+  state.skills.mining = { level: 100, xp: 0 };
   const elapsed = 100 * YEAR;
   let calls = 0;
   const result = settle(state, elapsed, () => { calls++; return 0.5; });
@@ -373,7 +395,7 @@ test("smelting chooses unlocked inputs from inventory, never fabricates resource
 
 test("high-level smelting automatically uses higher ore if present", () => {
   const start = newGame(0);
-  start.skills.smelting = { level: 25, xp: xpForLevel(25) };
+  start.skills.smelting = { level: 25, xp: 0 };
   start.items.iron_ore = 4;
   start.items.silver_ore = 2;
   assert.deepEqual(recipeOptions("smelting",1).map(x=>x.output),["ingot"]);
@@ -390,7 +412,7 @@ test("high-level smelting automatically uses higher ore if present", () => {
 
 test("protected ore cannot be consumed, even during very long absences", () => {
   const start = newGame(0);
-  start.skills.smelting = { level: 100, xp: xpForLevel(100) };
+  start.skills.smelting = { level: 100, xp: 0 };
   start.items.copper_ore = 3;
   start.items.iron_ore = 500;
   start.items.silver_ore = 200;
@@ -406,23 +428,28 @@ test("protected ore cannot be consumed, even during very long absences", () => {
   assert.equal(result.state.skills.smelting.level,100);
 });
 
-test("smelting remains frozen at logout level while gaining return-only XP", () => {
+test("the Master unlocks new smelting tiers only after forfeiting all old ingots", () => {
   const start = newGame(0);
-  start.skills.smelting = { level: 1, xp: xpForLevel(10) - 1 };
+  start.skills.smelting = { level: 9, xp: xpToNextLevel(9) };
   start.items.copper_ore = 1;
   start.items.iron_ore = 3;
   const s = choose(start, "smelting", 0).state;
   const out = finish(s, 10 * ACTIVITIES.smelting.durationMs);
-  assert.equal(out.report.completed,1);
-  assert.equal(out.state.items.iron_ore,3);
-  assert.equal(out.state.skills.smelting.level,1);
+  assert.equal(out.report.completed, 1);
+  assert.equal(out.state.items.iron_ore, 3);
+  assert.equal(out.state.skills.smelting.level, 9);
   const home = enter(s, 10 * ACTIVITIES.smelting.durationMs);
-  assert.equal(home.state.skills.smelting.level,10);
-  const later = finish(home.state, 20 * ACTIVITIES.smelting.durationMs);
-  assert.equal(later.state.items.iron_ore,0);
-  assert.equal(later.state.items.iron_ingot,3);
+  assert.equal(home.state.skills.smelting.level, 9);
+  const mastery = learnFromMaster(home.state, home.state.settledAtMs);
+  assert.equal(mastery.state.skills.smelting.level, 10);
+  assert.equal(mastery.state.skills.smelting.xp, 0);
+  assert.equal(mastery.state.items.ingot, 0, "Master takes finished goods, not raw inputs");
+  assert.equal(mastery.state.items.iron_ore, 3);
+  const later = finish(mastery.state,
+    mastery.state.settledAtMs + 10 * ACTIVITIES.smelting.durationMs);
+  assert.equal(later.state.items.iron_ore, 0);
+  assert.equal(later.state.items.iron_ingot, 3);
 });
-
 test("old save without protection field migrates safely and invalid locks are rejected", () => {
   const old = newGame(0);
   delete old.protectedItems;
@@ -522,7 +549,7 @@ test("protecting non-ore ingredients works over 20 years and survives save reloa
   assert.deepEqual(out.state.protectedItems, ["herb"]);
 });
 
-test("long offline cooking uses only available fish; levels unlock after return", () => {
+test("long offline cooking consumes available fish, but Master takes meals to level", () => {
   const start = newGame(0);
   start.items.fish = 1000;
   const selected = choose(start, "cooking", 0).state;
@@ -530,12 +557,15 @@ test("long offline cooking uses only available fish; levels unlock after return"
   assert.equal(out.report.completed, 1000);
   assert.equal(out.state.items.fish, 0);
   assert.equal(out.state.items.meal, 1000);
-  assert.equal(out.state.skills.cooking.level, 1, "OFF-001 freezes the effective level");
-  const returnOut = enter(selected, 20 * YEAR);
-  assert.ok(returnOut.state.skills.cooking.level > 1);
-  assert.deepEqual(readSave(JSON.stringify(returnOut.state)), returnOut.state);
+  assert.equal(out.state.skills.cooking.level, 1);
+  assert.equal(out.state.skills.cooking.xp, xpToNextLevel(1));
+  const returned = enter(selected, 20 * YEAR);
+  assert.equal(returned.state.skills.cooking.level, 1);
+  const claimed = learnFromMaster(returned.state, returned.state.settledAtMs);
+  assert.equal(claimed.state.skills.cooking.level, 2);
+  assert.equal(claimed.state.items.meal, 0);
+  assert.deepEqual(readSave(JSON.stringify(claimed.state)), claimed.state);
 });
-
 test("twenty new personal activities offer ten training and ten leisure skills without loot", () => {
   const training = Object.entries(ACTIVITIES).filter(([,a]) => a.category === "training");
   const leisure = Object.entries(ACTIVITIES).filter(([,a]) => a.category === "leisure");
@@ -557,7 +587,7 @@ test("twenty new personal activities offer ten training and ten leisure skills w
   }
 });
 
-test("new XP-only skills remain offline-safe for decades and old saves migrate", () => {
+test("XP-only skills remain offline-safe and advance with no material tribute", () => {
   const old = newGame(0);
   for (const [id, a] of Object.entries(ACTIVITIES)) {
     if (a.item === null) delete old.skills[id];
@@ -567,18 +597,20 @@ test("new XP-only skills remain offline-safe for decades and old saves migrate",
   assert.deepEqual(restored.skills.meditation, {level: 1, xp: 0});
   const away = choose(restored, "ale_with_friends", 0).state;
   const result = finish(away, 20 * YEAR);
-  assert.ok(result.state.skills.ale_with_friends.xp > 0);
+  assert.equal(result.state.skills.ale_with_friends.xp, 40);
   assert.equal(result.state.skills.ale_with_friends.level, 1);
   assert.deepEqual(result.report.items, {});
   assert.deepEqual(result.state.items, restored.items);
   const back = enter(away, 20 * YEAR);
-  assert.ok(back.state.skills.ale_with_friends.level > 1);
-  assert.equal(back.state.skills.meditation.level, 1);
-  assert.deepEqual(readSave(JSON.stringify(back.state)), back.state);
+  assert.equal(back.state.skills.ale_with_friends.level, 1);
+  const offer = skillMasterOffer(back.state);
+  assert.deepEqual(offer.ready, ["ale_with_friends"]);
+  assert.deepEqual(offer.tribute, {});
+  const trained = learnFromMaster(back.state, 20 * YEAR);
+  assert.deepEqual(trained.state.skills.ale_with_friends, {level:2,xp:0});
+  assert.equal(trained.state.skills.meditation.level, 1);
+  assert.deepEqual(readSave(JSON.stringify(trained.state)), trained.state);
 });
-
-const switchTo = (state, id, now) => requestActivityChange(state, id, now, midpoint);
-
 test("initial Start requires preparation but no imagined origin travel", () => {
   const initial = newGame(0);
   const requested = switchTo(initial, "mining", 0).state;
@@ -679,7 +711,7 @@ test("retarget while preparing restarts movement from the old zone", () => {
 
 test("offline twenty years spans both activities exactly once without advancing effective levels", () => {
   const start = choose(newGame(0), "mining", 0).state;
-  start.skills.hunting = { level: 1, xp: xpForLevel(10) - 1 };
+  start.skills.hunting = { level: 1, xp: xpToNextLevel(1) - 1 };
   const request = switchTo(start, "hunting", 0).state;
   let rolls = 0;
   const after = settle(request, 20 * YEAR, () => { rolls++; return 0.5; });
@@ -693,7 +725,8 @@ test("offline twenty years spans both activities exactly once without advancing 
   assert.equal(settle(after.state, 20 * YEAR, midpoint).report.completed, 0);
   assert.deepEqual(readSave(JSON.stringify(after.state)), after.state);
   const returned = enter(request, 20 * YEAR);
-  assert.ok(returned.state.skills.hunting.level >= 10);
+  assert.equal(returned.state.skills.hunting.level, 1);
+  assert.equal(returned.state.skills.hunting.xp, 40);
 });
 
 test("malformed transition saves are rejected and old saves retain current work", () => {
@@ -924,7 +957,8 @@ test("one and two wagon queue correctly settle a 20-year absence without daily c
   assert.equal(settle(result.state, YEAR * 20, midpoint).report.completed, 0);
   assert.deepEqual(readSave(JSON.stringify(result.state)), result.state);
   const returned = enter(queued, YEAR * 20);
-  assert.ok(returned.state.skills.hunting.level > 1);
+  assert.equal(returned.state.skills.hunting.level, 1);
+  assert.equal(returned.state.skills.hunting.xp, 40);
 });
 
 test("three wagons consume prior gathering in chronological order and then work forever", () => {
