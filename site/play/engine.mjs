@@ -8,15 +8,30 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=20261121-loot1";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 2;
-// A completed action represents an entire work cycle, not one swing or strike.
-// Adjust BASE_CYCLE_MS or a single activity's speed multiplier to rebalance.
+export const GAME_VERSION = 3;
+// ALPHA: switch this single profile back to "normal" when testing is complete.
+// Existing browser saves record their own profile and migrate progress fractions on load.
+export const TIMING_PROFILE = "alpha";
+const TIMING_PROFILES = Object.freeze({
+  normal: Object.freeze({ workCycleMs: null, sameZoneMs: 60_000, zoneMs: 300_000,
+    preparationMs: 120_000, firstPreparationMs: 120_000 }),
+  alpha: Object.freeze({ workCycleMs: 10_000, sameZoneMs: 5_000, zoneMs: 5_000,
+    preparationMs: 5_000, firstPreparationMs: 10_000 })
+});
+const timing = TIMING_PROFILES[TIMING_PROFILE];
+// One completed action is a full work cycle, not a swing or a hit.
+// Keep original balancing data intact for the normal profile.
 export const BASE_CYCLE_MS = 60_000;
-export const ZONE_TRAVEL_MS = 5 * 60_000;
-export const SAME_ZONE_TRAVEL_MS = 60_000;
-export const PREPARATION_MS = 2 * 60_000;
+export const ZONE_TRAVEL_MS = timing.zoneMs;
+export const SAME_ZONE_TRAVEL_MS = timing.sameZoneMs;
+export const PREPARATION_MS = timing.preparationMs;
+export const INITIAL_PREPARATION_MS = timing.firstPreparationMs;
+const normalWorkDuration = task => Math.round(task.baseMinutes * BASE_CYCLE_MS / task.speed);
+const workDurationForProfile = (task, profile) =>
+  TIMING_PROFILES[profile].workCycleMs ?? normalWorkDuration(task);
 const task = (title, subject, item, itemLabel, minutes, xp, description, zone, speed = 1, category = "craft") =>
-  Object.freeze({ title, subject, item, itemLabel, durationMs: Math.round(minutes * BASE_CYCLE_MS / speed),
+  Object.freeze({ title, subject, item, itemLabel,
+    durationMs: timing.workCycleMs ?? Math.round(minutes * BASE_CYCLE_MS / speed),
     baseMinutes: minutes, speed, xp, yield: 1, description, zone, category });
 export const ACTIVITIES = Object.freeze({
   hunting: task("Hunting", "Wolves", "hide", "Wolf hides", 12, 3, "Track, hunt, dress and carry a wolf back to camp.", "Wilds"),
@@ -81,6 +96,7 @@ export function newGame(now = Date.now()) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
   return {
     version: GAME_VERSION,
+    timingProfile: TIMING_PROFILE,
     name: "Wanderer",
     skills: blankSkills(),
     protectedItems: [],
@@ -94,11 +110,21 @@ export function newGame(now = Date.now()) {
   };
 }
 
-/** Read previous V1 browser saves without losing inventory, unfinished work or XP. */
+/**
+ * Loading under a new timing preset preserves the fraction of the unfinished
+ * cycle/phase rather than treating an old long-duration save as corrupted.
+ * Finished rewards and skill XP are not touched.
+ */
+function scalePartialProgress(value, sourceMs, targetMs) {
+  if (sourceMs === targetMs) return value;
+  return Math.min(targetMs - 1, Math.floor((value / sourceMs) * targetMs));
+}
+
+/** Read old V1/V2 saves and migrate progress when alpha/normal mode changes. */
 export function readSave(value) {
   try {
     const s = typeof value === "string" ? JSON.parse(value) : value;
-    if (!s || (s.version !== 1 && s.version !== GAME_VERSION) ||
+    if (!s || ![1, 2, GAME_VERSION].includes(s.version) ||
         typeof s.name !== "string" || s.name.length > 40 ||
         !s.items || typeof s.items !== "object" ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
@@ -106,11 +132,16 @@ export function readSave(value) {
           !s.protectedItems.every(key => typeof key === "string" && PRODUCTION_INPUTS.includes(key)))) ||
         (s.activity !== null && !Object.hasOwn(ACTIVITIES, s.activity)) ||
         !isCount(s.progressMs) || !validTime(s.settledAtMs)) return null;
-    if (s.activity && s.progressMs >= ACTIVITIES[s.activity].durationMs) return null;
+
+    // V1/V2 used the original normal times. V3 carries an explicit timing profile.
+    const savedProfile = s.version === GAME_VERSION ? s.timingProfile : "normal";
+    if (!Object.hasOwn(TIMING_PROFILES, savedProfile)) return null;
+    const sourceTiming = TIMING_PROFILES[savedProfile];
+    const sourceWorkMs = s.activity ? workDurationForProfile(ACTIVITIES[s.activity], savedProfile) : 0;
+    if (s.activity && s.progressMs >= sourceWorkMs) return null;
     if (!s.activity && s.progressMs !== 0) return null;
-    // Older saves omit the transition object; continue their existing work.
+
     const transition = s.transition ?? null;
-    if (s.transition !== undefined && s.transition !== null && !transition) return null;
     if (transition !== null) {
       if (typeof transition !== "object" || Array.isArray(transition) ||
           !Object.hasOwn(ACTIVITIES, transition.targetActivity) ||
@@ -119,9 +150,10 @@ export function readSave(value) {
           (transition.phase === "finishing" && (!s.activity || transition.phaseProgressMs !== 0)) ||
           (transition.phase === "moving" && (!s.activity || s.progressMs !== 0 ||
             transition.phaseProgressMs >= (ACTIVITIES[s.activity].zone ===
-              ACTIVITIES[transition.targetActivity].zone ? SAME_ZONE_TRAVEL_MS : ZONE_TRAVEL_MS))) ||
+              ACTIVITIES[transition.targetActivity].zone ? sourceTiming.sameZoneMs : sourceTiming.zoneMs))) ||
           (transition.phase === "preparing" &&
-            (transition.phaseProgressMs >= PREPARATION_MS || s.progressMs !== 0)))
+            (transition.phaseProgressMs >= (s.activity ? sourceTiming.preparationMs : sourceTiming.firstPreparationMs) ||
+              s.progressMs !== 0)))
         return null;
     }
 
@@ -129,27 +161,41 @@ export function readSave(value) {
     if (oldVersion) {
       if (!isCount(s.level) || s.level < 1 || !isCount(s.totalXP) ||
           s.level > levelFromXP(s.totalXP)) return null;
-    } else {
-      if (!isCount(s.unattributedXP) || !s.skills || typeof s.skills !== "object" ||
+    } else if (!isCount(s.unattributedXP) || !s.skills || typeof s.skills !== "object" ||
           !SKILL_IDS.every(id => {
             const skill = s.skills[id];
             return skill === undefined || (skill && typeof skill === "object" &&
               isCount(skill.xp) && isCount(skill.level) && skill.level >= 1 &&
               skill.level <= levelFromXP(skill.xp));
           })) return null;
-    }
+
     const skills = blankSkills();
     if (!oldVersion) {
       for (const id of SKILL_IDS) {
         if (s.skills[id]) skills[id] = { xp: s.skills[id].xp, level: s.skills[id].level };
       }
     }
+    let newProgressMs = s.activity
+      ? scalePartialProgress(s.progressMs, sourceWorkMs, ACTIVITIES[s.activity].durationMs) : 0;
+    const newTransition = transition ? { ...transition } : null;
+    if (newTransition) {
+      if (transition.phase === "moving") {
+        const sameZone = ACTIVITIES[s.activity].zone === ACTIVITIES[transition.targetActivity].zone;
+        const sourceMs = sameZone ? sourceTiming.sameZoneMs : sourceTiming.zoneMs;
+        const targetMs = sameZone ? SAME_ZONE_TRAVEL_MS : ZONE_TRAVEL_MS;
+        newTransition.phaseProgressMs = scalePartialProgress(transition.phaseProgressMs, sourceMs, targetMs);
+      } else if (transition.phase === "preparing") {
+        const sourceMs = s.activity ? sourceTiming.preparationMs : sourceTiming.firstPreparationMs;
+        const targetMs = s.activity ? PREPARATION_MS : INITIAL_PREPARATION_MS;
+        newTransition.phaseProgressMs = scalePartialProgress(transition.phaseProgressMs, sourceMs, targetMs);
+      }
+    }
     return {
-      version: GAME_VERSION, name: s.name, skills,
+      version: GAME_VERSION, timingProfile: TIMING_PROFILE, name: s.name, skills,
       protectedItems: [...new Set(s.protectedItems ?? [])],
       unattributedXP: oldVersion ? s.totalXP : s.unattributedXP,
       items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
-      activity: s.activity, progressMs: s.progressMs, transition: transition && { ...transition },
+      activity: s.activity, progressMs: newProgressMs, transition: newTransition,
       settledAtMs: s.settledAtMs
     };
   } catch {
@@ -272,7 +318,7 @@ export function settle(state, now = Date.now(), random = Math.random) {
       const phaseDuration = transition.phase === "moving"
         ? (ACTIVITIES[next.activity].zone === ACTIVITIES[transition.targetActivity].zone
           ? SAME_ZONE_TRAVEL_MS : ZONE_TRAVEL_MS)
-        : PREPARATION_MS;
+        : (next.activity ? PREPARATION_MS : INITIAL_PREPARATION_MS);
       const take = Math.min(remaining, phaseDuration - transition.phaseProgressMs);
       remaining -= take;
       const phaseProgressMs = transition.phaseProgressMs + take;
