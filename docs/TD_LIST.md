@@ -19,9 +19,18 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## GAME-006 — Skill-gated probabilistic encounters and resources
 - **Goal:** Progress hunting, mining, gathering and processing outcomes within a single activity; players never manually choose creature, vein or ore quality.
 - **Acceptance criteria:** Data-driven level thresholds and probability weights; low-tier results remain available; higher tiers grow more likely with relevant skill levels; crafting requires and consumes real inventory ingredients, with protections against unwanted ingredient use; encounter difficulty respects combat ability; offline resolution uses frozen skill levels and scales over long absences; deterministic balance and rarity tests.
-- **Status:** TODO (follow-up after GAME-005; not included in the initial leveling PR).
+- **Status:** PARTIAL (skill-weighted prototype for Hunting, Mining, Gathering, Woodcutting and Fishing in PR pending CI; crafting recipes, input protection and actual encounter combat remain TODO).
 - **Dependencies:** GAME-005, OFF-001.
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** Not yet.
 
+
+## GAME-006A — Skill-weighted gathering rewards (first slice of GAME-006)
+- **Goal:** Keep one activity per skill while unlocking rarer resource drops from higher effective skill levels.
+- **Acceptance criteria:** data-driven tier tables for hunting, mining, gathering, woodcutting and fishing; no manual resource targeting, low-tier stays obtainable, high-tier gates by skill, variable batch rewards conserve total quantity, unlocked drops shown in activity menu; no timing displays; save backward compatibility; 100-year offline batch handled without per-action replay and frozen skill effectiveness; deterministic tests.
+- **Status:** IN_REVIEW (feature PR; checks and automatic merge readiness gate apply).
+- **Dependencies:** GAME-005, OFF-001, UI-TIME-001.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet (pending verified merge).
