@@ -41,6 +41,12 @@ const task = (title, subject, item, itemLabel, minutes, xp, description, zone, s
     durationMs: timing.workCycleMs ?? Math.round(minutes * BASE_CYCLE_MS / speed),
     baseMinutes: minutes, speed, xp, yield: 1, description, zone, category });
 export const ACTIVITIES = Object.freeze({
+  // Fighting is separate from hunting or raiding. This alpha activity grants
+  // skill and time-based attribute growth; real per-hit combat will follow.
+  fighting: task("Fighting", "Matched opponents", null,
+    "Combat skill · duel simulation coming later", 20, 3,
+    "Face worthy opponents in the fighting grounds. Individual strikes, blocks and outcomes are not simulated in this alpha yet.",
+    "Fighting grounds", 1, "combat"),
   hunting: task("Hunting", "Wolves", "hide", "Wolf hides", 12, 3, "Track, hunt, dress and carry a wolf back to camp.", "Wilds"),
   mining: task("Mining", "Stone", "stone", "Stone", 15, 2, "Break rock, sort stone, load carts and haul it to storage.", "Quarry"),
   woodcutting: task("Woodcutting", "Trees", "log", "Logs", 12, 2, "Fell, trim and carry timber to a stack.", "Forest"),
