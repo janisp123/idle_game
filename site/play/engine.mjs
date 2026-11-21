@@ -313,13 +313,18 @@ function settleWork(state, now, random) {
     if (productive > 0) {
       report.completed = productive;
       report.item = rules.item;
+      // Early-alpha mastery benefit: a modest 2% extra productivity per
+      // activated level, capped at double. Training/leisure earn faster XP;
+      // resource gatherers also bring home more material. Old-offline levels
+      // stay frozen until the player explicitly trains with the Master.
+      const efficiency = 1 + Math.min(1, Math.max(0, prior.level - 1) * 0.02);
       report.gainedItems = rules.item === null ? 0 :
-        crafted ? productive : variedTotal(count * rules.yield, random);
+        crafted ? productive : variedTotal(count * rules.yield * efficiency, random);
       // The Master owns the next level. Extra XP never banks, even if a
       // character gathers resources unattended for decades.
       const missingXP = Math.max(0, xpToNextLevel(prior.level) - prior.xp);
       report.gainedXP = missingXP
-        ? Math.min(missingXP, variedTotal(productive * rules.xp, random)) : 0;
+        ? Math.min(missingXP, variedTotal(productive * rules.xp * efficiency, random)) : 0;
       report.items = rules.item === null ? {} :
         crafted ? crafted.created : LOOT_TABLES[state.activity]
         ? allocateLoot(state.activity, prior.level, report.gainedItems, random)
