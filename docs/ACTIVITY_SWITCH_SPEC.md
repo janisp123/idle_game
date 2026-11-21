@@ -1,7 +1,7 @@
 # Activity switching — three-phase transition specification (GAME-004)
 
-**Status:** Owner-approved behavior, implementation specification only; **not implemented**.
-**Recorded:** 2026-11-21 by chat. Applies to manual activity selection. The latest three-wagon Forever-last queue behavior is specified in [ACTIVITY_QUEUE_SPEC.md](ACTIVITY_QUEUE_SPEC.md); neither switching nor queued execution is implemented yet.
+**Status:** **Manual switching implemented and deployed in PR #60** (main Pages run 44901535752); the three-wagon queue remains unimplemented.
+**Recorded:** 2026-11-21 by chat. Applies to manual activity selection. The latest three-wagon Forever-last queue behavior is specified in [ACTIVITY_QUEUE_SPEC.md](ACTIVITY_QUEUE_SPEC.md); manual switching is implemented; queued execution is not yet implemented.
 **Source of truth:** `docs/DECISIONS.md` ACT-SWITCH-001, SWITCH-TIMING-001, QUEUE-002, ZONE-001, WORK-001, OFF-001, UI-TIME-001 and this task's entry in `docs/TD_LIST.md`.
 
 ## Player experience (approved behavior)
@@ -85,4 +85,4 @@ Current code switches instantly in `site/play/engine.mjs:chooseActivity` by rese
 - **Wagon swaps:** moving a different wagon into slot 1 restarts movement/readiness while preserving the old finishing cycle and all previously earned progress; future-only reorder is free.
 - Deleting a wagon/clearing a whole queue still requires a safe, non-destructive UI treatment; do not add an instant reset shortcut.
 
-This is an **approved implementation specification, not a claim of deployed gameplay**. UI-TIME-001 forbids showing live clocks, even though a configured duration can be selected.
+**Implementation status:** The manual Start → finishing/moving/preparing flow and dedicated progress bar are deployed in [PR #60](https://github.com/janisp123/idle_game/pull/60), verified by successful CI and live HTML readback. Queue/wagon sections describe later work, **not deployed wagon behavior**. UI-TIME-001 still forbids visible live clocks and countdowns.
