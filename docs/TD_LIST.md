@@ -42,3 +42,12 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** Not yet.
+
+## UI-001 — Remove all timing and detailed return metrics from gameplay
+- **Goal:** Keep pacing hidden: activity name and obtainable resource only, plus visual progress bar; no timers, duration labels, rates, action-count statistics or elapsed-time reports in the game UI.
+- **Acceptance criteria:** no time displayed on activity buttons, scene or chronicle; remove visible test-day and time-worked widgets; simple return report lists only gathered resources; continue saving and settling offline without any time cap; automatic site checks prevent regression.
+- **Status:** IN_REVIEW (expanded PR #38; awaiting owner merge approval).
+- **Dependencies:** SITE-001, OFF-001, GAME-003.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet (pending verified integration).
