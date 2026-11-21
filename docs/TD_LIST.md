@@ -43,3 +43,12 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** Not yet (pending verified merge).
 - **Art note:** Existing scene paintings reused for new training/leisure tasks temporarily; dedicated 20 illustrations not yet created.
+
+## GAME-009 — Reversible race transformation design and implementation
+- **Goal:** Eventually support one character beginning Human, able to become Undead and return to Human via resource-consuming rituals; no permanent race lock.
+- **Acceptance criteria:** Race is distinct from class/profession and independent skills; ritual requires resources and roughly six real days (provisional); repeat transformations are possible, including reversal; no alts or permanently inaccessible skills; account/change-limit implications, exact costs, race effects, and offline ritual progression must be designed and approved before implementation.
+- **Status:** BLOCKED (design agreed; implementation details and dependencies not yet decided).
+- **Dependencies:** CHAR-001, OFF-001, future account/character persistence.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet.
