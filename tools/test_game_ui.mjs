@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { ACTIVITIES, SAVE_KEY } from "../site/play/engine.mjs";
+import { ACTIVITIES, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS } from "../site/play/engine.mjs";
 
 class FakeElement {
   children = [];
@@ -25,6 +25,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
   const elements = new Map(ids.map(id => [id, new FakeElement()]));
   const originalNow = Date.now;
+  const originalRandom = Math.random;
+  Math.random = () => 0.5; // avoid stochastic 0-item single-cycle rewards in UI assertions
   let now = 2_000_000_000_000;
   let tick = null;
   const store = new Map([[SAVE_KEY, JSON.stringify({
@@ -121,7 +123,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, null, "first Start must not instantly work");
     assert.equal(state.transition.targetActivity, "mining");
-    now += 2 * 60_000;
+    now += INITIAL_PREPARATION_MS;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "mining");
@@ -204,10 +206,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.items.stone, previousStone + 1, "finishing earns only the old completed cycle");
     assert.equal(elements.get("transitionPhase").textContent, "Moving to new location");
-    now += 5 * 60_000;
+    now += ZONE_TRAVEL_MS;
     tick();
     assert.equal(elements.get("transitionPhase").textContent, "Getting ready to start new activity");
-    now += 2 * 60_000;
+    now += PREPARATION_MS;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "meditation");
@@ -226,6 +228,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("character-heading").textContent, "The Black Rider");
   } finally {
     Date.now = originalNow;
+    Math.random = originalRandom;
     delete globalThis.document;
     delete globalThis.localStorage;
     delete globalThis.window;

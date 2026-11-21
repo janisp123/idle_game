@@ -387,11 +387,11 @@ footer p{color:#aa9680}
 .activity.pending { border-color:#d1a068; box-shadow:inset 0 0 0 2px rgba(183,125,63,.2); }
 .scene-panel .transition-status[hidden],.scene-panel .activity-meter[hidden] { display:none !important; }
 .transition-phase {
-  margin:16px 22px 5px; color:#edc99a; font:700 14px Georgia,serif;
+  margin:16px 22px 5px; color:#bdc2c6; font:700 14px Georgia,serif;
   letter-spacing:.04em;
 }
-.transition-meter { margin-top:8px; border-color:#a3814c; }
-.transition-meter > span { background:linear-gradient(90deg,#685036,#b99764,#e7d0a0); }
+.transition-meter { margin-top:8px; border-color:#788085; background:#222629; }
+.transition-meter > span { background:linear-gradient(90deg,#444c52,#768087,#c1c8cc); }
 @media (max-width:490px) {
   .activity-title-line { gap:7px; }
   .activity-start { min-width:75px; padding:7px; font-size:13px; }

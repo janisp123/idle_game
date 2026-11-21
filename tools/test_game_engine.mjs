@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
-  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
+  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
   enterGame, testOfflineDay, xpForLevel, levelFromXP
 } from "../site/play/engine.mjs";
 
@@ -24,14 +24,18 @@ test("only individual activities have levels; character has a name but no level"
   for (const id of SKILL_IDS) assert.deepEqual(state.skills[id], { level: 1, xp: 0 });
 });
 
-test("forty activities retain independently configurable full work-cycle times", () => {
+test("alpha profile gives every complete work cycle ten seconds without losing normal balance data", () => {
+  assert.equal(TIMING_PROFILE, "alpha");
   assert.ok(Object.keys(ACTIVITIES).length >= 10);
   for (const activity of Object.values(ACTIVITIES)) {
-    assert.ok(activity.durationMs >= 8 * BASE_CYCLE_MS);
-    assert.equal(activity.durationMs, activity.baseMinutes * BASE_CYCLE_MS / activity.speed);
+    assert.equal(activity.durationMs, 10_000);
+    assert.ok(activity.baseMinutes * BASE_CYCLE_MS / activity.speed >= 8 * BASE_CYCLE_MS);
   }
-  assert.equal(ZONE_TRAVEL_MS, 300_000);
-  assert.equal(activityDuration("mining", 20), ACTIVITIES.mining.durationMs / 20);
+  assert.equal(SAME_ZONE_TRAVEL_MS, 5_000);
+  assert.equal(ZONE_TRAVEL_MS, 5_000);
+  assert.equal(PREPARATION_MS, 5_000);
+  assert.equal(INITIAL_PREPARATION_MS, 10_000);
+  assert.equal(activityDuration("mining", 20), 500);
   assert.throws(() => activityDuration("mining", 0), RangeError);
 });
 
@@ -130,7 +134,7 @@ test("old V1 saves retain their name, items, activity and partial progress", () 
   assert.equal(migrated.items.stone, 77);
   assert.equal(migrated.items.herb, 0);
   assert.equal(migrated.activity, "mining");
-  assert.equal(migrated.progressMs, 3000);
+  assert.equal(migrated.progressMs, Math.floor(3000 / (15 * BASE_CYCLE_MS) * 10_000));
   assert.equal(migrated.settledAtMs, source.settledAtMs);
   assert.equal(migrated.unattributedXP, source.totalXP, "do not invent assignment of historical global XP to a skill");
   assert.equal(migrated.skills.mining.xp, 0);
@@ -142,6 +146,8 @@ test("old V1 saves retain their name, items, activity and partial progress", () 
 
 test("V2 missing newly introduced skill/resource keys defaults safely", () => {
   const saved = newGame(0);
+  saved.version = 2;
+  delete saved.timingProfile;
   delete saved.skills.carpentry;
   delete saved.items.plank;
   saved.skills.mining = { xp: 115, level: 2 };
@@ -205,7 +211,7 @@ test("ten outlaw skills are independent, with their own spoils and long work cyc
   assert.equal(SKILL_IDS.length, 40);
   assert.ok(ITEM_KEYS.length > 20);
   for (const [id, task] of outlaws) {
-    assert.ok(task.durationMs >= 25 * BASE_CYCLE_MS, id);
+    assert.ok(task.baseMinutes * BASE_CYCLE_MS / task.speed >= 25 * BASE_CYCLE_MS, id);
     const selected = choose(newGame(0), id, 0).state;
     const result = finish(selected, task.durationMs);
     assert.equal(result.state.items[task.item], 1, id);
@@ -544,19 +550,19 @@ test("initial Start requires preparation but no imagined origin travel", () => {
   assert.deepEqual(requested.transition, {
     targetActivity: "mining", phase: "preparing", phaseProgressMs: 0
   });
-  const partial = finish(requested, PREPARATION_MS / 2).state;
+  const partial = finish(requested, INITIAL_PREPARATION_MS / 2).state;
   assert.equal(partial.activity, null);
-  assert.equal(partial.transition.phaseProgressMs, PREPARATION_MS / 2);
+  assert.equal(partial.transition.phaseProgressMs, INITIAL_PREPARATION_MS / 2);
   assert.deepEqual(readSave(JSON.stringify(partial)), partial);
-  const ready = finish(partial, PREPARATION_MS).state;
+  const ready = finish(partial, INITIAL_PREPARATION_MS).state;
   assert.equal(ready.activity, "mining");
   assert.equal(ready.transition, null);
   assert.equal(ready.items.stone, 0);
-  const mined = finish(ready, PREPARATION_MS + ACTIVITIES.mining.durationMs).state;
+  const mined = finish(ready, INITIAL_PREPARATION_MS + ACTIVITIES.mining.durationMs).state;
   assert.equal(mined.items.stone, 1);
 });
 
-test("changing zones finishes old work, moves five minutes and prepares two", () => {
+test("changing zones finishes old work then spends five seconds moving and five preparing", () => {
   const mined = choose(newGame(0), "mining", 0).state;
   const when = ACTIVITIES.mining.durationMs / 2;
   const partial = finish(mined, when).state;
@@ -569,9 +575,9 @@ test("changing zones finishes old work, moves five minutes and prepares two", ()
   assert.equal(finished.state.skills.mining.xp, 2);
   assert.equal(finished.state.transition.phase, "moving");
   assert.equal(finished.state.progressMs, 0);
-  const halfway = finish(finished.state, ACTIVITIES.mining.durationMs + 2 * 60_000).state;
+  const halfway = finish(finished.state, ACTIVITIES.mining.durationMs + ZONE_TRAVEL_MS / 2).state;
   assert.equal(halfway.transition.phase, "moving");
-  assert.equal(halfway.transition.phaseProgressMs, 2 * 60_000);
+  assert.equal(halfway.transition.phaseProgressMs, ZONE_TRAVEL_MS / 2);
   const arrivedAt = ACTIVITIES.mining.durationMs + ZONE_TRAVEL_MS;
   const arrived = finish(halfway, arrivedAt).state;
   assert.equal(arrived.transition.phase, "preparing");
@@ -585,7 +591,7 @@ test("changing zones finishes old work, moves five minutes and prepares two", ()
   assert.equal(finish(ready, startedAt).report.completed, 0);
 });
 
-test("same-zone changes travel only one minute, no extra five minutes", () => {
+test("same-zone changes follow the same five-second alpha travel time", () => {
   const initial = choose(newGame(0), "hunting", 0).state;
   const request = switchTo(initial, "gathering", 0).state;
   const finishedAt = ACTIVITIES.hunting.durationMs;
@@ -625,7 +631,7 @@ test("retarget while preparing restarts movement from the old zone", () => {
   const start = choose(newGame(0), "mining", 0).state;
   const requested = switchTo(start, "hunting", 0).state;
   const preparingAt = ACTIVITIES.mining.durationMs + ZONE_TRAVEL_MS;
-  const preparing = finish(requested, preparingAt + 60_000).state;
+  const preparing = finish(requested, preparingAt + PREPARATION_MS / 2).state;
   assert.equal(preparing.transition.phase, "preparing");
   const redirect = switchTo(preparing, "masonry", preparing.settledAtMs).state;
   assert.equal(redirect.transition.phase, "moving");
@@ -671,3 +677,65 @@ test("malformed transition saves are rejected and old saves retain current work"
   ]) assert.equal(readSave({ ...initial, transition: invalid }), null);
 });
 
+
+test("V2 unfinished cycles migrate to alpha without resetting name, XP or inventory", () => {
+  const old = newGame(1_000);
+  old.version = 2;
+  delete old.timingProfile;
+  old.name = "Old Wanderer";
+  old.activity = "mining";
+  old.progressMs = 450_000; // halfway through the original fifteen-minute work cycle
+  old.items.stone = 77;
+  old.items.herb = 9;
+  old.skills.mining = { level: 1, xp: 18 };
+  const converted = readSave(JSON.stringify(old));
+  assert.ok(converted);
+  assert.equal(converted.version, GAME_VERSION);
+  assert.equal(converted.timingProfile, "alpha");
+  assert.equal(converted.progressMs, 5_000);
+  assert.equal(converted.settledAtMs, 1_000);
+  assert.equal(converted.name, "Old Wanderer");
+  assert.equal(converted.items.stone, 77);
+  assert.equal(converted.items.herb, 9);
+  assert.deepEqual(converted.skills.mining, { level: 1, xp: 18 });
+  assert.deepEqual(readSave(JSON.stringify(converted)), converted);
+  const finished = finish(converted, 6_000);
+  assert.equal(finished.state.items.stone, 78);
+  assert.equal(finished.state.skills.mining.xp, 20);
+});
+
+test("V2 saved travel and preparation migrate proportionally without prematurely completing the switch", () => {
+  const original = newGame(0);
+  original.version = 2;
+  delete original.timingProfile;
+  original.activity = "mining";
+  original.items.stone = 12;
+  const moving = {
+    ...original,
+    transition: { targetActivity: "hunting", phase: "moving", phaseProgressMs: 150_000 }
+  };
+  const loadedMove = readSave(moving);
+  assert.ok(loadedMove);
+  assert.equal(loadedMove.transition.phaseProgressMs, 2_500);
+  assert.equal(finish(loadedMove, 2_500).state.transition.phase, "preparing");
+  assert.equal(finish(loadedMove, 2_500).state.items.stone, 12);
+  const preparing = {
+    ...original,
+    transition: { targetActivity: "hunting", phase: "preparing", phaseProgressMs: 60_000 }
+  };
+  const loadedPrep = readSave(preparing);
+  assert.equal(loadedPrep.transition.phaseProgressMs, 2_500);
+  assert.equal(finish(loadedPrep, 2_500).state.activity, "hunting");
+
+  const initial = { ...original, activity: null,
+    transition: { targetActivity: "mining", phase: "preparing", phaseProgressMs: 60_000 } };
+  assert.equal(readSave(initial).transition.phaseProgressMs, 5_000);
+  assert.equal(finish(readSave(initial), 5_000).state.activity, "mining");
+});
+
+test("unmodified character save keeps its alpha profile and rejects invalid profile data", () => {
+  const start = newGame(0);
+  assert.deepEqual(readSave(JSON.stringify(start)), start);
+  assert.equal(readSave({ ...start, timingProfile: "invalid" }), null);
+  assert.equal(readSave({ ...start, timingProfile: undefined }), null);
+});

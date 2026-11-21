@@ -4,6 +4,12 @@
 **Recorded:** 2026-11-21 by chat. Applies to manual activity selection. The latest three-wagon Forever-last queue behavior is specified in [ACTIVITY_QUEUE_SPEC.md](ACTIVITY_QUEUE_SPEC.md); manual switching is implemented; queued execution is not yet implemented.
 **Source of truth:** `docs/DECISIONS.md` ACT-SWITCH-001, SWITCH-TIMING-001, QUEUE-002, ZONE-001, WORK-001, OFF-001, UI-TIME-001 and this task's entry in `docs/TD_LIST.md`.
 
+## Temporary alpha tuning (ALPHA-TIME-001; reversible)
+
+**Currently selected alpha testing profile:** all complete activity work cycles take **10 seconds**. Switching **still finishes the current full work cycle** before changing activities; after that, **5 seconds moving + 5 seconds preparing = 10 seconds of changing** regardless of zones. The first-ever Start has **10 seconds of preparation** and no origin travel. The transition bar uses **grey/steel** instead of the warm work palette. No player-facing live time display.
+
+**Normal profile remains the intended long-term rule below:** original per-activity cycle lengths, **1 minute same-zone / 5 minutes cross-zone** movement and **2 minutes** preparation. Toggle only `TIMING_PROFILE` in `site/play/engine.mjs` to restore normal, with persisted `timingProfile` and partial-progress fraction migration for existing saves (including v1/v2). This overrides durations **temporarily**, not the finishing/movement/preparation state machine or queue design.
+
 ## Player experience (approved behavior)
 
 Each activity row places a distinct **Start** button immediately **after the activity name**. Clicking the row or browsing categories should not silently switch activities. Starting a different activity queues an actual, time-consuming transition instead of teleporting:
