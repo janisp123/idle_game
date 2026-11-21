@@ -40,10 +40,16 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "future jobs have only an invisible meter spacer");
   assert.match(queueCss, /\.wagon-name\s*\{[^}]*grid-row:1/s);
   assert.match(queueCss, /\.wagon-controls\s*\{[^}]*grid-row:5/s);
-  assert.match(queueCss, /\.activity-choices \.activity-title-line\s*\{[^}]*grid-template-columns:minmax\(0,1fr\) auto/s,
-    "icon controls must reserve a separate grid column without covering titles");
-  assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:42px/s,
-    "desktop and phone action buttons use bounded icon-only widths");
+  assert.match(queueCss, /\.activity-choices \.activity-title-line\s*\{[^}]*flex-direction:column/s,
+    "controls and names must stack vertically");
+  assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*order:2/s,
+    "name is beneath controls");
+  assert.match(queueCss, /\.activity-choices \.activity-actions\s*\{[^}]*order:1/s,
+    "controls are first");
+  assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:38px/s,
+    "buttons remain compact");
+  assert.match(html, /iron-ui\.css\?v=20261121-activity-controls-row2/,
+    "stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:anywhere/s,
     "long skill names may wrap rather than be hidden behind controls");
   assert.match(html, /id="queueMasteryMode"[^>]*aria-pressed="false"/,
