@@ -287,6 +287,20 @@ function renderWagons() {
       duration.className = "wagon-duration";
       const heading = document.createElement("span");
       heading.textContent = wagon.plannedMs === UNTIL_LEVEL_UP ? "Until" : "Scheduled for";
+      // One-click correction for an already queued timed task. The saved
+      // stop condition, not the planner's temporary selection, is authoritative.
+      const readyShortcut = document.createElement("button");
+      readyShortcut.type = "button";
+      readyShortcut.className = "wagon-mastery-shortcut";
+      readyShortcut.textContent = "↑";
+      readyShortcut.title = "Change " + ACTIVITIES[wagon.activity].title + " to Until LvL Up";
+      readyShortcut.setAttribute("aria-label", readyShortcut.title);
+      readyShortcut.hidden = wagon.plannedMs === UNTIL_LEVEL_UP;
+      readyShortcut.addEventListener("click", () => {
+        applyQueueChange(queueSetDuration(state, i, UNTIL_LEVEL_UP, Date.now()),
+          "Now scheduled until ready to level up.");
+      });
+      heading.append(readyShortcut);
       const amount = document.createElement("select");
       amount.setAttribute("aria-label", "Duration for " + ACTIVITIES[wagon.activity].title);
       const unit = document.createElement("select");
