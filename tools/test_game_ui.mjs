@@ -74,7 +74,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     categories[0].fire("click");
     buttons = elements.get("activityChoices").children.filter(node => node.type === "button");
     assert.equal(buttons.length, 10, "honest activities live in their own category");
-    assert.equal(buttons.some(b => b.children[0].children[0].textContent === "Highway robbery"), true);
+    assert.equal(buttons.some(b => b.children[0].children[0].textContent === "Highway robbery"), false,
+      "outlaw tasks must not leak into Honest Work");
     assert.equal(buttons.every(b => !/\\d+\\s*(min|sec)|per cycle/i.test(
       b.children[0].children[1].textContent
     )), true, "activity buttons must not reveal cycle rates");
