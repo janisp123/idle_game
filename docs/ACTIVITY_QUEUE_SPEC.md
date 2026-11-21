@@ -88,4 +88,4 @@ Do not pre-sum five or three independent loot totals without respecting order: o
 3. **UI and tests:** aged wagon strip above task panel, Start, Do it for, reorder controls, clear active/destination state, transition labels and progress bar, phone layout, accessibility, no live clocks.
 4. **Release checks:** normal browser-game CI, 20- and 100-year settlements, save migration/backward time/double-settlement, skill freeze, material dependencies, cross-zone and same-zone swaps, first-ever Start and in-progress transition reorders. Verify the deployed Pages version **separately** from passing PR CI.
 
-The existing play page still switches activities instantly. These rules are a **completed design decision, not a claim of running gameplay**.
+The existing play page now supports **manual Start and three-phase switching** after [PR #60](https://github.com/janisp123/idle_game/pull/60). The **three-wagon queue** (planned durations, reorder UI, forever-final scheduling) remains a **completed design decision, not yet running gameplay**.

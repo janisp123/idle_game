@@ -1,5 +1,12 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Manual activity switching and progressbar deployed (chat; PR #60)
+
+- **Implementation:** [PR #60](https://github.com/janisp123/idle_game/pull/60) merged into main as `102d7e895afcc0ba88834b7be00dcfc0f1b6c932`. Player activity rows now have distinct **Start** buttons rather than clicking the whole row; switching resolves the current full work cycle, then shows the dedicated transition progress bar with **Finishing current activity → Moving to new location → Getting ready to start new activity**. Same-zone travel is 1 minute, cross-zone travel 5 minutes, preparation 2 minutes (also for initial Start); these are internal game times, not player-visible clocks.
+- **Offline/save safety:** Transition phase, target and progress are saved alongside existing character data; old local saves migrate. Even 20-year absences are batch-settled, accumulating old and new activity rewards at frozen skill effectiveness. Changing destination mid-switch restarts travel/preparation without duplicating earned goods; existing ingredient protection and inventory remain intact.
+- **Validation:** PR-head **Idle Game website #80** ([run 44901479602](https://github.com/janisp123/idle_game/actions/runs/44901479602)) and **Project Protocol Preflight #139** ([run 44901479610](https://github.com/janisp123/idle_game/actions/runs/44901479610)) passed. Main Pages **Idle Game website #81** ([run 44901535752](https://github.com/janisp123/idle_game/actions/runs/44901535752)) passed validation and deployment. Independent public readback of `/play/` returned HTTP 200 and the new `20261121-activity-switch1` script and `transitionProgress` element. This proves published HTML, **not hands-on testing on user devices**.
+- **Remaining:** The three-wagon queue, finite task scheduling, reorder controls and automatic multi-activity catch-up remain unimplemented; GAME-004 is **PARTIAL**, not DONE.
+
 ## 2026-11-21 — Three-wagon queue and switching timings approved (chat; design only)
 
 - **Owner-approved QUEUE-002:** Replaces QUEUE-001's five-slot queue with **1–3 small connected old wagons above the activity panel**. Wagon 1 is current/immediate destination, the final wagon always runs Forever. Wagons can swap positions; future-only swaps are free, changing wagon 1 restarts movement/preparation, even during a transition, without deleting completed work rewards.
