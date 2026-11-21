@@ -149,7 +149,7 @@ def check():
         assert 'class="right-rail"' in game_html, "Resource/progress panel must exist"
         verify_links(game_parser, play_root)
         checked_links += len(game_parser.links)
-        for name in ("hunting.webp", "mining.webp"):
+        for name in ("hunting.webp", "mining.webp", "woodcutting.webp", "gathering.webp", "fishing.webp", "smelting.webp", "alchemy.webp", "carpentry.webp", "masonry.webp", "cooking.webp"):
             picture = play_root / "assets" / name
             raw = picture.read_bytes()
             assert len(raw) > 30_000, f"Activity painting suspiciously small: {name}"
