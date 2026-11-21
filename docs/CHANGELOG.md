@@ -1,5 +1,12 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Three-wagon queue and switching timings approved (chat; design only)
+
+- **Owner-approved QUEUE-002:** Replaces QUEUE-001's five-slot queue with **1–3 small connected old wagons above the activity panel**. Wagon 1 is current/immediate destination, the final wagon always runs Forever. Wagons can swap positions; future-only swaps are free, changing wagon 1 restarts movement/preparation, even during a transition, without deleting completed work rewards.
+- **Owner-approved SWITCH-TIMING-001:** Same-zone travel **1 minute**, cross-zone travel **5 minutes total**, equipment/readiness preparation **2 minutes** including first Start. Configured 1–8-hour/day slots measure productive work, not travel/preparation; a running activity's newly set duration begins at the edit.
+- **Documentation:** [ACTIVITY_QUEUE_SPEC.md](ACTIVITY_QUEUE_SPEC.md), [ACTIVITY_SWITCH_SPEC.md](ACTIVITY_SWITCH_SPEC.md), [TD_LIST.md](TD_LIST.md), [WORK_CHECKPOINT.md](WORK_CHECKPOINT.md) and [DECISIONS.md](DECISIONS.md) updated. Three-wagon UI is described, **not rendered or deployed**.
+- **Remaining engineering:** Save-state migration, bounded offline transition/queue math, wagon UI/reorder behavior and tests. No production code changes in this entry.
+
 ## 2026-11-21 — Forever-last activity queue specification (chat; documentation only)
 
 - **QUEUE-001:** Owner approved a linear queue of up to five activities: each nonfinal activity is configured for 1–8 hours or 1–8 days, and the final activity continues **forever**. This replaces earlier loop-to-first brainstorming and removes the earlier general deferral for queue design.
