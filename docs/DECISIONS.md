@@ -22,3 +22,4 @@
 | DICE-001 | 2026-11-21 | Owner | The three skull dice have a **maximum face value of 6 each**, making **6–6–6** the maximum combination and the visual motif. Earlier 7–7–7 / 3d7 concepts are superseded. Exact timing, reward mechanics and probabilities remain undecided until separately approved. | Active |
 
 Add project-specific decisions only when explicitly approved; date and link superseding decisions. Avoid copying private conversations.
+| QUAL-001 | 2026-11-21 | Owner | **Quality and security over quantity** across game code, research and automation. Prefer correct, safe, maintainable, tested and useful outcomes to feature count, commit volume or research frequency. Reject duplicate, unsafe, superficial or insufficiently verified work; it is acceptable to make no change. Respect existing approvals, security and license checks. | Active |
