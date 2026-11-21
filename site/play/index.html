@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261121-compact-route1">
-  <script type="module" src="./app.mjs?v=20261121-resource-protection1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261121-skill-master1">
+  <script type="module" src="./app.mjs?v=20261121-skill-master1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -58,7 +58,26 @@
           <div class="skill-meta"><span id="skillTitle">Choose an activity</span><strong id="skillLevel">—</strong></div>
           <div class="meter skill-meter" aria-label="XP toward next skill level"><span id="skillFill"></span></div>
           <p class="hint" id="skillXp">Each activity has independent XP.</p>
-          <p class="hint">Skill improvements activate when you return.</p>
+          <p class="hint">XP stops at 100%. The Master alone can teach the next level.</p>
+        </section>
+
+        <section class="panel skill-master" aria-labelledby="masterHeading">
+          <p class="section-index">THE PRICE OF MASTERY</p>
+          <h2 id="masterHeading" class="engraved-title">THE SKILL MASTER</h2>
+          <p class="master-voice">“Experience is only the beginning. Your spoils shall be my due. Are you ready to surrender them for knowledge?”</p>
+          <p class="hint" id="masterStatus">No skills are ready for the Master yet.</p>
+          <button id="visitMaster" class="activity-start master-visit" type="button" aria-controls="masterAudience" aria-expanded="false">Seek the Master</button>
+          <div id="masterAudience" class="master-audience" hidden>
+            <p class="master-voice">“I will take all you hold from the skills I advance. Even what you've marked Protected. Spend wisely before you accept.”</p>
+            <div id="masterSkills" class="master-summary" aria-label="Skills ready for training"></div>
+            <p class="master-subtitle">THE TRIBUTE TO BE SURRENDERED</p>
+            <div id="masterTribute" class="master-summary" aria-label="Exact inventory to sacrifice"></div>
+            <p id="masterWarning" class="hint"></p>
+            <div class="master-actions">
+              <button id="masterConfirm" class="activity-start" type="button">Surrender and learn</button>
+              <button id="masterCancel" class="activity-start activity-queue-button" type="button">Leave</button>
+            </div>
+          </div>
         </section>
 
         <section class="panel actions" aria-labelledby="actions-heading">
@@ -112,8 +131,8 @@
             <div class="image-caption" id="sceneCaption">THE WOLF ROAD</div>
           </div>
           <section id="wagonQueue" class="wagon-queue" hidden aria-label="Your activity route">
-            <p class="wagon-queue-heading">YOUR ROUTE · THREE HOURGLASSES</p>
-            <div id="wagonList" class="wagon-list" aria-label="Ordered activity hourglasses"></div>
+            <p class="wagon-queue-heading">YOUR ROUTE · THREE TASKS</p>
+            <div id="wagonList" class="wagon-list" aria-label="Ordered activity tasks"></div>
           </section>
           <div class="scene-bottom">
             <div>
@@ -150,7 +169,7 @@
       </aside>
     </div>
     <footer>
-      <p><strong>Early prototype.</strong> Activities repeat automatically. Each activity earns its own skill XP; higher skill can reveal rarer resources without changing activities. New skill levels activate on return. Smelting, alchemy, carpentry, masonry and cooking consume available, unprotected raw materials. Detailed combat is not yet simulated.</p>
+      <p><strong>Early prototype.</strong> Activities repeat automatically and resources accumulate forever. Each skill's XP stops at one level's threshold. Visit the Skill Master to surrender that skill's XP and all remaining spoils, even protected ones, in return for one level. There is no game currency. Smelting, alchemy, carpentry, masonry and cooking consume available, unprotected raw materials. Detailed combat is not yet simulated.</p>
       <p>All progress is stored in this browser only. Clearing site data or switching devices will lose this character. No account or server save yet.</p>
     </footer>
   </main>

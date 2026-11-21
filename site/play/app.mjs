@@ -3,8 +3,9 @@ import {
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
   MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE,
-  SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, xpForLevel
-} from "./engine.mjs?v=20261121-resource-protection1";
+  SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
+  xpToNextLevel, skillMasterOffer, learnFromMaster
+} from "./engine.mjs?v=20261121-skill-master1";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -15,6 +16,9 @@ const ui = {
   backToActivities: $("backToActivities"), backToCategories: $("backToCategories"),
   categoryTitle: $("activityCategoryTitle"),
   skillTitle: $("skillTitle"), skillLevel: $("skillLevel"), skillXp: $("skillXp"), skillFill: $("skillFill"),
+  masterStatus: $("masterStatus"), visitMaster: $("visitMaster"), masterAudience: $("masterAudience"),
+  masterSkills: $("masterSkills"), masterTribute: $("masterTribute"), masterWarning: $("masterWarning"),
+  masterConfirm: $("masterConfirm"), masterCancel: $("masterCancel"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
   heading: $("scene-heading"), description: $("activityDescription"), actionFill: $("actionFill"),
   activityProgress: $("activityProgress"), transitionStatus: $("transitionStatus"),
@@ -351,6 +355,93 @@ ui.queueConfirm.addEventListener("click", () => {
         " for the selected period.");
 });
 
+function renderMaster() {
+  const offer = skillMasterOffer(state);
+  const count = offer.ready.length;
+  ui.masterStatus.textContent = count
+    ? number(count) + " skill" + (count === 1 ? " is" : "s are") + " ready to advance."
+    : offer.blocked.length
+      ? "The Master awaits proof of your work. Keep gathering."
+      : "Your skills are still gathering experience.";
+  ui.visitMaster.textContent = count ? "Seek the Master · " + number(count) + " ready" : "Seek the Master";
+  ui.visitMaster.setAttribute("aria-expanded", String(!ui.masterAudience.hidden));
+  if (ui.masterAudience.hidden) return;
+  const readyLines = offer.ready.map(id => {
+    const item = document.createElement("p");
+    item.textContent = ACTIVITIES[id].title + ": Level " + number(state.skills[id].level) +
+      " → " + number(state.skills[id].level + 1);
+    return item;
+  });
+  if (!readyLines.length) {
+    const item = document.createElement("p");
+    item.textContent = "No skill can advance yet. Fill its XP bar, then bring the spoils of that work.";
+    readyLines.push(item);
+  }
+  ui.masterSkills.replaceChildren(...readyLines);
+  const resources = Object.entries(offer.tribute);
+  const tributeLines = resources.map(([id, qty]) => {
+    const item = document.createElement("p");
+    const protectedLabel = state.protectedItems.includes(id) ? " · Protected" : "";
+    item.textContent = number(qty) + " " + ITEM_LABELS[id] + protectedLabel;
+    return item;
+  });
+  if (!tributeLines.length) {
+    const item = document.createElement("p");
+    item.textContent = "No materials are produced by these skills.";
+    tributeLines.push(item);
+  }
+  ui.masterTribute.replaceChildren(...tributeLines);
+  ui.masterWarning.textContent = offer.blocked.length
+    ? "Other skills still lack proof of their labour. The Master will leave those unchanged."
+    : "Surrendered resources cannot be recovered. Protected items are included.";
+  ui.masterConfirm.disabled = count === 0;
+  ui.masterConfirm.setAttribute("aria-label", "Surrender listed resources and advance " +
+    number(count) + " ready skills once");
+}
+
+ui.visitMaster.addEventListener("click", () => {
+  ui.masterAudience.hidden = !ui.masterAudience.hidden;
+  render();
+});
+ui.masterCancel.addEventListener("click", () => {
+  ui.masterAudience.hidden = true;
+  render();
+});
+ui.masterConfirm.addEventListener("click", () => {
+  // Freeze the offer against the settled inventory before asking the player.
+  // The next ordinary tick handles the time elapsed during confirmation.
+  const outcome = settle(state, Date.now());
+  state = outcome.state;
+  reportProgress(outcome);
+  const offer = skillMasterOffer(state);
+  if (!offer.ready.length) {
+    message("The Master sees no skill ready for his lessons.");
+    writeSave();
+    render();
+    return;
+  }
+  const due = Object.entries(offer.tribute).map(([id, qty]) =>
+    number(qty) + " " + ITEM_LABELS[id] +
+    (state.protectedItems.includes(id) ? " (Protected)" : ""));
+  const warning = "THE MASTER'S DUE\nAdvance " + number(offer.ready.length) +
+    " skill(s), one level each?\n\nLose ALL their current-level XP and every resource listed:" +
+    (due.length ? "\n" + due.join("\n") : "\nNo material spoils from these skills.") +
+    "\n\nThis also takes Protected items. This cannot be undone.";
+  if (!window.confirm(warning)) {
+    writeSave();
+    render();
+    return;
+  }
+  const result = learnFromMaster(state, state.settledAtMs);
+  state = result.state;
+  ui.masterAudience.hidden = true;
+  message("The Master claims his due. " + number(result.mastery.ready.length) +
+    " skill" + (result.mastery.ready.length === 1 ? " has" : "s have") +
+    " risen. Your next lesson begins.");
+  writeSave();
+  render();
+});
+
 function render() {
   const current = state.activity ? ACTIVITIES[state.activity] : null;
   ui.playerName.textContent = state.name;
@@ -384,7 +475,8 @@ function render() {
   }
   for (const [id, { row, startButton, queueButton }] of activityButtons) {
     const skill = state.skills[id];
-    activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level);
+    activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level) +
+      (skill.xp >= xpToNextLevel(skill.level) ? " · Master ready" : "");
     const available = lootChances(id, skill.level);
     const recipes = recipeOptions(id, skill.level);
     activityRewardLabels.get(id).textContent = recipes.length
@@ -413,22 +505,20 @@ function render() {
   const selectedSkill = state.activity ? state.skills[state.activity] : null;
   ui.skillTitle.textContent = current ? current.title : "Choose an activity";
   if (selectedSkill) {
-    const baseXP = xpForLevel(selectedSkill.level);
-    const nextXP = xpForLevel(selectedSkill.level + 1);
-    const earned = Math.max(0, selectedSkill.xp - baseXP);
-    const required = nextXP - baseXP;
-    const ready = earned >= required;
+    const required = xpToNextLevel(selectedSkill.level);
+    const ready = selectedSkill.xp >= required;
     ui.skillLevel.textContent = "Level " + number(selectedSkill.level);
     ui.skillXp.textContent = ready
-      ? "Level-up ready on return"
-      : number(earned) + " / " + number(required) + " skill XP";
-    ui.skillFill.style.width = Math.min(100, earned / required * 100).toFixed(2) + "%";
+      ? "XP full · Seek the Skill Master to advance"
+      : number(selectedSkill.xp) + " / " + number(required) + " skill XP";
+    ui.skillFill.style.width = Math.min(100, selectedSkill.xp / required * 100).toFixed(2) + "%";
   } else {
     ui.skillLevel.textContent = "—";
     ui.skillXp.textContent = "Each activity has independent XP.";
     ui.skillFill.style.width = "0%";
   }
 
+  renderMaster();
   ui.activityProgress.hidden = Boolean(transition);
   ui.transitionStatus.hidden = !transition;
   if (transition) {
