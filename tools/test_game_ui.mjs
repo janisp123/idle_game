@@ -40,7 +40,15 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "future jobs have only an invisible meter spacer");
   assert.match(queueCss, /\.wagon-name\s*\{[^}]*grid-row:1/s);
   assert.match(queueCss, /\.wagon-controls\s*\{[^}]*grid-row:5/s);
-  const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
+  assert.match(queueCss, /\.activity-choices \.activity-title-line\s*\{[^}]*grid-template-columns:minmax\(0,1fr\) auto/s,
+    "icon controls must reserve a separate grid column without covering titles");
+  assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:42px/s,
+    "desktop and phone action buttons use bounded icon-only widths");
+  assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:anywhere/s,
+    "long skill names may wrap rather than be hidden behind controls");
+  assert.match(html, /id="queueMasteryMode"[^>]*aria-pressed="false"/,
+    "the level-up stop is a visible separate planner button");
+    const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
   const elements = new Map(ids.map(id => [id, new FakeElement()]));
   // Mirror the hidden HTML attribute in the minimal fake DOM.
   elements.get("masterAudience").hidden = true;
@@ -144,8 +152,14 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(categoryScreen.hidden, false);
     categories[0].fire("click");
     const miningStart = mining.children[0].children[0].children[1].children[0];
-    assert.equal(miningStart.textContent, "Start now");
-    assert.equal(mining.children[0].children[0].children[1].children[1].textContent, "Schedule");
+    const miningActions = mining.children[0].children[0].children[1];
+    assert.deepEqual(miningActions.children.map(button => button.textContent), ["▶","↻","↑"]);
+    assert.equal(miningStart.getAttribute("aria-label"), "Start Mining now");
+    assert.match(miningActions.children[1].getAttribute("aria-label"), /Schedule Mining for a chosen duration/);
+    assert.match(miningActions.children[2].getAttribute("aria-label"), /Schedule Mining until ready to level up/);
+    assert.equal(mining.children[0].children[0].children[0].textContent, "Mining",
+      "full skill name stays in a separate text element");
+    assert.equal(mining.children[0].children[2].textContent, "Skill level 1");
     mining.fire("click");
     assert.equal(JSON.parse(store.get(SAVE_KEY)).activity, null,
       "clicking activity card alone never starts work");
@@ -275,8 +289,31 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     const meditationActions = meditation.children[0].children[0].children[1];
     const meditationStart = meditationActions.children[0];
     const meditationSchedule = meditationActions.children[1];
-    assert.equal(meditationStart.textContent, "Start now");
-    assert.equal(meditationSchedule.textContent, "Schedule");
+    const meditationLevelUp = meditationActions.children[2];
+    assert.equal(meditationStart.textContent, "▶");
+    assert.equal(meditationSchedule.textContent, "↻");
+    assert.equal(meditationLevelUp.textContent, "↑");
+    assert.equal(meditationLevelUp.disabled, false);
+    // A visible ↑ opens the existing scheduler with mastery readiness selected.
+    const routeBeforePlanning = store.get(SAVE_KEY);
+    meditationLevelUp.fire("click");
+    assert.equal(elements.get("queuePlanner").hidden, false);
+    assert.equal(elements.get("queueUnit").value, UNTIL_LEVEL_UP);
+    assert.equal(elements.get("queueAmount").hidden, true);
+    assert.equal(elements.get("queueMasteryMode").getAttribute("aria-pressed"), "true");
+    assert.match(elements.get("queueConfirm").textContent, /LvL Up/);
+    // The prominent ↑ button also toggles the stop condition with no side effects.
+    elements.get("queueMasteryMode").fire("click");
+    assert.equal(elements.get("queueUnit").value, "minutes");
+    assert.equal(elements.get("queueMasteryMode").getAttribute("aria-pressed"), "false");
+    elements.get("queueMasteryMode").fire("click");
+    assert.equal(elements.get("queueUnit").value, UNTIL_LEVEL_UP);
+    elements.get("queueCancel").fire("click");
+    assert.equal(elements.get("queuePlanner").hidden, true);
+    assert.equal(store.get(SAVE_KEY), routeBeforePlanning,
+      "cancelling a proposed level-up schedule never changes the actual queue");
+    openActivities.fire("click");
+    categories[2].fire("click");
     meditationSchedule.fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "mining");
@@ -412,7 +449,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.deepEqual(rendered.map(card => card.children[4].className),
       ["wagon-controls", "wagon-controls", "wagon-controls"],
       "all bottom controls remain aligned");
-    assert.equal(masonryActions.children[1].textContent, "Queued");
+    assert.equal(masonryActions.children[1].textContent, "↻");
+    assert.equal(masonryActions.children[1].disabled, true);
+    assert.equal(masonryActions.children[2].textContent, "↑");
+    assert.equal(masonryActions.children[2].disabled, true);
 
     // Mastery condition is selectable directly on a future compact queue card.
     const futureDuration = elements.get("wagonList").children[1].children[3];
