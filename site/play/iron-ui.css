@@ -571,42 +571,37 @@ footer p{color:#aa9680}
 /* The mastery plan has no numeric amount; preserve compact mobile layout. */
 .planner-fields select[hidden], .planner-fields label[hidden], .wagon-duration select[hidden] { display:none !important; }
 
-/* Compact action icons: no full-width labels can overlap the activity title.
-   Three equal bronze controls stay touch-friendly at phone widths. */
-.activity-choices .activity-copy {width:100%;min-width:0;overflow:visible}
+/* Activity actions always occupy a distinct top row, never the skill-name row. */
+.activity-choices .activity {box-sizing:border-box;min-width:0}
+.activity-choices .activity-copy {display:block;width:100%;min-width:0}
 .activity-choices .activity-title-line {
-  display:grid;grid-template-columns:minmax(0,1fr) auto;
-  align-items:center;gap:8px;width:100%;min-width:0;
+  display:flex;flex-direction:column;align-items:stretch;
+  gap:7px;width:100%;min-width:0;
 }
 .activity-choices .activity-title-line > strong {
-  min-width:0;max-width:100%;line-height:1.22;
-  overflow-wrap:anywhere;word-break:normal;white-space:normal;
+  order:2;display:block;min-width:0;width:100%;line-height:1.22;
+  overflow-wrap:anywhere;white-space:normal;
 }
 .activity-choices .activity-actions {
-  display:flex;flex:0 0 auto;align-items:center;
-  justify-content:flex-end;gap:5px;width:auto;min-width:0;
+  order:1;display:flex;flex-wrap:nowrap;align-items:center;
+  justify-content:flex-start;gap:6px;width:100%;min-width:0;
 }
 .activity-choices .activity-actions .activity-icon-button {
-  display:inline-flex;align-items:center;justify-content:center;
-  flex:0 0 42px;width:42px;min-width:42px;max-width:42px;
-  height:44px;min-height:44px;margin:0;padding:0;
-  font:700 23px/1 Georgia,serif;text-align:center;
-  white-space:nowrap;color:#f1d3a1;
-  border:2px ridge #b98553;
+  box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;
+  flex:0 0 38px;width:38px;min-width:38px;max-width:38px;
+  height:40px;min-height:40px;margin:0;padding:0;
+  font:700 20px/1 Georgia,serif;text-align:center;white-space:nowrap;
+  color:#f1d3a1;border:2px ridge #b98553;
   background:linear-gradient(145deg,#593821,#281a12);
   box-shadow:inset 0 1px rgba(255,231,185,.13),0 2px 4px #100a07;
 }
 .activity-choices .activity-actions .activity-queue-button {
-  color:#e6c49c;background:linear-gradient(145deg,#46382a,#231c16);
-  border-color:#937454;
+  color:#e6c49c;background:linear-gradient(145deg,#46382a,#231c16);border-color:#937454;
 }
 .activity-choices .activity-actions .activity-levelup-button {
-  color:#f2c985;border-color:#a7824e;
-  background:linear-gradient(145deg,#51402a,#251b12);
+  color:#f2c985;border-color:#a7824e;background:linear-gradient(145deg,#51402a,#251b12);
 }
-.activity-choices .activity-actions .activity-icon-button:disabled {
-  opacity:.48;cursor:default;
-}
+.activity-choices .activity-actions .activity-icon-button:disabled {opacity:.48;cursor:not-allowed}
 .activity-choices .activity-actions .activity-icon-button:not(:disabled):hover,
 .activity-choices .activity-actions .activity-icon-button:not(:disabled):focus-visible {
   border-color:#e9b875;background:#704a2c;
@@ -629,23 +624,11 @@ footer p{color:#aa9680}
   margin:4px 0 9px;color:#ccb08b;font:12px/1.45 Georgia,serif;
 }
 @media(max-width:520px) {
-  .activity-choices .activity-title-line {
-    display:grid;grid-template-columns:minmax(0,1fr) auto;
-    align-items:center;gap:6px;
-  }
-  .activity-choices .activity-actions {
-    display:flex;gap:4px;width:auto;align-items:center;justify-content:flex-end;
-  }
-  .activity-choices .activity-actions .activity-icon-button {
-    flex:0 0 40px;width:40px;min-width:40px;max-width:40px;
-    height:44px;min-height:44px;padding:0;font-size:22px;
-  }
+  .activity-choices .activity-title-line {gap:6px}
+  .activity-choices .activity-actions {gap:5px}
   .activity-choices .activity-title-line > strong {font-size:18px}
 }
 @media(max-width:350px) {
-  .activity-choices .activity-actions {gap:3px}
-  .activity-choices .activity-actions .activity-icon-button {
-    flex-basis:38px;width:38px;min-width:38px;max-width:38px;
-  }
+  .activity-choices .activity-actions {gap:4px}
   .activity-choices .activity-title-line > strong {font-size:16px}
 }
