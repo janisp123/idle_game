@@ -1,7 +1,7 @@
 import {
-  SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, newGame, readSave, settle,
+  SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, PRODUCTION_INPUTS, recipeOptions, newGame, readSave, settle,
   enterGame, chooseActivity, xpForLevel
-} from "./engine.mjs?v=20261121-weighted-loot1";
+} from "./engine.mjs?v=20261121-production1";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -25,6 +25,7 @@ const activityLevelLabels = new Map();
 const activityRewardLabels = new Map();
 const resourceValues = {};
 const resourceRows = new Map();
+const reserveButtons = new Map();
 let previousCategory = null;
 for (const [id, task] of Object.entries(ACTIVITIES)) {
   if (task.category && task.category !== previousCategory) {
@@ -61,6 +62,21 @@ for (const item of ITEM_KEYS) {
   const count = document.createElement("strong");
   count.textContent = "0";
   row.append(label, count);
+  if (PRODUCTION_INPUTS.includes(item)) {
+    const reserve = document.createElement("button");
+    reserve.type = "button";
+    reserve.className = "resource-lock";
+    reserve.addEventListener("click", () => {
+      const protectedItems = new Set(state.protectedItems ?? []);
+      if (protectedItems.has(item)) protectedItems.delete(item);
+      else protectedItems.add(item);
+      state = { ...state, protectedItems: [...protectedItems] };
+      writeSave();
+      render();
+    });
+    row.append(reserve);
+    reserveButtons.set(item, reserve);
+  }
   ui.resourceList.append(row);
   resourceValues[item] = count;
   resourceRows.set(item, row);
@@ -118,14 +134,23 @@ function render() {
     const qty = state.items[key];
     resourceValues[key].textContent = number(qty);
     resourceRows.get(key).hidden = qty === 0;
+    const reserve = reserveButtons.get(key);
+    if (reserve) {
+      const isProtected = (state.protectedItems ?? []).includes(key);
+      reserve.textContent = isProtected ? "Protected" : "Auto use";
+      reserve.setAttribute("aria-label", (isProtected ? "Allow automatic use of " : "Protect ") + ITEM_LABELS[key]);
+      reserve.setAttribute("aria-pressed", String(isProtected));
+    }
   }
   emptyInventory.hidden = ITEM_KEYS.some(key => state.items[key] > 0);
   for (const [id, button] of activityButtons) {
     const skill = state.skills[id];
     activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level);
     const available = lootChances(id, skill.level);
-    activityRewardLabels.get(id).textContent = available.length
-      ? available.map(t => t.label).join(" · ")
+    const recipes = recipeOptions(id, skill.level);
+    activityRewardLabels.get(id).textContent = recipes.length
+      ? recipes.map(t => t.label).join(" · ")
+      : available.length ? available.map(t => t.label).join(" · ")
       : ACTIVITIES[id].itemLabel;
     button.classList.toggle("active", state.activity === id);
     button.setAttribute("aria-pressed", String(state.activity === id));
