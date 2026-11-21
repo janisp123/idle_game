@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP } from "../site/play/engine.mjs";
+import { newGame, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP } from "../site/play/engine.mjs";
 
 class FakeElement {
   children = [];
@@ -608,6 +608,28 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.name, "The Black Rider");
     assert.equal(elements.get("character-heading").textContent, "The Black Rider");
+
+    // A real running Fighting session (rather than a selected activity card)
+    // displays the simulated result after productive time has passed.
+    const fighting = newGame(now);
+    fighting.name = "The Black Rider";
+    fighting.activity = "fighting";
+    fighting.wagons = [{ activity: "fighting", plannedMs: null }];
+    const json = JSON.stringify(fighting);
+    store.set(SAVE_KEY, json);
+    handlers.get("storage")({ key: SAVE_KEY, newValue: json });
+    assert.equal(elements.get("combatPanel").hidden, true,
+      "no combat events are shown before the first fighting interval");
+    now += 20_000;
+    tick();
+    const arena = JSON.parse(store.get(SAVE_KEY));
+    assert.ok(arena.combatSession && arena.combatSession.elapsedMs === 20_000);
+    assert.equal(elements.get("combatPanel").hidden, false);
+    assert.match(elements.get("combatEventTitle").textContent, /^DUEL 1 · /);
+    assert.ok(elements.get("combatEventText").textContent.length > 20);
+    assert.equal(arena.skills.fighting.level, 1);
+    assert.deepEqual(arena.items, fighting.items,
+      "visual combat creates no unapproved loot, deletion, or permanent death");
   } finally {
     Date.now = originalNow;
     Math.random = originalRandom;
