@@ -303,7 +303,7 @@ function variedTotal(base, random) {
   return whole + (fraction > 0 && roll() < fraction ? 1 : 0);
 }
 
-function settleWork(state, now, random) {
+function settleWork(state, now, random, xpRandom = random) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
   const end = Math.max(state.settledAtMs, now);
   const elapsedMs = end - state.settledAtMs;
@@ -336,7 +336,7 @@ function settleWork(state, now, random) {
       // character gathers resources unattended for decades.
       const missingXP = Math.max(0, xpToNextLevel(prior.level) - prior.xp);
       report.gainedXP = missingXP
-        ? Math.min(missingXP, variedTotal(productive * rules.xp * efficiency, random)) : 0;
+        ? Math.min(missingXP, variedTotal(productive * rules.xp * efficiency, xpRandom)) : 0;
       report.items = rules.item === null ? {} :
         crafted ? crafted.created : LOOT_TABLES[state.activity]
         ? allocateLoot(state.activity, prior.level, report.gainedItems, random)
@@ -515,8 +515,15 @@ export function settle(state, now = Date.now(), random = Math.random) {
         if (!Number.isFinite(originalRoll) || originalRoll < 0 || originalRoll >= 1)
           throw new RangeError("Invalid random roll");
         const seed = Math.floor(originalRoll * 0x100000000);
+        // The XP roll must not shift when a variable-size crafting batch
+        // consumes a different number of loot RNG draws during probing.
+        // Holding its multiplier/rounding roll fixed makes XP (and readiness)
+        // monotone across candidate cycle counts.
+        const xpRoll = ((Math.imul(seed, 2246822519) + 3266489917) >>> 0) /
+          0x100000000;
         const atCycle = count => next.settledAtMs + count * task.durationMs - next.progressMs;
-        const probe = count => settleWork(next, atCycle(count), seededRoll(seed));
+        const probe = count => settleWork(next, atCycle(count), seededRoll(seed),
+          () => xpRoll);
         const finalResult = probe(possibleCycles);
         if (!skillMasterReadiness(finalResult.state, first.activity).ready) {
           // No crafting inputs or not enough loot/XP: stay on this task until
