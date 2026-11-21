@@ -14,10 +14,11 @@ The public repository should **not identify or link to games used for inspiratio
 
 **Optional, task-specific reference only.** Approved work lives in `docs/TD_LIST.md`; `AGENTS.md` and `docs/DECISIONS.md` govern implementation. Never treat a fit tag as authorization or require Codex to read the whole library.
 
-Start with the [Useful Examples index](USEFUL_EXAMPLES.md#quick-index), then open **only** a relevant guide. For combat/offline tasks, first consult the [short project handoff](brainstorm/ARCHITECTURE_AND_BALANCING.md#combatoffline-handoff--concise-context-for-codex-2026-11-20). External source provenance belongs to the owner's separate private source index, not this public library.
+For technical design choices, start with the compact [Research map](RESEARCH_MAP.md); then open **only** a relevant guide. Skip library reading on unrelated tasks. For combat/offline tasks, first consult the [short project handoff](brainstorm/ARCHITECTURE_AND_BALANCING.md#combatoffline-handoff--concise-context-for-codex-2026-11-20). External source provenance belongs to the owner's separate private source index, not this public library.
 
 ## Reading order
 
+- [Research map](RESEARCH_MAP.md): tiny topic overview for on-demand Codex discovery; not required on routine tasks.
 - [Useful Examples](USEFUL_EXAMPLES.md): short, generic, independent implementation patterns and tradeoffs.
 - [Time-safe offline simulation](library/offline-time-units-and-boundaries.md): consistent time units, exact resource-depletion boundaries, aggregate processing and proposed equivalence tests. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Idempotent reward settlement](library/idempotent-reward-settlement.md): atomic progress cursors, retry-safe grants, concurrency control and crash recovery. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
