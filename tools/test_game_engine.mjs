@@ -24,7 +24,7 @@ test("only individual activities have levels; character has a name but no level"
   for (const id of SKILL_IDS) assert.deepEqual(state.skills[id], { level: 1, xp: 0 });
 });
 
-test("mastery offers collect every possible skill spoil, including rare and protected stock", () => {
+test("mastery offers collect every possible skill spoil, including rare stock", () => {
   const start = newGame(0);
   start.skills.mining = {level:1,xp:xpToNextLevel(1)};
   start.skills.hunting = {level:1,xp:xpToNextLevel(1)};
@@ -34,7 +34,6 @@ test("mastery offers collect every possible skill spoil, including rare and prot
   start.items.iron_ore = 19;
   start.items.silver_ore = 5;
   start.items.log = 40; // unrelated resources must survive
-  start.protectedItems = ["stone", "silver_ore", "log"];
   assert.deepEqual(skillSpoils("mining"), ["stone","copper_ore","iron_ore","silver_ore"]);
   assert.deepEqual(skillSpoils("meditation"), []);
   assert.deepEqual(skillSpoils("cooking"), ["meal"]);
@@ -48,7 +47,7 @@ test("mastery offers collect every possible skill spoil, including rare and prot
   const out = learnFromMaster(start, 0);
   for (const key of Object.keys(offer.tribute)) assert.equal(out.state.items[key], 0, key);
   assert.equal(out.state.items.log, 40);
-  assert.deepEqual(out.state.protectedItems, ["stone", "silver_ore", "log"]);
+  assert.equal(Object.hasOwn(out.state, "protectedItems"), false);
   assert.deepEqual(out.state.skills.mining, {level:2,xp:0});
   assert.deepEqual(out.state.skills.meditation, {level:2,xp:0});
   assert.deepEqual(out.state.skills.hunting, {level:1,xp:40});
@@ -94,7 +93,7 @@ test("V3 lifetime XP migrates to a single current-level bar without inventory or
   assert.deepEqual(migrated.wagons, old.wagons);
   assert.equal(migrated.items.stone, 777);
   assert.equal(migrated.items.copper_ore, 10);
-  assert.deepEqual(migrated.protectedItems, ["stone"]);
+  assert.equal(Object.hasOwn(migrated, "protectedItems"), false, "old locks are discarded");
   assert.deepEqual(readSave(migrated), migrated);
 });
 
@@ -500,24 +499,27 @@ test("high-level smelting automatically uses higher ore if present", () => {
   assert.equal(out.state.items.silver_ore,0);
 });
 
-test("protected ore cannot be consumed, even during very long absences", () => {
-  const start = newGame(0);
-  start.skills.smelting = { level: 100, xp: 0 };
-  start.items.copper_ore = 3;
-  start.items.iron_ore = 500;
-  start.items.silver_ore = 200;
-  start.protectedItems = ["iron_ore", "silver_ore"];
-  const s = choose(start, "smelting", 0).state;
-  const result = finish(s, 100 * YEAR);
-  assert.equal(result.report.completed,3);
-  assert.equal(result.state.items.ingot,3);
-  assert.equal(result.state.items.copper_ore,0);
-  assert.equal(result.state.items.iron_ore,500);
-  assert.equal(result.state.items.silver_ore,200);
-  assert.deepEqual(result.state.protectedItems,["iron_ore","silver_ore"]);
-  assert.equal(result.state.skills.smelting.level,100);
+test("legacy protected ores become available to crafting over long absences", () => {
+  const old = newGame(0);
+  old.skills.smelting = { level: 100, xp: 0 };
+  old.items.copper_ore = 3;
+  old.items.iron_ore = 500;
+  old.items.silver_ore = 200;
+  old.protectedItems = ["iron_ore", "silver_ore"]; // legacy browser save
+  const loaded = readSave(JSON.stringify(old));
+  assert.ok(loaded);
+  assert.equal(Object.hasOwn(loaded, "protectedItems"), false);
+  assert.equal(loaded.items.iron_ore, 500, "old material amounts survive load");
+  const result = finish(choose(loaded, "smelting", 0).state, 100 * YEAR);
+  assert.equal(result.report.completed, 703);
+  assert.equal(result.state.items.copper_ore, 0);
+  assert.equal(result.state.items.iron_ore, 0);
+  assert.equal(result.state.items.silver_ore, 0);
+  assert.equal(result.state.items.ingot +
+    result.state.items.iron_ingot + result.state.items.silver_ingot, 703);
+  assert.equal(result.state.skills.smelting.level, 100);
+  assert.equal(Object.hasOwn(result.state, "protectedItems"), false);
 });
-
 test("the Master unlocks new smelting tiers only after forfeiting all old ingots", () => {
   const start = newGame(0);
   start.skills.smelting = { level: 9, xp: xpToNextLevel(9) };
@@ -540,56 +542,50 @@ test("the Master unlocks new smelting tiers only after forfeiting all old ingots
   assert.equal(later.state.items.iron_ore, 0);
   assert.equal(later.state.items.iron_ingot, 3);
 });
-test("old save without protection field migrates safely and invalid locks are rejected", () => {
+test("old saves with or without resource locks load safely and legacy locks are discarded", () => {
   const old = newGame(0);
-  delete old.protectedItems;
   old.items.iron_ore = 11;
   const loaded = readSave(JSON.stringify(old));
   assert.ok(loaded);
-  assert.deepEqual(loaded.protectedItems,[]);
-  assert.equal(loaded.items.iron_ore,11);
-  const forged = { ...old, protectedItems:["made_up_ore"] };
-  assert.equal(readSave(forged),null);
-  const safeguarded = { ...old, protectedItems:["iron_ore"] };
-  assert.deepEqual(readSave(safeguarded).protectedItems,["iron_ore"]);
+  assert.equal(Object.hasOwn(loaded, "protectedItems"), false);
+  assert.equal(loaded.items.iron_ore, 11);
+  const forged = { ...old, protectedItems: ["made_up_ore"] };
+  assert.equal(readSave(forged), null, "malformed old saves are still rejected");
+  const safeguarded = { ...old, protectedItems: ["iron_ore"] };
+  const migrated = readSave(safeguarded);
+  assert.equal(Object.hasOwn(migrated, "protectedItems"), false);
+  assert.equal(migrated.items.iron_ore, 11);
 });
-
-test("every known resource can be protected and survives save reload, including non-ingredients", () => {
+test("all old protected categories become ordinary inventory without losing quantities", () => {
   const stored = newGame(12345);
-  // Previously only recipe inputs could be protected; include raw loot,
-  // outlaw spoils, finished products, and materials with no recipe at all.
   const examples = ["hide", "stone", "herb", "meal", "stolen_purse", "valuables", "iron_ingot"];
   for (const key of examples) assert.ok(ITEM_KEYS.includes(key), key);
   for (const key of examples) stored.items[key] = 12;
-  stored.protectedItems = [...examples, "hide"]; // legacy duplicate entries migrate safely
+  stored.protectedItems = [...examples, "hide"];
   const loaded = readSave(JSON.stringify(stored));
-  assert.ok(loaded, "all valid protection keys should be accepted");
-  assert.deepEqual(loaded.protectedItems, examples, "duplicate keys are deduplicated");
-  assert.deepEqual(loaded.items, stored.items, "all inventory amounts survive migration");
-  assert.deepEqual(readSave(JSON.stringify(loaded)), loaded, "round-trip keeps all choices");
+  assert.ok(loaded);
+  assert.equal(Object.hasOwn(loaded, "protectedItems"), false);
+  assert.deepEqual(loaded.items, stored.items, "every inventory stack survives migration");
+  assert.deepEqual(readSave(JSON.stringify(loaded)), loaded, "new save stays clean");
   for (const bad of ["unknown_resource", 0, null, "__proto__"]) {
     assert.equal(readSave({ ...stored, protectedItems: [bad] }), null,
-      "invalid resource key must still be rejected");
+      "malformed legacy lists must still be rejected");
   }
   assert.equal(readSave({ ...stored, protectedItems: "hide" }), null);
 });
-
-test("protecting unused loot doesn't block gathering and doesn't change ingredient consumption", () => {
+test("unused loot remains in inventory while crafting auto-consumes eligible ingredients", () => {
   const state = newGame(0);
   state.items.hide = 7;
   state.items.stone = 5;
-  state.protectedItems = ["hide", "stolen_purse"];
   const crafted = finish(choose(state, "masonry", 0).state, 20 * ACTIVITIES.masonry.durationMs);
   assert.equal(crafted.state.items.hide, 7);
-  assert.equal(crafted.state.items.stone, 0, "unprotected stone still crafts normally");
+  assert.equal(crafted.state.items.stone, 0);
   assert.equal(crafted.state.items.block, 5);
-  assert.deepEqual(crafted.state.protectedItems, ["hide", "stolen_purse"]);
+  assert.equal(Object.hasOwn(crafted.state, "protectedItems"), false);
   const hunting = finish(choose(crafted.state, "hunting", crafted.state.settledAtMs).state,
     crafted.state.settledAtMs + 2 * ACTIVITIES.hunting.durationMs);
-  assert.ok(hunting.state.items.hide > 7, "protected loot can still be gathered");
-  assert.deepEqual(hunting.state.protectedItems, ["hide", "stolen_purse"]);
+  assert.ok(hunting.state.items.hide > 7, "gathering still accumulates loot");
 });
-
 test("all four basic crafting professions consume gathered stock and grant no free output", () => {
   const basic = [
     ["alchemy", "herb", "potion"],
@@ -619,26 +615,25 @@ test("all four basic crafting professions consume gathered stock and grant no fr
   }
 });
 
-test("protecting non-ore ingredients works over 20 years and survives save reload", () => {
+test("old protected herbs are consumed automatically, without per-cycle replay, after 20 years", () => {
   const start = newGame(0);
   start.items.herb = 9;
   start.protectedItems = ["herb"];
   const saved = readSave(JSON.stringify(start));
   assert.ok(saved);
-  assert.deepEqual(saved.protectedItems, ["herb"]);
+  assert.equal(Object.hasOwn(saved, "protectedItems"), false);
   const selected = choose(saved, "alchemy", 0).state;
   let rolls = 0;
   const out = settle(selected, 20 * YEAR, () => { rolls++; return 0.5; });
   assert.ok(rolls < 10, "production cannot replay twenty years cycle by cycle");
-  assert.equal(out.report.completed, 0);
-  assert.deepEqual(out.report.items, {});
-  assert.deepEqual(out.report.consumed, {});
-  assert.equal(out.state.items.herb, 9);
-  assert.equal(out.state.items.potion, 0);
-  assert.equal(out.state.skills.alchemy.xp, 0);
-  assert.deepEqual(out.state.protectedItems, ["herb"]);
+  assert.equal(out.report.completed, 9);
+  assert.deepEqual(out.report.items, { potion: 9 });
+  assert.deepEqual(out.report.consumed, { herb: 9 });
+  assert.equal(out.state.items.herb, 0);
+  assert.equal(out.state.items.potion, 9);
+  assert.ok(out.state.skills.alchemy.xp > 0);
+  assert.equal(Object.hasOwn(out.state, "protectedItems"), false);
 });
-
 test("long offline cooking consumes available fish, but Master takes meals to level", () => {
   const start = newGame(0);
   start.items.fish = 1000;
