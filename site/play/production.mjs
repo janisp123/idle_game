@@ -15,7 +15,13 @@ export const PRODUCTION_RECIPES = Object.freeze({
     recipe("copper_ore", "ingot", "Copper ingots", 1, 100),
     recipe("iron_ore", "iron_ingot", "Iron ingots", 10, 25, 0.5, 55),
     recipe("silver_ore", "silver_ingot", "Silver ingots", 25, 8, 0.4, 34)
-  ])
+  ]),
+  // Initial one-ingredient prototype recipes. Higher-tier recipes and more
+  // complex ingredients require separate balance/design approval.
+  alchemy: Object.freeze([recipe("herb", "potion", "Potions", 1, 100)]),
+  carpentry: Object.freeze([recipe("log", "plank", "Planks", 1, 100)]),
+  masonry: Object.freeze([recipe("stone", "block", "Stone blocks", 1, 100)]),
+  cooking: Object.freeze([recipe("fish", "meal", "Meals", 1, 100)])
 });
 export const PRODUCTION_INPUTS = Object.freeze([...new Set(
   Object.values(PRODUCTION_RECIPES).flatMap(list => list.map(r => r.input))
