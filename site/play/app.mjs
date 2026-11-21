@@ -1,7 +1,7 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, PRODUCTION_INPUTS, recipeOptions, newGame, readSave, settle,
-  enterGame, requestActivityChange, SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, xpForLevel
-} from "./engine.mjs?v=20261121-activity-switch1";
+  enterGame, requestActivityChange, SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, xpForLevel
+} from "./engine.mjs?v=20261121-alpha-timings1";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -248,7 +248,7 @@ function render() {
       transition.phase === "moving"
       ? (ACTIVITIES[state.activity].zone === ACTIVITIES[transition.targetActivity].zone
         ? SAME_ZONE_TRAVEL_MS : ZONE_TRAVEL_MS)
-      : PREPARATION_MS;
+      : (state.activity ? PREPARATION_MS : INITIAL_PREPARATION_MS);
     const phaseElapsed = transition.phase === "finishing" ? state.progressMs : transition.phaseProgressMs;
     const percent = Math.min(100, 100 * phaseElapsed / phaseLength);
     ui.transitionFill.style.width = percent.toFixed(2) + "%";
