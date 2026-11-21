@@ -1,5 +1,19 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Twenty activities, skill progression, artwork and timer-free play (chat)
+
+- **Merged:** [PR #40](https://github.com/janisp123/idle_game/pull/40), main commit `058bef74b5397b405bbe7f7dfff8ef22b8893972`. The older overlapping [PR #38](https://github.com/janisp123/idle_game/pull/38) and [PR #39](https://github.com/janisp123/idle_game/pull/39) were **closed as superseded, not individually merged**; their functionality and all ten outlaw scenes were integrated into #40 before merging.
+- **Implemented (GAME-005, GAME-007, UI-001):** Ten honest and ten outlaw activities, each with an original self-hosted WebP scene and its own skill XP/level. Player has an editable name and no character-wide level. Former V1 saves migrate without losing inventory, active work, or historical XP (unattributed XP retained invisibly). Uncapped offline rewards still settle under frozen effective skill levels; skill level-ups activate on return.
+- **Interface:** Activity menus show obtainable resources and skill levels but **no durations**. The active task uses an unlabeled visual progress bar; no countdown, per-action rate, time-worked record, testing time controls or elapsed-time return report. Return reports only display the gathered resources.
+- **Verification:** On the final PR #40 head `a231c95fd413dd273b8024ef320ee3db10cd4607`, **Project Protocol Preflight** and **Idle Game website** both passed. The website workflow ran `node --check`, 20-activity engine regression tests and a browser-UI smoke test; the site validator checked all 20 WebP assets. Main readback confirmed 20 activity declarations, independent skills and no time-related UI references.
+- **Remaining:** Loot and encounter rarity probability tables, ingredient-consuming smelting/crafting, guard/risk simulation and five-minute zone travel/5-task queue are **not implemented**. Live GitHub Pages publication had not been independently verified at the time of this record.
+
+## 2026-11-21 — Earlier game and visual work already in main
+
+- **Verified source:** Original grimdark interface, static scene paintings, landing-page hero and 10 foundational long work cycles were present on `main` before PR #40. PR #35 introduced the full work cycles and 10 base activities; PR #37 integrated the first 10 approved WebP scenes. SITE-003's existing painted landing-page gate is validated by the website checker. Earlier active task entries GAME-002, SITE-003 and GAME-003 have therefore been moved out of the active task list.
+- **Boundary:** This repository remains an early local-save prototype, not a complete combat, crafting or multiplayer game.
+
+
 ## 2026-11-20 — First playable prototype and public site (chat)
 
 - **Merged:** [PR #20](https://github.com/janisp123/idle_game/pull/20), commit `5ddebb0aaa35a8c30d61970240e95d1b7140f899`.
