@@ -9,8 +9,9 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "docs" / "RESEARCH_LIBRARY.md"
 CATALOG = ROOT / "docs" / "USEFUL_EXAMPLES.md"
+MAP = ROOT / "docs" / "RESEARCH_MAP.md"
 ARTICLES = sorted((ROOT / "docs" / "library").glob("*.md"))
-DOCUMENTS = [INDEX, CATALOG, *ARTICLES]
+DOCUMENTS = [INDEX, CATALOG, MAP, *ARTICLES]
 
 # External source provenance belongs in the private daily report, not these files.
 SOURCE_URL = re.compile(r"https?://|www\.|(?:github|gitlab|reddit)\.com/", re.I)
@@ -67,8 +68,11 @@ def main():
         else:
             contents[path] = path.read_text(encoding="utf-8")
 
-    if INDEX not in contents or CATALOG not in contents:
+    if INDEX not in contents or CATALOG not in contents or MAP not in contents:
         return errors
+
+    if len(contents[MAP].encode("utf-8")) > 3500:
+        errors.append("Research map exceeds 3.5 KB; keep it a short lookup, not an article")
 
     headings = {path: anchors(content) for path, content in contents.items()}
     titles = Counter()
