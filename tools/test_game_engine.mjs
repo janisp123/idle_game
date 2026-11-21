@@ -1,9 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  ACTIVITIES, newGame, readSave, settle, chooseActivity,
-  enterGame, testOfflineDay, xpForLevel, levelFromXP
+  ACTIVITIES, newGame, readSave, settle as engineSettle, chooseActivity as engineChooseActivity,
+  enterGame as engineEnterGame, testOfflineDay as engineTestOfflineDay, xpForLevel, levelFromXP
 } from "../site/play/engine.mjs";
+
+// Existing deterministic tests use the center of the +/-10% range.
+const midpoint = () => 0.5;
+const settle = (state, now) => engineSettle(state, now, midpoint);
+const chooseActivity = (state, activity, now) => engineChooseActivity(state, activity, now, midpoint);
+const enterGame = (state, now) => engineEnterGame(state, now, midpoint);
+const testOfflineDay = (state, now) => engineTestOfflineDay(state, now, midpoint);
 
 const MINUTE = 60_000;
 const YEAR = 365 * 24 * 60 * MINUTE;
@@ -101,4 +108,44 @@ test("the optional one-day testing shortcut uses real settlement logic", () => {
   const result = testOfflineDay(s, 200000000);
   assert.equal(result.report.completed, Math.floor(86400000 / 7000));
   assert.equal(result.state.level, levelFromXP(result.state.totalXP));
+});
+
+test("reward totals vary independently within +/-10%, with integer stochastic rounding", () => {
+  const base = engineChooseActivity(newGame(0), "hunting", 0, midpoint).state;
+  const low = engineSettle(base, 700_000, () => 0);
+  const highRolls = [0.999999, 0, 0.999999, 0];
+  const high = engineSettle(base, 700_000, () => highRolls.shift());
+  assert.equal(low.report.completed, 100);
+  assert.equal(low.report.gainedItems, 90);
+  assert.equal(low.report.gainedXP, 270);
+  assert.equal(high.report.gainedItems, 110);
+  assert.equal(high.report.gainedXP, 330);
+  assert.equal(low.state.level, 1);
+  assert.equal(high.state.level, 1);
+});
+test("one-action rewards remain integer and can vary rather than always rounding to baseline", () => {
+  const base = engineChooseActivity(newGame(0), "mining", 0, midpoint).state;
+  const lowRolls = [0, 0.999999, 0, 0.999999];
+  const highRolls = [0.999999, 0, 0.999999, 0];
+  const low = engineSettle(base, 5000, () => lowRolls.shift());
+  const high = engineSettle(base, 5000, () => highRolls.shift());
+  assert.equal(low.report.gainedItems, 0);
+  assert.equal(low.report.gainedXP, 1);
+  assert.equal(high.report.gainedItems, 2);
+  assert.equal(high.report.gainedXP, 3);
+});
+test("20 years settle in constant work without exceeding safe reward ranges", () => {
+  const start = 1_600_000_000_000;
+  const base = engineChooseActivity(newGame(start), "mining", start, midpoint).state;
+  let rolls = 0;
+  const result = engineEnterGame(base, start + 20 * YEAR, () => { rolls++; return 0.5; });
+  assert.equal(result.report.completed, 20 * YEAR / 5000);
+  assert.equal(result.report.gainedItems, result.report.completed);
+  assert.equal(result.report.gainedXP, result.report.completed * 2);
+  assert.equal(rolls, 2);
+});
+test("invalid random values cannot corrupt rewards", () => {
+  const base = engineChooseActivity(newGame(0), "hunting", 0, midpoint).state;
+  assert.throws(() => engineSettle(base, 7000, () => NaN), RangeError);
+  assert.throws(() => engineSettle(base, 7000, () => 1), RangeError);
 });
