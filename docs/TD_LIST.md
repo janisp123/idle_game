@@ -19,11 +19,11 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## GAME-006 — Skill-gated probabilistic encounters and resources
 - **Goal:** Progress hunting, mining, gathering and processing outcomes within a single activity; players never manually choose creature, vein or ore quality.
 - **Acceptance criteria:** Data-driven level thresholds and probability weights; low-tier results remain available; higher tiers grow more likely with relevant skill levels; crafting requires and consumes real inventory ingredients, with protections against unwanted ingredient use; encounter difficulty respects combat ability; offline resolution uses frozen skill levels and scales over long absences; deterministic balance and rarity tests.
-- **Status:** PARTIAL (PR #43 merged skill-weighted raw loot; PR #44 merged input-limited Smelting and protected ores. Alchemy/carpentry/masonry/cooking still produce placeholder goods without ingredients, and actual combat/encounter risk is not implemented).
+- **Status:** PARTIAL (PR #43 merged skill-weighted raw loot; PR #44 merged protected-ore Smelting; PR #54 merged ingredient-consuming Alchemy, Carpentry, Masonry and Cooking. Actual combat, encounter difficulty/risk and calibrated probability balancing are still not implemented).
 - **Dependencies:** GAME-005, OFF-001.
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
-- **Implemented by:** chat (partial work in PRs #43 and #44; remaining scope not yet implemented).
+- **Implemented by:** chat (partial work merged in PRs #43, #44 and #54; combat and balance work remain).
 
 ## GAME-009 — Reversible race transformation design and implementation
 - **Goal:** Eventually support one character beginning Human, able to become Undead and return to Human via resource-consuming rituals; no permanent race lock.
