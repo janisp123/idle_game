@@ -24,7 +24,7 @@ test("only individual activities have levels; character has a name but no level"
   for (const id of SKILL_IDS) assert.deepEqual(state.skills[id], { level: 1, xp: 0 });
 });
 
-test("twenty activities retain independently configurable full work-cycle times", () => {
+test("forty activities retain independently configurable full work-cycle times", () => {
   assert.ok(Object.keys(ACTIVITIES).length >= 10);
   for (const activity of Object.values(ACTIVITIES)) {
     assert.ok(activity.durationMs >= 8 * BASE_CYCLE_MS);
@@ -35,10 +35,11 @@ test("twenty activities retain independently configurable full work-cycle times"
   assert.throws(() => activityDuration("mining", 0), RangeError);
 });
 
-test("every activity earns its own skill XP and own resource", () => {
+test("every activity independently earns XP and only produces material when allowed", () => {
   for (const [id, activity] of Object.entries(ACTIVITIES)) {
     const start = newGame(0);
-    if (id === "smelting") start.items.copper_ore = 1;
+    const ingredient = PRODUCTION_RECIPES[id]?.[0]?.input;
+    if (ingredient) start.items[ingredient] = 1;
     const chosen = choose(start, id, 0).state;
     assert.equal(finish(chosen, activity.durationMs - 1000).report.completed, 0);
     const result = finish(chosen, activity.durationMs);
@@ -334,8 +335,8 @@ test("existing twenty-resource saves load with missing new rarities defaulted sa
 });
 
 test("processing consumes inventory: no copper ore means no ingots or XP", () => {
-  assert.equal(Object.keys(PRODUCTION_RECIPES).length, 1);
-  assert.deepEqual(PRODUCTION_INPUTS, ["copper_ore", "iron_ore", "silver_ore"]);
+  assert.deepEqual(Object.keys(PRODUCTION_RECIPES), ["smelting", "alchemy", "carpentry", "masonry", "cooking"]);
+  assert.deepEqual(PRODUCTION_INPUTS, ["copper_ore", "iron_ore", "silver_ore", "herb", "log", "stone", "fish"]);
   const s = choose(newGame(0), "smelting", 0).state;
   const result = finish(s, 100 * ACTIVITIES.smelting.durationMs);
   assert.equal(result.report.completed, 0);
@@ -428,6 +429,69 @@ test("old save without protection field migrates safely and invalid locks are re
   assert.equal(readSave(forged),null);
   const safeguarded = { ...old, protectedItems:["iron_ore"] };
   assert.deepEqual(readSave(safeguarded).protectedItems,["iron_ore"]);
+});
+
+test("all four basic crafting professions consume gathered stock and grant no free output", () => {
+  const basic = [
+    ["alchemy", "herb", "potion"],
+    ["carpentry", "log", "plank"],
+    ["masonry", "stone", "block"],
+    ["cooking", "fish", "meal"]
+  ];
+  for (const [activity, input, output] of basic) {
+    assert.deepEqual(recipeOptions(activity, 1).map(r => [r.input, r.output]), [[input, output]]);
+    const start = newGame(0);
+    start.items[input] = 4;
+    const selected = choose(start, activity, 0).state;
+    const at = 100 * ACTIVITIES[activity].durationMs;
+    const crafted = finish(selected, at);
+    assert.equal(crafted.report.completed, 4, activity);
+    assert.equal(crafted.report.gainedItems, 4, activity);
+    assert.deepEqual(crafted.report.items, { [output]: 4 }, activity);
+    assert.deepEqual(crafted.report.consumed, { [input]: 4 }, activity);
+    assert.equal(crafted.state.items[input], 0, activity);
+    assert.equal(crafted.state.items[output], 4, activity);
+    assert.equal(crafted.state.skills[activity].xp, 4 * ACTIVITIES[activity].xp, activity);
+    const depleted = finish(crafted.state, at + ACTIVITIES[activity].durationMs);
+    assert.equal(depleted.report.completed, 0, activity);
+    assert.equal(depleted.report.gainedXP, 0, activity);
+    assert.equal(depleted.state.items[output], 4, activity);
+    assert.equal(depleted.state.skills[activity].xp, crafted.state.skills[activity].xp, activity);
+  }
+});
+
+test("protecting non-ore ingredients works over 20 years and survives save reload", () => {
+  const start = newGame(0);
+  start.items.herb = 9;
+  start.protectedItems = ["herb"];
+  const saved = readSave(JSON.stringify(start));
+  assert.ok(saved);
+  assert.deepEqual(saved.protectedItems, ["herb"]);
+  const selected = choose(saved, "alchemy", 0).state;
+  let rolls = 0;
+  const out = settle(selected, 20 * YEAR, () => { rolls++; return 0.5; });
+  assert.ok(rolls < 10, "production cannot replay twenty years cycle by cycle");
+  assert.equal(out.report.completed, 0);
+  assert.deepEqual(out.report.items, {});
+  assert.deepEqual(out.report.consumed, {});
+  assert.equal(out.state.items.herb, 9);
+  assert.equal(out.state.items.potion, 0);
+  assert.equal(out.state.skills.alchemy.xp, 0);
+  assert.deepEqual(out.state.protectedItems, ["herb"]);
+});
+
+test("long offline cooking uses only available fish; levels unlock after return", () => {
+  const start = newGame(0);
+  start.items.fish = 1000;
+  const selected = choose(start, "cooking", 0).state;
+  const out = finish(selected, 20 * YEAR);
+  assert.equal(out.report.completed, 1000);
+  assert.equal(out.state.items.fish, 0);
+  assert.equal(out.state.items.meal, 1000);
+  assert.equal(out.state.skills.cooking.level, 1, "OFF-001 freezes the effective level");
+  const returnOut = enter(selected, 20 * YEAR);
+  assert.ok(returnOut.state.skills.cooking.level > 1);
+  assert.deepEqual(readSave(JSON.stringify(returnOut.state)), returnOut.state);
 });
 
 test("twenty new personal activities offer ten training and ten leisure skills without loot", () => {
