@@ -132,10 +132,17 @@ function render() {
     ui.banner.textContent = current.title.toUpperCase();
     ui.heading.textContent = current.title;
     ui.description.textContent = current.description;
-    // Existing paintings serve as temporary shared scenes until new original art is approved.
-    const desiredImage = "./assets/" + (isHunt || ["gathering", "woodcutting", "fishing"].includes(state.activity) ? "hunting.webp" : "mining.webp");
-    if (ui.sceneImage.getAttribute("src") !== desiredImage) ui.sceneImage.setAttribute("src", desiredImage);
-    ui.sceneImage.alt = "Temporary dark-fantasy work illustration";
+    // Each activity has its own painted scene. Existing paintings remain fallbacks
+    // until the new self-hosted WebP assets are uploaded alongside this change.
+    const desiredImage = "./assets/" + state.activity + ".webp?v=20261121-art37";
+    if (ui.sceneImage.getAttribute("src") !== desiredImage) {
+      ui.sceneImage.onerror = () => {
+        ui.sceneImage.onerror = null;
+        ui.sceneImage.src = "./assets/" + (isHunt ? "hunting.webp" : "mining.webp") + "?v=20261121-art37";
+      };
+      ui.sceneImage.src = desiredImage;
+    }
+    ui.sceneImage.alt = "Dark fantasy illustration of " + current.title.toLowerCase();
     ui.sceneCaption.textContent = current.zone.toUpperCase();
     ui.rate.textContent = (current.durationMs / 1000) + " SEC / ACTION";
     ui.progressDescription.textContent = "Auto-running · " + current.title;

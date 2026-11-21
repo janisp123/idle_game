@@ -1,3 +1,13 @@
 # Project playbook — evidence-based reusable lessons
 
 This is **not** another task list. When a real failure or useful workaround occurs, record: trigger → observed issue → prevention → evidence/check → confidence (PROVEN/PROVISIONAL/SUPERSEDED). Never include sensitive user data or transcripts in a public repository.
+
+
+## PROVEN — Upload generated binary artwork without manual user action (2026-11-21)
+
+- **Trigger:** Owner requests replacing game paintings while away from a desktop; GitHub's text-only create/update-file actions cannot safely send WebP bytes.
+- **Working route:** Generate/export artwork as WebP files; package them into a ZIP with exact repository paths. Upload the ZIP to the owner's connected Google Drive using its binary file reference. Fetch the ZIP as raw base64 using the Google Drive connector. Decode the ZIP entries (in this instance, a ZIP with **stored / method 0** entries), verify exactly the expected filenames and RIFF/WebP headers. For each WebP, use GitHub's `create_blob` with `encoding: "base64"`; use `create_tree` with the resulting blob SHAs and the current branch's base tree SHA, `create_commit`, and `update_ref` on the feature branch with expected head SHA. **Do not use text-only `create_file` for binary image bytes.**
+- **Practical workaround:** When ZIP decompression is unavailable in the orchestration runtime, create a ZIP with stored entries, or use a tool capable of extracting binary files. Stored ZIP entries can be parsed directly, but validate the ZIP method, file sizes, names and WebP signatures; never assume all ZIPs are stored. In this run, GitHub's create-tree commit was also briefly staged with a ZIP and an import workflow; the workflow subsequently unpacked and committed the images automatically. Prefer direct per-image blobs when available to avoid temporary import workflows.
+- **Verification:** PR #37 on `feat/activity-art-20261121` listed all ten self-hosted `site/play/assets/*.webp` files; the website and project-protocol CI checks both passed on commit `2414754be8459f5bb26272e6093df30d1debd133`. Image loading was versioned to avoid mixing cached JS and artwork. This proves binary upload and CI integration, **not** live deployment until separately verified.
+- **Security/quality:** Use only owner-approved original assets; never put credentials in the repository; do not merge untested artwork; preserve fallback images; avoid public-sharing changes to Drive files without authorization. Keep generated artifacts in a feature branch until owner merge approval.
+- **Confidence:** PROVEN for this project, with connected Google Drive and GitHub Git-data APIs. Connector availability and size limits may change.
