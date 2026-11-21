@@ -397,3 +397,94 @@ footer p{color:#aa9680}
   .activity-start { min-width:75px; padding:7px; font-size:13px; }
   .transition-phase { margin:14px 14px 5px; font-size:13px; }
 }
+
+/* QUEUE-002: three connected antique wagons above the active scene.
+   CSS-drawn timber cart + two wheels keep the feature self-contained and fast. */
+.wagon-queue {
+  padding:15px 16px 11px;
+  background:linear-gradient(180deg,#201914,#110d0a);
+  border-bottom:2px ridge #71543b;
+}
+.wagon-queue[hidden],.queue-planner[hidden] {display:none !important}
+.wagon-queue-heading {
+  margin:0 0 13px;color:#bfa27f;font:700 10px Georgia,serif;
+  letter-spacing:.15em;
+}
+.wagon-list {
+  display:flex;align-items:stretch;gap:13px;
+  overflow-x:auto;overflow-y:hidden;padding:3px 3px 13px;
+  scrollbar-color:#745038 #160f0b;
+}
+.wagon {
+  position:relative;flex:1 0 144px;min-width:144px;min-height:160px;
+  padding:13px 10px 8px;border:2px ridge #7e5838;
+  color:#edcfaa;text-align:center;
+  background:
+    repeating-linear-gradient(0deg,transparent 0 12px,rgba(0,0,0,.22) 13px 14px),
+    linear-gradient(130deg,#5b3d28 0%,#372518 49%,#221810 100%);
+  box-shadow:inset 0 0 0 2px #24170e,inset 0 9px 18px rgba(0,0,0,.25),0 3px 9px #090706;
+}
+.wagon:not(:last-child)::after {
+  content:"";position:absolute;left:calc(100% + 2px);top:43px;
+  width:14px;height:5px;border-top:2px solid #8f7150;border-bottom:1px solid #372719;
+}
+.wagon-cart {
+  position:relative;margin:0 auto 14px;
+  width:82%;max-width:130px;height:23px;
+  border:2px ridge #b08c60;border-radius:3px 3px 8px 8px;
+  background:repeating-linear-gradient(0deg,#68472e 0 5px,#4b301d 6px 8px);
+  box-shadow:0 -4px 0 #352313,inset 0 1px #b48d5c;
+}
+.wagon-cart::before,.wagon-cart::after {
+  content:"";position:absolute;bottom:-12px;width:16px;height:16px;
+  border-radius:50%;border:3px double #ac895b;
+  background:radial-gradient(circle,#2c211a 0 3px,#614328 4px 5px,#211810 6px);
+  box-shadow:0 2px 3px #0d0806;
+}
+.wagon-cart::before {left:13%}
+.wagon-cart::after {right:13%}
+.wagon-name {display:block;font:700 15px/1.22 Georgia,serif;text-shadow:0 1px 2px #090706}
+.wagon-position {
+  display:block;margin-top:5px;color:#d1b391;
+  font:11px Georgia,serif;
+}
+.wagon-forever {
+  display:block;margin-top:12px;color:#f5c584;
+  font:700 12px Georgia,serif;letter-spacing:.09em;
+}
+.wagon-duration {
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+  gap:4px;margin-top:9px;font:11px Georgia,serif;
+}
+.wagon-duration span {flex:1 0 100%;color:#e1c5a0}
+.wagon-duration select,.planner-fields select {
+  min-height:34px;max-width:100%;padding:3px;
+  color:#f3d6ae;background:#281b13;border:1px solid #a27c55;
+  font:12px Georgia,serif;
+}
+.wagon-controls {display:flex;justify-content:center;gap:7px;margin-top:9px}
+.wagon-control {
+  min-width:35px;min-height:38px;padding:4px 9px;
+  color:#e8c89e;background:#34261a;border:1px solid #ad8257;
+  font:700 12px Georgia,serif;cursor:pointer;
+}
+.wagon-control:hover,.wagon-control:focus-visible {border-color:#ebbd82}
+.wagon-control:focus-visible,.wagon-duration select:focus-visible,.planner-fields select:focus-visible {
+  outline:2px solid #ffcf81;outline-offset:2px;
+}
+.queue-planner {
+  margin:12px 2px;padding:12px 10px;
+  border:2px ridge #97724b;
+  background:linear-gradient(145deg,#463020,#1b130e);
+}
+.queue-planner .activity-nav-label {line-height:1.45;letter-spacing:0;text-transform:none}
+.planner-fields {display:flex;flex-wrap:wrap;align-items:center;gap:7px;color:#eed5b1}
+.planner-fields label {flex:1 0 100%;font:12px Georgia,serif}
+.planner-fields select {flex:1 1 60px}
+.planner-actions {display:flex;gap:8px;margin-top:12px}
+.planner-actions .activity-start {flex:1 1 50%;min-width:0}
+@media(max-width:520px) {
+  .wagon-queue {padding:12px 9px}
+  .wagon-list {gap:12px}
+  .wagon {flex-basis:150px}
+}

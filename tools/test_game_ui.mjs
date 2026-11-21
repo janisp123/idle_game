@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { ACTIVITIES, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS } from "../site/play/engine.mjs";
+import { ACTIVITIES, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, HOUR_MS } from "../site/play/engine.mjs";
 
 class FakeElement {
   children = [];
@@ -123,6 +123,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, null, "first Start must not instantly work");
     assert.equal(state.transition.targetActivity, "mining");
+    assert.deepEqual(state.wagons, [{ activity: "mining", plannedMs: null }]);
+    assert.equal(elements.get("wagonQueue").hidden, false);
+    assert.equal(elements.get("wagonList").children.length, 1);
+    assert.equal(elements.get("wagonList").children[0].children[3].textContent, "FOREVER");
     now += INITIAL_PREPARATION_MS;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
@@ -193,19 +197,38 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
 
     openActivities.fire("click");
     categories[2].fire("click");
-    const meditation = elements.get("activityChoices").children.find(b => b.children[0]?.children[0]?.children[0]?.textContent === "Meditation");
+    const meditation = elements.get("activityChoices").children.find(
+      b => b.children[0]?.children[0]?.children[0]?.textContent === "Meditation");
     const meditationStart = meditation.children[0].children[0].children[1];
     meditationStart.fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "mining");
-    assert.equal(state.transition.targetActivity, "meditation");
-    assert.equal(elements.get("transitionPhase").textContent, "Finishing current activity");
+    assert.equal(state.transition, null, "adding a future wagon does not abandon current work");
+    assert.equal(elements.get("queuePlanner").hidden, false);
+    assert.match(elements.get("queuePlannerTitle").textContent, /how long should Mining work/);
+    elements.get("queueAmount").value = "1";
+    elements.get("queueUnit").value = "hours";
+    elements.get("queueConfirm").fire("click");
+    assert.equal(elements.get("queuePlanner").hidden, true);
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.deepEqual(state.wagons, [
+      { activity: "mining", plannedMs: HOUR_MS },
+      { activity: "meditation", plannedMs: null }
+    ]);
+    assert.equal(elements.get("wagonList").children.length, 2);
+    assert.equal(elements.get("wagonList").children[1].children[3].textContent, "FOREVER");
     const previousStone = state.items.stone;
-    now += ACTIVITIES.mining.durationMs;
+    const previousMiningXP = state.skills.mining.xp;
+    now += HOUR_MS;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.equal(state.items.stone, previousStone + 1, "finishing earns only the old completed cycle");
+    assert.ok(state.items.stone >= previousStone, "scheduled mining never removes previous stone");
+    assert.equal(state.skills.mining.xp - previousMiningXP,
+      HOUR_MS / ACTIVITIES.mining.durationMs * ACTIVITIES.mining.xp,
+      "finite mining performs exactly the configured number of full work cycles");
+    assert.equal(state.transition.phase, "moving");
     assert.equal(elements.get("transitionPhase").textContent, "Moving to new location");
+    assert.deepEqual(state.wagons, [{ activity: "meditation", plannedMs: null }]);
     now += ZONE_TRAVEL_MS;
     tick();
     assert.equal(elements.get("transitionPhase").textContent, "Getting ready to start new activity");
@@ -221,6 +244,50 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(state.skills.meditation.xp > 0);
     assert.equal(state.items.stone, stoneAfterTravel, "meditation does not create resources");
     assert.ok(elements.get("logList").children.some(x => x.textContent === "Practised meditation."));
+
+    // Add a third wagon, reorder only future wagons, and edit a finite slot.
+    openActivities.fire("click");
+    categories[0].fire("click");
+    const hunting = elements.get("activityChoices").children.find(
+      b => b.children[0]?.children[0]?.children[0]?.textContent === "Hunting");
+    hunting.children[0].children[0].children[1].fire("click");
+    elements.get("queueConfirm").fire("click");
+    openActivities.fire("click");
+    categories[0].fire("click");
+    const masonry = elements.get("activityChoices").children.find(
+      b => b.children[0]?.children[0]?.children[0]?.textContent === "Masonry");
+    masonry.children[0].children[0].children[1].fire("click");
+    elements.get("queueConfirm").fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.wagons.length, 3);
+    assert.equal(elements.get("wagonList").children.length, 3);
+    assert.equal(hunting.children[0].children[0].children[1].textContent, "Queued");
+    assert.equal(masonry.children[0].children[0].children[1].textContent, "Queued");
+    const secondCard = elements.get("wagonList").children[1];
+    const secondControls = secondCard.children[secondCard.children.length - 1];
+    secondControls.children[1].fire("click"); // move hunting later (future-only swap)
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.deepEqual(state.wagons.map(w => w.activity), ["meditation", "masonry", "hunting"]);
+    assert.equal(state.activity, "meditation");
+    assert.equal(state.transition, null, "future-only swap does not restart travel");
+
+    // The first visible finite slot can be edited via touch-friendly selects.
+    const firstCard = elements.get("wagonList").children[0];
+    const durationControls = firstCard.children[3];
+    durationControls.children[1].value = "2";
+    durationControls.children[1].fire("change");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.wagons[0].plannedMs, 2 * HOUR_MS);
+    assert.equal(state.productiveElapsedMs, 0);
+    assert.equal(elements.get("wagonList").children.length, 3);
+
+    // Removing the final future wagon does not interrupt the current activity.
+    const finalCard = elements.get("wagonList").children[2];
+    finalCard.children[finalCard.children.length - 1].children[1].fire("click"); // Remove (after move-left)
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.deepEqual(state.wagons.map(w => w.activity), ["meditation", "masonry"]);
+    assert.equal(state.wagons[1].plannedMs, null);
+    assert.equal(state.activity, "meditation");
     elements.get("nameInput").value = "The Black Rider";
     elements.get("saveName").fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
