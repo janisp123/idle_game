@@ -1,6 +1,6 @@
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
-import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-production2";
-export { PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions } from "./production.mjs?v=20261121-production2";
+import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
+export { PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions } from "./production.mjs?v=20261121-no-resource-locks1";
 export { LOOT_TABLES, lootChances } from "./loot.mjs?v=20261121-loot1";
 /**
  * Tiny offline-capable prototype engine.
