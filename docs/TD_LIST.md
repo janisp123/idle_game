@@ -13,7 +13,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Dependencies:** GAME-003.
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
-- **Implemented by:** chat (partial work in PRs #43 and #44; remaining scope not yet implemented).
+- **Implemented by:** Not yet.
 
 
 ## GAME-006 — Skill-gated probabilistic encounters and resources
@@ -23,4 +23,4 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Dependencies:** GAME-005, OFF-001.
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (partial work in PRs #43 and #44; remaining scope not yet implemented).
