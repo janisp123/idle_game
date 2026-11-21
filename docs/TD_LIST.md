@@ -42,3 +42,13 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** Not yet.
+
+## GAME-005 — Ten outlaw activities with original grimdark scenes
+- **Goal:** Offer an optional criminal playstyle alongside the ten basic work activities.
+- **Acceptance criteria:** Highway robbery, burglary, bandit raiding, grave robbing, kidnapping, extortion, caravan plundering, cattle rustling, assassination, slave raiding; each has an independent long work-cycle duration, test spoils, and an original self-hosted WebP painting; old local saves remain readable; uncapped offline progression and level freeze remain intact; the UI clearly separates paths.
+- **Scope:** The prototype models timed actions and fictional spoils only. It does not yet simulate actual combat, guards, notoriety, ransom exchange, captive inventory, risk or reputation; do not describe those as implemented.
+- **Status:** IN_REVIEW (feature branch; checks and owner merge approval required).
+- **Dependencies:** GAME-003, VIS-001, OFF-001.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet (pending verified merge).
