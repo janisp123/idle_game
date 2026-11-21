@@ -9,7 +9,7 @@ const ui = {
   resourceList: $("resourceList"), choices: $("activityChoices"), totalXP: $("lifetimeXp"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
   heading: $("scene-heading"), description: $("activityDescription"), rate: $("rateText"),
-  progressDescription: $("progressDescription"), countdown: $("countdown"), actionFill: $("actionFill"),
+  progressDescription: $("progressDescription"), actionFill: $("actionFill"),
   logList: $("logList"), returnPanel: $("returnPanel"), returnMessage: $("returnMessage"),
   banner: $("sceneBanner"), actionCount: $("actionCount"), timeInvested: $("timeInvested"), experienceCount: $("experienceCount"),
   dismissReturn: $("dismissReturn"), testDay: $("testDay"), saveStatus: $("saveStatus")
@@ -124,7 +124,6 @@ function render() {
     ui.description.textContent = "Choose a craft or gathering task. Each cycle includes preparation and hauling.";
     ui.rate.textContent = "IDLE";
     ui.progressDescription.textContent = "Awaiting your orders";
-    ui.countdown.textContent = "—";
     ui.actionFill.style.width = "0%";
   } else {
     const isHunt = state.activity === "hunting";
@@ -146,7 +145,6 @@ function render() {
     ui.sceneCaption.textContent = current.zone.toUpperCase();
     ui.rate.textContent = (current.durationMs / 1000) + " SEC / ACTION";
     ui.progressDescription.textContent = "Auto-running · " + current.title;
-    ui.countdown.textContent = ((current.durationMs - state.progressMs) / 1000).toFixed(1) + "s";
     ui.actionFill.style.width = (state.progressMs / current.durationMs * 100).toFixed(2) + "%";
   }
 }
