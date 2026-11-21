@@ -51,6 +51,15 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(tick, "game tick must start");
     const buttons = elements.get("activityChoices").children.filter(node => node.type === "button");
     assert.equal(buttons.length, Object.keys(ACTIVITIES).length);
+    assert.equal(buttons.length, 20, "ten honest and ten outlaw activities");
+    const headings = elements.get("activityChoices").children
+      .filter(node => node !== null && node.textContent === "HONEST WORK" ||
+                            node !== null && node.textContent === "OUTLAW PATH");
+    assert.deepEqual(headings.map(n => n.textContent), ["HONEST WORK", "OUTLAW PATH"]);
+    assert.equal(buttons.some(b => b.children[0].children[0].textContent === "Highway robbery"), true);
+    assert.equal(buttons.every(b => !/\\d+\\s*(min|sec)|per cycle/i.test(
+      b.children[0].children[1].textContent
+    )), true, "activity buttons must not reveal cycle rates");
     assert.ok(buttons.every(b => b.children[0].children[2].textContent === "Skill level 1"));
     assert.equal(elements.get("character-heading").textContent, "Marauder");
     let state = JSON.parse(store.get(SAVE_KEY));
