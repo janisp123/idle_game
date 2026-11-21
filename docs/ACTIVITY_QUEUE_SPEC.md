@@ -1,94 +1,91 @@
-# Activity queue — finite steps, forever final activity (GAME-004)
+# Three-wagon activity queue — final wagon forever (GAME-004)
 
-**Status:** Owner-approved queue behavior, design/implementation plan only; **not yet in the playable game**.
-**Recorded:** 2026-11-21 by chat. This supersedes the earlier brainstorming idea of an indefinitely repeating task queue.
-**Related:** [ACTIVITY_SWITCH_SPEC.md](ACTIVITY_SWITCH_SPEC.md), [DECISIONS.md](DECISIONS.md) QUEUE-001 / ACT-SWITCH-001 / OFF-001 / ZONE-001 / UI-TIME-001, [TD_LIST.md](TD_LIST.md) GAME-004.
+**Status:** Owner-approved design and implementation guidance, **not implemented in the playable game**.
+**Updated:** 2026-11-21 by chat. **Supersedes** the earlier five-slot/looping queue designs.
+**Related:** [ACTIVITY_SWITCH_SPEC.md](ACTIVITY_SWITCH_SPEC.md), [DECISIONS.md](DECISIONS.md) QUEUE-002 / SWITCH-TIMING-001 / ACT-SWITCH-001 / OFF-001 / ZONE-001 / UI-TIME-001, and [TD_LIST.md](TD_LIST.md) GAME-004.
 
-## Core rule
+## The three small old wagons (owner-approved)
 
-A character can set up to **five activities in one linear queue**. **The final activity always continues forever**. Every preceding activity runs for a player-selected **1–8 hours or 1–8 days**, after which the next transition begins. **No loop, daily login, scheduled wake-up process, offline expiry, or time cap.** The queue must still work after 20 years offline.
+The queue is pictured as **one to three compact, connected, old wooden wagons in the established grimdark style**, **above the current activity panel**. Their sequence conveys the future route, with readable titles and touch-friendly reorder controls on mobile. Reuse existing painted/worn materials; actual artwork and CSS still need implementation.
 
-Illustrative plan:
+- **Wagon 1** = the active work / immediate destination when already transitioning. Clearly show **Changing to …** while travelling so the game never falsely claims the new job is already producing.
+- **Wagon 2** = the next job, if present.
+- **Wagon 3** = the final job, if present. **Whichever wagon is last always runs Forever.** With only one wagon, it is both current and Forever; with two, wagon 2 is Forever.
+- No loop, automatic stop at the end, required login, daily check-in, server scheduler, idle-expiry, or limit on the final wagon's offline duration.
+- Clicking an activity's separate **Start** button selects/adds a job. **Do it for** applies only to jobs that have another wagon after them: integers **1–8 Hours** or **1–8 Days**. Show **Forever** on the last wagon. Configured duration labels are planning data, **not** running clocks.
+- When adding a third wagon, the previously last Forever job must become finite; retain or ask for its allowed duration rather than producing a hidden/unreachable middle Forever entry. Do not accept a fourth wagon.
 
-| Position | Activity | Configured duration |
-| --- | --- | --- |
-| 1 | Mining | 2 hours |
-| 2 | Alchemy | 1 day |
-| 3 | Fishing | Forever |
+Illustrative layout, not artwork:
 
-Returning after 20 years should account for Mining, Alchemy, their switching phases, and the remaining years of Fishing, without simulating each minute or action.
+```text
+ [ old wagon 1: Mining · 2 hours ] — [ old wagon 2: Cooking · 1 day ] — [ old wagon 3: Hunting · FOREVER ]
+                                 CURRENT ACTIVITY PANEL
+```
 
-**Interpretation of “1–8 hours/days”:** A discrete amount 1, 2, … 8 and unit Hours or Days. This is **an explicit planning input**, not a live countdown and therefore does not violate UI-TIME-001's prohibition on real-time clock/duration displays.
+The wagon strip can be horizontally scrollable on narrow phones rather than shrinking text and controls until unusable. A swipe/drag or explicit swap/reorder control must work with touch, mouse and keyboard. Avoid a heavyweight game-map subsystem.
 
-## Player interaction
+## Previously suggested policies approved when consistent with wagons
 
-- Each activity has the already-approved **Start** button beside the activity name. Start requests that activity; it never instantly teleports a working character. Preserve the three switching phases in [ACTIVITY_SWITCH_SPEC.md](ACTIVITY_SWITCH_SPEC.md).
-- After selecting **Start**, present an editable **Do it for** setting: choose 1–8 and **Hours** or **Days**, or mark the activity **Forever** if it is the last activity. When the player is already doing an activity, they can set **Do it for** on that active slot and append the next activity.
-- The queue counts **at most five total positions including the current activity and the forever final position**. If the player wants to append another activity, a formerly forever final activity needs a finite planned duration. Do not allow an unreachable task after a Forever entry.
-- Once a queued task finishes, advance automatically. The final entry has no stop condition and runs forever, including when the user is offline. Never create an implicit idle state at the end.
-- Show the queue order, activity names, **configured** finite durations, and Forever for the last entry. Do **not** show live time remaining, elapsed absence, server time, hours per reward or action totals. During switching, show the separately specified transition bar and phase text.
-- Selecting/adjusting the queue while online first settles existing earned work to the current timestamp; edits must never recalculate history or retroactively overwrite already-earned resources/XP.
-- The pending-target cancellation, reordering, deletion and replacement policy is **not yet approved**; defer those controls rather than secretly changing progress. The first implementation can focus on building/committing a queue before leaving.
+- **Changing jobs takes real time:** first finish the currently running full work cycle; then **Moving to new location**; then **Getting ready to start new activity**. Display the **separate phase progress bar** and names, not a clock or countdown. Preserve that last cycle's earned goods/XP once.
+- **Movement:** **1 minute within the same zone**; **5 minutes between different zones** (ZONE-001). Do not stack 1 + 5 minutes for cross-zone moves.
+- **Preparation:** **2 minutes** for equipment/readiness after moving; the first-ever Start also requires 2 minutes of preparation. On a completely new character with no known previous zone, preparation applies, but do not invent a travel origin.
+- **Scheduled duration = productive time**, starting once the job actually begins, **excluding** preceding finishing/moving/preparation. Once the configured productive period ends, finish the current work cycle before leaving. If materials are unavailable, productive time still passes but the job invents no output/XP.
+- **Editing Do it for on an already-running job** counts the chosen duration **from the moment the player makes that selection**, not from when they originally started the activity. Settle work up to the edit first.
+- **Future wagons may be rearranged freely**, with no immediate travel cost when wagon 1 does not change; apply the new order to work that has not happened yet. Already completed work remains earned.
 
-## Transition and time budget semantics
+## Reordering including wagon 1 (owner-approved)
 
-- **Proposed implementation policy (needs final owner confirmation):** a configured duration measures productive work time starting when that activity begins. Finishing the previous task, travel and preparation would be outside that window. A 2-hour Mining task would mean 2 hours of productive Mining, not 2 hours including a trip.
-- At the end of a finite productive interval, **finish the currently running full work cycle** before departing, as required by ACT-SWITCH-001. This can make the actual handoff slightly later than the planned window. Award the final eligible completed cycle at most once (subject to the duration-policy confirmation above).
-- Next, apply **Moving to new location** and **Getting ready to start new activity** with no XP or materials from travel/preparation. Preserve the approved **five-minute cross-zone travel**; same-zone movement and preparation durations are still undecided (do not fill with zero or arbitrary guessed values in code).
-- Once ready, set the next activity active and start its finite work interval. Advance until the forever final activity, then batch-settle all remaining elapsed time there.
-- While a finite crafting job has **no unprotected ingredients**, its scheduled time still advances, but it generates **no fabricated output or XP**. It then moves to the next step normally. A final forever craft with no ingredients remains selected indefinitely without falsely granting products or resetting the queue.
-- Starting from an entirely new character has no previous work cycle to finish. Initial movement/preparation rules remain part of the separate transition design.
+**Wagons are swappable.** Changing wagon 1 changes the character's immediate destination and **restarts travel and readiness**, rather than teleporting or granting free progress.
 
-## Offline performance
+- Before any edit, settle earned work and any completed phase to the edit timestamp exactly once; do not delete previously earned items/XP or retroactively modify finished activity segments.
+- If the character is currently performing a work cycle, **finish that cycle once** before departing; do not grant its reward early. Then apply a **fresh movement phase** based on old and new zones (1 minute same zone, 5 minutes across zones), followed by **a fresh 2-minute preparation**.
+- If already moving/preparing when wagon 1 changes, **discard only unfinished transition-time progress**: reset the new destination's **movement phase to its beginning**, then preparation again. Never refund, double-count or duplicate work XP/loot. A pending finishing phase remains the same remaining old work cycle; only the destination changes.
+- Future-only reorder (wagons 2 and 3) **does not** restart a current transition or activity. The last position is Forever regardless of what task occupies it after reorder; finite slots must have an allowed duration before committing the new order.
+- If a swap exchanges a formerly Forever job with a finite position, use the finite position's existing configured duration as a **visible, editable slot setting**; the new final position becomes Forever. Keep durations visible and avoid hidden defaults. Reordering should not silently override an already elapsed work segment.
+- **Changing the first wagon is explicitly permitted while transitioning.** This supersedes the former proposal to disable all Starts until the transition completes. Preserve the existing finishing phase and restart movement/preparation for the changed first wagon.
+- Selecting the exact same first wagon is a no-op: no timer reset and no lost progress.
+- Other editing operations (deleting a wagon, clearing the queue) need a safe UX policy in implementation; avoid introducing a destructive Reset or silently dropping active work. The owner approved swapping/reordering and editing future durations, not losing completed resources.
 
-**Yes: time-bounded queues are efficient** when every activity has a bounded bulk-settlement calculation. The current engine's `settle` already uses arithmetic to calculate completed work cycles without replaying them; resource production uses bounded per-recipe allocation and probability sampling. Integrate queue segmentation into this engine rather than executing every scheduled action.
+This keeps the owner's rule that the first wagon represents the active/selected work while acknowledging that the **new** first wagon cannot produce anything until its switch finishes.
 
-For a fixed queue of at most five steps, processing cost is proportional to **queue entries and phase boundaries**, not elapsed days or the number of work cycles. A 20-year absence should require at most five activity batches plus a small fixed number of transition computations (subject to the existing loot/recipe calculation work). Do not create daily jobs, per-cycle loops, repeated-time timers, or per-encounter event generation.
+## Offline algorithm: efficient even after 20 years
 
-On return:
+A dormant character is **not** a running process. Save the queue, selected index/phase, progress, effective skills, inventory and settlement timestamp; on return, settle from that time to the present using bounded mathematics.
 
-1. Load the saved authoritative **queue, active step, current phase, progress and clock**, and snapshot of effective skills/equipment at logout.
-2. Calculate the total unprocessed elapsed time once. For each remaining finite queue step, process only the segment up to its configured deadline, plus at most one unfinished work cycle and its finishing/moving/preparing transition. Apply saved inventory dependencies in chronological order.
-3. Settle all remaining elapsed time in one bounded batch of the forever final activity.
-4. Apply **OFF-001**: all queued and final work throughout the absence use **effective skill levels and gear from the last offline snapshot**, even when earlier steps earn enough XP to level up. Activate earned levels only upon return, *after* all scheduled work is resolved.
-5. Persist the new active/forever state once, and never award anything twice for the same time interval. No player click is required to make the queue advance.
+1. Process any partially completed old work cycle and transition phase, using its saved progress.
+2. Settle the remaining productive time of each finite wagon in **chronological order**. At its productive-time boundary, complete at most one final old work cycle, travel, prepare, and move to the next wagon. Resources produced by earlier wagons become available to later crafting steps. Protected items remain protected.
+3. Settle all remaining time in **one bounded batch** of the final Forever wagon, whether one week or 20 years. Do not simulate each action minute by minute.
+4. During the whole offline absence, use the **effective skill/equipment levels from logout (OFF-001)**. Accumulate XP and rewards but activate new levels **only on return** after resolving all segments.
+5. Save one new, validated state. Repeated settlement at the same timestamp must award nothing twice; clock rollbacks must not create rewards.
 
-Prefer splitting by actual simulation boundaries, not subtracting all finite task durations blindly: completing the last work cycle, waiting for travel and readiness, depleted ingredients, and saved partial progress all matter. A short offline period may end in the middle of any transition or activity.
+**Computation cost:** `O(Q × bounded activity/transition work)`, with `Q ≤ 3` and **no dependency on elapsed offline years**, provided each activity (including any future combat) has a bounded batch/estimator. Three wagons mean at most three scheduled activity batches plus a handful of transition-boundary calculations; multiple UI ticks/save resumes may legitimately split these into more calls over time.
 
-**Complexity:** `O(Q × (phase work + bounded recipe/loot work))`, with `Q <= 5`. No asymptotic dependence on 20 years, assuming each underlying task resolves in a bounded batch. For future combat, this guarantee additionally requires a bounded bulk estimator (not replaying individual fights).
+Do not pre-sum five or three independent loot totals without respecting order: one wagon can gather ingredients that a subsequent wagon consumes. No background scheduler, server cron, or daily-login rule is necessary for this local-save prototype.
 
-## Save/data contract for implementation
-
-Preserve browser-local existing character data and migrate old saves without resetting the character. A potential shape, **not yet a final save schema**:
+## Suggested durable state (illustrative, not an implemented save format)
 
 ```js
 {
-  queue: [
-    { activity: "mining", durationMs: 2 * 60 * 60_000 },
-    { activity: "alchemy", durationMs: 24 * 60 * 60_000 },
-    { activity: "fishing", durationMs: null } // forever, always last
+  wagons: [
+    { activity: "mining", plannedMs: 2 * 60 * 60_000 },
+    { activity: "cooking", plannedMs: 24 * 60 * 60_000 },
+    { activity: "hunting", plannedMs: null } // last = Forever
   ],
-  queueIndex: 0,
+  activeWagon: 0,
   productiveElapsedMs: 0,
-  transition: null // or the phase structure of ACTIVITY_SWITCH_SPEC
+  transition: null // or phase + target + elapsed phase milliseconds
 }
 ```
 
-Use **nonnegative safe integer milliseconds** internally, validate known activity IDs and enforce length 1–5, exactly one Forever as the final entry, finite units only in the 1–8 hour/day set, valid index, progress and phase. Handle malformed saves safely without losing existing inventory/XP; reject maliciously oversized queue inputs. The shown `durationMs` is not sufficient alone to describe an already-in-progress transition: preserve the transition phase and its exact progress as defined in the switch specification.
+- 1–3 known activities only, **exactly one final Forever**. Finite durations are integers 1–8 hours or 1–8 days. Persist the current work-cycle fraction, phase progress, timestamps, the current zone/old activity when switching, and the saved effective build.
+- Check serialization, migration from older saves (no loss of existing inventory/skill XP/name/work/protection), malformed or adversarial queue data, safe integer bounds, clock rollback and multi-tab update races.
+- If reordering changes the first wagon, resolve old work before recording the new immediate destination; do not magically transfer old cycle progress to a different activity.
 
-No player-to-player trading, server-scheduled job, network polling, global account dependency or login-triggered queue restart is needed for the first prototype.
+## Small implementation patches (future, **not yet authorized by these docs alone**)
 
-## Suggested small verified patches
+1. **State and tests:** 1–3 wagons, finite/Forever invariants, migration, duration-from-edit semantics, slot reorder validation and clear pending-target semantics. No UI or fake rewards.
+2. **Engine and tests:** finish exactly one current cycle, 1/5-minute movement, 2-minute preparation, reset movement on first-wagon swaps, offline boundary segmentation and long-period idempotency.
+3. **UI and tests:** aged wagon strip above task panel, Start, Do it for, reorder controls, clear active/destination state, transition labels and progress bar, phone layout, accessibility, no live clocks.
+4. **Release checks:** normal browser-game CI, 20- and 100-year settlements, save migration/backward time/double-settlement, skill freeze, material dependencies, cross-zone and same-zone swaps, first-ever Start and in-progress transition reorders. Verify the deployed Pages version **separately** from passing PR CI.
 
-1. **Pure queue/state validation + tests:** migrate existing saves, model 1–5 steps and permitted finite durations with a forced forever final step, validate serialization and no-op edits. No UI wiring or assumed travel/preparation values.
-2. **Transition settlement + tests:** finish a partial cycle, cross-zone movement, preparation, append/advance, depleted materials, offline frozen skill levels and exact-once rewards. Do not deploy this step until missing duration values are approved.
-3. **UI + integration tests:** Start → Do it for (1–8, hours/days, Forever); queue list, mobile controls, accessibility and phases. No live clocks/timers.
-4. **Long-duration verification:** 20-year and 100-year examples, multiple settlement calls, reloading in the middle of each phase, clock rollback, level threshold during first task, inventory produced by one task used by the next, performance bounded by queue size. Check final PR-head CI, main merge and live Pages separately.
-
-## Outstanding owner decisions (do not silently guess)
-
-- Whether the configured interval measures productive work only (recommended) or includes transition time; and if **Do it for** is set on an already-running activity, whether its duration starts at that edit or includes time worked before it.
-- Same-zone movement time, nonzero preparation duration and whether a first-ever Start requires the same preparation.
-- Queue edit/reorder/cancel policy after it has already started; transition-target change policy from ACTIVITY_SWITCH_SPEC.
-
-Until these are decided, this document records the approved **queue rules and efficient calculation plan**; it does not claim that the current playable game already has the queue.
+The existing play page still switches activities instantly. These rules are a **completed design decision, not a claim of running gameplay**.
