@@ -1,13 +1,12 @@
 import {
-  SAVE_KEY, ACTIVITIES, newGame, readSave, settle,
+  SAVE_KEY, ACTIVITIES, ITEM_KEYS, newGame, readSave, settle,
   enterGame, chooseActivity, testOfflineDay, xpForLevel
 } from "./engine.mjs";
 
 const $ = id => document.getElementById(id);
 const ui = {
   level: $("level"), xp: $("xpText"), xpFill: $("xpFill"),
-  hide: $("hideCount"), stone: $("stoneCount"), totalXP: $("lifetimeXp"),
-  hunt: $("huntButton"), mine: $("mineButton"),
+  resourceList: $("resourceList"), choices: $("activityChoices"), totalXP: $("lifetimeXp"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
   heading: $("scene-heading"), description: $("activityDescription"), rate: $("rateText"),
   progressDescription: $("progressDescription"), countdown: $("countdown"), actionFill: $("actionFill"),
@@ -20,6 +19,34 @@ const messages = [];
 let state;
 let lastSavedAt = 0;
 let storageWorks = true;
+
+const activityButtons = new Map();
+const resourceValues = {};
+for (const [id, task] of Object.entries(ACTIVITIES)) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "activity";
+  button.setAttribute("aria-pressed", "false");
+  const name = document.createElement("strong");
+  name.textContent = task.title;
+  const detail = document.createElement("small");
+  detail.textContent = task.itemLabel + " · " + task.baseMinutes + "m per cycle";
+  const body = document.createElement("span");
+  body.append(name, detail);
+  button.append(body);
+  button.addEventListener("click", () => beginActivity(id));
+  ui.choices.append(button);
+  activityButtons.set(id, button);
+  const row = document.createElement("div");
+  row.className = "item";
+  const label = document.createElement("span");
+  label.textContent = task.itemLabel;
+  const count = document.createElement("strong");
+  count.textContent = "0";
+  row.append(label, count);
+  ui.resourceList.append(row);
+  resourceValues[task.item] = count;
+}
 
 function writeSave() {
   if (!storageWorks) return;
@@ -56,12 +83,11 @@ function duration(ms) {
 function reportProgress(report, gainedLevels = 0) {
   if (!report || !report.completed || !report.activity) return;
   const action = ACTIVITIES[report.activity];
-  const verb = report.activity === "hunting" ? "hunted" : "mined";
-  const thing = report.activity === "hunting" ? "wolves" : "stone deposits";
+  const thing = action.subject.toLowerCase();
   const levelText = gainedLevels > 0 ? " You gained " + number(gainedLevels) + " level" + (gainedLevels === 1 ? "" : "s") + " on returning." : "";
   ui.returnMessage.textContent =
     "During " + duration(report.elapsedMs) + " of " + action.title.toLowerCase() +
-    ", you " + verb + " " + number(report.completed) + " " + thing +
+    ", you completed " + number(report.completed) + " work cycles involving " + thing +
     ". Gained " + number(report.gainedItems) + " " + action.itemLabel.toLowerCase() +
     " and " + number(report.gainedXP) + " XP." + levelText;
   ui.returnPanel.hidden = false;
@@ -79,43 +105,38 @@ function render() {
   ui.level.textContent = number(state.level);
   ui.xp.textContent = ready ? "ADVANCE ON RETURN" : number(toward) + " / " + number(required) + " XP";
   ui.xpFill.style.width = Math.min(100, 100 * toward / required) + "%";
-  ui.hide.textContent = number(state.items.hide);
-  ui.stone.textContent = number(state.items.stone);
+  for (const key of ITEM_KEYS) resourceValues[key].textContent = number(state.items[key]);
   ui.totalXP.textContent = number(state.totalXP);
   ui.experienceCount.textContent = number(state.totalXP);
-  const completed = state.items.hide + state.items.stone;
+  const completed = ITEM_KEYS.reduce((sum, key) => sum + state.items[key], 0);
   ui.actionCount.textContent = number(completed);
-  ui.timeInvested.textContent = duration(state.items.hide * ACTIVITIES.hunting.durationMs + state.items.stone * ACTIVITIES.mining.durationMs);
-  ui.hunt.classList.toggle("active", state.activity === "hunting");
-  ui.mine.classList.toggle("active", state.activity === "mining");
-  ui.hunt.setAttribute("aria-pressed", String(state.activity === "hunting"));
-  ui.mine.setAttribute("aria-pressed", String(state.activity === "mining"));
+  ui.timeInvested.textContent = "Work continues"; // resource totals are not action counts under +/-10% rewards
+  for (const [id, button] of activityButtons) {
+    button.classList.toggle("active", state.activity === id);
+    button.setAttribute("aria-pressed", String(state.activity === id));
+  }
   ui.testDay.disabled = !current;
 
   if (!current) {
     ui.sceneTag.textContent = "WAITING FOR ORDERS";
     ui.banner.textContent = "THE LONG VIGIL";
     ui.heading.textContent = "Choose an activity";
-    ui.description.textContent = "The wolf road and the stone mine await. Select your first task.";
+    ui.description.textContent = "Choose a craft or gathering task. Each cycle includes preparation and hauling.";
     ui.rate.textContent = "IDLE";
     ui.progressDescription.textContent = "Awaiting your orders";
     ui.countdown.textContent = "—";
     ui.actionFill.style.width = "0%";
   } else {
     const isHunt = state.activity === "hunting";
-    ui.sceneTag.textContent = isHunt ? "THE WOLF ROAD" : "THE STONE MINE";
-    ui.banner.textContent = isHunt ? "HUNTING" : "MINING";
-    ui.heading.textContent = isHunt ? "Hunting wolves" : "Mining stone";
-    ui.description.textContent = isHunt
-      ? "Beyond the ruined watchtower, wolves stalk the dead forest. The hunt goes on without your command."
-      : "Under the old mountain, stone is split from the cold rock. Every strike brings another fragment home.";
-    const file = isHunt ? "hunting.webp" : "mining.webp";
-    const desiredImage = "./assets/" + file;
+    ui.sceneTag.textContent = current.zone.toUpperCase();
+    ui.banner.textContent = current.title.toUpperCase();
+    ui.heading.textContent = current.title;
+    ui.description.textContent = current.description;
+    // Existing paintings serve as temporary shared scenes until new original art is approved.
+    const desiredImage = "./assets/" + (isHunt || ["gathering", "woodcutting", "fishing"].includes(state.activity) ? "hunting.webp" : "mining.webp");
     if (ui.sceneImage.getAttribute("src") !== desiredImage) ui.sceneImage.setAttribute("src", desiredImage);
-    ui.sceneImage.alt = isHunt
-      ? "Dark-fantasy illustration of a lone hunter confronting wolves beneath dead trees"
-      : "Dark-fantasy illustration of a lone miner working a gloomy stone cavern";
-    ui.sceneCaption.textContent = isHunt ? "THE WOLF ROAD" : "THE HOLLOW MOUNTAIN";
+    ui.sceneImage.alt = "Temporary dark-fantasy work illustration";
+    ui.sceneCaption.textContent = current.zone.toUpperCase();
     ui.rate.textContent = (current.durationMs / 1000) + " SEC / ACTION";
     ui.progressDescription.textContent = "Auto-running · " + current.title;
     ui.countdown.textContent = ((current.durationMs - state.progressMs) / 1000).toFixed(1) + "s";
@@ -129,9 +150,10 @@ function tick() {
   state = result.state;
   if (result.report.completed) {
     const n = result.report.completed;
-    message(state.activity === "hunting"
-      ? number(n) + (n === 1 ? " wolf" : " wolves") + " hunted. +" + number(result.report.gainedItems) + " hides, +" + number(result.report.gainedXP) + " XP."
-      : number(n) + " rock deposit" + (n === 1 ? "" : "s") + " mined. +" + number(result.report.gainedItems) + " stone, +" + number(result.report.gainedXP) + " XP.");
+    const current = ACTIVITIES[state.activity];
+    message(number(n) + " " + current.title.toLowerCase() + " cycles completed. +" +
+      number(result.report.gainedItems) + " " + current.itemLabel.toLowerCase() + ", +" +
+      number(result.report.gainedXP) + " XP.");
     writeSave();
   } else if (Date.now() - lastSavedAt > 3000) {
     writeSave();
@@ -156,7 +178,7 @@ function beginActivity(kind) {
   const changed = state.activity !== kind;
   state = result.state;
   if (result.report.completed) message(number(result.report.completed) + " prior actions completed before switching.");
-  if (changed) message(kind === "hunting" ? "You enter the wolf-haunted woods." : "You descend into the cold stone mine.");
+  if (changed) message("You begin " + ACTIVITIES[kind].title.toLowerCase() + ".");
   ui.returnPanel.hidden = true;
   writeSave();
   render();
@@ -169,7 +191,7 @@ function start() {
   if (!state) {
     state = newGame();
     if (saved) message("The previous save could not be read; a new character was created.");
-    else message("Choose Hunting or Mining. Your character will work without further clicks.");
+    else message("Choose an activity. Your character will work without further clicks.");
     writeSave();
   } else {
     const result = enterGame(state, Date.now());
@@ -178,8 +200,7 @@ function start() {
     reportProgress(result.report, result.levelsGained);
     writeSave();
   }
-  ui.hunt.addEventListener("click", () => beginActivity("hunting"));
-  ui.mine.addEventListener("click", () => beginActivity("mining"));
+
   ui.dismissReturn.addEventListener("click", () => { ui.returnPanel.hidden = true; });
   ui.testDay.addEventListener("click", () => {
     if (!state.activity) return;
