@@ -423,10 +423,10 @@ ui.masterConfirm.addEventListener("click", () => {
   const due = Object.entries(offer.tribute).map(([id, qty]) =>
     number(qty) + " " + ITEM_LABELS[id] +
     (state.protectedItems.includes(id) ? " (Protected)" : ""));
-  const warning = "THE MASTER'S DUE\\nAdvance " + number(offer.ready.length) +
-    " skill(s), one level each?\\n\\nLose ALL their current-level XP and every resource listed:" +
-    (due.length ? "\\n" + due.join("\\n") : "\\nNo material spoils from these skills.") +
-    "\\n\\nThis also takes Protected items. This cannot be undone.";
+  const warning = "THE MASTER'S DUE\nAdvance " + number(offer.ready.length) +
+    " skill(s), one level each?\n\nLose ALL their current-level XP and every resource listed:" +
+    (due.length ? "\n" + due.join("\n") : "\nNo material spoils from these skills.") +
+    "\n\nThis also takes Protected items. This cannot be undone.";
   if (!window.confirm(warning)) {
     writeSave();
     render();
