@@ -19,27 +19,8 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## GAME-006 — Skill-gated probabilistic encounters and resources
 - **Goal:** Progress hunting, mining, gathering and processing outcomes within a single activity; players never manually choose creature, vein or ore quality.
 - **Acceptance criteria:** Data-driven level thresholds and probability weights; low-tier results remain available; higher tiers grow more likely with relevant skill levels; crafting requires and consumes real inventory ingredients, with protections against unwanted ingredient use; encounter difficulty respects combat ability; offline resolution uses frozen skill levels and scales over long absences; deterministic balance and rarity tests.
-- **Status:** PARTIAL (five raw gathering skills have weighted loot in merged PR #43; inventory-limited smelting with resource protection is in review; other processing and actual combat remain TODO).
+- **Status:** PARTIAL (PR #43 merged skill-weighted raw loot; PR #44 merged input-limited Smelting and protected ores. Alchemy/carpentry/masonry/cooking still produce placeholder goods without ingredients, and actual combat/encounter risk is not implemented).
 - **Dependencies:** GAME-005, OFF-001.
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
-- **Implemented by:** Not yet.
-
-
-## GAME-006A — Skill-weighted gathering rewards (first slice of GAME-006)
-- **Goal:** Keep one activity per skill while unlocking rarer resource drops from higher effective skill levels.
-- **Acceptance criteria:** data-driven tier tables for hunting, mining, gathering, woodcutting and fishing; no manual resource targeting, low-tier stays obtainable, high-tier gates by skill, variable batch rewards conserve total quantity, unlocked drops shown in activity menu; no timing displays; save backward compatibility; 100-year offline batch handled without per-action replay and frozen skill effectiveness; deterministic tests.
-- **Status:** IN_REVIEW (feature PR; checks and automatic merge readiness gate apply).
-- **Dependencies:** GAME-005, OFF-001, UI-TIME-001.
-- **Added by:** chat
-- **Requested by:** Owner (2026-11-21).
-- **Implemented by:** Not yet (pending verified merge).
-
-## GAME-006B — Auto-smelting from inventory, with optional protected ore
-- **Goal:** Make Smelting choose from actually available ores according to its own skill level, without player micro-selection.
-- **Acceptance criteria:** no ore means zero ingots and XP; copper at skill 1, iron at 10, silver at 25; one ore consumed per ingot; no negative stock or unavailable material production; protected ore never consumed; save protections backward-compatible; offline catch-up bounded independently of time away and uses frozen skill; UI reports created goods only, with no timers.
-- **Status:** IN_REVIEW (PR pending automatic merge readiness check).
-- **Dependencies:** GAME-006A, GAME-005, OFF-001.
-- **Added by:** chat
-- **Requested by:** Owner (2026-11-21).
-- **Implemented by:** Not yet (pending verified integration).
+- **Implemented by:** chat (partial work in PRs #43 and #44; remaining scope not yet implemented).

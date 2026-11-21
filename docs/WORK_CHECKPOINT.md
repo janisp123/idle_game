@@ -1,39 +1,20 @@
 # Current working checkpoint
 
-## Current work — inventory-consuming smelting, GAME-006B (2026-11-21)
+**Latest verified game deployment — 2026-11-21.** Main commit `7f2c2efa1cb505f076831d0df708560c2844ad74` merged PR #44 after successful final-head checks. Main GitHub Pages workflow run `44885082719` completed **successfully**, including Validate static site and Publish to GitHub Pages jobs. Public game: https://janisp123.github.io/idle_game/play/
 
-- PR #43 (skill-weighted raw loot) merged on `main` as `4e98d7488795e47ef5b3ea901dc7603f21ab22c6`; five raw gathering skills now have level-gated probability tables. Actual combat is still out of scope.
-- In-review PR branch `feat/inventory-powered-smelting-20261121` adds the pure `production.mjs` module with automatic copper/iron/silver recipes, consuming one corresponding unprotected ore per ingot, bounded over offline years, and no free material generation. Other crafting professions still retain prototype outputs, to be addressed separately.
-- The UI supports reversible "Auto use"/"Protected" controls for ore types and lists the outputs unlocked by effective Smelting skill. No player-visible timers or encounter rates are added.
-- Old V2 saves without `protectedItems` default to none protected; protected ore is excluded from automatic recipes. Skill levels remain frozen during absence.
-- **Validation pending:** run website check, Node syntax, engine tests, browser smoke and PR head checks; merge under AUTO-MERGE-001 only if green. Then verify main and Pages.
-- **Deferred:** alchemy/carpentry/masonry/cooking input requirements; real combat difficulty and calibration; queue/zone travel; persistent server authority.
+## Merged game functionality
 
+- **Player:** editable name, no overall character level; 20 activity-specific skill XP/levels. New skill levels activate on return only, never in the middle of an absence (OFF-001).
+- **Activities:** 10 honest and 10 outlaw activities, each with an original dark-fantasy WebP illustration and adjustable complete work-cycle duration. No visible timers, rates, elapsed reports or time-worked stats.
+- **Raw resources:** Hunting, Mining, Gathering, Woodcutting and Fishing use level-gated weighted loot tables in `site/play/loot.mjs`, with rare resources stored separately and potential rewards shown when the skill unlocks them. Bounded-cost offline settlement supports decades-long absences without per-action replay; effective skill remains frozen.
+- **Smelting:** `site/play/production.mjs` automatically selects unlocked copper/iron/silver recipes using real ore inventory, consuming one ore per finished ingot. Optional "Protected" controls exclude reserved raw ores. No materials grants no output or skill XP. Remaining production professions still have placeholder material-free output and must be corrected before a full crafting economy.
+- **Save migration:** Browser-local storage key remains the same and V1→V2 migration retains resources, character name, partial progress and unattributed historical global XP. New resource/protection fields default safely when missing.
+- **Validation:** `tools/test_game_engine.mjs`, `tools/test_game_ui.mjs` and `tools/check_pages_site.py` run in the website workflow alongside module syntax checks. PR #43/#44 checks passed; both features are merged and latest main Pages deployment passed. Tests are not full gameplay/security validation.
 
-## Current work — skill-weighted raw resource rewards, GAME-006A (2026-11-21)
+## Next approved tasks
 
-- Owner-approved AUTO-MERGE-001 merged via PR #42; agreed, passing, non-conflicting gameplay PRs may merge automatically.
-- This in-review branch adds `site/play/loot.mjs`: level-gated weighted tables for five raw-gathering activities, rare resources as separate unlimited inventory stacks, and bounded-cost stochastic allocation over large offline intervals. High-tier drops replace (do not add to) the settled batch. Skill levels remain frozen throughout each interval under OFF-001.
-- Hunting loot represents **placeholder spoils only**, not implemented combat. Rare encounters, HP, injury, protective ingredient settings and input-consuming smelting/crafting are still pending GAME-006 follow-ups.
-- New resource labels in the UI show only tiers unlocked at the currently effective skill level. Uncollected inventory stacks stay hidden. No activity timers or return-time metrics return.
-- New and legacy game saves remain under V2 format and the same localStorage key; missing new rare resource keys default to 0.
-- **Next:** confirm PR CI (engine+browser smoke+site checks), auto-merge if all gates pass, verify main and Pages deployment, then continue with inventory-respecting production as a separate small PR.
+- **GAME-006 (partial):** Extend real ingredient-consuming recipes to Alchemy, Carpentry, Masonry and Cooking; then develop actual combat and difficulty gating before portraying higher-tier hunting spoils as simulated dangerous fights. Provisional loot weights need balance calibration.
+- **GAME-004:** Later implement five-minute zone travel and five-task looping queue with no offline time cap.
+- **AUTO-MERGE-001:** Already-agreed, passing, reviewed and non-conflicting PRs may merge without a separate "M"; stop for significant risks, design choices or failed checks. Bare "Continue" alone is still read-only.
 
-
-**Verified after merge on 2026-11-21.** Source of truth is remote `main:docs/TD_LIST.md`; read it first. Latest combined game commit: `058bef74b5397b405bbe7f7dfff8ef22b8893972`, from merged [PR #40](https://github.com/janisp123/idle_game/pull/40). Both PR validation workflows **passed** on its final head `a231c95fd413dd273b8024ef320ee3db10cd4607`.
-
-## Current playable code in main
-
-- `site/play/` defines **20 independent activities** (10 honest and 10 outlaw), each with original self-hosted WebP artwork. `site/play/engine.mjs` uses separate skill XP/levels per activity and a name-only player identity; there is no global character level.
-- Activity selection is automatic and persistent. Full work cycles are adjustable in configuration; activity progress is visible as a bar, with no duration, countdown, work-rate or time-worked UI. Return reports summarize gathered resources only.
-- The original browser localStorage key is preserved. V1 saves migrate to skill-based V2 while retaining inventory, name, partial work, and unattributed previous global XP. Offline settlement has **no time cap**; skill effectiveness remains frozen during absence and earned levels activate when returning (OFF-001).
-- `tools/test_game_engine.mjs` covers 20 activity cycles, skill independence, migration, reward variance and 20–50 year absences. `tools/test_game_ui.mjs` checks browser-facing skill and time-free controls. `tools/check_pages_site.py` validates all activity paintings, Play Now, and UI markers.
-- The owner's approved code/art merged via PR #40; previous overlapping PR #38 (time UI) and #39 (outlaw scenes) were closed **superseded**, not merged independently.
-- **Deployment:** GitHub Pages publication after the final merge was not independently verified when recording this checkpoint. Source is on `main`; do not claim live availability without checking the deployment and page.
-
-## Next approved development scope
-
-- **GAME-006:** Weighted skill-gated encounters, rare ores, and crafting/production requiring real inventory; avoid selecting targets manually. Respect frozen offline skill levels and test long absences.
-- **GAME-004:** Future 5-minute zone travel and up-to-five-task repeating queue; not yet implemented.
-
-**Rules:** Owner-approved AUTO-MERGE-001 allows checked automatic PR merge only after already-agreed work is ready and no owner decision remains; see `AGENTS.md` and `docs/AGENT_PROTOCOL.md`. Every repository action starts by reading remote `main:docs/TD_LIST.md`. Follow `AGENTS.md`, `docs/AGENT_PROTOCOL.md` and `docs/DECISIONS.md`; new gameplay merges still require owner approval. Keep player-visible timers hidden by UI-TIME-001.
+**Project preflight:** Fetch current remote `main:docs/TD_LIST.md` first, then `AGENTS.md`, `docs/AGENT_PROTOCOL.md` and `docs/DECISIONS.md`; never trust this checkpoint over remote state.
