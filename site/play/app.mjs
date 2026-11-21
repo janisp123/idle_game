@@ -1,5 +1,5 @@
 import {
-  SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, PRODUCTION_INPUTS, recipeOptions, newGame, readSave, settle,
+  SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, recipeOptions, newGame, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
   MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE,
@@ -83,7 +83,6 @@ const activityLevelLabels = new Map();
 const activityRewardLabels = new Map();
 const resourceValues = {};
 const resourceRows = new Map();
-const reserveButtons = new Map();
 for (const [id, task] of Object.entries(ACTIVITIES)) {
   const row = document.createElement("div");
   row.className = "activity";
@@ -128,23 +127,6 @@ for (const item of ITEM_KEYS) {
   const count = document.createElement("strong");
   count.textContent = "0";
   row.append(label, count);
-  // Every inventory stack can be reserved, even if no current recipe
-  // consumes it. Future recipes already respect saved protectedItems.
-  {
-    const reserve = document.createElement("button");
-    reserve.type = "button";
-    reserve.className = "resource-lock";
-    reserve.addEventListener("click", () => {
-      const protectedItems = new Set(state.protectedItems ?? []);
-      if (protectedItems.has(item)) protectedItems.delete(item);
-      else protectedItems.add(item);
-      state = { ...state, protectedItems: [...protectedItems] };
-      writeSave();
-      render();
-    });
-    row.append(reserve);
-    reserveButtons.set(item, reserve);
-  }
   ui.resourceList.append(row);
   resourceValues[item] = count;
   resourceRows.set(item, row);
@@ -405,8 +387,7 @@ function renderMaster() {
   const resources = Object.entries(offer.tribute);
   const tributeLines = resources.map(([id, qty]) => {
     const item = document.createElement("p");
-    const protectedLabel = state.protectedItems.includes(id) ? " · Protected" : "";
-    item.textContent = number(qty) + " " + ITEM_LABELS[id] + protectedLabel;
+    item.textContent = number(qty) + " " + ITEM_LABELS[id];
     return item;
   });
   if (!tributeLines.length) {
@@ -417,7 +398,7 @@ function renderMaster() {
   ui.masterTribute.replaceChildren(...tributeLines);
   ui.masterWarning.textContent = offer.blocked.length
     ? "Other skills still lack proof of their labour. The Master will leave those unchanged."
-    : "Surrendered resources cannot be recovered. Protected items are included.";
+    : "Surrendered resources cannot be recovered.";
   ui.masterConfirm.disabled = count === 0;
   ui.masterConfirm.setAttribute("aria-label", "Surrender listed resources and advance " +
     number(count) + " ready skills once");
@@ -445,12 +426,11 @@ ui.masterConfirm.addEventListener("click", () => {
     return;
   }
   const due = Object.entries(offer.tribute).map(([id, qty]) =>
-    number(qty) + " " + ITEM_LABELS[id] +
-    (state.protectedItems.includes(id) ? " (Protected)" : ""));
+    number(qty) + " " + ITEM_LABELS[id]);
   const warning = "THE MASTER'S DUE\nAdvance " + number(offer.ready.length) +
     " skill(s), one level each?\n\nLose ALL their current-level XP and every resource listed:" +
     (due.length ? "\n" + due.join("\n") : "\nNo material spoils from these skills.") +
-    "\n\nThis also takes Protected items. This cannot be undone.";
+    "\n\nThis cannot be undone.";
   if (!window.confirm(warning)) {
     writeSave();
     render();
@@ -474,18 +454,6 @@ function render() {
     const qty = state.items[key];
     resourceValues[key].textContent = number(qty);
     resourceRows.get(key).hidden = qty === 0;
-    const reserve = reserveButtons.get(key);
-    if (reserve) {
-      const isProtected = (state.protectedItems ?? []).includes(key);
-      const usedInRecipe = PRODUCTION_INPUTS.includes(key);
-      reserve.textContent = isProtected ? "Protected" : usedInRecipe ? "Auto use" : "Unprotected";
-      reserve.setAttribute("aria-label", (isProtected ? "Remove protection from " :
-        "Protect ") + ITEM_LABELS[key]);
-      reserve.title = usedInRecipe
-        ? (isProtected ? "Not available for automatic crafting" : "Available for automatic crafting")
-        : (isProtected ? "Reserved for future use" : "Not currently consumed by crafting");
-      reserve.setAttribute("aria-pressed", String(isProtected));
-    }
   }
   emptyInventory.hidden = ITEM_KEYS.some(key => state.items[key] > 0);
   const transition = state.transition;
