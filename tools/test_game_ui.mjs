@@ -30,7 +30,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261121-attributes1/,
+  assert.match(html, /app\.mjs\?v=20261121-fighting-first1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -117,31 +117,41 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(categoryScreen.hidden, true);
     assert.equal(listScreen.hidden, true);
     assert.deepEqual(categories.map(b => b.textContent),
-      ["Honest Work", "Outlaw Path", "Training & Knowledge", "Tavern & Leisure", "Clan Activities", "Other Activities"]);
+      ["Fighting", "Honest Work", "Outlaw Path", "Training & Knowledge", "Tavern & Leisure", "Clan Activities", "Other Activities"]);
+    assert.doesNotMatch(html, />Choose a path<|CHOOSE YOUR PATH/i,
+      "the redundant choose-a-path heading is removed");
     openActivities.fire("click");
     assert.equal(openActivities.hidden, true);
     assert.equal(categoryScreen.hidden, false);
-    categories[2].fire("click");
+    categories[0].fire("click");
+    assert.equal(elements.get("activityCategoryTitle").textContent, "Fighting");
+    const fightingCards = elements.get("activityChoices").children;
+    assert.equal(fightingCards.length, 1);
+    assert.equal(fightingCards[0].children[0].children[0].children[0].textContent, "Fighting");
+    assert.match(fightingCards[0].children[0].children[3].textContent, /STR.*DEX|DEX.*STR/,
+      "Fighting shows its stat bonuses");
+    elements.get("backToCategories").fire("click");
+    categories[3].fire("click");
     assert.equal(elements.get("activityCategoryTitle").textContent, "Training & Knowledge");
     assert.equal(elements.get("activityChoices").children.length, 10);
     assert.ok(elements.get("activityChoices").children.some(b => b.children[0]?.children[0]?.children[0]?.textContent === "Meditation"));
     elements.get("backToCategories").fire("click");
-    categories[3].fire("click");
+    categories[4].fire("click");
     assert.equal(elements.get("activityCategoryTitle").textContent, "Tavern & Leisure");
     assert.equal(elements.get("activityChoices").children.length, 10);
     assert.ok(elements.get("activityChoices").children.some(b => b.children[0]?.children[0]?.children[0]?.textContent === "Drinking ale with friends"));
     elements.get("backToCategories").fire("click");
-    categories[4].fire("click");
+    categories[5].fire("click");
     assert.equal(elements.get("activityCategoryTitle").textContent, "Clan Activities");
     assert.equal(elements.get("activityChoices").children[0].textContent, "No activities here yet.");
     elements.get("backToCategories").fire("click");
     assert.equal(categoryScreen.hidden, false);
-    categories[1].fire("click");
+    categories[2].fire("click");
     let buttons = elements.get("activityChoices").children.filter(node => node.className === "activity");
     assert.equal(buttons.length, 10, "outlaw activities live in their own category");
     assert.equal(buttons.some(b => b.children[0].children[0].children[0].textContent === "Highway robbery"), true);
     elements.get("backToCategories").fire("click");
-    categories[0].fire("click");
+    categories[1].fire("click");
     buttons = elements.get("activityChoices").children.filter(node => node.className === "activity");
     assert.equal(buttons.length, 10, "honest activities live in their own category");
     assert.equal(buttons.some(b => b.children[0].children[0].children[0].textContent === "Highway robbery"), false,
@@ -177,7 +187,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(mining);
     elements.get("backToCategories").fire("click");
     assert.equal(categoryScreen.hidden, false);
-    categories[0].fire("click");
+    categories[1].fire("click");
     const miningStart = mining.children[0].children[0].children[1].children[0];
     const miningActions = mining.children[0].children[0].children[1];
     assert.deepEqual(miningActions.children.map(button => button.textContent), ["▶","↻","↑"]);
@@ -229,7 +239,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     miningQueueLabel = elements.get("wagonList").children[0].children[0];
     assert.equal(miningQueueLabel.textContent, "Mining LvL 1,00");
     openActivities.fire("click");
-    categories[0].fire("click");
+    categories[1].fire("click");
     elements.get("backToCategories").fire("click");
     elements.get("backToActivities").fire("click");
     assert.equal(openActivities.hidden, false);
@@ -313,7 +323,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
 
     // The chosen activity receives the requested duration, not Mining.
     openActivities.fire("click");
-    categories[2].fire("click");
+    categories[3].fire("click");
     const meditation = elements.get("activityChoices").children.find(
       b => b.children[0]?.children[0]?.children[0]?.textContent === "Meditation");
     const meditationActions = meditation.children[0].children[0].children[1];
@@ -343,7 +353,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(store.get(SAVE_KEY), routeBeforePlanning,
       "cancelling a proposed level-up schedule never changes the actual queue");
     openActivities.fire("click");
-    categories[2].fire("click");
+    categories[3].fire("click");
     meditationSchedule.fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "mining");
@@ -420,7 +430,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     // Build a three-hourglass route: Hunting now (1 minute), Masonry next
     // (2 minutes), Mining Forever. Future schedule must not stop Hunting.
     openActivities.fire("click");
-    categories[0].fire("click");
+    categories[1].fire("click");
     const hunting = elements.get("activityChoices").children.find(
       b => b.children[0]?.children[0]?.children[0]?.textContent === "Hunting");
     hunting.children[0].children[0].children[1].children[1].fire("click");
@@ -434,7 +444,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(state.transition, null);
 
     openActivities.fire("click");
-    categories[0].fire("click");
+    categories[1].fire("click");
     const masonry = elements.get("activityChoices").children.find(
       b => b.children[0]?.children[0]?.children[0]?.textContent === "Masonry");
     const masonryActions = masonry.children[0].children[0].children[1];
@@ -571,7 +581,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     // Start now is available even when a route exists. Declining the explicit
     // replacement confirmation keeps the whole schedule intact.
     openActivities.fire("click");
-    categories[0].fire("click");
+    categories[1].fire("click");
     const savedRoute = JSON.stringify(state.wagons);
     masonryActions.children[0].fire("click");
     assert.equal(overrideConfirmations, 1);
