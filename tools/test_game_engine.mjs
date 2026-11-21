@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  ACTIVITIES, ITEM_KEYS, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
+  ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
   ZONE_TRAVEL_MS, activityDuration, newGame, readSave, settle, chooseActivity,
   enterGame, testOfflineDay, xpForLevel, levelFromXP
 } from "../site/play/engine.mjs";
@@ -20,7 +20,7 @@ test("only individual activities have levels; character has a name but no level"
   assert.equal(Object.hasOwn(state, "level"), false);
   assert.equal(Object.hasOwn(state, "totalXP"), false);
   assert.ok(SKILL_IDS.length >= 10);
-  assert.equal(ITEM_KEYS.length, SKILL_IDS.length);
+  assert.ok(ITEM_KEYS.length > SKILL_IDS.length, "rare resources have separate stack keys");
   for (const id of SKILL_IDS) assert.deepEqual(state.skills[id], { level: 1, xp: 0 });
 });
 
@@ -197,7 +197,8 @@ test("ten outlaw skills are independent, with their own spoils and long work cyc
   assert.equal(outlaws.length, 10);
   assert.equal(honest.length, 10);
   assert.equal(SKILL_IDS.length, 20);
-  assert.equal(ITEM_KEYS.length, 20);
+  assert.equal(SKILL_IDS.length, 20);
+  assert.ok(ITEM_KEYS.length > 20);
   for (const [id, task] of outlaws) {
     assert.ok(task.durationMs >= 25 * BASE_CYCLE_MS, id);
     const selected = choose(newGame(0), id, 0).state;
@@ -228,7 +229,7 @@ test("old 10-skill saves load all ten new outlaw skills and resources safely", (
   assert.equal(loaded.skills.mining.level, 2);
   assert.equal(loaded.items.stolen_purse, 0);
   assert.deepEqual(loaded.skills.highway_robbery, { xp: 0, level: 1 });
-  assert.equal(Object.keys(loaded.items).length, 20);
+  assert.equal(Object.keys(loaded.items).length, ITEM_KEYS.length);
   assert.equal(Object.keys(loaded.skills).length, 20);
 });
 
@@ -246,4 +247,84 @@ test("outlaw offline work has no time cap and only activates skills on return", 
   const home = enter(away, start + years);
   assert.equal(home.state.skills.highway_robbery.level, levelFromXP(amount * task.xp));
   assert.equal(home.state.skills.mining.level, 1);
+});
+
+test("five basic activities have skill-gated loot tiers, other activities retain default resources", () => {
+  assert.deepEqual(Object.keys(LOOT_TABLES).sort(),
+    ["fishing", "gathering", "hunting", "mining", "woodcutting"].sort());
+  assert.deepEqual(lootChances("mining", 1).map(t => t.item), ["stone"]);
+  assert.deepEqual(lootChances("mining", 2).map(t => t.item), ["stone", "copper_ore"]);
+  assert.deepEqual(lootChances("mining", 10).map(t => t.item),
+    ["stone", "copper_ore", "iron_ore"]);
+  assert.deepEqual(lootChances("mining", 25).map(t => t.item),
+    ["stone", "copper_ore", "iron_ore", "silver_ore"]);
+  assert.equal(ITEM_LABELS.shadowroot, "Shadowroot");
+  for (const [id, table] of Object.entries(LOOT_TABLES)) {
+    assert.equal(table[0].item, ACTIVITIES[id].item);
+    for (const level of [1, 2, 7, 10, 25, 100]) {
+      const chance = lootChances(id, level);
+      assert.ok(chance.some(t => t.item === table[0].item));
+      assert.ok(Math.abs(chance.reduce((s, t) => s + t.chance, 0) - 1) < 1e-10);
+      assert.ok(chance.every(t => t.chance > 0 && t.minLevel <= level));
+    }
+  }
+  assert.ok(lootChances("mining", 100).find(t => t.item === "silver_ore").chance
+    > lootChances("mining", 25).find(t => t.item === "silver_ore").chance);
+});
+
+test("higher skill occasionally yields different ores without a second activity button", () => {
+  const state = choose(newGame(0), "mining", 0).state;
+  state.skills.mining = { level: 25, xp: xpForLevel(25) };
+  const out = settle(state, ACTIVITIES.mining.durationMs, () => 0);
+  assert.equal(out.report.gainedItems, 1);
+  assert.equal(out.report.items.silver_ore, 1);
+  assert.equal(out.state.items.silver_ore, 1);
+  assert.equal(out.state.items.stone, 0);
+  assert.equal(out.state.skills.mining.level, 25);
+  assert.equal(out.state.skills.mining.xp, xpForLevel(25) + 2);
+  assert.equal(Object.values(out.report.items).reduce((a, b) => a + b, 0), out.report.gainedItems);
+});
+
+test("offline skill upgrades never change ore chances mid-absence", () => {
+  const state = choose(newGame(0), "mining", 0).state;
+  const cycles = 90000;
+  const out = settle(state, cycles * ACTIVITIES.mining.durationMs, () => 0.5);
+  assert.equal(out.state.items.copper_ore, 0);
+  assert.equal(out.state.items.iron_ore, 0);
+  assert.equal(out.state.items.stone, out.report.gainedItems);
+  assert.equal(out.state.skills.mining.level, 1);
+  const home = enter(state, cycles * ACTIVITIES.mining.durationMs);
+  assert.ok(home.state.skills.mining.level > 25);
+  const after = settle(home.state, (cycles + 10000) * ACTIVITIES.mining.durationMs, () => 0.5);
+  assert.ok(after.state.items.copper_ore > 0);
+  assert.ok(after.state.items.silver_ore > 0);
+});
+
+test("century-scale tier allocation takes bounded RNG draws and keeps total exact", () => {
+  const state = choose(newGame(0), "mining", 0).state;
+  state.skills.mining = { level: 100, xp: xpForLevel(100) };
+  const elapsed = 100 * YEAR;
+  let calls = 0;
+  const result = settle(state, elapsed, () => { calls++; return 0.5; });
+  assert.ok(calls <= 10, "never replay individual actions or offline years");
+  assert.equal(Object.values(result.report.items).reduce((a, b) => a + b, 0),
+    result.report.gainedItems);
+  assert.equal(result.state.skills.mining.level, 100);
+  assert.ok(result.state.items.stone > 0);
+  assert.ok(result.state.items.copper_ore > 0);
+  assert.ok(result.state.items.iron_ore > 0);
+  assert.ok(result.state.items.silver_ore > 0);
+  assert.deepEqual(readSave(JSON.stringify(result.state)), result.state);
+});
+
+test("existing twenty-resource saves load with missing new rarities defaulted safely", () => {
+  const old = newGame(0);
+  delete old.items.copper_ore;
+  delete old.items.silver_ore;
+  old.items.stone = 87;
+  const result = readSave(JSON.stringify(old));
+  assert.ok(result);
+  assert.equal(result.items.stone, 87);
+  assert.equal(result.items.copper_ore, 0);
+  assert.equal(result.items.silver_ore, 0);
 });
