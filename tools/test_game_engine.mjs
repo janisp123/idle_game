@@ -124,8 +124,10 @@ test("reward totals vary independently within +/-10%, with integer stochastic ro
 });
 test("one-action rewards remain integer and can vary rather than always rounding to baseline", () => {
   const base = engineChooseActivity(newGame(0), "mining", 0, midpoint).state;
-  const low = engineSettle(base, 5000, () => 0);
-  const high = engineSettle(base, 5000, () => 0.999999);
+  const lowRolls = [0, 0.999999, 0, 0.999999];
+  const highRolls = [0.999999, 0, 0.999999, 0];
+  const low = engineSettle(base, 5000, () => lowRolls.shift());
+  const high = engineSettle(base, 5000, () => highRolls.shift());
   assert.equal(low.report.gainedItems, 0);
   assert.equal(low.report.gainedXP, 1);
   assert.equal(high.report.gainedItems, 2);
