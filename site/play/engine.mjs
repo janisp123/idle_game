@@ -8,7 +8,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=20261121-loot1";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 3;
+export const GAME_VERSION = 4;
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -135,7 +135,7 @@ function scalePartialProgress(value, sourceMs, targetMs) {
 export function readSave(value) {
   try {
     const s = typeof value === "string" ? JSON.parse(value) : value;
-    if (!s || ![1, 2, GAME_VERSION].includes(s.version) ||
+    if (!s || ![1, 2, 3, GAME_VERSION].includes(s.version) ||
         typeof s.name !== "string" || s.name.length > 40 ||
         !s.items || typeof s.items !== "object" ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
@@ -144,8 +144,8 @@ export function readSave(value) {
         (s.activity !== null && !Object.hasOwn(ACTIVITIES, s.activity)) ||
         !isCount(s.progressMs) || !validTime(s.settledAtMs)) return null;
 
-    // V1/V2 used the original normal times. V3 carries an explicit timing profile.
-    const savedProfile = s.version === GAME_VERSION ? s.timingProfile : "normal";
+    // V1/V2 used normal timings; V3 and later carry the selected timing profile.
+    const savedProfile = s.version >= 3 ? s.timingProfile : "normal";
     if (!Object.hasOwn(TIMING_PROFILES, savedProfile)) return null;
     const sourceTiming = TIMING_PROFILES[savedProfile];
     const sourceWorkMs = s.activity ? workDurationForProfile(ACTIVITIES[s.activity], savedProfile) : 0;
@@ -170,7 +170,7 @@ export function readSave(value) {
 
     // Old V1–V3 single-activity saves become a one-wagon Forever queue.
     // A saved transition already points at the intended first wagon.
-    const wagons = s.version !== GAME_VERSION || s.wagons === undefined
+    const wagons = s.version < 3 || s.wagons === undefined
       ? (transition ? [{ activity: transition.targetActivity, plannedMs: null }]
         : s.activity ? [{ activity: s.activity, plannedMs: null }] : [])
       : s.wagons;
@@ -196,13 +196,23 @@ export function readSave(value) {
             const skill = s.skills[id];
             return skill === undefined || (skill && typeof skill === "object" &&
               isCount(skill.xp) && isCount(skill.level) && skill.level >= 1 &&
-              skill.level <= levelFromXP(skill.xp));
+              (s.version === GAME_VERSION
+                ? skill.xp <= xpToNextLevel(skill.level)
+                : skill.level <= levelFromXP(skill.xp)));
           })) return null;
 
     const skills = blankSkills();
     if (!oldVersion) {
       for (const id of SKILL_IDS) {
-        if (s.skills[id]) skills[id] = { xp: s.skills[id].xp, level: s.skills[id].level };
+        if (s.skills[id]) {
+          const old = s.skills[id];
+          // V1–V3 used cumulative lifetime skill XP and allowed years of XP
+          // banking. V4 uses ONLY progress within the current level; preserve
+          // the earned level and at most one ready level of saved progress.
+          const xp = s.version === GAME_VERSION ? old.xp :
+            Math.min(xpToNextLevel(old.level), Math.max(0, old.xp - xpForLevel(old.level)));
+          skills[id] = { xp, level: old.level };
+        }
       }
     }
     let newProgressMs = s.activity
@@ -244,6 +254,13 @@ function safeAdd(a, b) {
 export function xpForLevel(level) {
   if (!Number.isSafeInteger(level) || level < 1) throw new RangeError("Invalid level");
   return 20 * (level - 1) * level;
+}
+
+/** Skill XP is per level, not a lifetime total. Each level takes longer. */
+export function xpToNextLevel(level) {
+  if (!Number.isSafeInteger(level) || level < 1 || level > Number.MAX_SAFE_INTEGER / 40)
+    throw new RangeError("Invalid level");
+  return 40 * level;
 }
 
 /** O(1) calculation; no loop through level thresholds even after decades. */
@@ -298,7 +315,11 @@ function settleWork(state, now, random) {
       report.item = rules.item;
       report.gainedItems = rules.item === null ? 0 :
         crafted ? productive : variedTotal(count * rules.yield, random);
-      report.gainedXP = variedTotal(productive * rules.xp, random);
+      // The Master owns the next level. Extra XP never banks, even if a
+      // character gathers resources unattended for decades.
+      const missingXP = Math.max(0, xpToNextLevel(prior.level) - prior.xp);
+      report.gainedXP = missingXP
+        ? Math.min(missingXP, variedTotal(productive * rules.xp, random)) : 0;
       report.items = rules.item === null ? {} :
         crafted ? crafted.created : LOOT_TABLES[state.activity]
         ? allocateLoot(state.activity, prior.level, report.gainedItems, random)
@@ -310,12 +331,12 @@ function settleWork(state, now, random) {
       for (const [item, amount] of Object.entries(report.items)) {
         next.items[item] = safeAdd(next.items[item], amount);
       }
-      next.skills[state.activity] = { ...prior, xp: safeAdd(prior.xp, report.gainedXP) };
+      next.skills[state.activity] = { ...prior, xp: prior.xp + report.gainedXP };
     }
     // Empty input stock consumes work time but grants no crafted goods or XP.
     // Offline skill effectiveness stays frozen at the last activated level.
   }
-  // Intentionally DO NOT modify next.level here, regardless of XP thresholds.
+  // A full XP bar cannot level here, on return or when the tab stays open.
   return { state: next, report };
 }
 
@@ -399,7 +420,7 @@ const emptyReport = (state, elapsedMs) => ({
 /**
  * Settle at most three finite wagons chronologically, then the Forever wagon.
  * No per-cycle replay; material from mining can feed subsequent masonry even
- * after a hundred years offline. Level activation remains only in enterGame().
+ * after a hundred years offline. Effective levels change only at the Master.
  */
 export function settle(state, now = Date.now(), random = Math.random) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
@@ -567,20 +588,57 @@ export function requestActivityChange(state, targetActivity, now = Date.now(), r
     { ...current, wagons, productiveElapsedMs: 0 }, targetActivity) };
 }
 
-/** Called only when the user ENTERS/RETURNS to the game, after full catch-up. */
-/** Apply all skill level-ups ONLY when the player returns, after offline settlement. */
+/** Returning is only a catch-up. No level or skill improvement applies automatically. */
 export function enterGame(state, now = Date.now(), random = Math.random) {
   const outcome = settle(state, now, random);
-  const skills = {};
-  const levelsGained = {};
-  for (const id of SKILL_IDS) {
-    const prior = outcome.state.skills[id];
-    const level = levelFromXP(prior.xp);
-    skills[id] = { ...prior, level };
-    if (level > prior.level) levelsGained[id] = level - prior.level;
+  return { ...outcome, levelsGained: {} };
+}
+
+/** All items that a particular skill can produce, including locked rare tiers. */
+export function skillSpoils(skillId) {
+  if (!Object.hasOwn(ACTIVITIES, skillId)) throw new RangeError("Unknown skill");
+  return [...new Set([
+    ACTIVITIES[skillId].item,
+    ...(LOOT_TABLES[skillId] ?? []).map(t => t.item),
+    ...(PRODUCTION_RECIPES[skillId] ?? []).map(t => t.output)
+  ].filter(key => key !== null))];
+}
+
+/** Quoted tribute at the exact current inventory snapshot. No fees/currency. */
+export function skillMasterOffer(state) {
+  const ready = [], blocked = [], tribute = {};
+  for (const skillId of SKILL_IDS) {
+    const skill = state.skills[skillId];
+    if (skill.xp < xpToNextLevel(skill.level)) continue;
+    const spoils = skillSpoils(skillId);
+    // XP-only practice/leisure skills have no loot to surrender. For skills
+    // producing materials, the hidden minimum is one owned item of that skill.
+    if (spoils.length && !spoils.some(key => state.items[key] > 0)) {
+      blocked.push(skillId);
+      continue;
+    }
+    ready.push(skillId);
+    for (const key of spoils) if (state.items[key] > 0) tribute[key] = state.items[key];
   }
-  return { state: { ...outcome.state, skills }, report: outcome.report,
-    ...(outcome.reports ? { reports: outcome.reports } : {}), levelsGained };
+  return { ready, blocked, tribute };
+}
+
+/** Player-confirmed exchange: advance each eligible skill ONCE, forfeit its
+ * current-level XP and every owned spoil from the advanced skills, including
+ * protected stacks. Inventory controls are not modified or reset.
+ */
+export function learnFromMaster(state, now = Date.now(), random = Math.random) {
+  const outcome = settle(state, now, random);
+  const offer = skillMasterOffer(outcome.state);
+  if (!offer.ready.length) throw new RangeError("No mastery available to claim");
+  const skills = { ...outcome.state.skills };
+  const items = { ...outcome.state.items };
+  for (const skillId of offer.ready) {
+    const old = skills[skillId];
+    skills[skillId] = { level: old.level + 1, xp: 0 };
+  }
+  for (const key of Object.keys(offer.tribute)) items[key] = 0;
+  return { ...outcome, state: { ...outcome.state, skills, items }, mastery: offer };
 }
 
 /** Legacy instant selection helper retained for historical engine fixtures only; the UI uses requestActivityChange. */
