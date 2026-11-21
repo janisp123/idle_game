@@ -1,7 +1,7 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, newGame, readSave, settle,
   enterGame, chooseActivity, xpForLevel
-} from "./engine.mjs?v=20261121-skills-v2";
+} from "./engine.mjs?v=20261121-skills-outlaws-v3";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -143,11 +143,11 @@ function render() {
     ui.description.textContent = current.description;
     // Each activity has its own painted scene. Existing paintings remain fallbacks
     // until the new self-hosted WebP assets are uploaded alongside this change.
-    const desiredImage = "./assets/" + state.activity + ".webp?v=20261121-art37";
+    const desiredImage = "./assets/" + state.activity + ".webp?v=20261121-skills-outlaws-v3";
     if (ui.sceneImage.getAttribute("src") !== desiredImage) {
       ui.sceneImage.onerror = () => {
         ui.sceneImage.onerror = null;
-        ui.sceneImage.src = "./assets/" + (isHunt ? "hunting.webp" : "mining.webp") + "?v=20261121-art37";
+        ui.sceneImage.src = "./assets/" + (isHunt ? "hunting.webp" : "mining.webp") + "?v=20261121-skills-outlaws-v3";
       };
       ui.sceneImage.src = desiredImage;
     }
