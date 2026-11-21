@@ -48,12 +48,14 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261121-mastery-queue4/,
+  assert.match(html, /iron-ui\.css\?v=20261121-planner-dropdown5/,
     "stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
-  assert.match(html, /id="queueMasteryMode"[^>]*aria-pressed="false"/,
-    "the level-up stop is a visible separate planner button");
+  assert.doesNotMatch(html, /id="queueMasteryMode"/,
+    "planner uses only the dropdown, not a duplicate mastery button");
+  assert.match(html, /<option value="untilLevelUp">↑ Until LvL Up!<\/option>/,
+    "mastery readiness remains available in the planner dropdown");
     const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
   const elements = new Map(ids.map(id => [id, new FakeElement()]));
   // Mirror the hidden HTML attribute in the minimal fake DOM.
@@ -309,14 +311,14 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("queuePlanner").hidden, false);
     assert.equal(elements.get("queueUnit").value, UNTIL_LEVEL_UP);
     assert.equal(elements.get("queueAmount").hidden, true);
-    assert.equal(elements.get("queueMasteryMode").getAttribute("aria-pressed"), "true");
     assert.match(elements.get("queueConfirm").textContent, /LvL Up/);
-    // The prominent ↑ button also toggles the stop condition with no side effects.
-    elements.get("queueMasteryMode").fire("click");
-    assert.equal(elements.get("queueUnit").value, "minutes");
-    assert.equal(elements.get("queueMasteryMode").getAttribute("aria-pressed"), "false");
-    elements.get("queueMasteryMode").fire("click");
-    assert.equal(elements.get("queueUnit").value, UNTIL_LEVEL_UP);
+    // Selecting another dropdown option and then returning to readiness remains safe.
+    elements.get("queueUnit").value = "minutes";
+    elements.get("queueUnit").fire("change");
+    assert.equal(elements.get("queueAmount").hidden, false);
+    elements.get("queueUnit").value = UNTIL_LEVEL_UP;
+    elements.get("queueUnit").fire("change");
+    assert.equal(elements.get("queueAmount").hidden, true);
     elements.get("queueCancel").fire("click");
     assert.equal(elements.get("queuePlanner").hidden, true);
     assert.equal(store.get(SAVE_KEY), routeBeforePlanning,

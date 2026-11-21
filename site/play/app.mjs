@@ -26,7 +26,6 @@ const ui = {
   wagonQueue: $("wagonQueue"), wagonList: $("wagonList"),
   queuePlanner: $("queuePlanner"), queuePlannerTitle: $("queuePlannerTitle"),
   queuePlannerHint: $("queuePlannerHint"), queueAmountLabel: $("queueAmountLabel"),
-  queueMasteryMode: $("queueMasteryMode"),
   queueAmount: $("queueAmount"), queueUnit: $("queueUnit"),
   queueConfirm: $("queueConfirm"), queueCancel: $("queueCancel"),
   logList: $("logList"),
@@ -388,15 +387,8 @@ function updatePlanningMode() {
   ui.queueConfirm.textContent = untilReady
     ? (state.wagons.length === 1 ? "Start until ↑ LvL Up" : "Add until ↑ LvL Up")
     : (state.wagons.length === 1 ? "Start for this time" : "Add timed task");
-  ui.queueMasteryMode.setAttribute("aria-pressed", String(untilReady));
-  ui.queueMasteryMode.classList.toggle("selected", untilReady);
 }
 ui.queueUnit.addEventListener("change", updatePlanningMode);
-ui.queueMasteryMode.addEventListener("click", () => {
-  const selected = ui.queueUnit.value === UNTIL_LEVEL_UP;
-  ui.queueUnit.value = selected ? (TIMING_PROFILE === "alpha" ? "minutes" : "hours") : UNTIL_LEVEL_UP;
-  updatePlanningMode();
-});
 ui.queueCancel.addEventListener("click", () => hideQueuePlanner());
 ui.queueConfirm.addEventListener("click", () => {
   if (!planningActivity) return;
