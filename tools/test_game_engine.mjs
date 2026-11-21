@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
-  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, HOUR_MS, DAY_MS, validPlannedDuration, queueStartActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
+  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, validPlannedDuration, queueStartActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
   enterGame, testOfflineDay, xpForLevel, levelFromXP
 } from "../site/play/engine.mjs";
 
@@ -750,10 +750,11 @@ const queueReorder = (state, index, now = state.settledAtMs) =>
 test("three wagon invariants: one Forever last, explicit previous slot duration, no fourth", () => {
   assert.equal(MAX_WAGONS, 3);
   for (let i = 1; i <= 8; i++) {
+    assert.equal(validPlannedDuration(i * MINUTE_MS), true);
     assert.equal(validPlannedDuration(i * HOUR_MS), true);
     assert.equal(validPlannedDuration(i * DAY_MS), true);
   }
-  for (const n of [0, 500, 9 * HOUR_MS, 9 * DAY_MS, 10_000]) {
+  for (const n of [0, 500, 9 * MINUTE_MS, 9 * HOUR_MS, 9 * DAY_MS, 10_000]) {
     assert.equal(validPlannedDuration(n), false);
   }
   const first = queueStart(newGame(0), "mining", null).state;
@@ -776,6 +777,26 @@ test("three wagon invariants: one Forever last, explicit previous slot duration,
   assert.throws(() => queueStart(third, "mining", HOUR_MS), RangeError);
   assert.throws(() => queueDuration(third, 2, HOUR_MS), RangeError);
   assert.deepEqual(readSave(JSON.stringify(third)), third);
+});
+
+test("alpha minute slots complete in real productive minutes without losing old saves", () => {
+  let first = queueStart(newGame(0), "mining", null).state;
+  first = queueStart(first, "hunting", MINUTE_MS).state;
+  assert.deepEqual(readSave(JSON.stringify(first)), first);
+  const ready = finish(first, INITIAL_PREPARATION_MS).state;
+  const halfway = finish(ready, INITIAL_PREPARATION_MS + 30_000).state;
+  assert.equal(halfway.productiveElapsedMs, 30_000);
+  assert.equal(halfway.activity, "mining");
+  assert.equal(halfway.items.stone, 3);
+  const end = finish(halfway, INITIAL_PREPARATION_MS + MINUTE_MS).state;
+  assert.equal(end.items.stone, 6);
+  assert.equal(end.transition.phase, "moving");
+  assert.deepEqual(end.wagons, [{ activity: "hunting", plannedMs: null }]);
+  const arrived = finish(end, end.settledAtMs + ZONE_TRAVEL_MS + PREPARATION_MS).state;
+  assert.equal(arrived.activity, "hunting");
+  assert.equal(arrived.items.hide, 0);
+  assert.deepEqual(readSave(arrived), arrived);
+  assert.equal(finish(arrived, arrived.settledAtMs).report.completed, 0);
 });
 
 test("one and two wagon queue correctly settle a 20-year absence without daily checks", () => {
