@@ -1,5 +1,15 @@
 # Current working checkpoint
 
+## Current work — inventory-consuming smelting, GAME-006B (2026-11-21)
+
+- PR #43 (skill-weighted raw loot) merged on `main` as `4e98d7488795e47ef5b3ea901dc7603f21ab22c6`; five raw gathering skills now have level-gated probability tables. Actual combat is still out of scope.
+- In-review PR branch `feat/inventory-powered-smelting-20261121` adds the pure `production.mjs` module with automatic copper/iron/silver recipes, consuming one corresponding unprotected ore per ingot, bounded over offline years, and no free material generation. Other crafting professions still retain prototype outputs, to be addressed separately.
+- The UI supports reversible "Auto use"/"Protected" controls for ore types and lists the outputs unlocked by effective Smelting skill. No player-visible timers or encounter rates are added.
+- Old V2 saves without `protectedItems` default to none protected; protected ore is excluded from automatic recipes. Skill levels remain frozen during absence.
+- **Validation pending:** run website check, Node syntax, engine tests, browser smoke and PR head checks; merge under AUTO-MERGE-001 only if green. Then verify main and Pages.
+- **Deferred:** alchemy/carpentry/masonry/cooking input requirements; real combat difficulty and calibration; queue/zone travel; persistent server authority.
+
+
 ## Current work — skill-weighted raw resource rewards, GAME-006A (2026-11-21)
 
 - Owner-approved AUTO-MERGE-001 merged via PR #42; agreed, passing, non-conflicting gameplay PRs may merge automatically.

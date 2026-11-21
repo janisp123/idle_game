@@ -69,7 +69,7 @@ export function lootChances(activity, level) {
  * Poisson or Gaussian draw for large counts, never replaying years of actions.
  * The approximation is intentionally visible in the technical documentation.
  */
-function sampleBinomial(count, chance, random) {
+export function sampleBinomial(count, chance, random) {
   if (!Number.isSafeInteger(count) || count < 0 || !(chance >= 0 && chance <= 1))
     throw new RangeError("Invalid weighted sample");
   if (count === 0 || chance === 0) return 0;

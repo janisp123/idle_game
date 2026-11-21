@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
+  ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
   ZONE_TRAVEL_MS, activityDuration, newGame, readSave, settle, chooseActivity,
   enterGame, testOfflineDay, xpForLevel, levelFromXP
 } from "../site/play/engine.mjs";
@@ -37,7 +37,9 @@ test("twenty activities retain independently configurable full work-cycle times"
 
 test("every activity earns its own skill XP and own resource", () => {
   for (const [id, activity] of Object.entries(ACTIVITIES)) {
-    const chosen = choose(newGame(0), id, 0).state;
+    const start = newGame(0);
+    if (id === "smelting") start.items.copper_ore = 1;
+    const chosen = choose(start, id, 0).state;
     assert.equal(finish(chosen, activity.durationMs - 1000).report.completed, 0);
     const result = finish(chosen, activity.durationMs);
     assert.equal(result.report.completed, 1);
@@ -327,4 +329,101 @@ test("existing twenty-resource saves load with missing new rarities defaulted sa
   assert.equal(result.items.stone, 87);
   assert.equal(result.items.copper_ore, 0);
   assert.equal(result.items.silver_ore, 0);
+});
+
+test("processing consumes inventory: no copper ore means no ingots or XP", () => {
+  assert.equal(Object.keys(PRODUCTION_RECIPES).length, 1);
+  assert.deepEqual(PRODUCTION_INPUTS, ["copper_ore", "iron_ore", "silver_ore"]);
+  const s = choose(newGame(0), "smelting", 0).state;
+  const result = finish(s, 100 * ACTIVITIES.smelting.durationMs);
+  assert.equal(result.report.completed, 0);
+  assert.equal(result.state.items.ingot, 0);
+  assert.equal(result.state.items.iron_ingot, 0);
+  assert.equal(result.state.skills.smelting.xp, 0);
+  assert.equal(result.state.settledAtMs, 100 * ACTIVITIES.smelting.durationMs);
+  assert.equal(result.state.progressMs, 0);
+});
+
+test("smelting chooses unlocked inputs from inventory, never fabricates resources", () => {
+  const start = newGame(0);
+  start.items.copper_ore = 5;
+  start.items.iron_ore = 4;
+  start.items.silver_ore = 3;
+  const s = choose(start, "smelting", 0).state;
+  const result = finish(s, 100 * ACTIVITIES.smelting.durationMs);
+  assert.equal(result.report.completed, 5, "level one can only smelt copper");
+  assert.equal(result.report.gainedItems, 5);
+  assert.equal(result.state.items.ingot, 5);
+  assert.equal(result.state.items.copper_ore, 0);
+  assert.equal(result.state.items.iron_ore, 4);
+  assert.equal(result.state.items.silver_ore, 3);
+  assert.equal(result.state.skills.smelting.xp, 15);
+  assert.equal(Object.values(result.report.items).reduce((n,x)=>n+x,0),5);
+  assert.deepEqual(result.report.consumed,{copper_ore:5});
+});
+
+test("high-level smelting automatically uses higher ore if present", () => {
+  const start = newGame(0);
+  start.skills.smelting = { level: 25, xp: xpForLevel(25) };
+  start.items.iron_ore = 4;
+  start.items.silver_ore = 2;
+  assert.deepEqual(recipeOptions("smelting",1).map(x=>x.output),["ingot"]);
+  assert.deepEqual(recipeOptions("smelting",10).map(x=>x.output),["ingot","iron_ingot"]);
+  assert.deepEqual(recipeOptions("smelting",25).map(x=>x.output),["ingot","iron_ingot","silver_ingot"]);
+  const s = choose(start, "smelting", 0).state;
+  const out = finish(s, 100 * ACTIVITIES.smelting.durationMs);
+  assert.equal(out.report.completed, 6);
+  assert.equal(out.state.items.iron_ingot,4);
+  assert.equal(out.state.items.silver_ingot,2);
+  assert.equal(out.state.items.iron_ore,0);
+  assert.equal(out.state.items.silver_ore,0);
+});
+
+test("protected ore cannot be consumed, even during very long absences", () => {
+  const start = newGame(0);
+  start.skills.smelting = { level: 100, xp: xpForLevel(100) };
+  start.items.copper_ore = 3;
+  start.items.iron_ore = 500;
+  start.items.silver_ore = 200;
+  start.protectedItems = ["iron_ore", "silver_ore"];
+  const s = choose(start, "smelting", 0).state;
+  const result = finish(s, 100 * YEAR);
+  assert.equal(result.report.completed,3);
+  assert.equal(result.state.items.ingot,3);
+  assert.equal(result.state.items.copper_ore,0);
+  assert.equal(result.state.items.iron_ore,500);
+  assert.equal(result.state.items.silver_ore,200);
+  assert.deepEqual(result.state.protectedItems,["iron_ore","silver_ore"]);
+  assert.equal(result.state.skills.smelting.level,100);
+});
+
+test("smelting remains frozen at logout level while gaining return-only XP", () => {
+  const start = newGame(0);
+  start.skills.smelting = { level: 1, xp: xpForLevel(10) - 1 };
+  start.items.copper_ore = 1;
+  start.items.iron_ore = 3;
+  const s = choose(start, "smelting", 0).state;
+  const out = finish(s, 10 * ACTIVITIES.smelting.durationMs);
+  assert.equal(out.report.completed,1);
+  assert.equal(out.state.items.iron_ore,3);
+  assert.equal(out.state.skills.smelting.level,1);
+  const home = enter(s, 10 * ACTIVITIES.smelting.durationMs);
+  assert.equal(home.state.skills.smelting.level,10);
+  const later = finish(home.state, 20 * ACTIVITIES.smelting.durationMs);
+  assert.equal(later.state.items.iron_ore,0);
+  assert.equal(later.state.items.iron_ingot,3);
+});
+
+test("old save without protection field migrates safely and invalid locks are rejected", () => {
+  const old = newGame(0);
+  delete old.protectedItems;
+  old.items.iron_ore = 11;
+  const loaded = readSave(JSON.stringify(old));
+  assert.ok(loaded);
+  assert.deepEqual(loaded.protectedItems,[]);
+  assert.equal(loaded.items.iron_ore,11);
+  const forged = { ...old, protectedItems:["made_up_ore"] };
+  assert.equal(readSave(forged),null);
+  const safeguarded = { ...old, protectedItems:["iron_ore"] };
+  assert.deepEqual(readSave(safeguarded).protectedItems,["iron_ore"]);
 });

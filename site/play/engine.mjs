@@ -1,4 +1,6 @@
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
+import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-production1";
+export { PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions } from "./production.mjs?v=20261121-production1";
 export { LOOT_TABLES, lootChances } from "./loot.mjs?v=20261121-loot1";
 /**
  * Tiny offline-capable prototype engine.
@@ -38,7 +40,8 @@ export const ACTIVITIES = Object.freeze({
 });
 export const ITEM_LABELS = Object.freeze({
   ...Object.fromEntries(Object.values(ACTIVITIES).map(a => [a.item, a.itemLabel])),
-  ...EXTRA_LOOT_LABELS
+  ...EXTRA_LOOT_LABELS,
+  ...PRODUCTION_LABELS
 });
 export const ITEM_KEYS = Object.freeze(Object.keys(ITEM_LABELS));
 export const SKILL_IDS = Object.freeze(Object.keys(ACTIVITIES));
@@ -58,6 +61,7 @@ export function newGame(now = Date.now()) {
     version: GAME_VERSION,
     name: "Wanderer",
     skills: blankSkills(),
+    protectedItems: [],
     // V1 global XP cannot be assigned to individual activities reliably.
     unattributedXP: 0,
     items: Object.fromEntries(ITEM_KEYS.map(key => [key, 0])),
@@ -75,6 +79,8 @@ export function readSave(value) {
         typeof s.name !== "string" || s.name.length > 40 ||
         !s.items || typeof s.items !== "object" ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
+        (s.protectedItems !== undefined && (!Array.isArray(s.protectedItems) ||
+          !s.protectedItems.every(key => typeof key === "string" && PRODUCTION_INPUTS.includes(key)))) ||
         (s.activity !== null && !Object.hasOwn(ACTIVITIES, s.activity)) ||
         !isCount(s.progressMs) || !validTime(s.settledAtMs)) return null;
     if (s.activity && s.progressMs >= ACTIVITIES[s.activity].durationMs) return null;
@@ -101,6 +107,7 @@ export function readSave(value) {
     }
     return {
       version: GAME_VERSION, name: s.name, skills,
+      protectedItems: [...new Set(s.protectedItems ?? [])],
       unattributedXP: oldVersion ? s.totalXP : s.unattributedXP,
       items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
       activity: s.activity, progressMs: s.progressMs, settledAtMs: s.settledAtMs
@@ -154,7 +161,8 @@ export function settle(state, now = Date.now(), random = Math.random) {
   const end = Math.max(state.settledAtMs, now);
   const elapsedMs = end - state.settledAtMs;
   const next = { ...state, skills: { ...state.skills }, items: { ...state.items }, settledAtMs: end };
-  const report = { activity: state.activity, elapsedMs, completed: 0, gainedXP: 0, item: null, gainedItems: 0, items: {} };
+  const report = { activity: state.activity, elapsedMs, completed: 0, gainedXP: 0,
+    item: null, gainedItems: 0, items: {}, consumed: {} };
   if (!state.activity || elapsedMs === 0) return { state: next, report };
 
   const rules = ACTIVITIES[state.activity]; // snapshot at start of this whole settlement
@@ -162,18 +170,29 @@ export function settle(state, now = Date.now(), random = Math.random) {
   const count = Math.floor(totalMs / rules.durationMs);
   next.progressMs = totalMs % rules.durationMs;
   if (count > 0) {
-    report.completed = count;
-    report.item = rules.item;
-    report.gainedItems = variedTotal(count * rules.yield, random);
-    report.gainedXP = variedTotal(count * rules.xp, random);
-    report.items = LOOT_TABLES[state.activity]
-      ? allocateLoot(state.activity, state.skills[state.activity].level, report.gainedItems, random)
-      : { [rules.item]: report.gainedItems };
-    for (const [item, amount] of Object.entries(report.items)) {
-      next.items[item] = safeAdd(next.items[item], amount);
-    }
     const prior = state.skills[state.activity];
-    next.skills[state.activity] = { ...prior, xp: safeAdd(prior.xp, report.gainedXP) };
+    const crafted = PRODUCTION_RECIPES[state.activity]
+      ? produce(state.activity, prior.level, count, state.items, state.protectedItems ?? [], random)
+      : null;
+    const productive = crafted ? crafted.completed : count;
+    if (productive > 0) {
+      report.completed = productive;
+      report.item = rules.item;
+      report.gainedItems = crafted ? productive : variedTotal(count * rules.yield, random);
+      report.gainedXP = variedTotal(productive * rules.xp, random);
+      report.items = crafted ? crafted.created : LOOT_TABLES[state.activity]
+        ? allocateLoot(state.activity, prior.level, report.gainedItems, random)
+        : { [rules.item]: report.gainedItems };
+      report.consumed = crafted?.consumed ?? {};
+      for (const [item, amount] of Object.entries(report.consumed)) {
+        next.items[item] -= amount; // produce() already bounded each recipe by unprotected inventory
+      }
+      for (const [item, amount] of Object.entries(report.items)) {
+        next.items[item] = safeAdd(next.items[item], amount);
+      }
+      next.skills[state.activity] = { ...prior, xp: safeAdd(prior.xp, report.gainedXP) };
+    }
+    // Empty input stock consumes work time but grants no crafted goods or XP.
     // Offline skill effectiveness stays frozen at the last activated level.
   }
   // Intentionally DO NOT modify next.level here, regardless of XP thresholds.

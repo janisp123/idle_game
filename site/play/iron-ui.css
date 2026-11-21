@@ -344,3 +344,8 @@ footer p{color:#aa9680}
 
 /* Hide uncollected resource rows; no numeric rates or timers in the UI. */
 .inventory .item[hidden]{display:none}
+
+/* Optional material protection: a safe toggle, not a consumption action. */
+.resource-lock { margin-left:auto; padding:5px 7px; flex:0 0 auto; min-width:60px; background:#2f241d; border:1px solid #7c6043; color:#e5c6a2; font:12px Georgia,serif; cursor:pointer; }
+.resource-lock[aria-pressed="true"] { background:#5b2f20; border-color:#c79560; color:#ffe0ae; }
+.resource-lock:focus-visible { outline:2px solid #f0bd7f; outline-offset:2px; }
