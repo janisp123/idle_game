@@ -84,6 +84,10 @@ This avoids conflating a plausible design with a proven implementation. Never la
 
 Good documentation should help a reader implement something correctly, not merely name a pattern.
 
+## Research continuity (research runs only)
+
+The short [Research queue](RESEARCH_QUEUE.md) tracks unanswered technical questions and topic rotation for scheduled research. It is **not a game backlog** and should not be read by Codex during ordinary tasks. Only new evidence changes the queue; completed questions leave the queue when their findings are indexed.
+
 ## How this library grows
 
 A research pass can explore several approaches and consolidate the useful lessons into a self-contained article. The public result should be **original commentary**, not copied code, quoted instructions or a hidden third-party dependency. Important claims should be presented as principles or as explicitly unverified hypotheses unless independently verified in this repository.
