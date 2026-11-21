@@ -59,7 +59,7 @@ This keeps the owner's rule that the first wagon represents the active/selected 
 A dormant character is **not** a running process. Save the queue, selected index/phase, progress, effective skills, inventory and settlement timestamp; on return, settle from that time to the present using bounded mathematics.
 
 1. Process any partially completed old work cycle and transition phase, using its saved progress.
-2. Settle the remaining productive time of each finite wagon in **chronological order**. At its productive-time boundary, complete at most one final old work cycle, travel, prepare, and move to the next wagon. Resources produced by earlier wagons become available to later crafting steps. Protected items remain protected.
+2. Settle the remaining productive time of each finite wagon in **chronological order**. At its productive-time boundary, complete at most one final old work cycle, travel, prepare, and move to the next wagon. Resources produced by earlier wagons become available to later crafting steps; all eligible ingredients may be consumed automatically under INV-PROTECT-REMOVE-001.
 3. Settle all remaining time in **one bounded batch** of the final Forever wagon, whether one week or 20 years. Do not simulate each action minute by minute.
 4. During the whole offline absence, use the **effective skill/equipment levels from logout (OFF-001)**. Accumulate XP and rewards but activate new levels **only on return** after resolving all segments.
 5. Save one new, validated state. Repeated settlement at the same timestamp must award nothing twice; clock rollbacks must not create rewards.
@@ -81,12 +81,12 @@ Do not pre-sum five or three independent loot totals without respecting order: o
   progressMs: 0,
   productiveElapsedMs: 0,
   transition: null // or { targetActivity, phase, phaseProgressMs }
-  // name, skills, items, protection, timingProfile and settledAtMs also persist
+  // name, skills, items, timingProfile and settledAtMs also persist
 }
 ```
 
 - 1–3 known activities only, **exactly one final Forever**. Finite durations are integers 1–8 hours or 1–8 days. Persist the current work-cycle fraction, phase progress, timestamps, the current zone/old activity when switching, and the saved effective build.
-- Serialization, V1–V3 old-save migration (without losing inventory, name, XP and protection), malformed wagon rejection, offline clock rollback and idempotency are covered by engine and browser tests. **Multi-tab concurrency races are still a general browser-local-save limitation** requiring separate hardening before any competitive server release.
+- Serialization, V1–V3 old-save migration (without losing inventory, name or XP; obsolete protection flags are discarded), malformed wagon rejection, offline clock rollback and idempotency are covered by engine and browser tests. **Multi-tab concurrency races are still a general browser-local-save limitation** requiring separate hardening before any competitive server release.
 - If reordering changes the first wagon, resolve old work before recording the new immediate destination; do not magically transfer old cycle progress to a different activity.
 
 ## Completed implementation and release evidence
