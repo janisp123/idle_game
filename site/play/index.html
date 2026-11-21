@@ -9,7 +9,7 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css">
-  <script type="module" src="./app.mjs?v=20261121-ingredient-crafting1"></script>
+  <script type="module" src="./app.mjs?v=20261121-activity-switch1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -77,7 +77,7 @@
               <div id="activityChoices" class="activity-choices" aria-label="Choose work"></div>
             </div>
           </div>
-          <p class="hint">Choose Activities → a path → a task. The Back buttons return without changing your current task.</p>
+          <p class="hint">Choose Activities → a path → press Start beside an activity. Switching takes travel and preparation; Back leaves your current work unchanged.</p>
         </section>
 
 
@@ -97,6 +97,10 @@
               <h2 id="scene-heading">Choose an activity</h2>
               <p id="activityDescription">A wolf prowls the treeline. Stone lies buried beneath the hills. Your journey begins with one decision.</p>
             </div>
+          </div>
+          <div id="transitionStatus" class="transition-status" hidden>
+            <p id="transitionPhase" class="transition-phase" role="status" aria-live="polite">Getting ready to start new activity</p>
+            <div class="meter activity-meter transition-meter" id="transitionProgress" role="progressbar" aria-label="Changing activity" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="transitionFill"></span></div>
           </div>
           <div class="meter activity-meter" id="activityProgress" role="progressbar" aria-label="Current activity progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="actionFill"></span></div>
         </section>
