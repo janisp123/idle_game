@@ -140,7 +140,7 @@ export function readSave(value) {
         !s.items || typeof s.items !== "object" ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
         (s.protectedItems !== undefined && (!Array.isArray(s.protectedItems) ||
-          !s.protectedItems.every(key => typeof key === "string" && PRODUCTION_INPUTS.includes(key)))) ||
+          !s.protectedItems.every(key => typeof key === "string" && ITEM_KEYS.includes(key)))) ||
         (s.activity !== null && !Object.hasOwn(ACTIVITIES, s.activity)) ||
         !isCount(s.progressMs) || !validTime(s.settledAtMs)) return null;
 

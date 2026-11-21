@@ -437,6 +437,42 @@ test("old save without protection field migrates safely and invalid locks are re
   assert.deepEqual(readSave(safeguarded).protectedItems,["iron_ore"]);
 });
 
+test("every known resource can be protected and survives save reload, including non-ingredients", () => {
+  const stored = newGame(12345);
+  // Previously only recipe inputs could be protected; include raw loot,
+  // outlaw spoils, finished products, and materials with no recipe at all.
+  const examples = ["hide", "stone", "herb", "meal", "stolen_purse", "valuables", "iron_ingot"];
+  for (const key of examples) assert.ok(ITEM_KEYS.includes(key), key);
+  for (const key of examples) stored.items[key] = 12;
+  stored.protectedItems = [...examples, "hide"]; // legacy duplicate entries migrate safely
+  const loaded = readSave(JSON.stringify(stored));
+  assert.ok(loaded, "all valid protection keys should be accepted");
+  assert.deepEqual(loaded.protectedItems, examples, "duplicate keys are deduplicated");
+  assert.deepEqual(loaded.items, stored.items, "all inventory amounts survive migration");
+  assert.deepEqual(readSave(JSON.stringify(loaded)), loaded, "round-trip keeps all choices");
+  for (const bad of ["unknown_resource", 0, null, "__proto__"]) {
+    assert.equal(readSave({ ...stored, protectedItems: [bad] }), null,
+      "invalid resource key must still be rejected");
+  }
+  assert.equal(readSave({ ...stored, protectedItems: "hide" }), null);
+});
+
+test("protecting unused loot doesn't block gathering and doesn't change ingredient consumption", () => {
+  const state = newGame(0);
+  state.items.hide = 7;
+  state.items.stone = 5;
+  state.protectedItems = ["hide", "stolen_purse"];
+  const crafted = finish(choose(state, "masonry", 0).state, 20 * ACTIVITIES.masonry.durationMs);
+  assert.equal(crafted.state.items.hide, 7);
+  assert.equal(crafted.state.items.stone, 0, "unprotected stone still crafts normally");
+  assert.equal(crafted.state.items.block, 5);
+  assert.deepEqual(crafted.state.protectedItems, ["hide", "stolen_purse"]);
+  const hunting = finish(choose(crafted.state, "hunting", crafted.state.settledAtMs).state,
+    crafted.state.settledAtMs + 2 * ACTIVITIES.hunting.durationMs);
+  assert.ok(hunting.state.items.hide > 7, "protected loot can still be gathered");
+  assert.deepEqual(hunting.state.protectedItems, ["hide", "stolen_purse"]);
+});
+
 test("all four basic crafting professions consume gathered stock and grant no free output", () => {
   const basic = [
     ["alchemy", "herb", "potion"],

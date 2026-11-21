@@ -123,7 +123,9 @@ for (const item of ITEM_KEYS) {
   const count = document.createElement("strong");
   count.textContent = "0";
   row.append(label, count);
-  if (PRODUCTION_INPUTS.includes(item)) {
+  // Every inventory stack can be reserved, even if no current recipe
+  // consumes it. Future recipes already respect saved protectedItems.
+  {
     const reserve = document.createElement("button");
     reserve.type = "button";
     reserve.className = "resource-lock";
@@ -360,8 +362,13 @@ function render() {
     const reserve = reserveButtons.get(key);
     if (reserve) {
       const isProtected = (state.protectedItems ?? []).includes(key);
-      reserve.textContent = isProtected ? "Protected" : "Auto use";
-      reserve.setAttribute("aria-label", (isProtected ? "Allow automatic use of " : "Protect ") + ITEM_LABELS[key]);
+      const usedInRecipe = PRODUCTION_INPUTS.includes(key);
+      reserve.textContent = isProtected ? "Protected" : usedInRecipe ? "Auto use" : "Unprotected";
+      reserve.setAttribute("aria-label", (isProtected ? "Remove protection from " :
+        "Protect ") + ITEM_LABELS[key]);
+      reserve.title = usedInRecipe
+        ? (isProtected ? "Not available for automatic crafting" : "Available for automatic crafting")
+        : (isProtected ? "Reserved for future use" : "Not currently consumed by crafting");
       reserve.setAttribute("aria-pressed", String(isProtected));
     }
   }

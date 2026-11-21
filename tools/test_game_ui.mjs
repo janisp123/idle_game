@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { ACTIVITIES, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS } from "../site/play/engine.mjs";
+import { ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS } from "../site/play/engine.mjs";
 
 class FakeElement {
   children = [];
@@ -189,6 +189,33 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(state.skills.hunting.level, 1);
     assert.match(mining.children[0].children[1].textContent, /Copper ore/,
       "rare ores become visible only after a skill unlocks them");
+    const rows = elements.get("resourceList").children.filter(row => row.className === "item");
+    assert.equal(rows.length, ITEM_KEYS.length);
+    assert.ok(rows.every(row => row.children.length === 3 &&
+      row.children[2].className === "resource-lock"),
+      "every resource, not only recipe ingredients, has a protection toggle");
+    const hidesRow = rows.find(row => row.children[0]?.textContent === "Wolf hides");
+    assert.ok(hidesRow, "hunting spoil must have an inventory row");
+    const hidesReserve = hidesRow.children[2];
+    assert.equal(hidesReserve.textContent, "Unprotected");
+    assert.equal(hidesReserve.getAttribute("aria-pressed"), "false");
+    hidesReserve.fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.deepEqual(state.protectedItems, ["hide"]);
+    assert.equal(hidesReserve.textContent, "Protected");
+    assert.equal(hidesReserve.getAttribute("aria-pressed"), "true");
+    assert.match(hidesReserve.title, /Reserved for future use/);
+    // A completely unused item category can also be protected when empty.
+    const stolenRow = rows.find(row => row.children[0]?.textContent === "Stolen purses");
+    assert.ok(stolenRow);
+    assert.equal(stolenRow.children[2].textContent, "Unprotected");
+    stolenRow.children[2].fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.deepEqual(state.protectedItems, ["hide", "stolen_purse"]);
+    assert.equal(stolenRow.children[2].textContent, "Protected");
+    stolenRow.children[2].fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.deepEqual(state.protectedItems, ["hide"]);
     const copperRow = elements.get("resourceList").children.find(row =>
       row.children[0]?.textContent === "Copper ore");
     assert.ok(copperRow, "rare resources must have inventory rows");
@@ -198,11 +225,11 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(reserve.textContent, "Auto use");
     reserve.fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.deepEqual(state.protectedItems, ["copper_ore"]);
+    assert.deepEqual(state.protectedItems, ["hide", "copper_ore"]);
     assert.equal(reserve.textContent, "Protected");
     reserve.fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.deepEqual(state.protectedItems, []);
+    assert.deepEqual(state.protectedItems, ["hide"]);
     assert.equal(reserve.textContent, "Auto use");
     const stoneRow = elements.get("resourceList").children.find(row =>
       row.children[0]?.textContent === "Stone");
@@ -211,11 +238,11 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(stoneReserve, "masonry ingredients can be protected");
     stoneReserve.fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.deepEqual(state.protectedItems, ["stone"]);
+    assert.deepEqual(state.protectedItems, ["hide", "stone"]);
     assert.equal(stoneReserve.textContent, "Protected");
     stoneReserve.fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.deepEqual(state.protectedItems, []);
+    assert.deepEqual(state.protectedItems, ["hide"]);
     assert.equal(elements.has("returnPanel"), false, "no welcome-back report panel");
     assert.equal(elements.has("dismissReturn"), false, "no popup dismiss control");
     const chronicle = elements.get("logList").children.map(node => node.textContent);
