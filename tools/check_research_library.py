@@ -15,8 +15,7 @@ BAD = ROOT / "docs" / "BAD_EXAMPLES.md"
 ARTICLES = sorted((ROOT / "docs" / "library").glob("*.md"))
 DOCUMENTS = [INDEX, CATALOG, MAP, QUEUE, BAD, *ARTICLES]
 
-# External source provenance belongs in the private daily report, not these files.
-SOURCE_URL = re.compile(r"https?://|www\.|(?:github|gitlab|reddit)\.com/", re.I)
+# External HTTPS citations are allowed; this validator does not fetch them.
 LINK = re.compile(r'(?<!!)\[[^\]]+\]\((<[^>]+>|[^\s)]+)(?:\s+"[^"]*")?\)')
 HEADING = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$")
 FENCE = re.compile(r"^\s*((?:\x60){3,}|~{3,})")
@@ -82,8 +81,6 @@ def main():
     titles = Counter()
     for path, content in contents.items():
         short = path.relative_to(ROOT)
-        if SOURCE_URL.search(content):
-            errors.append(f"{short}: public research contains a source URL/domain")
         if path in ARTICLES and path.name != "ENTRY_TEMPLATE.md":
             first_heading = next((line for line in prose_lines(content) if line.startswith("# ")), "")
             titles[slug(first_heading[2:])] += 1
@@ -91,8 +88,10 @@ def main():
             for link in LINK.finditer(line):
                 value = unquote(link.group(1).strip("<>"))
                 relative, sep, fragment = value.partition("#")
+                if re.match(r"^https://[^/\\s]+", value, re.I):
+                    continue  # External HTTPS citation; never fetch remote content here.
                 if ":" in relative or relative.startswith("//"):
-                    errors.append(f"{short}: external or unsafe link: {value}")
+                    errors.append(f"{short}: unsafe or non-HTTPS link: {value}")
                     continue
                 target = (path.parent / relative).resolve() if relative else path
                 if not target.is_relative_to(ROOT) or not target.is_file():
