@@ -94,11 +94,15 @@ const validTime = value => Number.isSafeInteger(value) && value >= 0;
 export const MAX_WAGONS = 3;
 /** This is a scheduled STOP condition, not an automatic Skill Master visit. */
 export const UNTIL_LEVEL_UP = "untilLevelUp";
+// Balancing lives here, not in queue settlement or the Skill Master UI.
+// Changing DEFAULT adjusts all producing skills; custom skill values can be
+// placed in OVERRIDES without changing the readiness logic or save format.
+export const MASTER_DEFAULT_ITEM_MINIMUM = 1;
+export const MASTER_ITEM_MINIMUM_OVERRIDES = Object.freeze({});
 export const MASTER_RESOURCE_MINIMUM = Object.freeze(Object.fromEntries(
-  SKILL_IDS.map(id => [id, ACTIVITIES[id].item === null ? 0 : 1])
+  SKILL_IDS.map(id => [id, MASTER_ITEM_MINIMUM_OVERRIDES[id] ??
+    (skillSpoils(id).length ? MASTER_DEFAULT_ITEM_MINIMUM : 0)])
 ));
-// Per-skill resource minima are centralised here: later balance changes do not
-// require changing the scheduler, inventory rules or Skill Master UI.
 export const validQueuePlan = plan => plan === UNTIL_LEVEL_UP || validPlannedDuration(plan);
 export const MINUTE_MS = 60_000;
 export const HOUR_MS = 60 * MINUTE_MS;
