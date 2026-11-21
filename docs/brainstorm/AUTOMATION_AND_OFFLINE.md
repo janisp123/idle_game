@@ -2,6 +2,10 @@
 
 **Status:** Living brainstorm — not approved implementation tasks. Updated 2026-11-20.
 
+## Superseding owner decision — finite queue, perpetual final activity (QUEUE-001; 2026-11-21)
+
+The previously brainstormed **repeating five-task loop** below is **superseded**. The new linear queue allows up to five activities; each nonfinal activity may run a configured 1–8 hours or 1–8 days, and the final activity **always runs forever**. No repeating loop and no daily-login requirement. Settling 20 years offline means processing the few finite activities, their transitions and then batching the unlimited remainder of the final activity. See [the activity queue specification](../ACTIVITY_QUEUE_SPEC.md) for the algorithm and unfinished design choices. No playable queue has been implemented yet.
+
 ## Owner-approved correction: advancement happens only on return (OFF-001; 2026-11-20)
 
 - **At logout, freeze the effective combat/activity build:** stats, character level, skill levels, unlocked perks and equipped gear. Offline fights use that exact effectiveness for the **entire** absence, whether one hour or 20 years.
