@@ -202,7 +202,7 @@ function start() {
 
   ui.dismissReturn.addEventListener("click", () => { ui.returnPanel.hidden = true; });
   ui.saveName.addEventListener("click", () => {
-    const chosen = ui.nameInput.value.trim().replace(/\\s+/g, " ");
+    const chosen = ui.nameInput.value.trim().replace(/\s+/g, " ");
     if (!chosen || chosen.length > 40) {
       message("Name must contain 1–40 characters.");
       return;
