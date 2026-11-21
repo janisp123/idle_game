@@ -1,6 +1,7 @@
 """Zero-dependency checks for the public static landing page."""
 
 from html.parser import HTMLParser
+import re
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
@@ -164,7 +165,11 @@ def check():
         assert 'class="right-rail"' in game_html, "Resource/progress panel must exist"
         verify_links(game_parser, play_root)
         checked_links += len(game_parser.links)
-        for name in ("hunting.webp", "mining.webp", "woodcutting.webp", "gathering.webp", "fishing.webp", "smelting.webp", "alchemy.webp", "carpentry.webp", "masonry.webp", "cooking.webp"):
+        engine_source = (play_root / "engine.mjs").read_text(encoding="utf-8")
+        activity_ids = re.findall(r"^\\s*([a-z_]+): task\\(", engine_source, re.MULTILINE)
+        assert len(activity_ids) >= 10 and len(set(activity_ids)) == len(activity_ids), "Invalid activity list"
+        for activity_id in activity_ids:
+            name = activity_id + ".webp"
             picture = play_root / "assets" / name
             raw = picture.read_bytes()
             assert len(raw) > 30_000, f"Activity painting suspiciously small: {name}"
