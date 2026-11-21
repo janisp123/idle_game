@@ -1,7 +1,7 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, newGame, readSave, settle,
   enterGame, chooseActivity, testOfflineDay, xpForLevel
-} from "./engine.mjs?v=20261121-game003-fix1";
+} from "./engine.mjs?v=20261121-outlaws1";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -22,7 +22,15 @@ let storageWorks = true;
 
 const activityButtons = new Map();
 const resourceValues = {};
+let previousCategory = null;
 for (const [id, task] of Object.entries(ACTIVITIES)) {
+  if (task.category !== previousCategory) {
+    const heading = document.createElement("h3");
+    heading.className = "activity-group-title";
+    heading.textContent = task.category === "outlaw" ? "OUTLAW PATH" : "HONEST WORK";
+    ui.choices.append(heading);
+    previousCategory = task.category;
+  }
   const button = document.createElement("button");
   button.type = "button";
   button.className = "activity";
@@ -134,7 +142,7 @@ function render() {
     ui.description.textContent = current.description;
     // Each activity has its own painted scene. Existing paintings remain fallbacks
     // until the new self-hosted WebP assets are uploaded alongside this change.
-    const desiredImage = "./assets/" + state.activity + ".webp?v=20261121-art37";
+    const desiredImage = "./assets/" + state.activity + ".webp?v=20261121-outlaws1";
     if (ui.sceneImage.getAttribute("src") !== desiredImage) {
       ui.sceneImage.onerror = () => {
         ui.sceneImage.onerror = null;
