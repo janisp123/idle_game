@@ -90,6 +90,12 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     state = JSON.parse(store.get(SAVE_KEY));
     assert.ok(state.skills.mining.level > 1, "return activates skill levels");
     assert.equal(state.skills.hunting.level, 1);
+    assert.match(mining.children[0].children[1].textContent, /Copper ore/,
+      "rare ores become visible only after a skill unlocks them");
+    const copperRow = elements.get("resourceList").children.find(row =>
+      row.children[0]?.textContent === "Copper ore");
+    assert.ok(copperRow, "rare resources must have inventory rows");
+    assert.equal(copperRow.hidden, true, "zero inventory quantities remain hidden");
     assert.match(elements.get("returnMessage").textContent, /^You gathered \d+ stone\.$/);
     assert.doesNotMatch(elements.get("returnMessage").textContent, /seconds|hours|XP|actions|cycles/i);
 
