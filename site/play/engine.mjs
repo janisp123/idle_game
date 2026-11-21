@@ -5,6 +5,10 @@ export {
   ATTRIBUTE_BALANCE, ATTRIBUTES, ATTRIBUTE_IDS, ACTIVITY_STAT_WEIGHTS,
   attributeXP, attributeProgress, allAttributeProgress
 } from "./attributes.mjs?v=20261121-attributes1";
+import {
+  validCombatSession, startCombatSession, advanceCombatSession
+} from "./combat.mjs?v=20261121-combat-v1";
+import { allAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261121-attributes1";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
 export { PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions } from "./production.mjs?v=20261121-no-resource-locks1";
@@ -15,7 +19,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=20261121-loot1";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 5;
+export const GAME_VERSION = 6;
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -138,6 +142,7 @@ export function newGame(now = Date.now()) {
     name: "Wanderer",
     skills: blankSkills(),
     attributeEffort: blankAttributeEffort(),
+    combatSession: null,
     // V1 global XP cannot be assigned to individual activities reliably.
     unattributedXP: 0,
     items: Object.fromEntries(ITEM_KEYS.map(key => [key, 0])),
@@ -163,10 +168,12 @@ function scalePartialProgress(value, sourceMs, targetMs) {
 export function readSave(value) {
   try {
     const s = typeof value === "string" ? JSON.parse(value) : value;
-    if (!s || ![1, 2, 3, 4, GAME_VERSION].includes(s.version) ||
+    if (!s || ![1, 2, 3, 4, 5, GAME_VERSION].includes(s.version) ||
         typeof s.name !== "string" || s.name.length > 40 ||
         !s.items || typeof s.items !== "object" ||
-        (s.version === GAME_VERSION && !validAttributeEffort(s.attributeEffort)) ||
+        (s.version >= 5 && !validAttributeEffort(s.attributeEffort)) ||
+        (s.version === GAME_VERSION && (!Object.hasOwn(s, "combatSession") ||
+          !validCombatSession(s.combatSession))) ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
         (s.protectedItems !== undefined && (!Array.isArray(s.protectedItems) ||
           !s.protectedItems.every(key => typeof key === "string" && ITEM_KEYS.includes(key)))) ||
@@ -262,7 +269,9 @@ export function readSave(value) {
     }
     return {
       version: GAME_VERSION, timingProfile: TIMING_PROFILE, name: s.name, skills,
-      attributeEffort: s.version === GAME_VERSION ? { ...s.attributeEffort } : blankAttributeEffort(),
+      attributeEffort: s.version >= 5 ? { ...s.attributeEffort } : blankAttributeEffort(),
+      combatSession: s.version === GAME_VERSION && s.combatSession
+        ? { ...s.combatSession, player: { ...s.combatSession.player } } : null,
       // Legacy protectedItems are validated above but discarded: no resource locks remain.
       unattributedXP: oldVersion ? s.totalXP : s.unattributedXP,
       items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
@@ -334,6 +343,21 @@ function settleWork(state, now, random, xpRandom = random) {
   // Attribute progress is based on productive time, not work cycles or
   // alpha timing. Master-capped skill XP does not stop attribute growth.
   next.attributeEffort = awardAttributeTime(state.attributeEffort, state.activity, elapsedMs);
+  if (state.activity === "fighting") {
+    // Snapshot effectiveness before this batch: offline-earned stats and XP
+    // cannot make any of this absent interval's duels stronger (OFF-001).
+    let session = state.combatSession;
+    if (!session) {
+      const attrs = combatAttributeProgress(state.attributeEffort);
+      session = startCombatSession({
+        name: state.name,
+        weapon: "hammer",
+        str: attrs.STR.value, dex: attrs.DEX.value, end: attrs.END.value,
+        skill: state.skills.fighting.level
+      }, state.settledAtMs >>> 0);
+    }
+    next.combatSession = advanceCombatSession(session, elapsedMs);
+  }
   const rules = ACTIVITIES[state.activity]; // snapshot at start of this whole settlement
   const totalMs = state.progressMs + elapsedMs;
   const count = Math.floor(totalMs / rules.durationMs);
@@ -421,7 +445,9 @@ function settleTransition(state, now, random) {
       if (transition.phase === "moving") {
         next = { ...next, transition: { ...transition, phase: "preparing", phaseProgressMs: 0 } };
       } else {
-        next = { ...next, activity: transition.targetActivity, progressMs: 0, transition: null };
+        next = { ...next, activity: transition.targetActivity, progressMs: 0,
+          transition: null, combatSession: transition.targetActivity === "fighting"
+            ? null : next.combatSession };
       }
     }
   }
@@ -767,6 +793,7 @@ export function chooseActivity(state, activity, now = Date.now(), random = Math.
   const settled = settle(state, now, random);
   if (settled.state.activity === activity && !settled.state.transition) return settled;
   return { state: { ...settled.state, activity, progressMs: 0, transition: null,
+    combatSession: activity === "fighting" ? null : settled.state.combatSession,
     wagons: [{ activity, plannedMs: null }], productiveElapsedMs: 0 }, report: settled.report };
 }
 
