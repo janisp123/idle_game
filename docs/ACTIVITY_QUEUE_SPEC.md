@@ -2,11 +2,13 @@
 
 **Status:** Implemented and deployed in [engine PR #64](https://github.com/janisp123/idle_game/pull/64) and [wagon UI PR #65](https://github.com/janisp123/idle_game/pull/65), with automated engine/UI tests and public HTML readback; hands-on device QA remains useful.
 **Updated:** 2026-11-21 by chat. **Supersedes** the earlier five-slot/looping queue designs.
+
+**Newest owner-approved UI revision (UI-HOURGLASS-001, PR #67):** The queue still stores `wagons` internally for legacy-save stability, but its visible slots are **three illustrated antique grimdark hourglasses**, **all visible side-by-side at once on mobile**, not horizontally scrollable carts. Art is a compact generated transparent WebP; titles, durations and reorder controls wrap/stack inside each slot instead of hiding the third. The final hourglass is Forever. For early-alpha testing the finite slots also accept **1–8 Minutes** (beside the original 1–8 Hours/Days), counted in productive time only. This does not change normal final balance; stored minute durations remain valid when reverting profiles. See [PR #67](https://github.com/janisp123/idle_game/pull/67).
 **Related:** [ACTIVITY_SWITCH_SPEC.md](ACTIVITY_SWITCH_SPEC.md), [DECISIONS.md](DECISIONS.md) QUEUE-002 / SWITCH-TIMING-001 / ACT-SWITCH-001 / OFF-001 / ZONE-001 / UI-TIME-001, and [TD_LIST.md](TD_LIST.md) GAME-004.
 
 ## The three small old wagons (owner-approved)
 
-The queue is pictured as **one to three compact, connected, old wooden wagons in the established grimdark style**, **above the current activity panel**. Their sequence conveys the future route, with readable titles and touch-friendly reorder controls on mobile. The live implementation uses lightweight CSS-drawn wooden carts and wheels; no extra image downloads or heavy animations are required.
+**Historical cart design (superseded visually by UI-HOURGLASS-001):** The early queue used connected timber wagons above the task panel. The running game now renders **one to three compact illustrated hourglasses above the current activity panel**, while retaining the same queue ordering, saved keys and touch/keyboard reorder controls. The hourglass icons are optimized transparent game assets, not animated clocks.
 
 - **Wagon 1** = the active work / immediate destination when already transitioning. Clearly show **Changing to …** while travelling so the game never falsely claims the new job is already producing.
 - **Wagon 2** = the next job, if present.
@@ -91,3 +93,5 @@ Do not pre-sum five or three independent loot totals without respecting order: o
 4. **Temporary alpha speeds:** ALPHA-TIME-001 currently uses 10-second full work cycles, 5-second movement and 5-second preparation (first Start: 10-second prep). Configured finite wagon periods remain **1–8 hours/days** and are *not* silently shortened. The original slower normal profile remains stored in the engine for restoration before real-progress launch.
 
 **Status:** The approved GAME-004 three-wagon queue is live. Future adjustments should use small, newly approved backlog tasks and preserve the no-offline-cap rule.
+
+**Current visual/alpha follow-up:** [PR #67](https://github.com/janisp123/idle_game/pull/67) replaced wagon drawings with grimdark hourglass artwork, guaranteed a three-column layout without lateral scroll, and introduced 1–8-minute testing periods. This supersedes the earlier cart artwork and horizontal-scroll allowance above, while all core queue mechanics remain as documented.
