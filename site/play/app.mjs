@@ -1,7 +1,7 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, newGame, readSave, settle,
   enterGame, chooseActivity, testOfflineDay, xpForLevel
-} from "./engine.mjs";
+} from "./engine.mjs?v=20261121-game003-fix1";
 
 const $ = id => document.getElementById(id);
 const ui = {
