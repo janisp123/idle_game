@@ -1,7 +1,7 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, PRODUCTION_INPUTS, recipeOptions, newGame, readSave, settle,
   enterGame, chooseActivity, xpForLevel
-} from "./engine.mjs?v=20261121-forty-activities1";
+} from "./engine.mjs?v=20261121-ingredient-crafting1";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -182,7 +182,7 @@ function render() {
     const available = lootChances(id, skill.level);
     const recipes = recipeOptions(id, skill.level);
     activityRewardLabels.get(id).textContent = recipes.length
-      ? recipes.map(t => t.label).join(" · ")
+      ? recipes.map(t => `${t.label} (uses ${ITEM_LABELS[t.input]})`).join(" · ")
       : available.length ? available.map(t => t.label).join(" · ")
       : ACTIVITIES[id].itemLabel;
     button.classList.toggle("active", state.activity === id);
