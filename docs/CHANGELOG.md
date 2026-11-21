@@ -1,5 +1,12 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Universal inventory protection deployed (chat; PRs #75 and #76)
+
+- **Implementation:** [PR #75](https://github.com/janisp123/idle_game/pull/75) merged as `8577fa92921cad78619ced455accd3273e2526d6`: all known inventory resources, including Wolf hides, Meals, Stolen purses and processed outputs, now expose a saved Protected/Unprotected toggle. Existing crafting input flags remain Auto use/Protected; non-ingredients show Unprotected rather than claiming there is a recipe consuming them. Valid saved protection lists can contain **any known inventory key**, while unknown keys remain invalid; existing item quantities, names and XP are untouched. Protecting loot does not suppress gathering. Existing recipes still consume only available unprotected inputs.
+- **Mobile cache follow-up:** [PR #76](https://github.com/janisp123/idle_game/pull/76) merged as `4608b2514a2a65fa5ccdbbfecf643e6d4ed384ce`, refreshing app and engine module cache parameters so returning Android browsers pick up the new resource protection controls.
+- **Validation:** Final PR-head game engine/UI and protocol checks passed on PRs #75 and #76. Main [Pages run 44915436796](https://github.com/janisp123/idle_game/actions/runs/44915436796) completed successfully, including website deployment. Independent public `/play/` readback returned HTTP 200 and the current `app.mjs?v=20261121-resource-protection1` reference. This is public HTML/CI validation, **not** hands-on inspection of every resource button on the Owner's phone.
+- **Separate future feature:** The Owner described direct **higher-tier-for-lower quest resource substitution**, without conversion/trading. This has been saved as planned decision QUEST-SUB-001 and blocked task GAME-010; it is **not part of the protection implementation** and no quest code was added.
+
 ## 2026-11-21 — Compact image-free three-column queue (chat; PR #73)
 
 - **Owner refinement:** After seeing the six-row UI on phone, the Owner asked to **remove the hourglass illustration** and reduce the large empty spaces, rather than placing the picture in the card background.

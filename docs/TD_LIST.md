@@ -23,3 +23,11 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** Not yet.
+## GAME-010 — Higher-tier materials substitute lower quest requirements
+- **Goal:** When quests are implemented, let players satisfy a lower-tier resource requirement using qualifying higher-tier inventory materials directly, without any material exchange or trading screen (e.g. Copper ore may satisfy a Stone requirement).
+- **Acceptance criteria:** Explicit, validated tiers/eligibility map (not an arbitrary all-materials swap); quest acceptance and reward settlement respect Protected resource stacks, save/inventory correctness and idempotency; mixed lower/higher inventory, shortage, rollback and long-offline behaviour are tested; no extra conversion inventory or economy exploit. Specify substitution ratio, resource-use priority, confirmation UI and exact mapping with Owner before coding.
+- **Status:** BLOCKED (owner-approved direction, but quests and exact material hierarchy/conversion rates are not specified or implemented; no quest substitution code authorized yet).
+- **Dependencies:** Future quest system, resource tier ordering, INV-PROTECT-ALL-001 and OFF-001.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet.
