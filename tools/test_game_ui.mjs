@@ -42,6 +42,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   assert.match(queueCss, /\.wagon-controls\s*\{[^}]*grid-row:5/s);
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
   const elements = new Map(ids.map(id => [id, new FakeElement()]));
+  // Mirror the hidden HTML attribute in the minimal fake DOM.
+  elements.get("masterAudience").hidden = true;
   const originalNow = Date.now;
   const originalRandom = Math.random;
   Math.random = () => 0.5; // avoid stochastic 0-item single-cycle rewards in UI assertions
