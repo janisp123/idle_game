@@ -1,5 +1,9 @@
 # Agent instructions — Idle Game and public research library
 
+## Core principle — QUAL-001: quality and security over quantity
+
+**Owner-approved, 2026-11-21.** Applies to game development, the public research library, and automated work. Prioritize correctness, security, maintainability, and genuinely useful results over speed, feature count, research volume, commits, or GitHub activity. Reject duplicate, superficial, unsafe or weakly supported additions; do not merge simply to meet a schedule. Validate what can be tested, label unverified claims honestly, review dependencies and changes for security/licensing risks, and prefer a smaller safe change or **no change** when evidence is insufficient. Never bypass required approval or safety checks for throughput. This principle does not authorize new features.
+
 ## Project protocol v1.0 — read before any project action
 
 **Before every project-specific action**, identify the repository and fetch **current remote `main:docs/TD_LIST.md` first**. Then read this file, `docs/WORK_CHECKPOINT.md`, `docs/DECISIONS.md` and relevant instructions; inspect main, open PRs and the actual files. Do not assume old chat context is current.
