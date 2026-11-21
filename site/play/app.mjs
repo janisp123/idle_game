@@ -1,12 +1,13 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, newGame, readSave, settle,
   enterGame, chooseActivity, xpForLevel
-} from "./engine.mjs?v=20261121-game003-fix1";
+} from "./engine.mjs?v=20261121-skills-v2";
 
 const $ = id => document.getElementById(id);
 const ui = {
-  level: $("level"), xp: $("xpText"), xpFill: $("xpFill"),
-  resourceList: $("resourceList"), choices: $("activityChoices"), totalXP: $("lifetimeXp"),
+  playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
+  resourceList: $("resourceList"), choices: $("activityChoices"),
+  skillTitle: $("skillTitle"), skillLevel: $("skillLevel"), skillXp: $("skillXp"), skillFill: $("skillFill"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
   heading: $("scene-heading"), description: $("activityDescription"), actionFill: $("actionFill"),
   activityProgress: $("activityProgress"),
@@ -20,6 +21,7 @@ let lastSavedAt = 0;
 let storageWorks = true;
 
 const activityButtons = new Map();
+const activityLevelLabels = new Map();
 const resourceValues = {};
 for (const [id, task] of Object.entries(ACTIVITIES)) {
   const button = document.createElement("button");
@@ -31,8 +33,11 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   const detail = document.createElement("small");
   detail.textContent = task.itemLabel;
   const body = document.createElement("span");
-  body.append(name, detail);
+  const rank = document.createElement("small");
+  rank.className = "skill-rank";
+  body.append(name, detail, rank);
   button.append(body);
+  activityLevelLabels.set(id, rank);
   button.addEventListener("click", () => beginActivity(id));
   ui.choices.append(button);
   activityButtons.set(id, button);
@@ -86,19 +91,33 @@ function reportProgress(report) {
 
 function render() {
   const current = state.activity ? ACTIVITIES[state.activity] : null;
-  const thisLevelXp = xpForLevel(state.level);
-  const nextLevelXp = xpForLevel(state.level + 1);
-  const toward = state.totalXP - thisLevelXp;
-  const required = nextLevelXp - thisLevelXp;
-  const ready = state.totalXP >= nextLevelXp;
-  ui.level.textContent = number(state.level);
-  ui.xp.textContent = ready ? "ADVANCE ON RETURN" : number(toward) + " / " + number(required) + " XP";
-  ui.xpFill.style.width = Math.min(100, 100 * toward / required) + "%";
+  ui.playerName.textContent = state.name;
+  if (document.activeElement !== ui.nameInput) ui.nameInput.value = state.name;
   for (const key of ITEM_KEYS) resourceValues[key].textContent = number(state.items[key]);
-  ui.totalXP.textContent = number(state.totalXP);
   for (const [id, button] of activityButtons) {
+    const skill = state.skills[id];
+    activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level);
     button.classList.toggle("active", state.activity === id);
     button.setAttribute("aria-pressed", String(state.activity === id));
+  }
+
+  const selectedSkill = state.activity ? state.skills[state.activity] : null;
+  ui.skillTitle.textContent = current ? current.title : "Choose an activity";
+  if (selectedSkill) {
+    const baseXP = xpForLevel(selectedSkill.level);
+    const nextXP = xpForLevel(selectedSkill.level + 1);
+    const earned = Math.max(0, selectedSkill.xp - baseXP);
+    const required = nextXP - baseXP;
+    const ready = earned >= required;
+    ui.skillLevel.textContent = "Level " + number(selectedSkill.level);
+    ui.skillXp.textContent = ready
+      ? "Level-up ready on return"
+      : number(earned) + " / " + number(required) + " skill XP";
+    ui.skillFill.style.width = Math.min(100, earned / required * 100).toFixed(2) + "%";
+  } else {
+    ui.skillLevel.textContent = "—";
+    ui.skillXp.textContent = "Each activity has independent XP.";
+    ui.skillFill.style.width = "0%";
   }
 
   if (!current) {
@@ -182,6 +201,16 @@ function start() {
   }
 
   ui.dismissReturn.addEventListener("click", () => { ui.returnPanel.hidden = true; });
+  ui.saveName.addEventListener("click", () => {
+    const chosen = ui.nameInput.value.trim().replace(/\\s+/g, " ");
+    if (!chosen || chosen.length > 40) {
+      message("Name must contain 1–40 characters.");
+      return;
+    }
+    state = { ...state, name: chosen };
+    writeSave();
+    render();
+  });
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") returnToGame();
     else writeSave();
