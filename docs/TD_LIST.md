@@ -6,11 +6,13 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
-## GAME-004 — Zone travel and five-task repeating queue
-- **Goal:** Add actual zones, five-minute zone changes, and up to five configurable repeating activities.
-- **Acceptance criteria:** each zone change costs five real minutes; queue can loop or end in ongoing work; offline calculations handle zone travel and queued transitions without an offline cap; work stops appropriately on unavailable ingredients; test with long absences.
-- **Status:** TODO (explicitly deferred by Owner until after the ten-task prototype).
-- **Dependencies:** GAME-003.
+## GAME-004 — Activity switching, zone travel and five-task repeating queue
+- **Goal:** Add manual, non-instant activity changes first: each activity lists a distinct **Start** button; after pressing it, the character finishes the current full work cycle, moves to the next location and prepares before starting the new task. Later add actual zones and up to five configurable repeating activities.
+- **Acceptance criteria (manual switching):** visibly distinct transition progress bar with phase text **Finishing current activity**, **Moving to new location**, **Getting ready to start new activity**; no player-facing countdowns or numeric durations; preserve the remaining work cycle reward exactly once; no production during travel/preparation; save/restore transitions and settle even decades offline without an offline cap, preserving OFF-001 effective-level freezing and protected inventory. Respect existing five-minute cross-zone travel.
+- **Acceptance criteria (later queue):** up to five configurable tasks can loop or end in ongoing work; real zone changes cost five minutes; transitions and resource depletion remain safe under unlimited offline settlement.
+- **Spec:** [ACTIVITY_SWITCH_SPEC.md](ACTIVITY_SWITCH_SPEC.md) records approved behavior, a small-patch implementation plan, and still-open timing/retargeting choices. The manual switch feature is **not implemented**.
+- **Status:** TODO (manual switch behavior/spec approved; exact same-zone travel, preparation durations and retargeting policy still open. Five-task automation remains explicitly deferred).
+- **Dependencies:** GAME-003, OFF-001, ZONE-001, UI-TIME-001.
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** Not yet.
