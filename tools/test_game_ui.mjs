@@ -46,9 +46,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "name is beneath controls");
   assert.match(queueCss, /\.activity-choices \.activity-actions\s*\{[^}]*order:1/s,
     "controls are first");
-  assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:38px/s,
-    "buttons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261121-activity-controls-row2/,
+  assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
+    "desktop icons remain compact");
+  assert.match(html, /iron-ui\.css\?v=20261121-desktop-icons3/,
     "stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:anywhere/s,
     "long skill names may wrap rather than be hidden behind controls");
