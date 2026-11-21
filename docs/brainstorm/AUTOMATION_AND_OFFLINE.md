@@ -2,9 +2,9 @@
 
 **Status:** Living brainstorm — not approved implementation tasks. Updated 2026-11-20.
 
-## Superseding owner decision — finite queue, perpetual final activity (QUEUE-001; 2026-11-21)
+## Superseding owner decisions — three old wagons, forever final activity (QUEUE-002 / SWITCH-TIMING-001; 2026-11-21)
 
-The previously brainstormed **repeating five-task loop** below is **superseded**. The new linear queue allows up to five activities; each nonfinal activity may run a configured 1–8 hours or 1–8 days, and the final activity **always runs forever**. No repeating loop and no daily-login requirement. Settling 20 years offline means processing the few finite activities, their transitions and then batching the unlimited remainder of the final activity. See [the activity queue specification](../ACTIVITY_QUEUE_SPEC.md) for the algorithm and unfinished design choices. No playable queue has been implemented yet.
+The earlier **repeating five-task loop** and later five-slot fixed plan are **superseded**. The latest design has **up to three small old wagons**, re-orderable above the current task, and the final wagon **always works Forever**. Earlier wagons use 1–8 hours or days of productive work. Same-zone moves cost 1 minute, cross-zone moves 5 minutes, and preparation 2 minutes. A future-only swap costs nothing immediately; changing wagon 1 restarts movement/readiness while preserving current-cycle and previously earned resources. Settling 20 years offline requires a few bounded finite segments plus the Forever remainder, with offline skill effectiveness frozen. See [the current queue specification](../ACTIVITY_QUEUE_SPEC.md). This is documented design, not playable queue code.
 
 ## Owner-approved correction: advancement happens only on return (OFF-001; 2026-11-20)
 
