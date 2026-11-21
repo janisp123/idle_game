@@ -49,7 +49,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   try {
     await import("../site/play/app.mjs?smoke-test");
     assert.ok(tick, "game tick must start");
-    const buttons = elements.get("activityChoices").children;
+    const buttons = elements.get("activityChoices").children.filter(node => node.type === "button");
     assert.equal(buttons.length, Object.keys(ACTIVITIES).length);
     assert.ok(buttons.every(b => b.children[0].children[2].textContent === "Skill level 1"));
     assert.equal(elements.get("character-heading").textContent, "Marauder");
