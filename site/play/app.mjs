@@ -1,18 +1,18 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, newGame, readSave, settle,
-  enterGame, chooseActivity, testOfflineDay, xpForLevel
-} from "./engine.mjs?v=20261121-game003-fix1";
+  enterGame, chooseActivity, xpForLevel
+} from "./engine.mjs?v=20261121-skills-outlaws-v3";
 
 const $ = id => document.getElementById(id);
 const ui = {
-  level: $("level"), xp: $("xpText"), xpFill: $("xpFill"),
-  resourceList: $("resourceList"), choices: $("activityChoices"), totalXP: $("lifetimeXp"),
+  playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
+  resourceList: $("resourceList"), choices: $("activityChoices"),
+  skillTitle: $("skillTitle"), skillLevel: $("skillLevel"), skillXp: $("skillXp"), skillFill: $("skillFill"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
-  heading: $("scene-heading"), description: $("activityDescription"), rate: $("rateText"),
-  progressDescription: $("progressDescription"), countdown: $("countdown"), actionFill: $("actionFill"),
+  heading: $("scene-heading"), description: $("activityDescription"), actionFill: $("actionFill"),
+  activityProgress: $("activityProgress"),
   logList: $("logList"), returnPanel: $("returnPanel"), returnMessage: $("returnMessage"),
-  banner: $("sceneBanner"), actionCount: $("actionCount"), timeInvested: $("timeInvested"), experienceCount: $("experienceCount"),
-  dismissReturn: $("dismissReturn"), testDay: $("testDay"), saveStatus: $("saveStatus")
+  banner: $("sceneBanner"), dismissReturn: $("dismissReturn"), saveStatus: $("saveStatus")
 };
 const number = value => new Intl.NumberFormat("en-GB").format(value);
 const messages = [];
@@ -21,8 +21,17 @@ let lastSavedAt = 0;
 let storageWorks = true;
 
 const activityButtons = new Map();
+const activityLevelLabels = new Map();
 const resourceValues = {};
+let previousCategory = null;
 for (const [id, task] of Object.entries(ACTIVITIES)) {
+  if (task.category && task.category !== previousCategory) {
+    const heading = document.createElement("h3");
+    heading.className = "activity-group-title";
+    heading.textContent = task.category === "outlaw" ? "OUTLAW PATH" : "HONEST WORK";
+    ui.choices.append(heading);
+  }
+  previousCategory = task.category ?? null;
   const button = document.createElement("button");
   button.type = "button";
   button.className = "activity";
@@ -30,10 +39,13 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   const name = document.createElement("strong");
   name.textContent = task.title;
   const detail = document.createElement("small");
-  detail.textContent = task.itemLabel + " · " + task.baseMinutes + "m per cycle";
+  detail.textContent = task.itemLabel;
   const body = document.createElement("span");
-  body.append(name, detail);
+  const rank = document.createElement("small");
+  rank.className = "skill-rank";
+  body.append(name, detail, rank);
   button.append(body);
+  activityLevelLabels.set(id, rank);
   button.addEventListener("click", () => beginActivity(id));
   ui.choices.append(button);
   activityButtons.set(id, button);
@@ -62,7 +74,7 @@ function writeSave() {
 }
 
 function message(text) {
-  messages.unshift("[" + new Date().toLocaleTimeString("en-GB", { hour12: false }) + "]  " + text);
+  messages.unshift(text);
   if (messages.length > 7) messages.length = 7;
   ui.logList.replaceChildren(...messages.map(line => {
     const item = document.createElement("li");
@@ -71,61 +83,58 @@ function message(text) {
   }));
 }
 
-function duration(ms) {
-  const seconds = Math.max(0, Math.floor(ms / 1000));
-  if (seconds < 60) return seconds + "s";
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  return [days && days + "d", hours && hours + "h", mins && mins + "m"].filter(Boolean).join(" ") || "under 1m";
+function lootSummary(report) {
+  if (!report || !report.activity || !report.gainedItems) return "No new resources collected.";
+  return "You gathered " + number(report.gainedItems) + " " +
+    ACTIVITIES[report.activity].itemLabel.toLowerCase() + ".";
 }
 
-function reportProgress(report, gainedLevels = 0) {
-  if (!report || !report.completed || !report.activity) return;
-  const action = ACTIVITIES[report.activity];
-  const thing = action.subject.toLowerCase();
-  const levelText = gainedLevels > 0 ? " You gained " + number(gainedLevels) + " level" + (gainedLevels === 1 ? "" : "s") + " on returning." : "";
-  ui.returnMessage.textContent =
-    "During " + duration(report.elapsedMs) + " of " + action.title.toLowerCase() +
-    ", you completed " + number(report.completed) + " work cycles involving " + thing +
-    ". Gained " + number(report.gainedItems) + " " + action.itemLabel.toLowerCase() +
-    " and " + number(report.gainedXP) + " XP." + levelText;
+function reportProgress(report) {
+  if (!report || !report.activity) return;
+  const summary = lootSummary(report);
+  ui.returnMessage.textContent = summary;
   ui.returnPanel.hidden = false;
-  message("Welcome back. " + number(report.completed) + " actions settled; " + number(report.gainedXP) + " XP earned.");
-  if (gainedLevels > 0) message("You advanced " + number(gainedLevels) + " level(s) on return.");
+  message("Welcome back. " + summary);
 }
 
 function render() {
   const current = state.activity ? ACTIVITIES[state.activity] : null;
-  const thisLevelXp = xpForLevel(state.level);
-  const nextLevelXp = xpForLevel(state.level + 1);
-  const toward = state.totalXP - thisLevelXp;
-  const required = nextLevelXp - thisLevelXp;
-  const ready = state.totalXP >= nextLevelXp;
-  ui.level.textContent = number(state.level);
-  ui.xp.textContent = ready ? "ADVANCE ON RETURN" : number(toward) + " / " + number(required) + " XP";
-  ui.xpFill.style.width = Math.min(100, 100 * toward / required) + "%";
+  ui.playerName.textContent = state.name;
+  if (document.activeElement !== ui.nameInput) ui.nameInput.value = state.name;
   for (const key of ITEM_KEYS) resourceValues[key].textContent = number(state.items[key]);
-  ui.totalXP.textContent = number(state.totalXP);
-  ui.experienceCount.textContent = number(state.totalXP);
-  const completed = ITEM_KEYS.reduce((sum, key) => sum + state.items[key], 0);
-  ui.actionCount.textContent = number(completed);
-  ui.timeInvested.textContent = "Work continues"; // resource totals are not action counts under +/-10% rewards
   for (const [id, button] of activityButtons) {
+    const skill = state.skills[id];
+    activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level);
     button.classList.toggle("active", state.activity === id);
     button.setAttribute("aria-pressed", String(state.activity === id));
   }
-  ui.testDay.disabled = !current;
+
+  const selectedSkill = state.activity ? state.skills[state.activity] : null;
+  ui.skillTitle.textContent = current ? current.title : "Choose an activity";
+  if (selectedSkill) {
+    const baseXP = xpForLevel(selectedSkill.level);
+    const nextXP = xpForLevel(selectedSkill.level + 1);
+    const earned = Math.max(0, selectedSkill.xp - baseXP);
+    const required = nextXP - baseXP;
+    const ready = earned >= required;
+    ui.skillLevel.textContent = "Level " + number(selectedSkill.level);
+    ui.skillXp.textContent = ready
+      ? "Level-up ready on return"
+      : number(earned) + " / " + number(required) + " skill XP";
+    ui.skillFill.style.width = Math.min(100, earned / required * 100).toFixed(2) + "%";
+  } else {
+    ui.skillLevel.textContent = "—";
+    ui.skillXp.textContent = "Each activity has independent XP.";
+    ui.skillFill.style.width = "0%";
+  }
 
   if (!current) {
     ui.sceneTag.textContent = "WAITING FOR ORDERS";
     ui.banner.textContent = "THE LONG VIGIL";
     ui.heading.textContent = "Choose an activity";
     ui.description.textContent = "Choose a craft or gathering task. Each cycle includes preparation and hauling.";
-    ui.rate.textContent = "IDLE";
-    ui.progressDescription.textContent = "Awaiting your orders";
-    ui.countdown.textContent = "—";
     ui.actionFill.style.width = "0%";
+    ui.activityProgress.setAttribute("aria-valuenow", "0");
   } else {
     const isHunt = state.activity === "hunting";
     ui.sceneTag.textContent = current.zone.toUpperCase();
@@ -134,20 +143,19 @@ function render() {
     ui.description.textContent = current.description;
     // Each activity has its own painted scene. Existing paintings remain fallbacks
     // until the new self-hosted WebP assets are uploaded alongside this change.
-    const desiredImage = "./assets/" + state.activity + ".webp?v=20261121-art37";
+    const desiredImage = "./assets/" + state.activity + ".webp?v=20261121-skills-outlaws-v3";
     if (ui.sceneImage.getAttribute("src") !== desiredImage) {
       ui.sceneImage.onerror = () => {
         ui.sceneImage.onerror = null;
-        ui.sceneImage.src = "./assets/" + (isHunt ? "hunting.webp" : "mining.webp") + "?v=20261121-art37";
+        ui.sceneImage.src = "./assets/" + (isHunt ? "hunting.webp" : "mining.webp") + "?v=20261121-skills-outlaws-v3";
       };
       ui.sceneImage.src = desiredImage;
     }
     ui.sceneImage.alt = "Dark fantasy illustration of " + current.title.toLowerCase();
     ui.sceneCaption.textContent = current.zone.toUpperCase();
-    ui.rate.textContent = (current.durationMs / 1000) + " SEC / ACTION";
-    ui.progressDescription.textContent = "Auto-running · " + current.title;
-    ui.countdown.textContent = ((current.durationMs - state.progressMs) / 1000).toFixed(1) + "s";
-    ui.actionFill.style.width = (state.progressMs / current.durationMs * 100).toFixed(2) + "%";
+    const percentage = Math.min(100, 100 * state.progressMs / current.durationMs);
+    ui.actionFill.style.width = percentage.toFixed(2) + "%";
+    ui.activityProgress.setAttribute("aria-valuenow", String(Math.round(percentage)));
   }
 }
 
@@ -156,11 +164,8 @@ function tick() {
   const result = settle(state, Date.now());
   state = result.state;
   if (result.report.completed) {
-    const n = result.report.completed;
-    const current = ACTIVITIES[state.activity];
-    message(number(n) + " " + current.title.toLowerCase() + " cycles completed. +" +
-      number(result.report.gainedItems) + " " + current.itemLabel.toLowerCase() + ", +" +
-      number(result.report.gainedXP) + " XP.");
+    message("Collected " + number(result.report.gainedItems) + " " +
+      ACTIVITIES[state.activity].itemLabel.toLowerCase() + ".");
     writeSave();
   } else if (Date.now() - lastSavedAt > 3000) {
     writeSave();
@@ -171,11 +176,7 @@ function tick() {
 function returnToGame() {
   const result = enterGame(state, Date.now());
   state = result.state;
-  if (result.report.completed && (result.report.elapsedMs > 8000 || result.levelsGained)) {
-    reportProgress(result.report, result.levelsGained);
-  } else if (result.levelsGained) {
-    message("You gained " + result.levelsGained + " level(s) on return.");
-  }
+  if (result.report.activity) reportProgress(result.report);
   writeSave();
   render();
 }
@@ -184,7 +185,7 @@ function beginActivity(kind) {
   const result = chooseActivity(state, kind, Date.now());
   const changed = state.activity !== kind;
   state = result.state;
-  if (result.report.completed) message(number(result.report.completed) + " prior actions completed before switching.");
+  if (result.report.gainedItems) message("Collected " + number(result.report.gainedItems) + " " + ACTIVITIES[result.report.activity].itemLabel.toLowerCase() + ".");
   if (changed) message("You begin " + ACTIVITIES[kind].title.toLowerCase() + ".");
   ui.returnPanel.hidden = true;
   writeSave();
@@ -203,19 +204,18 @@ function start() {
   } else {
     const result = enterGame(state, Date.now());
     state = result.state;
-    message("Wanderer returns to the world.");
-    reportProgress(result.report, result.levelsGained);
+    reportProgress(result.report);
     writeSave();
   }
 
   ui.dismissReturn.addEventListener("click", () => { ui.returnPanel.hidden = true; });
-  ui.testDay.addEventListener("click", () => {
-    if (!state.activity) return;
-    state = settle(state, Date.now()).state;
-    const result = testOfflineDay(state, Date.now());
-    state = result.state;
-    reportProgress(result.report, result.levelsGained);
-    message("Testing shortcut: 1 day added using the frozen character level.");
+  ui.saveName.addEventListener("click", () => {
+    const chosen = ui.nameInput.value.trim().replace(/\s+/g, " ");
+    if (!chosen || chosen.length > 40) {
+      message("Name must contain 1–40 characters.");
+      return;
+    }
+    state = { ...state, name: chosen };
     writeSave();
     render();
   });

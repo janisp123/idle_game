@@ -7,6 +7,7 @@ on:
       - "site/**"
       - "tools/check_pages_site.py"
       - "tools/test_game_engine.mjs"
+      - "tools/test_game_ui.mjs"
       - ".github/workflows/pages.yml"
   pull_request:
     branches: [main]
@@ -14,6 +15,7 @@ on:
       - "site/**"
       - "tools/check_pages_site.py"
       - "tools/test_game_engine.mjs"
+      - "tools/test_game_ui.mjs"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -34,8 +36,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Test offline engine and frozen-level rules
-        run: node --test tools/test_game_engine.mjs
+      - name: Check game module syntax
+        run: node --check site/play/app.mjs && node --check site/play/engine.mjs
+      - name: Test offline engine, skill migration and browser UI
+        run: node --test tools/test_game_engine.mjs tools/test_game_ui.mjs
 
   deploy:
     name: Publish to GitHub Pages

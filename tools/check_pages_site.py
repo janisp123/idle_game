@@ -1,6 +1,7 @@
 """Zero-dependency checks for the public static landing page."""
 
 from html.parser import HTMLParser
+import re
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
@@ -143,13 +144,32 @@ def check():
         assert game_parser.lang == "en", "Game must declare English document language"
         assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
         assert {"game", "activityChoices", "resourceList", "sceneImage", "returnPanel",
-                "testDay", "logList", "sceneBanner", "actionCount", "timeInvested",
-                "experienceCount"}.issubset(game_parser.ids), "Missing essential gameplay UI"
+                "activityProgress", "actionFill", "logList", "sceneBanner", "character-heading",
+                "skillTitle", "skillLevel", "skillXp", "skillFill", "nameInput", "saveName"}.issubset(game_parser.ids), "Missing essential gameplay UI"
+        assert not ({"level", "xpText", "xpFill", "lifetimeXp"} & game_parser.ids), (
+            "Character must have no global level or XP widget"
+        )
+        assert not ({"rateText", "countdown", "timeInvested", "testDay", "actionCount"} & game_parser.ids), (
+            "Time, action counts, and testing controls must not be exposed to players"
+        )
+        app_js = (play_root / "app.mjs").read_text(encoding="utf-8")
+        for leak in ("baseMinutes", "SEC / ACTION", "toLocaleTimeString", "elapsedMs",
+                     "timeInvested", "testDay", "gainedXP", "per cycle"):
+            assert leak not in app_js, f"Player-facing time/action detail leaked: {leak}"
+        assert "lootSummary(report)" in app_js and "aria-valuenow" in app_js
+        assert "state.skills[id]" in app_js and "skillFill" in app_js
+        assert "state.totalXP" not in app_js and "state.level" not in app_js
+        assert 'role="progressbar"' in game_html
+        assert "Welcome back." in game_html
         assert "./iron-ui.css" in game_html, "The shared dark-fantasy theme must be active"
         assert 'class="right-rail"' in game_html, "Resource/progress panel must exist"
         verify_links(game_parser, play_root)
         checked_links += len(game_parser.links)
-        for name in ("hunting.webp", "mining.webp", "woodcutting.webp", "gathering.webp", "fishing.webp", "smelting.webp", "alchemy.webp", "carpentry.webp", "masonry.webp", "cooking.webp"):
+        engine_source = (play_root / "engine.mjs").read_text(encoding="utf-8")
+        activity_ids = re.findall(r"^\s*([a-z_]+): task\(", engine_source, re.MULTILINE)
+        assert len(activity_ids) >= 10 and len(set(activity_ids)) == len(activity_ids), "Invalid activity list"
+        for activity_id in activity_ids:
+            name = activity_id + ".webp"
             picture = play_root / "assets" / name
             raw = picture.read_bytes()
             assert len(raw) > 30_000, f"Activity painting suspiciously small: {name}"

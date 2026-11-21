@@ -1,5 +1,15 @@
 # Current working checkpoint
 
+## Latest in-review change — GAME-005 / PR #40 (2026-11-21)
+
+- **Branch:** `feat/independent-skill-levels-20261121`, opened against `main` in PR #40; **NOT MERGED OR LIVE**. Latest verified pre-checkpoint revision: `7e7f5e5e5bc069b71e7147b5c7eb45db84776fdb`.
+- **Implementation:** `site/play/engine.mjs` now gives each configured activity its own `{xp, level}` and removes character-wide level and active global XP. V1 saves under the same `SAVE_KEY` migrate without wiping resources, partial work or name. Unassignable previous global XP is held as invisible `unattributedXP`. Each task earns its own XP; only `enterGame()` activates earned levels, after full uncapped offline settlement (OFF-001).
+- **Player-facing:** `site/play/index.html`, `app.mjs`, `iron-ui.css` display the character's editable name, skill levels next to activity choices and active-skill XP progress; no time readouts, no detailed return metrics. Images remain in use. Activity UI also supports grouping once outlaw tasks are added.
+- **Validation:** The latest `Idle Game website` and `Project Protocol Preflight` checks both **PASS** at the pre-checkpoint SHA above. `tools/test_game_engine.mjs` covers V1 migration, skill isolation, frozen levels and 50-year absence. Added `tools/test_game_ui.mjs` fake-DOM browser smoke tests; Pages CI runs both plus module syntax checks.
+- **Dependencies/conflicts:** PR #38 separately contains the no-visible-time UI that was included here to prevent regression; PR #39 contains pending outlaw activities and shares the same engine/UI files. **Do not merge the overlapping PRs in arbitrary order**: reconcile the branches and rerun all checks first. New tier probabilities, harder encounters and ingredient-consuming processing remain **GAME-006 TODO**, not implemented.
+- **Next action:** Owner reviews PR #40; once merge sequencing with #38 and #39 is resolved and CI passes on the final head, request explicit owner merge approval. Separately validate live GitHub Pages after merge.
+
+
 **Gameplay checkpoint (last verified 2026-11-20; recheck current main and PRs):** GAME-001 was merged as PR #20 and deployed on GitHub Pages: a **playable but simple** automatic Hunting/Mining browser prototype with local saves, no offline cap and login-only level increases. No true wolf combat engine, server-authoritative settlement, account backend or game database. **Branch work GAME-002** replaces the interface HTML/CSS and both static activity paintings with approved 960×540 WebP imagery; it is **not live until separately approved, merged and deployed**.
 
 **Canonical source:** Always fetch current remote `main:docs/TD_LIST.md` first. Then read `AGENTS.md`, this checkpoint, `docs/DECISIONS.md`, the protocol, current main and open PRs; this page is a snapshot, not authority.

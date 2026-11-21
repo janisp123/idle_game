@@ -42,3 +42,39 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** Not yet.
+
+## GAME-005 — Independent skill levels, character name only
+- **Goal:** Replace the single character level with independent XP/levels for every activity, without changing slow work cycles or offline rules.
+- **Acceptance criteria:** Player has a safe editable name and no overall level; skill progress visible per activity and on current-skill panel; each task awards only its own XP; levels activate when entering/returning, not during absence; V1 saves preserve name/items/partial work and historical unassigned XP; no visible time reports or timers; tests cover offline decades, migrations, and skill isolation.
+- **Status:** IN_REVIEW (feature PR; awaiting checks and separate owner merge approval).
+- **Dependencies:** OFF-001, GAME-003, UI-TIME-001.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet (pending verified integration).
+
+## GAME-006 — Skill-gated probabilistic encounters and resources
+- **Goal:** Progress hunting, mining, gathering and processing outcomes within a single activity; players never manually choose creature, vein or ore quality.
+- **Acceptance criteria:** Data-driven level thresholds and probability weights; low-tier results remain available; higher tiers grow more likely with relevant skill levels; crafting requires and consumes real inventory ingredients, with protections against unwanted ingredient use; encounter difficulty respects combat ability; offline resolution uses frozen skill levels and scales over long absences; deterministic balance and rarity tests.
+- **Status:** TODO (follow-up after GAME-005; not included in the initial leveling PR).
+- **Dependencies:** GAME-005, OFF-001.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet.
+
+## UI-001 — Hide all in-game timing and return metrics
+- **Goal:** Players see activity names, possible rewards and a progress bar, without durations, actions-per-time estimates or a timer.
+- **Acceptance criteria:** no visible cycle duration, countdown, timestamp, rates, elapsed absence, test-day control, time-at-work counters or action totals. Return summary reports only gathered resources. Internal settlement continues indefinitely.
+- **Status:** IN_REVIEW (consolidated into PR #40; earlier PR #38 overlaps).
+- **Dependencies:** OFF-001.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet (pending verified integration).
+
+## GAME-007 — Ten outlaw activities and their illustrations
+- **Goal:** Add ten optional grimdark outlaw jobs with their own full-length cycles and original self-hosted paintings.
+- **Acceptance criteria:** highway robbery, burglary, bandit raiding, grave robbing, kidnapping, extortion, caravan plundering, cattle rustling, assassination and slave raiding; separate honest/outlaw categories, distinct placeholder loot and independent skill tracks; old saves, long-term offline work and speed configuration preserved; no fabricated guards, fights or ransom payouts.
+- **Status:** IN_REVIEW (consolidated into PR #40; earlier PR #39 overlaps).
+- **Dependencies:** GAME-005, VIS-001, OFF-001.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet (pending verified integration).
