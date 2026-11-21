@@ -64,12 +64,12 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     categories[2].fire("click");
     assert.equal(elements.get("activityCategoryTitle").textContent, "Training & Knowledge");
     assert.equal(elements.get("activityChoices").children.length, 10);
-    assert.ok(elements.get("activityChoices").children.some(b => b.children[0]?.children[0]?.textContent === "Meditation"));
+    assert.ok(elements.get("activityChoices").children.some(b => b.children[0]?.children[0]?.children[0]?.textContent === "Meditation"));
     elements.get("backToCategories").fire("click");
     categories[3].fire("click");
     assert.equal(elements.get("activityCategoryTitle").textContent, "Tavern & Leisure");
     assert.equal(elements.get("activityChoices").children.length, 10);
-    assert.ok(elements.get("activityChoices").children.some(b => b.children[0]?.children[0]?.textContent === "Drinking ale with friends"));
+    assert.ok(elements.get("activityChoices").children.some(b => b.children[0]?.children[0]?.children[0]?.textContent === "Drinking ale with friends"));
     elements.get("backToCategories").fire("click");
     categories[4].fire("click");
     assert.equal(elements.get("activityCategoryTitle").textContent, "Clan Activities");
@@ -77,21 +77,21 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     elements.get("backToCategories").fire("click");
     assert.equal(categoryScreen.hidden, false);
     categories[1].fire("click");
-    let buttons = elements.get("activityChoices").children.filter(node => node.type === "button");
+    let buttons = elements.get("activityChoices").children.filter(node => node.className === "activity");
     assert.equal(buttons.length, 10, "outlaw activities live in their own category");
-    assert.equal(buttons.some(b => b.children[0].children[0].textContent === "Highway robbery"), true);
+    assert.equal(buttons.some(b => b.children[0].children[0].children[0].textContent === "Highway robbery"), true);
     elements.get("backToCategories").fire("click");
     categories[0].fire("click");
-    buttons = elements.get("activityChoices").children.filter(node => node.type === "button");
+    buttons = elements.get("activityChoices").children.filter(node => node.className === "activity");
     assert.equal(buttons.length, 10, "honest activities live in their own category");
-    assert.equal(buttons.some(b => b.children[0].children[0].textContent === "Highway robbery"), false,
+    assert.equal(buttons.some(b => b.children[0].children[0].children[0].textContent === "Highway robbery"), false,
       "outlaw tasks must not leak into Honest Work");
     assert.equal(buttons.every(b => !/\\d+\\s*(min|sec)|per cycle/i.test(
       b.children[0].children[1].textContent
     )), true, "activity buttons must not reveal cycle rates");
     assert.ok(buttons.every(b => b.children[0].children[2].textContent === "Skill level 1"));
-    const alchemy = buttons.find(b => b.children[0].children[0].textContent === "Potion making");
-    const cooking = buttons.find(b => b.children[0].children[0].textContent === "Cooking");
+    const alchemy = buttons.find(b => b.children[0].children[0].children[0].textContent === "Potion making");
+    const cooking = buttons.find(b => b.children[0].children[0].children[0].textContent === "Cooking");
     assert.ok(alchemy.children[0].children[1].textContent.includes("Potions (uses Herbs)"));
     assert.ok(cooking.children[0].children[1].textContent.includes("Meals (uses Fish)"));
     assert.equal(elements.get("character-heading").textContent, "Marauder");
@@ -101,17 +101,34 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(Object.hasOwn(state, "level"), false);
     assert.equal(Object.hasOwn(state, "totalXP"), false);
 
-    const mining = buttons.find(b => b.children[0].children[0].textContent === "Mining");
+    const mining = buttons.find(b => b.children[0].children[0].children[0].textContent === "Mining");
     assert.ok(mining);
     elements.get("backToCategories").fire("click");
     assert.equal(categoryScreen.hidden, false);
     categories[0].fire("click");
+    const miningStart = mining.children[0].children[0].children[1];
+    assert.equal(miningStart.textContent, "Start");
     mining.fire("click");
-    assert.equal(openActivities.hidden, false, "choosing work closes the picker");
+    assert.equal(JSON.parse(store.get(SAVE_KEY)).activity, null,
+      "clicking activity card alone never starts work");
+    miningStart.fire("click");
+    assert.equal(openActivities.hidden, false, "Start closes the picker");
     assert.equal(listScreen.hidden, true);
-    assert.equal(elements.get("skillTitle").textContent, "Mining");
+    assert.equal(elements.get("scene-heading").textContent, "Changing to Mining");
+    assert.equal(elements.get("transitionPhase").textContent, "Getting ready to start new activity");
+    assert.equal(elements.get("transitionStatus").hidden, false);
+    assert.equal(elements.get("activityProgress").hidden, true);
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.activity, null, "first Start must not instantly work");
+    assert.equal(state.transition.targetActivity, "mining");
+    now += 2 * 60_000;
+    tick();
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "mining");
+    assert.equal(state.transition, null);
+    assert.equal(elements.get("transitionStatus").hidden, true);
+    assert.equal(elements.get("activityProgress").hidden, false);
+    assert.equal(elements.get("skillTitle").textContent, "Mining");
     openActivities.fire("click");
     categories[0].fire("click");
     elements.get("backToCategories").fire("click");
@@ -174,16 +191,33 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
 
     openActivities.fire("click");
     categories[2].fire("click");
-    const meditation = elements.get("activityChoices").children.find(b => b.children[0]?.children[0]?.textContent === "Meditation");
-    meditation.fire("click");
+    const meditation = elements.get("activityChoices").children.find(b => b.children[0]?.children[0]?.children[0]?.textContent === "Meditation");
+    const meditationStart = meditation.children[0].children[0].children[1];
+    meditationStart.fire("click");
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.activity, "mining");
+    assert.equal(state.transition.targetActivity, "meditation");
+    assert.equal(elements.get("transitionPhase").textContent, "Finishing current activity");
+    const previousStone = state.items.stone;
+    now += ACTIVITIES.mining.durationMs;
+    tick();
+    state = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(state.items.stone, previousStone + 1, "finishing earns only the old completed cycle");
+    assert.equal(elements.get("transitionPhase").textContent, "Moving to new location");
+    now += 5 * 60_000;
+    tick();
+    assert.equal(elements.get("transitionPhase").textContent, "Getting ready to start new activity");
+    now += 2 * 60_000;
+    tick();
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "meditation");
-    const previousStone = state.items.stone;
+    assert.equal(state.transition, null);
+    const stoneAfterTravel = state.items.stone;
     now += ACTIVITIES.meditation.durationMs * 2;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
     assert.ok(state.skills.meditation.xp > 0);
-    assert.equal(state.items.stone, previousStone, "meditation does not create resources");
+    assert.equal(state.items.stone, stoneAfterTravel, "meditation does not create resources");
     assert.ok(elements.get("logList").children.some(x => x.textContent === "Practised meditation."));
     elements.get("nameInput").value = "The Black Rider";
     elements.get("saveName").fire("click");
