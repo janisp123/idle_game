@@ -1,9 +1,10 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, PRODUCTION_INPUTS, recipeOptions, newGame, readSave, settle,
-  enterGame, queueStartActivity, queueSetDuration, queueSwap, queueRemoveLast,
+  enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
+  queueSetDuration, queueSwap, queueRemoveLast,
   MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, xpForLevel
-} from "./engine.mjs?v=20261121-hourglasses1";
+} from "./engine.mjs?v=20261121-hourglass-fixes1";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -20,6 +21,7 @@ const ui = {
   transitionPhase: $("transitionPhase"), transitionProgress: $("transitionProgress"), transitionFill: $("transitionFill"),
   wagonQueue: $("wagonQueue"), wagonList: $("wagonList"),
   queuePlanner: $("queuePlanner"), queuePlannerTitle: $("queuePlannerTitle"),
+  queuePlannerHint: $("queuePlannerHint"),
   queueAmount: $("queueAmount"), queueUnit: $("queueUnit"),
   queueConfirm: $("queueConfirm"), queueCancel: $("queueCancel"),
   logList: $("logList"),
@@ -32,6 +34,8 @@ let lastSavedAt = 0;
 let storageWorks = true;
 let planningActivity = null;
 let lastWagonSignature = null;
+let currentScheduledMeter = null;
+let currentScheduledFill = null;
 
 const CATEGORY_LABELS = Object.freeze({
   craft: "Honest Work", outlaw: "Outlaw Path", training: "Training & Knowledge", leisure: "Tavern & Leisure", clan: "Clan Activities", other: "Other Activities"
@@ -87,10 +91,19 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   const startButton = document.createElement("button");
   startButton.type = "button";
   startButton.className = "activity-start";
-  startButton.textContent = "Start";
-  startButton.setAttribute("aria-label", "Start " + task.title);
-  startButton.addEventListener("click", () => beginActivity(id));
-  titleRow.append(name, startButton);
+  startButton.textContent = "Start now";
+  startButton.setAttribute("aria-label", "Start " + task.title + " now");
+  startButton.addEventListener("click", () => startActivityNow(id));
+  const queueButton = document.createElement("button");
+  queueButton.type = "button";
+  queueButton.className = "activity-start activity-queue-button";
+  queueButton.textContent = "Schedule";
+  queueButton.setAttribute("aria-label", "Schedule " + task.title + " for a chosen duration");
+  queueButton.addEventListener("click", () => planActivity(id));
+  const actions = document.createElement("span");
+  actions.className = "activity-actions";
+  actions.append(startButton, queueButton);
+  titleRow.append(name, actions);
   const detail = document.createElement("small");
   detail.textContent = task.itemLabel;
   const rank = document.createElement("small");
@@ -100,7 +113,7 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   activityRewardLabels.set(id, detail);
   activityLevelLabels.set(id, rank);
   categoryActivities.get(task.category in CATEGORY_LABELS ? task.category : "other").push(row);
-  activityButtons.set(id, { row, startButton });
+  activityButtons.set(id, { row, startButton, queueButton });
 }
 for (const item of ITEM_KEYS) {
   const row = document.createElement("div");
@@ -196,6 +209,8 @@ function renderWagons() {
   const signature = JSON.stringify([wagons, state.transition?.targetActivity, state.activity]);
   if (signature === lastWagonSignature) return;
   lastWagonSignature = signature;
+  currentScheduledMeter = null;
+  currentScheduledFill = null;
   // Unlike the previous scrolling wagon strip, every hourglass fits in view.
   ui.wagonList.style.gridTemplateColumns = "repeat(" + Math.max(1, wagons.length) +
     ", minmax(0, 1fr))";
@@ -222,6 +237,24 @@ function renderWagons() {
       : i === wagons.length - 1 ? "Final destination" : "Next activity";
     card.append(picture, label, position);
 
+    // Only the running finite activity needs an in-card progress bar.
+    // Scheduled future slots show their chosen duration; Forever has no bar.
+    if (i === 0 && wagon.plannedMs !== null) {
+      const meter = document.createElement("div");
+      meter.className = "hourglass-schedule-progress";
+      meter.setAttribute("role", "progressbar");
+      meter.setAttribute("aria-label", ACTIVITIES[wagon.activity].title + " work period progress");
+      meter.setAttribute("aria-valuemin", "0");
+      meter.setAttribute("aria-valuemax", "100");
+      meter.setAttribute("aria-valuenow", "0");
+      const fill = document.createElement("span");
+      fill.className = "hourglass-schedule-progress-fill";
+      meter.append(fill);
+      card.append(meter);
+      currentScheduledMeter = meter;
+      currentScheduledFill = fill;
+    }
+
     if (i === wagons.length - 1) {
       const forever = document.createElement("strong");
       forever.className = "wagon-forever";
@@ -231,7 +264,7 @@ function renderWagons() {
       const duration = document.createElement("div");
       duration.className = "wagon-duration";
       const heading = document.createElement("span");
-      heading.textContent = "Do it for";
+      heading.textContent = "Scheduled for";
       const amount = document.createElement("select");
       amount.setAttribute("aria-label", "Duration for " + ACTIVITIES[wagon.activity].title);
       const unit = document.createElement("select");
@@ -308,8 +341,14 @@ ui.queueConfirm.addEventListener("click", () => {
   const ms = Number(ui.queueAmount.value) * durationUnitMs(ui.queueUnit.value);
   const task = planningActivity;
   hideQueuePlanner();
-  applyQueueChange(queueStartActivity(state, task, ms, Date.now()), "Added " +
-    ACTIVITIES[task].title.toLowerCase() + " to your route.");
+  const startsImmediately = state.wagons.length === 1;
+  applyQueueChange(queueInsertTimedActivity(state, task, ms, Date.now()),
+    startsImmediately
+      ? "Starting " + ACTIVITIES[task].title.toLowerCase() +
+        " for the selected period, then returning to " +
+        ACTIVITIES[state.wagons.at(-1).activity].title.toLowerCase() + "."
+      : "Scheduled " + ACTIVITIES[task].title.toLowerCase() +
+        " for the selected period.");
 });
 
 function render() {
@@ -331,7 +370,14 @@ function render() {
   emptyInventory.hidden = ITEM_KEYS.some(key => state.items[key] > 0);
   const transition = state.transition;
   renderWagons();
-  for (const [id, { row, startButton }] of activityButtons) {
+  if (currentScheduledMeter && currentScheduledFill && state.wagons[0]?.plannedMs) {
+    const progress = Math.max(0, Math.min(100,
+      100 * state.productiveElapsedMs / state.wagons[0].plannedMs));
+    currentScheduledFill.style.width = progress.toFixed(2) + "%";
+    currentScheduledMeter.setAttribute("aria-valuenow", String(Math.round(progress)));
+    currentScheduledMeter.hidden = Boolean(state.transition);
+  }
+  for (const [id, { row, startButton, queueButton }] of activityButtons) {
     const skill = state.skills[id];
     activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level);
     const available = lootChances(id, skill.level);
@@ -346,13 +392,17 @@ function render() {
     row.classList.toggle("pending", destination);
     const queuedIndex = state.wagons.findIndex(w => w.activity === id);
     const queueFull = state.wagons.length >= MAX_WAGONS;
-    startButton.disabled = queuedIndex !== -1 || queueFull;
-    startButton.textContent = destination ? "Changing" : queuedIndex === 0 ? "Working" :
-      queuedIndex > 0 ? "Queued" : queueFull ? "Full" : "Start";
-    startButton.setAttribute("aria-label", destination ? "Changing to " + ACTIVITIES[id].title :
-      queuedIndex === 0 ? "Current wagon: " + ACTIVITIES[id].title :
-      queuedIndex > 0 ? "Already queued: " + ACTIVITIES[id].title :
-      queueFull ? "Three wagons already queued" : "Start " + ACTIVITIES[id].title);
+    startButton.disabled = queuedIndex === 0;
+    startButton.textContent = destination ? "Changing" : queuedIndex === 0
+      ? "Current" : "Start now";
+    startButton.setAttribute("aria-label", queuedIndex === 0
+      ? "Current route destination: " + ACTIVITIES[id].title
+      : "Start " + ACTIVITIES[id].title + " now, replacing the current route");
+    queueButton.disabled = !state.wagons.length || queuedIndex !== -1 || queueFull;
+    queueButton.textContent = queuedIndex > 0 ? "Queued" : queueFull ? "Full" : "Schedule";
+    queueButton.setAttribute("aria-label", queueButton.disabled
+      ? "Cannot schedule " + ACTIVITIES[id].title
+      : "Schedule " + ACTIVITIES[id].title + " for a selected duration");
   }
 
   const selectedSkill = state.activity ? state.skills[state.activity] : null;
@@ -455,22 +505,38 @@ function returnToGame() {
   render();
 }
 
-function beginActivity(kind) {
-  if (state.wagons.some(w => w.activity === kind) || state.wagons.length >= MAX_WAGONS) return;
+function startActivityNow(kind) {
+  const alreadyCurrent = state.wagons[0]?.activity === kind;
+  if (alreadyCurrent) return;
+  // A deliberate manual override can clear *uncompleted plans* but never
+  // inventory/XP. Require confirmation if any future routes are discarded.
+  if (state.wagons.length > 1 &&
+      !window.confirm("Start " + ACTIVITIES[kind].title +
+        " now? This will replace your remaining scheduled route. Earned items and XP stay.")) return;
+  hideQueuePlanner();
   showActivityScreen("root", null);
-  if (!state.wagons.length) {
-    hideQueuePlanner();
-    applyQueueChange(queueStartActivity(state, kind, null, Date.now()),
-      "Preparing to begin " + ACTIVITIES[kind].title.toLowerCase() + ".");
-    return;
-  }
-  // The formerly final Forever hourglass must get an explicit duration.
+  const result = state.wagons.length
+    ? requestActivityChange(state, kind, Date.now())
+    : queueStartActivity(state, kind, null, Date.now());
+  applyQueueChange(result, "Changing to " + ACTIVITIES[kind].title.toLowerCase() + " now.");
+}
+
+function planActivity(kind) {
+  if (!state.wagons.length || state.wagons.some(w => w.activity === kind) ||
+      state.wagons.length >= MAX_WAGONS) return;
+  showActivityScreen("root", null);
   planningActivity = kind;
   ui.queueAmount.value = "1";
   ui.queueUnit.value = TIMING_PROFILE === "alpha" ? "minutes" : "hours";
-  const previous = state.wagons.at(-1).activity;
-  ui.queuePlannerTitle.textContent = "Before adding " + ACTIVITIES[kind].title +
-    ", how long should " + ACTIVITIES[previous].title + " work?";
+  const previous = ACTIVITIES[state.wagons.at(-1).activity].title;
+  ui.queuePlannerTitle.textContent = "How long should " + ACTIVITIES[kind].title + " run?";
+  ui.queuePlannerHint.textContent = state.wagons.length === 1
+    ? ACTIVITIES[kind].title + " starts after the current work cycle and travel. " +
+      previous + " resumes Forever afterwards."
+    : ACTIVITIES[kind].title + " runs after " +
+      ACTIVITIES[state.wagons[0].activity].title +
+      " finishes. " + previous + " remains Forever.";
+  ui.queueConfirm.textContent = state.wagons.length === 1 ? "Start for this time" : "Add timed task";
   ui.queuePlanner.hidden = false;
 }
 
