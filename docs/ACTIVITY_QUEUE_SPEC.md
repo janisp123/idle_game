@@ -1,12 +1,12 @@
 # Three-wagon activity queue — final wagon forever (GAME-004)
 
-**Status:** Owner-approved design and implementation guidance, **not implemented in the playable game**.
+**Status:** Implemented and deployed in [engine PR #64](https://github.com/janisp123/idle_game/pull/64) and [wagon UI PR #65](https://github.com/janisp123/idle_game/pull/65), with automated engine/UI tests and public HTML readback; hands-on device QA remains useful.
 **Updated:** 2026-11-21 by chat. **Supersedes** the earlier five-slot/looping queue designs.
 **Related:** [ACTIVITY_SWITCH_SPEC.md](ACTIVITY_SWITCH_SPEC.md), [DECISIONS.md](DECISIONS.md) QUEUE-002 / SWITCH-TIMING-001 / ACT-SWITCH-001 / OFF-001 / ZONE-001 / UI-TIME-001, and [TD_LIST.md](TD_LIST.md) GAME-004.
 
 ## The three small old wagons (owner-approved)
 
-The queue is pictured as **one to three compact, connected, old wooden wagons in the established grimdark style**, **above the current activity panel**. Their sequence conveys the future route, with readable titles and touch-friendly reorder controls on mobile. Reuse existing painted/worn materials; actual artwork and CSS still need implementation.
+The queue is pictured as **one to three compact, connected, old wooden wagons in the established grimdark style**, **above the current activity panel**. Their sequence conveys the future route, with readable titles and touch-friendly reorder controls on mobile. The live implementation uses lightweight CSS-drawn wooden carts and wheels; no extra image downloads or heavy animations are required.
 
 - **Wagon 1** = the active work / immediate destination when already transitioning. Clearly show **Changing to …** while travelling so the game never falsely claims the new job is already producing.
 - **Wagon 2** = the next job, if present.
@@ -62,7 +62,7 @@ A dormant character is **not** a running process. Save the queue, selected index
 
 Do not pre-sum five or three independent loot totals without respecting order: one wagon can gather ingredients that a subsequent wagon consumes. No background scheduler, server cron, or daily-login rule is necessary for this local-save prototype.
 
-## Suggested durable state (illustrative, not an implemented save format)
+## Implemented durable state (illustrative values; existing save V3)
 
 ```js
 {
@@ -71,21 +71,23 @@ Do not pre-sum five or three independent loot totals without respecting order: o
     { activity: "cooking", plannedMs: 24 * 60 * 60_000 },
     { activity: "hunting", plannedMs: null } // last = Forever
   ],
-  activeWagon: 0,
+  activity: "mining", // previous work remains here until travel/preparation finish
+  progressMs: 0,
   productiveElapsedMs: 0,
-  transition: null // or phase + target + elapsed phase milliseconds
+  transition: null // or { targetActivity, phase, phaseProgressMs }
+  // name, skills, items, protection, timingProfile and settledAtMs also persist
 }
 ```
 
 - 1–3 known activities only, **exactly one final Forever**. Finite durations are integers 1–8 hours or 1–8 days. Persist the current work-cycle fraction, phase progress, timestamps, the current zone/old activity when switching, and the saved effective build.
-- Check serialization, migration from older saves (no loss of existing inventory/skill XP/name/work/protection), malformed or adversarial queue data, safe integer bounds, clock rollback and multi-tab update races.
+- Serialization, V1–V3 old-save migration (without losing inventory, name, XP and protection), malformed wagon rejection, offline clock rollback and idempotency are covered by engine and browser tests. **Multi-tab concurrency races are still a general browser-local-save limitation** requiring separate hardening before any competitive server release.
 - If reordering changes the first wagon, resolve old work before recording the new immediate destination; do not magically transfer old cycle progress to a different activity.
 
-## Small implementation patches (future, **not yet authorized by these docs alone**)
+## Completed implementation and release evidence
 
-1. **State and tests:** 1–3 wagons, finite/Forever invariants, migration, duration-from-edit semantics, slot reorder validation and clear pending-target semantics. No UI or fake rewards.
-2. **Engine and tests:** finish exactly one current cycle, 1/5-minute movement, 2-minute preparation, reset movement on first-wagon swaps, offline boundary segmentation and long-period idempotency.
-3. **UI and tests:** aged wagon strip above task panel, Start, Do it for, reorder controls, clear active/destination state, transition labels and progress bar, phone layout, accessibility, no live clocks.
-4. **Release checks:** normal browser-game CI, 20- and 100-year settlements, save migration/backward time/double-settlement, skill freeze, material dependencies, cross-zone and same-zone swaps, first-ever Start and in-progress transition reorders. Verify the deployed Pages version **separately** from passing PR CI.
+1. **State, arithmetic and tests:** [PR #64](https://github.com/janisp123/idle_game/pull/64) implemented one to three persistent wagons, explicit 1–8-hour/day finite slots and Forever last, duration editing from the moment selected, first-wagon swaps and free future swaps, safe removal of a *future* final wagon and old-save migration. Offline progression processes at most a handful of scheduled segments, using previously gathered resources chronologically while keeping effective skill levels frozen until return.
+2. **Wagon interface and browser tests:** [PR #65](https://github.com/janisp123/idle_game/pull/65) added the connected timber-and-wheel wagon strip above the active task, accessible touch-friendly arrow swaps, explicit duration planner, finite-slot duration editors, clear Forever status, and prevention of a fourth wagon. A Start button adds a future job through the visible duration prompt. The first wagon's status distinguishes changing from productive work.
+3. **Verification:** Both PRs passed final-head game/engine/browser tests and Project Protocol Preflight. Main Pages [run 44905877943](https://github.com/janisp123/idle_game/actions/runs/44905877943) successfully published the website. Public `/play/` readback returned HTTP 200 with script `20261121-three-wagons1`, `wagonQueue` and `queuePlanner`. This is **deployment confirmation, not a claim of hands-on mobile/device visual testing**.
+4. **Temporary alpha speeds:** ALPHA-TIME-001 currently uses 10-second full work cycles, 5-second movement and 5-second preparation (first Start: 10-second prep). Configured finite wagon periods remain **1–8 hours/days** and are *not* silently shortened. The original slower normal profile remains stored in the engine for restoration before real-progress launch.
 
-The existing play page now supports **manual Start and three-phase switching** after [PR #60](https://github.com/janisp123/idle_game/pull/60). The **three-wagon queue** (planned durations, reorder UI, forever-final scheduling) remains a **completed design decision, not yet running gameplay**.
+**Status:** The approved GAME-004 three-wagon queue is live. Future adjustments should use small, newly approved backlog tasks and preserve the no-offline-cap rule.
