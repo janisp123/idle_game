@@ -1,45 +1,27 @@
 # Current working checkpoint
 
-## In review — forty skills and skull crest (2026-11-21)
+**Verified 2026-11-21 after PR #52.** The playable game is deployed at https://janisp123.github.io/idle_game/play/ . This is a browser-local prototype, not a released server-backed RPG.
 
-- Owner requested ten training/knowledge activities, ten tavern/social activities, and replacement of the top-left cross.
-- Branch `feat/training-tavern-activities-20261121` adds 20 independently leveled XP-only activities (10 per new category) on top of the existing 20; no global character level, no forced universal specialization, no new loot. All use frozen effective levels during uncapped offline settlement.
-- Mobile activity categories now include Training & Knowledge and Tavern & Leisure. Top-left cross becomes skull crest. New categories currently reuse existing paintings instead of claiming 20 original scenes.
-- Existing V2 saves migrate missing skill keys. Engine/browser tests updated for 40 skills, XP-only inventory safety, navigation and decades offline.
-- Pending final-head CI and conflict review before automatic merge.
+## Last confirmed merge, CI and deployment
 
+- **Repository:** `janisp123/idle_game`, default branch `main`. Last verified playable main revision: `e09a30b84ae77104832f298e953ae0c503db3e32` ([PR #52](https://github.com/janisp123/idle_game/pull/52)).
+- **Live release:** main Pages [run 44894015921](https://github.com/janisp123/idle_game/actions/runs/44894015921) concluded successfully on 2026-11-21. GitHub reported successful validation, artifact upload, 20-second indexing grace period and deployment.
+- **Public readback:** the live `/play/` page returned HTTP 200 with the `20261121-forty-activities1` app script, category menu markup and skull crest. This confirms the deployed HTML; it is not comprehensive gameplay or cross-device testing.
+- **Deployment incident:** [PR #52](https://github.com/janisp123/idle_game/pull/52) mitigated a zero-artifact lookup after a successful upload by inserting a short delay. The new run passed; the underlying intermittent GitHub service cause remains unproven. Do not rerun a failed upload/deploy in the same workflow run if the original artifact exists; create a fresh run instead.
 
-## In review — chronicle-only return reporting (2026-11-21)
+## Verified merged features
 
-- Owner explicitly requested removal of the redundant "Welcome back" report and unnecessary pop-ups because return loot already appears in the Chronicle.
-- This branch removes the entire return report panel and dismissal button. Returning after offline work records the short loot summary only in the Chronicle, retaining existing offline settlement and saves.
-- Website structure check and browser smoke test updated to enforce no popup and no duplicate welcome-back message.
-- Next: verify final PR-head checks, merge under AUTO-MERGE-001, verify main and Pages.
+- **UI-002:** [PR #46](https://github.com/janisp123/idle_game/pull/46) merged a nested Activities picker with Honest Work, Outlaw Path, Clan Activities and Other Activities, Back navigation and truthful empty states. [PR #48](https://github.com/janisp123/idle_game/pull/48) added Training & Knowledge and Tavern & Leisure categories.
+- **Return reporting:** [PR #47](https://github.com/janisp123/idle_game/pull/47) removed the redundant Welcome back popup; offline loot appears in the Chronicle.
+- **GAME-008:** [PR #48](https://github.com/janisp123/idle_game/pull/48) merged 20 extra XP-only activities and the skull crest. There are now **40 independently leveled skills** with no global character level. The 20 new training/leisure activities temporarily reuse earlier paintings; 20 distinct new artworks have **not** been delivered.
+- **GAME-006 partial:** [PR #43](https://github.com/janisp123/idle_game/pull/43) added probabilistic skill-gated raw loot; [PR #44](https://github.com/janisp123/idle_game/pull/44) added inventory-limited protected-ore smelting. Higher-tier hunting spoils remain **loot, not simulated combat**.
+- **Save/offline boundary:** Browser-local saves only; inventory persists locally; old save skill fields migrate. Activity settlement is uncapped by absence duration and honors OFF-001: levels earned offline affect work/combat only after return. No accounts, server state, actual combat, health/death or multiplayer.
 
+## Next approved work and boundaries
 
-## In review — UI-002 mobile activity categories (2026-11-21)
+1. **GAME-006 remains PARTIAL:** Make Alchemy, Carpentry, Masonry and Cooking consume existing inventory ingredients instead of generating free goods; preserve protections, frozen effective skill and bounded multi-year offline settlement. Add tests. Actual combat/encounter risk and loot-rate balancing are separate portions; do not imply they exist.
+2. **GAME-004 TODO / deferred:** Five-minute zone travel and five-task repeating queue, following the existing task backlog and explicit owner sequencing.
+3. **GAME-009 BLOCKED:** Human/Undead reversible cumulative ritual is design-only pending exact costs, effects, persistence and other choices.
+4. Keep documentation, user-facing UI and release notes consistent with actual features. Do not equate a merged PR or a passing CI run with a verified public deployment.
 
-- Owner requested a short three-step picker: Activities → Honest Work / Outlaw Path / Clan Activities / Other Activities → matching activity. Back is always available at both nested levels.
-- Implemented in feature branch `feat/mobile-activity-category-navigation-20261121`: one compact entrypoint, 4 categories, 10 honest and 10 outlaw buttons, empty future categories explicitly labeled rather than inventing activities. Selecting an activity closes the picker; navigating Back does not alter current work, inventory, XP or save.
-- CSS enforces hidden screens, mobile-friendly full-width buttons and touch targets; smoke tests cover categories, empty states, navigation and uninterrupted work.
-- Pending PR CI, owner-approved AUTO-MERGE-001 readiness and main Pages verification.
-
-
-**Latest verified game deployment — 2026-11-21.** Main commit `7f2c2efa1cb505f076831d0df708560c2844ad74` merged PR #44 after successful final-head checks. Main GitHub Pages workflow run `44885082719` completed **successfully**, including Validate static site and Publish to GitHub Pages jobs. Public game: https://janisp123.github.io/idle_game/play/
-
-## Merged game functionality
-
-- **Player:** editable name, no overall character level; 20 activity-specific skill XP/levels. New skill levels activate on return only, never in the middle of an absence (OFF-001).
-- **Activities:** 10 honest and 10 outlaw activities, each with an original dark-fantasy WebP illustration and adjustable complete work-cycle duration. No visible timers, rates, elapsed reports or time-worked stats.
-- **Raw resources:** Hunting, Mining, Gathering, Woodcutting and Fishing use level-gated weighted loot tables in `site/play/loot.mjs`, with rare resources stored separately and potential rewards shown when the skill unlocks them. Bounded-cost offline settlement supports decades-long absences without per-action replay; effective skill remains frozen.
-- **Smelting:** `site/play/production.mjs` automatically selects unlocked copper/iron/silver recipes using real ore inventory, consuming one ore per finished ingot. Optional "Protected" controls exclude reserved raw ores. No materials grants no output or skill XP. Remaining production professions still have placeholder material-free output and must be corrected before a full crafting economy.
-- **Save migration:** Browser-local storage key remains the same and V1→V2 migration retains resources, character name, partial progress and unattributed historical global XP. New resource/protection fields default safely when missing.
-- **Validation:** `tools/test_game_engine.mjs`, `tools/test_game_ui.mjs` and `tools/check_pages_site.py` run in the website workflow alongside module syntax checks. PR #43/#44 checks passed; both features are merged and latest main Pages deployment passed. Tests are not full gameplay/security validation.
-
-## Next approved tasks
-
-- **GAME-006 (partial):** Extend real ingredient-consuming recipes to Alchemy, Carpentry, Masonry and Cooking; then develop actual combat and difficulty gating before portraying higher-tier hunting spoils as simulated dangerous fights. Provisional loot weights need balance calibration.
-- **GAME-004:** Later implement five-minute zone travel and five-task looping queue with no offline time cap.
-- **AUTO-MERGE-001:** Already-agreed, passing, reviewed and non-conflicting PRs may merge without a separate "M"; stop for significant risks, design choices or failed checks. Bare "Continue" alone is still read-only.
-
-**Project preflight:** Fetch current remote `main:docs/TD_LIST.md` first, then `AGENTS.md`, `docs/AGENT_PROTOCOL.md` and `docs/DECISIONS.md`; never trust this checkpoint over remote state.
+**Project preflight:** Always fetch current remote `main:docs/TD_LIST.md` first, then `AGENTS.md`, `docs/AGENT_PROTOCOL.md`, `docs/DECISIONS.md`, recent main and open PRs. This checkpoint is a historical verified snapshot, not a substitute.

@@ -25,25 +25,6 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** chat (partial work in PRs #43 and #44; remaining scope not yet implemented).
 
-## UI-002 — Compact mobile activity category navigation
-- **Goal:** Replace the long 20-task selector with Activities → Honest Work / Outlaw Path / Clan Activities / Other Activities → activity selection.
-- **Acceptance criteria:** first screen stays compact; category buttons show only matching tasks; Clan and Other remain honest empty placeholders until implemented; visible Back controls work at each level without changing the ongoing task; selecting a task starts it and collapses the picker; mobile portrait touch targets and keyboard focus are usable; no save format change; browser smoke tests cover navigation.
-- **Status:** IN_REVIEW (owner-approved implementation, pending PR checks).
-- **Dependencies:** Existing 20-activity UI.
-- **Added by:** chat
-- **Requested by:** Owner (2026-11-21).
-- **Implemented by:** Not yet (pending verified merge).
-
-## GAME-008 — Training and tavern activities; forty independent skills
-- **Goal:** Add ten personal training/knowledge activities and ten social/leisure activities without forcing mastery of every skill.
-- **Acceptance criteria:** Forty independent skill tracks, no global character level or competitive ranking; ten Training & Knowledge and ten Tavern & Leisure actions, selectable in the nested mobile menu; these actions award skill XP only and never fabricate physical inventory; offline progression remains unlimited with frozen effective levels until return; old saves gain missing skills safely; no player-facing timers; top-left cross replaced by a grimdark skull crest.
-- **Status:** IN_REVIEW (owner-approved feature branch; PR checks pending).
-- **Dependencies:** GAME-005, UI-002, OFF-001.
-- **Added by:** chat
-- **Requested by:** Owner (2026-11-21).
-- **Implemented by:** Not yet (pending verified merge).
-- **Art note:** Existing scene paintings reused for new training/leisure tasks temporarily; dedicated 20 illustrations not yet created.
-
 ## GAME-009 — Reversible race transformation design and implementation
 - **Goal:** Eventually support one character beginning Human, able to become Undead and return to Human via resource-consuming rituals; no permanent race lock.
 - **Acceptance criteria:** Race is distinct from class/profession and independent skills; ritual requires resources and roughly six cumulative days of actual ritual work (provisional), split freely across sessions; progress is saved indefinitely through breaks and unrelated activities; repeat transformations are possible, including reversal; no alts or permanently inaccessible skills; account/change-limit implications, exact costs, race effects, and offline ritual progression must be designed and approved before implementation.
