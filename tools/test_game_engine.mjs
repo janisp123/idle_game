@@ -24,7 +24,7 @@ test("only individual activities have levels; character has a name but no level"
   for (const id of SKILL_IDS) assert.deepEqual(state.skills[id], { level: 1, xp: 0 });
 });
 
-test("ten activities retain independently configurable full work-cycle times", () => {
+test("twenty activities retain independently configurable full work-cycle times", () => {
   assert.ok(Object.keys(ACTIVITIES).length >= 10);
   for (const activity of Object.values(ACTIVITIES)) {
     assert.ok(activity.durationMs >= 8 * BASE_CYCLE_MS);
@@ -189,4 +189,61 @@ test("one-day testing shortcut internally respects frozen skill levels", () => {
   assert.equal(out.report.completed, Math.floor(86400000 / ACTIVITIES.gathering.durationMs));
   assert.equal(out.state.skills.gathering.level, levelFromXP(out.state.skills.gathering.xp));
   assert.deepEqual(readSave(JSON.stringify(out.state)), out.state);
+});
+
+test("ten outlaw skills are independent, with their own spoils and long work cycles", () => {
+  const outlaws = Object.entries(ACTIVITIES).filter(([, a]) => a.category === "outlaw");
+  const honest = Object.entries(ACTIVITIES).filter(([, a]) => a.category === "craft");
+  assert.equal(outlaws.length, 10);
+  assert.equal(honest.length, 10);
+  assert.equal(SKILL_IDS.length, 20);
+  assert.equal(ITEM_KEYS.length, 20);
+  for (const [id, task] of outlaws) {
+    assert.ok(task.durationMs >= 25 * BASE_CYCLE_MS, id);
+    const selected = choose(newGame(0), id, 0).state;
+    const result = finish(selected, task.durationMs);
+    assert.equal(result.state.items[task.item], 1, id);
+    assert.equal(result.state.skills[id].xp, task.xp, id);
+    assert.equal(result.state.skills[id].level, 1, "no offline/active auto-levels");
+    assert.equal(result.state.skills.mining.xp, 0, "outlaw work does not increase mining skill");
+  }
+});
+
+test("old 10-skill saves load all ten new outlaw skills and resources safely", () => {
+  const old = newGame(0);
+  for (const [id, task] of Object.entries(ACTIVITIES)) {
+    if (task.category === "outlaw") {
+      delete old.skills[id];
+      delete old.items[task.item];
+    }
+  }
+  old.name = "Thief";
+  old.items.stone = 314;
+  old.skills.mining = { xp: 55, level: 2 };
+  const loaded = readSave(JSON.stringify(old));
+  assert.ok(loaded);
+  assert.equal(loaded.name, "Thief");
+  assert.equal(loaded.items.stone, 314);
+  assert.equal(loaded.skills.mining.xp, 55);
+  assert.equal(loaded.skills.mining.level, 2);
+  assert.equal(loaded.items.stolen_purse, 0);
+  assert.deepEqual(loaded.skills.highway_robbery, { xp: 0, level: 1 });
+  assert.equal(Object.keys(loaded.items).length, 20);
+  assert.equal(Object.keys(loaded.skills).length, 20);
+});
+
+test("outlaw offline work has no time cap and only activates skills on return", () => {
+  const start = 1_600_000_000_000;
+  const years = 20 * YEAR;
+  const task = ACTIVITIES.highway_robbery;
+  const away = choose(newGame(start), "highway_robbery", start).state;
+  const result = finish(away, start + years);
+  const amount = Math.floor(years / task.durationMs);
+  assert.equal(result.report.completed, amount);
+  assert.equal(result.state.items.stolen_purse, amount);
+  assert.equal(result.state.skills.highway_robbery.xp, amount * task.xp);
+  assert.equal(result.state.skills.highway_robbery.level, 1);
+  const home = enter(away, start + years);
+  assert.equal(home.state.skills.highway_robbery.level, levelFromXP(amount * task.xp));
+  assert.equal(home.state.skills.mining.level, 1);
 });
