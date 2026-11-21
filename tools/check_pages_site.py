@@ -132,7 +132,7 @@ def check():
 
     if play_entry.is_file():
         play_root = SITE / "play"
-        required_game = ("index.html", "app.mjs", "engine.mjs", "loot.mjs", "game.css", "iron-ui.css",
+        required_game = ("index.html", "app.mjs", "engine.mjs", "loot.mjs", "production.mjs", "game.css", "iron-ui.css",
                          "assets/hunting.webp", "assets/mining.webp")
         for name in required_game:
             asset = play_root / name
