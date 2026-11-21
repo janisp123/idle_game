@@ -24,6 +24,96 @@ test("only individual activities have levels; character has a name but no level"
   for (const id of SKILL_IDS) assert.deepEqual(state.skills[id], { level: 1, xp: 0 });
 });
 
+test("mastery offers collect every possible skill spoil, including rare and protected stock", () => {
+  const start = newGame(0);
+  start.skills.mining = {level:1,xp:xpToNextLevel(1)};
+  start.skills.hunting = {level:1,xp:xpToNextLevel(1)};
+  start.skills.meditation = {level:1,xp:xpToNextLevel(1)};
+  start.items.stone = 1; // the smallest sacrifice is enough
+  start.items.copper_ore = 31;
+  start.items.iron_ore = 19;
+  start.items.silver_ore = 5;
+  start.items.log = 40; // unrelated resources must survive
+  start.protectedItems = ["stone", "silver_ore", "log"];
+  assert.deepEqual(skillSpoils("mining"), ["stone","copper_ore","iron_ore","silver_ore"]);
+  assert.deepEqual(skillSpoils("meditation"), []);
+  assert.deepEqual(skillSpoils("cooking"), ["meal"]);
+  const offer = skillMasterOffer(start);
+  assert.deepEqual(offer.ready, ["mining","meditation"],
+    "no hunting spoils means that skill cannot be trained yet");
+  assert.deepEqual(offer.blocked, ["hunting"]);
+  assert.deepEqual(offer.tribute, {
+    stone:1,copper_ore:31,iron_ore:19,silver_ore:5
+  });
+  const out = learnFromMaster(start, 0);
+  for (const key of Object.keys(offer.tribute)) assert.equal(out.state.items[key], 0, key);
+  assert.equal(out.state.items.log, 40);
+  assert.deepEqual(out.state.protectedItems, ["stone", "silver_ore", "log"]);
+  assert.deepEqual(out.state.skills.mining, {level:2,xp:0});
+  assert.deepEqual(out.state.skills.meditation, {level:2,xp:0});
+  assert.deepEqual(out.state.skills.hunting, {level:1,xp:40});
+  assert.deepEqual(readSave(JSON.stringify(out.state)), out.state);
+  assert.throws(() => learnFromMaster(out.state, 0), RangeError,
+    "one visit can never grant two levels for a single XP bar");
+});
+
+test("spending spoils before the Master is strategic, but at least one remains necessary", () => {
+  const start = newGame(0);
+  start.skills.mining.xp = xpToNextLevel(1);
+  assert.deepEqual(skillMasterOffer(start).ready, []);
+  assert.deepEqual(skillMasterOffer(start).blocked, ["mining"]);
+  assert.throws(() => learnFromMaster(start, 0), RangeError);
+  start.items.stone = 1;
+  start.items.copper_ore = 0;
+  assert.deepEqual(skillMasterOffer(start).ready, ["mining"]);
+  const out = learnFromMaster(start, 0);
+  assert.equal(out.state.items.stone, 0);
+  assert.equal(out.state.skills.mining.level, 2);
+  assert.equal(out.state.skills.mining.xp, 0);
+  assert.deepEqual(skillMasterOffer(out.state).ready, []);
+});
+
+test("V3 lifetime XP migrates to a single current-level bar without inventory or queue loss", () => {
+  const old = newGame(250000);
+  old.version = 3;
+  old.name = "The Ancient";
+  old.activity = "mining";
+  old.wagons = [{activity:"mining",plannedMs:null}];
+  old.items.stone = 777;
+  old.items.copper_ore = 10;
+  old.protectedItems = ["stone"];
+  old.skills.mining = {level:25,xp:xpForLevel(100)};
+  old.skills.hunting = {level:4,xp:xpForLevel(4)+11};
+  const migrated = readSave(JSON.stringify(old));
+  assert.ok(migrated);
+  assert.equal(migrated.version, GAME_VERSION);
+  assert.equal(migrated.timingProfile, old.timingProfile);
+  assert.equal(migrated.skills.mining.level, 25);
+  assert.equal(migrated.skills.mining.xp, xpToNextLevel(25));
+  assert.deepEqual(migrated.skills.hunting, {level:4,xp:11});
+  assert.deepEqual(migrated.wagons, old.wagons);
+  assert.equal(migrated.items.stone, 777);
+  assert.equal(migrated.items.copper_ore, 10);
+  assert.deepEqual(migrated.protectedItems, ["stone"]);
+  assert.deepEqual(readSave(migrated), migrated);
+});
+
+test("Master's new level improves raw-resource yield and XP efficiency", () => {
+  const start = newGame(0);
+  start.skills.mining = {level:1,xp:40};
+  start.items.stone = 1;
+  const taught = learnFromMaster(start, 0).state;
+  const before = finish(choose(newGame(0), "mining", 0).state,
+    100 * ACTIVITIES.mining.durationMs);
+  const after = finish(choose(taught, "mining", 0).state,
+    100 * ACTIVITIES.mining.durationMs);
+  assert.ok(after.report.gainedItems > before.report.gainedItems,
+    "level 2 improves raw output over an equal number of actions");
+  assert.equal(after.state.skills.mining.level, 2);
+  assert.equal(after.state.skills.mining.xp, xpToNextLevel(2));
+  assert.equal(before.state.skills.mining.xp, xpToNextLevel(1));
+});
+
 test("alpha profile gives every complete work cycle ten seconds without losing normal balance data", () => {
   assert.equal(TIMING_PROFILE, "alpha");
   assert.ok(Object.keys(ACTIVITIES).length >= 10);
