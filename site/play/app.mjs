@@ -7,6 +7,10 @@ const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
   resourceList: $("resourceList"), choices: $("activityChoices"),
+  openActivities: $("openActivities"), categories: $("activityCategories"),
+  categoryChoices: $("activityCategoryChoices"), listScreen: $("activityListScreen"),
+  backToActivities: $("backToActivities"), backToCategories: $("backToCategories"),
+  categoryTitle: $("activityCategoryTitle"),
   skillTitle: $("skillTitle"), skillLevel: $("skillLevel"), skillXp: $("skillXp"), skillFill: $("skillFill"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
   heading: $("scene-heading"), description: $("activityDescription"), actionFill: $("actionFill"),
@@ -20,21 +24,48 @@ let state;
 let lastSavedAt = 0;
 let storageWorks = true;
 
+const CATEGORY_LABELS = Object.freeze({
+  craft: "Honest Work", outlaw: "Outlaw Path", clan: "Clan Activities", other: "Other Activities"
+});
+const categoryActivities = new Map(Object.keys(CATEGORY_LABELS).map(id => [id, []]));
+let selectedCategory = null;
+
+function showActivityScreen(screen, category = selectedCategory) {
+  selectedCategory = category;
+  ui.categories.hidden = screen !== "categories";
+  ui.listScreen.hidden = screen !== "list";
+  ui.openActivities.hidden = screen !== "root";
+  ui.openActivities.setAttribute("aria-expanded", String(screen !== "root"));
+  if (screen === "list") {
+    ui.categoryTitle.textContent = CATEGORY_LABELS[category] ?? "Activities";
+    ui.choices.replaceChildren(...(categoryActivities.get(category) ?? []));
+    if (!ui.choices.children.length) {
+      const empty = document.createElement("p");
+      empty.className = "hint";
+      empty.textContent = "No activities here yet.";
+      ui.choices.append(empty);
+    }
+  }
+}
+ui.openActivities.addEventListener("click", () => showActivityScreen("categories"));
+ui.backToActivities.addEventListener("click", () => showActivityScreen("root", null));
+ui.backToCategories.addEventListener("click", () => showActivityScreen("categories"));
+for (const [id, label] of Object.entries(CATEGORY_LABELS)) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "activity-nav-button activity-category-button";
+  button.textContent = label;
+  button.setAttribute("aria-label", "Open " + label);
+  button.addEventListener("click", () => showActivityScreen("list", id));
+  ui.categoryChoices.append(button);
+}
 const activityButtons = new Map();
 const activityLevelLabels = new Map();
 const activityRewardLabels = new Map();
 const resourceValues = {};
 const resourceRows = new Map();
 const reserveButtons = new Map();
-let previousCategory = null;
 for (const [id, task] of Object.entries(ACTIVITIES)) {
-  if (task.category && task.category !== previousCategory) {
-    const heading = document.createElement("h3");
-    heading.className = "activity-group-title";
-    heading.textContent = task.category === "outlaw" ? "OUTLAW PATH" : "HONEST WORK";
-    ui.choices.append(heading);
-  }
-  previousCategory = task.category ?? null;
   const button = document.createElement("button");
   button.type = "button";
   button.className = "activity";
@@ -51,7 +82,7 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   button.append(body);
   activityLevelLabels.set(id, rank);
   button.addEventListener("click", () => beginActivity(id));
-  ui.choices.append(button);
+  categoryActivities.get(task.category in CATEGORY_LABELS ? task.category : "other").push(button);
   activityButtons.set(id, button);
 }
 for (const item of ITEM_KEYS) {
@@ -228,6 +259,7 @@ function returnToGame() {
 }
 
 function beginActivity(kind) {
+  showActivityScreen("root", null);
   const result = chooseActivity(state, kind, Date.now());
   const changed = state.activity !== kind;
   state = result.state;
