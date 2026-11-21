@@ -162,7 +162,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.deepEqual(state.wagons, [{ activity: "mining", plannedMs: null }]);
     assert.equal(elements.get("wagonQueue").hidden, false);
     assert.equal(elements.get("wagonList").children.length, 1);
-    const miningQueueLabel = elements.get("wagonList").children[0].children[0];
+    let miningQueueLabel = elements.get("wagonList").children[0].children[0];
     assert.equal(miningQueueLabel.textContent, "Mining LvL 1,00",
       "each queue title includes the current skill level and XP percent");
     assert.match(miningQueueLabel.getAttribute("aria-label"), /skill level 1, 0% toward/);
@@ -179,6 +179,11 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("transitionStatus").hidden, true);
     assert.equal(elements.get("activityProgress").hidden, false);
     assert.equal(elements.get("skillTitle").textContent, "Mining");
+    // The first preparation completion legitimately rebuilds the queue card.
+    // Capture the mounted Mining label after that transition, then verify
+    // productive XP ticks update the same element without remounting.
+    miningQueueLabel = elements.get("wagonList").children[0].children[0];
+    assert.equal(miningQueueLabel.textContent, "Mining LvL 1,00");
     openActivities.fire("click");
     categories[0].fire("click");
     elements.get("backToCategories").fire("click");
