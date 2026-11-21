@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261121-planner-dropdown5">
-  <script type="module" src="./app.mjs?v=20261121-planner-dropdown6"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261121-attributes1">
+  <script type="module" src="./app.mjs?v=20261121-attributes1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -26,7 +26,7 @@
       <div>
         <p class="eyebrow">✣ THE FIRST EMBER · THE LONG VIGIL</p>
         <h1>THE <em>LONG VIGIL</em></h1>
-        <p>Choose your path. Every skill improves independently.</p>
+        <p>Choose your path. Your skills and attributes grow through the activities you choose.</p>
       </div>
       <div class="status-pill" id="saveStatus" role="status">Local save</div>
     </div>
@@ -49,7 +49,9 @@
               <button id="saveName" type="button" class="small-button">Save</button>
             </div>
           </div>
-          <p class="hint">Your character has no overall level. Only skills improve.</p>
+          <p class="hint">No overall character level. Five attributes grow through time spent working.</p>
+          <div id="characterAttributes" class="character-attributes" aria-label="Character attributes"></div>
+          <p class="hint">STR Strength · DEX Dexterity · END Endurance · INT Intelligence · WIL Willpower. Attribute growth is uncapped; each new point takes longer.</p>
         </section>
 
         <section class="panel skill-focus" aria-labelledby="skill-heading">
@@ -170,7 +172,7 @@
       </aside>
     </div>
     <footer>
-      <p><strong>Early prototype.</strong> Activities repeat automatically and resources accumulate forever. Each skill's XP stops at one level's threshold. Visit the Skill Master to surrender that skill's XP and all remaining spoils, in return for one level. There is no game currency. Smelting, alchemy, carpentry, masonry and cooking consume available raw materials. Detailed combat is not yet simulated.</p>
+      <p><strong>Early prototype.</strong> Activities repeat automatically; resources and attributes grow through productive time. Each skill's XP stops at one level's threshold. Visit the Skill Master to surrender that skill's XP and all remaining spoils, in return for one level. There is no game currency. Smelting, alchemy, carpentry, masonry and cooking consume available raw materials. Detailed combat is not yet simulated.</p>
       <p>All progress is stored in this browser only. Clearing site data or switching devices will lose this character. No account or server save yet.</p>
     </footer>
   </main>
