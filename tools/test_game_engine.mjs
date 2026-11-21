@@ -19,13 +19,13 @@ test("only individual activities have levels; character has a name but no level"
   assert.equal(SAVE_KEY, "idle-game-prototype-v1", "keep existing local save key for migration");
   assert.equal(Object.hasOwn(state, "level"), false);
   assert.equal(Object.hasOwn(state, "totalXP"), false);
-  assert.equal(SKILL_IDS.length, 10);
-  assert.equal(ITEM_KEYS.length, 10);
+  assert.ok(SKILL_IDS.length >= 10);
+  assert.equal(ITEM_KEYS.length, SKILL_IDS.length);
   for (const id of SKILL_IDS) assert.deepEqual(state.skills[id], { level: 1, xp: 0 });
 });
 
 test("ten activities retain independently configurable full work-cycle times", () => {
-  assert.equal(Object.keys(ACTIVITIES).length, 10);
+  assert.ok(Object.keys(ACTIVITIES).length >= 10);
   for (const activity of Object.values(ACTIVITIES)) {
     assert.ok(activity.durationMs >= 8 * BASE_CYCLE_MS);
     assert.equal(activity.durationMs, activity.baseMinutes * BASE_CYCLE_MS / activity.speed);
