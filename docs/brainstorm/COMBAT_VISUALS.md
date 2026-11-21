@@ -1,6 +1,6 @@
 # Fighting and raiding visual events — owner direction (2026-11-21)
 
-**Status:** Approved visual direction; event-driven combat/raid playback is **not implemented**. The first Fighting activity is a distinct progression path; today's alpha has no hit/block/damage outcome simulation.
+**Status:** Approved visual direction. PR #94 now provides an alpha deterministic solo duel resolver with real hit/block/dodge/damage/finisher results and twenty-second textual event playback. The event-specific image gallery and all raid/clan battle simulations are **not yet implemented**.
 
 ## Distinguish visual systems
 
@@ -30,4 +30,4 @@
 
 **Noncombat as character-building pathways:** Mining, crafting, prayer, study, forbidden rituals and ordinary life can remain valid ways to train attributes and shape identity. Combat is their ultimate showcase rather than forcing everyone to grind the same five most-efficient tasks. Different mastered paths should offer distinct battle advantages (for example: gear, rites, abilities), but exact advantages are not yet approved or implemented.
 
-**Status of current prototype:** The first Fighting card is a skill/attribute-progression activity only. It has no fake hit/block events, no opponent HP, and no risk of severed limbs. The art is one temporary battle tableau until real event-specific original illustrations are committed.
+**Status after PR #94:** Fighting has deterministic HP, strikes, dodges, blocks, actual dice results, and named opponents. These outcomes currently affect its on-screen duel transcript, not persistent wounds, deaths or special loot. Its image is still one *arena backdrop*, and the exact-event art registry only maps engagement until original paintings are added. Offline progression uses frozen combat stats, derives only the current bout in bounded work, and does not invent retrospective kill counts. All numerical combat balance is provisional.
