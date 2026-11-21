@@ -10,9 +10,9 @@ const choose = (state, activity, now) => chooseActivity(state, activity, now, mi
 const finish = (state, now) => settle(state, now, midpoint);
 const enter = (state, now) => enterGame(state, now, midpoint);
 
-test("ten basic tasks have independent full-cycle times and outputs", () => {
-  assert.equal(Object.keys(ACTIVITIES).length, 10);
-  assert.equal(ITEM_KEYS.length, 10);
+test("twenty basic and outlaw tasks have independent full-cycle times and outputs", () => {
+  assert.equal(Object.keys(ACTIVITIES).length, 20);
+  assert.equal(ITEM_KEYS.length, 20);
   for (const task of Object.values(ACTIVITIES)) {
     assert.ok(task.durationMs >= 8 * BASE_CYCLE_MS);
     assert.equal(task.durationMs, task.baseMinutes * BASE_CYCLE_MS / task.speed);
@@ -61,7 +61,7 @@ test("old browser saves gain new resource slots without losing progress", () => 
   assert.equal(loaded.items.hide, 3);
   assert.equal(loaded.items.stone, 4);
   assert.equal(loaded.items.log, 0);
-  assert.equal(Object.keys(loaded.items).length, 10);
+  assert.equal(Object.keys(loaded.items).length, 20);
   assert.equal(readSave({ ...old, items: { hide: -1, stone: 4 } }), null);
   assert.equal(readSave({ ...old, activity: "unknown" }), null);
 });
@@ -107,4 +107,33 @@ test("one-day test shortcut and save validation remain functional", () => {
   assert.equal(result.report.completed, Math.floor(86400000 / ACTIVITIES.gathering.durationMs));
   assert.deepEqual(readSave(JSON.stringify(result.state)), result.state);
   assert.equal(readSave("not json"), null);
+});
+
+test("outlaw actions have separate loot and remain uncapped while offline", () => {
+  const outlaws = Object.entries(ACTIVITIES).filter(([, task]) => task.category === "outlaw");
+  assert.equal(outlaws.length, 10);
+  for (const [id, task] of outlaws) {
+    assert.ok(task.durationMs >= 25 * BASE_CYCLE_MS);
+    const initial = choose(newGame(0), id, 0).state;
+    const result = finish(initial, task.durationMs);
+    assert.equal(result.state.items[task.item], 1);
+    assert.equal(result.state.totalXP, task.xp);
+    assert.equal(result.state.level, 1);
+  }
+  const start = choose(newGame(0), "highway_robbery", 0).state;
+  const result = finish(start, 20 * YEAR);
+  assert.equal(result.report.completed, Math.floor(20 * YEAR / ACTIVITIES.highway_robbery.durationMs));
+  assert.equal(result.state.level, 1);
+});
+
+test("existing ten-task save migrates with new outlaw inventory keys", () => {
+  const old = newGame(0);
+  for (const [id, task] of Object.entries(ACTIVITIES)) {
+    if (task.category === "outlaw") delete old.items[task.item];
+  }
+  old.items.stone = 123;
+  const loaded = readSave(old);
+  assert.equal(loaded.items.stone, 123);
+  assert.equal(loaded.items.stolen_purse, 0);
+  assert.equal(Object.keys(loaded.items).length, 20);
 });
