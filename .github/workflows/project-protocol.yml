@@ -29,3 +29,5 @@ jobs:
           python-version: '3.12'
       - name: Validate shared agent project layout
         run: python tools/check_project_protocol.py
+      - name: Validate public research library (links, IDs and source neutrality)
+        run: python tools/check_research_library.py
