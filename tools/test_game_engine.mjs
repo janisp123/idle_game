@@ -1210,7 +1210,9 @@ test("Until LvL Up requires actual owned resources, not only a full XP bar", () 
   let state = queueStart(newGame(0), "hunting", null).state;
   state.skills.mining.xp = xpToNextLevel(1);
   state = queueTimed(state, "mining", UNTIL_LEVEL_UP).state;
-  const arrivedAt = ACTIVITIES.hunting.durationMs + ZONE_TRAVEL_MS + PREPARATION_MS;
+  // The initial character has never worked: switching its pending Start goes
+  // straight to preparation, with no invented hunting cycle or travel.
+  const arrivedAt = INITIAL_PREPARATION_MS;
   const arriving = finish(state, arrivedAt).state;
   assert.equal(arriving.activity, "mining");
   assert.equal(arriving.skills.mining.xp, xpToNextLevel(1));
