@@ -658,7 +658,7 @@ test("twenty new personal activities offer ten training and ten leisure skills w
   assert.equal(training.length, 10);
   assert.equal(leisure.length, 10);
   assert.equal(SKILL_IDS.length, 41);
-  assert.equal(new Set(SKILL_IDS).size, 40);
+  assert.equal(new Set(SKILL_IDS).size, 41);
   for (const [id, task] of [...training, ...leisure]) {
     assert.equal(task.item, null);
     const start = choose(newGame(0), id, 0).state;
