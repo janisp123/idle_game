@@ -253,6 +253,14 @@ function renderWagons() {
       card.append(meter);
       currentScheduledMeter = meter;
       currentScheduledFill = fill;
+    } else {
+      // All cards reserve the same progress row, but only the active timed
+      // task renders an actual progressbar. This keeps future/Forever
+      // labels and controls aligned without adding fake progress.
+      const spacer = document.createElement("div");
+      spacer.className = "hourglass-progress-spacer";
+      spacer.setAttribute("aria-hidden", "true");
+      card.append(spacer);
     }
 
     if (i === wagons.length - 1) {
