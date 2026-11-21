@@ -23,7 +23,15 @@ let storageWorks = true;
 const activityButtons = new Map();
 const activityLevelLabels = new Map();
 const resourceValues = {};
+let previousCategory = null;
 for (const [id, task] of Object.entries(ACTIVITIES)) {
+  if (task.category && task.category !== previousCategory) {
+    const heading = document.createElement("h3");
+    heading.className = "activity-group-title";
+    heading.textContent = task.category === "outlaw" ? "OUTLAW PATH" : "HONEST WORK";
+    ui.choices.append(heading);
+  }
+  previousCategory = task.category ?? null;
   const button = document.createElement("button");
   button.type = "button";
   button.className = "activity";
