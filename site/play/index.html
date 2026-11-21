@@ -9,7 +9,7 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css">
-  <script type="module" src="./app.mjs?v=20261121-alpha-timings1"></script>
+  <script type="module" src="./app.mjs?v=20261121-three-wagons1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -77,7 +77,25 @@
               <div id="activityChoices" class="activity-choices" aria-label="Choose work"></div>
             </div>
           </div>
-          <p class="hint">Choose Activities → a path → press Start beside an activity. Switching takes travel and preparation; Back leaves your current work unchanged.</p>
+
+          <div id="queuePlanner" class="queue-planner" hidden>
+            <p class="activity-nav-label" id="queuePlannerTitle">Do it for</p>
+            <div class="planner-fields">
+              <label for="queueAmount">Do it for</label>
+              <select id="queueAmount" aria-label="Number of hours or days">
+                <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+                <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
+              </select>
+              <select id="queueUnit" aria-label="Hours or days">
+                <option value="hours">Hours</option><option value="days">Days</option>
+              </select>
+            </div>
+            <div class="planner-actions">
+              <button type="button" id="queueConfirm" class="activity-start">Add wagon</button>
+              <button type="button" id="queueCancel" class="activity-start">Cancel</button>
+            </div>
+          </div>
+          <p class="hint">Start your first activity, then add up to two more wagons. Choose how long each earlier wagon works; the last one works forever.</p>
         </section>
 
 
@@ -92,6 +110,10 @@
             <div class="image-veil" aria-hidden="true"></div>
             <div class="image-caption" id="sceneCaption">THE WOLF ROAD</div>
           </div>
+          <section id="wagonQueue" class="wagon-queue" hidden aria-label="Your activity route">
+            <p class="wagon-queue-heading">YOUR ROUTE · UP TO THREE WAGONS</p>
+            <div id="wagonList" class="wagon-list" aria-label="Ordered activity wagons"></div>
+          </section>
           <div class="scene-bottom">
             <div>
               <h2 id="scene-heading">Choose an activity</h2>
