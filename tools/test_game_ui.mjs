@@ -24,13 +24,17 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   const html = readFileSync(new URL("../site/play/index.html", import.meta.url), "utf8");
   const queueCss = readFileSync(new URL("../site/play/iron-ui.css", import.meta.url), "utf8");
   assert.match(html, /id="characterAttributes"/, "five visible stats belong to the character panel");
+  assert.match(html, /id="combatPanel"/, "only combat receives a dedicated event panel");
+  assert.match(html, /id="combatDice"/, "real dice results have a dedicated UI");
+  assert.match(queueCss, /\.combat-panel\.finisher \.combat-dice/,
+    "triple six gets the special grimdark visual state");
   assert.match(queueCss, /\.character-attributes\s*\{[^}]*display:grid/s);
   assert.match(queueCss, /\.activity-choices \.activity-stat-gains/);
   assert.match(queueCss, /\.wagon-list\s*\{[^}]*display:grid/s,
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261121-fighting-first1/,
+  assert.match(html, /app\.mjs\?v=20261121-combat-v1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -55,7 +59,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261121-attributes1/,
+  assert.match(html, /iron-ui\.css\?v=20261121-combat-v1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -127,6 +131,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("activityCategoryTitle").textContent, "Fighting");
     const fightingCards = elements.get("activityChoices").children;
     assert.equal(fightingCards.length, 1);
+    assert.equal(elements.get("combatPanel").hidden, true,
+      "ordinary activity selection has no simulated fight");
+    assert.equal(elements.get("combatDice").hidden, true,
+      "dice appear only on actual vulnerable-hit rolls");
     assert.equal(fightingCards[0].children[0].children[0].children[0].textContent, "Fighting");
     assert.match(fightingCards[0].children[0].children[3].textContent, /STR.*DEX|DEX.*STR/,
       "Fighting shows its stat bonuses");
