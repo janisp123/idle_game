@@ -1,5 +1,12 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Temporary 10-second alpha cycles and grey transition bar deployed (chat; PR #62)
+
+- **Implementation:** [PR #62](https://github.com/janisp123/idle_game/pull/62) merged into main as `87fcfb24780e297958e18126f03118c684de2466`. All activity work cycles now take **10 seconds** while alpha mode is selected. Changing activities finishes the old cycle, then has **5 seconds movement + 5 seconds preparation**, while the first-ever Start has 10 seconds preparation. The switching progressbar changed from warm browns to steel grey, visibly distinct from work.
+- **Reversibility and compatibility:** `site/play/engine.mjs` retains original per-activity balance data, 1-minute same-zone / 5-minute cross-zone movement and 2-minute preparation as the `normal` profile, with a single `TIMING_PROFILE` selection. Version 3 browser saves record `timingProfile` and proportionally migrate work and transition partial progress from earlier V1/V2 saves or between alpha/normal; inventory, XP and name remain. Restore normal mode with a code change and cache-busting asset version, not by deleting saves.
+- **Validation:** Final PR-head [game engine/browser tests](https://github.com/janisp123/idle_game/actions/runs/44903124781) and [Project Protocol Preflight](https://github.com/janisp123/idle_game/actions/runs/44903124674) passed. Main [Pages deployment 44903191879](https://github.com/janisp123/idle_game/actions/runs/44903191879) succeeded. Independent public `/play/` readback returned HTTP 200 with `20261121-alpha-timings1` script and `transitionProgress` markup. No actual user-device visual walkthrough was performed.
+- **Remaining:** Three-wagon queue mechanics still not implemented; this is a temporary alpha testing override (ALPHA-TIME-001).
+
 ## 2026-11-21 — Manual activity switching and progressbar deployed (chat; PR #60)
 
 - **Implementation:** [PR #60](https://github.com/janisp123/idle_game/pull/60) merged into main as `102d7e895afcc0ba88834b7be00dcfc0f1b6c932`. Player activity rows now have distinct **Start** buttons rather than clicking the whole row; switching resolves the current full work cycle, then shows the dedicated transition progress bar with **Finishing current activity → Moving to new location → Getting ready to start new activity**. Same-zone travel is 1 minute, cross-zone travel 5 minutes, preparation 2 minutes (also for initial Start); these are internal game times, not player-visible clocks.
