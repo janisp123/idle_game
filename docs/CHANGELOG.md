@@ -1,6 +1,6 @@
 # Changelog — verified completed work
 
-## 2026-11-21 — Phone-tested hourglass queue UX repairs (chat; PR #69)
+## 2026-11-21 — Android screenshot-informed hourglass queue UX repairs (chat; PR #69)
 
 - **Evidence:** The Owner supplied Android browser screenshots showing the sandglass image overlapping the task title, inaccessible **Start now** on a populated route, and a four-hour duration selected for a new task instead being assigned to the previous task.
 - **Game correction:** [PR #69](https://github.com/janisp123/idle_game/pull/69) merged on main as `a800c3b3880e42623eacd2c1079f54fee2c528f4`. Each activity has two distinct actions: **Start now** immediately requests the approved finish-cycle/travel/prepare transition (with explicit confirmation if it would discard unfinished future plans), and **Schedule** inserts the **chosen timed task before the existing Forever fallback**. With one previous Forever activity, the new timed task starts now and the previous job resumes Forever afterward; with two slots, the new finite activity becomes the future second task and does not alter the current finite duration. Max three and Forever last still hold. Previously earned resources/XP and old local saves persist.
