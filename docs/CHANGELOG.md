@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Fighting first in the activities menu (chat; PR #93)
+
+- **Fighting added as a distinct activity:** First category is now **Fighting**; it has independent skill progress and time-based attribute weights STR 30%, DEX 35%, END 25%, WIL 10%. Hunting and outlaw raids remain separate. New Fighting skill migrates safely into existing V5 saves; current inventory and queue are preserved.
+- **Navigation:** Removed the repeated “Choose a path” copy, including the activity picker heading, and renamed the return button “Back to activities”.
+- **Artwork:** Fighting has a working, local `fighting.webp` tableau temporarily using the existing bandit-raid battle painting; the newly generated **two-warriors** illustration is still only in the chat, **not on the deployed site**. The full strike/block/dodge/raid event-driven gallery is scoped in `docs/brainstorm/COMBAT_VISUALS.md`; no fake hit/block outcomes or image slideshow were added.
+- **Validation:** Regression tests cover 41 total skills, fighting-first navigation, save migration and unchanged character progression. PR-head checks verified by GitHub Actions; Pages deployment and actual device appearance must be verified separately after merge.
+
+
 ## 2026-11-21 — Five configurable time-based character attributes (chat; ATTR-001)
 
 - **Character growth:** Added Strength, Dexterity, Endurance, Intelligence and Willpower (STR/DEX/END/INT/WIL), shown on the character panel; each existing activity displays its primary and secondary attribute gains. No overall character level or mana system was introduced.
