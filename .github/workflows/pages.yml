@@ -63,6 +63,12 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: "./site"
+      # GitHub Pages can briefly fail to discover a just-uploaded artifact.
+      # Give the Actions artifact index time to become visible before deployment.
+      # If a run fails, start a NEW run; rerunning upload can create duplicate
+      # github-pages artifacts under the same run ID (incident 44891200055).
+      - name: Allow Pages artifact indexing
+        run: sleep 20
       - name: Deploy website
         id: deployment
         uses: actions/deploy-pages@v4
