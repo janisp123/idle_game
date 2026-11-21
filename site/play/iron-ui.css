@@ -617,23 +617,6 @@ footer p{color:#aa9680}
 .activity-choices .activity-actions .activity-icon-button:not(:disabled):focus-visible {
   border-color:#e9b875;background:#704a2c;
 }
-.mastery-choice {
-  display:flex;gap:10px;align-items:center;justify-content:center;
-  margin:12px 0 6px;padding:8px 12px;min-height:46px;width:100%;
-  color:#e9c69b;font:700 16px Georgia,serif;text-align:center;
-  cursor:pointer;border:2px ridge #93734d;
-  background:linear-gradient(140deg,#423022,#231810);
-}
-.mastery-choice-arrow {font-size:27px;line-height:1;color:#f0c484}
-.mastery-choice[aria-pressed="true"] {
-  border-color:#e4b676;color:#ffe2ad;
-  background:linear-gradient(140deg,#624125,#332014);
-  box-shadow:inset 0 0 0 1px rgba(255,215,157,.25);
-}
-.mastery-choice:focus-visible {outline:2px solid #f4cf8c;outline-offset:3px}
-.mastery-choice-note {
-  margin:4px 0 9px;color:#ccb08b;font:12px/1.45 Georgia,serif;
-}
 @media(max-width:520px) {
   .activity-choices .activity-title-line {gap:6px}
   .activity-choices .activity-actions {gap:5px}
