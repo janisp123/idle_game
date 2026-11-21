@@ -1,5 +1,12 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Live skill level and percent in all activity route cards (chat; PR #80)
+
+- **Owner phone request:** After each activity title on the three-across schedule show the current skill level and progress to the next Skill Master threshold, e.g. `Mining LvL 31,28` = skill level 31, 28% current-level XP; `,100` means capped and ready for the Master.
+- **Implementation:** [PR #80](https://github.com/janisp123/idle_game/pull/80) merged as `10f57bcdf07d4c590ed63d01fbd4eab37d613f3a`. Update all three activity names (including queued and Forever) from real saved state on render; XP-only ticks update existing label nodes in place without destroying duration dropdown focus/controls. Display full level/percent explicitly for accessibility. No engine, save, resource, Skill Master or queue-timing changes, and the compact five-row, three-across image-free layout stays intact.
+- **Validation:** PR-head [Idle Game website game/engine/UI tests 44922909511](https://github.com/janisp123/idle_game/actions/runs/44922909511) and [Project Protocol Preflight 44922909528](https://github.com/janisp123/idle_game/actions/runs/44922909528) passed. Main [GitHub Pages run 44922990345](https://github.com/janisp123/idle_game/actions/runs/44922990345) completed validation and deployment. Independent public `/play/` readback returned HTTP 200 and the updated `app.mjs?v=20261121-queue-skill-progress1` reference. No fresh physical on-device screenshot review of the new labels yet.
+- **Follow-up:** Confirm legibility of the longer titles on the Owner's actual phone, especially Woodcutting and unusually long activity names.
+
 ## 2026-11-21 — The Skill Master's Due: one-level XP cap and full-tribute training (chat; PR #78)
 
 - **Owner-approved alpha redesign:** A capped one-level XP bar does **not** grant automatic levels online or on return, but resources continue to accumulate without an idle time limit, even after years offline. All progression is material-based; no gold, selling or exchange system is introduced.
