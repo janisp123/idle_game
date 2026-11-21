@@ -59,6 +59,7 @@ for (const [id, label] of Object.entries(CATEGORY_LABELS)) {
   button.addEventListener("click", () => showActivityScreen("list", id));
   ui.categoryChoices.append(button);
 }
+showActivityScreen("root", null);
 const activityButtons = new Map();
 const activityLevelLabels = new Map();
 const activityRewardLabels = new Map();
