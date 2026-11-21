@@ -1,5 +1,13 @@
 # Current working checkpoint
 
+## In review — chronicle-only return reporting (2026-11-21)
+
+- Owner explicitly requested removal of the redundant "Welcome back" report and unnecessary pop-ups because return loot already appears in the Chronicle.
+- This branch removes the entire return report panel and dismissal button. Returning after offline work records the short loot summary only in the Chronicle, retaining existing offline settlement and saves.
+- Website structure check and browser smoke test updated to enforce no popup and no duplicate welcome-back message.
+- Next: verify final PR-head checks, merge under AUTO-MERGE-001, verify main and Pages.
+
+
 ## In review — UI-002 mobile activity categories (2026-11-21)
 
 - Owner requested a short three-step picker: Activities → Honest Work / Outlaw Path / Clan Activities / Other Activities → matching activity. Back is always available at both nested levels.
