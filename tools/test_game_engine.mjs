@@ -313,7 +313,7 @@ test("ten outlaw skills are independent, with their own spoils and long work cyc
   const honest = Object.entries(ACTIVITIES).filter(([, a]) => a.category === "craft");
   assert.equal(outlaws.length, 10);
   assert.equal(honest.length, 10);
-  assert.equal(SKILL_IDS.length, 40);
+  assert.equal(SKILL_IDS.length, 41);
   assert.ok(ITEM_KEYS.length > 20);
   for (const [id, task] of outlaws) {
     assert.ok(task.baseMinutes * BASE_CYCLE_MS / task.speed >= 25 * BASE_CYCLE_MS, id);
@@ -346,7 +346,7 @@ test("old 10-skill saves load all ten new outlaw skills and resources safely", (
   assert.equal(loaded.items.stolen_purse, 0);
   assert.deepEqual(loaded.skills.highway_robbery, { xp: 0, level: 1 });
   assert.equal(Object.keys(loaded.items).length, ITEM_KEYS.length);
-  assert.equal(Object.keys(loaded.skills).length, 40);
+  assert.equal(Object.keys(loaded.skills).length, 41);
 });
 
 test("outlaw offline loot is unlimited but XP is capped and only the Master levels", () => {
@@ -657,7 +657,7 @@ test("twenty new personal activities offer ten training and ten leisure skills w
   const leisure = Object.entries(ACTIVITIES).filter(([,a]) => a.category === "leisure");
   assert.equal(training.length, 10);
   assert.equal(leisure.length, 10);
-  assert.equal(SKILL_IDS.length, 40);
+  assert.equal(SKILL_IDS.length, 41);
   assert.equal(new Set(SKILL_IDS).size, 40);
   for (const [id, task] of [...training, ...leisure]) {
     assert.equal(task.item, null);
@@ -1373,4 +1373,27 @@ test("V4 saves migrate without losing skills, resources or schedules; V5 validat
     { ...progressed.attributeEffort, WIL: 1.25 },
     { ...progressed.attributeEffort, UNKNOWN: 0 }
   ]) assert.equal(readSave({ ...progressed, attributeEffort: corrupt }), null);
+});
+
+test("Fighting is a distinct first activity and does not manufacture simulated combat", () => {
+  assert.equal(SKILL_IDS[0], "fighting");
+  assert.equal(ACTIVITIES.fighting.category, "combat");
+  assert.equal(ACTIVITIES.fighting.item, null);
+  assert.equal(ACTIVITIES.fighting.zone, "Fighting grounds");
+  assert.notEqual(ACTIVITIES.fighting, ACTIVITIES.hunting);
+  assert.equal(Object.values(ACTIVITY_STAT_WEIGHTS.fighting).reduce((a, b) => a + b, 0), 100);
+  const first = choose(newGame(0), "fighting", 0).state;
+  const result = finish(first, 10 * ACTIVITIES.fighting.durationMs);
+  assert.equal(result.report.completed, 10);
+  assert.equal(result.report.gainedItems, 0);
+  assert.deepEqual(result.report.items, {});
+  assert.equal(result.state.skills.fighting.level, 1);
+  assert.ok(result.state.skills.fighting.xp > 0);
+  assert.ok(result.state.attributeEffort.STR > 0);
+  assert.ok(result.state.attributeEffort.DEX > 0);
+  assert.deepEqual(result.state.items, first.items);
+  const oldV5 = { ...newGame(0), skills: { ...newGame(0).skills } };
+  delete oldV5.skills.fighting;
+  assert.deepEqual(readSave(oldV5).skills.fighting, { level: 1, xp: 0 },
+    "existing V5 saves safely acquire the new Fighting skill");
 });
