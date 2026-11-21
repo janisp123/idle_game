@@ -701,6 +701,8 @@ test("XP-only skills remain offline-safe and advance with no material tribute", 
   assert.equal(trained.state.skills.meditation.level, 1);
   assert.deepEqual(readSave(JSON.stringify(trained.state)), trained.state);
 });
+const switchTo = (state, id, now) => requestActivityChange(state, id, now, midpoint);
+
 test("initial Start requires preparation but no imagined origin travel", () => {
   const initial = newGame(0);
   const requested = switchTo(initial, "mining", 0).state;
@@ -1059,8 +1061,8 @@ test("three wagons consume prior gathering in chronological order and then work 
   assert.equal(result.state.items.stone, 0, "masonry uses previously mined stone");
   assert.equal(result.state.items.block, HOUR_MS / ACTIVITIES.masonry.durationMs);
   assert.ok(result.state.items.hide > 1_000);
-  assert.equal(result.state.skills.mining.xp, HOUR_MS / 10_000 * ACTIVITIES.mining.xp);
-  assert.equal(result.state.skills.masonry.xp, HOUR_MS / 10_000 * ACTIVITIES.masonry.xp);
+  assert.equal(result.state.skills.mining.xp, xpToNextLevel(1));
+  assert.equal(result.state.skills.masonry.xp, xpToNextLevel(1));
   assert.deepEqual(result.state.wagons, [{ activity: "hunting", plannedMs: null }]);
   assert.equal(result.reports.length, 3);
   assert.deepEqual(result.reports.map(r => r.activity), ["mining", "masonry", "hunting"]);
