@@ -19,6 +19,7 @@ For technical design choices, start with the compact [Research map](RESEARCH_MAP
 ## Reading order
 
 - [Research map](RESEARCH_MAP.md): tiny topic overview for on-demand Codex discovery; not required on routine tasks.
+- [Bad examples](BAD_EXAMPLES.md): failure modes and avoidable project-specific conflicts; consult only when relevant, never as mandatory reading.
 - [Useful Examples](USEFUL_EXAMPLES.md): short, generic, independent implementation patterns and tradeoffs.
 - [Bulk random loot sampling](library/bulk-random-loot-sampling.md): independent and mutually exclusive reward counts, rare-event tails, RNG versioning and tests. `[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Time-safe offline simulation](library/offline-time-units-and-boundaries.md): consistent time units, exact resource-depletion boundaries, aggregate processing and proposed equivalence tests. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
@@ -71,6 +72,10 @@ For each article or technique, use both a fit assessment and an evidence status.
 - `[EVIDENCE: BENCHMARKED]` — performance measurements actually recorded; include hardware and dataset.
 
 This avoids conflating a plausible design with a proven implementation. Never label work “tested” when tests weren't run.
+
+## Negative findings and avoidable mistakes
+
+Keep evidence-backed failure patterns in the short [Bad examples](BAD_EXAMPLES.md) catalogue. This is for **clearly explained, conditional engineering failures**, not unpopular opinions, unsupported anecdotes or a backlog of features to reject. If new research only duplicates existing documentation or reveals no actionable insight, **do not open or merge a research PR**; report that the run found no publishable addition. When a failure is already covered, improve its existing entry only if genuinely new evidence changes the guidance.
 
 ## Standard for useful technical articles
 

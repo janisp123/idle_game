@@ -11,8 +11,9 @@ INDEX = ROOT / "docs" / "RESEARCH_LIBRARY.md"
 CATALOG = ROOT / "docs" / "USEFUL_EXAMPLES.md"
 MAP = ROOT / "docs" / "RESEARCH_MAP.md"
 QUEUE = ROOT / "docs" / "RESEARCH_QUEUE.md"
+BAD = ROOT / "docs" / "BAD_EXAMPLES.md"
 ARTICLES = sorted((ROOT / "docs" / "library").glob("*.md"))
-DOCUMENTS = [INDEX, CATALOG, MAP, QUEUE, *ARTICLES]
+DOCUMENTS = [INDEX, CATALOG, MAP, QUEUE, BAD, *ARTICLES]
 
 # External source provenance belongs in the private daily report, not these files.
 SOURCE_URL = re.compile(r"https?://|www\.|(?:github|gitlab|reddit)\.com/", re.I)
@@ -22,6 +23,7 @@ FENCE = re.compile(r"^\s*((?:\x60){3,}|~{3,})")
 SECTION_ID = re.compile(r"^## (P\d{2})\s+[—-]", re.M)
 ROW_ID = re.compile(r"^\|\s*(P\d{2})\s*\|", re.M)
 QUESTION_ID = re.compile(r"^\|\s*(RQ-\d{3})\s*\|", re.M)
+BAD_ID = re.compile(r"^\|\s*(BAD-\d{3})\s*\|", re.M)
 
 
 def prose_lines(content):
@@ -70,7 +72,7 @@ def main():
         else:
             contents[path] = path.read_text(encoding="utf-8")
 
-    if INDEX not in contents or CATALOG not in contents or MAP not in contents or QUEUE not in contents:
+    if INDEX not in contents or CATALOG not in contents or MAP not in contents or QUEUE not in contents or BAD not in contents:
         return errors
 
     if len(contents[MAP].encode("utf-8")) > 3500:
@@ -122,6 +124,13 @@ def main():
             errors.append(f"Duplicate research question ID: {key} ({count})")
     if len(contents[QUEUE].encode("utf-8")) > 6500:
         errors.append("Research queue exceeds 6.5 KB; prune or consolidate questions")
+    bad_ids = BAD_ID.findall(contents[BAD])
+    if len(bad_ids) > 20:
+        errors.append("Bad examples exceeds 20 active entries; consolidate rather than add more")
+    for key, count in Counter(bad_ids).items():
+        if count != 1:
+            errors.append(f"Duplicate bad example ID: {key} ({count})")
+
 
     for article in ARTICLES:
         if article.name != "ENTRY_TEMPLATE.md":
