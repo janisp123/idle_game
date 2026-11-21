@@ -1,6 +1,6 @@
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
-import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-production2";
-export { PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions } from "./production.mjs?v=20261121-production2";
+import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
+export { PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions } from "./production.mjs?v=20261121-no-resource-locks1";
 export { LOOT_TABLES, lootChances } from "./loot.mjs?v=20261121-loot1";
 /**
  * Tiny offline-capable prototype engine.
@@ -109,7 +109,6 @@ export function newGame(now = Date.now()) {
     timingProfile: TIMING_PROFILE,
     name: "Wanderer",
     skills: blankSkills(),
-    protectedItems: [],
     // V1 global XP cannot be assigned to individual activities reliably.
     unattributedXP: 0,
     items: Object.fromEntries(ITEM_KEYS.map(key => [key, 0])),
@@ -232,7 +231,7 @@ export function readSave(value) {
     }
     return {
       version: GAME_VERSION, timingProfile: TIMING_PROFILE, name: s.name, skills,
-      protectedItems: [...new Set(s.protectedItems ?? [])],
+      // Legacy protectedItems are validated above but discarded: no resource locks remain.
       unattributedXP: oldVersion ? s.totalXP : s.unattributedXP,
       items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
       activity: s.activity, progressMs: newProgressMs, transition: newTransition,
@@ -307,7 +306,7 @@ function settleWork(state, now, random) {
   if (count > 0) {
     const prior = state.skills[state.activity];
     const crafted = PRODUCTION_RECIPES[state.activity]
-      ? produce(state.activity, prior.level, count, state.items, state.protectedItems ?? [], random)
+      ? produce(state.activity, prior.level, count, state.items, random)
       : null;
     const productive = crafted ? crafted.completed : count;
     if (productive > 0) {
@@ -629,8 +628,8 @@ export function skillMasterOffer(state) {
 }
 
 /** Player-confirmed exchange: advance each eligible skill ONCE, forfeit its
- * current-level XP and every owned spoil from the advanced skills, including
- * protected stacks. Inventory controls are not modified or reset.
+ * current-level XP and every owned spoil from the advanced skills.
+ * This is always an explicitly confirmed inventory sacrifice.
  */
 export function learnFromMaster(state, now = Date.now(), random = Math.random) {
   const outcome = settle(state, now, random);

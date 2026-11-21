@@ -9,7 +9,7 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css?v=20261121-skill-master1">
-  <script type="module" src="./app.mjs?v=20261121-queue-skill-progress1"></script>
+  <script type="module" src="./app.mjs?v=20261121-no-resource-locks1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -68,7 +68,7 @@
           <p class="hint" id="masterStatus">No skills are ready for the Master yet.</p>
           <button id="visitMaster" class="activity-start master-visit" type="button" aria-controls="masterAudience" aria-expanded="false">Seek the Master</button>
           <div id="masterAudience" class="master-audience" hidden>
-            <p class="master-voice">“I will take all you hold from the skills I advance. Even what you've marked Protected. Spend wisely before you accept.”</p>
+            <p class="master-voice">“I will take all you hold from the skills I advance. Spend wisely before you accept.”</p>
             <div id="masterSkills" class="master-summary" aria-label="Skills ready for training"></div>
             <p class="master-subtitle">THE TRIBUTE TO BE SURRENDERED</p>
             <div id="masterTribute" class="master-summary" aria-label="Exact inventory to sacrifice"></div>
@@ -169,7 +169,7 @@
       </aside>
     </div>
     <footer>
-      <p><strong>Early prototype.</strong> Activities repeat automatically and resources accumulate forever. Each skill's XP stops at one level's threshold. Visit the Skill Master to surrender that skill's XP and all remaining spoils, even protected ones, in return for one level. There is no game currency. Smelting, alchemy, carpentry, masonry and cooking consume available, unprotected raw materials. Detailed combat is not yet simulated.</p>
+      <p><strong>Early prototype.</strong> Activities repeat automatically and resources accumulate forever. Each skill's XP stops at one level's threshold. Visit the Skill Master to surrender that skill's XP and all remaining spoils, in return for one level. There is no game currency. Smelting, alchemy, carpentry, masonry and cooking consume available raw materials. Detailed combat is not yet simulated.</p>
       <p>All progress is stored in this browser only. Clearing site data or switching devices will lose this character. No account or server save yet.</p>
     </footer>
   </main>
