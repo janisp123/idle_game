@@ -1,9 +1,9 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, PRODUCTION_INPUTS, recipeOptions, newGame, readSave, settle,
   enterGame, queueStartActivity, queueSetDuration, queueSwap, queueRemoveLast,
-  MAX_WAGONS, HOUR_MS, DAY_MS,
+  MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, xpForLevel
-} from "./engine.mjs?v=20261121-three-wagons1";
+} from "./engine.mjs?v=20261121-hourglasses1";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -187,19 +187,31 @@ function announceArrival(priorTransition) {
 }
 
 
-/** Show one to three illustrated wagon cards without rebuilding focused controls every tick. */
+/** Keep all queued jobs visible; focused controls are rebuilt only on queue edits. */
+const durationUnitMs = unit => unit === "days" ? DAY_MS :
+  unit === "hours" ? HOUR_MS : MINUTE_MS;
 function renderWagons() {
   const wagons = state.wagons ?? [];
   ui.wagonQueue.hidden = wagons.length === 0;
   const signature = JSON.stringify([wagons, state.transition?.targetActivity, state.activity]);
   if (signature === lastWagonSignature) return;
   lastWagonSignature = signature;
+  // Unlike the previous scrolling wagon strip, every hourglass fits in view.
+  ui.wagonList.style.gridTemplateColumns = "repeat(" + Math.max(1, wagons.length) +
+    ", minmax(0, 1fr))";
   const cards = wagons.map((wagon, i) => {
     const card = document.createElement("article");
     card.className = "wagon";
     const picture = document.createElement("div");
-    picture.className = "wagon-cart";
+    picture.className = "wagon-hourglass";
     picture.setAttribute("aria-hidden", "true");
+    const art = document.createElement("img");
+    art.src = "./assets/hourglass-amber.webp?v=20261121-hourglasses1";
+    art.alt = "";
+    art.width = 96;
+    art.height = 96;
+    art.decoding = "async";
+    picture.append(art);
     const label = document.createElement("strong");
     label.className = "wagon-name";
     label.textContent = ACTIVITIES[wagon.activity].title;
@@ -230,18 +242,21 @@ function renderWagons() {
         option.textContent = String(n);
         amount.append(option);
       }
-      for (const [value, label] of [["hours", "Hours"], ["days", "Days"]]) {
+      for (const [value, label] of [["minutes", "Min"], ["hours", "Hours"], ["days", "Days"]]
+        .filter(([value]) => value !== "minutes" || TIMING_PROFILE === "alpha" ||
+          wagon.plannedMs < HOUR_MS)) {
         const option = document.createElement("option");
         option.value = value;
         option.textContent = label;
         unit.append(option);
       }
-      const days = wagon.plannedMs % DAY_MS === 0;
-      amount.value = String(wagon.plannedMs / (days ? DAY_MS : HOUR_MS));
-      unit.value = days ? "days" : "hours";
+      const selectedUnit = wagon.plannedMs % DAY_MS === 0 ? "days" :
+        wagon.plannedMs % HOUR_MS === 0 ? "hours" : "minutes";
+      amount.value = String(wagon.plannedMs / durationUnitMs(selectedUnit));
+      unit.value = selectedUnit;
       const apply = () => {
-        const ms = Number(amount.value) * (unit.value === "days" ? DAY_MS : HOUR_MS);
-        applyQueueChange(queueSetDuration(state, i, ms, Date.now()), "Wagon duration updated.");
+        const ms = Number(amount.value) * durationUnitMs(unit.value);
+        applyQueueChange(queueSetDuration(state, i, ms, Date.now()), "Hourglass duration updated.");
       };
       amount.addEventListener("change", apply);
       unit.addEventListener("change", apply);
@@ -264,8 +279,8 @@ function renderWagons() {
       () => applyQueueChange(queueSwap(state, i - 1, Date.now()), "Route rearranged."));
     if (i < wagons.length - 1) control("→", "Move " + ACTIVITIES[wagon.activity].title + " later",
       () => applyQueueChange(queueSwap(state, i, Date.now()), "Route rearranged."));
-    if (i === wagons.length - 1 && i > 0) control("Remove", "Remove final future wagon",
-      () => applyQueueChange(queueRemoveLast(state, Date.now()), "Future wagon removed."));
+    if (i === wagons.length - 1 && i > 0) control("Remove", "Remove final future hourglass",
+      () => applyQueueChange(queueRemoveLast(state, Date.now()), "Future hourglass removed."));
     card.append(controls);
     return card;
   });
@@ -290,7 +305,7 @@ function hideQueuePlanner() {
 ui.queueCancel.addEventListener("click", () => hideQueuePlanner());
 ui.queueConfirm.addEventListener("click", () => {
   if (!planningActivity) return;
-  const ms = Number(ui.queueAmount.value) * (ui.queueUnit.value === "days" ? DAY_MS : HOUR_MS);
+  const ms = Number(ui.queueAmount.value) * durationUnitMs(ui.queueUnit.value);
   const task = planningActivity;
   hideQueuePlanner();
   applyQueueChange(queueStartActivity(state, task, ms, Date.now()), "Added " +
@@ -449,10 +464,10 @@ function beginActivity(kind) {
       "Preparing to begin " + ACTIVITIES[kind].title.toLowerCase() + ".");
     return;
   }
-  // The formerly final Forever wagon must get an explicit duration.
+  // The formerly final Forever hourglass must get an explicit duration.
   planningActivity = kind;
   ui.queueAmount.value = "1";
-  ui.queueUnit.value = "hours";
+  ui.queueUnit.value = TIMING_PROFILE === "alpha" ? "minutes" : "hours";
   const previous = state.wagons.at(-1).activity;
   ui.queuePlannerTitle.textContent = "Before adding " + ACTIVITIES[kind].title +
     ", how long should " + ACTIVITIES[previous].title + " work?";
