@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0c0807">
-  <meta name="description" content="An early, playable grimdark idle RPG prototype. Choose from forty slow-paced activities; your activity continues while you are away.">
+  <meta name="description" content="An early, playable grimdark idle RPG prototype. Choose from forty-one slow-paced activities; your activity continues while you are away.">
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css?v=20261121-attributes1">
-  <script type="module" src="./app.mjs?v=20261121-attributes1"></script>
+  <script type="module" src="./app.mjs?v=20261121-fighting-first1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -26,7 +26,7 @@
       <div>
         <p class="eyebrow">✣ THE FIRST EMBER · THE LONG VIGIL</p>
         <h1>THE <em>LONG VIGIL</em></h1>
-        <p>Choose your path. Your skills and attributes grow through the activities you choose.</p>
+        <p>Your skills and attributes grow through the activities you choose.</p>
       </div>
       <div class="status-pill" id="saveStatus" role="status">Local save</div>
     </div>
@@ -83,17 +83,16 @@
         </section>
 
         <section class="panel actions" aria-labelledby="actions-heading">
-          <p class="section-index">II · CHOOSE YOUR PATH</p>
+          <p class="section-index">II · ACTIVITIES</p>
           <h2 id="actions-heading" class="engraved-title">ACTIVITIES</h2>
           <div id="activityNav" class="activity-navigation">
             <button id="openActivities" class="activity-nav-button" type="button" aria-controls="activityCategories" aria-expanded="false">Choose activity <span aria-hidden="true">›</span></button>
             <div id="activityCategories" class="activity-nav-screen" hidden aria-label="Activity categories">
               <button id="backToActivities" class="activity-back" type="button">‹ Back</button>
-              <p class="activity-nav-label">Choose a path</p>
               <div id="activityCategoryChoices" class="activity-category-choices"></div>
             </div>
             <div id="activityListScreen" class="activity-nav-screen" hidden aria-label="Activities in selected category">
-              <button id="backToCategories" class="activity-back" type="button">‹ Back to paths</button>
+              <button id="backToCategories" class="activity-back" type="button">‹ Back to activities</button>
               <p id="activityCategoryTitle" class="activity-nav-label"></p>
               <div id="activityChoices" class="activity-choices" aria-label="Choose work"></div>
             </div>

@@ -32,6 +32,7 @@ const HOUR_MS = 3_600_000;
 // These are suggested character-fantasy mappings, NOT hard class restrictions.
 // No activity has a faster overall attribute-XP rate than another.
 export const ACTIVITY_STAT_WEIGHTS = Object.freeze({
+  fighting:           { STR: 30, DEX: 35, END: 25, WIL: 10 },
   hunting:            { DEX: 45, END: 25, WIL: 30 },
   mining:             { STR: 70, END: 30 },
   woodcutting:        { STR: 65, END: 35 },

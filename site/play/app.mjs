@@ -46,7 +46,7 @@ let currentScheduledMeter = null;
 let currentScheduledFill = null;
 
 const CATEGORY_LABELS = Object.freeze({
-  craft: "Honest Work", outlaw: "Outlaw Path", training: "Training & Knowledge", leisure: "Tavern & Leisure", clan: "Clan Activities", other: "Other Activities"
+  combat: "Fighting", craft: "Honest Work", outlaw: "Outlaw Path", training: "Training & Knowledge", leisure: "Tavern & Leisure", clan: "Clan Activities", other: "Other Activities"
 });
 const categoryActivities = new Map(Object.keys(CATEGORY_LABELS).map(id => [id, []]));
 let selectedCategory = null;
@@ -645,14 +645,19 @@ function render() {
       : sceneActivity.description;
     // Reuse the existing painted scene for the selected destination.
     const sceneId = transition ? transition.targetActivity : state.activity;
-    const sceneAsset = sceneActivity.item === null
-      ? (sceneActivity.category === "training" ? "masonry" : "cooking")
-      : sceneId;
-    const desiredImage = "./assets/" + sceneAsset + ".webp?v=20261121-skills-outlaws-v3";
+    // Temporary existing confrontation art for Fighting until the generated
+    // duel image is added to the repository. Later a real combat
+    // event stream will choose strike/block/retreat images by event type.
+    // Do not rotate unrelated images: the picture must match the event.
+    const sceneAsset = sceneId === "fighting" ? "fighting" :
+      sceneActivity.item === null
+        ? (sceneActivity.category === "training" ? "masonry" : "cooking")
+        : sceneId;
+    const desiredImage = "./assets/" + sceneAsset + ".webp?v=20261121-fighting-intro1";
     if (ui.sceneImage.getAttribute("src") !== desiredImage) {
       ui.sceneImage.onerror = () => {
         ui.sceneImage.onerror = null;
-        ui.sceneImage.src = "./assets/" + (isHunt ? "hunting.webp" : "mining.webp") + "?v=20261121-skills-outlaws-v3";
+        ui.sceneImage.src = "./assets/" + (isHunt ? "hunting.webp" : "mining.webp") + "?v=20261121-fighting-intro1";
       };
       ui.sceneImage.src = desiredImage;
     }
