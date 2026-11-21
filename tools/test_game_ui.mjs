@@ -49,14 +49,33 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   try {
     await import("../site/play/app.mjs?smoke-test");
     assert.ok(tick, "game tick must start");
-    const buttons = elements.get("activityChoices").children.filter(node => node.type === "button");
-    assert.equal(buttons.length, Object.keys(ACTIVITIES).length);
-    assert.equal(buttons.length, 20, "ten honest and ten outlaw activities");
-    const headings = elements.get("activityChoices").children
-      .filter(node => node !== null && node.textContent === "HONEST WORK" ||
-                            node !== null && node.textContent === "OUTLAW PATH");
-    assert.deepEqual(headings.map(n => n.textContent), ["HONEST WORK", "OUTLAW PATH"]);
+    const openActivities = elements.get("openActivities");
+    const categoryScreen = elements.get("activityCategories");
+    const listScreen = elements.get("activityListScreen");
+    const categories = elements.get("activityCategoryChoices").children;
+    assert.equal(openActivities.hidden, false, "only the compact entrypoint appears initially");
+    assert.equal(categoryScreen.hidden, true);
+    assert.equal(listScreen.hidden, true);
+    assert.deepEqual(categories.map(b => b.textContent),
+      ["Honest Work", "Outlaw Path", "Clan Activities", "Other Activities"]);
+    openActivities.fire("click");
+    assert.equal(openActivities.hidden, true);
+    assert.equal(categoryScreen.hidden, false);
+    categories[2].fire("click");
+    assert.equal(elements.get("activityCategoryTitle").textContent, "Clan Activities");
+    assert.equal(elements.get("activityChoices").children[0].textContent, "No activities here yet.");
+    elements.get("backToCategories").fire("click");
+    assert.equal(categoryScreen.hidden, false);
+    categories[1].fire("click");
+    let buttons = elements.get("activityChoices").children.filter(node => node.type === "button");
+    assert.equal(buttons.length, 10, "outlaw activities live in their own category");
     assert.equal(buttons.some(b => b.children[0].children[0].textContent === "Highway robbery"), true);
+    elements.get("backToCategories").fire("click");
+    categories[0].fire("click");
+    buttons = elements.get("activityChoices").children.filter(node => node.type === "button");
+    assert.equal(buttons.length, 10, "honest activities live in their own category");
+    assert.equal(buttons.some(b => b.children[0].children[0].textContent === "Highway robbery"), false,
+      "outlaw tasks must not leak into Honest Work");
     assert.equal(buttons.every(b => !/\\d+\\s*(min|sec)|per cycle/i.test(
       b.children[0].children[1].textContent
     )), true, "activity buttons must not reveal cycle rates");
@@ -70,10 +89,22 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
 
     const mining = buttons.find(b => b.children[0].children[0].textContent === "Mining");
     assert.ok(mining);
+    elements.get("backToCategories").fire("click");
+    assert.equal(categoryScreen.hidden, false);
+    categories[0].fire("click");
     mining.fire("click");
+    assert.equal(openActivities.hidden, false, "choosing work closes the picker");
+    assert.equal(listScreen.hidden, true);
     assert.equal(elements.get("skillTitle").textContent, "Mining");
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "mining");
+    openActivities.fire("click");
+    categories[0].fire("click");
+    elements.get("backToCategories").fire("click");
+    elements.get("backToActivities").fire("click");
+    assert.equal(openActivities.hidden, false);
+    assert.equal(JSON.parse(store.get(SAVE_KEY)).activity, "mining",
+      "back navigation must not interrupt the active task");
 
     now += 30 * ACTIVITIES.mining.durationMs;
     tick();

@@ -24,3 +24,12 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
 - **Implemented by:** chat (partial work in PRs #43 and #44; remaining scope not yet implemented).
+
+## UI-002 — Compact mobile activity category navigation
+- **Goal:** Replace the long 20-task selector with Activities → Honest Work / Outlaw Path / Clan Activities / Other Activities → activity selection.
+- **Acceptance criteria:** first screen stays compact; category buttons show only matching tasks; Clan and Other remain honest empty placeholders until implemented; visible Back controls work at each level without changing the ongoing task; selecting a task starts it and collapses the picker; mobile portrait touch targets and keyboard focus are usable; no save format change; browser smoke tests cover navigation.
+- **Status:** IN_REVIEW (owner-approved implementation, pending PR checks).
+- **Dependencies:** Existing 20-activity UI.
+- **Added by:** chat
+- **Requested by:** Owner (2026-11-21).
+- **Implemented by:** Not yet (pending verified merge).

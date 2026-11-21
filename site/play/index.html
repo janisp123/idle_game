@@ -9,7 +9,7 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css">
-  <script type="module" src="./app.mjs?v=20261121-production1"></script>
+  <script type="module" src="./app.mjs?v=20261121-mobile-activity-nav1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -64,8 +64,20 @@
         <section class="panel actions" aria-labelledby="actions-heading">
           <p class="section-index">II · CHOOSE YOUR PATH</p>
           <h2 id="actions-heading" class="engraved-title">ACTIVITIES</h2>
-          <div id="activityChoices" class="activity-choices" aria-label="Choose work"></div>
-          <p class="hint">Selecting an activity starts it immediately and repeats it until you choose another.</p>
+          <div id="activityNav" class="activity-navigation">
+            <button id="openActivities" class="activity-nav-button" type="button" aria-controls="activityCategories" aria-expanded="false">Choose activity <span aria-hidden="true">›</span></button>
+            <div id="activityCategories" class="activity-nav-screen" hidden aria-label="Activity categories">
+              <button id="backToActivities" class="activity-back" type="button">‹ Back</button>
+              <p class="activity-nav-label">Choose a path</p>
+              <div id="activityCategoryChoices" class="activity-category-choices"></div>
+            </div>
+            <div id="activityListScreen" class="activity-nav-screen" hidden aria-label="Activities in selected category">
+              <button id="backToCategories" class="activity-back" type="button">‹ Back to paths</button>
+              <p id="activityCategoryTitle" class="activity-nav-label"></p>
+              <div id="activityChoices" class="activity-choices" aria-label="Choose work"></div>
+            </div>
+          </div>
+          <p class="hint">Choose Activities → a path → a task. The Back buttons return without changing your current task.</p>
         </section>
 
 

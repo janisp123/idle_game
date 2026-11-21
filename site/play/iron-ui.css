@@ -349,3 +349,23 @@ footer p{color:#aa9680}
 .resource-lock { margin-left:auto; padding:5px 7px; flex:0 0 auto; min-width:60px; background:#2f241d; border:1px solid #7c6043; color:#e5c6a2; font:12px Georgia,serif; cursor:pointer; }
 .resource-lock[aria-pressed="true"] { background:#5b2f20; border-color:#c79560; color:#ffe0ae; }
 .resource-lock:focus-visible { outline:2px solid #f0bd7f; outline-offset:2px; }
+
+/* Mobile-first nested activity picker: keep the entire 20-task list out of view
+   until a category is chosen. Hidden is respected at every viewport size. */
+.activity-navigation [hidden] { display:none !important; }
+.activity-nav-button,.activity-back {
+  width:100%;min-height:52px;padding:12px 14px;margin:0 0 9px;
+  border:2px ridge #826044;background:linear-gradient(150deg,#403022,#19110d);
+  color:#efd5ac;font:700 17px Georgia,serif;text-align:left;cursor:pointer;
+}
+.activity-nav-button span{float:right;font-size:24px;line-height:18px}
+.activity-nav-button:hover,.activity-back:hover{border-color:#d8a369}
+.activity-nav-button:focus-visible,.activity-back:focus-visible{outline:2px solid #eac087;outline-offset:2px}
+.activity-back{min-height:44px;color:#f0bf84;background:#271a14;font-size:15px}
+.activity-nav-label{margin:8px 0 12px;color:#d7af79;font-size:13px;letter-spacing:.09em;text-transform:uppercase}
+.activity-category-choices{display:grid;gap:2px}
+.activity-choices .activity{width:100%;text-align:left}
+@media (max-width:520px) {
+  .activity-nav-button{min-height:58px;font-size:19px}
+  .activity-back{min-height:50px;font-size:17px}
+}
