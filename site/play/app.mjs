@@ -1,7 +1,7 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, PRODUCTION_INPUTS, recipeOptions, newGame, readSave, settle,
-  enterGame, chooseActivity, xpForLevel
-} from "./engine.mjs?v=20261121-ingredient-crafting1";
+  enterGame, requestActivityChange, SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, xpForLevel
+} from "./engine.mjs?v=20261121-activity-switch1";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -14,7 +14,8 @@ const ui = {
   skillTitle: $("skillTitle"), skillLevel: $("skillLevel"), skillXp: $("skillXp"), skillFill: $("skillFill"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
   heading: $("scene-heading"), description: $("activityDescription"), actionFill: $("actionFill"),
-  activityProgress: $("activityProgress"),
+  activityProgress: $("activityProgress"), transitionStatus: $("transitionStatus"),
+  transitionPhase: $("transitionPhase"), transitionProgress: $("transitionProgress"), transitionFill: $("transitionFill"),
   logList: $("logList"),
   banner: $("sceneBanner"), saveStatus: $("saveStatus")
 };
@@ -67,24 +68,31 @@ const resourceValues = {};
 const resourceRows = new Map();
 const reserveButtons = new Map();
 for (const [id, task] of Object.entries(ACTIVITIES)) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "activity";
-  button.setAttribute("aria-pressed", "false");
+  const row = document.createElement("div");
+  row.className = "activity";
+  const body = document.createElement("span");
+  body.className = "activity-copy";
+  const titleRow = document.createElement("span");
+  titleRow.className = "activity-title-line";
   const name = document.createElement("strong");
   name.textContent = task.title;
+  const startButton = document.createElement("button");
+  startButton.type = "button";
+  startButton.className = "activity-start";
+  startButton.textContent = "Start";
+  startButton.setAttribute("aria-label", "Start " + task.title);
+  startButton.addEventListener("click", () => beginActivity(id));
+  titleRow.append(name, startButton);
   const detail = document.createElement("small");
   detail.textContent = task.itemLabel;
-  const body = document.createElement("span");
   const rank = document.createElement("small");
   rank.className = "skill-rank";
-  body.append(name, detail, rank);
+  body.append(titleRow, detail, rank);
+  row.append(body);
   activityRewardLabels.set(id, detail);
-  button.append(body);
   activityLevelLabels.set(id, rank);
-  button.addEventListener("click", () => beginActivity(id));
-  categoryActivities.get(task.category in CATEGORY_LABELS ? task.category : "other").push(button);
-  activityButtons.set(id, button);
+  categoryActivities.get(task.category in CATEGORY_LABELS ? task.category : "other").push(row);
+  activityButtons.set(id, { row, startButton });
 }
 for (const item of ITEM_KEYS) {
   const row = document.createElement("div");
@@ -153,10 +161,21 @@ function lootSummary(report) {
   return found.length ? "You gathered " + found.join(", ") + "." : "No new resources collected.";
 }
 
-function reportProgress(report) {
-  if (!report || !report.activity) return;
-  const summary = lootSummary(report);
-  if (summary) message(summary);
+function reportProgress(outcome) {
+  if (!outcome) return false;
+  let gained = false;
+  for (const report of outcome.reports ?? [outcome.report ?? outcome]) {
+    if (!report?.completed) continue;
+    const summary = lootSummary(report);
+    if (summary) message(summary);
+    gained = true;
+  }
+  return gained;
+}
+
+function announceArrival(priorTransition) {
+  if (priorTransition && !state.transition && state.activity === priorTransition.targetActivity)
+    message("You begin " + ACTIVITIES[state.activity].title.toLowerCase() + ".");
 }
 
 function render() {
@@ -176,7 +195,8 @@ function render() {
     }
   }
   emptyInventory.hidden = ITEM_KEYS.some(key => state.items[key] > 0);
-  for (const [id, button] of activityButtons) {
+  const transition = state.transition;
+  for (const [id, { row, startButton }] of activityButtons) {
     const skill = state.skills[id];
     activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level);
     const available = lootChances(id, skill.level);
@@ -185,8 +205,14 @@ function render() {
       ? recipes.map(t => `${t.label} (uses ${ITEM_LABELS[t.input]})`).join(" · ")
       : available.length ? available.map(t => t.label).join(" · ")
       : ACTIVITIES[id].itemLabel;
-    button.classList.toggle("active", state.activity === id);
-    button.setAttribute("aria-pressed", String(state.activity === id));
+    const workingHere = state.activity === id && (!transition || transition.phase === "finishing");
+    const destination = transition?.targetActivity === id;
+    row.classList.toggle("active", workingHere);
+    row.classList.toggle("pending", destination);
+    startButton.disabled = (!transition && state.activity === id) || destination;
+    startButton.textContent = destination ? "Changing" : workingHere ? "Working" : "Start";
+    startButton.setAttribute("aria-label", destination ? "Changing to " + ACTIVITIES[id].title :
+      workingHere ? "Currently working: " + ACTIVITIES[id].title : "Start " + ACTIVITIES[id].title);
   }
 
   const selectedSkill = state.activity ? state.skills[state.activity] : null;
@@ -208,7 +234,29 @@ function render() {
     ui.skillFill.style.width = "0%";
   }
 
-  if (!current) {
+  ui.activityProgress.hidden = Boolean(transition);
+  ui.transitionStatus.hidden = !transition;
+  if (transition) {
+    const stageNames = {
+      finishing: "Finishing current activity",
+      moving: "Moving to new location",
+      preparing: "Getting ready to start new activity"
+    };
+    const phaseName = stageNames[transition.phase];
+    if (ui.transitionPhase.textContent !== phaseName) ui.transitionPhase.textContent = phaseName;
+    const phaseLength = transition.phase === "finishing" ? ACTIVITIES[state.activity].durationMs :
+      transition.phase === "moving"
+      ? (ACTIVITIES[state.activity].zone === ACTIVITIES[transition.targetActivity].zone
+        ? SAME_ZONE_TRAVEL_MS : ZONE_TRAVEL_MS)
+      : PREPARATION_MS;
+    const phaseElapsed = transition.phase === "finishing" ? state.progressMs : transition.phaseProgressMs;
+    const percent = Math.min(100, 100 * phaseElapsed / phaseLength);
+    ui.transitionFill.style.width = percent.toFixed(2) + "%";
+    ui.transitionProgress.setAttribute("aria-valuenow", String(Math.round(percent)));
+    ui.transitionProgress.setAttribute("aria-label", phaseName);
+  }
+  const sceneActivity = transition ? ACTIVITIES[transition.targetActivity] : current;
+  if (!sceneActivity) {
     ui.sceneTag.textContent = "WAITING FOR ORDERS";
     ui.banner.textContent = "THE LONG VIGIL";
     ui.heading.textContent = "Choose an activity";
@@ -216,16 +264,18 @@ function render() {
     ui.actionFill.style.width = "0%";
     ui.activityProgress.setAttribute("aria-valuenow", "0");
   } else {
-    const isHunt = state.activity === "hunting";
-    ui.sceneTag.textContent = current.zone.toUpperCase();
-    ui.banner.textContent = current.title.toUpperCase();
-    ui.heading.textContent = current.title;
-    ui.description.textContent = current.description;
-    // Each activity has its own painted scene. Existing paintings remain fallbacks
-    // until the new self-hosted WebP assets are uploaded alongside this change.
-    const sceneAsset = current.item === null
-      ? (current.category === "training" ? "masonry" : "cooking")
-      : state.activity;
+    const isHunt = sceneActivity === ACTIVITIES.hunting;
+    ui.sceneTag.textContent = transition ? "CHANGING PATH" : sceneActivity.zone.toUpperCase();
+    ui.banner.textContent = transition ? "THE JOURNEY" : sceneActivity.title.toUpperCase();
+    ui.heading.textContent = transition ? "Changing to " + sceneActivity.title : sceneActivity.title;
+    ui.description.textContent = transition
+      ? "Your character finishes their work, travels and prepares before the new task begins."
+      : sceneActivity.description;
+    // Reuse the existing painted scene for the selected destination.
+    const sceneId = transition ? transition.targetActivity : state.activity;
+    const sceneAsset = sceneActivity.item === null
+      ? (sceneActivity.category === "training" ? "masonry" : "cooking")
+      : sceneId;
     const desiredImage = "./assets/" + sceneAsset + ".webp?v=20261121-skills-outlaws-v3";
     if (ui.sceneImage.getAttribute("src") !== desiredImage) {
       ui.sceneImage.onerror = () => {
@@ -234,46 +284,47 @@ function render() {
       };
       ui.sceneImage.src = desiredImage;
     }
-    ui.sceneImage.alt = "Dark fantasy illustration of " + current.title.toLowerCase();
-    ui.sceneCaption.textContent = current.zone.toUpperCase();
-    const percentage = Math.min(100, 100 * state.progressMs / current.durationMs);
-    ui.actionFill.style.width = percentage.toFixed(2) + "%";
-    ui.activityProgress.setAttribute("aria-valuenow", String(Math.round(percentage)));
+    ui.sceneImage.alt = "Dark fantasy illustration of " + sceneActivity.title.toLowerCase();
+    ui.sceneCaption.textContent = sceneActivity.zone.toUpperCase();
+    if (!transition) {
+      const percentage = Math.min(100, 100 * state.progressMs / sceneActivity.durationMs);
+      ui.actionFill.style.width = percentage.toFixed(2) + "%";
+      ui.activityProgress.setAttribute("aria-valuenow", String(Math.round(percentage)));
+    }
   }
 }
 
 function tick() {
   if (document.visibilityState === "hidden") return;
+  const before = state.transition;
   const result = settle(state, Date.now());
   state = result.state;
-  if (result.report.completed) {
-    const summary = lootSummary(result.report);
-    if (summary) message(summary);
-    writeSave();
-  } else if (Date.now() - lastSavedAt > 3000) {
-    writeSave();
-  }
+  const gained = reportProgress(result);
+  announceArrival(before);
+  if (gained || (before && !state.transition) || Date.now() - lastSavedAt > 3000) writeSave();
   render();
 }
 
 function returnToGame() {
+  const before = state.transition;
   const result = enterGame(state, Date.now());
   state = result.state;
-  if (result.report.activity) reportProgress(result.report);
+  reportProgress(result);
+  announceArrival(before);
   writeSave();
   render();
 }
 
 function beginActivity(kind) {
   showActivityScreen("root", null);
-  const result = chooseActivity(state, kind, Date.now());
-  const changed = state.activity !== kind;
+  const before = state.transition;
+  const previousTarget = before?.targetActivity ?? state.activity;
+  const result = requestActivityChange(state, kind, Date.now());
   state = result.state;
-  if (result.report.completed) {
-    const summary = lootSummary(result.report);
-    if (summary) message(summary);
-  }
-  if (changed) message("You begin " + ACTIVITIES[kind].title.toLowerCase() + ".");
+  reportProgress(result);
+  if (before && !state.transition) announceArrival(before);
+  if (state.transition && kind !== previousTarget)
+    message("Changing to " + ACTIVITIES[kind].title.toLowerCase() + ".");
   writeSave();
   render();
 }
@@ -290,7 +341,7 @@ function start() {
   } else {
     const result = enterGame(state, Date.now());
     state = result.state;
-    reportProgress(result.report);
+    reportProgress(result);
     writeSave();
   }
 
