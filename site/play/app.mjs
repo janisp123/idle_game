@@ -78,10 +78,10 @@ function lootSummary(report) {
 
 function reportProgress(report) {
   if (!report || !report.activity) return;
-  const summary = "Welcome back. " + lootSummary(report);
+  const summary = lootSummary(report);
   ui.returnMessage.textContent = summary;
   ui.returnPanel.hidden = false;
-  message(summary);
+  message("Welcome back. " + summary);
 }
 
 function render() {
