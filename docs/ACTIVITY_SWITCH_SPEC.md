@@ -1,8 +1,8 @@
 # Activity switching — three-phase transition specification (GAME-004)
 
 **Status:** Owner-approved behavior, implementation specification only; **not implemented**.
-**Recorded:** 2026-11-21 by chat. Applies to manual activity selection first. The five-task queue and automated zone-changing are still deferred.
-**Source of truth:** `docs/DECISIONS.md` ACT-SWITCH-001, ZONE-001, WORK-001, OFF-001, UI-TIME-001 and this task's entry in `docs/TD_LIST.md`.
+**Recorded:** 2026-11-21 by chat. Applies to manual activity selection. The newly approved Forever-last queue behavior is specified in [ACTIVITY_QUEUE_SPEC.md](ACTIVITY_QUEUE_SPEC.md); neither switching nor queued execution is implemented yet.
+**Source of truth:** `docs/DECISIONS.md` ACT-SWITCH-001, QUEUE-001, ZONE-001, WORK-001, OFF-001, UI-TIME-001 and this task's entry in `docs/TD_LIST.md`.
 
 ## Player experience (approved behavior)
 
@@ -61,7 +61,7 @@ Current code switches instantly in `site/play/engine.mjs:chooseActivity` by rese
 - Respect **OFF-001**: during any offline catch-up that crosses the switch, *both* old and new activity use the saved **pre-return effective skill levels**, even if the old finishing reward crosses an XP level threshold. Apply effective level changes only on return, after all elapsed work has been resolved.
 - Use existing safe inventory counters, reward allocation, ingredient protection, clock validation and save idempotency. Never duplicate rewards when settling the same timestamp repeatedly.
 - An existing activity requires at least one remaining cycle to finish; do not grant the old cycle reward immediately at Start unless it was already complete by that timestamp.
-- This manual feature does **not** implement the later five-task loop, automatic queue/fallback rules, accounts or new terrain systems.
+- This manual-switch patch does **not** itself implement queued scheduling, accounts or terrain. The separate [ACTIVITY_QUEUE_SPEC.md](ACTIVITY_QUEUE_SPEC.md) supersedes the old looping queue: its final activity stays selected forever.
 
 ### UI implementation notes
 
@@ -75,7 +75,7 @@ Current code switches instantly in `site/play/engine.mjs:chooseActivity` by rese
 
 1. **Engine + tests:** transition state, safe persistence/migration, request and deterministic phase advancement, cross-zone five-minute travel, bounded long-absence settlement and idempotency. First settle the two remaining duration values listed below.
 2. **UI + smoke tests:** Start beside activity name, phase text and distinct bar, mobile/keyboard/ARIA support, no time labels or surprise row-click switch.
-3. **Integration + release:** full game/Pages CI; tests across resource exhaustion, same/different zone, no active task, logout mid-phase, 20-year absence, skill threshold crossing, multiple tabs, backward time and repeated settlements. Verify deployed page separately, then mark this subtask implemented; keep five-task queue open.
+3. **Integration + release:** full game/Pages CI; tests across resource exhaustion, same/different zone, no active task, logout mid-phase, 20-year absence, skill threshold crossing, multiple tabs, backward time and repeated settlements. Verify deployed page separately, then mark this subtask implemented; keep queue execution open until independently implemented and verified.
 
 ## Decisions not yet set — do not invent these in code
 
@@ -84,4 +84,4 @@ Current code switches instantly in `site/play/engine.mjs:chooseActivity` by rese
 - Whether a player can replace/cancel a pending target mid-transition. The first implementation **proposes disabling Start until completion**, but that specific edge behavior is not yet owner-approved.
 - Whether there should be one **fixed total switching interval** (aside from finishing the old full cycle) or separate fixed moving and preparation intervals. Any design must still honor the approved five-minute cross-zone travel rule.
 
-Until these values are approved, this is an **implementation specification**, not permission to deploy guessed timings.
+Until these values are approved, this is an **implementation specification**, not permission to deploy guessed timings. The queue allows player-configured task durations without showing a live timer.
