@@ -1,7 +1,9 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, PRODUCTION_INPUTS, recipeOptions, newGame, readSave, settle,
-  enterGame, requestActivityChange, SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, xpForLevel
-} from "./engine.mjs?v=20261121-alpha-timings1";
+  enterGame, queueStartActivity, queueSetDuration, queueSwap, queueRemoveLast,
+  MAX_WAGONS, HOUR_MS, DAY_MS,
+  SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, xpForLevel
+} from "./engine.mjs?v=20261121-three-wagons1";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -16,6 +18,10 @@ const ui = {
   heading: $("scene-heading"), description: $("activityDescription"), actionFill: $("actionFill"),
   activityProgress: $("activityProgress"), transitionStatus: $("transitionStatus"),
   transitionPhase: $("transitionPhase"), transitionProgress: $("transitionProgress"), transitionFill: $("transitionFill"),
+  wagonQueue: $("wagonQueue"), wagonList: $("wagonList"),
+  queuePlanner: $("queuePlanner"), queuePlannerTitle: $("queuePlannerTitle"),
+  queueAmount: $("queueAmount"), queueUnit: $("queueUnit"),
+  queueConfirm: $("queueConfirm"), queueCancel: $("queueCancel"),
   logList: $("logList"),
   banner: $("sceneBanner"), saveStatus: $("saveStatus")
 };
@@ -24,6 +30,8 @@ const messages = [];
 let state;
 let lastSavedAt = 0;
 let storageWorks = true;
+let planningActivity = null;
+let lastWagonSignature = null;
 
 const CATEGORY_LABELS = Object.freeze({
   craft: "Honest Work", outlaw: "Outlaw Path", training: "Training & Knowledge", leisure: "Tavern & Leisure", clan: "Clan Activities", other: "Other Activities"
@@ -178,6 +186,117 @@ function announceArrival(priorTransition) {
     message("You begin " + ACTIVITIES[state.activity].title.toLowerCase() + ".");
 }
 
+
+/** Show one to three illustrated wagon cards without rebuilding focused controls every tick. */
+function renderWagons() {
+  const wagons = state.wagons ?? [];
+  ui.wagonQueue.hidden = wagons.length === 0;
+  const signature = JSON.stringify([wagons, state.transition?.targetActivity, state.activity]);
+  if (signature === lastWagonSignature) return;
+  lastWagonSignature = signature;
+  const cards = wagons.map((wagon, i) => {
+    const card = document.createElement("article");
+    card.className = "wagon";
+    const picture = document.createElement("div");
+    picture.className = "wagon-cart";
+    picture.setAttribute("aria-hidden", "true");
+    const label = document.createElement("strong");
+    label.className = "wagon-name";
+    label.textContent = ACTIVITIES[wagon.activity].title;
+    const position = document.createElement("small");
+    position.className = "wagon-position";
+    position.textContent = i === 0
+      ? (state.transition?.targetActivity === wagon.activity ? "Changing to…" : "Current activity")
+      : i === wagons.length - 1 ? "Final destination" : "Next activity";
+    card.append(picture, label, position);
+
+    if (i === wagons.length - 1) {
+      const forever = document.createElement("strong");
+      forever.className = "wagon-forever";
+      forever.textContent = "FOREVER";
+      card.append(forever);
+    } else {
+      const duration = document.createElement("div");
+      duration.className = "wagon-duration";
+      const heading = document.createElement("span");
+      heading.textContent = "Do it for";
+      const amount = document.createElement("select");
+      amount.setAttribute("aria-label", "Duration for " + ACTIVITIES[wagon.activity].title);
+      const unit = document.createElement("select");
+      unit.setAttribute("aria-label", "Duration unit for " + ACTIVITIES[wagon.activity].title);
+      for (let n = 1; n <= 8; n++) {
+        const option = document.createElement("option");
+        option.value = String(n);
+        option.textContent = String(n);
+        amount.append(option);
+      }
+      for (const [value, label] of [["hours", "Hours"], ["days", "Days"]]) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        unit.append(option);
+      }
+      const days = wagon.plannedMs % DAY_MS === 0;
+      amount.value = String(wagon.plannedMs / (days ? DAY_MS : HOUR_MS));
+      unit.value = days ? "days" : "hours";
+      const apply = () => {
+        const ms = Number(amount.value) * (unit.value === "days" ? DAY_MS : HOUR_MS);
+        applyQueueChange(queueSetDuration(state, i, ms, Date.now()), "Wagon duration updated.");
+      };
+      amount.addEventListener("change", apply);
+      unit.addEventListener("change", apply);
+      duration.append(heading, amount, unit);
+      card.append(duration);
+    }
+
+    const controls = document.createElement("div");
+    controls.className = "wagon-controls";
+    const control = (label, title, action) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "wagon-control";
+      button.textContent = label;
+      button.setAttribute("aria-label", title);
+      button.addEventListener("click", action);
+      controls.append(button);
+    };
+    if (i > 0) control("←", "Move " + ACTIVITIES[wagon.activity].title + " earlier",
+      () => applyQueueChange(queueSwap(state, i - 1, Date.now()), "Route rearranged."));
+    if (i < wagons.length - 1) control("→", "Move " + ACTIVITIES[wagon.activity].title + " later",
+      () => applyQueueChange(queueSwap(state, i, Date.now()), "Route rearranged."));
+    if (i === wagons.length - 1 && i > 0) control("Remove", "Remove final future wagon",
+      () => applyQueueChange(queueRemoveLast(state, Date.now()), "Future wagon removed."));
+    card.append(controls);
+    return card;
+  });
+  ui.wagonList.replaceChildren(...cards);
+}
+
+function applyQueueChange(result, description) {
+  const prior = state.transition;
+  state = result.state;
+  reportProgress(result);
+  announceArrival(prior);
+  if (description) message(description);
+  writeSave();
+  render();
+}
+
+function hideQueuePlanner() {
+  planningActivity = null;
+  ui.queuePlanner.hidden = true;
+}
+
+ui.queueCancel.addEventListener("click", () => hideQueuePlanner());
+ui.queueConfirm.addEventListener("click", () => {
+  if (!planningActivity) return;
+  const ms = Number(ui.queueAmount.value) * (ui.queueUnit.value === "days" ? DAY_MS : HOUR_MS);
+  const task = planningActivity;
+  hideQueuePlanner();
+  applyQueueChange(queueStartActivity(state, task, ms, Date.now()), "Added " +
+    ACTIVITIES[task].title.toLowerCase() + " to your route.");
+});
+
 function render() {
   const current = state.activity ? ACTIVITIES[state.activity] : null;
   ui.playerName.textContent = state.name;
@@ -196,6 +315,7 @@ function render() {
   }
   emptyInventory.hidden = ITEM_KEYS.some(key => state.items[key] > 0);
   const transition = state.transition;
+  renderWagons();
   for (const [id, { row, startButton }] of activityButtons) {
     const skill = state.skills[id];
     activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level);
@@ -209,10 +329,15 @@ function render() {
     const destination = transition?.targetActivity === id;
     row.classList.toggle("active", workingHere);
     row.classList.toggle("pending", destination);
-    startButton.disabled = (!transition && state.activity === id) || destination;
-    startButton.textContent = destination ? "Changing" : workingHere ? "Working" : "Start";
+    const queuedIndex = state.wagons.findIndex(w => w.activity === id);
+    const queueFull = state.wagons.length >= MAX_WAGONS;
+    startButton.disabled = queuedIndex !== -1 || queueFull;
+    startButton.textContent = destination ? "Changing" : queuedIndex === 0 ? "Working" :
+      queuedIndex > 0 ? "Queued" : queueFull ? "Full" : "Start";
     startButton.setAttribute("aria-label", destination ? "Changing to " + ACTIVITIES[id].title :
-      workingHere ? "Currently working: " + ACTIVITIES[id].title : "Start " + ACTIVITIES[id].title);
+      queuedIndex === 0 ? "Current wagon: " + ACTIVITIES[id].title :
+      queuedIndex > 0 ? "Already queued: " + ACTIVITIES[id].title :
+      queueFull ? "Three wagons already queued" : "Start " + ACTIVITIES[id].title);
   }
 
   const selectedSkill = state.activity ? state.skills[state.activity] : null;
@@ -316,17 +441,22 @@ function returnToGame() {
 }
 
 function beginActivity(kind) {
+  if (state.wagons.some(w => w.activity === kind) || state.wagons.length >= MAX_WAGONS) return;
   showActivityScreen("root", null);
-  const before = state.transition;
-  const previousTarget = before?.targetActivity ?? state.activity;
-  const result = requestActivityChange(state, kind, Date.now());
-  state = result.state;
-  reportProgress(result);
-  if (before && !state.transition) announceArrival(before);
-  if (state.transition && kind !== previousTarget)
-    message("Changing to " + ACTIVITIES[kind].title.toLowerCase() + ".");
-  writeSave();
-  render();
+  if (!state.wagons.length) {
+    hideQueuePlanner();
+    applyQueueChange(queueStartActivity(state, kind, null, Date.now()),
+      "Preparing to begin " + ACTIVITIES[kind].title.toLowerCase() + ".");
+    return;
+  }
+  // The formerly final Forever wagon must get an explicit duration.
+  planningActivity = kind;
+  ui.queueAmount.value = "1";
+  ui.queueUnit.value = "hours";
+  const previous = state.wagons.at(-1).activity;
+  ui.queuePlannerTitle.textContent = "Before adding " + ACTIVITIES[kind].title +
+    ", how long should " + ACTIVITIES[previous].title + " work?";
+  ui.queuePlanner.hidden = false;
 }
 
 function start() {
