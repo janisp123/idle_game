@@ -141,7 +141,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.has("returnPanel"), false, "no welcome-back report panel");
     assert.equal(elements.has("dismissReturn"), false, "no popup dismiss control");
     const chronicle = elements.get("logList").children.map(node => node.textContent);
-    assert.ok(chronicle.some(line => /^You gathered \\d+ stone\\.$/.test(line)),
+    assert.ok(chronicle.some(line => /^You gathered \d+ stone\.$/.test(line)),
       "return loot is recorded in the chronicle");
     assert.ok(chronicle.every(line => !/Welcome back|seconds|hours|XP|actions|cycles/i.test(line)),
       "no duplicated welcome messages or timers");
