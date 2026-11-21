@@ -1,15 +1,17 @@
 import {
-  SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, lootChances, recipeOptions, newGame, readSave, settle,
+  SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
+  lootChances, recipeOptions, newGame, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
   MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster
-} from "./engine.mjs?v=20261121-until-levelup1";
+} from "./engine.mjs?v=20261121-attributes1";
 
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
+  characterAttributes: $("characterAttributes"),
   resourceList: $("resourceList"), choices: $("activityChoices"),
   openActivities: $("openActivities"), categories: $("activityCategories"),
   categoryChoices: $("activityCategoryChoices"), listScreen: $("activityListScreen"),
@@ -82,6 +84,18 @@ showActivityScreen("root", null);
 const activityButtons = new Map();
 const activityLevelLabels = new Map();
 const activityRewardLabels = new Map();
+const attributeValues = new Map();
+for (const { id, name } of ATTRIBUTES) {
+  const row = document.createElement("div");
+  row.className = "character-attribute-row";
+  const label = document.createElement("span");
+  label.textContent = id + " · " + name;
+  const value = document.createElement("strong");
+  value.textContent = "10";
+  row.append(label, value);
+  ui.characterAttributes.append(row);
+  attributeValues.set(id, value);
+}
 const resourceValues = {};
 const resourceRows = new Map();
 for (const [id, task] of Object.entries(ACTIVITIES)) {
@@ -122,7 +136,15 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   detail.textContent = task.itemLabel;
   const rank = document.createElement("small");
   rank.className = "skill-rank";
-  body.append(titleRow, detail, rank);
+  const statGains = document.createElement("small");
+  statGains.className = "activity-stat-gains";
+  const weights = Object.entries(ACTIVITY_STAT_WEIGHTS[id])
+    .sort((left, right) => right[1] - left[1]);
+  statGains.textContent = "Stats · " +
+    weights.map(([stat, weight]) => stat + (weight >= 50 ? "++" : "+")).join(" · ");
+  statGains.title = "Attribute XP share: " +
+    weights.map(([stat, weight]) => stat + " " + weight + "%").join(", ");
+  body.append(titleRow, detail, rank, statGains);
   row.append(body);
   activityRewardLabels.set(id, detail);
   activityLevelLabels.set(id, rank);
@@ -495,6 +517,14 @@ ui.masterConfirm.addEventListener("click", () => {
 function render() {
   const current = state.activity ? ACTIVITIES[state.activity] : null;
   ui.playerName.textContent = state.name;
+  const stats = allAttributeProgress(state.attributeEffort);
+  for (const { id } of ATTRIBUTES) {
+    const value = attributeValues.get(id);
+    value.textContent = number(stats[id].value);
+    value.title = id + ": " + stats[id].progressPercent.toFixed(1) +
+      "% toward the next point (" + stats[id].progressXP.toFixed(1) +
+      " / " + number(stats[id].nextXP) + " XP)";
+  }
   if (document.activeElement !== ui.nameInput) ui.nameInput.value = state.name;
   for (const key of ITEM_KEYS) {
     const qty = state.items[key];

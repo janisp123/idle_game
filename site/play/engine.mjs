@@ -1,3 +1,10 @@
+import {
+  ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
+} from "./attributes.mjs?v=20261121-attributes1";
+export {
+  ATTRIBUTE_BALANCE, ATTRIBUTES, ATTRIBUTE_IDS, ACTIVITY_STAT_WEIGHTS,
+  attributeXP, attributeProgress, allAttributeProgress
+} from "./attributes.mjs?v=20261121-attributes1";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
 export { PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions } from "./production.mjs?v=20261121-no-resource-locks1";
@@ -8,7 +15,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=20261121-loot1";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 4;
+export const GAME_VERSION = 5;
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -82,6 +89,9 @@ export const ITEM_LABELS = Object.freeze({
 });
 export const ITEM_KEYS = Object.freeze(Object.keys(ITEM_LABELS));
 export const SKILL_IDS = Object.freeze(Object.keys(ACTIVITIES));
+if (Object.keys(ACTIVITY_STAT_WEIGHTS).length !== SKILL_IDS.length ||
+    SKILL_IDS.some(id => !Object.hasOwn(ACTIVITY_STAT_WEIGHTS, id)))
+  throw new Error("Every activity must define exactly one attribute-weight distribution");
 const blankSkills = () => Object.fromEntries(SKILL_IDS.map(id => [id, { level: 1, xp: 0 }]));
 export const activityDuration = (id, speedMultiplier = 1) => {
   if (!Object.hasOwn(ACTIVITIES, id) || !Number.isFinite(speedMultiplier) || speedMultiplier <= 0)
@@ -121,6 +131,7 @@ export function newGame(now = Date.now()) {
     timingProfile: TIMING_PROFILE,
     name: "Wanderer",
     skills: blankSkills(),
+    attributeEffort: blankAttributeEffort(),
     // V1 global XP cannot be assigned to individual activities reliably.
     unattributedXP: 0,
     items: Object.fromEntries(ITEM_KEYS.map(key => [key, 0])),
@@ -146,9 +157,10 @@ function scalePartialProgress(value, sourceMs, targetMs) {
 export function readSave(value) {
   try {
     const s = typeof value === "string" ? JSON.parse(value) : value;
-    if (!s || ![1, 2, 3, GAME_VERSION].includes(s.version) ||
+    if (!s || ![1, 2, 3, 4, GAME_VERSION].includes(s.version) ||
         typeof s.name !== "string" || s.name.length > 40 ||
         !s.items || typeof s.items !== "object" ||
+        (s.version === GAME_VERSION && !validAttributeEffort(s.attributeEffort)) ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
         (s.protectedItems !== undefined && (!Array.isArray(s.protectedItems) ||
           !s.protectedItems.every(key => typeof key === "string" && ITEM_KEYS.includes(key)))) ||
@@ -208,7 +220,7 @@ export function readSave(value) {
             const skill = s.skills[id];
             return skill === undefined || (skill && typeof skill === "object" &&
               isCount(skill.xp) && isCount(skill.level) && skill.level >= 1 &&
-              (s.version === GAME_VERSION
+              (s.version >= 4
                 ? skill.xp <= xpToNextLevel(skill.level)
                 : skill.level <= levelFromXP(skill.xp)));
           })) return null;
@@ -221,7 +233,7 @@ export function readSave(value) {
           // V1–V3 used cumulative lifetime skill XP and allowed years of XP
           // banking. V4 uses ONLY progress within the current level; preserve
           // the earned level and at most one ready level of saved progress.
-          const xp = s.version === GAME_VERSION ? old.xp :
+          const xp = s.version >= 4 ? old.xp :
             Math.min(xpToNextLevel(old.level), Math.max(0, old.xp - xpForLevel(old.level)));
           skills[id] = { xp, level: old.level };
         }
@@ -244,6 +256,7 @@ export function readSave(value) {
     }
     return {
       version: GAME_VERSION, timingProfile: TIMING_PROFILE, name: s.name, skills,
+      attributeEffort: s.version === GAME_VERSION ? { ...s.attributeEffort } : blankAttributeEffort(),
       // Legacy protectedItems are validated above but discarded: no resource locks remain.
       unattributedXP: oldVersion ? s.totalXP : s.unattributedXP,
       items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
@@ -312,6 +325,9 @@ function settleWork(state, now, random, xpRandom = random) {
     item: null, gainedItems: 0, items: {}, consumed: {} };
   if (!state.activity || elapsedMs === 0) return { state: next, report };
 
+  // Attribute progress is based on productive time, not work cycles or
+  // alpha timing. Master-capped skill XP does not stop attribute growth.
+  next.attributeEffort = awardAttributeTime(state.attributeEffort, state.activity, elapsedMs);
   const rules = ACTIVITIES[state.activity]; // snapshot at start of this whole settlement
   const totalMs = state.progressMs + elapsedMs;
   const count = Math.floor(totalMs / rules.durationMs);
@@ -350,7 +366,8 @@ function settleWork(state, now, random, xpRandom = random) {
       }
       next.skills[state.activity] = { ...prior, xp: prior.xp + report.gainedXP };
     }
-    // Empty input stock consumes work time but grants no crafted goods or XP.
+    // Empty input stock grants no crafted goods or skill XP; time-based
+    // attributes remain a separate, universally accessible progression path.
     // Offline skill effectiveness stays frozen at the last activated level.
   }
   // A full XP bar cannot level here, on return or when the tab stays open.

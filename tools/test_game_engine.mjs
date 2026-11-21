@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
+  ATTRIBUTES, ATTRIBUTE_IDS, ATTRIBUTE_BALANCE, ACTIVITY_STAT_WEIGHTS, attributeXP, attributeProgress, allAttributeProgress,
   ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, UNTIL_LEVEL_UP, MASTER_RESOURCE_MINIMUM, skillMasterReadiness, validQueuePlan, validPlannedDuration, queueStartActivity, queueInsertTimedActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
   enterGame, testOfflineDay, xpForLevel, levelFromXP, xpToNextLevel, skillSpoils, skillMasterOffer, learnFromMaster
 } from "../site/play/engine.mjs";
@@ -1274,4 +1275,102 @@ test("editing and reordering Until LvL Up schedule preserve other jobs and saved
     {activity:"mining",plannedMs:UNTIL_LEVEL_UP},
     {activity:"meditation",plannedMs:UNTIL_LEVEL_UP}]}), null,
     "last wagon must remain Forever");
+});
+
+test("every one of the forty activities splits the same hourly stat budget", () => {
+  assert.equal(ATTRIBUTE_IDS.length, 5);
+  assert.deepEqual(ATTRIBUTE_IDS, ["STR", "DEX", "END", "INT", "WIL"]);
+  assert.equal(ATTRIBUTE_BALANCE.xpPerProductiveHour, 100);
+  assert.deepEqual(Object.keys(ACTIVITY_STAT_WEIGHTS).sort(), [...SKILL_IDS].sort());
+  for (const id of SKILL_IDS) {
+    const weights = ACTIVITY_STAT_WEIGHTS[id];
+    assert.equal(Object.values(weights).reduce((sum, x) => sum + x, 0), 100, id);
+    assert.ok(Object.keys(weights).every(stat => ATTRIBUTE_IDS.includes(stat)), id);
+  }
+});
+
+test("stat growth is based on productive time, even mid-cycle, never actions completed", () => {
+  const start = choose(newGame(0), "mining", 0).state;
+  const first = finish(start, HOUR_MS - 1);
+  const second = finish(first.state, HOUR_MS);
+  const continuous = finish(start, HOUR_MS);
+  assert.deepEqual(second.state.attributeEffort, continuous.state.attributeEffort,
+    "settling in small pieces must not lose fractional XP");
+  assert.equal(continuous.state.attributeEffort.STR, HOUR_MS * 70);
+  assert.equal(continuous.state.attributeEffort.END, HOUR_MS * 30);
+  assert.equal(continuous.state.attributeEffort.INT, 0);
+  assert.equal(attributeXP(continuous.state.attributeEffort.STR), 70);
+  assert.equal(attributeXP(continuous.state.attributeEffort.END), 30);
+  assert.equal(Object.values(continuous.state.attributeEffort)
+    .reduce((sum, amount) => sum + attributeXP(amount), 0), 100);
+  assert.deepEqual(start.attributeEffort, newGame(0).attributeEffort,
+    "settling may not mutate the original state");
+});
+
+test("changing activities changes stat distribution but not total XP per hour", () => {
+  const mining = finish(choose(newGame(0), "mining", 0).state, HOUR_MS).state;
+  const study = finish(choose(newGame(0), "ancient_texts", 0).state, HOUR_MS).state;
+  assert.equal(attributeXP(mining.attributeEffort.STR), 70);
+  assert.equal(attributeXP(study.attributeEffort.INT), 80);
+  for (const state of [mining, study]) {
+    assert.equal(Object.values(state.attributeEffort)
+      .reduce((sum, amount) => sum + attributeXP(amount), 0), 100);
+  }
+  assert.equal(Object.hasOwn(mining, "level"), false, "no global character level");
+});
+
+test("travel and preparation never grant attribute XP", () => {
+  const start = newGame(0);
+  const preparing = requestActivityChange(start, "mining", 0, midpoint).state;
+  const mid = finish(preparing, INITIAL_PREPARATION_MS / 2).state;
+  assert.deepEqual(mid.attributeEffort, start.attributeEffort);
+  const ready = finish(mid, INITIAL_PREPARATION_MS).state;
+  assert.deepEqual(ready.attributeEffort, start.attributeEffort);
+  const mined = finish(ready, INITIAL_PREPARATION_MS + ACTIVITIES.mining.durationMs).state;
+  assert.ok(mined.attributeEffort.STR > 0);
+  const switching = requestActivityChange(mined, "meditation", mined.settledAtMs, midpoint).state;
+  const oldDoneAt = mined.settledAtMs + ACTIVITIES.mining.durationMs;
+  const finished = finish(switching, oldDoneAt).state;
+  const afterTransition = finish(finished, oldDoneAt + ZONE_TRAVEL_MS + PREPARATION_MS).state;
+  assert.deepEqual(afterTransition.attributeEffort, finished.attributeEffort,
+    "travel and preparation are not productive work");
+});
+
+test("uncapped attribute progress continues after skill XP caps over twenty years offline", () => {
+  const start = choose(newGame(0), "meditation", 0).state;
+  const firstYear = finish(start, YEAR);
+  const twentyYears = finish(start, 20 * YEAR);
+  assert.equal(twentyYears.state.skills.meditation.level, 1);
+  assert.equal(twentyYears.state.skills.meditation.xp, xpToNextLevel(1),
+    "the Skill Master rule still caps skill XP");
+  assert.ok(attributeProgress(twentyYears.state.attributeEffort.WIL).value >
+    attributeProgress(firstYear.state.attributeEffort.WIL).value);
+  assert.ok(attributeProgress(twentyYears.state.attributeEffort.WIL).value > 10);
+  assert.equal(Object.values(twentyYears.state.attributeEffort).reduce(
+    (sum, effort) => sum + attributeXP(effort), 0),
+    20 * 365 * 24 * ATTRIBUTE_BALANCE.xpPerProductiveHour);
+  assert.deepEqual(readSave(JSON.stringify(twentyYears.state)), twentyYears.state);
+});
+
+test("V4 saves migrate without losing skills, resources or schedules; V5 validates stats", () => {
+  const legacy = newGame(123);
+  legacy.version = 4;
+  delete legacy.attributeEffort;
+  legacy.skills.mining = { level: 18, xp: 21 };
+  legacy.items.stone = 37;
+  const migrated = readSave(JSON.stringify(legacy));
+  assert.ok(migrated);
+  assert.equal(migrated.version, GAME_VERSION);
+  assert.deepEqual(migrated.skills.mining, legacy.skills.mining);
+  assert.equal(migrated.items.stone, 37);
+  assert.deepEqual(migrated.attributeEffort,
+    Object.fromEntries(ATTRIBUTE_IDS.map(id => [id, 0])));
+  const progressed = finish(choose(migrated, "mining", 123).state, 123 + HOUR_MS).state;
+  assert.ok(allAttributeProgress(progressed.attributeEffort).STR.value > 10);
+  assert.deepEqual(readSave(JSON.stringify(progressed)), progressed);
+  for (const corrupt of [
+    null, {}, { ...progressed.attributeEffort, STR: -1 },
+    { ...progressed.attributeEffort, WIL: 1.25 },
+    { ...progressed.attributeEffort, UNKNOWN: 0 }
+  ]) assert.equal(readSave({ ...progressed, attributeEffort: corrupt }), null);
 });

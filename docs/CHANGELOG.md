@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Five configurable time-based character attributes (chat; ATTR-001)
+
+- **Character growth:** Added Strength, Dexterity, Endurance, Intelligence and Willpower (STR/DEX/END/INT/WIL), shown on the character panel; each existing activity displays its primary and secondary attribute gains. No overall character level or mana system was introduced.
+- **One balance file:** `site/play/attributes.mjs` defines the shared provisional `xpPerProductiveHour: 100`, starting attributes, increasing per-point XP cost and the editable distribution for all 40 activities. Attribute growth is based on productive wall-clock time, not action count, so temporary alpha action speed does not inflate gains. Transitions grant no XP; the one-level Skill Master cap applies only to skill XP.
+- **Persistence:** Save format V5 adds integer weighted-time effort for the five attributes, preserving sub-second/partial-cycle progress and long offline absences. Older saves preserve names, inventory, levels, skills and schedules; untracked historical attribute time starts at baseline rather than being invented. Existing local-storage key is unchanged. Current attributes are display/progression groundwork only: combat/equipment stat formulas are **not** implemented in this patch.
+- **Validation:** Engine tests cover 40 configured weight distributions, exact per-hour budgets, partial ticks, twenty years of offline progression, transitions, no global level and V4/V5 migration; browser smoke tests cover stat UI, rewards and cache versions. Run history and Pages publication must be confirmed separately; manual phone review remains pending.
+
+
 ## 2026-11-21 — Compact bronze activity icons and visible level-up planner shortcut (chat; PR #85)
 
 - **Fixed mobile overlap:** [PR #85](https://github.com/janisp123/idle_game/pull/85) merged as `dae2d8f28a5ef062a179f78774b054808857328e`. The large Start now / Schedule word buttons, which overlapped skill names in the owner's screenshots, were replaced by compact bronze/gold **▶ Start**, **↻ Schedule**, and **↑ Until LvL Up** icons. Independent grid columns and wrapping allow skill titles to remain readable; activity reward and skill-level lines are unobscured, with descriptive screen-reader labels and button titles.
