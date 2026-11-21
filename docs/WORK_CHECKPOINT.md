@@ -16,4 +16,4 @@
 - **GAME-006:** Weighted skill-gated encounters, rare ores, and crafting/production requiring real inventory; avoid selecting targets manually. Respect frozen offline skill levels and test long absences.
 - **GAME-004:** Future 5-minute zone travel and up-to-five-task repeating queue; not yet implemented.
 
-**Rules:** Every repository action starts by reading remote `main:docs/TD_LIST.md`. Follow `AGENTS.md`, `docs/AGENT_PROTOCOL.md` and `docs/DECISIONS.md`; new gameplay merges still require owner approval. Keep player-visible timers hidden by UI-TIME-001.
+**Rules:** Owner-approved AUTO-MERGE-001 allows checked automatic PR merge only after already-agreed work is ready and no owner decision remains; see `AGENTS.md` and `docs/AGENT_PROTOCOL.md`. Every repository action starts by reading remote `main:docs/TD_LIST.md`. Follow `AGENTS.md`, `docs/AGENT_PROTOCOL.md` and `docs/DECISIONS.md`; new gameplay merges still require owner approval. Keep player-visible timers hidden by UI-TIME-001.
