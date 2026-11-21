@@ -33,7 +33,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Implemented by:** Not yet.
 
 ## GAME-011 — True Fighting and Raiding combat events with matched illustrations
-- **Goal:** Build a real autonomous event-driven Fighting system, distinct from hunting and from raid activities. Each actual strike, block, dodge, counterattack, hit, defeat or victory can display a corresponding original static illustration. Raids use their own multi-phase event system, rather than becoming Fighting.
+- **Goal:** Make combat the game's central power fantasy: build real autonomous, consequential and potentially brutal event-driven Fighting, distinct from hunting and from raid activities. Each actual strike, block, dodge, counterattack, hit, defeat or victory can display a corresponding original static illustration. Raids use their own multi-phase event system, rather than becoming Fighting.
 - **Acceptance criteria:** Opponents of similar character power; independently testable hit/block/HP/outcome rules to be defined with Owner; event type and outcome select only matching images (never fake/random events); cooldown abilities without mana/stamina; equal time-based attribute XP principles; OFF-001 frozen offline effectiveness and unlimited time; a bounded retrospective instead of replaying every offline combat event; no forced clicks.
 - **Status:** BLOCKED (the first Fighting activity and an introductory *temporary* battle tableau are being added in PR #93; real fight rules, raid phase outcomes, cooldowns, risk, and high-quality event-specific images still need design).
 - **Dependencies:** GAME-006, OFF-001, [visual direction](brainstorm/COMBAT_VISUALS.md).
