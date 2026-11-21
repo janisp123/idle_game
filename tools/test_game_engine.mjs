@@ -113,7 +113,8 @@ test("the optional one-day testing shortcut uses real settlement logic", () => {
 test("reward totals vary independently within +/-10%, with integer stochastic rounding", () => {
   const base = engineChooseActivity(newGame(0), "hunting", 0, midpoint).state;
   const low = engineSettle(base, 700_000, () => 0);
-  const high = engineSettle(base, 700_000, () => 0.999999);
+  const highRolls = [0.999999, 0, 0.999999, 0];
+  const high = engineSettle(base, 700_000, () => highRolls.shift());
   assert.equal(low.report.completed, 100);
   assert.equal(low.report.gainedItems, 90);
   assert.equal(low.report.gainedXP, 270);
