@@ -1,5 +1,15 @@
 # Changelog — verified completed work
 
+## 2026-11-21 — Forty-skill UI, chronicle-only returns and Pages recovery (chat)
+
+- **UI-002:** [PR #46](https://github.com/janisp123/idle_game/pull/46) merged mobile-first nested activity navigation with category Back controls and empty Clan/Other placeholders.
+- **Offline return UI:** [PR #47](https://github.com/janisp123/idle_game/pull/47) removed the duplicated welcome-back popup; loot appears in Chronicle instead.
+- **GAME-008:** [PR #48](https://github.com/janisp123/idle_game/pull/48), main commit `d4344a602e17ee1a78ae9806bbf59a9052cd42db`, merged 20 training/tavern XP-only actions, 40 independent skill tracks and a skull crest. New training/leisure art is **not** complete; those actions reuse existing paintings.
+- **Design only:** [PRs #49–#51](https://github.com/janisp123/idle_game/pulls?q=is%3Apr+is%3Aclosed+49+50+51) recorded one-character unlimited mastery and reversible cumulative Human/Undead ritual decisions; no race mechanics were implemented.
+- **Pages incident:** [PR #52](https://github.com/janisp123/idle_game/pull/52), main `e09a30b84ae77104832f298e953ae0c503db3e32`, added a 20-second artifact-indexing delay and documented the first-run zero-artifact / same-run retry duplicate-artifact failures. This delay is mitigation, not proven root-cause repair.
+- **Verified live:** [main website workflow #76](https://github.com/janisp123/idle_game/actions/runs/44894015921) passed both validation and deployment. Public `/play/` HTML returned HTTP 200 with the forty-activity version, category markup and skull crest. Actual browser gameplay and save safety were not exhaustively retested.
+- **Still partial:** Alchemy, Carpentry, Masonry and Cooking fabricate prototype goods without ingredients; actual encounter combat/risk is absent. GAME-006 remains active. UI-002 and GAME-008 were removed from the active task backlog.
+
 ## 2026-11-21 — Owner-approved auto-merge, skill-weighted loot and inventory-limited smelting (chat)
 
 - **Governance:** [PR #42](https://github.com/janisp123/idle_game/pull/42), commit `5a6b1fcd246d166b80a6eb4141f97fd185c85dc5`, recorded AUTO-MERGE-001. Already-agreed PR work may merge automatically after final-head tests, review for conflicts/risk and no remaining owner decisions; the old bare `Continue` remains read-only.
@@ -31,7 +41,7 @@
 - **Limitation:** GAME-001 remains an early prototype, not a finished RPG.
 
 
-This is a record of **merged repository work**, not a promise that game mechanics are implemented. The actual playable game has **not** been built. Current approved tasks remain exclusively in [TD_LIST.md](TD_LIST.md).
+This is a record of **merged repository work**, not a promise that game mechanics are implemented. The playable browser prototype exists, but the complete planned game has **not** been built. Current approved tasks remain exclusively in [TD_LIST.md](TD_LIST.md).
 
 ## 2026-11-20 — Public landing page and automatic deployment (chat)
 
