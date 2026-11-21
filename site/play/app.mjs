@@ -637,6 +637,7 @@ function render() {
   const combat = current?.category === "combat" && !transition
     ? combatAtTime(state.combatSession) : null;
   ui.combatPanel.hidden = !combat;
+  ui.combatDice.hidden = !combat || !combat.event.dice;
   if (combat) {
     const event = combat.event;
     const key = state.combatSession.seed + ":" + combat.bout + ":" + combat.step;
