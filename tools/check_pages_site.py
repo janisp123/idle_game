@@ -160,7 +160,8 @@ def check():
         assert "state.skills[id]" in app_js and "skillFill" in app_js
         assert "state.totalXP" not in app_js and "state.level" not in app_js
         assert 'role="progressbar"' in game_html
-        assert "Welcome back." in game_html
+        assert "Welcome back." not in game_html
+    assert "returnPanel" not in game_html
         assert "./iron-ui.css" in game_html, "The shared dark-fantasy theme must be active"
         assert 'class="right-rail"' in game_html, "Resource/progress panel must exist"
         verify_links(game_parser, play_root)
