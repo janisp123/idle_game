@@ -50,7 +50,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "desktop icons remain compact");
   assert.match(html, /iron-ui\.css\?v=20261121-mastery-queue4/,
     "stylesheet cache version is changed");
-  assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:anywhere/s,
+  assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
   assert.match(html, /id="queueMasteryMode"[^>]*aria-pressed="false"/,
     "the level-up stop is a visible separate planner button");
