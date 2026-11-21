@@ -573,3 +573,63 @@ footer p{color:#aa9680}
   .wagon-hourglass {flex-basis:66px;height:66px;min-height:66px;margin-bottom:10px}
   .wagon-name {margin-top:5px}
 }
+
+/* Equal, deliberately reserved rows keep all three hourglasses aligned:
+   artwork / name / role / progress slot / duration or Forever / actions.
+   No subgrid dependency, horizontal scrolling, timers or fake progressbars. */
+.wagon {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:100px 62px 32px 16px minmax(116px,1fr) 48px;
+  align-items:center;
+  justify-items:center;
+}
+.wagon-hourglass {
+  grid-row:1;align-self:center;
+  margin:0 auto;
+}
+.wagon-name {
+  grid-row:2;align-self:end;
+  margin:0;max-width:100%;
+  text-align:center;line-height:1.25;
+}
+.wagon-position {
+  grid-row:3;align-self:start;
+  margin:5px 0 0;text-align:center;
+}
+.hourglass-schedule-progress,
+.hourglass-progress-spacer {
+  grid-row:4;align-self:center;
+  margin:0;width:calc(100% - 12px);height:8px;
+  box-sizing:border-box;
+}
+.hourglass-progress-spacer {visibility:hidden}
+.wagon-duration,.wagon-forever {
+  grid-row:5;align-self:start;
+  margin-top:10px;
+}
+.wagon-duration {width:100%}
+.wagon-forever {justify-self:center}
+.wagon-controls {
+  grid-row:6;align-self:end;
+  margin:0;padding:0;width:100%;
+}
+@media(max-width:520px) {
+  .wagon {
+    grid-template-rows:84px 64px 34px 16px minmax(116px,1fr) 46px;
+  }
+  .wagon-hourglass {
+    margin:0 auto;flex-basis:auto;
+  }
+  .wagon-name {margin:0;line-height:1.22}
+  .wagon-position {margin-top:4px}
+  .hourglass-schedule-progress,
+  .hourglass-progress-spacer {margin:0}
+  .wagon-duration,.wagon-forever {margin-top:9px}
+}
+@media(max-width:370px) {
+  .wagon {
+    grid-template-rows:72px 72px 34px 16px minmax(114px,1fr) 46px;
+  }
+  .wagon-hourglass {margin:0 auto}
+}
