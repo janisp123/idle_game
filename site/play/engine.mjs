@@ -5,10 +5,31 @@
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
 export const GAME_VERSION = 1;
+// A completed action represents an entire work cycle, not one swing or strike.
+// Adjust BASE_CYCLE_MS or a single activity's speed multiplier to rebalance.
+export const BASE_CYCLE_MS = 60_000;
+export const ZONE_TRAVEL_MS = 5 * 60_000; // reserved for future zone-change mechanic
+const task = (title, subject, item, itemLabel, minutes, xp, description, zone, speed = 1) =>
+  Object.freeze({ title, subject, item, itemLabel, durationMs: Math.round(minutes * BASE_CYCLE_MS / speed),
+    baseMinutes: minutes, speed, xp, yield: 1, description, zone });
 export const ACTIVITIES = Object.freeze({
-  hunting: Object.freeze({ title: "Hunting", subject: "Wolves", item: "hide", itemLabel: "Wolf hides", durationMs: 7000, xp: 3, yield: 1 }),
-  mining: Object.freeze({ title: "Mining", subject: "Stone", item: "stone", itemLabel: "Stone", durationMs: 5000, xp: 2, yield: 1 })
+  hunting: task("Hunting", "Wolves", "hide", "Wolf hides", 12, 3, "Track, hunt, dress and carry a wolf back to camp.", "Wilds"),
+  mining: task("Mining", "Stone", "stone", "Stone", 15, 2, "Break rock, sort stone, load carts and haul it to storage.", "Quarry"),
+  woodcutting: task("Woodcutting", "Trees", "log", "Logs", 12, 2, "Fell, trim and carry timber to a stack.", "Forest"),
+  gathering: task("Gathering", "Wild plants", "herb", "Herbs", 8, 2, "Search, pick, clean and bundle useful plants.", "Wilds"),
+  fishing: task("Fishing", "River fish", "fish", "Fish", 10, 2, "Catch, clean and carry fish.", "River"),
+  smelting: task("Smelting", "Ore", "ingot", "Ingots", 20, 3, "Heat the furnace, process ore and cool ingots.", "Forge"),
+  alchemy: task("Potion making", "Herbal mixtures", "potion", "Potions", 15, 3, "Prepare ingredients, brew and bottle a potion.", "Workshop"),
+  carpentry: task("Carpentry", "Timber", "plank", "Planks", 15, 3, "Saw, shape and stack construction timber.", "Workshop"),
+  masonry: task("Masonry", "Stone", "block", "Stone blocks", 18, 3, "Cut, dress and stack building stone.", "Workshop"),
+  cooking: task("Cooking", "Meals", "meal", "Meals", 12, 2, "Prepare fuel, cook food and pack rations.", "Camp")
 });
+export const ITEM_KEYS = Object.freeze([...new Set(Object.values(ACTIVITIES).map(a => a.item))]);
+export const activityDuration = (id, speedMultiplier = 1) => {
+  if (!Object.hasOwn(ACTIVITIES, id) || !Number.isFinite(speedMultiplier) || speedMultiplier <= 0)
+    throw new RangeError("Invalid activity or speed");
+  return Math.max(1, Math.round(ACTIVITIES[id].durationMs / speedMultiplier));
+};
 const MAX = Number.MAX_SAFE_INTEGER;
 const isCount = value => Number.isSafeInteger(value) && value >= 0;
 const validTime = value => Number.isSafeInteger(value) && value >= 0;
@@ -20,7 +41,7 @@ export function newGame(now = Date.now()) {
     name: "Wanderer",
     level: 1,
     totalXP: 0,
-    items: { hide: 0, stone: 0 },
+    items: Object.fromEntries(ITEM_KEYS.map(key => [key, 0])),
     activity: null,
     progressMs: 0,
     settledAtMs: now
@@ -34,7 +55,7 @@ export function readSave(value) {
     if (!s || s.version !== GAME_VERSION ||
       typeof s.name !== "string" || s.name.length > 40 ||
       !isCount(s.level) || s.level < 1 || !isCount(s.totalXP) ||
-      !s.items || !isCount(s.items.hide) || !isCount(s.items.stone) ||
+      !s.items || typeof s.items !== "object" || !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
       (s.activity !== null && !Object.hasOwn(ACTIVITIES, s.activity)) ||
       !isCount(s.progressMs) || !validTime(s.settledAtMs)) return null;
     if (s.activity && s.progressMs >= ACTIVITIES[s.activity].durationMs) return null;
@@ -42,7 +63,7 @@ export function readSave(value) {
     if (s.level > levelFromXP(s.totalXP)) return null;
     return {
       version: GAME_VERSION, name: s.name, level: s.level,
-      totalXP: s.totalXP, items: { hide: s.items.hide, stone: s.items.stone },
+      totalXP: s.totalXP, items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
       activity: s.activity, progressMs: s.progressMs, settledAtMs: s.settledAtMs
     };
   } catch {
