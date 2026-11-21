@@ -26,16 +26,20 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   assert.match(queueCss, /\.wagon-list\s*\{[^}]*display:grid/s,
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
-  assert.match(queueCss, /\.wagon-hourglass img/);
+  const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
+  assert.doesNotMatch(appSource, /wagon-hourglass|hourglass-amber\.webp/,
+    "the route no longer renders image elements");
+  const queueStyles = queueCss.slice(queueCss.indexOf("/* QUEUE-002:"));
+  assert.ok(queueStyles.length > 100, "queue CSS contract must be present");
+  assert.doesNotMatch(queueStyles, /wagon-hourglass|hourglass-amber\.webp|background-image:\s*url/,
+    "the queue must not reserve illustration space or use a new card background image");
   assert.match(queueCss, /\.hourglass-schedule-progress/);
-  assert.match(queueCss, /grid-template-rows:100px 62px 32px 16px minmax\(116px,1fr\) 48px/,
-    "each hourglass has matching image/name/status/progress/duration/control rows");
+  assert.match(queueCss, /grid-template-rows:54px 22px 12px 91px 40px/,
+    "five compact aligned rows: name, status, meter, duration, controls");
   assert.match(queueCss, /\.hourglass-progress-spacer\s*\{visibility:hidden\}/,
-    "future jobs reserve but never display progress bars");
-  assert.match(queueCss, /grid-template-rows:84px 64px 34px 16px minmax\(116px,1fr\) 46px/,
-    "phone view must also keep hourglass rows aligned");
-  assert.match(queueCss, /\.wagon-hourglass\s*\{[^}]*overflow:hidden/s,
-    "sandglass art must stay clipped inside a separate box to avoid covering text");
+    "future jobs have only an invisible meter spacer");
+  assert.match(queueCss, /\.wagon-name\s*\{[^}]*grid-row:1/s);
+  assert.match(queueCss, /\.wagon-controls\s*\{[^}]*grid-row:5/s);
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
   const elements = new Map(ids.map(id => [id, new FakeElement()]));
   const originalNow = Date.now;
@@ -147,14 +151,11 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.deepEqual(state.wagons, [{ activity: "mining", plannedMs: null }]);
     assert.equal(elements.get("wagonQueue").hidden, false);
     assert.equal(elements.get("wagonList").children.length, 1);
-    assert.equal(elements.get("wagonList").children[0].children[4].textContent, "FOREVER");
+    assert.equal(elements.get("wagonList").children[0].children[3].textContent, "FOREVER");
     assert.deepEqual(elements.get("wagonList").children[0].children.map(c => c.className), [
-      "wagon-hourglass", "wagon-name", "wagon-position",
-      "hourglass-progress-spacer", "wagon-forever", "wagon-controls"
-    ], "first Forever hourglass reserves exactly the same six grid rows");
-    assert.equal(elements.get("wagonList").children[0].children[0].className, "wagon-hourglass");
-    assert.match(elements.get("wagonList").children[0].children[0].children[0].src,
-      /hourglass-amber\.webp/);
+      "wagon-name", "wagon-position", "hourglass-progress-spacer",
+      "wagon-forever", "wagon-controls"
+    ], "the Forever card has five compact rows and no illustration");
     now += INITIAL_PREPARATION_MS;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
@@ -261,9 +262,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(!elements.get("wagonList").children[1].children.some(child =>
       child.className === "hourglass-schedule-progress"), "Forever has no meter");
     assert.deepEqual(elements.get("wagonList").children[1].children.map(c => c.className), [
-      "wagon-hourglass", "wagon-name", "wagon-position",
-      "hourglass-progress-spacer", "wagon-forever", "wagon-controls"
-    ], "Forever fallback has the same visual row structure as the current timed slot");
+      "wagon-name", "wagon-position", "hourglass-progress-spacer",
+      "wagon-forever", "wagon-controls"
+    ], "Forever fallback keeps the compact five-row layout");
 
     now += ACTIVITIES.mining.durationMs;
     tick();
@@ -338,20 +339,20 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(rendered[0].children.some(c => c.className === "hourglass-schedule-progress"));
     assert.ok(!rendered[1].children.some(c => c.className === "hourglass-schedule-progress"));
     assert.ok(!rendered[2].children.some(c => c.className === "hourglass-schedule-progress"));
-    assert.deepEqual(rendered.map(card => card.children.length), [6, 6, 6],
-      "all three cards reserve the same number of grid rows");
+    assert.deepEqual(rendered.map(card => card.children.length), [5, 5, 5],
+      "all three cards share five compact rows, with no artwork row");
     assert.deepEqual(rendered.map(card => card.children[0].className),
-      ["wagon-hourglass", "wagon-hourglass", "wagon-hourglass"],
-      "artwork starts at the same grid position");
-    assert.deepEqual(rendered.map(card => card.children[3].className),
+      ["wagon-name", "wagon-name", "wagon-name"],
+      "titles start together without a blank image area");
+    assert.deepEqual(rendered.map(card => card.children[2].className),
       ["hourglass-schedule-progress", "hourglass-progress-spacer", "hourglass-progress-spacer"],
-      "only the active timed task has an actual progressbar");
-    assert.deepEqual(rendered.map(card => card.children[4].className),
+      "only the running finite task has a real meter");
+    assert.deepEqual(rendered.map(card => card.children[3].className),
       ["wagon-duration", "wagon-duration", "wagon-forever"],
-      "duration selectors and Forever use one aligned schedule row");
-    assert.deepEqual(rendered.map(card => card.children[5].className),
+      "schedule fields and Forever share one compact row");
+    assert.deepEqual(rendered.map(card => card.children[4].className),
       ["wagon-controls", "wagon-controls", "wagon-controls"],
-      "all reorder/remove buttons share a bottom row");
+      "all bottom controls remain aligned");
     assert.equal(masonryActions.children[1].textContent, "Queued");
 
     now += MINUTE_MS / 2;

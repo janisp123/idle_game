@@ -398,80 +398,100 @@ footer p{color:#aa9680}
   .transition-phase { margin:14px 14px 5px; font-size:13px; }
 }
 
-/* QUEUE-002: grimdark sandglass route. Exactly three across, never sideways
-   scrolling, even on narrow phone screens. The icon is a real game illustration. */
+/* QUEUE-002: compact three-across activity route. No queue artwork or
+   horizontal scroll; the painted action scene above remains untouched. */
 .wagon-queue {
-  min-width:0;padding:12px clamp(5px,1.4vw,16px) 8px;
+  min-width:0;
+  padding:9px clamp(5px,1.4vw,14px) 6px;
   background:linear-gradient(180deg,#211a16,#100c0a);
   border-bottom:2px ridge #71543b;
 }
 .wagon-queue[hidden],.queue-planner[hidden] {display:none !important}
 .wagon-queue-heading {
-  margin:0 0 10px;color:#bda17c;font:700 10px Georgia,serif;
-  letter-spacing:.11em;
+  margin:0 0 7px;color:#bda17c;
+  font:700 10px Georgia,serif;letter-spacing:.10em;
 }
 .wagon-list {
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
-  width:100%;min-width:0;gap:clamp(4px,0.7vw,10px);
-  overflow:visible;padding:2px 0 8px;box-sizing:border-box;
+  width:100%;min-width:0;gap:clamp(4px,.7vw,8px);
+  overflow:visible;padding:0 0 4px;box-sizing:border-box;
 }
 .wagon {
-  display:flex;flex-direction:column;align-items:center;
   position:relative;box-sizing:border-box;
-  min-width:0;width:100%;padding:8px 5px 7px;
-  border:1px solid #735338;border-radius:4px;color:#edcfaa;text-align:center;
-  background:radial-gradient(ellipse at 50% 15%,#4b3325 0,transparent 58%),
-    linear-gradient(160deg,#30231c,#15100d 85%);
-  box-shadow:inset 0 0 0 1px rgba(192,138,82,.10),0 3px 11px #080504;
+  display:grid;grid-template-columns:minmax(0,1fr);
+  /* Identical compact rows: name / status / work progress /
+     duration or Forever / bottom controls. */
+  grid-template-rows:54px 22px 12px 91px 40px;
+  align-items:center;justify-items:center;
+  width:100%;min-width:0;padding:5px 4px;
+  border:1px solid #735338;border-radius:4px;
+  color:#edcfaa;text-align:center;
+  background:linear-gradient(160deg,#30231c,#15100d 85%);
+  box-shadow:inset 0 0 0 1px rgba(192,138,82,.10),0 2px 8px #080504;
 }
 .wagon:first-child {
   border-color:#bd8a57;
-  background:radial-gradient(ellipse at 50% 14%,#5f3e26,transparent 67%),
-    linear-gradient(160deg,#39271d,#1b120e);
-  box-shadow:inset 0 0 0 1px rgba(237,173,105,.15),0 0 9px rgba(173,107,50,.18);
-}
-.wagon-hourglass {
-  flex:0 0 auto;display:grid;place-items:center;
-  width:min(88px,95%);height:clamp(58px,8vw,90px);min-width:0;
-  margin:0 auto 5px;
-}
-.wagon-hourglass img {
-  display:block;width:100%;height:100%;object-fit:contain;
-  filter:drop-shadow(0 2px 5px #080504);
+  background:linear-gradient(160deg,#3c291e,#1b120e);
+  box-shadow:inset 0 0 0 1px rgba(237,173,105,.15),0 0 7px rgba(173,107,50,.14);
 }
 .wagon-name {
-  display:block;width:100%;min-width:0;overflow-wrap:anywhere;
-  font:700 clamp(11px,1.4vw,15px)/1.2 Georgia,serif;
+  grid-row:1;align-self:center;
+  display:block;max-width:100%;min-width:0;
+  overflow-wrap:anywhere;
+  font:700 12px/1.22 Georgia,serif;
   text-shadow:0 1px 2px #090706;
 }
 .wagon-position {
-  display:block;margin-top:5px;color:#bea184;
-  font:clamp(9px,1.1vw,11px)/1.2 Georgia,serif;
+  grid-row:2;align-self:center;
+  display:block;margin:0;
+  color:#c1a386;font:11px/1.2 Georgia,serif;
 }
-.wagon-forever {
-  display:block;margin-top:12px;color:#f4c88e;
-  font:700 clamp(9px,1.2vw,12px) Georgia,serif;letter-spacing:.05em;
+.hourglass-schedule-progress,.hourglass-progress-spacer {
+  grid-row:3;align-self:center;
+  width:calc(100% - 10px);height:8px;
+  box-sizing:border-box;margin:0;
 }
+.hourglass-schedule-progress {
+  border:1px solid #88633e;border-radius:2px;
+  overflow:hidden;background:#20150f;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.9);
+}
+.hourglass-schedule-progress[hidden] {display:none !important}
+.hourglass-schedule-progress-fill {
+  display:block;height:100%;width:0;
+  background:linear-gradient(90deg,#654027,#ad773d,#efbe74);
+}
+.hourglass-progress-spacer {visibility:hidden}
+.wagon-duration,.wagon-forever {grid-row:4}
 .wagon-duration {
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-  align-items:center;width:100%;gap:4px;margin-top:8px;
+  display:grid;grid-template-columns:minmax(0,1fr);
+  align-self:start;width:100%;min-width:0;
+  gap:3px;margin:4px 0 0;
   font:11px Georgia,serif;
 }
-.wagon-duration span {grid-column:1/-1;color:#dbc3a4}
+.wagon-duration span {font-size:10px;color:#dbc3a4}
 .wagon-duration select,.planner-fields select {
-  display:block;width:100%;min-width:0;min-height:34px;padding:4px 1px;
-  color:#f3d6ae;background:#281b13;border:1px solid #997453;
-  font:12px Georgia,serif;
+  display:block;width:100%;min-width:0;
+  min-height:31px;padding:3px 2px;
+  color:#f3d6ae;background:#281b13;
+  border:1px solid #997453;font:12px Georgia,serif;
+}
+.wagon-forever {
+  align-self:center;margin:0;color:#f4c88e;
+  font:700 11px Georgia,serif;letter-spacing:.05em;
 }
 .wagon-controls {
-  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
-  width:100%;min-width:0;gap:4px;margin-top:auto;padding-top:8px;
+  grid-row:5;align-self:end;
+  display:flex;flex-wrap:nowrap;
+  align-items:center;justify-content:center;
+  width:100%;min-width:0;gap:4px;margin:0;padding:0;
 }
 .wagon-control {
-  flex:0 1 auto;min-width:32px;min-height:36px;padding:3px 7px;
+  flex:0 1 auto;min-width:28px;min-height:38px;
+  padding:3px 5px;
   color:#e8c89e;background:linear-gradient(#413025,#271a13);
   border:1px solid #a47d55;border-radius:2px;
-  font:700 13px Georgia,serif;cursor:pointer;
+  font:700 12px Georgia,serif;cursor:pointer;
 }
 .wagon-control:hover,.wagon-control:focus-visible {border-color:#ebbd82}
 .wagon-control:focus-visible,.wagon-duration select:focus-visible,.planner-fields select:focus-visible {
@@ -488,55 +508,6 @@ footer p{color:#aa9680}
 .planner-fields select {flex:1 1 60px}
 .planner-actions {display:flex;gap:8px;margin-top:12px}
 .planner-actions .activity-start {flex:1 1 50%;min-width:0}
-@media(max-width:520px) {
-  .wagon-queue {padding:10px 5px 7px}
-  .wagon-list {gap:4px}
-  .wagon {padding:6px 3px 7px}
-  .wagon-hourglass {width:min(67px,94%);height:66px}
-  .wagon-name {font-size:11px}
-  .wagon-position {font-size:9px}
-  .wagon-duration {grid-template-columns:minmax(0,1fr);gap:3px}
-  .wagon-duration span {font-size:10px}
-  .wagon-duration select {min-height:32px;padding:2px 1px;font-size:11px}
-  .wagon-control {min-width:31px;min-height:36px;font-size:12px;padding:2px 5px}
-}
-@media(max-width:370px) {
-  .wagon-hourglass {height:54px}
-  .wagon-name {font-size:10px}
-  .wagon-position {font-size:9px}
-  .wagon-control {min-width:29px;padding:2px 4px}
-}
-
-/* Fix the phone screenshot overlap: image and label occupy separate, clipped
-   blocks. Labels and controls never paint into the illustration's bounds. */
-.wagon-hourglass {
-  display:flex;align-items:center;justify-content:center;
-  flex:0 0 92px;position:relative;
-  width:min(96px,94%);height:92px;min-height:92px;
-  overflow:hidden;box-sizing:border-box;margin:0 auto 12px;
-  isolation:isolate;
-}
-.wagon-hourglass img {
-  display:block;width:100%;height:100%;max-width:100%;max-height:100%;
-  object-fit:contain;object-position:center;
-}
-.wagon-name {
-  flex:0 0 auto;position:relative;z-index:1;
-  margin:3px 0 0;line-height:1.35;
-}
-.wagon-position {flex:0 0 auto;margin-top:5px}
-.hourglass-schedule-progress {
-  width:calc(100% - 12px);min-width:0;height:8px;
-  box-sizing:border-box;overflow:hidden;margin:9px 0 2px;
-  border:1px solid #88633e;border-radius:2px;
-  background:linear-gradient(#130e0b,#33251b);
-  box-shadow:inset 0 1px 2px rgba(0,0,0,.9);
-}
-.hourglass-schedule-progress[hidden] {display:none!important}
-.hourglass-schedule-progress-fill {
-  display:block;height:100%;width:0;
-  background:linear-gradient(90deg,#654027,#ad773d,#efbe74);
-}
 .activity-actions {
   display:flex;gap:6px;align-items:center;
   justify-content:flex-end;flex:0 1 auto;min-width:0;
@@ -549,19 +520,18 @@ footer p{color:#aa9680}
   background:linear-gradient(150deg,#3c3026,#211a16);
   border-color:#8b7357;color:#dbc4a5;
 }
-.activity-actions .activity-start:disabled {
-  opacity:.65;cursor:default;
-}
+.activity-actions .activity-start:disabled {opacity:.65;cursor:default}
 .queue-planner #queuePlannerHint {
   margin:3px 0 12px;color:#e5c69e;line-height:1.45;
 }
-@media (max-width:520px) {
-  .wagon-hourglass {
-    flex-basis:78px;width:min(80px,94%);
-    height:78px;min-height:78px;margin-bottom:10px;
-  }
-  .wagon-name {margin-top:5px;line-height:1.3}
-  .hourglass-schedule-progress {margin:9px 0 3px}
+@media(max-width:520px) {
+  .wagon-queue {padding:8px 5px 6px}
+  .wagon-list {gap:4px}
+  .wagon {padding:5px 3px}
+  .wagon-name {font-size:11px;line-height:1.20}
+  .wagon-position {font-size:10px}
+  .wagon-duration select {font-size:11px;min-height:31px}
+  .wagon-control {font-size:11px;min-width:27px;min-height:38px;padding:3px 4px}
   .activity-title-line {flex-direction:column;align-items:stretch;gap:8px}
   .activity-actions {
     display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
@@ -569,67 +539,7 @@ footer p{color:#aa9680}
   }
   .activity-actions .activity-start {min-width:0;width:100%;padding:7px 4px;font-size:13px}
 }
-@media (max-width:370px) {
-  .wagon-hourglass {flex-basis:66px;height:66px;min-height:66px;margin-bottom:10px}
-  .wagon-name {margin-top:5px}
-}
-
-/* Equal, deliberately reserved rows keep all three hourglasses aligned:
-   artwork / name / role / progress slot / duration or Forever / actions.
-   No subgrid dependency, horizontal scrolling, timers or fake progressbars. */
-.wagon {
-  display:grid;
-  grid-template-columns:minmax(0,1fr);
-  grid-template-rows:100px 62px 32px 16px minmax(116px,1fr) 48px;
-  align-items:center;
-  justify-items:center;
-}
-.wagon-hourglass {
-  grid-row:1;align-self:center;
-  margin:0 auto;
-}
-.wagon-name {
-  grid-row:2;align-self:end;
-  margin:0;max-width:100%;
-  text-align:center;line-height:1.25;
-}
-.wagon-position {
-  grid-row:3;align-self:start;
-  margin:5px 0 0;text-align:center;
-}
-.hourglass-schedule-progress,
-.hourglass-progress-spacer {
-  grid-row:4;align-self:center;
-  margin:0;width:calc(100% - 12px);height:8px;
-  box-sizing:border-box;
-}
-.hourglass-progress-spacer {visibility:hidden}
-.wagon-duration,.wagon-forever {
-  grid-row:5;align-self:start;
-  margin-top:10px;
-}
-.wagon-duration {width:100%}
-.wagon-forever {justify-self:center}
-.wagon-controls {
-  grid-row:6;align-self:end;
-  margin:0;padding:0;width:100%;
-}
-@media(max-width:520px) {
-  .wagon {
-    grid-template-rows:84px 64px 34px 16px minmax(116px,1fr) 46px;
-  }
-  .wagon-hourglass {
-    margin:0 auto;flex-basis:auto;
-  }
-  .wagon-name {margin:0;line-height:1.22}
-  .wagon-position {margin-top:4px}
-  .hourglass-schedule-progress,
-  .hourglass-progress-spacer {margin:0}
-  .wagon-duration,.wagon-forever {margin-top:9px}
-}
 @media(max-width:370px) {
-  .wagon {
-    grid-template-rows:72px 72px 34px 16px minmax(114px,1fr) 46px;
-  }
-  .wagon-hourglass {margin:0 auto}
+  .wagon-name {font-size:10px}
+  .wagon-control {font-size:10px;padding:2px 3px;min-width:26px}
 }
