@@ -143,8 +143,11 @@ def check():
         assert game_parser.lang == "en", "Game must declare English document language"
         assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
         assert {"game", "activityChoices", "resourceList", "sceneImage", "returnPanel",
-                "activityProgress", "actionFill", "logList", "sceneBanner",
-                "lifetimeXp"}.issubset(game_parser.ids), "Missing essential gameplay UI"
+                "activityProgress", "actionFill", "logList", "sceneBanner", "character-heading",
+                "skillTitle", "skillLevel", "skillXp", "skillFill", "nameInput", "saveName"}.issubset(game_parser.ids), "Missing essential gameplay UI"
+        assert not ({"level", "xpText", "xpFill", "lifetimeXp"} & game_parser.ids), (
+            "Character must have no global level or XP widget"
+        )
         assert not ({"rateText", "countdown", "timeInvested", "testDay", "actionCount"} & game_parser.ids), (
             "Time, action counts, and testing controls must not be exposed to players"
         )
@@ -153,6 +156,8 @@ def check():
                      "timeInvested", "testDay", "gainedXP", "per cycle"):
             assert leak not in app_js, f"Player-facing time/action detail leaked: {leak}"
         assert "lootSummary(report)" in app_js and "aria-valuenow" in app_js
+        assert "state.skills[id]" in app_js and "skillFill" in app_js
+        assert "state.totalXP" not in app_js and "state.level" not in app_js
         assert 'role="progressbar"' in game_html
         assert "Welcome back." in game_html
         assert "./iron-ui.css" in game_html, "The shared dark-fantasy theme must be active"
