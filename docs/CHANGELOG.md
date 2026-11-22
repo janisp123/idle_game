@@ -1,5 +1,14 @@
 # Changelog — verified completed work
 
+## 2026-11-22 — Equip by actual attributes, Mage Robe rename (chat, PRs #113/#114)
+
+- [PR #113](https://github.com/janisp123/idle_game/pull/113) merged at `c6db4d1308d9350780eef8d8979476e4776d3522`: remove Fighting rank armour locks, use **STR** for Plate (per piece 11–16), **DEX** for Leather (10–12), and **WIL** for Mage Robe (10). Configured in one `ARMOUR_REQUIREMENTS` registry; each of 11 slots is independently checked. UI shows real `STR/DEX/WIL N` requirements, updates automatically as trained attributes rise, and keeps existing weight/counter values.
+- Rename visible Robe pieces to Mage Hood/Mantle/Robe/Sleeves/Gloves/Leggings/Footwraps while retaining the existing internal `robe` save ID. Legacy V7 equipment choices persist even if a new stat threshold would disallow re-equipping; once changed away, the requirement applies. No player XP, items, equipment, activity scheduling or old offline power are deleted.
+- [PR #114](https://github.com/janisp123/idle_game/pull/114) merged at `c87252f2eddae4613f142067124317303b1321c6` to ensure browsers request the updated app and engine modules instead of cached script versions.
+- Final-head checks passed: #113 [website 45040689229](https://github.com/janisp123/idle_game/actions/runs/45040689229) and [protocol 45040689214](https://github.com/janisp123/idle_game/actions/runs/45040689214); #114 [website 45040815764](https://github.com/janisp123/idle_game/actions/runs/45040815764) and [protocol 45040815822](https://github.com/janisp123/idle_game/actions/runs/45040815822). Main [Pages 45040863719](https://github.com/janisp123/idle_game/actions/runs/45040863719) deployed successfully; fresh public raw HTML HTTP 200 contains `app.mjs?v=20261122-stat-gates1`.
+- Future enchantments recorded in BLOCKED GAME-013, **not implemented**. Magic attacks/spell damage absent; current Magic Resistance still future-only. Manual Android appearance review pending.
+
+
 ## 2026-11-22 — Four-tier armour, weights and meaningful combat penalties (chat, PR #111)
 
 - Merged [PR #111](https://github.com/janisp123/idle_game/pull/111) into main at `00f98855b6b21dad9992c50d3784c0d0c8cdd476`. The equipment chooser now offers exactly None / Robe / Leather / Plate in each of 11 body slots, with consistent part names and individually configured weights; Greatsword 5kg, Sword 2kg, Shield 5kg.
