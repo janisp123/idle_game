@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { combatAtTime } from "../site/play/combat.mjs";
+import { combatArtworkForEvent } from "../site/play/combat-art.mjs";
 import { newGame, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP } from "../site/play/engine.mjs";
 
 class FakeElement {
@@ -652,9 +654,14 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       "Chronicle contains the actual narration, not the scene panel");
     now += 20_000;
     tick();
-    assert.match(elements.get("sceneImage").src,
-      /assets\/combat\/sword-shield-thrust\.webp/,
-      "the enemy Thrust must display the enemy weapon's image");
+    const afterEnemyTurn = JSON.parse(store.get(SAVE_KEY));
+    const resolved = combatAtTime(afterEnemyTurn.combatSession);
+    const picture = combatArtworkForEvent(resolved.event, "greatsword", resolved.enemyLoadout);
+    assert.ok(elements.get("sceneImage").src.includes(
+      "/assets/combat/" + picture.asset + ".webp"),
+      "the scene matches the actual second turn, including parries and blocks");
+    assert.notEqual(picture.asset, "greatsword-charge",
+      "the image changes after the first wind-up turn");
     assert.match(elements.get("logList").children[0].textContent,
       /ATK \d+ · DEF \d+/,
       "attack and defense numbers belong to Chronicle alone");
