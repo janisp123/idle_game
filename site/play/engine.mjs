@@ -50,8 +50,8 @@ export const ACTIVITIES = Object.freeze({
   // Fighting is separate from hunting or raiding. This alpha activity grants
   // skill and time-based attribute growth; real per-hit combat will follow.
   fighting: task("Fighting", "Matched opponents", null,
-    "Combat skill · duel simulation coming later", 20, 3,
-    "Face worthy opponents in the fighting grounds. Individual strikes, blocks and outcomes are not simulated in this alpha yet.",
+    "Combat skill · automatic turn-based duels", 20, 3,
+    "Fight worthy opponents in automatic turns. Attack rolls, guards, wounds and outcomes decide each illustrated scene.",
     "Fighting grounds", 1, "combat"),
   hunting: task("Hunting", "Wolves", "hide", "Wolf hides", 12, 3, "Track, hunt, dress and carry a wolf back to camp.", "Wilds"),
   mining: task("Mining", "Stone", "stone", "Stone", 15, 2, "Break rock, sort stone, load carts and haul it to storage.", "Quarry"),
