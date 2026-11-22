@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-22 — XP-eligible Fighting Glory Scrolls and risky fixed-slot enchants (chat, PR #118)
+
+- Merged [PR #118](https://github.com/janisp123/idle_game/pull/118) into main at `148e9a42c2ce2a482ee2aac8346ff993a7a1331f`. Real completed **player Fighting victories** that started before their frozen XP-earning window closes have an independent **50%** Glory Scroll chance; losses/draws and XP-ineligible bouts produce none. Older saved Fighting sessions start the reward cursor at the next fresh bout, preventing invented retroactive Glory.
+- One scroll consumed per selected weapon or armour **slot** attempt: 50% success +1, 50% failure resets that slot rank to 0; other slots and worn tier remain untouched. Current alpha +1 physical attack per weapon rank and +1 flat physical defense per armour rank (minimum 1 landed-hit damage), independent of actual 3d6 rolls. Provisional maximum +20/rank; more stats, spells and enchanting requirements deferred.
+- Existing V7 saves remain valid: optional `enchantments` values and `glory_scroll` item default to 0, with no inventory, XP, queue, armour choice, timed progress or offline snapshot loss. Frozen XP-based Glory eligibility and 50% drop checker use actual deterministic victor, never a fabricated win; nominal XP window is an explicit alpha approximation. Arbitrarily long offline time remains allowed and ineligible ancient fights are not replayed. Full roll-free offline GAME-012 remains blocked.
+- Full final-head [website CI 45050867474](https://github.com/janisp123/idle_game/actions/runs/45050867474) and [protocol 45050867335](https://github.com/janisp123/idle_game/actions/runs/45050867335) passed. Main [Pages 45050983683](https://github.com/janisp123/idle_game/actions/runs/45050983683) deployed. Public raw HTTP 200 confirmed new `app.mjs?v=20261122-glory1` and all three Glory/enchant DOM controls. Manual Android usability QA pending.
+
+
 ## 2026-11-22 — One permanent automatic character stat per claimed activity level (chat, PR #116)
 
 - [PR #116](https://github.com/janisp123/idle_game/pull/116) merged on `main` at `92f7485f1cd9074a3b90bfed7af46165821300f7`. All 41 independently leveled activities now give **one automatically distributed permanent STR/DEX/END/INT/WIL point** on each **explicitly confirmed** level-up at the Skill Master (no bonus for the starting Lv1). No manual stat spend, irreversible specialization or new progression currency.
