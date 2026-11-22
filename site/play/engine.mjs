@@ -9,17 +9,17 @@ export {
 } from "./attributes.mjs?v=20261122-mastery1";
 import {
   validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS
-} from "./combat.mjs?v=20261122-glory1";
+} from "./combat.mjs?v=20261122-guard-impact1";
 import {
   GLORY_SCROLL_ID, GLORY_RULES, blankEnchantments, normalizeEnchantments,
   enchantBonus, enchantSlot, gloryEligibilityWindow, attachGloryTracker,
   tallyGloryVictories
-} from "./glory.mjs?v=20261122-glory1";
+} from "./glory.mjs?v=20261122-guard-impact1";
 export { GLORY_SCROLL_ID, GLORY_RULES, ENCHANT_SLOTS, enchantBonus }
-  from "./glory.mjs?v=20261122-glory1";
+  from "./glory.mjs?v=20261122-guard-impact1";
 import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
-  from "./combat-skills.mjs?v=20261122-dice-duels1";
-import { initialArmour, normalizeArmour, armourUnlocked, armourOption, armourStats } from "./armour.mjs?v=20261122-stat-gates1";
+  from "./combat-skills.mjs?v=20261122-guard-impact1";
+import { initialArmour, normalizeArmour, armourUnlocked, armourOption, armourStats } from "./armour.mjs?v=20261122-guard-impact1";
 import { effectiveAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261122-mastery1";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
