@@ -381,7 +381,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     tick();
     const miningTokens = elements.get("workResultTokens").children;
     assert.ok(miningTokens.some(t => t.getAttribute("data-tone")==="gain" &&
-      t.children[1]?.textContent==="Stone" && /^\\+\\d+$/.test(t.children[0].textContent)),
+      t.children[1]?.textContent==="Stone" && /^\+\d+$/.test(t.children[0].textContent)),
       "real gathered stone is displayed in green");
     assert.ok(miningTokens.some(t => t.children[1]?.textContent==="XP" &&
       t.children[0].textContent==="+8"),"four productive mining cycles earn 8 actual XP");
