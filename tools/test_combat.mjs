@@ -105,7 +105,7 @@ test("miss is a real blunder even with high stat margin; block and dodge inflict
   assert.equal(miss.damage,0);
   const block=firstTurn(shield,shield,4,4);
   assert.equal(block.damage,0);
-  const dodge=firstTurn(shield,{...great,defenseSkill:null,dex:100},4,6);
+  const dodge=firstTurn(shield,{...great,defenseSkill:null},4,6);
   assert.equal(dodge.damage,0);
   assert.ok(["dodge","parry"].includes(dodge.type));
 });
@@ -119,7 +119,7 @@ test("6–6–6 is a finisher only if the attacker overcomes defense",()=>{
   assert.equal(fatal.enemyHP,0);
   assert.equal(fatal.outcome,"victory");
   assert.match(finisher.text,/6–6–6/);
-  const defended=firstTurn(great,{...shield,dex:500,skill:200},6,6);
+  const defended=firstTurn(great,{...shield,end:500,skill:200},6,6);
   assert.notEqual(defended.type,"finisher","massive veteran defense can survive a lucky triple six");
 });
 test("a duel never creates more than three attack attempts per side",()=>{
