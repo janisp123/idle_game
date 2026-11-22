@@ -229,12 +229,6 @@ body {
 .activity-meter {height:15px;border:3px ridge #936a43}
 .activity-meter > span{background:linear-gradient(90deg,#72321f,#c27439,#f1ba61)}
 
-/* Reports and the hand-inscribed chronicle. */
-.chronicle h2{margin:5px 0 0}
-.chronicle ul{min-height:120px;max-height:240px;overflow:auto}
-.chronicle li{color:#e1c6a1;font-size:14px;border-top:1px solid #493326;padding:8px 0 8px 19px}
-.chronicle li::before{content:"◆";font-size:9px;top:13px;color:#aa784b}
-.log-mark{color:#bd8061}
 .return-panel{
   border-color:#bc895c;
   background:radial-gradient(ellipse at 60% 0,rgba(158,90,47,.2),transparent),linear-gradient(145deg,#492f23,#1b120e);
