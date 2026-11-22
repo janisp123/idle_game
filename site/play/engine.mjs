@@ -145,9 +145,9 @@ export const DAY_MS = 24 * HOUR_MS;
 // Minutes are an alpha testing option; accept them in existing saves even
 // after restoring normal timings, so switching profiles never deletes a route.
 export const validPlannedDuration = ms => Number.isSafeInteger(ms) &&
-  Array.from({ length: SCHEDULE_BALANCE.maxDurationUnits - SCHEDULE_BALANCE.minDurationUnits + 1 },
-    (_, i) => i + SCHEDULE_BALANCE.minDurationUnits)
-    .some(n => ms === n * MINUTE_MS || ms === n * HOUR_MS || ms === n * DAY_MS);
+  [MINUTE_MS, HOUR_MS, DAY_MS].some(unit => ms % unit === 0 &&
+    ms / unit >= SCHEDULE_BALANCE.minDurationUnits &&
+    ms / unit <= SCHEDULE_BALANCE.maxDurationUnits);
 
 
 export function newGame(now = Date.now()) {
