@@ -11,6 +11,7 @@ const E=(type,actor=null,target=null,defenseSkill=null) => ({
 test("every combat action and real victory/defeat chooses the appropriate weapon art",()=>{
   const cases=[
     [E("engage"),"fight-engage"],
+    [E("initiative"),"fight-engage"],
     [E("charge","player","enemy"),"greatsword-charge"],
     [E("charge","enemy","player"),"fight-engage"],
     [E("miss","player","enemy"),"greatsword-miss"],

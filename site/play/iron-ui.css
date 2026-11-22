@@ -728,3 +728,51 @@ footer p{color:#aa9680}
   .character-attribute-row {padding:4px 6px}
   .scene-bottom {padding-block:9px}
 }
+
+/* DICE-DUEL-001: dramatic, resolved 3d6 versus 3d6, never an extra full text card. */
+.illustration {position:relative}
+.combat-dice-stage {
+  position:absolute;z-index:5;left:9px;right:9px;bottom:30px;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:8px 6px;background:linear-gradient(110deg,rgba(23,13,11,.95),rgba(50,26,19,.92),rgba(23,13,11,.95));
+  border:2px ridge #a67949;border-radius:6px;
+  box-shadow:0 2px 16px rgba(0,0,0,.9),inset 0 0 0 1px #493021;
+  color:#f4d4aa;
+}
+.combat-dice-stage[hidden]{display:none !important}
+.combat-roll-tray {flex:1 1 0;min-width:0;text-align:center}
+.combat-roll-tray strong {display:block;font:700 10px/1.2 Georgia,serif;letter-spacing:.08em;white-space:nowrap}
+.combat-roll-tray small {display:block;font:700 12px/1.1 Georgia,serif;color:#f2ba79;min-height:13px}
+.combat-versus {flex:0 0 auto;color:#bb7b5b;font:700 15px Georgia,serif;text-shadow:0 2px #060404}
+.combat-dice-row {display:flex;align-items:center;justify-content:center;gap:5px;margin:5px 0}
+.combat-die {
+  box-sizing:border-box;display:flex;justify-content:center;align-items:center;
+  width:clamp(27px,6vw,40px);height:clamp(32px,7vw,44px);
+  border:2px ridge #ac7951;border-radius:5px;
+  background:linear-gradient(135deg,#fff0c3,#b59b78);
+  box-shadow:inset 0 1px 2px #fff4cf,0 2px 4px #080605;
+  font:700 clamp(19px,4vw,27px)/1 Georgia,serif;color:#4d261d;
+  font-variant-numeric:tabular-nums;
+}
+.combat-dice-stage.rolling .combat-die {
+  animation:combat-die-rock .35s ease-in-out infinite alternate;
+  border-color:#e5b975;
+}
+.combat-dice-stage.rolling .combat-die:nth-child(even) {animation-direction:alternate-reverse}
+@keyframes combat-die-rock {
+  from {transform:rotate(-12deg) scale(.93)}
+  to {transform:rotate(12deg) scale(1.07)}
+}
+.combat-turns {color:#cfa77a;font:700 12px Georgia,serif;letter-spacing:.13em;white-space:nowrap}
+#activityProgress[hidden] {display:none !important}
+@media(max-width:400px) {
+  .combat-dice-stage {left:5px;right:5px;bottom:24px;gap:3px;padding:6px 3px}
+  .combat-dice-row {gap:3px}
+  .combat-roll-tray strong {font-size:9px}
+  .combat-versus{font-size:12px}
+  .combat-die {width:27px;height:31px;font-size:19px}
+  .combat-turns {letter-spacing:0;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .combat-dice-stage.rolling .combat-die {animation:none}
+}

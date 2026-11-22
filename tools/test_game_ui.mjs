@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { combatAtTime } from "../site/play/combat.mjs";
+import { combatAtTime, COMBAT_BALANCE, COMBAT_SKILLS } from "../site/play/combat.mjs";
 import { combatArtworkForEvent } from "../site/play/combat-art.mjs";
 import { newGame, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP } from "../site/play/engine.mjs";
 
@@ -32,6 +32,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(!html.includes(oldCopy), "remove redundant mobile tutorial text: " + oldCopy);
   }
   assert.match(html, /id="combatDice"/, "real dice results have a dedicated UI");
+  assert.match(html, /id="combatDiceStage"/, "both combat dice trays appear above arena scene");
+  for (const id of ["playerDie1","playerDie2","playerDie3","enemyDie1","enemyDie2","enemyDie3"])
+    assert.ok(html.includes('id="' + id + '"'),"both fighters get three distinct visible dice");
   assert.match(html, /id="combatLoadout"/, "a player can equip one of the two combat styles");
   assert.match(html, /id="combatSkillsText"/, "the two equipped skills are visible");
   assert.doesNotMatch(html, /id="combatRolls"|id="combatEventText"/,
@@ -46,7 +49,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261122-compact1/,
+  assert.match(html, /app\.mjs\?v=20261122-duel-initiative1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -71,7 +74,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261122-compact1/,
+  assert.match(html, /iron-ui\.css\?v=20261122-duel-initiative1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -648,33 +651,54 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     handlers.get("window:storage")({ key: SAVE_KEY, newValue: json });
     assert.equal(elements.get("combatPanel").hidden, true,
       "no combat events are shown before the first fighting interval");
-    now += 20_000;
+    now += COMBAT_BALANCE.eventMs;
     tick();
     const arena = JSON.parse(store.get(SAVE_KEY));
-    assert.ok(arena.combatSession && arena.combatSession.elapsedMs === 20_000);
-    assert.equal(elements.get("combatPanel").hidden, false);
-    assert.match(elements.get("combatEventTitle").textContent, /^DUEL 1 · /);
-    assert.equal(elements.get("activityDescription").hidden, true,
-      "the obsolete fighting paragraph is not repeated above Chronicle");
-    assert.match(elements.get("sceneImage").src,
-      /assets\/combat\/greatsword-charge\.webp/,
-      "the first greatsword turn must display Heavy Swing preparation art");
-    assert.match(elements.get("logList").children[0].textContent,
-      /draw back the enormous greatsword/,
-      "Chronicle contains the actual narration, not the scene panel");
-    now += 20_000;
+    assert.ok(arena.combatSession && arena.combatSession.elapsedMs === COMBAT_BALANCE.eventMs);
+    assert.equal(elements.get("combatPanel").hidden,false);
+    assert.equal(elements.get("activityProgress").hidden,true,
+      "the old activity work bar must never masquerade as an attack timer");
+    assert.equal(elements.get("wagonQueue").hidden,true,"single Forever route stays out of the way");
+    assert.equal(elements.get("combatDiceStage").hidden,false,
+      "initiative starts with three animated dice on both sides");
+    assert.match(elements.get("combatEventTitle").textContent,/DICE ROLLING/);
+    assert.match(elements.get("sceneImage").src,/assets\/combat\/fight-engage\.webp/,
+      "neutral fight art remains until BOTH initiative rolls resolve");
+    assert.doesNotMatch(elements.get("logList").children[0].textContent,
+      /Skull dice decide initiative/,"no initiative conclusion is shown in advance");
+    now += COMBAT_BALANCE.initiativeAnimationMs + 250;
     tick();
-    const afterEnemyTurn = JSON.parse(store.get(SAVE_KEY));
-    const resolved = combatAtTime(afterEnemyTurn.combatSession);
-    const picture = combatArtworkForEvent(resolved.event, "greatsword", resolved.enemyLoadout);
+    assert.match(elements.get("combatEventTitle").textContent,/YOU ATTACK FIRST|ENEMY ATTACKS FIRST/);
+    assert.match(elements.get("logList").children[0].textContent,/Skull dice decide initiative/);
+    assert.notEqual(elements.get("playerDiceTotal").textContent,"ROLLING");
+    assert.notEqual(elements.get("enemyDiceTotal").textContent,"ROLLING");
+    const initiativeState = JSON.parse(store.get(SAVE_KEY));
+    const initiativeEvent = combatAtTime(initiativeState.combatSession).event;
+    assert.equal(Number(elements.get("playerDiceTotal").textContent),initiativeEvent.playerTotal);
+    assert.equal(Number(elements.get("enemyDiceTotal").textContent),initiativeEvent.enemyTotal);
+
+    now += COMBAT_BALANCE.eventMs - COMBAT_BALANCE.initiativeAnimationMs - 250;
+    tick();
+    const firstTurnState = JSON.parse(store.get(SAVE_KEY));
+    const firstTurn = combatAtTime(firstTurnState.combatSession);
+    assert.equal(firstTurn.event.turn,1);
+    assert.match(elements.get("sceneImage").src,/assets\/combat\/fight-engage\.webp/,
+      "an attack image cannot be seen before dice are done rolling");
+    const rollOrWindup = elements.get("combatEventTitle").textContent;
+    assert.match(rollOrWindup,/DICE ROLLING|PREPARING/);
+    now += (COMBAT_SKILLS[firstTurn.event.attackSkill].windupMs ?? 0) +
+      COMBAT_BALANCE.attackAnimationMs + 250;
+    tick();
+    const afterAttack = JSON.parse(store.get(SAVE_KEY));
+    const resolved = combatAtTime(afterAttack.combatSession);
+    const picture = combatArtworkForEvent(resolved.event,"greatsword",resolved.enemyLoadout);
     assert.ok(elements.get("sceneImage").src.includes(
       "/assets/combat/" + picture.asset + ".webp"),
-      "the scene matches the actual second turn, including parries and blocks");
-    assert.notEqual(picture.asset, "greatsword-charge",
-      "the image changes after the first wind-up turn");
+      "matching result image appears only AFTER actual attack and defense dice resolve");
     assert.match(elements.get("logList").children[0].textContent,
-      /ATK \d+ · DEF \d+/,
-      "attack and defense numbers belong to Chronicle alone");
+      /ATK \d[–\d]* = \d+ · DEF \d[–\d]* = \d+/,
+      "both complete 3d6 rolls and computed scores belong to Chronicle");
+    assert.equal(elements.get("combatTurns").textContent.includes("◆"),true);
     assert.equal(arena.skills.fighting.level, 1);
     assert.equal(arena.combatSession.player.loadout,"greatsword");
     const picker = elements.get("combatLoadout");
@@ -684,7 +708,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(swapped.combatLoadout,"sword_shield");
     assert.equal(swapped.combatSession,null,"new style starts a new duel");
     assert.match(elements.get("combatSkillsText").textContent,/Thrust.*Shield Block/);
-    now += 20_000;
+    now += COMBAT_BALANCE.eventMs;
     tick();
     const shieldDuel = JSON.parse(store.get(SAVE_KEY));
     assert.equal(shieldDuel.combatSession.player.loadout,"sword_shield");

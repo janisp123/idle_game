@@ -2,71 +2,67 @@
 
 **Live gameplay and tuning:** [combat.mjs](../../site/play/combat.mjs) → `COMBAT_BALANCE`, `OPPONENTS`, `COMBAT_ART`; [combat-skills.mjs](../../site/play/combat-skills.mjs) → `COMBAT_SKILLS` and `COMBAT_LOADOUTS`. [engine.mjs](../../site/play/engine.mjs) handles save V7, frozen stats, and switching a combat style. [app.mjs](../../site/play/app.mjs) shows the matched cinematic scene; **the Chronicle alone** contains event narration, attack/defense rolls and damage figures, with no image attachments or duplicate story block.
 
-## Two skills per fighter (first two presets)
+## Two automatic abilities per fighter — unchanged loadouts, new 3d6 rolls
 
-There are exactly two **equipped combat ability slots**: **one automatic offensive skill** and **one automatic defensive skill**. The player can switch between the two presets in the character panel. Enemies use the same rules and two-skill presets; named opponents can equip a different style. There is no per-turn player input.
+Each fighter automatically equips **one attack** and **one defense** skill. All score adjustments and timing values are editable in `COMBAT_BALANCE` and `COMBAT_SKILLS`.
 
-| Loadout | Offensive ability | Defensive ability | Playstyle |
+| Loadout | Attack | Defense | Initiative |
 | --- | --- | --- | --- |
-| Two-handed Greatsword | **Heavy Swing**: one **charge turn** before the next attack; ×1.9 damage, −6 percentage-point accuracy | **Blade Guard**: 24% additional chance to parry | Huge dangerous blows but fewer swings and weaker defense |
-| Sword & Shield | **Thrust**: attacks without a charge turn; ×1.0 damage, +8 percentage-point accuracy | **Shield Block**: 56% additional chance to block | Faster ordinary damage with much stronger guarding |
+| **Greatsword** | Heavy Swing, **+3 attack score**, 1.9× damage; **1.8 s wind-up within the attack turn** | Blade Guard, **+2 defense score** (parry) | −2 |
+| **Sword & Shield** | Thrust, **+2 attack score**, 1× damage; no extra wind-up | Shield Block, **+5 defense score** (block) | +1 |
+| **No defense skill** (future NPC) | Own equipped attack applies | **−2 defense score** from untrained fallback; may still dodge using stats and dice | Depends on style |
 
-**All numbers are provisional alpha settings**, not locked-in balance. Edit one row in `COMBAT_SKILLS` to change a skill; add a new skill and associate its ID with a `COMBAT_LOADOUTS` pair to introduce another style later. Slot types are validated at module load. The existing independent activity skills `weapons_training` and `shield_drills` do **not yet** grant separate levels or modify these automatic combat abilities.
+The old `chargeTurns` event is **removed**: the greatsword's charge is a brief preparation stage **inside an attack turn**, not a wasted attack and not a preemptive illustration.
 
-## Strict alternating turns
+## Order of a duel — implementation
+
+1. Finish normal movement and preparation into the Fighting arena (the existing activity transition; no teleport).
+2. **Engage:** neutral faceoff illustration, no attack outcome.
+3. **Initiative:** each fighter rolls **three real six-sided skull dice**, independently. Higher `3d6 + initiative modifiers` attacks first. On an exact score tie reroll (maximum 3 rounds); if still tied, DEX and then a deterministic player fallback decide. Both dice groups visibly animate before the true scores and result are revealed.
+4. **First attack:** the initiative winner rolls their own 3d6, **opponent separately rolls 3d6 for defense**. On-screen dice animate; the prior resolved illustration stays in place. Only after the dice finish does the actual missed/dodged/blocked/parried/wounding result appear in the painting and Chronicle.
+5. **Second attack:** roles reverse. Alternate until a fighter falls or at most **six half-turns total** (at most **three attacks per fighter**).
+6. **Aftermath:** a knockout immediately decides the victor; if six turns expire with both standing, the fighter with a higher fraction of HP remaining wins a nonfatal judges' decision, or both draw if the fractions tie. No fabricated fatal wound is added at the horn. The scene uses the actual player victory/defeat/stalemate painting.
+
+A completed duel lasts **at most nine displayed stages**: engage + initiative + six attacks + aftermath. Current `eventMs=25,000` → a maximum of 225 seconds per bout; phase timing is internal only and does not appear as countdowns. Initial rolling animation is 3.5 seconds; Heavy Swing adds 1.8 seconds of internal wind-up. Those values are presentation defaults and do **not** change event outcomes, work-cycle XP or offline progression. The long-lived duel is reconstructed from a seed in constant bounded work even after years away.
+
+## Exact initiative and attack / defense formulas
+
+All `3d6` are **three independent fair six-sided rolls**. Define:
 
 ```text
-Engage
-Player attack turn: if Heavy Swing needs charging, emit CHARGE instead
-  otherwise attack roll, then (if attack passes) enemy defense roll
-  → miss / dodge / parry / block / actual hit / wound / finisher
-Enemy attack turn: same rules, roles reversed
-Repeat automatically while both remain standing (max 14 turns)
-Victory / defeat / stalemate
+dexBonus(X)     = floor((DEX_X − startingStat) / dexPerScorePoint)
+endBonus(X)     = floor((END_X − startingStat) / endurancePerDefensePoint)
+skillBonus(X)   = floor((FightingLevel_X − 1) / levelsPerScorePoint)
+
+initiativeTotal_X = sum(3d6_X) + dexBonus(X) +
+                    COMBAT_LOADOUTS[style_X].initiativeBonus
+
+attackTotal_A = sum(3d6_attack) + dexBonus(A) + skillBonus(A)
+              + COMBAT_SKILLS[attackSkill].attackBonus
+              + (counterOpening ? counterOpeningBonus : 0)
+
+defenseTotal_D = sum(3d6_defense) + dexBonus(D) + endBonus(D)
+               + (trainedDefense ? COMBAT_SKILLS[defenseSkill].defenseBonus
+                                 : −untrainedDefensePenalty)
 ```
 
-One combat event is displayed each `eventMs=20,000` milliseconds; `maxExchanges=14` plus engage and final outcome fit in `slotsPerBout=16`. Wind-up takes a full combat turn and requires **no extra random draw**. The next time the greatsword fighter gets a turn, Heavy Swing executes; thereafter it needs another wind-up. Sword & Shield can Thrust immediately on each turn. This is **not** the 10-second work cycle used for time-based skill XP.
+Current `COMBAT_BALANCE` uses `startingStat=10`, `dexPerScorePoint=6`, `endurancePerDefensePoint=8`, `levelsPerScorePoint=6`, `counterOpeningBonus=2`, `untrainedDefensePenalty=2`. These are provisional alpha balance numbers, **not final PvP rules**.
 
-## Attack roll and defender roll
+### Resolve the attack (always one attack 3d6 and one defense 3d6)
 
-For attacker `A`, defender `D`:
+1. If the **raw attack dice sum ≤ 5**, a genuine miss/overreach occurs even with high skill. The defender still rolls; no damage is dealt, and the defender earns an opening for their next attack.
+2. Otherwise, if `attackTotal ≤ defenseTotal`, the attack is **stopped**. A defender with trained Shield Block **blocks**, with Blade Guard **parries**; an untrained defender **dodges**. A defense margin of at least `dodgeMargin=7` also gives a **dodge**. Successful dodging yields an opening; guard and miss deal zero damage.
+3. If `attackTotal > defenseTotal`, the attack **lands**. If the attacker rolled **6–6–6** and the score margin is at least `criticalFinisherMargin=1`, the blow is an immediate devastating weapon-specific **finisher**. A superior defender can still survive a triple-six if they genuinely beat the attacker. A fair attacker-side triple-six occurs with probability 1/216 **per attack**, but actual finisher probability also depends on overcoming defense.
+4. Otherwise calculate `damage = max(1, round((baseDamage + STR_A × damagePerStrength + FightingLevel_A × damagePerSkill) × attackSkill.damageMultiplier))`. Defaults are `6 + STR×0.5 + FightingLevel×1.4`. Defender HP begins at `max(1, round(baseHP + END×hpPerEndurance))`, currently `baseHP=16`, `hpPerEndurance=1.4`. Apply damage, then emit **strike**, **wound** (remaining HP ≤ 50%), or **collapse** (HP=0). These are actual health results, not random paintings.
 
-1. Calculate the attacker chance using their **offensive skill's accuracy**:
-   ```text
-   hitChance = clamp(
-     baseHitChance
-     + (DEX_A − DEX_D) × accuracyPerDex
-     + (FightingLevel_A − FightingLevel_D) × accuracyPerSkill
-     + (opening_A ? openingAccuracyBonus : 0)
-     + COMBAT_SKILLS[attackSkill].accuracyBonus,
-     minHitChance, maxHitChance)
-   ```
-   Defaults: `baseHitChance=.72`, `accuracyPerDex=.012`, `accuracyPerSkill=.015`, `openingAccuracyBonus=.10`, `minHitChance=.15`, `maxHitChance=.96`.
-2. Draw the **attacker's own** uniform `attackRoll ∈ [0,1)`. If it is `>= hitChance`, miss: zero damage, the defender earns a counter opening. The opponent **does not** roll to defend a miss.
-3. On a successful attack check, draw a **separate defender roll** `defenseRoll ∈ [0,1)`. First compare:
-   ```text
-   dodgeChance = clamp(
-     dodgeChanceBase + (DEX_D − DEX_A) × dodgePerDex,
-     minDodgeChance, maxDodgeChance)
-   ```
-   Defaults: `dodgeChanceBase=.10` (`COMBAT_BALANCE.dodgeChance`), `dodgePerDex=.006`, `minDodgeChance=.02`, `maxDodgeChance=.28`.
-4. `defenseRoll < dodgeChance` means DODGE (no damage, counter opening). Otherwise compare against `dodgeChance + guardChance`, where `guardChance` is taken from **the defender's equipped defensive skill**: Shield Block `.56`; Blade Guard `.24`. A guard success becomes a skill-specific BLOCK or PARRY (zero damage). The same roll is used for dodge and guard; they are mutually exclusive outcomes.
-5. **If the defender has no defensive skill**, fallback guard chance is only `COMBAT_BALANCE.untrainedGuardChance=.035`, alongside the weak **DEX-based dodge chance**. This is much worse than learned Shield Block, but not mathematically zero.
-6. If neither defense succeeds, the attacker lands one clean blow. The chosen attack skill changes damage:
-   ```text
-   damage = max(1, round(
-      (baseDamage + STR_A × damagePerStrength
-       + FightingLevel_A × damagePerSkill)
-      × COMBAT_SKILLS[attackSkill].damageMultiplier))
-   ```
-   Defaults: `baseDamage=6`, `damagePerStrength=.5`, `damagePerSkill=1.4`. Defender's HP starts at `max(1, round(24 + 2 × END))`; the hit reduces HP and emits STRIKE / WOUND / COLLAPSE depending on remaining HP. No permanent injury/gear breakage is added by this alpha.
-7. On a clean hit when the defender's **pre-hit HP <= 50% max**, roll three independently fair six-sided **skull dice**. Only **6–6–6** ends the duel as a devastating weapon-specific finisher (conditional chance **1/216 per eligible successful hit**). The visible roll is Fighting-only; attack/defense numbers are also shown in Fighting's event panel, not in ordinary resource activities.
+At equal STR=DEX=END=10 and Fighting level 1, the greatsword deals **24** on a clean hit, while sword thrust deals **12**, against a 30-HP fighter. However the greatsword is slower to reveal and has weaker initiative and defense. Both players and NPCs use these same equations.
 
-### Example at equal attributes and activated Fighting level 1
+## What the player sees — strictly after rolls
 
-Two characters each have STR=10, DEX=10 and Fighting skill level 1. An unprepared greatsword character must first **charge**. On its attack, `hitChance=.72 − .06=.66`, then a shield defender has `dodgeChance=.10` and `guardChance=.56`: a defender roll from `.10` up to `.66` blocks. On a successful clean hit the greatsword deals `round((6+5+1.4)×1.9)=24` damage. The shield user's immediate Thrust has `hitChance=.72+.08=.80`, the greatsword defender dodges at `.10` and parries in the next `.24` roll interval; its clean thrust deals `round(12.4)=12` damage. Without a defensive skill only `.035` additional guard remains.
-
-This produces the owner's desired trade-off: **huge but slow swings versus quick sword attacks and a reliable shield**. Player and enemy receive the same formulas.
+- **Live Fighting only:** initiative has **two animated groups of three skull dice**. Every later attacking turn displays both attacker's and defender's three dice, identified as YOU/ENEMY and ATTACK/DEFEND. The dice values shown after animation are the actual predetermined simulation results; cosmetic preview face changes **never reroll the game**.
+- During the roll, the **previous result image** stays visible. No attack picture, damage or Chronicle outcome is leaked early. At revelation, update to the exact relevant original art and append **one** Chronicle line with damage and both 3d6 groups/scores. Main scene has only short duel/turn indicators and optional special 6–6–6 celebration.
+- For Fighting, **hide the old work-cycle progress bar** (it falsely looked like a strike timer) and display six tiny completed-turn markers instead. Other activities retain their own static image and appropriate productive progress bar.
+- Respect `prefers-reduced-motion` for the cosmetic dice wobble. The game's rolls still work without CSS animation or a constantly open tab.
 
 ## Data and persistence guarantees
 
@@ -78,10 +74,10 @@ This produces the owner's desired trade-off: **huge but slow swings versus quick
 
 ## Change and expansion map
 
-- Edit offensive damage, charge turns, accuracy: `COMBAT_SKILLS.heavy_swing` or `COMBAT_SKILLS.thrust`.
-- Edit trained guard strength and type: `COMBAT_SKILLS.blade_guard` or `COMBAT_SKILLS.shield_block`.
-- Edit untrained fallbacks, stat scaling, HP, timing, skull finisher threshold: `COMBAT_BALANCE`.
+- Edit offensive damage, within-turn wind-up, attack score: `COMBAT_SKILLS.heavy_swing` or `COMBAT_SKILLS.thrust`.
+- Edit trained guard dice-score bonus and type: `COMBAT_SKILLS.blade_guard` or `COMBAT_SKILLS.shield_block`.
+- Edit untrained fallback penalty, dice-score scaling, initiative tie handling, HP, timing and triple-six margin: `COMBAT_BALANCE`.
 - Add new skill: define it in `COMBAT_SKILLS` with a role and corresponding attributes, then add or modify `COMBAT_LOADOUTS`. For a new animation event type, update event parsing, UI and original art registry.
 - Tests: [test_combat.mjs](../../tools/test_combat.mjs) for independent rolls, charge, shield/parry/fallback probabilities, rare finishers, V6→V7 migration and multi-decade offline safety; [test_game_ui.mjs](../../tools/test_game_ui.mjs) for choice, screen, persistence and no duplicate retroactive gains.
 
-**Not yet implemented:** individual combat ability XP/leveling, skill cooldowns beyond wind-up, physical equipment inventory, raid and clan actions, ally rescues/revives, permanent wounds and an exhaustive per-outcome/per-opponent art library. Those require subsequent owner-approved mechanics; the alpha values are intentionally simple and editable.
+**Not yet implemented:** an exact aggregate roll-free offline combat victory report, individual combat ability XP/leveling, skill cooldowns beyond wind-up, physical equipment inventory, raid and clan actions, ally rescues/revives, permanent wounds and an exhaustive per-outcome/per-opponent art library. Those require subsequent owner-approved mechanics; the alpha values are intentionally simple and editable.
