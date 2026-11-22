@@ -7,7 +7,7 @@ export {
 } from "./attributes.mjs?v=20261121-attributes1";
 import {
   validCombatSession, startCombatSession, advanceCombatSession
-} from "./combat.mjs?v=20261122-combat-scenes1";
+} from "./combat.mjs?v=20261122-dice-duels1";
 import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=20261122-combat-skills1";
 import { allAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261121-attributes1";
