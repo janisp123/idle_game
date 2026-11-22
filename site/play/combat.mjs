@@ -33,9 +33,8 @@ export const COMBAT_BALANCE = Object.freeze({
   finisherWindowHP: 0.5
 });
 export const BOUT_MS = COMBAT_BALANCE.eventMs * COMBAT_BALANCE.slotsPerBout;
-export const COMBAT_ART = Object.freeze({
-  engage: "fighting" // No fake block/hit/finisher images until painted assets exist.
-});
+// Stable public export, while scene matching lives in its own pure art module.
+export { COMBAT_ART } from "./combat-art.mjs?v=20261122-combat-scenes1";
 const OPPONENTS = Object.freeze([
   ["Varrik the Loud", "sword_shield", 10, 9, 10, 1],
   ["Odran Ironjaw", "greatsword", 13, 7, 13, 2],
@@ -227,7 +226,9 @@ export function combatAtTime(session) {
   const bout = Math.floor(session.elapsedMs / BOUT_MS);
   const inside = session.elapsedMs % BOUT_MS;
   const seed = (Math.imul(session.seed ^ (bout >>> 0), 2654435761) + (bout >>> 16)) >>> 0;
-  const duel = simulateDuel(session.player, makeOpponent(bout), seededCombatRandom(seed));
+  const opponent = makeOpponent(bout);
+  const duel = simulateDuel(session.player, opponent, seededCombatRandom(seed));
   const step = Math.min(duel.events.length - 1, Math.floor(inside / COMBAT_BALANCE.eventMs));
-  return { ...duel, bout: bout + 1, step, event: duel.events[step] };
+  return { ...duel, bout: bout + 1, enemyLoadout: opponent.loadout,
+    step, event: duel.events[step] };
 }
