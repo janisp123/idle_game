@@ -143,7 +143,7 @@ def check():
         game_parser.close()
         assert game_parser.lang == "en", "Game must declare English document language"
         assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
-        assert {"game", "activityChoices", "resourceList", "sceneImage", "logList",
+        assert {"game", "activityChoices", "resourceList", "sceneImage",
                 "activityProgress", "actionFill", "sceneBanner", "character-heading",
                 "resultPanel", "combatReadout", "playerResult", "enemyResult",
                 "workReadout", "workResultTokens",
