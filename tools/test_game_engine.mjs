@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import {
   ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
   ATTRIBUTES, ATTRIBUTE_IDS, ATTRIBUTE_BALANCE, ACTIVITY_STAT_WEIGHTS, attributeXP, attributeProgress, allAttributeProgress,
+   MASTERY_ATTRIBUTE_BALANCE, masteryBonusesForSkill, masteryAwardForNextLevel,
+   totalMasteryAttributeBonuses, effectiveAttributeProgress,
   ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, SKILL_BALANCE, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, UNTIL_LEVEL_UP, MASTER_RESOURCE_MINIMUM, skillMasterReadiness, validQueuePlan, validPlannedDuration, queueStartActivity, queueInsertTimedActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
   enterGame, testOfflineDay, xpForLevel, levelFromXP, xpToNextLevel, skillSpoils, skillMasterOffer, learnFromMaster, setArmourChoice
 } from "../site/play/engine.mjs";
@@ -46,6 +48,93 @@ test("documented skill costs and duration choices come from shared balance table
       false, "days above the configured max are invalid");
   }
   assert.equal(validPlannedDuration(30_000), false);
+});
+
+test("each claimed activity rank awards exactly ONE automatically allocated attribute point",()=>{
+  assert.equal(MASTERY_ATTRIBUTE_BALANCE.pointsPerClaimedLevel,1);
+  const blank = newGame(0);
+  assert.deepEqual(totalMasteryAttributeBonuses(blank.skills),
+    {STR:0,DEX:0,END:0,INT:0,WIL:0});
+  const zero = effectiveAttributeProgress(blank.attributeEffort,blank.skills);
+  for(const id of ATTRIBUTE_IDS) {
+    assert.equal(zero[id].value, ATTRIBUTE_BALANCE.startingStat);
+    assert.equal(zero[id].masteryBonus,0);
+  }
+  for(const [activity, weights] of Object.entries(ACTIVITY_STAT_WEIGHTS)) {
+    const onceAround=masteryBonusesForSkill(activity,101);
+    assert.deepEqual(onceAround,Object.fromEntries(ATTRIBUTE_IDS.map(id =>
+      [id,weights[id]??0])),"100 claimed levels follow original "+activity+" percentages");
+    let last=masteryBonusesForSkill(activity,1);
+    for(let level=1;level<150;level++) {
+      const now=masteryBonusesForSkill(activity,level+1);
+      const award=masteryAwardForNextLevel(activity,level);
+      assert.equal(Object.values(award).reduce((sum,v)=>sum+v,0),1,
+        activity+" level "+level+" must earn exactly one point");
+      assert.equal(ATTRIBUTE_IDS.reduce((sum,id)=>sum+now[id]-last[id],0),1);
+      for(const id of ATTRIBUTE_IDS) assert.ok(now[id]>=last[id],
+        "leveling "+activity+" may never remove "+id+" points");
+      last=now;
+    }
+  }
+  assert.deepEqual(masteryBonusesForSkill("mining",11),
+    {STR:7,DEX:0,END:3,INT:0,WIL:0});
+  assert.deepEqual(masteryBonusesForSkill("meditation",11),
+    {STR:0,DEX:0,END:0,INT:2,WIL:8});
+  assert.deepEqual(masteryBonusesForSkill("ancient_texts",11),
+    {STR:0,DEX:0,END:0,INT:8,WIL:2});
+  const twentyYearVeteran = masteryBonusesForSkill("mining",100_000_001);
+  assert.equal(Object.values(twentyYearVeteran).reduce((a,x)=>a+x,0),100_000_000,
+    "mastery awards are computed in bounded time, not by replaying levels");
+  assert.throws(()=>masteryBonusesForSkill("made_up",2),RangeError);
+  assert.throws(()=>masteryBonusesForSkill("mining",0),RangeError);
+});
+
+test("existing skill levels grant derived mastery stats once without changing V7 saves",()=>{
+  const existing=newGame(0);
+  existing.skills.mining={level:11,xp:0};
+  existing.skills.meditation={level:11,xp:0};
+  existing.items.stone=91;
+  const expected={STR:7,DEX:0,END:3,INT:2,WIL:8};
+  assert.deepEqual(totalMasteryAttributeBonuses(existing.skills),expected);
+  const before=effectiveAttributeProgress(existing.attributeEffort,existing.skills);
+  for(const id of ATTRIBUTE_IDS) assert.equal(before[id].value,10+expected[id]);
+  assert.equal(before.STR.baseValue,10);
+  const restored=readSave(JSON.stringify(existing));
+  assert.deepEqual(restored,existing,"no schema, XP or inventory migration");
+  assert.deepEqual(totalMasteryAttributeBonuses(restored.skills),expected);
+  assert.deepEqual(effectiveAttributeProgress(restored.attributeEffort,restored.skills),before,
+    "reading save again cannot duplicate earned points");
+  assert.equal(armourUnlocked(before,"chest","plate"),true,
+    "mining mastery STR may independently unlock Plate gear");
+  assert.equal(armourUnlocked(before,"chest","leather"),false,
+    "unused DEX never rises from Mining or Meditation");
+  const plate=setArmourChoice(existing,"chest","plate",0).state;
+  assert.equal(plate.armour.chest,"plate");
+  assert.equal(plate.skills.fighting.level,1);
+});
+
+test("Skill Master grants one stat point only on explicit confirmed level advancement",()=>{
+  const s=newGame(0);
+  s.skills.mining.xp=xpToNextLevel(1);
+  s.items.stone=17;
+  const before=effectiveAttributeProgress(s.attributeEffort,s.skills);
+  const returned=enterGame(s,0,midpoint).state;
+  assert.deepEqual(effectiveAttributeProgress(returned.attributeEffort,returned.skills),before,
+    "full XP bar and offline return alone give no mastery attribute");
+  const taught=learnFromMaster(returned,0,midpoint);
+  const after=effectiveAttributeProgress(taught.state.attributeEffort,taught.state.skills);
+  const award=masteryAwardForNextLevel("mining",1);
+  assert.deepEqual(award,{STR:1});
+  assert.equal(after.STR.value,before.STR.value+1);
+  assert.equal(after.STR.masteryBonus,1);
+  for(const id of ATTRIBUTE_IDS.filter(x=>x!=="STR"))
+    assert.equal(after[id].value,before[id].value);
+  assert.equal(taught.state.items.stone,0,"existing Master tribute is unchanged");
+  assert.equal(taught.state.skills.mining.xp,0);
+  assert.deepEqual(effectiveAttributeProgress(readSave(taught.state).attributeEffort,
+    readSave(taught.state).skills),after);
+  assert.throws(()=>learnFromMaster(taught.state,0,midpoint),RangeError,
+    "cannot claim the same level's permanent stat reward twice");
 });
 
 test("only individual activities have levels; character has a name but no level", () => {
