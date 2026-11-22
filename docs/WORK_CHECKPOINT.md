@@ -1,5 +1,14 @@
 # Current working checkpoint
 
+## Latest verified — fixed, level-gated armour wardrobe (2026-11-22, PR #107)
+
+- **Main:** `e24b20b5f43ae41ff8c3fe99d4bc6bcfc2f1312f` after [PR #107](https://github.com/janisp123/idle_game/pull/107). No competing open PR at final merge.
+- **Checks/deploy:** final PR head `f1419a3155d08b98e55b8eef2b903027c3767e06` passed [site CI 45033520161](https://github.com/janisp123/idle_game/actions/runs/45033520161) and [protocol 45033520277](https://github.com/janisp123/idle_game/actions/runs/45033520277); main [GitHub Pages 45033587375](https://github.com/janisp123/idle_game/actions/runs/45033587375) deployed successfully; fresh public `/play/?verify=fixed-armour1` returned HTTP 200 with `armourCabinet`, `armourSlots` and `armourChoice` in HTML.
+- **Shipped:** A collapsible original bronze body-shaped 11-slot gear grid beneath combat weapon style: head (hood/helmet), chest, leggings, left/right shoulder pads, armguards, gloves and boots. Tap a slot; choose from a single dropdown. Free baseline clothing; leather choices need activated Fighting Lv 5, iron Lv 12 (locked options disabled). Definitions/thresholds in `site/play/armour.mjs`. No random gear generation, required craft materials or currency.
+- **Save/logic:** Optional `armour` field with existing V7 `SAVE_KEY`. Old saves normalize to free starting clothing, preserving all unrelated progress; illegal locked choices are rejected even if forged in UI. Selectors intentionally do **not** add armor combat bonuses or reset existing duels. Frozen offline power remains the same.
+- **Next:** Owner Android review of equipment selector styling/spacing at [Play Now](https://janisp123.github.io/idle_game/play/); owner decisions needed later for actual armour combat stats, resource costs, alternative unlock activities and physical appearance in event art. GAME-012 remains separate, BLOCKED.
+
+
 ## Latest verified — automatic fighting action flow under picture, PR #105 (2026-11-22)
 
 - **Main:** `2417ec76984c3345398602fcf7e296432fa123aa` following [PR #105](https://github.com/janisp123/idle_game/pull/105); prior duel mechanics from PRs #102/#103 unchanged.
