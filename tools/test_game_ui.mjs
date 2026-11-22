@@ -5,7 +5,7 @@ import { combatAtTime, COMBAT_BALANCE, COMBAT_SKILLS } from "../site/play/combat
 import { combatArtworkForEvent } from "../site/play/combat-art.mjs";
 import { combatFlowState } from "../site/play/combat-flow.mjs";
 import { combatReadoutForEvent, workReadoutForReport } from "../site/play/result-readout.mjs";
-import { newGame, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP } from "../site/play/engine.mjs";
+import { newGame, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP, xpToNextLevel } from "../site/play/engine.mjs";
 
 class FakeElement {
   children = [];
@@ -987,7 +987,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(afterDay.settledAtMs-afterNormal.settledAtMs,86_400_000);
     assert.equal(afterDay.skills.mining.level,1,
       "one-day testing may fill but never auto-level the skill");
-    assert.equal(afterDay.skills.mining.xp,200,
+    assert.equal(afterDay.skills.mining.xp,xpToNextLevel(1),
       "XP must still obey the original per-skill Skill Master cap");
     assert.ok(afterDay.items.stone>0,"one day makes real mine loot");
     assert.equal(JSON.parse(store.get("idle-game-alpha-clock-v1")).speed,1);
