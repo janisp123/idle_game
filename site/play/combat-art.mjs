@@ -36,7 +36,7 @@ const STYLE_NAMES = Object.freeze({
   sword_shield: "Sword and shield"
 });
 const TYPE_TITLES = Object.freeze({
-  engage: "ENGAGE", charge: "HEAVY SWING · PREPARE",
+  engage: "ENGAGE", initiative: "INITIATIVE", charge: "HEAVY SWING · PREPARE",
   miss: "MISSED ATTACK", dodge: "DODGE", parry: "PARRY",
   block: "SHIELD BLOCK", strike: "CLEAN HIT", wound: "BLOODY WOUND",
   collapse: "FINAL BLOW", finisher: "6–6–6 · FINISHER",
@@ -57,7 +57,7 @@ export function combatArtworkForEvent(event, playerLoadout, enemyLoadout) {
   if (!event || typeof event !== "object") throw new RangeError("Invalid combat event");
   const type = event.type;
   let asset;
-  if (type === "engage" || type === "stalemate") asset = COMBAT_ART.engage;
+  if (type === "engage" || type === "initiative" || type === "stalemate") asset = COMBAT_ART.engage;
   else if (type === "victory" || type === "defeat")
     asset = COMBAT_ART[type][playerLoadout];
   else if (type === "charge")
