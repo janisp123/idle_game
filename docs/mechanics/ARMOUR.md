@@ -1,10 +1,10 @@
 # Armour weight and combat balance — four-tier alpha
 
-The OWNER requested a deliberate physical / evasion / magic counter triangle, with **exactly four choices per body slot**: `None`, `Robe`, `Leather`, `Plate`. This is a fixed selectable loadout, **not random loot, a store, or consumable/craft gear**. All 11 slots are independently changeable; each side can mix types.
+The OWNER requested a deliberate physical / evasion / magic counter triangle, with **exactly four choices per body slot**: `None`, `Mage Robe`, `Leather`, `Plate`. This is a fixed selectable loadout, **not random loot, a store, or consumable/craft gear**. All 11 slots are independently changeable; each side can mix types.
 
 ## Per-item catalogue and weight (kg)
 
-| Slot | Coverage of full suit | None | Robe | Leather | Plate |
+| Slot | Coverage of full suit | None | Mage Robe | Leather | Plate |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Head: Hood / Mask / Helm | 12% | 0 | 0.40 | 0.70 | 2.80 |
 | Shoulder pad (each ×2) | 8% each | 0 | 0.30 | 1.00 | 2.20 |
@@ -15,7 +15,7 @@ The OWNER requested a deliberate physical / evasion / magic counter triangle, wi
 | Boots (each ×2) | 4% each | 0 | 0.35 | 0.85 | 1.60 |
 | **Full suit** | **100%** | **0 kg** | **6 kg** | **12 kg** | **30 kg** |
 
-Names remain consistent within each family: **Robe Hood / Leather Mask / Plate Helm**, Robe Mantle / Leather Spaulder / Plate Pauldron, Robe Vestment / Leather Jerkin / Plate Cuirass, Robe Sleeves / Leather Bracer / Plate Vambrace, Robe Gloves / Leather Gloves / Plate Gauntlets, Robe Leggings / Leather Leggings / Plate Cuisses, Robe Footwraps / Leather Boots / Plate Sabatons. `None` always unequips the slot.
+Names remain consistent within each family: **Mage Hood / Leather Mask / Plate Helm**, Mage Mantle / Leather Spaulder / Plate Pauldron, Mage Robe / Leather Jerkin / Plate Cuirass, Mage Sleeves / Leather Bracer / Plate Vambrace, Mage Gloves / Leather Gloves / Plate Gauntlets, Mage Leggings / Leather Leggings / Plate Cuisses, Mage Footwraps / Leather Boots / Plate Sabatons. `None` always unequips the slot. The saved internal tier ID is still `robe` for backwards compatibility.
 
 **Existing weapon pieces:** Greatsword **5 kg** (greatsword style); Sword **2 kg** + Shield **5 kg** (sword-and-shield style, **7 kg** total). Those pieces are fixed and included in total weight; their old skill bonuses remain in `combat-skills.mjs`.
 
@@ -24,7 +24,7 @@ Names remain consistent within each family: **Robe Hood / Leather Mask / Plate H
 | Armour | Physical damage reduction (on landed hit) | Magic resistance (future) | Evasion dice score | Dodge margin needed | Armour mobility (before weapon) |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | None | 0% | 0% | +3 | 2 | 100% |
-| Robe | 4% | 45% | +0 | 5 | 95% |
+| Mage Robe | 4% | 45% | +0 | 5 | 95% |
 | Leather | 22% | 12% | +2 | 3 | 90% |
 | Plate | 50% | 0% | −3 | 99 | 75% |
 
@@ -32,20 +32,34 @@ A lower dodge margin makes the already-successful 3d6 defense appear as a **dodg
 
 **Mixed sets:** Each of the 11 pieces contributes its **body coverage share**, and the shares sum to exactly 100. `physicalReductionPct = round(Σ (coverage% × typePhysicalReduction%)/100)`, similarly for magic resistance, evasion score and dodge-margin target. Equipment damage reduction applies to a landed *physical* hit once, `max(1, round(baseHitDamage × (100 − physicalReductionPct)/100))`. A successful 6–6–6 finisher still resolves through the opposed-roll finisher rule: do not fabricate a hit amount or silently weaken the special event.
 
-**Weight and movement:** `totalKg = Σ armour piece kg + Σ weapon pieces kg`. `armourMobilityPct = max(65, 100 − round(armourKg × 25/30))`; subtract `round(weaponKg × 0.6)` for final `mobilityPct` (minimum 60%). E.g., Greatsword + None is **5 kg / 97% mobility**, + Robe **11 kg / 92%**, + Leather **17 kg / 87%**, + Plate **35 kg / 72%**. Encumbrance also imposes `initiativePenalty = min(4, floor(totalKg / 12))` on the existing three-dice initiative total. Movement and dodge are **combat mobility only in this release**; changing real-world activity travel/preparation duration would conflict with separately pending GAME-012 and needs its own timing-profile migration. There are no new timers on screen.
+**Weight and movement:** `totalKg = Σ armour piece kg + Σ weapon pieces kg`. `armourMobilityPct = max(65, 100 − round(armourKg × 25/30))`; subtract `round(weaponKg × 0.6)` for final `mobilityPct` (minimum 60%). E.g., Greatsword + None is **5 kg / 97% mobility**, + Mage Robe **11 kg / 92%**, + Leather **17 kg / 87%**, + Plate **35 kg / 72%**. Encumbrance also imposes `initiativePenalty = min(4, floor(totalKg / 12))` on the existing three-dice initiative total. Movement and dodge are **combat mobility only in this release**; changing real-world activity travel/preparation duration would conflict with separately pending GAME-012 and needs its own timing-profile migration. There are no new timers on screen.
 
-**Paper–scissors–rock intent:** Plate counters common physical blows; Leather favors practical dodging and light gear; Robe is fragile against steel but counters magic. **There is no spell/elemental damage system yet**, so the triangle is *not yet complete in live combat*. `magicResistancePct` is calculated/stored for future damage types but has **no current combat effect**. Do not misrepresent MR as providing protection from physical attacks. No gender/class/race restriction is added.
+**Paper–scissors–rock intent:** Plate counters common physical blows; Leather favors practical dodging and light gear; Mage Robe is fragile against steel but counters magic. **There is no spell/elemental damage system yet**, so the triangle is *not yet complete in live combat*. `magicResistancePct` is calculated/stored for future damage types but has **no current combat effect**. Do not misrepresent MR as providing protection from physical attacks. No gender/class/race restriction is added.
 
-## Level locks and saved progression
+## Attribute requirements and saved progression
 
-- None and Robe: **Fighting Lv 1**. Leather: **activated Fighting Lv 5**. Plate: **activated Fighting Lv 12**. Only this recognized skill level gates the current alpha set; no global character level exists.
-- Former V7 clothing keys `hood`, `cloth`, `tunic`, `wraps`, `trousers`, `worn` migrate to `robe`; old `iron` migrates to `plate` if the activated Fighting level actually qualifies. Existing `leather` and `none` persist. Missing and invalid entries become the free starter Robe, without resetting skills, XP, resources, tasks, or character name. No `SAVE_KEY` or `GAME_VERSION` bump.
-- `setArmourChoice` settles any already-earned interval under the **old** frozen gear and then replaces the selection. When Fighting, the next duel starts afresh with the new effective equipment, without dropping acquired resources, XP, or any previous attribute effort. A no-change selection is a no-op.
-- The frozen active Fighting session stores an optional checked `player.gear` snapshot from `armourStats`; new opponent snapshots use starting Robe equipment. Old saved sessions lacking `gear` retain their historical no-gear combat math on *both sides*, including after years offline. There are no unbounded per-duel replay loops, and OFF-001 applies as before.
+**Armour is equipped using permanent character attributes, not any activity skill level.** There is no global character level. The character's actual **STR, DEX and WIL** come from `allAttributeProgress(attributeEffort)` and refresh immediately when productive time raises those attributes; the Skill Master and Fighting level are irrelevant for equipment access.
+
+| Piece family | Mage Robe — WIL required | Leather — DEX required | Plate — STR required |
+| --- | ---: | ---: | ---: |
+| Head | 10 | 11 | 13 |
+| Shoulders (each) | 10 | 11 | 13 |
+| Chest | 10 | 12 | 16 |
+| Armguards (each) | 10 | 11 | 12 |
+| Gloves (each) | 10 | 10 | 12 |
+| Leggings | 10 | 12 | 15 |
+| Boots (each) | 10 | 11 | 12 |
+
+- **None** always has no requirements. Baseline attributes are all 10, so ordinary Mage Robe and certain light Leather pieces are immediately available. The largest Plate pieces require real STR training. Each left/right slot is independent; a player can mix qualifying pieces without inventing extra item tiers.
+- These are **provisional balance thresholds** centralized in `ARMOUR_REQUIREMENTS` inside `site/play/armour.mjs`. Unlocks require real attribute **values**, never skill XP or Fighting rank. Disabled options remain visible with the exact `STR N` / `DEX N` / `WIL N` requirement and their existing weight.
+- **Enchantment is future-only**. The owner intends slot-specific enchanting to require *additional attributes*, especially higher **WIL for enchanted Mage Robe pieces**. There is no enchantment selection, level, crafting cost, save field, random gear or stat bonus implemented by this change; the future formula and caps must be approved independently.
+- Former V7 clothing keys `hood`, `cloth`, `tunic`, `wraps`, `trousers`, `worn` migrate to `robe`; old `iron` migrates to `plate` regardless of new stats. Existing `leather`, `robe`, `plate` and `none` persist. Unknown malformed selections alone fall back to Mage Robe. **Previously worn valid gear is grandfathered** when loading a save even if the character is below the new requirement, so the revision never silently deletes an old selection; once a player removes that piece, equipping it again requires the correct attribute. This is suitable for the existing browser-local prototype, not an anti-cheat multiplayer policy.
+- `setArmourChoice` settles already-earned work time under the old frozen effective gear, then checks the resulting character attributes; a newly qualified player can equip immediately without advancing a skill. Changing a piece during Fighting starts a fresh duel without deleting acquired resources, skill XP, any attribute effort or queued activities. A same-piece selection is a no-op, including grandfathered gear.
+- The frozen Fighting session retains its gear snapshot throughout offline time (OFF-001). Former gearless sessions keep the prior combat math; no retroactive changes to past effective combat.
 
 ## Source and verification
 
-- Values / names / weights: `site/play/armour.mjs`.
+- Names, weights, tier counters and attribute gates: `site/play/armour.mjs`. Character attributes are derived by `site/play/attributes.mjs`.
 - Combat initiative / evasion / physical mitigation: `site/play/combat.mjs`.
 - Frozen snapshot and validated equipment changes: `site/play/engine.mjs`.
 - Dropdown and compact stats: `site/play/app.mjs` and `site/play/iron-ui.css`. `MR*` denotes an intentionally inactive future magic counter.
