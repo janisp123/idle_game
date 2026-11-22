@@ -17,7 +17,13 @@ export const COMBAT_BALANCE = Object.freeze({
   damagePerStrength: 0.5,
   damagePerSkill: 1.4,
   baseHitChance: 0.72,
+  accuracyPerDex: 0.012,
+  accuracyPerSkill: 0.015,
+  openingAccuracyBonus: 0.10,
   dodgeChance: 0.18,
+  dodgePerDex: 0.006,
+  minDodgeChance: 0.03,
+  maxDodgeChance: 0.42,
   blockChance: 0.18,
   finisherWindowHP: 0.5,         // Dice only when a CLEAN hit finds a vulnerable target.
   minHitChance: 0.15,
@@ -128,8 +134,9 @@ export function simulateDuel(player, opponent, random) {
     const a = turn % 2 === 0 ? p : e;
     const d = turn % 2 === 0 ? e : p;
     const hit = bounded(COMBAT_BALANCE.baseHitChance +
-      (a.dex - d.dex) * 0.012 + (a.skill - d.skill) * 0.015 +
-      (a.opening ? 0.1 : 0), COMBAT_BALANCE.minHitChance, COMBAT_BALANCE.maxHitChance);
+      (a.dex - d.dex) * COMBAT_BALANCE.accuracyPerDex +
+      (a.skill - d.skill) * COMBAT_BALANCE.accuracyPerSkill +
+      (a.opening ? COMBAT_BALANCE.openingAccuracyBonus : 0), COMBAT_BALANCE.minHitChance, COMBAT_BALANCE.maxHitChance);
     a.opening = false;
     if (roll(random) >= hit) {
       // Missing opens the attacker to the opponent's next counter, not
@@ -142,7 +149,9 @@ export function simulateDuel(player, opponent, random) {
       continue;
     }
     const defense = roll(random);
-    const dodge = bounded(COMBAT_BALANCE.dodgeChance + (d.dex - a.dex) * 0.006, 0.03, 0.42);
+    const dodge = bounded(COMBAT_BALANCE.dodgeChance +
+      (d.dex - a.dex) * COMBAT_BALANCE.dodgePerDex,
+      COMBAT_BALANCE.minDodgeChance, COMBAT_BALANCE.maxDodgeChance);
     if (defense < dodge) {
       d.opening = true;
       events.push({ type: "dodge", actor: d.id, target: a.id, damage: 0,
