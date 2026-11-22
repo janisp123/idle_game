@@ -7,7 +7,9 @@ import {
 } from "../site/play/combat.mjs";
 import {newGame, chooseActivity, settle, enterGame, readSave, setCombatLoadout, setArmourChoice,
   GAME_VERSION, allAttributeProgress, effectiveAttributeProgress, learnFromMaster,
-  xpToNextLevel} from "../site/play/engine.mjs";
+  xpToNextLevel, GLORY_SCROLL_ID} from "../site/play/engine.mjs";
+import { gloryEligibilityWindow, tallyGloryVictories, GLORY_RULES }
+  from "../site/play/glory.mjs";
 import { ARMOUR_SLOTS, armourStats } from "../site/play/armour.mjs";
 
 const great={name:"Wanderer",loadout:"greatsword",str:10,dex:10,end:10,skill:1};
@@ -229,6 +231,77 @@ test("Skill Master raises stat immediately but restarts a Fighting duel only aft
   assert.equal(next.combatSession.player.str,11);
   assert.equal(next.skills.mining.level,2);
   assert.deepEqual(readSave(JSON.stringify(next)),next);
+});
+
+test("Glory requires a real finished player victory and an XP-eligible bout",()=>{
+  assert.equal(GLORY_RULES.winDropChance,.5);
+  assert.equal(gloryEligibilityWindow(40,3,10000),140000);
+  assert.equal(gloryEligibilityWindow(0,3,10000),0);
+  assert.throws(()=>gloryEligibilityWindow(-1,3,10000),RangeError);
+
+  // Many different seeds exercise winning, losing, dropping and non-dropping
+  // without manufacturing any kill or applying fake win-rate estimates.
+  let victories=0,drops=0,nonDrops=0,defeats=0;
+  for(let seed=0;seed<100;seed++) {
+    const start=chooseActivity(newGame(seed),"fighting",seed,()=>.5).state;
+    const after=settle(start,seed+BOUT_MS,()=>.5);
+    const session=after.state.combatSession;
+    const observed=combatAtTime({...session,elapsedMs:BOUT_MS-1});
+    const scrolls=after.state.items[GLORY_SCROLL_ID];
+    const gained=after.report.gainedGlory;
+    assert.equal(gained,scrolls);
+    assert.ok(scrolls<=1);
+    if(observed.outcome!=="victory"){
+      defeats++;
+      assert.equal(scrolls,0,"loss/draw never drops a Glory Scroll");
+    } else {
+      victories++;
+      if(scrolls)drops++;else nonDrops++;
+    }
+    assert.equal(after.state.skills.fighting.level,1);
+    assert.equal(after.state.skills.fighting.xp,xpToNextLevel(1),
+      "XP may be full at the END even though the bout STARTED while earning XP");
+    assert.equal(after.state.combatSession.gloryCursor,1,
+      "reward cursor pays for the real duel exactly once");
+    const unchanged=settle(after.state,seed+BOUT_MS,()=>.5);
+    assert.equal(unchanged.state.items[GLORY_SCROLL_ID],scrolls);
+    assert.equal(unchanged.report.gainedGlory,0);
+    assert.deepEqual(readSave(JSON.stringify(after.state)),after.state);
+  }
+  assert.ok(victories>0&&defeats>0&&drops>0&&nonDrops>0,
+    "fighting actually has both won and lost duels and genuine 50% rewards");
+  const capped=newGame(0);
+  capped.skills.fighting.xp=xpToNextLevel(1);
+  const old=chooseActivity(capped,"fighting",0,()=>.5).state;
+  const noGlory=settle(old,20*YEAR,()=>.5).state;
+  assert.equal(noGlory.items[GLORY_SCROLL_ID],0,
+    "full Fighting XP before the next bout means NO Glory for all offline years");
+  assert.equal(noGlory.combatSession.gloryCursor,0);
+  const fresh=chooseActivity(newGame(0),"fighting",0,()=>.5).state;
+  const away=enterGame(fresh,20*YEAR,()=>.5).state;
+  const short=settle(fresh,20*BOUT_MS,()=>.5).state;
+  assert.equal(away.items[GLORY_SCROLL_ID],short.items[GLORY_SCROLL_ID],
+    "unlimited absence still counts exact actual victories only in XP-earning window");
+  assert.equal(away.combatSession.elapsedMs,20*YEAR);
+  assert.equal(away.combatSession.gloryCursor,short.combatSession.gloryCursor);
+});
+
+test("per-slot enchant adds small physical attack/defense but never extra dice",()=>{
+  const unguarded={...shield,name:"Untrained",defenseSkill:null};
+  const basic=firstTurn(great,unguarded,5,1);
+  const enchanted=firstTurn({...great,attackEnchant:2},unguarded,5,1);
+  assert.ok(enchanted.damage>basic.damage,
+    "each enchant rank increases landed physical attack");
+  assert.deepEqual(enchanted.attackDice,basic.attackDice);
+  assert.deepEqual(enchanted.defenseDice,basic.defenseDice);
+  const protectedHit=firstTurn(great,{...unguarded,
+    gear:{...armourStats(Object.fromEntries(ARMOUR_SLOTS.map(x=>[x.id,"robe"])),
+      "sword_shield"),defenseEnchant:4}},5,1);
+  const sameRobe=firstTurn(great,{...unguarded,
+    gear:armourStats(Object.fromEntries(ARMOUR_SLOTS.map(x=>[x.id,"robe"])),
+      "sword_shield")},5,1);
+  assert.equal(protectedHit.damage,Math.max(1,sameRobe.damage-4));
+  assert.deepEqual(protectedHit.defenseDice,sameRobe.defenseDice);
 });
 
 test("combat sessions are deterministic, persisted and O(1) after decades away",()=>{
