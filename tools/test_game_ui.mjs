@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { newGame, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP } from "../site/play/engine.mjs";
+import { newGame, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP } from "../site/play/engine.mjs";
 
 class FakeElement {
   children = [];
@@ -34,7 +34,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261121-combat-v1/,
+  assert.match(html, /app\.mjs\?v=20261122-mechanics1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -112,6 +112,12 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   Date.now = () => now;
   try {
     await import("../site/play/app.mjs?smoke-test");
+    assert.deepEqual(elements.get("queueAmount").children.map(option => Number(option.value)),
+      Array.from({ length: SCHEDULE_BALANCE.maxDurationUnits - SCHEDULE_BALANCE.minDurationUnits + 1 },
+        (_, i) => i + SCHEDULE_BALANCE.minDurationUnits),
+      "planner amounts must be populated from engine SCHEDULE_BALANCE");
+    assert.doesNotMatch(html, /<option value="8">8<\/option>/,
+      "planner must not carry a duplicated static 1..8 range");
     assert.ok(tick, "game tick must start");
     const openActivities = elements.get("openActivities");
     const categoryScreen = elements.get("activityCategories");
