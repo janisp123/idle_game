@@ -694,7 +694,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     const firstTurnState = JSON.parse(store.get(SAVE_KEY));
     const firstTurn = combatAtTime(firstTurnState.combatSession);
     assert.equal(firstTurn.event.turn,1);
-    const initialFlow = combatFlowState(firstTurn,firstTurnState.combatSession.elapsedMs);
+    const initialFlow = combatFlowState(firstTurn,firstTurnState.combatSession);
     assert.equal(initialFlow.steps[1].label,"Attack dice");
     assert.equal(initialFlow.steps[2].label,"Defense dice");
     assert.equal(initialFlow.steps[3].label,
