@@ -3,7 +3,7 @@ import {
   lootChances, recipeOptions, newGame, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
-  MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
+  MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster
 } from "./engine.mjs?v=20261121-combat-v1";
@@ -37,6 +37,14 @@ const ui = {
   banner: $("sceneBanner"), saveStatus: $("saveStatus")
 };
 const number = value => new Intl.NumberFormat("en-GB").format(value);
+// The planner and editable hourglass draw from the same validated duration
+// limits as the engine. No duplicated 1..8 lists in HTML or JS.
+for (let n = SCHEDULE_BALANCE.minDurationUnits; n <= SCHEDULE_BALANCE.maxDurationUnits; n++) {
+  const option = document.createElement("option");
+  option.value = String(n);
+  option.textContent = String(n);
+  ui.queueAmount.append(option);
+}
 const messages = [];
 let state;
 let lastSavedAt = 0;
@@ -331,7 +339,7 @@ function renderWagons() {
       amount.setAttribute("aria-label", "Duration for " + ACTIVITIES[wagon.activity].title);
       const unit = document.createElement("select");
       unit.setAttribute("aria-label", "Duration unit for " + ACTIVITIES[wagon.activity].title);
-      for (let n = 1; n <= 8; n++) {
+      for (let n = SCHEDULE_BALANCE.minDurationUnits; n <= SCHEDULE_BALANCE.maxDurationUnits; n++) {
         const option = document.createElement("option");
         option.value = String(n);
         option.textContent = String(n);
@@ -348,7 +356,7 @@ function renderWagons() {
       const selectedUnit = wagon.plannedMs === UNTIL_LEVEL_UP ? UNTIL_LEVEL_UP :
         wagon.plannedMs % DAY_MS === 0 ? "days" :
         wagon.plannedMs % HOUR_MS === 0 ? "hours" : "minutes";
-      amount.value = selectedUnit === UNTIL_LEVEL_UP ? "1" :
+      amount.value = selectedUnit === UNTIL_LEVEL_UP ? String(SCHEDULE_BALANCE.minDurationUnits) :
         String(wagon.plannedMs / durationUnitMs(selectedUnit));
       amount.hidden = selectedUnit === UNTIL_LEVEL_UP;
       unit.value = selectedUnit;
@@ -746,7 +754,7 @@ function planActivity(kind, untilLevelUp = false) {
       state.wagons.length >= MAX_WAGONS) return;
   showActivityScreen("root", null);
   planningActivity = kind;
-  ui.queueAmount.value = "1";
+  ui.queueAmount.value = String(SCHEDULE_BALANCE.minDurationUnits);
   ui.queueUnit.value = untilLevelUp ? UNTIL_LEVEL_UP :
     (TIMING_PROFILE === "alpha" ? "minutes" : "hours");
   const previous = ACTIVITIES[state.wagons.at(-1).activity].title;
