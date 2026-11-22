@@ -361,8 +361,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("transitionStatus").hidden, true);
     assert.equal(elements.get("activityProgress").hidden, false);
     assert.equal(elements.get("skillTitle").textContent, "Mining");
-    assert.equal(elements.get("resultCombat").hidden,true);
-    assert.equal(elements.get("resultWork").hidden,false);
+    assert.equal(elements.get("combatReadout").hidden,true);
+    assert.equal(elements.get("workReadout").hidden,false);
     assert.equal(elements.get("workResultTitle").textContent,"Mining");
     // The first preparation completion legitimately rebuilds the queue card.
     // Capture the mounted Mining label after that transition, then verify
@@ -774,7 +774,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     now += COMBAT_BALANCE.initiativeAnimationMs + 250;
     tick();
     assert.match(elements.get("combatEventTitle").textContent,/YOU ATTACK FIRST|ENEMY ATTACKS FIRST/);
-    assert.equal(elements.get("resultCombat").hidden,false,
+    assert.equal(elements.get("combatReadout").hidden,false,
       "fighting uses two-sided compact results");
     assert.notEqual(elements.get("playerDiceTotal").textContent,"ROLLING");
     assert.notEqual(elements.get("enemyDiceTotal").textContent,"ROLLING");
