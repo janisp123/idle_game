@@ -1,5 +1,14 @@
 # Changelog — verified completed work
 
+## 2026-11-22 — One permanent automatic character stat per claimed activity level (chat, PR #116)
+
+- [PR #116](https://github.com/janisp123/idle_game/pull/116) merged on `main` at `92f7485f1cd9074a3b90bfed7af46165821300f7`. All 41 independently leveled activities now give **one automatically distributed permanent STR/DEX/END/INT/WIL point** on each **explicitly confirmed** level-up at the Skill Master (no bonus for the starting Lv1). No manual stat spend, irreversible specialization or new progression currency.
+- An original deterministic weighted round-robin schedule reuses each activity's existing percent emphasis, and 100 awarded ranks match the configured stat distribution exactly. Point grants are monotonic and computed in bounded work for very high levels. Ten ranks yield Mining +7 STR/+3 END; Fighting +3 STR/+4 DEX/+2 END/+1 WIL; Meditation +8 WIL/+2 INT; Reading ancient texts +8 INT/+2 WIL.
+- New effective stats apply in the player character panel, STR/DEX/WIL armour requirements and new 3d6 combat session snapshots; a Master claim refreshes the current duel after settling old power. Master panel previews exact next `+1 STAT`. Existing V7 saved skill levels receive derived stats without changing their serialized values or granting duplicates on repeat load. XP cap/tribute, OFF-001, resource inventory, travel/queue and no cap on offline time remain intact.
+- Prior time-trained attribute effort and 100 attribute XP/hour remain **unchanged**, and the previously discussed ±30% dice luck multiplier is **not implemented**. Future adjustment to weights/points per level must explicitly address retroactive derived stat rebasing rather than silently rewriting existing characters.
+- Final-head [website CI 45048268555](https://github.com/janisp123/idle_game/actions/runs/45048268555) and [protocol 45048268524](https://github.com/janisp123/idle_game/actions/runs/45048268524) passed. Main [Pages 45048321922](https://github.com/janisp123/idle_game/actions/runs/45048321922) deployed successfully; fresh public HTTP 200 raw HTML confirmed the new `app.mjs?v=20261122-mastery1` script. Owner phone QA pending.
+
+
 ## 2026-11-22 — Equip by actual attributes, Mage Robe rename (chat, PRs #113/#114)
 
 - [PR #113](https://github.com/janisp123/idle_game/pull/113) merged at `c6db4d1308d9350780eef8d8979476e4776d3522`: remove Fighting rank armour locks, use **STR** for Plate (per piece 11–16), **DEX** for Leather (10–12), and **WIL** for Mage Robe (10). Configured in one `ARMOUR_REQUIREMENTS` registry; each of 11 slots is independently checked. UI shows real `STR/DEX/WIL N` requirements, updates automatically as trained attributes rise, and keeps existing weight/counter values.

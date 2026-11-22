@@ -1,5 +1,16 @@
 # Current working checkpoint
 
+## Latest verified — permanent stats awarded by claimed activity levels (2026-11-22, PR #116)
+
+- **Main:** `92f7485f1cd9074a3b90bfed7af46165821300f7` after [PR #116](https://github.com/janisp123/idle_game/pull/116), with no overlapping open PR at final merge.
+- **Checks / deployment:** Final PR head `2f1057a070bed80b4e84d2d36073ce51293c43c2` passed [website CI 45048268555](https://github.com/janisp123/idle_game/actions/runs/45048268555) and [Project Protocol Preflight 45048268524](https://github.com/janisp123/idle_game/actions/runs/45048268524). Main [GitHub Pages run 45048321922](https://github.com/janisp123/idle_game/actions/runs/45048321922) completed successfully. Fresh public `/play/?verify=skill-mastery-stats-v1` **raw HTML** returned HTTP 200 with `app.mjs?v=20261122-mastery1` and no stale stat-gate app script. Actual Android on-device visual QA remains Owner's.
+- **Shipped:** Every explicitly Skill-Master-confirmed activity level above starting Lv1 gives **one deterministic character stat point**; distribution uses the existing 41 activity STR/DEX/END/INT/WIL weight rows via a monotone 100-point weighted wheel. Examples, ten claimed ranks: Mining +7 STR/+3 END, Meditation +8 WIL/+2 INT, Fighting +3 STR/+4 DEX/+2 END/+1 WIL. Master preview shows `+1 STAT`. Character stats, gear STR/DEX/WIL gates, and new combat effective snapshots include points from **all** claimed activity ranks. Master confirmation refreshes a current Fighting duel only after settling old frozen power.
+- **Persistence:** No new save fields, GAME_VERSION or SAVE_KEY changes. Mastery stats derive from already activated saved levels, so old rank levels gain correct points once and repeated load cannot duplicate them. A full XP bar, absence, cancelled Master confirmation or merely returning cannot level or award a bonus. OFF-001 frozen battle stats and unlimited offline time remain unchanged.
+- **Balance:** Current productive-time attribute XP remains **100/hour** to avoid reinterpreting saved effort. Existing STR/DEX/END additive combat formulas and opposed 3d6 remain unchanged; the discussed ±30% dice factor is a **separate unimplemented proposal**, not shipped here. Altering activity weight splits or points/level would currently rebase derived historical bonuses: Owner approval and migration plan required to preserve earned characters before retuning.
+- **Source/tests:** `site/play/attributes.mjs`, `engine.mjs`, `app.mjs`, `index.html`, `tools/test_game_engine.mjs`, `tools/test_combat.mjs`, `tools/test_game_ui.mjs`, [Progression handbook](mechanics/PROGRESSION.md), [ATTR-MASTERY-002 decision](DECISIONS.md).
+- **Next:** Owner tests the Master modal, resulting STR/DEX/END/INT/WIL values and armour unlocks at [Play Now](https://janisp123.github.io/idle_game/play/). Later balance discussion may tune the number of points, long-term stat growth/caps and dice percentage only with a safe migration plan.
+
+
 ## Latest verified — STR/DEX/WIL gear gates and Mage Robe (2026-11-22, PRs #113/#114)
 
 - **Main releases:** [PR #113](https://github.com/janisp123/idle_game/pull/113) merged at `c6db4d1308d9350780eef8d8979476e4776d3522`. Follow-up script-cache fix [PR #114](https://github.com/janisp123/idle_game/pull/114) merged at `c87252f2eddae4613f142067124317303b1321c6`.
