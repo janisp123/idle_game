@@ -684,3 +684,42 @@ footer p{color:#aa9680}
   .combat-panel {padding:12px 11px}
   .combat-event-text {font-size:15px}
 }
+
+/* GAME-011 Combat V2: two readable automatic ability slots. */
+.combat-loadout-control {
+  margin-top:14px;
+  padding:11px 12px;
+  border:1px solid #70533c;
+  background:#1e1713;
+  border-radius:5px;
+}
+.combat-loadout-control label {
+  display:block;
+  margin-bottom:7px;
+  font:700 12px/1.4 Georgia,serif;
+  color:#dfb47c;
+  letter-spacing:.04em;
+}
+.combat-loadout-control select {
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  min-height:40px;
+  border:1px solid #89674c;
+  border-radius:3px;
+  background:#100f0d;
+  color:#f0dcc1;
+  padding:7px;
+  font:14px Georgia,serif;
+}
+.combat-loadout-control select:focus-visible {
+  outline:2px solid #e3b479;outline-offset:2px;
+}
+.combat-loadout-control .hint {margin:8px 0 0}
+.combat-rolls {
+  margin:7px 0 0;
+  color:#d7b78a;
+  font:12px/1.4 Georgia,serif;
+  overflow-wrap:anywhere;
+}
+.combat-rolls:empty {display:none}

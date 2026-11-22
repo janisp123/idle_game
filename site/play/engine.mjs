@@ -7,7 +7,9 @@ export {
 } from "./attributes.mjs?v=20261121-attributes1";
 import {
   validCombatSession, startCombatSession, advanceCombatSession
-} from "./combat.mjs?v=20261122-mechanics1";
+} from "./combat.mjs?v=20261122-combat-skills1";
+import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
+  from "./combat-skills.mjs?v=20261122-combat-skills1";
 import { allAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261121-attributes1";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
@@ -19,7 +21,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=20261121-loot1";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 6;
+export const GAME_VERSION = 7;
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -159,6 +161,7 @@ export function newGame(now = Date.now()) {
     skills: blankSkills(),
     attributeEffort: blankAttributeEffort(),
     combatSession: null,
+    combatLoadout: DEFAULT_COMBAT_LOADOUT,
     // V1 global XP cannot be assigned to individual activities reliably.
     unattributedXP: 0,
     items: Object.fromEntries(ITEM_KEYS.map(key => [key, 0])),
@@ -184,12 +187,22 @@ function scalePartialProgress(value, sourceMs, targetMs) {
 export function readSave(value) {
   try {
     const s = typeof value === "string" ? JSON.parse(value) : value;
-    if (!s || ![1, 2, 3, 4, 5, GAME_VERSION].includes(s.version) ||
+    if (!s || ![1, 2, 3, 4, 5, 6, GAME_VERSION].includes(s.version) ||
         typeof s.name !== "string" || s.name.length > 40 ||
         !s.items || typeof s.items !== "object" ||
         (s.version >= 5 && !validAttributeEffort(s.attributeEffort)) ||
-        (s.version === GAME_VERSION && (!Object.hasOwn(s, "combatSession") ||
+        (s.version >= 6 && !Object.hasOwn(s, "combatSession")) ||
+        (s.version === GAME_VERSION && (!validCombatLoadout(s.combatLoadout) ||
           !validCombatSession(s.combatSession))) ||
+        (s.version === 6 && s.combatSession !== null &&
+          (!s.combatSession || typeof s.combatSession !== "object" ||
+            !isCount(s.combatSession.elapsedMs) ||
+            !isCount(s.combatSession.seed) || s.combatSession.seed > 0xffffffff ||
+            !s.combatSession.player || typeof s.combatSession.player.name !== "string" ||
+            !["hammer", "axe", "sword", "spear"].includes(s.combatSession.player.weapon) ||
+            !["str", "dex", "end", "skill"].every(k =>
+              Number.isFinite(s.combatSession.player[k]) &&
+              s.combatSession.player[k] >= 0))) ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
         (s.protectedItems !== undefined && (!Array.isArray(s.protectedItems) ||
           !s.protectedItems.every(key => typeof key === "string" && ITEM_KEYS.includes(key)))) ||
@@ -286,8 +299,18 @@ export function readSave(value) {
     return {
       version: GAME_VERSION, timingProfile: TIMING_PROFILE, name: s.name, skills,
       attributeEffort: s.version >= 5 ? { ...s.attributeEffort } : blankAttributeEffort(),
-      combatSession: s.version === GAME_VERSION && s.combatSession
-        ? { ...s.combatSession, player: { ...s.combatSession.player } } : null,
+      combatLoadout: s.version === GAME_VERSION ? s.combatLoadout : DEFAULT_COMBAT_LOADOUT,
+      // Migrate old V6 sword/axe/hammer prototype duels to the first real
+      // two-skill greatsword loadout; keep time, RNG seed, stats and XP intact.
+      combatSession: s.version >= 6 && s.combatSession ? {
+        ...s.combatSession,
+        player: s.version === 6 ? {
+          name: s.combatSession.player.name,
+          loadout: DEFAULT_COMBAT_LOADOUT,
+          str: s.combatSession.player.str, dex: s.combatSession.player.dex,
+          end: s.combatSession.player.end, skill: s.combatSession.player.skill
+        } : { ...s.combatSession.player }
+      } : null,
       // Legacy protectedItems are validated above but discarded: no resource locks remain.
       unattributedXP: oldVersion ? s.totalXP : s.unattributedXP,
       items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
@@ -367,7 +390,7 @@ function settleWork(state, now, random, xpRandom = random) {
       const attrs = combatAttributeProgress(state.attributeEffort);
       session = startCombatSession({
         name: state.name,
-        weapon: "hammer",
+        loadout: state.combatLoadout,
         str: attrs.STR.value, dex: attrs.DEX.value, end: attrs.END.value,
         skill: state.skills.fighting.level
       }, state.settledAtMs >>> 0);
@@ -802,6 +825,20 @@ export function learnFromMaster(state, now = Date.now(), random = Math.random) {
   }
   for (const key of Object.keys(offer.tribute)) items[key] = 0;
   return { ...outcome, state: { ...outcome.state, skills, items }, mastery: offer };
+}
+
+/**
+ * Choose a different TWO-ability preset (attack skill + defense skill).
+ * Settle first at old frozen power. Changing during a live duel starts a
+ * fresh duel without losing any previously earned time-based XP or materials.
+ */
+export function setCombatLoadout(state, loadout, now = Date.now(), random = Math.random) {
+  if (!validCombatLoadout(loadout)) throw new RangeError("Unknown combat loadout");
+  const result = settle(state, now, random);
+  if (result.state.combatLoadout === loadout) return result;
+  return { ...result, state: { ...result.state, combatLoadout: loadout,
+    combatSession: result.state.activity === "fighting" && !result.state.transition
+      ? null : result.state.combatSession } };
 }
 
 /** Legacy instant selection helper retained for historical engine fixtures only; the UI uses requestActivityChange. */

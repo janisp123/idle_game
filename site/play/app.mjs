@@ -5,14 +5,15 @@ import {
   queueSetDuration, queueSwap, queueRemoveLast,
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
-  xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster
-} from "./engine.mjs?v=20261122-mechanics1";
+  xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout
+} from "./engine.mjs?v=20261122-two-skills1";
 
-import { combatAtTime, COMBAT_ART } from "./combat.mjs?v=20261122-mechanics1";
+import { combatAtTime, COMBAT_ART, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-two-skills1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
   characterAttributes: $("characterAttributes"),
+  combatLoadout: $("combatLoadout"), combatSkillsText: $("combatSkillsText"),
   resourceList: $("resourceList"), choices: $("activityChoices"),
   openActivities: $("openActivities"), categories: $("activityCategories"),
   categoryChoices: $("activityCategoryChoices"), listScreen: $("activityListScreen"),
@@ -24,7 +25,7 @@ const ui = {
   masterConfirm: $("masterConfirm"), masterCancel: $("masterCancel"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
   combatPanel: $("combatPanel"), combatEventTitle: $("combatEventTitle"),
-  combatEventText: $("combatEventText"), combatDice: $("combatDice"),
+  combatEventText: $("combatEventText"), combatDice: $("combatDice"), combatRolls: $("combatRolls"),
   heading: $("scene-heading"), description: $("activityDescription"), actionFill: $("actionFill"),
   activityProgress: $("activityProgress"), transitionStatus: $("transitionStatus"),
   transitionPhase: $("transitionPhase"), transitionProgress: $("transitionProgress"), transitionFill: $("transitionFill"),
@@ -44,6 +45,12 @@ for (let n = SCHEDULE_BALANCE.minDurationUnits; n <= SCHEDULE_BALANCE.maxDuratio
   option.value = String(n);
   option.textContent = String(n);
   ui.queueAmount.append(option);
+}
+for (const loadout of Object.values(COMBAT_LOADOUTS)) {
+  const option = document.createElement("option");
+  option.value = loadout.id;
+  option.textContent = loadout.name;
+  ui.combatLoadout.append(option);
 }
 const messages = [];
 let state;
@@ -529,6 +536,11 @@ ui.masterConfirm.addEventListener("click", () => {
 
 function render() {
   const current = state.activity ? ACTIVITIES[state.activity] : null;
+  ui.combatLoadout.value = state.combatLoadout;
+  const chosen = COMBAT_LOADOUTS[state.combatLoadout];
+  ui.combatSkillsText.textContent = "Attack: " +
+    COMBAT_SKILLS[chosen.attackSkill].name + " · Defense: " +
+    COMBAT_SKILLS[chosen.defenseSkill].name;
   ui.playerName.textContent = state.name;
   const stats = allAttributeProgress(state.attributeEffort);
   for (const { id } of ATTRIBUTES) {
@@ -652,6 +664,13 @@ function render() {
     ui.combatEventTitle.textContent = "DUEL " + number(combat.bout) +
       " · " + event.type.toUpperCase();
     ui.combatEventText.textContent = event.text;
+    ui.combatRolls.textContent = event.attackRoll === undefined ? "" :
+      "Attack roll " + (Math.floor(event.attackRoll * 100) + 1) +
+      (event.defenseRoll === null ? " · missed before defense" :
+        " · Defense roll " + (Math.floor(event.defenseRoll * 100) + 1)) +
+      " · " + COMBAT_SKILLS[event.attackSkill].name +
+      (event.defenseSkill ? " vs " + COMBAT_SKILLS[event.defenseSkill].name :
+        " vs untrained defense");
     ui.combatDice.hidden = !event.dice;
     ui.combatDice.textContent = event.dice ? event.dice.join(" · ") : "";
     ui.combatPanel.classList.toggle("finisher", event.type === "finisher");
@@ -661,6 +680,7 @@ function render() {
     }
   } else {
     lastCombatEventKey = null;
+    ui.combatRolls.textContent = "";
   }
   const sceneActivity = transition ? ACTIVITIES[transition.targetActivity] : current;
   if (!sceneActivity) {
@@ -785,6 +805,16 @@ function start() {
     writeSave();
   }
 
+  ui.combatLoadout.addEventListener("change", () => {
+    const result = setCombatLoadout(state, ui.combatLoadout.value, Date.now());
+    state = result.state;
+    reportProgress(result);
+    message("Combat style equipped: " + COMBAT_LOADOUTS[state.combatLoadout].name +
+      ". Two skills: " + ui.combatSkillsText.textContent +
+      ". A fresh duel begins if you were fighting.");
+    writeSave();
+    render();
+  });
   ui.saveName.addEventListener("click", () => {
     const chosen = ui.nameInput.value.trim().replace(/\s+/g, " ");
     if (!chosen || chosen.length > 40) {
