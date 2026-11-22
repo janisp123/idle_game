@@ -8,7 +8,8 @@ import {
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout
 } from "./engine.mjs?v=20261122-two-skills1";
 
-import { combatAtTime, COMBAT_ART, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-two-skills1";
+import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-combat-scenes1";
+import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-combat-scenes1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -25,7 +26,7 @@ const ui = {
   masterConfirm: $("masterConfirm"), masterCancel: $("masterCancel"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
   combatPanel: $("combatPanel"), combatEventTitle: $("combatEventTitle"),
-  combatEventText: $("combatEventText"), combatDice: $("combatDice"), combatRolls: $("combatRolls"),
+  combatDice: $("combatDice"),
   heading: $("scene-heading"), description: $("activityDescription"), actionFill: $("actionFill"),
   activityProgress: $("activityProgress"), transitionStatus: $("transitionStatus"),
   transitionPhase: $("transitionPhase"), transitionProgress: $("transitionProgress"), transitionFill: $("transitionFill"),
@@ -51,6 +52,19 @@ for (const loadout of Object.values(COMBAT_LOADOUTS)) {
   option.value = loadout.id;
   option.textContent = loadout.name;
   ui.combatLoadout.append(option);
+}
+// Combat descriptions, actual rolled values and numeric damage belong ONLY
+// in the Chronicle. The image panel is a cinematic illustration + short label.
+export function combatChronicleLine(event) {
+  const parts = [event.text];
+  if (event.attackRoll !== undefined) {
+    parts.push("ATK " + (Math.floor(event.attackRoll * 100) + 1));
+    parts.push(event.defenseRoll === null ? "DEF —" :
+      "DEF " + (Math.floor(event.defenseRoll * 100) + 1));
+  }
+  if (event.dice && event.type !== "finisher")
+    parts.push("SKULLS " + event.dice.join("–"));
+  return parts.join(" · ");
 }
 const messages = [];
 let state;
@@ -663,30 +677,22 @@ function render() {
     const key = state.combatSession.seed + ":" + combat.bout + ":" + combat.step;
     ui.combatEventTitle.textContent = "DUEL " + number(combat.bout) +
       " · " + event.type.toUpperCase();
-    ui.combatEventText.textContent = event.text;
-    ui.combatRolls.textContent = event.attackRoll === undefined ? "" :
-      "Attack roll " + (Math.floor(event.attackRoll * 100) + 1) +
-      (event.defenseRoll === null ? " · missed before defense" :
-        " · Defense roll " + (Math.floor(event.defenseRoll * 100) + 1)) +
-      " · " + COMBAT_SKILLS[event.attackSkill].name +
-      (event.defenseSkill ? " vs " + COMBAT_SKILLS[event.defenseSkill].name :
-        " vs untrained defense");
     ui.combatDice.hidden = !event.dice;
     ui.combatDice.textContent = event.dice ? event.dice.join(" · ") : "";
     ui.combatPanel.classList.toggle("finisher", event.type === "finisher");
     if (key !== lastCombatEventKey) {
-      message(event.text);
+      message(combatChronicleLine(event));
       lastCombatEventKey = key;
     }
   } else {
     lastCombatEventKey = null;
-    ui.combatRolls.textContent = "";
   }
   const sceneActivity = transition ? ACTIVITIES[transition.targetActivity] : current;
   if (!sceneActivity) {
     ui.sceneTag.textContent = "WAITING FOR ORDERS";
     ui.banner.textContent = "THE LONG VIGIL";
     ui.heading.textContent = "Choose an activity";
+    ui.description.hidden = false;
     ui.description.textContent = "Choose a craft or gathering task. Each cycle includes preparation and hauling.";
     ui.actionFill.style.width = "0%";
     ui.activityProgress.setAttribute("aria-valuenow", "0");
@@ -695,35 +701,38 @@ function render() {
     ui.sceneTag.textContent = transition ? "CHANGING PATH" : sceneActivity.zone.toUpperCase();
     ui.banner.textContent = transition ? "THE JOURNEY" : sceneActivity.title.toUpperCase();
     ui.heading.textContent = transition ? "Changing to " + sceneActivity.title : sceneActivity.title;
-    ui.description.textContent = transition
+    // No misleading prototype explanation or repeated combat narrative above
+    // the Chronicle. The arena art and short outcome label stand on their own.
+    ui.description.hidden = Boolean(combat);
+    ui.description.textContent = combat ? "" : transition
       ? "Your character finishes their work, travels and prepares before the new task begins."
       : sceneActivity.description;
-    // Reuse the existing painted scene for the selected destination.
+    // Every live turn selects its actual combat event / attacker weapon /
+    // defender shield / player outcome. Other activities retain static art.
     const sceneId = transition ? transition.targetActivity : state.activity;
-    // Temporary existing confrontation art for Fighting until the generated
-    // duel image is added to the repository. Later a real combat
-    // event stream will choose strike/block/retreat images by event type.
-    // Do not rotate unrelated images: the picture must match the event.
-    // Exact-match image registry is intentionally sparse until unique art
-    // exists. The permanent arena tableau remains a *backdrop*, never a
-    // fabricated picture of a hit/block/finisher that was not illustrated.
-    const combatArt = combat && COMBAT_ART[combat.event.type];
-    const sceneAsset = sceneId === "fighting" ? (combatArt ?? "fighting") :
-      sceneActivity.item === null
-        ? (sceneActivity.category === "training" ? "masonry" : "cooking")
-        : sceneId;
-    const desiredImage = "./assets/" + sceneAsset + ".webp?v=20261121-combat-v1";
+    const combatArt = combat ? combatArtworkForEvent(
+      combat.event, state.combatSession.player.loadout, combat.enemyLoadout) : null;
+    const sceneAsset = sceneActivity.item === null
+      ? (sceneActivity.category === "training" ? "masonry" : "cooking")
+      : sceneId;
+    const desiredImage = sceneId === "fighting"
+      ? "./assets/combat/" + (combatArt?.asset ?? "fight-engage") + ".webp?v=20261122-combat-scenes1"
+      : "./assets/" + sceneAsset + ".webp?v=20261122-combat-scenes1";
     if (ui.sceneImage.getAttribute("src") !== desiredImage) {
       ui.sceneImage.onerror = () => {
         ui.sceneImage.onerror = null;
-        ui.sceneImage.src = "./assets/" + (isHunt ? "hunting.webp" : "mining.webp") + "?v=20261121-combat-v1";
+        ui.sceneImage.src = sceneId === "fighting"
+          ? "./assets/combat/fight-engage.webp?v=20261122-combat-scenes1"
+          : "./assets/" + (isHunt ? "hunting.webp" : "mining.webp") +
+            "?v=20261122-combat-scenes1";
       };
       ui.sceneImage.src = desiredImage;
     }
-    ui.sceneImage.alt = "Dark fantasy illustration of " + sceneActivity.title.toLowerCase();
-    ui.sceneCaption.textContent = combat
-      ? (combatArt ? "THE FIGHTING PIT" : "ARENA BACKDROP · EVENT ART COMING")
-      : sceneActivity.zone.toUpperCase();
+    ui.sceneImage.alt = combatArt?.alt ?? (sceneId === "fighting"
+      ? "Two battle-worn warriors in a torchlit fighting pit."
+      : "Dark fantasy illustration of " + sceneActivity.title.toLowerCase());
+    ui.sceneCaption.textContent = combatArt?.label ??
+      (sceneId === "fighting" ? "THE FIGHTING PIT" : sceneActivity.zone.toUpperCase());
     if (!transition) {
       const percentage = Math.min(100, 100 * state.progressMs / sceneActivity.durationMs);
       ui.actionFill.style.width = percentage.toFixed(2) + "%";
