@@ -1,11 +1,11 @@
-# Alpha Tools — local test switches (ALPHA-TOOLS-001)
+# Alpha Tools — local test switches and button (ALPHA-TOOLS-001)
 
-The Owner requested a compact **Alpha Tools** block with three **on/off switch controls**. It sits *collapsed* beneath the resources rail (including on phones), keeping normal play uncluttered. All controls act only on this browser's local prototype and never affect the real phone clock.
+The Owner requested a compact **Alpha Tools** block with two switches and one **24-hour test button**. It sits *collapsed* beneath the resources rail (including on phones), keeping normal play uncluttered. All controls act only on this browser's local prototype and never affect the real phone clock.
 
-| Switch | Behavior | Stays on? |
+| Control | Behavior | Persistence |
 | --- | --- | --- |
 | **Reset all progress** | Ask for explicit confirmation, then replace ONLY the saved Idle Game character with `newGame(realNow)`, including reset activity levels/XP, attribute effort, item stocks, Glory Scrolls, enchant ranks, armor choices, queue, battle and preparation. Remove the separate alpha clock. `newGame` starts valid levels at **Lv 1** and attributes at **10**, not mathematically zero. Cancelling does **nothing**. | No — one-shot; automatically returns OFF |
-| **Test 24 hours idle** | Advance the local *logical engine timestamp* by **exactly 86,400,000 ms**, settle the unchanged game through **actual `enterGame`** in one batch, show real inventory, available XP and route changes; preserve one current XP bar, Skill Master manual progression, frozen combat power and infinite offline rules. Multiple deliberate ON actions each simulate one extra day. | No — one-shot; automatically returns OFF |
+| **Test 24 hours idle** — button | **Each click** advances the local *logical engine timestamp* by **exactly 86,400,000 ms**, settles the unchanged game through real `enterGame` in one batch, and shows actual inventory, available XP and route changes. Keeps the current XP-bar limit, manual Skill Master progression, frozen combat power and infinite offline rules. Each separate click simulates another day. | Stateless action button; no ON/OFF mode |
 | **Activity speed ×10** | Toggle a persistent **10× virtual game clock** affecting the real engine's activity work, movement, preparation and Fighting steps together. Switching OFF returns to **1×** without moving time backwards or rewriting cycle lengths/RNG; closing and reopening the browser continues the selected speed, even for offline time while enabled. | Yes — remains checked until OFF |
 
 ## Architecture / safety
@@ -17,4 +17,4 @@ The Owner requested a compact **Alpha Tools** block with three **on/off switch c
 - **Alpha-only**: These controls intentionally accelerate earned resources and can reset local progression. They must be removed or restricted before any authenticated multiplayer, production economy, achievements/competitive rankings or authoritative server launch. Browser local saves are already non-secure.
 - Automated tests in `tools/test_game_engine.mjs` and `tools/test_game_ui.mjs` cover virtual-clock persistence, 1×↔10× continuity, exact simulated day, save reload, offline XP cap, reset cancellation, full reset and closed-panel UI.
 
-**Known behavior:** This is a forward-only simulation, **not an undoable 24h preview**. A confirmed reset is not reversible. The reset/day controls are drawn as toggles for consistency with the Owner's request but automatically switch back OFF, because they are actions rather than persistent game modes. Only ×10 is a persistent setting.
+**Known behavior:** This is a forward-only simulation, **not an undoable 24h preview**. A confirmed reset is not reversible. The reset remains a one-shot confirmation switch that returns OFF; the 24h test is a real clickable button with no checked state; only ×10 is a persistent switch. This button replaces the earlier 24h toggle at the Owner's request.
