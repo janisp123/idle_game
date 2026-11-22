@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261122-action-flow1">
-  <script type="module" src="./app.mjs?v=20261122-action-flow1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261122-fixed-armour1">
+  <script type="module" src="./app.mjs?v=20261122-fixed-armour1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -53,6 +53,14 @@
             <select id="combatLoadout" aria-label="Choose combat equipment and skills"></select>
             <p class="hint" id="combatSkillsText">One attack skill and one defense skill.</p>
           </div>
+          <details id="armourCabinet" class="armour-cabinet">
+            <summary class="armour-summary">ARMOUR <span aria-hidden="true">✥</span></summary>
+            <div id="armourSlots" class="armour-slots" aria-label="Equipped armour slots"></div>
+            <div class="armour-choice">
+              <label id="armourChoiceLabel" for="armourChoice">Hood / helmet</label>
+              <select id="armourChoice" aria-label="Choose armour for selected slot"></select>
+            </div>
+          </details>
         </section>
 
         <section class="panel skill-focus" aria-labelledby="skill-heading">
