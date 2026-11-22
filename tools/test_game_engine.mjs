@@ -12,12 +12,62 @@ import {
 import { ARMOUR_SLOTS, ARMOUR_CHOICES, ARMOUR_REQUIREMENTS, ARMOUR_TIER_LABELS, ARMOUR_TIERS,
   initialArmour, armourOption, armourUnlocked, armourStats, WEAPON_PIECES, ARMOUR_PIECES } from "../site/play/armour.mjs";
 import { xpForAttributeValue } from "../site/play/attributes.mjs";
+import { ALPHA_CLOCK_KEY, ALPHA_SPEED, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
+  setAlphaSpeed, advanceAlphaClock } from "../site/play/alpha-tools.mjs";
 
 const midpoint = () => 0.5;
 const YEAR = 365 * 24 * 60 * 60 * 1000;
 const choose = (s, a, now) => chooseActivity(s, a, now, midpoint);
 const finish = (s, now) => settle(s, now, midpoint);
 const enter = (s, now) => enterGame(s, now, midpoint);
+
+test("alpha test clock simulates 24h and switches 1x/10x without rewinding time",()=>{
+  assert.equal(ALPHA_CLOCK_KEY,"idle-game-alpha-clock-v1");
+  assert.equal(ALPHA_DAY_MS,86_400_000);
+  assert.equal(ALPHA_SPEED,10);
+  const t=2_000_000_000_000;
+  assert.equal(alphaTime(null,t),t,"normal mode uses real clock");
+  const accelerated=setAlphaSpeed(null,t,ALPHA_SPEED);
+  assert.deepEqual(parseAlphaClock(JSON.stringify(accelerated)),accelerated,
+    "persistent alpha clock reloads without losing the virtual timestamp");
+  assert.equal(alphaTime(accelerated,t+1000),t+10_000);
+  const normal=setAlphaSpeed(accelerated,t+1000,1);
+  assert.equal(alphaTime(normal,t+1000),t+10_000,
+    "turning 10x off never rewinds the saved game timestamp");
+  assert.equal(alphaTime(normal,t+2000),t+11_000,
+    "normal speed accrues only one second per second after toggle off");
+  const advanced=advanceAlphaClock(normal,t+2000,ALPHA_DAY_MS);
+  assert.equal(alphaTime(advanced,t+2000),t+11_000+ALPHA_DAY_MS,
+    "exact simulated day advances the logical game by 24 hours once");
+  assert.equal(advanced.speed,1,"one-day testing does not turn on 10x");
+  assert.equal(alphaTime(advanced,t+3000),t+12_000+ALPHA_DAY_MS);
+  const ten=advanceAlphaClock(accelerated,t+1000,ALPHA_DAY_MS);
+  assert.equal(ten.speed,10,"one-day test preserves an already enabled 10x mode");
+  assert.equal(alphaTime(ten,t+2000),t+10_000+ALPHA_DAY_MS+10_000);
+  assert.equal(alphaTime(accelerated,t-10_000),t,
+    "backward wall-clock adjustment never goes backwards");
+  assert.equal(parseAlphaClock(null),null);
+  for(const bad of ["not-json","{}",
+      '{"version":1,"realAnchorMs":-1,"gameAnchorMs":1,"speed":10}',
+      '{"version":1,"realAnchorMs":1,"gameAnchorMs":1,"speed":100}'])
+    assert.equal(parseAlphaClock(bad),null);
+  assert.throws(()=>setAlphaSpeed(null,t,42),RangeError);
+  assert.throws(()=>advanceAlphaClock(null,t,-1),RangeError);
+  assert.throws(()=>alphaTime(null,-5),RangeError);
+
+  // This tool invokes the real engine, not handcrafted 24h ore or XP.
+  const work={...newGame(t),activity:"mining",wagons:[{activity:"mining",plannedMs:null}]};
+  const oneDay=enterGame(work,alphaTime(advanceAlphaClock(null,t,ALPHA_DAY_MS),t),midpoint);
+  assert.equal(oneDay.state.settledAtMs,t+ALPHA_DAY_MS);
+  assert.equal(oneDay.state.skills.mining.level,1,
+    "testing 24h cannot auto-level a skill past Skill Master");
+  assert.equal(oneDay.state.skills.mining.xp,xpToNextLevel(1),
+    "testing 24h must still obey one-bar skill XP cap");
+  assert.ok(oneDay.state.items.stone>0);
+  assert.deepEqual(readSave(JSON.stringify(oneDay.state)),oneDay.state);
+  assert.deepEqual(enterGame(oneDay.state,t+ALPHA_DAY_MS,midpoint).state,oneDay.state,
+    "reopening at the same virtual time never duplicates 24-hour rewards");
+});
 
 test("documented skill costs and duration choices come from shared balance tables", () => {
   assert.ok(Number.isFinite(SKILL_BALANCE.xpPerNextLevel) && SKILL_BALANCE.xpPerNextLevel > 0);
