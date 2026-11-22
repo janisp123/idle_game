@@ -4,10 +4,11 @@ import {
   ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
   ATTRIBUTES, ATTRIBUTE_IDS, ATTRIBUTE_BALANCE, ACTIVITY_STAT_WEIGHTS, attributeXP, attributeProgress, allAttributeProgress,
   ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, SKILL_BALANCE, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, UNTIL_LEVEL_UP, MASTER_RESOURCE_MINIMUM, skillMasterReadiness, validQueuePlan, validPlannedDuration, queueStartActivity, queueInsertTimedActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
-  enterGame, testOfflineDay, xpForLevel, levelFromXP, xpToNextLevel, xpForAttributeValue, skillSpoils, skillMasterOffer, learnFromMaster, setArmourChoice
+  enterGame, testOfflineDay, xpForLevel, levelFromXP, xpToNextLevel, skillSpoils, skillMasterOffer, learnFromMaster, setArmourChoice
 } from "../site/play/engine.mjs";
 import { ARMOUR_SLOTS, ARMOUR_CHOICES, ARMOUR_REQUIREMENTS, ARMOUR_TIER_LABELS, ARMOUR_TIERS,
   initialArmour, armourOption, armourUnlocked, armourStats, WEAPON_PIECES, ARMOUR_PIECES } from "../site/play/armour.mjs";
+import { xpForAttributeValue } from "../site/play/attributes.mjs";
 
 const midpoint = () => 0.5;
 const YEAR = 365 * 24 * 60 * 60 * 1000;
