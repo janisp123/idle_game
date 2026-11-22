@@ -96,6 +96,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   assert.match(html, /<details id="armourCabinet"/, "equipment folds away on narrow screens");
   assert.match(html, /id="armourSlots"/);
   assert.match(html, /id="armourChoice"/, "one equipment dropdown handles the active slot");
+  assert.match(html,/id="gearStats"/,"aggregate loadout stats appear inside existing compact armour panel");
   assert.match(queueCss, /grid-template-areas:[\s\S]*left_shoulder head right_shoulder/, "slots make a body-shaped grid");
   assert.doesNotMatch(html, /id="combatRolls"|id="combatEventText"/,
     "repeated fighting narration and rolls must not appear above Chronicle");
@@ -109,7 +110,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261122-results1/,
+  assert.match(html, /app\.mjs\?v=20261122-armour-balance1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -134,7 +135,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261122-results1/,
+  assert.match(html, /iron-ui\.css\?v=20261122-armour-balance1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -206,7 +207,11 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="left_boot").length,1);
     assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="right_boot").length,1);
     assert.equal(elements.get("armourChoiceLabel").textContent,"Hood / helmet");
-    assert.equal(elements.get("armourChoice").value,"hood");
+    assert.equal(elements.get("armourChoice").value,"robe");
+    assert.match(elements.get("gearStats").textContent,/11 kg.*MOVE 92%.*PHYS 4%.*MR\\* 45%/,
+      "starter robe and greatsword have truthful weight, mobility, protection and future magic values");
+    assert.deepEqual(elements.get("armourChoice").children.map(o=>o.value),
+      ["none","robe","leather","plate"],"exactly four standardized choices");
     assert.deepEqual(elements.get("armourChoice").children.map(o=>o.disabled),
       [false,false,true,true],"locked levels are disabled in the native dropdown");
     const leftGloveButton=armourButtons.find(b=>b.getAttribute("data-slot")==="left_glove");
@@ -217,17 +222,17 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     elements.get("armourChoice").fire("change");
     let gearSave=JSON.parse(store.get(SAVE_KEY));
     assert.equal(gearSave.armour.left_glove,"none");
-    assert.equal(gearSave.armour.right_glove,"cloth",
+    assert.equal(gearSave.armour.right_glove,"robe",
       "equipping one glove cannot replace the other glove");
     assert.equal(gearSave.items.hide,8,"armour choices do not spend gathered inventory");
-    elements.get("armourChoice").value="iron";
+    elements.get("armourChoice").value="plate";
     elements.get("armourChoice").fire("change");
     gearSave=JSON.parse(store.get(SAVE_KEY));
     assert.equal(gearSave.armour.left_glove,"none",
       "a forged dropdown selection cannot bypass the locked level gate");
-    elements.get("armourChoice").value="cloth";
+    elements.get("armourChoice").value="robe";
     elements.get("armourChoice").fire("change");
-    assert.equal(JSON.parse(store.get(SAVE_KEY)).armour.left_glove,"cloth");
+    assert.equal(JSON.parse(store.get(SAVE_KEY)).armour.left_glove,"robe");
 
     const openActivities = elements.get("openActivities");
     const categoryScreen = elements.get("activityCategories");
