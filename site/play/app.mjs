@@ -13,7 +13,7 @@ import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-dice-duels1";
 import { combatFlowState } from "./combat-flow.mjs?v=20261122-action-flow1";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, armourOption, armourUnlocked, armourStats }
-  from "./armour.mjs?v=20261122-armour-balance1";
+  from "./armour.mjs?v=20261122-stat-gates1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -107,15 +107,22 @@ ui.armourSlots.append(insignia);
 
 function renderArmour() {
   const slot = ARMOUR_SLOT_BY_ID[selectedArmourSlot];
-  const skillLevel = state.skills.fighting.level;
-  const key = slot.id + ":" + skillLevel;
+  const attributes = allAttributeProgress(state.attributeEffort);
+  const key = slot.id + ":" + ["STR","DEX","WIL"].map(id => attributes[id].value).join(":") +
+    ":" + state.armour[slot.id];
   if (lastArmourOptionsKey !== key) {
     const options = ARMOUR_CHOICES[slot.group].map(piece => {
       const opt = document.createElement("option");
       opt.value = piece.id;
-      opt.disabled = !armourUnlocked(state.skills,slot.id,piece.id);
+      const eligible = armourUnlocked(attributes,slot.id,piece.id);
+      // Already-worn V7 gear survives this new stat requirement, but cannot
+      // be newly equipped again until the character really qualifies.
+      const legacyEquipped = !eligible && state.armour[slot.id] === piece.id;
+      opt.disabled = !eligible && !legacyEquipped;
+      const gate = piece.requirement;
       opt.textContent = piece.name + " · " + piece.weightKg + " kg" +
-        (opt.disabled ? " · Fighting Lv " + piece.level : "");
+        (gate ? " · " + gate.stat + " " + gate.min : "") +
+        (legacyEquipped ? " · Previously equipped" : "");
       return opt;
     });
     ui.armourChoice.replaceChildren(...options);
@@ -1035,7 +1042,8 @@ function start() {
   ui.armourChoice.addEventListener("change", () => {
     const slot = ARMOUR_SLOT_BY_ID[selectedArmourSlot];
     const option = armourOption(slot.id, ui.armourChoice.value);
-    if (!option || !armourUnlocked(state.skills,slot.id,option.id)) {
+    if (!option || (state.armour[slot.id] !== option.id &&
+      !armourUnlocked(allAttributeProgress(state.attributeEffort),slot.id,option.id))) {
       renderArmour();
       return;
     }
