@@ -112,6 +112,21 @@ const MAX = Number.MAX_SAFE_INTEGER;
 const isCount = value => Number.isSafeInteger(value) && value >= 0;
 const validTime = value => Number.isSafeInteger(value) && value >= 0;
 export const MAX_WAGONS = 3;
+/**
+ * Independent skill progression and batch reward tuning.
+ * Existing alpha numbers are unchanged. See docs/mechanics/.
+ * Changing XP costs may rebase saved progression.
+ */
+export const SKILL_BALANCE = Object.freeze({
+  xpPerNextLevel: 40,
+  efficiencyPerLevel: 0.02,
+  maxEfficiency: 2,
+  batchVariation: 0.10
+});
+export const SCHEDULE_BALANCE = Object.freeze({
+  minDurationUnits: 1,
+  maxDurationUnits: 8
+});
 /** This is a scheduled STOP condition, not an automatic Skill Master visit. */
 export const UNTIL_LEVEL_UP = "untilLevelUp";
 // Balancing lives here, not in queue settlement or the Skill Master UI.
@@ -130,7 +145,8 @@ export const DAY_MS = 24 * HOUR_MS;
 // Minutes are an alpha testing option; accept them in existing saves even
 // after restoring normal timings, so switching profiles never deletes a route.
 export const validPlannedDuration = ms => Number.isSafeInteger(ms) &&
-  Array.from({ length: 8 }, (_, i) => i + 1)
+  Array.from({ length: SCHEDULE_BALANCE.maxDurationUnits - SCHEDULE_BALANCE.minDurationUnits + 1 },
+    (_, i) => i + SCHEDULE_BALANCE.minDurationUnits)
     .some(n => ms === n * MINUTE_MS || ms === n * HOUR_MS || ms === n * DAY_MS);
 
 
@@ -293,20 +309,20 @@ function safeAdd(a, b) {
 
 export function xpForLevel(level) {
   if (!Number.isSafeInteger(level) || level < 1) throw new RangeError("Invalid level");
-  return 20 * (level - 1) * level;
+  return SKILL_BALANCE.xpPerNextLevel * (level - 1) * level / 2;
 }
 
 /** Skill XP is per level, not a lifetime total. Each level takes longer. */
 export function xpToNextLevel(level) {
-  if (!Number.isSafeInteger(level) || level < 1 || level > Number.MAX_SAFE_INTEGER / 40)
+  if (!Number.isSafeInteger(level) || level < 1 || level > Number.MAX_SAFE_INTEGER / SKILL_BALANCE.xpPerNextLevel)
     throw new RangeError("Invalid level");
-  return 40 * level;
+  return SKILL_BALANCE.xpPerNextLevel * level;
 }
 
 /** O(1) calculation; no loop through level thresholds even after decades. */
 export function levelFromXP(xp) {
   if (!isCount(xp)) throw new RangeError("Invalid XP");
-  let result = Math.max(1, Math.floor((1 + Math.sqrt(1 + xp / 5)) / 2));
+  let result = Math.max(1, Math.floor((1 + Math.sqrt(1 + 8 * xp / SKILL_BALANCE.xpPerNextLevel)) / 2));
   while (result > 1 && xpForLevel(result) > xp) result--;
   while (xpForLevel(result + 1) <= xp) result++;
   return result;
@@ -324,7 +340,7 @@ function variedTotal(base, random) {
     if (!Number.isFinite(value) || value < 0 || value >= 1) throw new RangeError("Invalid random roll");
     return value;
   };
-  const scaled = base * (0.9 + 0.2 * roll());
+  const scaled = base * (1 - SKILL_BALANCE.batchVariation + 2 * SKILL_BALANCE.batchVariation * roll());
   if (!Number.isSafeInteger(Math.ceil(scaled))) throw new RangeError("Reward exceeds safe numeric range");
   const whole = Math.floor(scaled);
   const fraction = scaled - whole;
@@ -375,7 +391,8 @@ function settleWork(state, now, random, xpRandom = random) {
       // activated level, capped at double. Training/leisure earn faster XP;
       // resource gatherers also bring home more material. Old-offline levels
       // stay frozen until the player explicitly trains with the Master.
-      const efficiency = 1 + Math.min(1, Math.max(0, prior.level - 1) * 0.02);
+      const efficiency = Math.min(SKILL_BALANCE.maxEfficiency,
+        1 + Math.max(0, prior.level - 1) * SKILL_BALANCE.efficiencyPerLevel);
       report.gainedItems = rules.item === null ? 0 :
         crafted ? productive : variedTotal(count * rules.yield * efficiency, random);
       // The Master owns the next level. Extra XP never banks, even if a
