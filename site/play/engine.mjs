@@ -1,17 +1,19 @@
 import {
   ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
-} from "./attributes.mjs?v=20261121-attributes1";
+} from "./attributes.mjs?v=20261122-mastery1";
 export {
   ATTRIBUTE_BALANCE, ATTRIBUTES, ATTRIBUTE_IDS, ACTIVITY_STAT_WEIGHTS,
-  attributeXP, attributeProgress, allAttributeProgress
-} from "./attributes.mjs?v=20261121-attributes1";
+  attributeXP, attributeProgress, allAttributeProgress,
+  MASTERY_ATTRIBUTE_BALANCE, masteryBonusesForSkill, masteryAwardForNextLevel,
+  totalMasteryAttributeBonuses, effectiveAttributeProgress
+} from "./attributes.mjs?v=20261122-mastery1";
 import {
   validCombatSession, startCombatSession, advanceCombatSession
 } from "./combat.mjs?v=20261122-dice-duels1";
 import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=20261122-dice-duels1";
 import { initialArmour, normalizeArmour, armourUnlocked, armourOption, armourStats } from "./armour.mjs?v=20261122-stat-gates1";
-import { allAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261121-attributes1";
+import { effectiveAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261122-mastery1";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
 export { PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions } from "./production.mjs?v=20261121-no-resource-locks1";
@@ -392,7 +394,7 @@ function settleWork(state, now, random, xpRandom = random) {
     // cannot make any of this absent interval's duels stronger (OFF-001).
     let session = state.combatSession;
     if (!session) {
-      const attrs = combatAttributeProgress(state.attributeEffort);
+      const attrs = combatAttributeProgress(state.attributeEffort, state.skills);
       session = startCombatSession({
         name: state.name,
         loadout: state.combatLoadout,
@@ -830,7 +832,14 @@ export function learnFromMaster(state, now = Date.now(), random = Math.random) {
     skills[skillId] = { level: old.level + 1, xp: 0 };
   }
   for (const key of Object.keys(offer.tribute)) items[key] = 0;
-  return { ...outcome, state: { ...outcome.state, skills, items }, mastery: offer };
+  return { ...outcome, state: {
+    ...outcome.state, skills, items,
+    // A confirmed level-up grants its stat immediately. Restart only the
+    // current Fighting duel, after settling old frozen power first. Offline
+    // bouts and previously collected progress are never recalculated.
+    combatSession: outcome.state.activity === "fighting" && !outcome.state.transition
+      ? null : outcome.state.combatSession
+  }, mastery: offer };
 }
 
 /**
@@ -858,7 +867,7 @@ export function setArmourChoice(state, slot, item, now = Date.now(), random = Ma
   if (!armourOption(slot,item)) throw new RangeError("Unknown armour choice");
   const result = settle(state, now, random);
   if (result.state.armour[slot] === item) return result;
-  const attributes = combatAttributeProgress(result.state.attributeEffort);
+  const attributes = combatAttributeProgress(result.state.attributeEffort, result.state.skills);
   if (!armourUnlocked(attributes,slot,item))
     throw new RangeError("Armour requires higher character attributes");
   return { ...result, state: {
