@@ -1,6 +1,18 @@
 # Changelog — verified completed work
 
 
+## 2026-11-22 — Compact mobile screen and six-turn 3d6 combat (chat, PRs #102 and #103)
+
+- **Merged and verified:** [PR #102](https://github.com/janisp123/idle_game/pull/102) at `fdc01383ae886e83be279da46f923248e9d93c5f`, and [PR #103](https://github.com/janisp123/idle_game/pull/103) at `3de66fbb58f9ab023efe9c30013aa16632666236`.
+- **Mobile:** Removed long tutorial paragraphs, unused footer, raw attribute explanations and the premature "uncapped" claim. Kept five abbreviated stats/weapon choice, hid the route strip with only one task (2–3 still visible), disabled and dimmed Skill Master until at least one skill satisfies its real XP/resource readiness. **No attribute cap was introduced** and all local saves and skill formulas remain unchanged.
+- **Combat:** After existing arena transition, both fighters roll animated **3d6 vs 3d6 initiative**; winner attacks first. Each automatic attack involves **independent attack 3d6 vs defense 3d6** with trained guard or weaker stat-only defense. At most **three attacks per fighter/six half-turns total**; no more 14-action placeholder. Greatsword Heavy Swing wind-up delays its roll reveal *within* an attack turn, not by wasting a turn. Attacker 6–6–6 is a devastating finisher only if the attack actually overcomes defense. Every modifier, damage number and interval remains editable in `COMBAT_BALANCE` and `COMBAT_SKILLS`.
+- **Visuals:** Both sets of animated dice appear in the main arena image with true final faces/scores; pictures and Chronicle text are withheld until rolling finishes. The Fighting work-cycle progress bar is hidden and replaced by six small completed-turn markers. Other activities show no combat dice. Original action/outcome WebP imagery is unchanged.
+- **Validation:** PR #102 final-head [Pages CI 45021857967](https://github.com/janisp123/idle_game/actions/runs/45021857967) and [protocol 45021857980](https://github.com/janisp123/idle_game/actions/runs/45021857980) passed; main Pages [45021952768](https://github.com/janisp123/idle_game/actions/runs/45021952768) deployed. PR #103 final-head [Pages CI 45022874315](https://github.com/janisp123/idle_game/actions/runs/45022874315) and [protocol 45022874320](https://github.com/janisp123/idle_game/actions/runs/45022874320) passed; main Pages [45022934189](https://github.com/janisp123/idle_game/actions/runs/45022934189) deployed. Fresh public `/play/` returned HTTP 200 with `20261122-duel-initiative1`, both three-dice UI groups, turn markers and no prototype footer.
+- **Pending:** GAME-012's **one-minute work cycles, slower transitions and fully roll-free aggregate offline fighting formula**, as well as future PvP attribute caps, have **not** been changed by these PRs. No fabricated historical combat kill counts.
+
+
+
+
 ## 2026-11-22 — Twelve original turn-based Fighting images and de-duplicated Chronicle (chat, PR #100)
 
 - **Merged:** [PR #100](https://github.com/janisp123/idle_game/pull/100) as main commit `81a4a36d8f9a2172760dace4672f2c54fc9f5af1`. Twelve local original 960×540 WebP scene files added under `site/play/assets/combat/`, including Greatsword victory/defeat and Sword & Shield victory/defeat, plus engage, wind-up, weapon hits, misses, parry and shield block.
