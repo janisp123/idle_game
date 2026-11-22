@@ -8,7 +8,7 @@ import {
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster
 } from "./engine.mjs?v=20261122-mechanics1";
 
-import { combatAtTime, COMBAT_ART } from "./combat.mjs?v=20261121-combat-v1";
+import { combatAtTime, COMBAT_ART } from "./combat.mjs?v=20261122-mechanics1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
