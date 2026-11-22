@@ -708,7 +708,7 @@ function render() {
   // No early damage text, premature artwork or redundant work-cycle bar.
   const combat = current?.category === "combat" && !transition
     ? combatAtTime(state.combatSession) : null;
-  ui.activityProgress.hidden = Boolean(transition || combat);
+  ui.activityProgress.hidden = Boolean(transition || current?.category === "combat");
   ui.combatPanel.hidden = !combat;
   ui.combatDiceStage.hidden = true;
   ui.combatDice.hidden = true;
