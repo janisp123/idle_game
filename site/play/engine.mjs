@@ -10,7 +10,7 @@ import {
 } from "./combat.mjs?v=20261122-dice-duels1";
 import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=20261122-dice-duels1";
-import { initialArmour, normalizeArmour, armourUnlocked } from "./armour.mjs?v=20261122-fixed-armour1";
+import { initialArmour, normalizeArmour, armourUnlocked, armourStats } from "./armour.mjs?v=20261122-armour-balance1";
 import { allAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261121-attributes1";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
@@ -396,6 +396,7 @@ function settleWork(state, now, random, xpRandom = random) {
       session = startCombatSession({
         name: state.name,
         loadout: state.combatLoadout,
+        gear: armourStats(state.armour,state.combatLoadout),
         str: attrs.STR.value, dex: attrs.DEX.value, end: attrs.END.value,
         skill: state.skills.fighting.level
       }, state.settledAtMs >>> 0);
@@ -847,10 +848,9 @@ export function setCombatLoadout(state, loadout, now = Date.now(), random = Math
 }
 
 /**
- * Fixed wardrobe choice, not a drop or craft transaction. Level-gate using
- * activated Fighting skill level (NOT accumulated, unclaimed XP); settle at
- * the previous state before changing. Gear adds NO combat modifiers in this
- * phase, so no running duel, offline snapshot, or saved resources are reset.
+ * Validated gear selection: settle prior productive time with the OLD frozen
+ * effective gear, then reset only the current Fighting duel observation.
+ * Skill XP, items, travel and saved routes never reset.
  */
 export function setArmourChoice(state, slot, item, now = Date.now(), random = Math.random) {
   if (!armourUnlocked(state.skills, slot, item))
@@ -858,7 +858,9 @@ export function setArmourChoice(state, slot, item, now = Date.now(), random = Ma
   const result = settle(state, now, random);
   if (result.state.armour[slot] === item) return result;
   return { ...result, state: {
-    ...result.state, armour: { ...result.state.armour, [slot]: item }
+    ...result.state, armour: { ...result.state.armour, [slot]: item },
+    combatSession: result.state.activity === "fighting" && !result.state.transition
+      ? null : result.state.combatSession
   } };
 }
 
