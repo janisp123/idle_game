@@ -47,8 +47,8 @@ const task = (title, subject, item, itemLabel, minutes, xp, description, zone, s
     durationMs: timing.workCycleMs ?? Math.round(minutes * BASE_CYCLE_MS / speed),
     baseMinutes: minutes, speed, xp, yield: 1, description, zone, category });
 export const ACTIVITIES = Object.freeze({
-  // Fighting is separate from hunting or raiding. This alpha activity grants
-  // skill and time-based attribute growth; real per-hit combat will follow.
+  // Fighting is independent of hunting/raiding: real turn-by-turn attack and
+  // defense outcomes drive an event-specific original illustration.
   fighting: task("Fighting", "Matched opponents", null,
     "Combat skill · automatic turn-based duels", 20, 3,
     "Fight worthy opponents in automatic turns. Attack rolls, guards, wounds and outcomes decide each illustrated scene.",
