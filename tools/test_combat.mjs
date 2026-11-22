@@ -132,7 +132,7 @@ test("combat session remains bounded after decades with stable seed and frozen p
   assert.equal(at.enemy,makeOpponent(1).name);
   assert.deepEqual(combatAtTime(within),at);
   assert.ok(combatAtTime(advanceCombatSession(session,20*YEAR)).bout>1_000_000);
-  assert.equal(COMBAT_ART.engage,"fighting");
+  assert.equal(COMBAT_ART.engage,"fight-engage");
   assert.equal(COMBAT_ART.finisher,undefined);
 });
 
