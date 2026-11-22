@@ -259,6 +259,10 @@ export function combatAtTime(session) {
   const inside=session.elapsedMs%BOUT_MS;
   const seed=(Math.imul(session.seed^(bout>>>0),2654435761)+(bout>>>16))>>>0;
   const foe=makeOpponent(bout);
+  // A pre-gear V7 snapshot must not be retroactively upgraded on readback.
+  // New sessions carry their frozen gear; old sessions retain legacy behavior
+  // on BOTH sides of every reconstructed duel.
+  if (session.player.gear === undefined) delete foe.gear;
   const duel=simulateDuel(session.player,foe,seededCombatRandom(seed));
   const step=Math.min(duel.events.length-1,Math.floor(inside/COMBAT_BALANCE.eventMs));
   return {...duel,bout:bout+1,enemyLoadout:foe.loadout,
