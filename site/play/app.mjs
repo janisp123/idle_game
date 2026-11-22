@@ -6,10 +6,10 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout
-} from "./engine.mjs?v=20261122-compact1";
+} from "./engine.mjs?v=20261122-dice-duels1";
 
-import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-combat-scenes1";
-import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-combat-scenes1";
+import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-dice-duels1";
+import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-dice-duels1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -26,7 +26,12 @@ const ui = {
   masterConfirm: $("masterConfirm"), masterCancel: $("masterCancel"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
   combatPanel: $("combatPanel"), combatEventTitle: $("combatEventTitle"),
-  combatDice: $("combatDice"),
+  combatDice: $("combatDice"), combatTurns: $("combatTurns"),
+  combatDiceStage: $("combatDiceStage"),
+  playerDiceLabel: $("playerDiceLabel"), enemyDiceLabel: $("enemyDiceLabel"),
+  playerDiceTotal: $("playerDiceTotal"), enemyDiceTotal: $("enemyDiceTotal"),
+  playerDie: [$("playerDie1"), $("playerDie2"), $("playerDie3")],
+  enemyDie: [$("enemyDie1"), $("enemyDie2"), $("enemyDie3")],
   heading: $("scene-heading"), description: $("activityDescription"), actionFill: $("actionFill"),
   activityProgress: $("activityProgress"), transitionStatus: $("transitionStatus"),
   transitionPhase: $("transitionPhase"), transitionProgress: $("transitionProgress"), transitionFill: $("transitionFill"),
@@ -56,15 +61,47 @@ for (const loadout of Object.values(COMBAT_LOADOUTS)) {
 // Combat descriptions, actual rolled values and numeric damage belong ONLY
 // in the Chronicle. The image panel is a cinematic illustration + short label.
 export function combatChronicleLine(event) {
-  const parts = [event.text];
-  if (event.attackRoll !== undefined) {
-    parts.push("ATK " + (Math.floor(event.attackRoll * 100) + 1));
-    parts.push(event.defenseRoll === null ? "DEF —" :
-      "DEF " + (Math.floor(event.defenseRoll * 100) + 1));
+  if (!event.attackDice) return event.text; // Initiative includes BOTH genuine rolls.
+  return event.text + " · ATK " + event.attackDice.join("–") + " = " + event.attackTotal +
+    " · DEF " + event.defenseDice.join("–") + " = " + event.defenseTotal;
+}
+const FACE_GLYPHS = Object.freeze(["⚀","⚁","⚂","⚃","⚄","⚅"]);
+// Animated previews never affect the already-resolved deterministic game dice.
+function previewFace(seed, bout, step, frame, index) {
+  let n = (seed ^ Math.imul(bout + 1, 2654435761) ^
+    Math.imul(step + 1, 2246822519) ^ Math.imul(frame + 1, 3266489917) ^
+    Math.imul(index + 1, 668265263)) >>> 0;
+  n ^= n >>> 16;
+  n = Math.imul(n, 2246822519) >>> 0;
+  n ^= n >>> 13;
+  return 1 + n % 6;
+}
+function presentDice(combat, event, isRolling, isRevealed) {
+  const initiative = event.type === "initiative";
+  const left = initiative ? event.playerDice :
+    event.actor === "player" ? event.attackDice : event.defenseDice;
+  const right = initiative ? event.enemyDice :
+    event.actor === "enemy" ? event.attackDice : event.defenseDice;
+  const leftScore = initiative ? event.playerTotal :
+    event.actor === "player" ? event.attackTotal : event.defenseTotal;
+  const rightScore = initiative ? event.enemyTotal :
+    event.actor === "enemy" ? event.attackTotal : event.defenseTotal;
+  ui.playerDiceLabel.textContent = initiative ? "YOU · FIRST?" :
+    event.actor === "player" ? "YOU · ATTACK" : "YOU · DEFEND";
+  ui.enemyDiceLabel.textContent = initiative ? "ENEMY · FIRST?" :
+    event.actor === "enemy" ? "ENEMY · ATTACK" : "ENEMY · DEFEND";
+  const frame = Math.floor(combat.eventElapsedMs / 250);
+  for (let i = 0; i < 3; i++) {
+    const p = isRolling ? previewFace(state.combatSession.seed,combat.bout,combat.step,frame,i) : left[i];
+    const e = isRolling ? previewFace(state.combatSession.seed,combat.bout,combat.step,frame,i + 3) : right[i];
+    ui.playerDie[i].textContent = FACE_GLYPHS[p - 1];
+    ui.enemyDie[i].textContent = FACE_GLYPHS[e - 1];
+    ui.playerDie[i].title = String(p);
+    ui.enemyDie[i].title = String(e);
   }
-  if (event.dice && event.type !== "finisher")
-    parts.push("SKULLS " + event.dice.join("–"));
-  return parts.join(" · ");
+  ui.playerDiceTotal.textContent = isRevealed ? String(leftScore) : "ROLLING";
+  ui.enemyDiceTotal.textContent = isRevealed ? String(rightScore) : "ROLLING";
+  ui.combatDiceStage.classList.toggle("rolling",isRolling);
 }
 const messages = [];
 let state;
