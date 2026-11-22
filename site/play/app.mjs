@@ -6,7 +6,7 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster
-} from "./engine.mjs?v=20261121-combat-v1";
+} from "./engine.mjs?v=20261122-mechanics1";
 
 import { combatAtTime, COMBAT_ART } from "./combat.mjs?v=20261121-combat-v1";
 const $ = id => document.getElementById(id);
