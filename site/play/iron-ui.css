@@ -899,3 +899,72 @@ footer p{color:#aa9680}
   .armour-slot {min-height:65px}
   .armour-slot-item {font-size:9px}
 }
+
+/* UI-RESULTS-001 — a small, truthful result display for every activity.
+   No Chronicle/history card, timers, fabricated loot or decorative numbers. */
+.result-panel {
+  border:2px ridge #76533a;
+  background:linear-gradient(145deg,#271a13,#120c0a);
+  padding:8px 11px;
+  min-width:0;
+  box-shadow:inset 0 0 0 1px rgba(186,133,88,.14);
+}
+.result-panel [hidden] {display:none !important}
+.result-work {
+  display:flex;align-items:center;gap:11px;min-height:40px;min-width:0;
+}
+.result-activity-name {
+  flex:0 0 auto;max-width:33%;color:#d2a777;
+  font:700 11px/1.3 Georgia,serif;letter-spacing:.08em;
+  text-transform:uppercase;overflow-wrap:anywhere;
+}
+.result-tokens {
+  display:flex;align-items:center;gap:9px;flex-wrap:wrap;min-width:0;
+}
+.result-token {
+  display:inline-flex;align-items:baseline;gap:4px;min-width:0;
+  font:700 21px/1.12 Georgia,serif;font-variant-numeric:tabular-nums;
+  animation:result-reveal .22s ease-out both;
+}
+.result-token small {
+  color:#c5ae90;font:600 11px/1.25 Georgia,serif;
+  overflow-wrap:anywhere;
+}
+.result-token[data-tone="gain"] {color:#8cd6a2;text-shadow:0 0 7px rgba(68,143,81,.2)}
+.result-token[data-tone="damage"] {color:#f08070;text-shadow:0 0 7px rgba(155,37,25,.2)}
+.result-token[data-tone="guard"] {color:#e3c596;font-size:17px;letter-spacing:.04em}
+.result-token[data-tone="neutral"] {color:#b79c80;font-size:15px;letter-spacing:.025em}
+.result-combat {
+  display:grid;grid-template-columns:minmax(0,1fr) 16px minmax(0,1fr);
+  align-items:center;gap:7px;min-height:45px;
+}
+.result-side {min-width:0;display:flex;flex-direction:column;gap:4px}
+.result-side-name {
+  color:#b99270;font:700 10px/1.1 Georgia,serif;letter-spacing:.1em;
+}
+.result-side-enemy {align-items:flex-end;text-align:right}
+.result-side-enemy .result-tokens {justify-content:flex-end}
+.result-side-player .result-tokens {justify-content:flex-start}
+.result-versus {font:18px/1 Georgia,serif;text-align:center;color:#78533c}
+.result-notice {
+  margin:0;color:#b99b80;font:11px/1.3 Georgia,serif;
+  overflow:hidden;max-height:2.6em;
+}
+.result-notice:empty {display:none}
+@keyframes result-reveal {
+  from {opacity:.55;transform:translateY(3px)}
+  to {opacity:1;transform:translateY(0)}
+}
+@media(max-width:520px) {
+  .result-panel {padding:7px 8px}
+  .result-work {flex-wrap:wrap;gap:5px}
+  .result-activity-name {max-width:100%;font-size:10px}
+  .result-tokens {gap:6px}
+  .result-token {font-size:19px}
+  .result-token small {font-size:10px}
+  .result-combat {gap:4px;grid-template-columns:minmax(0,1fr) 11px minmax(0,1fr)}
+  .result-token[data-tone="guard"] {font-size:14px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .result-token {animation:none}
+}
