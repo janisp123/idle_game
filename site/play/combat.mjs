@@ -73,6 +73,8 @@ const validGear = gear => gear && typeof gear === "object" && !Array.isArray(gea
   ["physicalReductionPct","magicResistancePct","evasionScore","dodgeMargin",
    "initiativePenalty","mobilityPct","totalKg","armourKg","weaponKg"].every(k =>
      typeof gear[k] === "number" && Number.isFinite(gear[k])) &&
+  (gear.defenseEnchant === undefined || (Number.isSafeInteger(gear.defenseEnchant) &&
+    gear.defenseEnchant >= 0 && gear.defenseEnchant <= 220)) &&
   gear.physicalReductionPct >= 0 && gear.physicalReductionPct <= 60 &&
   gear.magicResistancePct >= 0 && gear.magicResistancePct <= 55 &&
   gear.evasionScore >= -4 && gear.evasionScore <= 4 &&
@@ -88,7 +90,9 @@ function validateFighter(f) {
     !["str","dex","end","skill"].every(k => validStat(f[k])) ||
     (f.defenseSkill !== undefined && f.defenseSkill !== null &&
       COMBAT_SKILLS[f.defenseSkill]?.role !== "defense") ||
-    (f.gear !== undefined && !validGear(f.gear)))
+    (f.gear !== undefined && !validGear(f.gear)) ||
+    (f.attackEnchant !== undefined && (!Number.isSafeInteger(f.attackEnchant) ||
+      f.attackEnchant < 0 || f.attackEnchant > 20)))
     throw new RangeError("Invalid fighter");
 }
 export function makeOpponent(bout) {
@@ -121,6 +125,7 @@ function normalize(f,id) {
   const abilities=COMBAT_LOADOUTS[f.loadout];
   const maxHP=Math.max(1,Math.round(COMBAT_BALANCE.baseHP+f.end*COMBAT_BALANCE.hpPerEndurance));
   return {...f,id,maxHP,hp:maxHP,opening:false,
+    attackEnchant:f.attackEnchant??0,
     gear:f.gear??LEGACY_NO_BONUS,
     attackAbility:COMBAT_SKILLS[abilities.attackSkill],
     defenseAbility:f.defenseSkill===null?null:
@@ -205,11 +210,15 @@ function resolveTurn(a,d,turn,random) {
           " The pit wardens carry you to safety.")};
   }
   const raw=COMBAT_BALANCE.baseDamage+a.str*COMBAT_BALANCE.damagePerStrength+
-    a.skill*COMBAT_BALANCE.damagePerSkill;
+    a.skill*COMBAT_BALANCE.damagePerSkill+a.attackEnchant;
   const baseDamage=Math.max(1,Math.round(raw*a.attackAbility.damageMultiplier));
   // Armour mitigates a LANDED physical hit; the 6–6–6 finisher remains an
   // exceptional opposed-roll event, not arbitrarily rewritten as N damage.
-  const damage=Math.max(1,Math.round(baseDamage*(100-d.gear.physicalReductionPct)/100));
+  // Slot enchantments are small flat bonuses, not extra dice or guaranteed
+  // misses. Defence applies only after a physical hit beats the guard.
+  const damage=Math.max(1,
+    Math.round(baseDamage*(100-d.gear.physicalReductionPct)/100)-
+      (d.gear.defenseEnchant??0));
   d.hp=Math.max(0,d.hp-damage);
   const type=d.hp===0?"collapse":d.hp<=d.maxHP/2?"wound":"strike";
   return {type,...meta,damage,hpAfter:d.hp,
