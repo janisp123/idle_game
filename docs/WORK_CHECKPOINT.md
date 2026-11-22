@@ -1,6 +1,17 @@
 # Current working checkpoint
 
 
+## Latest verified — mobile compactness and 3d6 six-turn duels, PRs #102/#103 (2026-11-22)
+
+- **Main:** `3de66fbb58f9ab023efe9c30013aa16632666236` after [PR #102](https://github.com/janisp123/idle_game/pull/102) and [PR #103](https://github.com/janisp123/idle_game/pull/103), superseding previous #100 checkpoint.
+- **Evidence:** Final PR #103 head `c1391883998f078299a32746326e22d4e4425a9f` passed [Idle Game website 45022874315](https://github.com/janisp123/idle_game/actions/runs/45022874315) and [Project Protocol Preflight 45022874320](https://github.com/janisp123/idle_game/actions/runs/45022874320); main [Pages 45022934189](https://github.com/janisp123/idle_game/actions/runs/45022934189) succeeded. Fresh public `/play/` readback HTTP 200 confirmed the `20261122-duel-initiative1` module, `combatDiceStage`, three dice each for player/enemy, `combatTurns`, and removed prototype footer.
+- **Now implemented:** Mobile no-explanation layout, hidden singleton route, actual Skill Master disabled/dim state, terse STR/DEX/END/INT/WIL labels. Combat engine has 3d6 initiative and 3d6 attack versus 3d6 defense per alternating turn, maximum six turns, greatsword wind-up *inside* an attack, tied initiative bounded rerolls and rare successful 6–6–6 brutal finisher. Results are unveiled **after** cosmetic rolling, using the existing action/outcome paintings; Chronicle alone holds numerical roll/damage narration, while six pips replace the Fighting bar.
+- **Code/tuning:** `site/play/combat.mjs:COMBAT_BALANCE`, `site/play/combat-skills.mjs:COMBAT_SKILLS`, `site/play/app.mjs` and `site/play/combat-art.mjs`; exact new equations and dice UI timing in [docs/mechanics/COMBAT.md](mechanics/COMBAT.md). No V7 save migration, skill progression formula, three-wagon scheduling, resource calculation, or PvP attribute-cap implementation in these PRs.
+- **Next step:** GAME-012 remains BLOCKED: owner asked for one-minute work cycles, slower transitions and roll-free aggregate offline Fighting. Decide its explicit balance / performance formula and compatible timing-profile migration, then implement as a separate tested PR. Other pending work: additional truthful event paintings, clan raids/rescue, physical equipment and meaningful opponent matching. Owner should review new dice reveal and compact mobile UI on their phone.
+
+
+
+
 ## Latest verified — PR #100 cinematic Fighting art and Chronicle cleanup (2026-11-22)
 
 - **Main:** `81a4a36d8f9a2172760dace4672f2c54fc9f5af1`, merged [PR #100](https://github.com/janisp123/idle_game/pull/100). This supersedes the former PR #98 gameplay head below.
