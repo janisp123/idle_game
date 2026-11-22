@@ -11,6 +11,7 @@
  */
 import { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=20261122-dice-duels1";
+import { armourStats, initialArmour } from "./armour.mjs?v=20261122-armour-balance1";
 export { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=20261122-dice-duels1";
 export { COMBAT_ART } from "./combat-art.mjs?v=20261122-dice-duels1";
@@ -68,18 +69,33 @@ export function seededCombatRandom(seed) {
     return n / 0x100000000;
   };
 }
+const validGear = gear => gear && typeof gear === "object" && !Array.isArray(gear) &&
+  ["physicalReductionPct","magicResistancePct","evasionScore","dodgeMargin",
+   "initiativePenalty","mobilityPct","totalKg","armourKg","weaponKg"].every(k =>
+     typeof gear[k] === "number" && Number.isFinite(gear[k])) &&
+  gear.physicalReductionPct >= 0 && gear.physicalReductionPct <= 60 &&
+  gear.magicResistancePct >= 0 && gear.magicResistancePct <= 55 &&
+  gear.evasionScore >= -4 && gear.evasionScore <= 4 &&
+  gear.dodgeMargin >= 1 && gear.dodgeMargin <= 99 &&
+  gear.initiativePenalty >= 0 && gear.initiativePenalty <= 4 &&
+  gear.mobilityPct >= 60 && gear.mobilityPct <= 100 &&
+  gear.totalKg >= 0 && gear.totalKg <= 60 &&
+  gear.armourKg >= 0 && gear.armourKg <= 40 &&
+  gear.weaponKg >= 0 && gear.weaponKg <= 12;
 function validateFighter(f) {
   if (!f || typeof f !== "object" || typeof f.name !== "string" || !f.name ||
     f.name.length > 40 || !validCombatLoadout(f.loadout) ||
     !["str","dex","end","skill"].every(k => validStat(f[k])) ||
     (f.defenseSkill !== undefined && f.defenseSkill !== null &&
-      COMBAT_SKILLS[f.defenseSkill]?.role !== "defense"))
+      COMBAT_SKILLS[f.defenseSkill]?.role !== "defense") ||
+    (f.gear !== undefined && !validGear(f.gear)))
     throw new RangeError("Invalid fighter");
 }
 export function makeOpponent(bout) {
   if (!validUnsigned(bout)) throw new RangeError("Invalid bout number");
   const [name,loadout,str,dex,end,skill] = OPPONENTS[bout % OPPONENTS.length];
-  return {name,loadout,str,dex,end,skill};
+  // Opponents use starter Robe gear, not fictional heavy armour they never own.
+  return {name,loadout,str,dex,end,skill,gear:armourStats(initialArmour(),loadout)};
 }
 export function validCombatSession(session) {
   return session === null || Boolean(session && typeof session === "object" &&
@@ -99,10 +115,13 @@ export function advanceCombatSession(session, elapsedMs) {
   if (!validUnsigned(total)) throw new RangeError("Combat clock exceeded safe range");
   return {...session,elapsedMs:total};
 }
+const LEGACY_NO_BONUS = Object.freeze({ physicalReductionPct:0, magicResistancePct:0,
+  evasionScore:0,dodgeMargin:COMBAT_BALANCE.dodgeMargin,initiativePenalty:0 });
 function normalize(f,id) {
   const abilities=COMBAT_LOADOUTS[f.loadout];
   const maxHP=Math.max(1,Math.round(COMBAT_BALANCE.baseHP+f.end*COMBAT_BALANCE.hpPerEndurance));
   return {...f,id,maxHP,hp:maxHP,opening:false,
+    gear:f.gear??LEGACY_NO_BONUS,
     attackAbility:COMBAT_SKILLS[abilities.attackSkill],
     defenseAbility:f.defenseSkill===null?null:
       COMBAT_SKILLS[f.defenseSkill??abilities.defenseSkill]};
@@ -121,9 +140,9 @@ function initiative(player,enemy,random) {
   do {
     playerDice=rollSkullDice(random);enemyDice=rollSkullDice(random);
     playerTotal=sum(playerDice)+scoreStats(player,"initiative")+
-      (COMBAT_LOADOUTS[player.loadout].initiativeBonus??0);
+      (COMBAT_LOADOUTS[player.loadout].initiativeBonus??0)-player.gear.initiativePenalty;
     enemyTotal=sum(enemyDice)+scoreStats(enemy,"initiative")+
-      (COMBAT_LOADOUTS[enemy.loadout].initiativeBonus??0);
+      (COMBAT_LOADOUTS[enemy.loadout].initiativeBonus??0)-enemy.gear.initiativePenalty;
     if(playerTotal!==enemyTotal)break;
     rerolls++;
   }while(rerolls<COMBAT_BALANCE.initiativeRerolls);
@@ -155,7 +174,8 @@ function resolveTurn(a,d,turn,random) {
   const attackTotal=sum(attackDice)+scoreStats(a,"attack")+
     (a.attackAbility.attackBonus??0)+(opening?COMBAT_BALANCE.counterOpeningBonus:0);
   const defenseTotal=sum(defenseDice)+scoreStats(d,"defense")+
-    (d.defenseAbility?.defenseBonus??-COMBAT_BALANCE.untrainedDefensePenalty);
+    (d.defenseAbility?.defenseBonus??-COMBAT_BALANCE.untrainedDefensePenalty)+
+    d.gear.evasionScore;
   const meta={actor:a.id,target:d.id,turn,attackSkill:a.attackAbility.id,
     defenseSkill:d.defenseAbility?.id??null,attackDice,defenseDice,
     attackTotal,defenseTotal,damage:0};
@@ -167,7 +187,7 @@ function resolveTurn(a,d,turn,random) {
   }
   if(attackTotal<=defenseTotal) {
     const gap=defenseTotal-attackTotal;
-    const evasion=!d.defenseAbility || gap>=COMBAT_BALANCE.dodgeMargin;
+    const evasion=!d.defenseAbility || gap>=d.gear.dodgeMargin;
     const type=evasion?"dodge":d.defenseAbility.result;
     if(evasion)d.opening=true;
     const prose=evasion?"dodges the blow":type==="block"?"stops the blow with a shield":
@@ -186,7 +206,10 @@ function resolveTurn(a,d,turn,random) {
   }
   const raw=COMBAT_BALANCE.baseDamage+a.str*COMBAT_BALANCE.damagePerStrength+
     a.skill*COMBAT_BALANCE.damagePerSkill;
-  const damage=Math.max(1,Math.round(raw*a.attackAbility.damageMultiplier));
+  const baseDamage=Math.max(1,Math.round(raw*a.attackAbility.damageMultiplier));
+  // Armour mitigates a LANDED physical hit; the 6–6–6 finisher remains an
+  // exceptional opposed-roll event, not arbitrarily rewritten as N damage.
+  const damage=Math.max(1,Math.round(baseDamage*(100-d.gear.physicalReductionPct)/100));
   d.hp=Math.max(0,d.hp-damage);
   const type=d.hp===0?"collapse":d.hp<=d.maxHP/2?"wound":"strike";
   return {type,...meta,damage,hpAfter:d.hp,
