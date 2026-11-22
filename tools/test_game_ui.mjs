@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { newGame, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP } from "../site/play/engine.mjs";
+import { newGame, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP } from "../site/play/engine.mjs";
 
 class FakeElement {
   children = [];
@@ -112,8 +112,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   Date.now = () => now;
   try {
     await import("../site/play/app.mjs?smoke-test");
-    assert.deepEqual(elements.get("queueAmount").children.map(option => option.value),
-      ["1", "2", "3", "4", "5", "6", "7", "8"],
+    assert.deepEqual(elements.get("queueAmount").children.map(option => Number(option.value)),
+      Array.from({ length: SCHEDULE_BALANCE.maxDurationUnits - SCHEDULE_BALANCE.minDurationUnits + 1 },
+        (_, i) => i + SCHEDULE_BALANCE.minDurationUnits),
       "planner amounts must be populated from engine SCHEDULE_BALANCE");
     assert.doesNotMatch(html, /<option value="8">8<\/option>/,
       "planner must not carry a duplicated static 1..8 range");
