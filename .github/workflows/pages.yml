@@ -37,7 +37,7 @@ jobs:
         with:
           node-version: "22"
       - name: Check game module syntax
-        run: node --check site/play/app.mjs && node --check site/play/engine.mjs && node --check site/play/loot.mjs && node --check site/play/production.mjs && node --check site/play/attributes.mjs && node --check site/play/combat.mjs
+        run: node --check site/play/app.mjs && node --check site/play/engine.mjs && node --check site/play/loot.mjs && node --check site/play/production.mjs && node --check site/play/attributes.mjs && node --check site/play/combat.mjs && node --check site/play/combat-skills.mjs
       - name: Test offline engine, skill migration and browser UI
         run: node --test tools/test_game_engine.mjs tools/test_game_ui.mjs tools/test_combat.mjs
 
