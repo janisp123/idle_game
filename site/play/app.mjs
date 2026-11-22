@@ -5,17 +5,21 @@ import {
   queueSetDuration, queueSwap, queueRemoveLast,
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
-  xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout
-} from "./engine.mjs?v=20261122-dice-duels1";
+  xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
+} from "./engine.mjs?v=20261122-fixed-armour1";
 
 import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-dice-duels1";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-dice-duels1";
 import { combatFlowState } from "./combat-flow.mjs?v=20261122-action-flow1";
+import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, armourOption, armourUnlocked }
+  from "./armour.mjs?v=20261122-fixed-armour1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
   characterAttributes: $("characterAttributes"),
   combatLoadout: $("combatLoadout"), combatSkillsText: $("combatSkillsText"),
+  armourSlots: $("armourSlots"), armourChoice: $("armourChoice"),
+  armourChoiceLabel: $("armourChoiceLabel"),
   resourceList: $("resourceList"), choices: $("activityChoices"),
   openActivities: $("openActivities"), categories: $("activityCategories"),
   categoryChoices: $("activityCategoryChoices"), listScreen: $("activityListScreen"),
@@ -63,6 +67,66 @@ for (const loadout of Object.values(COMBAT_LOADOUTS)) {
   option.value = loadout.id;
   option.textContent = loadout.name;
   ui.combatLoadout.append(option);
+}
+// The user selects an engraved body slot, then uses ONE dropdown for its
+// fixed equipment choices. Both left/right pieces are independent. No item
+// database, loot generator, crafting or unapproved combat bonus is involved.
+let selectedArmourSlot = "head";
+let lastArmourOptionsKey = null;
+const armourButtons = new Map();
+for (const slot of ARMOUR_SLOTS) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "armour-slot";
+  button.setAttribute("data-slot", slot.id);
+  const glyph = document.createElement("span");
+  glyph.className = "armour-slot-symbol";
+  glyph.textContent = slot.icon;
+  const caption = document.createElement("span");
+  caption.className = "armour-slot-caption";
+  caption.textContent = slot.short;
+  const equipped = document.createElement("span");
+  equipped.className = "armour-slot-item";
+  button.append(glyph, caption, equipped);
+  button.addEventListener("click", () => {
+    selectedArmourSlot = slot.id;
+    render();
+  });
+  armourButtons.set(slot.id, {button, equipped});
+  ui.armourSlots.append(button);
+}
+const insignia = document.createElement("span");
+insignia.className = "armour-insignia";
+insignia.textContent = "✣";
+insignia.setAttribute("aria-hidden", "true");
+ui.armourSlots.append(insignia);
+
+function renderArmour() {
+  const slot = ARMOUR_SLOT_BY_ID[selectedArmourSlot];
+  const skillLevel = state.skills.fighting.level;
+  const key = slot.id + ":" + skillLevel;
+  if (lastArmourOptionsKey !== key) {
+    const options = ARMOUR_CHOICES[slot.group].map(piece => {
+      const opt = document.createElement("option");
+      opt.value = piece.id;
+      opt.disabled = !armourUnlocked(state.skills,slot.id,piece.id);
+      opt.textContent = opt.disabled
+        ? piece.name + " · Fighting Lv " + piece.level : piece.name;
+      return opt;
+    });
+    ui.armourChoice.replaceChildren(...options);
+    lastArmourOptionsKey = key;
+  }
+  ui.armourChoiceLabel.textContent = slot.name;
+  ui.armourChoice.value = state.armour[slot.id];
+  for (const part of ARMOUR_SLOTS) {
+    const row = armourButtons.get(part.id);
+    const picked = armourOption(part.id, state.armour[part.id]);
+    row.equipped.textContent = picked?.name ?? "—";
+    row.button.setAttribute("aria-pressed",String(part.id === selectedArmourSlot));
+    row.button.setAttribute("aria-label",part.name+": "+(picked?.name ?? "none")+
+      ". Choose this armour slot");
+  }
 }
 // Combat descriptions, actual rolled values and numeric damage belong ONLY
 // in the Chronicle. The image panel is a cinematic illustration + short label.
@@ -722,6 +786,7 @@ function render() {
   }
 
   renderMaster();
+  renderArmour();
   ui.activityProgress.hidden = Boolean(transition);
   ui.transitionStatus.hidden = !transition;
   if (transition) {
@@ -926,6 +991,19 @@ function start() {
     message("Combat style equipped: " + COMBAT_LOADOUTS[state.combatLoadout].name +
       ". Two skills: " + ui.combatSkillsText.textContent +
       ". A fresh duel begins if you were fighting.");
+    writeSave();
+    render();
+  });
+  ui.armourChoice.addEventListener("change", () => {
+    const slot = ARMOUR_SLOT_BY_ID[selectedArmourSlot];
+    const option = armourOption(slot.id, ui.armourChoice.value);
+    if (!option || !armourUnlocked(state.skills,slot.id,option.id)) {
+      renderArmour();
+      return;
+    }
+    const outcome = setArmourChoice(state,slot.id,option.id,Date.now());
+    state = outcome.state;
+    reportProgress(outcome);
     writeSave();
     render();
   });

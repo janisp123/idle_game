@@ -43,6 +43,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(html.includes('id="' + id + '"'),"both fighters get three distinct visible dice");
   assert.match(html, /id="combatLoadout"/, "a player can equip one of the two combat styles");
   assert.match(html, /id="combatSkillsText"/, "the two equipped skills are visible");
+  assert.match(html, /<details id="armourCabinet"/, "equipment folds away on narrow screens");
+  assert.match(html, /id="armourSlots"/);
+  assert.match(html, /id="armourChoice"/, "one equipment dropdown handles the active slot");
+  assert.match(queueCss, /grid-template-areas:[\s\S]*left_shoulder head right_shoulder/, "slots make a body-shaped grid");
   assert.doesNotMatch(html, /id="combatRolls"|id="combatEventText"/,
     "repeated fighting narration and rolls must not appear above Chronicle");
   assert.doesNotMatch(html, /Event-specific illustrations are being commissioned/,
@@ -55,7 +59,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261122-action-flow1/,
+  assert.match(html, /app\.mjs\?v=20261122-fixed-armour1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -80,7 +84,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261122-action-flow1/,
+  assert.match(html, /iron-ui\.css\?v=20261122-fixed-armour1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -144,6 +148,37 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       ["greatsword","sword_shield"],"selectable loadouts come from the skill registry");
     assert.match(elements.get("combatSkillsText").textContent,/Heavy Swing.*Blade Guard/);
     assert.equal(elements.get("combatLoadout").value,"greatsword");
+    const armourGrid = elements.get("armourSlots").children;
+    assert.equal(armourGrid.length,12,"eleven armour slots plus the central emblem");
+    const armourButtons = armourGrid.slice(0,11);
+    assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="left_glove").length,1);
+    assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="right_glove").length,1);
+    assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="left_boot").length,1);
+    assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="right_boot").length,1);
+    assert.equal(elements.get("armourChoiceLabel").textContent,"Hood / helmet");
+    assert.equal(elements.get("armourChoice").value,"hood");
+    assert.deepEqual(elements.get("armourChoice").children.map(o=>o.disabled),
+      [false,false,true,true],"locked levels are disabled in the native dropdown");
+    const leftGloveButton=armourButtons.find(b=>b.getAttribute("data-slot")==="left_glove");
+    leftGloveButton.fire("click");
+    assert.equal(leftGloveButton.getAttribute("aria-pressed"),"true");
+    assert.equal(elements.get("armourChoiceLabel").textContent,"Left glove");
+    elements.get("armourChoice").value="none";
+    elements.get("armourChoice").fire("change");
+    let gearSave=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(gearSave.armour.left_glove,"none");
+    assert.equal(gearSave.armour.right_glove,"cloth",
+      "equipping one glove cannot replace the other glove");
+    assert.equal(gearSave.items.hide,8,"armour choices do not spend gathered inventory");
+    elements.get("armourChoice").value="iron";
+    elements.get("armourChoice").fire("change");
+    gearSave=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(gearSave.armour.left_glove,"none",
+      "a forged dropdown selection cannot bypass the locked level gate");
+    elements.get("armourChoice").value="cloth";
+    elements.get("armourChoice").fire("change");
+    assert.equal(JSON.parse(store.get(SAVE_KEY)).armour.left_glove,"cloth");
+
     const openActivities = elements.get("openActivities");
     const categoryScreen = elements.get("activityCategories");
     const listScreen = elements.get("activityListScreen");
