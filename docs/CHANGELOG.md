@@ -1,5 +1,14 @@
 # Changelog — verified completed work
 
+## 2026-11-22 — Canonical mechanics formulas and centralized tuning (chat; PR #96)
+
+- **Merged:** [PR #96](https://github.com/janisp123/idle_game/pull/96), main commit `ad8d387a08f9096e329cd2de99cb68bf26daf537`. Created [docs/mechanics/README.md](mechanics/README.md) and five linked guides for implemented XP/stat costs, skill-gated rarity/crafting, current solo Combat V1 (explicitly separate from intended turn-based V2), scheduling/offline/saves and safe balance changes.
+- **Code structure:** `SKILL_BALANCE` now centralizes the skill-XP curve, efficiency cap and ±10% reward variation; `SCHEDULE_BALANCE` drives engine validation plus both UI duration selectors; `COMBAT_BALANCE` owns accuracy, defense and opening coefficients. Old numeric defaults and current RNG outcome order remain unchanged; no save schema change or V2 gameplay release.
+- **Discoverability:** Main README and `AGENTS.md` link the handbook so future chat/CW/Codex work reads the formulas before implementation. Outdated README prototype claims were corrected.
+- **Checks:** Final PR-head [Pages CI 45008477533](https://github.com/janisp123/idle_game/actions/runs/45008477533) and [protocol 45008477525](https://github.com/janisp123/idle_game/actions/runs/45008477525) passed; main [Pages deploy 45008521008](https://github.com/janisp123/idle_game/actions/runs/45008521008) succeeded. Fresh public `/play/` HTTP 200 readback confirmed `20261122-mechanics1`.
+- **Still pending:** Combat V2's attack/defense skill design and implementation, exact event art and clan raids. This PR intentionally preserves existing game balance.
+
+
 ## 2026-11-21 — Real slow Fighting duel prototype (chat; PR #94)
 
 - **Merged:** [PR #94](https://github.com/janisp123/idle_game/pull/94), commit `bb61a3ea9de7c48ec732b42a0779ab1b196f09af`. Pure duel rules in `site/play/combat.mjs`: actual misses, dodges, blocks, wounds, HP, defeat/victory, named rivals and vulnerability-triggered three six-sided skull dice. A 6–6–6 roll yields a rare weapon-specific finishing event. Balance is provisional.
