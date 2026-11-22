@@ -109,9 +109,9 @@ const MASTERY_PREFIXES = Object.freeze(Object.fromEntries(
     const prefixes = [Object.freeze({ ...running })];
     for (let step = 0; step < STAT_WEIGHT_TOTAL; step++) {
       let chosen = null;
+      for (const id of ATTRIBUTE_IDS) deficit[id] += weights[id] ?? 0;
       for (const id of ATTRIBUTE_IDS) {
         if (!(weights[id] ?? 0)) continue;
-        deficit[id] += weights[id];
         if (chosen === null || deficit[id] > deficit[chosen]) chosen = id;
       }
       if (chosen === null) throw new Error("No stat recipient: " + activity);
