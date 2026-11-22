@@ -6,19 +6,19 @@
 export const COMBAT_SKILLS = Object.freeze({
   heavy_swing: Object.freeze({
     id: "heavy_swing", name: "Heavy Swing", role: "attack",
-    chargeTurns: 1, accuracyBonus: -0.06, damageMultiplier: 1.9
+    windupMs: 1_800, attackBonus: 3, damageMultiplier: 1.9
   }),
   thrust: Object.freeze({
     id: "thrust", name: "Thrust", role: "attack",
-    chargeTurns: 0, accuracyBonus: 0.08, damageMultiplier: 1
+    windupMs: 0, attackBonus: 2, damageMultiplier: 1
   }),
   blade_guard: Object.freeze({
     id: "blade_guard", name: "Blade Guard", role: "defense",
-    guardChance: 0.24, result: "parry"
+    defenseBonus: 2, result: "parry"
   }),
   shield_block: Object.freeze({
     id: "shield_block", name: "Shield Block", role: "defense",
-    guardChance: 0.56, result: "block"
+    defenseBonus: 5, result: "block"
   })
 });
 
@@ -26,12 +26,12 @@ export const COMBAT_LOADOUTS = Object.freeze({
   greatsword: Object.freeze({
     id: "greatsword", name: "Two-handed Greatsword",
     attackSkill: "heavy_swing", defenseSkill: "blade_guard",
-    weapon: "greatsword"
+    weapon: "greatsword", initiativeBonus: -2
   }),
   sword_shield: Object.freeze({
     id: "sword_shield", name: "Sword & Shield",
     attackSkill: "thrust", defenseSkill: "shield_block",
-    weapon: "sword"
+    weapon: "sword", initiativeBonus: 1
   })
 });
 export const DEFAULT_COMBAT_LOADOUT = "greatsword";
