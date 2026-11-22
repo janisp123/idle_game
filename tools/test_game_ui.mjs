@@ -208,7 +208,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="right_boot").length,1);
     assert.equal(elements.get("armourChoiceLabel").textContent,"Hood / helmet");
     assert.equal(elements.get("armourChoice").value,"robe");
-    assert.match(elements.get("gearStats").textContent,/11 kg.*MOVE 92%.*PHYS 4%.*MR\\* 45%/,
+    assert.match(elements.get("gearStats").textContent,/11 kg.*MOVE 92%.*PHYS 4%.*MR\* 45%/,
       "starter robe and greatsword have truthful weight, mobility, protection and future magic values");
     assert.deepEqual(elements.get("armourChoice").children.map(o=>o.value),
       ["none","robe","leather","plate"],"exactly four standardized choices");
