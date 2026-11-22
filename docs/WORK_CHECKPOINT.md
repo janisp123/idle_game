@@ -1,5 +1,16 @@
 # Current working checkpoint
 
+## Latest verified — Glory Scrolls & risky fixed-slot enchants (2026-11-22, PR #118)
+
+- **Main:** `148e9a42c2ce2a482ee2aac8346ff993a7a1331f` after [PR #118](https://github.com/janisp123/idle_game/pull/118); no competing open PR at merge.
+- **Checks/deploy:** Final PR head `0239fc19f714d3ede25f1f957af3af31cf94b25d` passed [website CI 45050867474](https://github.com/janisp123/idle_game/actions/runs/45050867474) (combat/engine/browser smoke, static site) and [protocol 45050867335](https://github.com/janisp123/idle_game/actions/runs/45050867335). Main [Pages 45050983683](https://github.com/janisp123/idle_game/actions/runs/45050983683) deployed successfully. Fresh public `/play/?verify=glory-alpha1` returned HTTP 200 raw HTML with `app.mjs?v=20261122-glory1`, `enchantWeapon`, `enchantArmour`, and `gloryWallet`. Physical-phone QA remains for Owner.
+- **Implemented:** Glory Scrolls are an ordinary V7 inventory item. Each **actually won, completed Fighting bout** begun before the frozen Fighting XP-earning window ends gets 50% chance of one scroll (draw/loss, capped XP = 0). Seed/bout-based independent reward salt never alters 3d6 results. A persisted combat reward cursor prevents duplicates and old saved sessions do not claim fake past wins. Offline settlement reconstructs only actual *XP-eligible* bouts, not millions of ineligible historical fights. The window uses nominal Fighting XP/cycle (±10% underlying XP variation may differ slightly), and GAME-012's exact roll-free offline aggregate remains BLOCKED.
+- **Enchantment:** A single saved `weapon` enchant slot and 11 independently saved armour slot ranks. Each explicit attempt consumes 1 scroll; 50% raises **only that slot** by one, 50% resets **only that slot** to +0. Weapon +1 raw physical attack/rank; armour +1 flat physical defense/rank after base mitigation (minimum 1 damage), with the 3d6 rolls untouched. Provisional rank limit +20, configurable. Changing worn armor or combat style does not erase slot enchant. A changed rank refreshes active Fighting snapshot only after settling old effects. Compact equipment drawer UI, no extra always-visible card.
+- **Preservation:** Optional `enchantments` field and `glory_scroll` inventory key default to 0 on older V7 without changing GAME_VERSION or SAVE_KEY; all existing XP, items, character, task and combat seed retained. No additional STR/DEX/WIL gates per enchanted rank, enchanted elemental gear, generated items or new ability trees; GAME-013 remains PARTIAL, those features deferred.
+- **Source:** [Mechanics/ENCHANTMENTS.md](mechanics/ENCHANTMENTS.md), `site/play/glory.mjs`, `combat.mjs`, `engine.mjs`, `app.mjs`, `index.html`, `iron-ui.css`; matching engine/combat/UI tests.
+- **Next:** Owner checks live Fighting victories before the XP cap, Glory wallet and selected-slot success/reset on [Play Now](https://janisp123.github.io/idle_game/play/). Later decisions should specify enchant stat requirements, better numerical PvP defense balance, and GAME-012 offline aggregation without replaying per-bout dice.
+
+
 ## Latest verified — permanent stats awarded by claimed activity levels (2026-11-22, PR #116)
 
 - **Main:** `92f7485f1cd9074a3b90bfed7af46165821300f7` after [PR #116](https://github.com/janisp123/idle_game/pull/116), with no overlapping open PR at final merge.
