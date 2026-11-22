@@ -1,0 +1,20 @@
+# Alpha Tools — local test switches (ALPHA-TOOLS-001)
+
+The Owner requested a compact **Alpha Tools** block with three **on/off switch controls**. It sits *collapsed* beneath the resources rail (including on phones), keeping normal play uncluttered. All controls act only on this browser's local prototype and never affect the real phone clock.
+
+| Switch | Behavior | Stays on? |
+| --- | --- | --- |
+| **Reset all progress** | Ask for explicit confirmation, then replace ONLY the saved Idle Game character with `newGame(realNow)`, including reset activity levels/XP, attribute effort, item stocks, Glory Scrolls, enchant ranks, armor choices, queue, battle and preparation. Remove the separate alpha clock. `newGame` starts valid levels at **Lv 1** and attributes at **10**, not mathematically zero. Cancelling does **nothing**. | No — one-shot; automatically returns OFF |
+| **Test 24 hours idle** | Advance the local *logical engine timestamp* by **exactly 86,400,000 ms**, settle the unchanged game through **actual `enterGame`** in one batch, show real inventory, available XP and route changes; preserve one current XP bar, Skill Master manual progression, frozen combat power and infinite offline rules. Multiple deliberate ON actions each simulate one extra day. | No — one-shot; automatically returns OFF |
+| **Activity speed ×10** | Toggle a persistent **10× virtual game clock** affecting the real engine's activity work, movement, preparation and Fighting steps together. Switching OFF returns to **1×** without moving time backwards or rewriting cycle lengths/RNG; closing and reopening the browser continues the selected speed, even for offline time while enabled. | Yes — remains checked until OFF |
+
+## Architecture / safety
+
+- `site/play/alpha-tools.mjs` is a pure, zero-dependency virtual-clock helper. It validates integer anchors `{version:1,realAnchorMs,gameAnchorMs,speed:1|10}` and stores it **separately** as `ALPHA_CLOCK_KEY="idle-game-alpha-clock-v1"`. This is **not** a new V7 gameplay/save field; older saves still load unchanged.
+- Instead of changing core timing constants, app actions that settle resources/XP call `gameNow()` using `alphaTime`, while autosave throttling uses **real time**. `setAlphaSpeed` anchors the new rate at the current virtual time. `advanceAlphaClock` jumps that virtual time forward exactly 24 hours. This prevents the common failure where a speed toggle puts `settledAtMs` into the future and disabling it freezes play for days.
+- The reset is deliberately destructive but explicit, unlike a benign toggle: a confirmation spells out loss of local character, XP, stats, loot, gear, enchants and route. It does not clear unrelated website or project data. If localStorage is unavailable, speed/reset should report that rather than pretending progress will persist.
+- 24h simulation and speed changes never give artificial stat points, Skill Master levels, magically favorable dice or fabricated loot; they run the same settlement / combat code as normal activity. New in-game cycle durations, gameplay XP probabilities and magic combat remain untouched.
+- **Alpha-only**: These controls intentionally accelerate earned resources and can reset local progression. They must be removed or restricted before any authenticated multiplayer, production economy, achievements/competitive rankings or authoritative server launch. Browser local saves are already non-secure.
+- Automated tests in `tools/test_game_engine.mjs` and `tools/test_game_ui.mjs` cover virtual-clock persistence, 1×↔10× continuity, exact simulated day, save reload, offline XP cap, reset cancellation, full reset and closed-panel UI.
+
+**Known behavior:** This is a forward-only simulation, **not an undoable 24h preview**. A confirmed reset is not reversible. The reset/day controls are drawn as toggles for consistency with the Owner's request but automatically switch back OFF, because they are actions rather than persistent game modes. Only ×10 is a persistent setting.
