@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-22 — Fixed 11-slot armour wardrobe (chat, PR #107)
+
+- Merged [PR #107](https://github.com/janisp123/idle_game/pull/107) into main at `e24b20b5f43ae41ff8c3fe99d4bc6bcfc2f1312f`. A collapsible bronze original equipment board beneath the character's weapon-style control has eleven independently selectable slots (head, chest, leggings, two shoulders, two armguards, two gloves, two boots), using a single dropdown for the selected slot.
+- Four fixed choices per family: unequipped, basic free clothing, leather at activated Fighting Lv 5 and iron at Lv 12. Higher tiers remain visible but disabled; no random item database, material cost, currency or click-to-farm loop. All values centralized at `site/play/armour.mjs`.
+- Gear preferences are saved via an optional backward-compatible `armour` object in the existing V7 local save. Older saves receive free starter clothing without losing XP, resources, queue or duel state. No armor/HP/defense/damage modifiers are introduced before separate balance approval; combat and OFF-001 are unchanged.
+- Passed final-head [website CI 45033520161](https://github.com/janisp123/idle_game/actions/runs/45033520161) (engine/UI tests, static site, module syntax) and [protocol 45033520277](https://github.com/janisp123/idle_game/actions/runs/45033520277). Main [Pages deployment 45033587375](https://github.com/janisp123/idle_game/actions/runs/45033587375) succeeded, and public `/play/?verify=fixed-armour1` returned HTTP 200 containing the new armour controls. Owner physical-phone layout review remains pending.
+
+
 ## 2026-11-22 — Fighting action progress under the scene (chat, PR #105)
 
 - Merged [PR #105](https://github.com/janisp123/idle_game/pull/105) into `main` at `2417ec76984c3345398602fcf7e296432fa123aa`: a real responsive five-step bronze action timeline below the painting, with initiative, attacker dice, defender dice, outcome and next battle. Current step highlighted; previous steps completed; next steps muted.
