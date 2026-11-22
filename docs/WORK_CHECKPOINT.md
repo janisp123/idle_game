@@ -1,5 +1,14 @@
 # Current working checkpoint
 
+## Latest verified — automatic fighting action flow under picture, PR #105 (2026-11-22)
+
+- **Main:** `2417ec76984c3345398602fcf7e296432fa123aa` following [PR #105](https://github.com/janisp123/idle_game/pull/105); prior duel mechanics from PRs #102/#103 unchanged.
+- **Checks:** Final PR head `6772bb21a2471632cf9a25e495db4749774278b7` passed [Idle Game website 45029901503](https://github.com/janisp123/idle_game/actions/runs/45029901503) including module syntax, engine and UI tests, and [Project Protocol Preflight 45029901476](https://github.com/janisp123/idle_game/actions/runs/45029901476). [Main GitHub Pages 45029942325](https://github.com/janisp123/idle_game/actions/runs/45029942325) deployed successfully. A fresh public `/play/?verify=action-flow1` HTML fetch returned HTTP 200 with the new `combatFlow` element and both distinct dice-tray IDs. Android manual visual review is still pending.
+- **Shipped:** A compact, bronze five-stage action bar immediately below the fighting painting shows real initiative, separate visible attack-side and defense-side 3d6 animations for every automatic strike, corresponding YOUR/ENEMY attack resolution, and next-action or post-duel preparation. Progress and active state follow the simulator, including short duels; six duel-history pips remain. Real engine dice, attack/defense scores, outcome paintings, Chronicle damage, offline settlement, skill values, V7 saves and work schedules remain unchanged.
+- **Source:** `site/play/combat-flow.mjs` calculates only display states from existing combat/session data; `app.mjs`, `index.html`, `iron-ui.css` implement the interface; `tools/test_game_ui.mjs` tests the two independently shown dice phases. `docs/mechanics/COMBAT.md` updated.
+- **Next:** Owner phone review of the live [Play Now page](https://janisp123.github.io/idle_game/play/), especially active bar readability and visible dice sequencing. GAME-012 timing and aggregate offline balancing remain BLOCKED/pending separate decisions.
+
+
 
 ## Latest verified — mobile compactness and 3d6 six-turn duels, PRs #102/#103 (2026-11-22)
 
