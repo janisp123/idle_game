@@ -5,8 +5,9 @@ import {
   rollSkullDice, seededCombatRandom, makeOpponent, startCombatSession,
   advanceCombatSession, simulateDuel, combatAtTime, validCombatSession
 } from "../site/play/combat.mjs";
-import {newGame, chooseActivity, settle, enterGame, readSave, setCombatLoadout,
+import {newGame, chooseActivity, settle, enterGame, readSave, setCombatLoadout, setArmourChoice,
   GAME_VERSION, allAttributeProgress} from "../site/play/engine.mjs";
+import { ARMOUR_SLOTS, armourStats } from "../site/play/armour.mjs";
 
 const great={name:"Wanderer",loadout:"greatsword",str:10,dex:10,end:10,skill:1};
 const shield={name:"Varrik",loadout:"sword_shield",str:10,dex:10,end:10,skill:1};
@@ -134,6 +135,61 @@ test("a duel never creates more than three attack attempts per side",()=>{
     }
   }
 });
+test("physical armor counters real hits; evasion and weight alter actual opposed rolls",()=>{
+  const wear=(f,tier)=>({...f,gear:armourStats(
+    Object.fromEntries(ARMOUR_SLOTS.map(slot=>[slot.id,tier])),f.loadout)});
+  const unguarded={...shield,name:"Unguarded",defenseSkill:null};
+  const unarmored=firstTurn(great,wear(unguarded,"none"),5,1);
+  const robe=firstTurn(great,wear(unguarded,"robe"),5,1);
+  const leather=firstTurn(great,wear(unguarded,"leather"),5,1);
+  const plate=firstTurn(great,wear(unguarded,"plate"),5,1);
+  assert.equal(unarmored.damage,24);
+  assert.equal(robe.damage,23);
+  assert.equal(leather.damage,19);
+  assert.equal(plate.damage,12,"full Plate prevents half of landed physical damage");
+  assert.ok(plate.attackTotal===leather.attackTotal);
+  assert.ok(plate.defenseTotal<leather.defenseTotal,
+    "full Plate lowers the defender's opposed defense/dodge score");
+  const leatherAvoid=firstTurn(shield,wear(great,"leather"),4,5);
+  const plateAvoid=firstTurn(shield,wear(great,"plate"),4,5);
+  assert.equal(leatherAvoid.type,"dodge");
+  assert.notEqual(plateAvoid.type,"dodge",
+    "Plate must nearly eliminate successful dodges");
+  const equalFighters={...shield,name:"Equal"};
+  const heavy=simulateDuel(wear(equalFighters,"plate"),
+    wear({...equalFighters,name:"Light"},"none"),()=>.5);
+  assert.equal(heavy.events[1].actor,"enemy",
+    "heavy encumbrance lowers the actual three-dice initiative total");
+  assert.equal(heavy.events[1].playerTotal<heavy.events[1].enemyTotal,true);
+  const old=simulateDuel(great,shield,()=>.5);
+  assert.equal(old.events.length>0,true,
+    "pre-equipment combat fixtures keep original rules for old snapshots");
+});
+
+test("changing armour mid-Fighting preserves earned progression and refreshes frozen power",()=>{
+  const init=chooseActivity(newGame(0),"fighting",0,()=>.5).state;
+  init.items.stone=77;
+  const before=settle(init,COMBAT_BALANCE.eventMs,()=>.5).state;
+  assert.equal(before.combatSession.player.gear.physicalReductionPct,4);
+  const oldXP=before.skills.fighting.xp,oldEffort={...before.attributeEffort};
+  const changed=setArmourChoice(before,"chest","none",COMBAT_BALANCE.eventMs,()=>.5).state;
+  assert.equal(changed.combatSession,null,"equipping a different piece begins a new fight");
+  assert.equal(changed.items.stone,77);
+  assert.equal(changed.skills.fighting.xp,oldXP);
+  assert.deepEqual(changed.attributeEffort,oldEffort);
+  assert.equal(changed.armour.chest,"none");
+  const later=settle(changed,2*COMBAT_BALANCE.eventMs,()=>.5).state;
+  assert.equal(later.combatSession.player.gear.physicalReductionPct,3);
+  assert.equal(later.combatSession.player.gear.totalKg<before.combatSession.player.gear.totalKg,true);
+  assert.deepEqual(readSave(JSON.stringify(later)),later);
+  // A long offline interval MUST keep the original stats without repeatedly
+  // upgrading equipment or retroactively recalculating any absent duels.
+  const away=enterGame(before,20*YEAR,()=>.5).state;
+  assert.deepEqual(away.combatSession.player.gear,before.combatSession.player.gear);
+  assert.equal(away.combatSession.elapsedMs>=20*YEAR,true);
+  assert.deepEqual(readSave(JSON.stringify(away)),away);
+});
+
 test("combat sessions are deterministic, persisted and O(1) after decades away",()=>{
   const s=startCombatSession(great,12345);
   assert.equal(validCombatSession(s),true);
