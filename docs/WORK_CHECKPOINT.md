@@ -1,6 +1,17 @@
 # Current working checkpoint
 
 
+## Latest verified — PR #100 cinematic Fighting art and Chronicle cleanup (2026-11-22)
+
+- **Main:** `81a4a36d8f9a2172760dace4672f2c54fc9f5af1`, merged [PR #100](https://github.com/janisp123/idle_game/pull/100). This supersedes the former PR #98 gameplay head below.
+- **CI:** final PR head `fc79f35912fd0dea624c0abdd57e3deec310b79a` passed [Pages validator 45015801061](https://github.com/janisp123/idle_game/actions/runs/45015801061) and [Project Protocol Preflight 45015801098](https://github.com/janisp123/idle_game/actions/runs/45015801098). Main [Pages deploy 45016017696](https://github.com/janisp123/idle_game/actions/runs/45016017696) passed. Fresh public `/play/` HTML HTTP 200 served `app.mjs?v=20261122-combat-scenes1`, with no duplicate `combatEventText`/`combatRolls` fields.
+- **Feature:** 12 original 16:9 WebP images live under `site/play/assets/combat/`. Selector `site/play/combat-art.mjs` maps genuine simulator event type, actor weapon, trained defense skill and final player victory/defeat to scene paintings. Greatsword and Sword & Shield **each** have their own win and loss images. Browser main scene owns the art; Chronicle alone owns combat text, attack/defense roll and damage values. A compact duel status/skull-dice strip remains.
+- **Save/security:** No user-save format/schema or offline gain change; no per-hit simulation invented for historical offline events; old local V7 saves remain valid. Noncombat static scenes and resource formulas untouched.
+- **Limits:** This is the *first* cinematic art set; only twelve image types and some lower-resolution upscale crops. Enemy gear variants, rare effects, raids and clan moments still need new scene files. Owner's earlier request for one-minute work cycles and slower transitions plus roll-free offline combat remains **not implemented**; see GAME-012 and its still-undecided transition/aggregate formulas.
+- **Next action:** Owner Android review for readability, image changes on each turn and Victory/Defeat variants. Follow up with new verified art for gaps, or design/implement GAME-012 as a separate small testable change (never silently alter live combat probabilities).
+
+
+
 ## Latest verified — two-skill combat loadouts, PR #98 (2026-11-22)
 
 - **Main gameplay release:** `3372699bba75b92254a6889b4b1147acd733a099`, merged [PR #98](https://github.com/janisp123/idle_game/pull/98), superseding the historical PR #96/94 heads below.
