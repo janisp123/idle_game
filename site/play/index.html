@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261122-alpha-tools1">
-  <script type="module" src="./app.mjs?v=20261122-alpha-tools1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261122-alpha-day-button1">
+  <script type="module" src="./app.mjs?v=20261122-alpha-day-button1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -230,10 +230,7 @@
               <span>Reset all progress</span>
               <input type="checkbox" id="alphaReset" role="switch" aria-label="Reset all progress">
             </label>
-            <label class="alpha-toggle">
-              <span>Test 24 hours idle</span>
-              <input type="checkbox" id="alphaDay" role="switch" aria-label="Test 24 hours idle">
-            </label>
+            <button type="button" id="alphaDay" class="alpha-day-button">Test 24 hours idle</button>
             <label class="alpha-toggle">
               <span>Activity speed ×10</span>
               <input type="checkbox" id="alphaSpeed" role="switch" aria-label="Increase all activity speed ten times">

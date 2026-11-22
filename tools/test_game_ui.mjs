@@ -105,9 +105,15 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   assert.match(html, /<details id="alphaTools"/,
     "alpha tools must fold away rather than occupy normal phone space");
   for(const id of ["alphaReset","alphaDay","alphaSpeed","alphaStatus"])
-    assert.ok(html.includes('id="' + id + '"'),"alpha switch target: "+id);
+    assert.ok(html.includes('id="' + id + '"'),"alpha control target: "+id);
+  assert.match(html, /<button type="button" id="alphaDay" class="alpha-day-button">Test 24 hours idle<\/button>/,
+    "24h action is a real button, not a switch");
+  assert.doesNotMatch(html, /<input[^>]*id="alphaDay"/,
+    "the one-day action must not be a checkbox");
   assert.match(queueCss,/\.alpha-toggle input:checked/,
-    "3 alpha test controls must have visually meaningful on/off states");
+    "the reset and speed switches retain visible checked states");
+  assert.match(queueCss,/\.alpha-day-button\s*\{/,
+    "the one-day button has its own compact style");
   assert.match(html, /id="combatSkillsText"/, "the two equipped skills are visible");
   for (const id of ["resultPanel","combatReadout","playerResult","enemyResult",
     "workReadout","workResultTokens","resultNotice"])
@@ -136,7 +142,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261122-alpha-tools1/,
+  assert.match(html, /app\.mjs\?v=20261122-alpha-day-button1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -161,7 +167,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261122-alpha-tools1/,
+  assert.match(html, /iron-ui\.css\?v=20261122-alpha-day-button1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -979,11 +985,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(afterNormal.settledAtMs-afterFast.settledAtMs,4000,
       "normal-speed toggle must restore exactly 1x without rewinding");
 
-    elements.get("alphaDay").checked=true;
-    elements.get("alphaDay").fire("change");
+    elements.get("alphaDay").fire("click");
     const afterDay=JSON.parse(store.get(SAVE_KEY));
-    assert.equal(elements.get("alphaDay").checked,false,
-      "the 24-hour testing switch returns OFF after exactly one run");
     assert.equal(afterDay.settledAtMs-afterNormal.settledAtMs,86_400_000);
     assert.equal(afterDay.skills.mining.level,1,
       "one-day testing may fill but never auto-level the skill");
@@ -992,6 +995,12 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(afterDay.items.stone>0,"one day makes real mine loot");
     assert.equal(JSON.parse(store.get("idle-game-alpha-clock-v1")).speed,1);
     assert.match(elements.get("alphaStatus").textContent,/24 hours/);
+    elements.get("alphaDay").fire("click");
+    const afterSecondDay=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(afterSecondDay.settledAtMs-afterDay.settledAtMs,86_400_000,
+      "each button click simulates exactly one additional day");
+    assert.equal(afterSecondDay.skills.mining.level,1,
+      "repeated 24h clicks still cannot level up automatically");
     const savedBeforeCancelledReset=store.get(SAVE_KEY);
     elements.get("alphaReset").checked=true;
     elements.get("alphaReset").fire("change");
@@ -1013,7 +1022,6 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(reset.items.stone,0);
     assert.equal(reset.enchantments.weapon,0);
     assert.equal(elements.get("alphaSpeed").checked,false);
-    assert.equal(elements.get("alphaDay").checked,false);
     assert.match(elements.get("alphaStatus").textContent,/Progress reset/);
   } finally {
     Date.now = originalNow;
