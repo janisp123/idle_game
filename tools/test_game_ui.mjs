@@ -213,11 +213,20 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.deepEqual(elements.get("armourChoice").children.map(o=>o.value),
       ["none","robe","leather","plate"],"exactly four standardized choices");
     assert.deepEqual(elements.get("armourChoice").children.map(o=>o.disabled),
-      [false,false,true,true],"locked levels are disabled in the native dropdown");
+      [false,false,true,true],"unmet character stats disable gear choices");
+    assert.match(elements.get("armourChoice").children[1].textContent,/Mage Hood.*WIL 10/,
+      "mage equipment requires Willpower, not a combat skill");
+    assert.match(elements.get("armourChoice").children[2].textContent,/Leather Mask.*DEX 11/);
+    assert.match(elements.get("armourChoice").children[3].textContent,/Plate Helm.*STR 13/);
+    assert.ok(elements.get("armourChoice").children.every(o=>
+      !o.textContent.includes("Fighting Lv")),"gear must never require skill levels");
     const leftGloveButton=armourButtons.find(b=>b.getAttribute("data-slot")==="left_glove");
     leftGloveButton.fire("click");
     assert.equal(leftGloveButton.getAttribute("aria-pressed"),"true");
     assert.equal(elements.get("armourChoiceLabel").textContent,"Left glove");
+    assert.deepEqual(elements.get("armourChoice").children.map(o=>o.disabled),
+      [false,false,false,true],
+      "Leather gloves unlock with DEX 10, independently of Fighting level");
     elements.get("armourChoice").value="none";
     elements.get("armourChoice").fire("change");
     let gearSave=JSON.parse(store.get(SAVE_KEY));
@@ -229,7 +238,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     elements.get("armourChoice").fire("change");
     gearSave=JSON.parse(store.get(SAVE_KEY));
     assert.equal(gearSave.armour.left_glove,"none",
-      "a forged dropdown selection cannot bypass the locked level gate");
+      "a forged dropdown selection cannot bypass the STR requirement");
     elements.get("armourChoice").value="robe";
     elements.get("armourChoice").fire("change");
     assert.equal(JSON.parse(store.get(SAVE_KEY)).armour.left_glove,"robe");

@@ -10,7 +10,7 @@ import {
 } from "./combat.mjs?v=20261122-dice-duels1";
 import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=20261122-dice-duels1";
-import { initialArmour, normalizeArmour, armourUnlocked, armourStats } from "./armour.mjs?v=20261122-armour-balance1";
+import { initialArmour, normalizeArmour, armourUnlocked, armourOption, armourStats } from "./armour.mjs?v=20261122-stat-gates1";
 import { allAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261121-attributes1";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
@@ -304,7 +304,7 @@ export function readSave(value) {
       combatLoadout: s.version === GAME_VERSION ? s.combatLoadout : DEFAULT_COMBAT_LOADOUT,
       // Optional additive V7 field: older V7 and V1–V6 saves retain all
       // progression and simply begin with the free starter armour.
-      armour: normalizeArmour(s.version === GAME_VERSION ? s.armour : null, skills),
+      armour: normalizeArmour(s.version === GAME_VERSION ? s.armour : null),
       // Migrate old V6 sword/axe/hammer prototype duels to the first real
       // two-skill greatsword loadout; keep time, RNG seed, stats and XP intact.
       combatSession: s.version >= 6 && s.combatSession ? {
@@ -848,15 +848,19 @@ export function setCombatLoadout(state, loadout, now = Date.now(), random = Math
 }
 
 /**
- * Validated gear selection: settle prior productive time with the OLD frozen
- * effective gear, then reset only the current Fighting duel observation.
- * Skill XP, items, travel and saved routes never reset.
+ * Stat-gated gear selection. Settle earned work under the OLD frozen gear
+ * before checking post-settlement attributes; a newly qualified player may
+ * equip after logging in without visiting the Skill Master. Existing gear
+ * selection is a no-op even if it predates this attribute rule.
+ * A real change resets only the active Fighting duel; no XP/items are lost.
  */
 export function setArmourChoice(state, slot, item, now = Date.now(), random = Math.random) {
-  if (!armourUnlocked(state.skills, slot, item))
-    throw new RangeError("Armour choice is locked or unknown");
+  if (!armourOption(slot,item)) throw new RangeError("Unknown armour choice");
   const result = settle(state, now, random);
   if (result.state.armour[slot] === item) return result;
+  const attributes = combatAttributeProgress(result.state.attributeEffort);
+  if (!armourUnlocked(attributes,slot,item))
+    throw new RangeError("Armour requires higher character attributes");
   return { ...result, state: {
     ...result.state, armour: { ...result.state.armour, [slot]: item },
     combatSession: result.state.activity === "fighting" && !result.state.transition

@@ -49,3 +49,12 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Added by:** chat.
 - **Requested by:** Owner (2026-11-22).
 - **Implemented by:** Not yet.
+
+## GAME-013 — Slot enchantments with escalating attribute requirements
+- **Goal:** Later let a player enchant individually chosen equipment slots, while keeping the current four fixed armour families and their independent left/right selections. Enhanced Mage Robe parts should demand more Willpower; other enchanted pieces use their appropriate character attributes rather than a Fighting or activity skill-level gate.
+- **Acceptance criteria:** Define and obtain Owner approval for enchantment ranks, any per-piece STR/DEX/WIL or other attribute increments, enchantment benefits/downsides, power caps, whether enhancements need resources or work time, persistence/unequipping rules, and interaction with combat, older V7 gear, offline snapshots and equipment limits. Do not silently implement a loot generator, enchantment database, extra global character levels, spells, crafting or PvP rules as part of this future task. Keep all eleven slots and the existing four families.
+- **Status:** BLOCKED (Owner approved the future attribute-gated enchantment direction on 2026-11-22; exact gameplay mechanics and values are not yet decided, and no enchantments have been implemented).
+- **Dependencies:** GAME-011, OFF-001, EQUIP-STAT-001, later magic-system and balance decisions.
+- **Added by:** chat.
+- **Requested by:** Owner (2026-11-22).
+- **Implemented by:** Not yet.

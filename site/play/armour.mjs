@@ -3,25 +3,46 @@
  * counter triangle. All values are provisional alpha design constants.
  * No drop generation, item stacks, magical attacks, or generic item database.
  */
-export const ARMOUR_LEVELS = Object.freeze({ none: 1, robe: 1, leather: 5, plate: 12 });
 export const ARMOUR_TIERS = Object.freeze(["none","robe","leather","plate"]);
+// Keep the saved `robe` key; only the visible category/part names change.
+export const ARMOUR_TIER_LABELS = Object.freeze({
+  none:"None", robe:"Mage Robe", leather:"Leather", plate:"Plate"
+});
+/**
+ * Gear is gated by CHARACTER ATTRIBUTES, never by Fighting/skill level.
+ * Configure requirements per body-part family so mixing pieces becomes
+ * possible as attributes rise. Future enchantment ranks may extend these
+ * minimums without introducing random item generation or global levels.
+ */
+export const ARMOUR_REQUIREMENTS = Object.freeze({
+  none:null,
+  robe:Object.freeze({ stat:"WIL", byGroup:Object.freeze({
+    head:10,shoulders:10,chest:10,armguards:10,gloves:10,legs:10,boots:10
+  })}),
+  leather:Object.freeze({ stat:"DEX", byGroup:Object.freeze({
+    head:11,shoulders:11,chest:12,armguards:11,gloves:10,legs:12,boots:11
+  })}),
+  plate:Object.freeze({ stat:"STR", byGroup:Object.freeze({
+    head:13,shoulders:13,chest:16,armguards:12,gloves:12,legs:15,boots:12
+  })})
+});
 
 /** Per PIECE weights (kilograms); paired slots count twice. */
 export const ARMOUR_PIECES = Object.freeze({
   head: Object.freeze({ coverage: 12, kg: [0, 0.4, 0.7, 2.8],
-    names: ["None","Robe Hood","Leather Mask","Plate Helm"] }),
+    names: ["None","Mage Hood","Leather Mask","Plate Helm"] }),
   shoulders: Object.freeze({ coverage: 8, kg: [0, 0.3, 1, 2.2],
-    names: ["None","Robe Mantle","Leather Spaulder","Plate Pauldron"] }),
+    names: ["None","Mage Mantle","Leather Spaulder","Plate Pauldron"] }),
   chest: Object.freeze({ coverage: 33, kg: [0, 2.4, 4, 9.5],
-    names: ["None","Robe Vestment","Leather Jerkin","Plate Cuirass"] }),
+    names: ["None","Mage Robe","Leather Jerkin","Plate Cuirass"] }),
   armguards: Object.freeze({ coverage: 5, kg: [0, 0.2, 0.5, 1.7],
-    names: ["None","Robe Sleeves","Leather Bracer","Plate Vambrace"] }),
+    names: ["None","Mage Sleeves","Leather Bracer","Plate Vambrace"] }),
   gloves: Object.freeze({ coverage: 2.5, kg: [0, 0.15, 0.3, 0.6],
-    names: ["None","Robe Gloves","Leather Gloves","Plate Gauntlets"] }),
+    names: ["None","Mage Gloves","Leather Gloves","Plate Gauntlets"] }),
   legs: Object.freeze({ coverage: 16, kg: [0, 1.2, 2, 5.5],
-    names: ["None","Robe Leggings","Leather Leggings","Plate Cuisses"] }),
+    names: ["None","Mage Leggings","Leather Leggings","Plate Cuisses"] }),
   boots: Object.freeze({ coverage: 4, kg: [0, 0.35, 0.85, 1.6],
-    names: ["None","Robe Footwraps","Leather Boots","Plate Sabatons"] })
+    names: ["None","Mage Footwraps","Leather Boots","Plate Sabatons"] })
 });
 
 /** Full-set target profiles. Physical mitigation applies only on landed hits.
@@ -43,12 +64,16 @@ export const WEAPON_PIECES = Object.freeze({
     Object.freeze({name:"Sword",kg:2}), Object.freeze({name:"Shield",kg:5})
   ])
 });
-const option = (id, name, weightKg) => Object.freeze({
-  id, name, weightKg, level: ARMOUR_LEVELS[id], skill: "fighting"
-});
+const option = (id, group, name, weightKg) => {
+  const gate=ARMOUR_REQUIREMENTS[id];
+  return Object.freeze({
+    id, name, weightKg,
+    requirement:gate ? Object.freeze({stat:gate.stat,min:gate.byGroup[group]}) : null
+  });
+};
 export const ARMOUR_CHOICES = Object.freeze(Object.fromEntries(
   Object.entries(ARMOUR_PIECES).map(([group, piece]) => [group,Object.freeze(
-    ARMOUR_TIERS.map((tier,i) => option(tier,piece.names[i],piece.kg[i]))
+    ARMOUR_TIERS.map((tier,i) => option(tier,group,piece.names[i],piece.kg[i]))
   )])
 ));
 
@@ -77,26 +102,32 @@ export function armourOption(slotId, optionId) {
   if (!slot) return null;
   return ARMOUR_CHOICES[slot.group].find(item => item.id === optionId) ?? null;
 }
-export function armourUnlocked(skills, slotId, optionId) {
+export function armourUnlocked(attributes, slotId, optionId) {
   const chosen = armourOption(slotId, optionId);
-  return Boolean(chosen && skills?.[chosen.skill] &&
-    Number.isSafeInteger(skills[chosen.skill].level) &&
-    skills[chosen.skill].level >= chosen.level);
+  if (!chosen) return false;
+  if (!chosen.requirement) return true;
+  const {stat,min}=chosen.requirement;
+  const actual=attributes?.[stat]?.value ?? attributes?.[stat];
+  return Number.isSafeInteger(actual) && actual >= min;
 }
 
-/** Preserve prior V7 clothing by converting its tier once, on save read. */
+/** Preserve prior V7 clothing by converting its tier once, on save read.
+ * Old, already equipped selections are grandfathered until explicitly swapped:
+ * loading a character must NEVER delete prior valid gear because an attribute
+ * requirement changed. New selections still use armourUnlocked.
+ */
 const LEGACY_ROBE = Object.freeze({
   head:"hood", shoulders:"cloth", chest:"tunic", armguards:"wraps",
   gloves:"cloth", legs:"trousers", boots:"worn"
 });
-export function normalizeArmour(value, skills) {
+export function normalizeArmour(value) {
   const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
   const base = initialArmour();
   for (const slot of ARMOUR_SLOTS) {
     const oldId = source[slot.id];
     const id = oldId === "iron" ? "plate" :
       oldId === LEGACY_ROBE[slot.group] ? "robe" : oldId;
-    if (typeof id === "string" && armourUnlocked(skills, slot.id, id))
+    if (typeof id === "string" && armourOption(slot.id,id))
       base[slot.id] = id;
   }
   return base;

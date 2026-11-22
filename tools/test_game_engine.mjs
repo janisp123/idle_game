@@ -6,8 +6,9 @@ import {
   ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, SKILL_BALANCE, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, UNTIL_LEVEL_UP, MASTER_RESOURCE_MINIMUM, skillMasterReadiness, validQueuePlan, validPlannedDuration, queueStartActivity, queueInsertTimedActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
   enterGame, testOfflineDay, xpForLevel, levelFromXP, xpToNextLevel, skillSpoils, skillMasterOffer, learnFromMaster, setArmourChoice
 } from "../site/play/engine.mjs";
-import { ARMOUR_SLOTS, ARMOUR_CHOICES, ARMOUR_LEVELS, ARMOUR_TIERS,
+import { ARMOUR_SLOTS, ARMOUR_CHOICES, ARMOUR_REQUIREMENTS, ARMOUR_TIER_LABELS, ARMOUR_TIERS,
   initialArmour, armourOption, armourUnlocked, armourStats, WEAPON_PIECES, ARMOUR_PIECES } from "../site/play/armour.mjs";
+import { xpForAttributeValue } from "../site/play/attributes.mjs";
 
 const midpoint = () => 0.5;
 const YEAR = 365 * 24 * 60 * 60 * 1000;
@@ -71,10 +72,12 @@ test("four standardized armor tiers total 11 pieces with sane weight, mobility a
   assert.equal(coverage,100,"per-slot coverage may not compound 11 entire set bonuses");
   for(const slot of ARMOUR_SLOTS) {
     assert.deepEqual(ARMOUR_CHOICES[slot.group].map(x=>x.id),ARMOUR_TIERS);
-    assert.ok(armourUnlocked(base.skills,slot.id,"none"));
-    assert.ok(armourUnlocked(base.skills,slot.id,"robe"));
-    assert.equal(armourUnlocked(base.skills,slot.id,"leather"),false);
-    assert.equal(armourUnlocked(base.skills,slot.id,"plate"),false);
+    const stats=allAttributeProgress(base.attributeEffort);
+    assert.ok(armourUnlocked(stats,slot.id,"none"));
+    assert.ok(armourUnlocked(stats,slot.id,"robe"));
+    assert.equal(armourUnlocked(stats,slot.id,"plate"),false);
+    assert.equal(armourUnlocked(stats,slot.id,"leather"),
+      ARMOUR_REQUIREMENTS.leather.byGroup[slot.group]<=10);
     for(const piece of ARMOUR_CHOICES[slot.group]) assert.ok(piece.weightKg>=0);
   }
   const totals={};
@@ -98,10 +101,24 @@ test("four standardized armor tiers total 11 pieces with sane weight, mobility a
   assert.throws(()=>armourStats({...base.armour,head:"bogus"},"greatsword"),RangeError);
 });
 
-test("four-tier gear choices are level-gated, independent and backward-compatible",()=>{
+test("armour equips from STR/DEX/WIL, not skill levels, preserving legacy gear",()=>{
   const base=newGame(0);
-  assert.equal(ARMOUR_LEVELS.robe,1);
-  assert.equal(armourUnlocked(base.skills,"head","plate"),false);
+  const stats=allAttributeProgress(base.attributeEffort);
+  assert.equal(ARMOUR_TIER_LABELS.robe,"Mage Robe");
+  assert.deepEqual(["none","robe","leather","plate"],
+    ARMOUR_CHOICES.chest.map(x=>x.id));
+  assert.deepEqual(ARMOUR_CHOICES.chest.map(x=>x.name),
+    ["None","Mage Robe","Leather Jerkin","Plate Cuirass"]);
+  assert.deepEqual(ARMOUR_CHOICES.head.map(x=>x.name),
+    ["None","Mage Hood","Leather Mask","Plate Helm"]);
+  assert.deepEqual(ARMOUR_CHOICES.chest.map(x=>x.requirement),
+    [null,{stat:"WIL",min:10},{stat:"DEX",min:12},{stat:"STR",min:16}]);
+  assert.equal(armourUnlocked(stats,"head","robe"),true);
+  assert.equal(armourUnlocked(stats,"left_glove","leather"),true,
+    "light leather gloves are available at baseline DEX 10");
+  assert.equal(armourUnlocked(stats,"chest","leather"),false);
+  assert.equal(armourUnlocked(stats,"head","plate"),false);
+  assert.equal(armourUnlocked(stats,"fake_slot","robe"),false);
   assert.throws(()=>setArmourChoice(base,"head","plate",0),RangeError);
   assert.throws(()=>setArmourChoice(base,"fake_slot","robe",0),RangeError);
   assert.throws(()=>setArmourChoice(base,"left_glove","unknown",0),RangeError);
@@ -113,16 +130,22 @@ test("four-tier gear choices are level-gated, independent and backward-compatibl
   assert.deepEqual(starter.items,base.items);
   assert.deepEqual(starter.skills,base.skills);
   assert.deepEqual(readSave(JSON.stringify(starter)),starter);
-  const skilled={...starter,skills:{...starter.skills,
-    fighting:{level:ARMOUR_LEVELS.leather,xp:0}}};
-  const withLeather=setArmourChoice(skilled,"left_glove","leather",0).state;
-  assert.equal(withLeather.armour.left_glove,"leather");
-  assert.equal(withLeather.armour.right_glove,"robe");
-  assert.throws(()=>setArmourChoice(withLeather,"left_glove","plate",0),RangeError);
-  const veteran={...withLeather,skills:{...withLeather.skills,
-    fighting:{level:ARMOUR_LEVELS.plate,xp:0}}};
-  const plate=setArmourChoice(veteran,"head","plate",0).state;
-  assert.equal(plate.armour.head,"plate");
+
+  // Existing skills never grant permission to equip gear.
+  const highSkill={...starter,skills:{...starter.skills,
+    fighting:{level:100,xp:0}}};
+  assert.throws(()=>setArmourChoice(highSkill,"chest","plate",0),RangeError);
+  const withStats=(state,id,value)=>({...state,attributeEffort:{
+    ...state.attributeEffort,[id]:xpForAttributeValue(value)*HOUR_MS
+  }});
+  const dexReady=withStats(highSkill,"DEX",12);
+  const leather=setArmourChoice(dexReady,"chest","leather",0).state;
+  assert.equal(leather.armour.chest,"leather");
+  assert.equal(leather.armour.right_glove,"robe");
+  assert.throws(()=>setArmourChoice(leather,"chest","plate",0),RangeError);
+  const strong=withStats(leather,"STR",16);
+  const plate=setArmourChoice(strong,"chest","plate",0).state;
+  assert.equal(plate.armour.chest,"plate");
   assert.deepEqual(readSave(JSON.stringify(plate)),plate);
   const altered={...plate,armour:{...plate.armour,head:"cheat",left_glove:"nope"}};
   const repaired=readSave(altered);
@@ -135,16 +158,30 @@ test("four-tier gear choices are level-gated, independent and backward-compatibl
   assert.deepEqual(migrated.items,plate.items);
   assert.deepEqual(migrated.skills,plate.skills);
   assert.deepEqual(migrated.wagons,plate.wagons);
-  const oldClothes={...veteran,armour:{...veteran.armour,
+
+  const oldClothes={...starter,armour:{...starter.armour,
     head:"hood",chest:"tunic",left_glove:"cloth",
     right_glove:"iron",right_boot:"worn"}};
   const converted=readSave(oldClothes);
   assert.equal(converted.armour.head,"robe");
   assert.equal(converted.armour.chest,"robe");
   assert.equal(converted.armour.left_glove,"robe");
-  assert.equal(converted.armour.right_glove,"plate");
+  assert.equal(converted.armour.right_glove,"plate",
+    "legitimately selected old equipment must not vanish on a new stat gate");
   assert.equal(converted.armour.right_boot,"robe");
   assert.deepEqual(readSave(JSON.stringify(converted)),converted);
+  const unequipped=setArmourChoice(converted,"right_glove","none",0).state;
+  assert.throws(()=>setArmourChoice(unequipped,"right_glove","plate",0),RangeError,
+    "re-equipping a previously kept Plate piece requires qualifying STR");
+  assert.equal(unequipped.armour.right_glove,"none");
+  assert.deepEqual(unequipped.items,converted.items);
+  assert.deepEqual(unequipped.skills,converted.skills);
+
+  // WIL increases are reserved for enchanted Mage gear later, not magic
+  // spells or enchanted pieces secretly introduced in this release.
+  assert.equal(ARMOUR_CHOICES.chest.find(x=>x.id==="robe").requirement.stat,"WIL");
+  assert.equal(armourUnlocked(allAttributeProgress(withStats(base,"WIL",15).attributeEffort),
+    "chest","robe"),true);
 });
 
 test("mastery offers collect every possible skill spoil, including rare stock", () => {
