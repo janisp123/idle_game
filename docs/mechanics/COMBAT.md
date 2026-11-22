@@ -64,16 +64,41 @@ These are derived from an eleven-slot body-coverage weighted set, not eleven ful
 ### Resolve the attack (always one attack 3d6 and one defense 3d6)
 
 1. If the **raw attack dice sum ≤ 5**, a genuine miss/overreach occurs even with high skill. The defender still rolls; no damage is dealt, and the defender earns an opening for their next attack.
-2. Otherwise, if `attackTotal ≤ defenseTotal`, the attack is **stopped**. A defender with trained Shield Block **blocks**, with Blade Guard **parries**; an untrained defender **dodges**. A defense margin of at least `dodgeMargin=7` also gives a **dodge**. Successful dodging yields an opening; guard and miss deal zero damage.
+2. Otherwise, if `attackTotal ≤ defenseTotal`, the attack's **direct hit is prevented**. Trained Shield Block **blocks** (+5 defense score) and Blade Guard **parries** (+2), but the weapon's impact can still cause **partial HP damage**. An untrained successful defender **dodges**, taking zero damage. Trained defenders only dodge when the defense score exceeds attack by at least their gear's larger dodge margin; dodging gives a counter-opening, blocking/parrying does not.
 3. If `attackTotal > defenseTotal`, the attack **lands**. If the attacker rolled **6–6–6** and the score margin is at least `criticalFinisherMargin=1`, the blow is an immediate devastating weapon-specific **finisher**. A superior defender can still survive a triple-six if they genuinely beat the attacker. A fair attacker-side triple-six occurs with probability 1/216 **per attack**, but actual finisher probability also depends on overcoming defense.
 4. Otherwise calculate `damage = max(1, round((baseDamage + STR_A × damagePerStrength + FightingLevel_A × damagePerSkill) × attackSkill.damageMultiplier))`. Defaults are `6 + STR×0.5 + FightingLevel×1.4`. Defender HP begins at `max(1, round(baseHP + END×hpPerEndurance))`, currently `baseHP=16`, `hpPerEndurance=1.4`. Apply damage, then emit **strike**, **wound** (remaining HP ≤ 50%), or **collapse** (HP=0). These are actual health results, not random paintings.
 
-At equal STR=DEX=END=10 and Fighting level 1, the greatsword has **24 raw physical damage** and sword thrust **12 raw damage**, against a 30-HP fighter, **before the defender’s new armour reduction**. Example: a full Plate defender takes **12** from the greatsword hit; a full Mage Robe defender takes **23**. Greatsword remains slower to reveal and has different initiative/defense than Sword & Shield. Real numbers come from the actual chosen per-slot armour in [ARMOUR.md](ARMOUR.md).
+At equal STR=DEX=END=10 and Fighting level 1, the greatsword has **24 raw physical damage** and sword thrust **12 raw damage**, against a 30-HP fighter, **before the defender’s normal armour reduction**. Example: a full Plate defender takes **12** from the greatsword hit; a full Mage Robe defender takes **23**. Greatsword remains slower to reveal and has different initiative/defense than Sword & Shield. Real numbers come from the actual chosen per-slot armour in [ARMOUR.md](ARMOUR.md).
+
+### Damage through a successful shield block or weapon parry (alpha)
+
+**No separate block chance, no extra die, no reduction of the original Shield Block +5 / Blade Guard +2 bonuses.** A trained defense still occurs when its existing opposed 3d6 defense score wins, except that exceptionally high margins produce a real dodge. The attack skill defines two percentages of its ordinary raw physical damage that pass through a successful guard:
+
+| Attack skill | Full raw damage at starting stats | Through shield block | Through weapon parry |
+| --- | ---: | ---: | ---: |
+| Heavy Swing | 24 | 25% (6 HP before protection) | 35% (8 HP before protection) |
+| Thrust | 12 | 10% (1 HP before protection) | 15% (2 HP before protection) |
+
+Exact formulas for **successful, non-dodged trained guards**:
+
+```text
+rawAttack = max(1, round((baseDamage + STR×0.5 + FightingLevel×1.4
+             + weaponEnchantBonus) × weaponDamageMultiplier))
+through = attackSkill.blockDamagePct or attackSkill.parryDamagePct
+impact = round(rawAttack × through / 100)
+protectedImpact = max(0, round(impact × (100 − armourPhysicalReductionPct)/100)
+                         − defenderArmourEnchantDefense)
+actualHPDamage = min(defenderCurrentHP, protectedImpact)
+```
+
+**Zero impact is possible:** armor/enchantment can absorb the entire glancing shock, and a successful true dodge or attacker miss always deals **zero**. A shield remains significantly better at protecting against a heavy impact than a weapon parry; a successful defense is not automatically invulnerable. Guarded impact can reduce a defender to 0 HP and end the duel as usual; no invented secondary attack or special 'guard break' RNG.
+
+**Dodge rarity** changed only for **new** equipment profiles: None requires a defense margin of **6** instead of 2, Mage Robe **9** instead of 5, Leather **8** instead of 3, Plate remains **99**. The base evasion score and both trained defense bonuses are untouched. Even a strong parry or shield block is more commonly displayed as itself, with its partial damage, rather than relabeled DODGED. Older already-frozen combat sessions keep their saved dodge margin and fighter attributes (OFF-001). New sessions pick the current balance. This is deliberately provisional; future weapons need their own two penetration percentages.
 
 ## What the player sees — strictly after rolls
 
 - **Live Fighting only:** initiative has **two animated groups of three skull dice**. Every later attacking turn displays both attacker's and defender's three dice, identified as YOU/ENEMY and ATTACK/DEFEND. The dice values shown after animation are the actual predetermined simulation results; cosmetic preview face changes **never reroll the game**.
-- During the roll, the **previous result image** stays visible. No attack picture or result-strip damage is leaked early. At revelation, update to the exact relevant original art and replace the compact two-sided result display with measured **post-armour** damage or the correct block/parry/dodge/miss label. The existing dice tray owns the real dice faces/scores; no scrolling narration remains. Main scene has only short duel/turn indicators and optional special 6–6–6 celebration.
+- During the roll, the **previous result image** stays visible. No attack picture or result-strip damage is leaked early. At revelation, update to the exact relevant original art and replace the compact two-sided result display with measured **post-armour** damage. Successful BLOCKED / PARRIED can now show **both the guard label and red `-N HP` on the defending side**, while DODGED and MISSED remain damage-free. The existing dice tray owns the real dice faces/scores; no scrolling narration remains. Main scene has only short duel/turn indicators and optional special 6–6–6 celebration.
 - For Fighting, **hide the old work-cycle progress bar** (it falsely looked like a strike timer). Place a responsive five-stage combat action timeline **immediately beneath the artwork**, with a highlighted active stage, completed and upcoming segments, and a small progress fill. Initiative, each opposed attack, the actual revealed move and next-duel preparation all have grounded labels. Each attack visually rolls the attacker's 3d6 first, then the defender's 3d6; both dice were already calculated by the unchanged deterministic engine. After both phases the matching art and compact numerical result are revealed. The bar adapts to whichever fighter attacks first, and to early duel endings; it does not imply a fixed alternation or a mandatory six turns. Six small completed-turn markers remain for duel history. Other activities retain their ordinary work progress bar. No extra XP, save fields, combat RNG, or offline replay is added.
 - Respect `prefers-reduced-motion` for the cosmetic dice wobble. The game's rolls still work without CSS animation or a constantly open tab.
 
