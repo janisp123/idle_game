@@ -110,7 +110,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261122-stat-gates1/,
+  assert.match(html, /app\.mjs\?v=20261122-mastery1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -430,7 +430,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     visitMaster.fire("click");
     assert.equal(elements.get("masterAudience").hidden, false);
     assert.equal(visitMaster.getAttribute("aria-expanded"), "true");
-    assert.ok(elements.get("masterSkills").children.some(row => /Mining: Level 1/.test(row.textContent)));
+    assert.ok(elements.get("masterSkills").children.some(row =>
+      /Mining: Level 1/.test(row.textContent) && /\+1 STR/.test(row.textContent)),
+      "Master previews the exact permanent stat gained by claiming Mining");
     const originalStone = state.items.stone;
     assert.ok(elements.get("masterTribute").children.some(row =>
       row.textContent === originalStone.toLocaleString("en-GB") + " Stone"),
@@ -439,12 +441,21 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(masterConfirmations, 1);
     assert.equal(state.skills.mining.level, 1, "declining must not sacrifice inventory");
+    assert.equal(elements.get("characterAttributes").children[0].children[1].textContent,
+      "10","declining does not award any permanent stat");
     assert.equal(state.items.stone, originalStone);
     allowMasterTribute = true;
     elements.get("masterConfirm").fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(masterConfirmations, 2);
     assert.deepEqual(state.skills.mining, {level:2,xp:0});
+    const firstStat = elements.get("characterAttributes").children.find(row=>
+      row.children[0].textContent === "STR");
+    assert.ok(firstStat,"character displays STR");
+    assert.equal(firstStat.children[1].textContent,"11",
+      "confirmed Master claim adds one permanent STR");
+    assert.match(firstStat.children[1].title,/\+ 1 from claimed activity levels/,
+      "visible stat includes the actual claimed Master bonus");
     assert.equal(miningQueueLabel.textContent, "Mining LvL 2,00",
       "Master advancement updates the queue level and clears percent without rebuilding");
     assert.equal(state.items.stone, 0, "Master takes every stone");

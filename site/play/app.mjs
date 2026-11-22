@@ -1,12 +1,13 @@
 import {
   SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
+  effectiveAttributeProgress, masteryAwardForNextLevel,
   lootChances, recipeOptions, newGame, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=20261122-stat-gates1";
+} from "./engine.mjs?v=20261122-mastery1";
 
 import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-dice-duels1";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-dice-duels1";
@@ -107,7 +108,7 @@ ui.armourSlots.append(insignia);
 
 function renderArmour() {
   const slot = ARMOUR_SLOT_BY_ID[selectedArmourSlot];
-  const attributes = allAttributeProgress(state.attributeEffort);
+  const attributes = effectiveAttributeProgress(state.attributeEffort, state.skills);
   const key = slot.id + ":" + ["STR","DEX","WIL"].map(id => attributes[id].value).join(":") +
     ":" + state.armour[slot.id];
   if (lastArmourOptionsKey !== key) {
@@ -658,8 +659,11 @@ function renderMaster() {
   if (ui.masterAudience.hidden) return;
   const readyLines = offer.ready.map(id => {
     const item = document.createElement("p");
+    const award = masteryAwardForNextLevel(id, state.skills[id].level);
+    const bonus = Object.entries(award).map(([stat,points]) =>
+      "+" + number(points) + " " + stat).join(", ");
     item.textContent = ACTIVITIES[id].title + ": Level " + number(state.skills[id].level) +
-      " → " + number(state.skills[id].level + 1);
+      " → " + number(state.skills[id].level + 1) + " · " + bonus;
     return item;
   });
   if (!readyLines.length) {
@@ -726,7 +730,9 @@ ui.masterConfirm.addEventListener("click", () => {
   ui.masterAudience.hidden = true;
   message("The Master claims his due. " + number(result.mastery.ready.length) +
     " skill" + (result.mastery.ready.length === 1 ? " has" : "s have") +
-    " risen. Your next lesson begins.");
+    " risen. +" + number(result.mastery.ready.length) +
+    " permanent attribute " + (result.mastery.ready.length === 1 ? "point" : "points") +
+    " allocated.");
   writeSave();
   render();
 });
@@ -739,12 +745,14 @@ function render() {
     COMBAT_SKILLS[chosen.attackSkill].name + " · Defense: " +
     COMBAT_SKILLS[chosen.defenseSkill].name;
   ui.playerName.textContent = state.name;
-  const stats = allAttributeProgress(state.attributeEffort);
+  const stats = effectiveAttributeProgress(state.attributeEffort, state.skills);
   for (const { id } of ATTRIBUTES) {
     const value = attributeValues.get(id);
     value.textContent = number(stats[id].value);
-    value.title = id + ": " + stats[id].progressPercent.toFixed(1) +
-      "% toward the next point (" + stats[id].progressXP.toFixed(1) +
+    value.title = id + ": " + number(stats[id].baseValue) +
+      " from training + " + number(stats[id].masteryBonus) +
+      " from claimed activity levels. " + stats[id].progressPercent.toFixed(1) +
+      "% toward the next trained point (" + stats[id].progressXP.toFixed(1) +
       " / " + number(stats[id].nextXP) + " XP)";
   }
   if (document.activeElement !== ui.nameInput) ui.nameInput.value = state.name;
