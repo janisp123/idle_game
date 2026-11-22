@@ -5,7 +5,7 @@ A public hobby project with **two parallel purposes**:
 1. **Build an original idle fantasy browser RPG** with mobile portrait controls, atmospheric static illustrations, automated activities, cooperative play and unlimited offline progression.
 2. **Maintain a public learning library** explaining practical browser-game mechanics and engineering techniques, including approaches we will never use ourselves.
 
-The repository contains the public engineering research library **and a first playable local browser prototype** with automatic wolf hunting, stone mining and offline catch-up. This is not yet a full combat RPG.
+The repository contains the public engineering research library **and a playable, browser-local alpha** with 41 activities, time-based attributes, autonomous Fighting duels, schedules and unlimited offline settlement. Combat art and clan battles are still incomplete; multiplayer accounts are not implemented.
 
 ## Project website
 
@@ -32,6 +32,7 @@ Original third-party materials, if added later, remain subject to their own lice
 | [Research library](docs/RESEARCH_LIBRARY.md) | Purpose, topic index, article standards and relevance labels |
 | [Useful implementation examples](docs/USEFUL_EXAMPLES.md) | Standalone algorithms, tradeoffs and implementation sketches |
 | [Technical article template](docs/library/ENTRY_TEMPLATE.md) | Consistent format for future educational guides |
+| [Mechanics handbook — exact live formulas and balance settings](docs/mechanics/README.md) | Source-of-truth map for XP, drops, combat, scheduling, saves and how to tune values safely |
 | [Game brainstorm](docs/BRAINSTORM.md) | Design possibilities, directions, rejected ideas and open questions |
 | [Durable decisions](docs/DECISIONS.md) | Owner-approved project decisions |
 | [Development tasks](docs/TD_LIST.md) | Actual authorized implementation tasks |
@@ -51,10 +52,12 @@ The public guides are independently written explanations and original illustrati
 
 Read [AGENTS.md](AGENTS.md) and the [agent protocol](docs/AGENT_PROTOCOL.md) before taking project actions, beginning with current remote `main:docs/TD_LIST.md`. The owner approves changes. Brainstorming and library materials **do not** authorize gameplay implementation.
 
-## First prototype controls and limits
+## Playable alpha controls and limits
 
-Select **Hunting** (wolves: 1 hide and 3 XP every 7 seconds) or **Mining** (1 stone and 2 XP every 5 seconds). Actions loop automatically. Reopening the browser settles the elapsed time in bulk and applies earned level-ups **only on returning** (OFF-001). A clearly marked **Test 1 day away** control enables quick local testing. Progress is stored in browser localStorage only, not synchronized between devices or backed up. Clearing browser data erases the character; it is not cheat-resistant. Both activity scenes now use original, high-detail, static **painted WebP illustrations** (hunting and mining) served locally from the repository. The interface uses an ornate iron-and-parchment visual theme. Combat outcomes, health/death and equipment remain future work.
+Use **Activities** to select Fighting, gathering, crafting, training or leisure; configure a three-activity route with a final **Forever** task. Active **alpha testing timings** run full work cycles at 10 seconds each; normal activity durations and transitions are preserved in the engine. Every activity has an independent skill XP bar, capped until the player confirms Skill Master training. Five uncapped time-based attributes (STR/DEX/END/INT/WIL) grow through productive work.
 
-Core algorithm: `site/play/engine.mjs`; browser UI: `site/play/app.mjs`; deterministic regression tests: `tools/test_game_engine.mjs` run by the GitHub Pages validation job.
+**Fighting V1** automatically resolves named-foe duels with hit/block/dodge, HP, wound and 6–6–6 finisher outcomes. It currently has a **textual combat event panel and a generic arena backdrop**, not unique paintings for every hit, attack/defense skill checks, persistent injuries or clan warfare. The planned turn-based Combat V2 is explained separately from the actual V1 rules in the [combat mechanics page](docs/mechanics/COMBAT.md).
+
+Progress is saved in **browser localStorage only** and settled in bounded batches after absence. There is no cross-device account sync or server anti-cheat. See the [mechanics handbook](docs/mechanics/README.md) for the actual formulas, every tunable value, save invariants and regression tests.
 
 **Visual design:** see [Visual language](docs/VISUAL_LANGUAGE.md) for the shared grimdark artwork and UI rules. The approved activity paintings live in `site/play/assets/hunting.webp` and `site/play/assets/mining.webp`; the original flat vector placeholders have been removed.
