@@ -973,10 +973,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     elements.get("alphaSpeed").fire("change");
     assert.equal(elements.get("alphaSpeed").checked,false);
     assert.equal(JSON.parse(store.get("idle-game-alpha-clock-v1")).speed,1);
-    now+=1000;
+    now+=4000;
     tick();
     const afterNormal=JSON.parse(store.get(SAVE_KEY));
-    assert.equal(afterNormal.settledAtMs-afterFast.settledAtMs,1000,
+    assert.equal(afterNormal.settledAtMs-afterFast.settledAtMs,4000,
       "normal-speed toggle must restore exactly 1x without rewinding");
 
     elements.get("alphaDay").checked=true;
