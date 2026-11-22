@@ -9,6 +9,7 @@
 | Skill XP, automatic mastery stats, STR/DEX/END/INT/WIL | [Progression](PROGRESSION.md) | `site/play/engine.mjs` → `SKILL_BALANCE`, `ACTIVITIES`, `MASTER_RESOURCE_MINIMUM`; `site/play/attributes.mjs` → `ATTRIBUTE_BALANCE`, `ACTIVITY_STAT_WEIGHTS` |
 | Skill-gated drops, rarity, crafting | [Resources](RESOURCES.md) | `site/play/loot.mjs` → `LOOT_TABLES`; `site/play/production.mjs` → `PRODUCTION_RECIPES`; engine `SKILL_BALANCE.batchVariation` |
 | [Compact action results](RESULTS.md) — fighting and all work | [Results](RESULTS.md) | `site/play/result-readout.mjs`, `site/play/app.mjs` |
+| [Glory Scrolls and slot enchanting](ENCHANTMENTS.md) — 50% real win loot and 50% reset risk | [Enchantments](ENCHANTMENTS.md) | `site/play/glory.mjs`, `engine.mjs:enchantEquipmentSlot` |
 | [Equipment by attributes](ARMOUR.md) — STR / DEX / WIL, weight and physical counters | [Armour](ARMOUR.md) | `site/play/armour.mjs`; `engine.mjs:setArmourChoice` | 
 | Playable two-skill turn-based Fighting V2 alpha | [Combat](COMBAT.md) | `site/play/combat.mjs` → `COMBAT_BALANCE`, `OPPONENTS`; `site/play/combat-skills.mjs` → `COMBAT_SKILLS`, `COMBAT_LOADOUTS`; `site/play/combat-art.mjs` → `COMBAT_ART` |
 | Work cycles, switches, schedule, offline and saves | [Scheduling & offline](SCHEDULING.md) | `site/play/engine.mjs` → `TIMING_PROFILE`, `TIMING_PROFILES`, `SCHEDULE_BALANCE`, `MAX_WAGONS` |
