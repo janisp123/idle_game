@@ -668,7 +668,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       /Skull dice decide initiative/,"no initiative conclusion is shown in advance");
     now += COMBAT_BALANCE.initiativeAnimationMs + 250;
     tick();
-    assert.match(elements.get("combatEventTitle").textContent,/ATTACK FIRST/);
+    assert.match(elements.get("combatEventTitle").textContent,/YOU ATTACK FIRST|ENEMY ATTACKS FIRST/);
     assert.match(elements.get("logList").children[0].textContent,/Skull dice decide initiative/);
     assert.notEqual(elements.get("playerDiceTotal").textContent,"ROLLING");
     assert.notEqual(elements.get("enemyDiceTotal").textContent,"ROLLING");
