@@ -112,6 +112,11 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   Date.now = () => now;
   try {
     await import("../site/play/app.mjs?smoke-test");
+    assert.deepEqual(elements.get("queueAmount").children.map(option => option.value),
+      ["1", "2", "3", "4", "5", "6", "7", "8"],
+      "planner amounts must be populated from engine SCHEDULE_BALANCE");
+    assert.doesNotMatch(html, /<option value="8">8<\/option>/,
+      "planner must not carry a duplicated static 1..8 range");
     assert.ok(tick, "game tick must start");
     const openActivities = elements.get("openActivities");
     const categoryScreen = elements.get("activityCategories");
