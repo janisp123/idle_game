@@ -6,7 +6,8 @@ import {
   advanceCombatSession, simulateDuel, combatAtTime, validCombatSession
 } from "../site/play/combat.mjs";
 import {newGame, chooseActivity, settle, enterGame, readSave, setCombatLoadout, setArmourChoice,
-  GAME_VERSION, allAttributeProgress} from "../site/play/engine.mjs";
+  GAME_VERSION, allAttributeProgress, effectiveAttributeProgress, learnFromMaster,
+  xpToNextLevel} from "../site/play/engine.mjs";
 import { ARMOUR_SLOTS, armourStats } from "../site/play/armour.mjs";
 
 const great={name:"Wanderer",loadout:"greatsword",str:10,dex:10,end:10,skill:1};
@@ -188,6 +189,46 @@ test("changing armour mid-Fighting preserves earned progression and refreshes fr
   assert.deepEqual(away.combatSession.player.gear,before.combatSession.player.gear);
   assert.equal(away.combatSession.elapsedMs>=20*YEAR,true);
   assert.deepEqual(readSave(JSON.stringify(away)),away);
+});
+
+test("claimed levels in ANY activity affect future fighting snapshot without rerolling dice",()=>{
+  const s=newGame(0);
+  s.skills.mining={level:11,xp:0};
+  s.skills.meditation={level:11,xp:0};
+  const playing=chooseActivity(s,"fighting",0,()=>.5).state;
+  const first=settle(playing,COMBAT_BALANCE.eventMs,()=>.5).state;
+  assert.equal(first.combatSession.player.str,17,"ten claimed Mining levels add 7 STR");
+  assert.equal(first.combatSession.player.end,13,"ten Mining levels add 3 END");
+  assert.equal(first.combatSession.player.dex,10,"other unused attributes remain unchanged");
+  assert.equal(first.combatSession.player.skill,1,"Fighting skill itself did not level");
+  const beforeSession=first.combatSession.player;
+  const persisted=readSave(JSON.stringify(first));
+  assert.deepEqual(persisted,first);
+  const away=enterGame(persisted,25*365*24*3600_000,()=>.5).state;
+  assert.deepEqual(away.combatSession.player,beforeSession,
+    "25 years offline keeps original frozen bonus and dice combat power");
+  assert.deepEqual(readSave(JSON.stringify(away)),away);
+});
+
+test("Skill Master raises stat immediately but restarts a Fighting duel only afterward",()=>{
+  const s=newGame(0);
+  s.skills.mining={level:1,xp:xpToNextLevel(1)};
+  s.items.stone=7;
+  const play=chooseActivity(s,"fighting",0,()=>.5).state;
+  const prior=settle(play,COMBAT_BALANCE.eventMs,()=>.5).state;
+  assert.equal(prior.combatSession.player.str,10);
+  const skillsBefore=prior.skills.fighting.xp;
+  const taught=learnFromMaster(prior,COMBAT_BALANCE.eventMs,()=>.5);
+  assert.equal(taught.state.skills.mining.level,2);
+  assert.equal(taught.state.combatSession,null,
+    "new permanent stats should not inherit a stale active Fighting snapshot");
+  assert.equal(taught.state.items.stone,0);
+  assert.equal(taught.state.skills.fighting.xp,skillsBefore);
+  assert.equal(effectiveAttributeProgress(taught.state.attributeEffort,taught.state.skills).STR.value,11);
+  const next=settle(taught.state,2*COMBAT_BALANCE.eventMs,()=>.5).state;
+  assert.equal(next.combatSession.player.str,11);
+  assert.equal(next.skills.mining.level,2);
+  assert.deepEqual(readSave(JSON.stringify(next)),next);
 });
 
 test("combat sessions are deterministic, persisted and O(1) after decades away",()=>{
