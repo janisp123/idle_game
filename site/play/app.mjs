@@ -12,15 +12,15 @@ import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./
 import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-dice-duels1";
 import { combatFlowState } from "./combat-flow.mjs?v=20261122-action-flow1";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
-import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, armourOption, armourUnlocked }
-  from "./armour.mjs?v=20261122-fixed-armour1";
+import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, armourOption, armourUnlocked, armourStats }
+  from "./armour.mjs?v=20261122-armour-balance1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
   characterAttributes: $("characterAttributes"),
   combatLoadout: $("combatLoadout"), combatSkillsText: $("combatSkillsText"),
   armourSlots: $("armourSlots"), armourChoice: $("armourChoice"),
-  armourChoiceLabel: $("armourChoiceLabel"),
+  armourChoiceLabel: $("armourChoiceLabel"), gearStats: $("gearStats"),
   resourceList: $("resourceList"), choices: $("activityChoices"),
   openActivities: $("openActivities"), categories: $("activityCategories"),
   categoryChoices: $("activityCategoryChoices"), listScreen: $("activityListScreen"),
@@ -114,8 +114,8 @@ function renderArmour() {
       const opt = document.createElement("option");
       opt.value = piece.id;
       opt.disabled = !armourUnlocked(state.skills,slot.id,piece.id);
-      opt.textContent = opt.disabled
-        ? piece.name + " · Fighting Lv " + piece.level : piece.name;
+      opt.textContent = piece.name + " · " + piece.weightKg + " kg" +
+        (opt.disabled ? " · Fighting Lv " + piece.level : "");
       return opt;
     });
     ui.armourChoice.replaceChildren(...options);
@@ -123,6 +123,14 @@ function renderArmour() {
   }
   ui.armourChoiceLabel.textContent = slot.name;
   ui.armourChoice.value = state.armour[slot.id];
+  const gear = armourStats(state.armour,state.combatLoadout);
+  ui.gearStats.textContent = gear.totalKg + " kg  ·  MOVE " + gear.mobilityPct +
+    "%  ·  PHYS " + gear.physicalReductionPct + "%  ·  DODGE " +
+    (gear.evasionScore >= 0 ? "+" : "") + gear.evasionScore +
+    "  ·  MR* " + gear.magicResistancePct + "%";
+  ui.gearStats.title = "Physical damage reduction; DODGE modifies real 3d6 defense. " +
+    "Move is combat mobility; real travel times stay unchanged. " +
+    "MR is reserved for future magic damage.";
   for (const part of ARMOUR_SLOTS) {
     const row = armourButtons.get(part.id);
     const picked = armourOption(part.id, state.armour[part.id]);
