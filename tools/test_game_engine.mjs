@@ -220,9 +220,10 @@ test("armour equips from STR/DEX/WIL, not skill levels, preserving legacy gear",
   assert.deepEqual(starter.skills,base.skills);
   assert.deepEqual(readSave(JSON.stringify(starter)),starter);
 
-  // Existing skills never grant permission to equip gear.
+  // Activity rank itself is not a gear gate. Even a huge Meditation level
+  // cannot equip Plate without STR (though its points raise INT/WIL).
   const highSkill={...starter,skills:{...starter.skills,
-    fighting:{level:100,xp:0}}};
+    meditation:{level:100,xp:0}}};
   assert.throws(()=>setArmourChoice(highSkill,"chest","plate",0),RangeError);
   const withStats=(state,id,value)=>({...state,attributeEffort:{
     ...state.attributeEffort,[id]:xpForAttributeValue(value)*HOUR_MS
