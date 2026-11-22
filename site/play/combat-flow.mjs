@@ -3,7 +3,7 @@
  * defense dice animation, then one revealed move. No RNG or saved data here.
  * The real combat engine remains the authority for opponents, roles and time.
  */
-import { COMBAT_BALANCE, BOUT_MS } from "./combat.mjs?v=20261122-dice-duels1";
+import { COMBAT_BALANCE, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=20261122-dice-duels1";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const step = (icon, label) => ({ icon, label });
@@ -19,8 +19,7 @@ export function combatFlowState(combat, elapsedMs) {
   let steps, current, percent;
 
   if (event.attackDice) {
-    const windup = COMBAT_BALANCE.eventMs > 0
-      ? (event.attackSkill === "heavy_swing" ? 1_800 : 0) : 0;
+    const windup = COMBAT_SKILLS[event.attackSkill]?.windupMs ?? 0;
     // The individual attack and defense rolls share the existing total
     // animation duration; neither changes the predetermined game result.
     const midpoint = windup + COMBAT_BALANCE.attackAnimationMs / 2;
