@@ -1070,7 +1070,7 @@ function start() {
     const slot = ARMOUR_SLOT_BY_ID[selectedArmourSlot];
     const option = armourOption(slot.id, ui.armourChoice.value);
     if (!option || (state.armour[slot.id] !== option.id &&
-      !armourUnlocked(allAttributeProgress(state.attributeEffort),slot.id,option.id))) {
+      !armourUnlocked(effectiveAttributeProgress(state.attributeEffort,state.skills),slot.id,option.id))) {
       renderArmour();
       return;
     }
