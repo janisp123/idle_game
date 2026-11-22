@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { combatAtTime, COMBAT_BALANCE, COMBAT_SKILLS } from "../site/play/combat.mjs";
 import { combatArtworkForEvent } from "../site/play/combat-art.mjs";
 import { combatFlowState } from "../site/play/combat-flow.mjs";
+import { combatReadoutForEvent, workReadoutForReport } from "../site/play/result-readout.mjs";
 import { newGame, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP } from "../site/play/engine.mjs";
 
 class FakeElement {
@@ -22,6 +23,49 @@ class FakeElement {
   getAttribute(name) { return this.attributes.get(name) ?? null; }
   fire(event) { this.listeners.get(event)?.(); }
 }
+
+test("compact results use only real event/report values and correct combat side", () => {
+  assert.deepEqual(combatReadoutForEvent({type:"strike",actor:"player",target:"enemy",damage:24}),
+    {player:[],enemy:[{value:"-24",tone:"damage",label:"HP"}]});
+  assert.deepEqual(combatReadoutForEvent({type:"wound",actor:"enemy",target:"player",damage:17}),
+    {player:[{value:"-17",tone:"damage",label:"HP"}],enemy:[]});
+  for (const [type,value] of [["dodge","DODGED"],["parry","PARRIED"],["block","BLOCKED"]]) {
+    assert.deepEqual(combatReadoutForEvent({type,actor:"enemy",target:"player",damage:0}),
+      {player:[{value,tone:"guard",label:""}],enemy:[]});
+  }
+  assert.deepEqual(combatReadoutForEvent({type:"miss",actor:"enemy",target:"player",damage:0}),
+    {player:[],enemy:[{value:"MISSED",tone:"guard",label:""}]});
+  assert.deepEqual(combatReadoutForEvent({type:"finisher",actor:"player",target:"enemy",hpAfter:0,damage:0}),
+    {player:[],enemy:[{value:"FINISHED",tone:"damage",label:""}]},
+    "finisher has no quantified damage: never invent a -HP number");
+  assert.deepEqual(combatReadoutForEvent({type:"strike",actor:"player",target:"enemy",
+    damage:20,heals:{player:8}}),{
+    player:[{value:"+8",tone:"gain",label:"HP"}],
+    enemy:[{value:"-20",tone:"damage",label:"HP"}]
+  },"future genuine damage+healing events fit on independent sides");
+  assert.deepEqual(combatReadoutForEvent({type:"engage",damage:0}),{player:[],enemy:[]});
+  assert.deepEqual(combatReadoutForEvent({type:"strike",target:"enemy",damage:0}),
+    {player:[],enemy:[]},"never invent zero or unsuccessful damage");
+
+  const labels={stone:"Stone",copper_ore:"Copper ore",log:"Logs"};
+  const tasks={mining:{title:"Mining"},carpentry:{title:"Carpentry"}};
+  assert.deepEqual(workReadoutForReport({activity:"mining",completed:1,items:{stone:23,copper_ore:2},
+    gainedXP:4,consumed:{}},labels,tasks),{activity:"mining",title:"Mining",tokens:[
+    {value:"+23",tone:"gain",label:"Stone"},
+    {value:"+2",tone:"gain",label:"Copper ore"},
+    {value:"+4",tone:"gain",label:"XP"}
+  ]});
+  assert.deepEqual(workReadoutForReport({activity:"carpentry",completed:1,
+    items:{},consumed:{log:3},gainedXP:0},labels,tasks).tokens,
+    [{value:"-3",tone:"damage",label:"Logs"}]);
+  assert.deepEqual(workReadoutForReport({activity:"mining",completed:1,items:{},gainedXP:0},
+    labels,tasks).tokens,[{value:"NO NEW GAINS",tone:"neutral",label:""}],
+    "no drops is not falsely labelled a failed mining action");
+  assert.equal(workReadoutForReport({activity:"mining",completed:0,items:{},gainedXP:0},
+    labels,tasks),null,"a cycle with no resolved output is not an invented failure");
+  assert.equal(workReadoutForReport({activity:"fighting",completed:1,gainedXP:2},labels,tasks),null,
+    "fighting uses the real combat event result, not a fake loot readout");
+});
 
 test("real browser-app entrypoint renders skill UI and migrates old saved character", async () => {
   const html = readFileSync(new URL("../site/play/index.html", import.meta.url), "utf8");
@@ -43,6 +87,12 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(html.includes('id="' + id + '"'),"both fighters get three distinct visible dice");
   assert.match(html, /id="combatLoadout"/, "a player can equip one of the two combat styles");
   assert.match(html, /id="combatSkillsText"/, "the two equipped skills are visible");
+  for (const id of ["resultPanel","combatReadout","playerResult","enemyResult",
+    "workReadout","workResultTokens","resultNotice"])
+    assert.ok(html.includes('id="' + id + '"'),"compact result DOM: " + id);
+  assert.doesNotMatch(html,/id="logList"|THE CHRONICLE/,"never retain a scrollable battle log");
+  assert.match(queueCss,/\.result-token\[data-tone="damage"\]/);
+  assert.match(queueCss,/\.result-token\[data-tone="gain"\]/);
   assert.match(html, /<details id="armourCabinet"/, "equipment folds away on narrow screens");
   assert.match(html, /id="armourSlots"/);
   assert.match(html, /id="armourChoice"/, "one equipment dropdown handles the active slot");
@@ -59,7 +109,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261122-fixed-armour1/,
+  assert.match(html, /app\.mjs\?v=20261122-results1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -84,7 +134,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261122-fixed-armour1/,
+  assert.match(html, /iron-ui\.css\?v=20261122-results1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -311,6 +361,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("transitionStatus").hidden, true);
     assert.equal(elements.get("activityProgress").hidden, false);
     assert.equal(elements.get("skillTitle").textContent, "Mining");
+    assert.equal(elements.get("resultCombat").hidden,true);
+    assert.equal(elements.get("resultWork").hidden,false);
+    assert.equal(elements.get("workResultTitle").textContent,"Mining");
     // The first preparation completion legitimately rebuilds the queue card.
     // Capture the mounted Mining label after that transition, then verify
     // productive XP ticks update the same element without remounting.
@@ -326,6 +379,12 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
 
     now += 4 * ACTIVITIES.mining.durationMs;
     tick();
+    const miningTokens = elements.get("workResultTokens").children;
+    assert.ok(miningTokens.some(t => t.getAttribute("data-tone")==="gain" &&
+      t.children[1]?.textContent==="Stone" && /^\\+\\d+$/.test(t.children[0].textContent)),
+      "real gathered stone is displayed in green");
+    assert.ok(miningTokens.some(t => t.children[1]?.textContent==="XP" &&
+      t.children[0].textContent==="+8"),"four productive mining cycles earn 8 actual XP");
     assert.equal(miningQueueLabel.textContent, "Mining LvL 1,20",
       "queue skill progress updates on every ordinary work tick");
     assert.equal(elements.get("wagonList").children[0].children[0], miningQueueLabel,
@@ -395,11 +454,11 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(stoneRow, "masonry ingredients still have visible quantities");
     assert.equal(elements.has("returnPanel"), false, "no welcome-back report panel");
     assert.equal(elements.has("dismissReturn"), false, "no popup dismiss control");
-    const chronicle = elements.get("logList").children.map(node => node.textContent);
-    assert.ok(chronicle.some(line => /^You gathered \d+ stone\.$/.test(line)),
-      "return loot is recorded in the chronicle");
-    assert.ok(chronicle.every(line => !/Welcome back|seconds|hours|XP|actions|cycles/i.test(line)),
-      "no duplicated welcome messages or timers");
+    assert.ok(elements.get("workResultTokens").children.some(node =>
+      node.getAttribute("data-tone") === "gain" &&
+      node.children[1]?.textContent === "Stone"),
+      "real mining gains stay compact, not historical sentences");
+    assert.equal(elements.has("logList"),false,"no hidden Chronicle survives");
 
     // The chosen activity receives the requested duration, not Mining.
     openActivities.fire("click");
@@ -504,8 +563,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "mining", "Mining resumes Forever only after Meditation's minute");
     assert.equal(state.transition, null);
-    assert.ok(elements.get("logList").children.some(x => x.textContent ===
-      "Practised meditation."));
+    assert.equal(elements.get("workResultTitle").textContent,"Mining",
+      "after returning to Mining, do not display an old Meditation result");
 
     // Build a three-hourglass route: Hunting now (1 minute), Masonry next
     // (2 minutes), Mining Forever. Future schedule must not stop Hunting.
@@ -709,12 +768,14 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.match(elements.get("combatEventTitle").textContent,/ROLLING FOR FIRST/);
     assert.match(elements.get("sceneImage").src,/assets\/combat\/fight-engage\.webp/,
       "neutral fight art remains until BOTH initiative rolls resolve");
-    assert.doesNotMatch(elements.get("logList").children[0].textContent,
-      /Skull dice decide initiative/,"no initiative conclusion is shown in advance");
+    assert.deepEqual(elements.get("playerResult").children,[],
+      "before initiative resolves there is no manufactured result");
+    assert.deepEqual(elements.get("enemyResult").children,[]);
     now += COMBAT_BALANCE.initiativeAnimationMs + 250;
     tick();
     assert.match(elements.get("combatEventTitle").textContent,/YOU ATTACK FIRST|ENEMY ATTACKS FIRST/);
-    assert.match(elements.get("logList").children[0].textContent,/Skull dice decide initiative/);
+    assert.equal(elements.get("resultCombat").hidden,false,
+      "fighting uses two-sided compact results");
     assert.notEqual(elements.get("playerDiceTotal").textContent,"ROLLING");
     assert.notEqual(elements.get("enemyDiceTotal").textContent,"ROLLING");
     const initiativeState = JSON.parse(store.get(SAVE_KEY));
@@ -762,9 +823,14 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(elements.get("sceneImage").src.includes(
       "/assets/combat/" + picture.asset + ".webp"),
       "matching result image appears only AFTER actual attack and defense dice resolve");
-    assert.match(elements.get("logList").children[0].textContent,
-      /ATK \d[–\d]* = \d+ · DEF \d[–\d]* = \d+/,
-      "both complete 3d6 rolls and computed scores belong to Chronicle");
+    const displayed = combatReadoutForEvent(resolved.event);
+    for (const [side,id] of [["player","playerResult"],["enemy","enemyResult"]]) {
+      assert.deepEqual(elements.get(id).children.map(node => ({
+        value:node.children[0].textContent,
+        tone:node.getAttribute("data-tone"),
+        label:node.children[1]?.textContent ?? ""
+      })),displayed[side],"resolved event displays on the correct side, without a log");
+    }
     assert.equal(elements.get("combatTurns").textContent.includes("◆"),true);
     assert.equal(arena.skills.fighting.level, 1);
     assert.equal(arena.combatSession.player.loadout,"greatsword");
