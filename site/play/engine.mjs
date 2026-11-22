@@ -10,6 +10,7 @@ import {
 } from "./combat.mjs?v=20261122-dice-duels1";
 import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=20261122-dice-duels1";
+import { initialArmour, normalizeArmour, armourUnlocked } from "./armour.mjs?v=20261122-fixed-armour1";
 import { allAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261121-attributes1";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
@@ -162,6 +163,7 @@ export function newGame(now = Date.now()) {
     attributeEffort: blankAttributeEffort(),
     combatSession: null,
     combatLoadout: DEFAULT_COMBAT_LOADOUT,
+    armour: initialArmour(),
     // V1 global XP cannot be assigned to individual activities reliably.
     unattributedXP: 0,
     items: Object.fromEntries(ITEM_KEYS.map(key => [key, 0])),
@@ -300,6 +302,9 @@ export function readSave(value) {
       version: GAME_VERSION, timingProfile: TIMING_PROFILE, name: s.name, skills,
       attributeEffort: s.version >= 5 ? { ...s.attributeEffort } : blankAttributeEffort(),
       combatLoadout: s.version === GAME_VERSION ? s.combatLoadout : DEFAULT_COMBAT_LOADOUT,
+      // Optional additive V7 field: older V7 and V1–V6 saves retain all
+      // progression and simply begin with the free starter armour.
+      armour: normalizeArmour(s.version === GAME_VERSION ? s.armour : null, skills),
       // Migrate old V6 sword/axe/hammer prototype duels to the first real
       // two-skill greatsword loadout; keep time, RNG seed, stats and XP intact.
       combatSession: s.version >= 6 && s.combatSession ? {
@@ -839,6 +844,22 @@ export function setCombatLoadout(state, loadout, now = Date.now(), random = Math
   return { ...result, state: { ...result.state, combatLoadout: loadout,
     combatSession: result.state.activity === "fighting" && !result.state.transition
       ? null : result.state.combatSession } };
+}
+
+/**
+ * Fixed wardrobe choice, not a drop or craft transaction. Level-gate using
+ * activated Fighting skill level (NOT accumulated, unclaimed XP); settle at
+ * the previous state before changing. Gear adds NO combat modifiers in this
+ * phase, so no running duel, offline snapshot, or saved resources are reset.
+ */
+export function setArmourChoice(state, slot, item, now = Date.now(), random = Math.random) {
+  if (!armourUnlocked(state.skills, slot, item))
+    throw new RangeError("Armour choice is locked or unknown");
+  const result = settle(state, now, random);
+  if (result.state.armour[slot] === item) return result;
+  return { ...result, state: {
+    ...result.state, armour: { ...result.state.armour, [slot]: item }
+  } };
 }
 
 /** Legacy instant selection helper retained for historical engine fixtures only; the UI uses requestActivityChange. */
