@@ -10,10 +10,10 @@
  * combat-skills.mjs; paintings in combat-art.mjs. No DOM or timers here.
  */
 import { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
-  from "./combat-skills.mjs?v=20261122-dice-duels1";
-import { armourStats, initialArmour } from "./armour.mjs?v=20261122-armour-balance1";
+  from "./combat-skills.mjs?v=20261122-guard-impact1";
+import { armourStats, initialArmour } from "./armour.mjs?v=20261122-guard-impact1";
 export { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
-  from "./combat-skills.mjs?v=20261122-dice-duels1";
+  from "./combat-skills.mjs?v=20261122-guard-impact1";
 export { COMBAT_ART } from "./combat-art.mjs?v=20261122-dice-duels1";
 
 export const COMBAT_BALANCE = Object.freeze({
