@@ -6,7 +6,8 @@ import {
    MASTERY_ATTRIBUTE_BALANCE, masteryBonusesForSkill, masteryAwardForNextLevel,
    totalMasteryAttributeBonuses, effectiveAttributeProgress,
   ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, SKILL_BALANCE, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, UNTIL_LEVEL_UP, MASTER_RESOURCE_MINIMUM, skillMasterReadiness, validQueuePlan, validPlannedDuration, queueStartActivity, queueInsertTimedActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
-  enterGame, testOfflineDay, xpForLevel, levelFromXP, xpToNextLevel, skillSpoils, skillMasterOffer, learnFromMaster, setArmourChoice
+  enterGame, testOfflineDay, xpForLevel, levelFromXP, xpToNextLevel, skillSpoils, skillMasterOffer, learnFromMaster, setArmourChoice,
+  GLORY_SCROLL_ID, GLORY_RULES, ENCHANT_SLOTS, enchantEquipmentSlot, enchantBonus
 } from "../site/play/engine.mjs";
 import { ARMOUR_SLOTS, ARMOUR_CHOICES, ARMOUR_REQUIREMENTS, ARMOUR_TIER_LABELS, ARMOUR_TIERS,
   initialArmour, armourOption, armourUnlocked, armourStats, WEAPON_PIECES, ARMOUR_PIECES } from "../site/play/armour.mjs";
@@ -135,6 +136,52 @@ test("Skill Master grants one stat point only on explicit confirmed level advanc
     readSave(taught.state).skills),after);
   assert.throws(()=>learnFromMaster(taught.state,0,midpoint),RangeError,
     "cannot claim the same level's permanent stat reward twice");
+});
+
+test("Glory Scroll item, fixed equipment slots and 50/50 enchant failure have exact costs",()=>{
+  const base=newGame(0);
+  assert.equal(GLORY_SCROLL_ID,"glory_scroll");
+  assert.equal(GLORY_RULES.winDropChance,0.5);
+  assert.equal(GLORY_RULES.enchantSuccessChance,0.5);
+  assert.equal(base.items.glory_scroll,0);
+  assert.equal(ENCHANT_SLOTS.length,12,"one weapon plus eleven independent armour slots");
+  assert.deepEqual(ENCHANT_SLOTS.slice(1),ARMOUR_SLOTS.map(x=>x.id));
+  assert.deepEqual(Object.values(base.enchantments),Array(12).fill(0));
+  assert.throws(()=>enchantEquipmentSlot(base,"weapon",0,()=>0),RangeError);
+  const funded={...base,items:{...base.items,glory_scroll:4}};
+  const gained=enchantEquipmentSlot(funded,"weapon",0,()=>0.49);
+  assert.equal(gained.enchantment.success,true);
+  assert.equal(gained.state.enchantments.weapon,1);
+  assert.equal(gained.state.items.glory_scroll,3);
+  assert.equal(enchantBonus(gained.state.enchantments).attack,1);
+  assert.equal(enchantBonus(gained.state.enchantments).defense,0);
+  const second=enchantEquipmentSlot(gained.state,"weapon",0,()=>0.49);
+  assert.equal(second.state.enchantments.weapon,2);
+  const failed=enchantEquipmentSlot(second.state,"weapon",0,()=>0.5);
+  assert.equal(failed.enchantment.success,false);
+  assert.equal(failed.enchantment.before,2);
+  assert.equal(failed.enchantment.rank,0,"failure destroys ALL ranks on this slot");
+  assert.equal(failed.state.items.glory_scroll,1,"every attempt spends one scroll");
+  assert.equal(enchantBonus(failed.state.enchantments).attack,0);
+  const glove=enchantEquipmentSlot(failed.state,"left_glove",0,()=>0.05);
+  assert.equal(glove.state.enchantments.left_glove,1);
+  assert.equal(glove.state.enchantments.right_glove,0);
+  assert.equal(enchantBonus(glove.state.enchantments).defense,1);
+  assert.equal(glove.state.items.glory_scroll,0);
+  assert.throws(()=>enchantEquipmentSlot(glove.state,"left_glove",0,()=>0),RangeError);
+  const reloaded=readSave(JSON.stringify(glove.state));
+  assert.deepEqual(reloaded,glove.state);
+  const preFeature={...funded};delete preFeature.enchantments;
+  const migrated=readSave(preFeature);
+  assert.deepEqual(migrated.enchantments,base.enchantments);
+  assert.equal(migrated.items.glory_scroll,4);
+  const oldItems={...funded,items:{...funded.items}};delete oldItems.items.glory_scroll;
+  assert.equal(readSave(oldItems).items.glory_scroll,0,"old V7 missing scroll remains valid");
+  assert.equal(readSave({...funded,enchantments:{weapon:-1}}),null);
+  assert.equal(readSave({...funded,enchantments:{unknown_slot:1}}),null);
+  assert.equal(readSave({...funded,enchantments:{weapon:GLORY_RULES.maxRank+1}}),null);
+  assert.deepEqual(funded.items,{...base.items,glory_scroll:4},
+    "failed/successful enchant transactions never mutate the original state");
 });
 
 test("only individual activities have levels; character has a name but no level", () => {
