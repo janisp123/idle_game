@@ -1,6 +1,17 @@
 # Changelog — verified completed work
 
 
+## 2026-11-22 — Twelve original turn-based Fighting images and de-duplicated Chronicle (chat, PR #100)
+
+- **Merged:** [PR #100](https://github.com/janisp123/idle_game/pull/100) as main commit `81a4a36d8f9a2172760dace4672f2c54fc9f5af1`. Twelve local original 960×540 WebP scene files added under `site/play/assets/combat/`, including Greatsword victory/defeat and Sword & Shield victory/defeat, plus engage, wind-up, weapon hits, misses, parry and shield block.
+- **Actual gameplay:** `site/play/combat-art.mjs` chooses a painted static image by the **simulated** event, attacker/defender role, weapon style, equipped defense and real winner/loser. The main scene changes on each live combat beat. Existing character abilities, timed rolls, 6–6–6 logic and V7 saves remain unchanged. Neutral tableau is the fallback for unillustrated abilities—no fabricated hit or shield image.
+- **UX:** Removed repeated full event narrative, attack/defense roll recap and 'art coming later' notice from the combat panel. The Chronicle is the **single textual log** with real description, numeric damage and true ATK/DEF rolls; no images appear in log items. The separate combat strip contains only a short DUEL/status label and special skull dice. Removed obsolete copy claiming fighting strikes weren't implemented.
+- **Evidence:** Final PR-head [Idle Game website CI 45015801061](https://github.com/janisp123/idle_game/actions/runs/45015801061) and [Project Protocol Preflight 45015801098](https://github.com/janisp123/idle_game/actions/runs/45015801098) passed. Main [GitHub Pages deployment 45016017696](https://github.com/janisp123/idle_game/actions/runs/45016017696) completed successfully. Fresh public `/play/` HTML returned HTTP 200, included `20261122-combat-scenes1`, and no longer contained the duplicate `combatEventText`/`combatRolls` elements.
+- **Quality:** `tools/test_combat_art.mjs` checks 12 actual RIFF/WebP files, real role/weapon/result mappings and neutral fallback for untrained parries; UI smoke tests inspect current seeded image and sole chronicle roll. Some lower-resolution concept-art crops can later be upgraded independently.
+- **Unfinished:** Opponent-specific mirror-match art, all rare event variants, clan/raid events and offline encounter summaries. The earlier Owner request for a 60-second work cycle, slower transitions and **roll-free aggregate offline combat** is tracked separately as GAME-012, not silently claimed as part of this image release.
+
+
+
 ## 2026-11-22 — Two equipped skills per fighter: Greatsword and Sword & Shield (chat; PR #98)
 
 - **Merged:** [PR #98](https://github.com/janisp123/idle_game/pull/98), commit `3372699bba75b92254a6889b4b1147acd733a099`.
