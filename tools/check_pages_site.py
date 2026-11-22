@@ -133,7 +133,7 @@ def check():
     if play_entry.is_file():
         play_root = SITE / "play"
         required_game = ("index.html", "app.mjs", "engine.mjs", "loot.mjs", "production.mjs", "game.css", "iron-ui.css",
-                         "assets/hunting.webp", "assets/mining.webp")
+                         "assets/hunting.webp", "assets/mining.webp", "result-readout.mjs")
         for name in required_game:
             asset = play_root / name
             assert asset.is_file() and asset.stat().st_size, f"Missing game asset: {name}"
@@ -144,7 +144,9 @@ def check():
         assert game_parser.lang == "en", "Game must declare English document language"
         assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
         assert {"game", "activityChoices", "resourceList", "sceneImage", "logList",
-                "activityProgress", "actionFill", "logList", "sceneBanner", "character-heading",
+                "activityProgress", "actionFill", "sceneBanner", "character-heading",
+                "resultPanel", "combatReadout", "playerResult", "enemyResult",
+                "workReadout", "workResultTokens",
                 "skillTitle", "skillLevel", "skillXp", "skillFill", "nameInput", "saveName"}.issubset(game_parser.ids), "Missing essential gameplay UI"
         assert not ({"level", "xpText", "xpFill", "lifetimeXp"} & game_parser.ids), (
             "Character must have no global level or XP widget"
@@ -156,10 +158,11 @@ def check():
         for leak in ("baseMinutes", "SEC / ACTION", "toLocaleTimeString", "elapsedMs",
                      "timeInvested", "testDay", "gainedXP", "per cycle"):
             assert leak not in app_js, f"Player-facing time/action detail leaked: {leak}"
-        assert "lootSummary(report)" in app_js and "aria-valuenow" in app_js
+        assert "workReadoutForReport(report" in app_js and "aria-valuenow" in app_js
         assert "state.skills[id]" in app_js and "skillFill" in app_js
         assert "state.totalXP" not in app_js and "state.level" not in app_js
         assert 'role="progressbar"' in game_html
+        assert "logList" not in game_html, "Chronicle must be fully replaced by result readout"
         assert "Welcome back." not in game_html
         assert "returnPanel" not in game_html
         assert "./iron-ui.css" in game_html, "The shared dark-fantasy theme must be active"
