@@ -26,6 +26,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   assert.match(html, /id="characterAttributes"/, "five visible stats belong to the character panel");
   assert.match(html, /id="combatPanel"/, "only combat receives a dedicated event panel");
   assert.match(html, /id="combatDice"/, "real dice results have a dedicated UI");
+  assert.match(html, /id="combatLoadout"/, "a player can equip one of the two combat styles");
+  assert.match(html, /id="combatSkillsText"/, "the two equipped skills are visible");
+  assert.match(html, /id="combatRolls"/, "attacker and defender rolls are shown when resolved");
   assert.match(queueCss, /\.combat-panel\.finisher \.combat-dice/,
     "triple six gets the special grimdark visual state");
   assert.match(queueCss, /\.character-attributes\s*\{[^}]*display:grid/s);
@@ -34,7 +37,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261122-mechanics1/,
+  assert.match(html, /app\.mjs\?v=20261122-two-skills1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -119,6 +122,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.doesNotMatch(html, /<option value="8">8<\/option>/,
       "planner must not carry a duplicated static 1..8 range");
     assert.ok(tick, "game tick must start");
+    assert.deepEqual(elements.get("combatLoadout").children.map(option => option.value),
+      ["greatsword","sword_shield"],"selectable loadouts come from the skill registry");
+    assert.match(elements.get("combatSkillsText").textContent,/Heavy Swing.*Blade Guard/);
+    assert.equal(elements.get("combatLoadout").value,"greatsword");
     const openActivities = elements.get("openActivities");
     const categoryScreen = elements.get("activityCategories");
     const listScreen = elements.get("activityListScreen");
@@ -634,6 +641,19 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.match(elements.get("combatEventTitle").textContent, /^DUEL 1 · /);
     assert.ok(elements.get("combatEventText").textContent.length > 20);
     assert.equal(arena.skills.fighting.level, 1);
+    assert.equal(arena.combatSession.player.loadout,"greatsword");
+    const picker = elements.get("combatLoadout");
+    picker.value = "sword_shield";
+    picker.fire("change");
+    const swapped = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(swapped.combatLoadout,"sword_shield");
+    assert.equal(swapped.combatSession,null,"new style starts a new duel");
+    assert.match(elements.get("combatSkillsText").textContent,/Thrust.*Shield Block/);
+    now += 20_000;
+    tick();
+    const shieldDuel = JSON.parse(store.get(SAVE_KEY));
+    assert.equal(shieldDuel.combatSession.player.loadout,"sword_shield");
+    assert.equal(shieldDuel.items.stone,arena.items.stone);
     assert.deepEqual(arena.items, fighting.items,
       "visual combat creates no unapproved loot, deletion, or permanent death");
   } finally {
