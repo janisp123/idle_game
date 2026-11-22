@@ -1,5 +1,15 @@
 # Current working checkpoint
 
+## Latest verified — STR/DEX/WIL gear gates and Mage Robe (2026-11-22, PRs #113/#114)
+
+- **Main releases:** [PR #113](https://github.com/janisp123/idle_game/pull/113) merged at `c6db4d1308d9350780eef8d8979476e4776d3522`. Follow-up script-cache fix [PR #114](https://github.com/janisp123/idle_game/pull/114) merged at `c87252f2eddae4613f142067124317303b1321c6`.
+- **Verification:** Final #113 head `b941ef5469457539869df19cb3fe304e3d21f18d` passed [site CI 45040689229](https://github.com/janisp123/idle_game/actions/runs/45040689229) and [protocol 45040689214](https://github.com/janisp123/idle_game/actions/runs/45040689214). Final #114 head `67bf611efcdfb2c89b74fd3c322f16204583ff04` passed [site CI 45040815764](https://github.com/janisp123/idle_game/actions/runs/45040815764) and [protocol 45040815822](https://github.com/janisp123/idle_game/actions/runs/45040815822). Main [Pages 45040863719](https://github.com/janisp123/idle_game/actions/runs/45040863719) deployed successfully; public `/play/?verify=stat-gates4` returned HTTP 200, **raw** HTML contains the new `app.mjs?v=20261122-stat-gates1` script rather than a stale cached version. Android visual QA remains for Owner.
+- **Shipped:** Character **STR** unlocks Plate pieces (11–16), **DEX** unlocks Leather (10–12), **WIL** unlocks Mage Robe (base 10), thresholds per body part in `ARMOUR_REQUIREMENTS`. Fighting/activity skill level has **no gear gate**. UI options show named stat thresholds and kg; as stats rise, options refresh. The old `robe` internal save key is intentionally unchanged but all player-facing part labels now say Mage, e.g. Mage Hood and Mage Robe.
+- **Save/offline safety:** Existing equipped valid gear, including prior `iron`→`plate`, stays equipped even if a newly introduced attribute requirement would disallow re-equipping it. Once changed away, new equip must satisfy the actual stat. Unknown gear still normalizes to free Mage clothing. Switching settles under old frozen combat gear; no XP, resource, timer, queue or duel RNG losses; OFF-001 intact.
+- **Future only:** Individual slot **enchantments** would add attribute requirements (especially WIL for enchanted Mage gear), but enchant benefits, ranks, costs and stats are not implemented. Tracked as **BLOCKED GAME-013**; magic resistance still inactive absent magic attacks. GAME-012 timing/roll-free offline also remains BLOCKED.
+- **Next:** Owner checks new dropdown unlock labels and equipment selection at [Play Now](https://janisp123.github.io/idle_game/play/). Collect phone feedback; do not implement enchant mechanics without an approved design.
+
+
 ## Latest verified — four-tier armour counter balance & encumbrance (2026-11-22, PR #111)
 
 - **Main:** `00f98855b6b21dad9992c50d3784c0d0c8cdd476` after [PR #111](https://github.com/janisp123/idle_game/pull/111). No competing open PR during merge.
