@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-22 — Fighting action progress under the scene (chat, PR #105)
+
+- Merged [PR #105](https://github.com/janisp123/idle_game/pull/105) into `main` at `2417ec76984c3345398602fcf7e296432fa123aa`: a real responsive five-step bronze action timeline below the painting, with initiative, attacker dice, defender dice, outcome and next battle. Current step highlighted; previous steps completed; next steps muted.
+- Each automatically resolved attack now **visually** rolls attacker 3d6 first, then defender 3d6; the already-determined engine results, event paintings and Chronicle remain hidden until both complete. Roles correctly follow whichever fighter attacks first; the bar handles early-ending duels.
+- No changed combat RNG, damage, skill growth, progression formulas, save schema, offline settlement or gameplay timings. Existing six-turn pips and noncombat work bars remain.
+- Checks: [website tests 45029901503](https://github.com/janisp123/idle_game/actions/runs/45029901503) and [protocol 45029901476](https://github.com/janisp123/idle_game/actions/runs/45029901476) passed on final PR head; [main Pages 45029942325](https://github.com/janisp123/idle_game/actions/runs/45029942325) succeeded. Fresh public HTML returned HTTP 200 and included the new combat flow markup. Phone interaction remains to be reviewed.
+
+
 
 ## 2026-11-22 — Compact mobile screen and six-turn 3d6 combat (chat, PRs #102 and #103)
 
