@@ -23,12 +23,12 @@ Names remain consistent within each family: **Mage Hood / Leather Mask / Plate H
 
 | Armour | Physical damage reduction (on landed hit) | Magic resistance (future) | Evasion dice score | Dodge margin needed | Armour mobility (before weapon) |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| None | 0% | 0% | +3 | 2 | 100% |
-| Mage Robe | 4% | 45% | +0 | 5 | 95% |
-| Leather | 22% | 12% | +2 | 3 | 90% |
+| None | 0% | 0% | +3 | 6 | 100% |
+| Mage Robe | 4% | 45% | +0 | 9 | 95% |
+| Leather | 22% | 12% | +2 | 8 | 90% |
 | Plate | 50% | 0% | −3 | 99 | 75% |
 
-A lower dodge margin makes the already-successful 3d6 defense appear as a **dodge** instead of a trained guard/parry. Plate margin `99` makes dodging exceptionally unlikely: heavy armour usually relies on direct absorption or weapon blocking. Evasion score modifies the **same genuine defender 3d6 total**, not a secretly invented second RNG roll. None has the most raw evasion but takes all damage that lands. Actual probability of a dodge is **not** equal to the above score and depends on both fighters' stats, dice and trained guards.
+A lower dodge margin makes an exceptionally successful 3d6 defense appear as a **dodge** instead of a trained guard/parry. The margin thresholds have been increased to make true dodges rarer; a block or parry can transmit partial physical impact even when the roll succeeds (see [Combat](COMBAT.md)). Plate margin `99` makes dodging exceptionally unlikely: heavy armour usually relies on direct absorption or weapon blocking. Evasion score modifies the **same genuine defender 3d6 total**, not a secretly invented second RNG roll. None has the most raw evasion but takes all damage that lands. Actual probability of a dodge is **not** equal to the above score and depends on both fighters' stats, dice and trained guards.
 
 **Mixed sets:** Each of the 11 pieces contributes its **body coverage share**, and the shares sum to exactly 100. `physicalReductionPct = round(Σ (coverage% × typePhysicalReduction%)/100)`, similarly for magic resistance, evasion score and dodge-margin target. Equipment damage reduction applies to a landed *physical* hit once, `max(1, round(baseHitDamage × (100 − physicalReductionPct)/100))`. A successful 6–6–6 finisher still resolves through the opposed-roll finisher rule: do not fabricate a hit amount or silently weaken the special event.
 
