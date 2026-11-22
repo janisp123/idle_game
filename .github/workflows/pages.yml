@@ -8,6 +8,7 @@ on:
       - "tools/check_pages_site.py"
       - "tools/test_game_engine.mjs"
       - "tools/test_game_ui.mjs"
+      - "tools/test_combat_art.mjs"
       - ".github/workflows/pages.yml"
   pull_request:
     branches: [main]
@@ -16,6 +17,7 @@ on:
       - "tools/check_pages_site.py"
       - "tools/test_game_engine.mjs"
       - "tools/test_game_ui.mjs"
+      - "tools/test_combat_art.mjs"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -37,9 +39,9 @@ jobs:
         with:
           node-version: "22"
       - name: Check game module syntax
-        run: node --check site/play/app.mjs && node --check site/play/engine.mjs && node --check site/play/loot.mjs && node --check site/play/production.mjs && node --check site/play/attributes.mjs && node --check site/play/combat.mjs && node --check site/play/combat-skills.mjs
+        run: node --check site/play/app.mjs && node --check site/play/engine.mjs && node --check site/play/loot.mjs && node --check site/play/production.mjs && node --check site/play/attributes.mjs && node --check site/play/combat.mjs && node --check site/play/combat-skills.mjs && node --check site/play/combat-art.mjs
       - name: Test offline engine, skill migration and browser UI
-        run: node --test tools/test_game_engine.mjs tools/test_game_ui.mjs tools/test_combat.mjs
+        run: node --test tools/test_game_engine.mjs tools/test_game_ui.mjs tools/test_combat.mjs tools/test_combat_art.mjs
 
   deploy:
     name: Publish to GitHub Pages

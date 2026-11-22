@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { combatAtTime } from "../site/play/combat.mjs";
+import { combatArtworkForEvent } from "../site/play/combat-art.mjs";
 import { newGame, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP } from "../site/play/engine.mjs";
 
 class FakeElement {
@@ -28,7 +30,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   assert.match(html, /id="combatDice"/, "real dice results have a dedicated UI");
   assert.match(html, /id="combatLoadout"/, "a player can equip one of the two combat styles");
   assert.match(html, /id="combatSkillsText"/, "the two equipped skills are visible");
-  assert.match(html, /id="combatRolls"/, "attacker and defender rolls are shown when resolved");
+  assert.doesNotMatch(html, /id="combatRolls"|id="combatEventText"/,
+    "repeated fighting narration and rolls must not appear above Chronicle");
+  assert.doesNotMatch(html, /Event-specific illustrations are being commissioned/,
+    "real event art is in git, not a future placeholder");
   assert.match(queueCss, /\.combat-panel\.finisher \.combat-dice/,
     "triple six gets the special grimdark visual state");
   assert.match(queueCss, /\.character-attributes\s*\{[^}]*display:grid/s);
@@ -37,7 +42,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261122-two-skills1/,
+  assert.match(html, /app\.mjs\?v=20261122-combat-scenes1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -62,7 +67,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261122-two-skills1/,
+  assert.match(html, /iron-ui\.css\?v=20261122-combat-scenes1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -639,7 +644,27 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(arena.combatSession && arena.combatSession.elapsedMs === 20_000);
     assert.equal(elements.get("combatPanel").hidden, false);
     assert.match(elements.get("combatEventTitle").textContent, /^DUEL 1 · /);
-    assert.ok(elements.get("combatEventText").textContent.length > 20);
+    assert.equal(elements.get("activityDescription").hidden, true,
+      "the obsolete fighting paragraph is not repeated above Chronicle");
+    assert.match(elements.get("sceneImage").src,
+      /assets\/combat\/greatsword-charge\.webp/,
+      "the first greatsword turn must display Heavy Swing preparation art");
+    assert.match(elements.get("logList").children[0].textContent,
+      /draw back the enormous greatsword/,
+      "Chronicle contains the actual narration, not the scene panel");
+    now += 20_000;
+    tick();
+    const afterEnemyTurn = JSON.parse(store.get(SAVE_KEY));
+    const resolved = combatAtTime(afterEnemyTurn.combatSession);
+    const picture = combatArtworkForEvent(resolved.event, "greatsword", resolved.enemyLoadout);
+    assert.ok(elements.get("sceneImage").src.includes(
+      "/assets/combat/" + picture.asset + ".webp"),
+      "the scene matches the actual second turn, including parries and blocks");
+    assert.notEqual(picture.asset, "greatsword-charge",
+      "the image changes after the first wind-up turn");
+    assert.match(elements.get("logList").children[0].textContent,
+      /ATK \d+ · DEF \d+/,
+      "attack and defense numbers belong to Chronicle alone");
     assert.equal(arena.skills.fighting.level, 1);
     assert.equal(arena.combatSession.player.loadout,"greatsword");
     const picker = elements.get("combatLoadout");

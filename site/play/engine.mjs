@@ -7,7 +7,7 @@ export {
 } from "./attributes.mjs?v=20261121-attributes1";
 import {
   validCombatSession, startCombatSession, advanceCombatSession
-} from "./combat.mjs?v=20261122-combat-skills1";
+} from "./combat.mjs?v=20261122-combat-scenes1";
 import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=20261122-combat-skills1";
 import { allAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261121-attributes1";
@@ -47,11 +47,11 @@ const task = (title, subject, item, itemLabel, minutes, xp, description, zone, s
     durationMs: timing.workCycleMs ?? Math.round(minutes * BASE_CYCLE_MS / speed),
     baseMinutes: minutes, speed, xp, yield: 1, description, zone, category });
 export const ACTIVITIES = Object.freeze({
-  // Fighting is separate from hunting or raiding. This alpha activity grants
-  // skill and time-based attribute growth; real per-hit combat will follow.
+  // Fighting is independent of hunting/raiding: real turn-by-turn attack and
+  // defense outcomes drive an event-specific original illustration.
   fighting: task("Fighting", "Matched opponents", null,
-    "Combat skill · duel simulation coming later", 20, 3,
-    "Face worthy opponents in the fighting grounds. Individual strikes, blocks and outcomes are not simulated in this alpha yet.",
+    "Combat skill · automatic turn-based duels", 20, 3,
+    "Fight worthy opponents in automatic turns. Attack rolls, guards, wounds and outcomes decide each illustrated scene.",
     "Fighting grounds", 1, "combat"),
   hunting: task("Hunting", "Wolves", "hide", "Wolf hides", 12, 3, "Track, hunt, dress and carry a wolf back to camp.", "Wilds"),
   mining: task("Mining", "Stone", "stone", "Stone", 15, 2, "Break rock, sort stone, load carts and haul it to storage.", "Quarry"),

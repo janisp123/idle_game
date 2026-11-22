@@ -25,7 +25,7 @@
 | Recipes and relative choice weights | `site/play/production.mjs` → `PRODUCTION_RECIPES` | `produce` material-conservation algorithm |
 | Current solo combat timing, damage, hit/defense probabilities, 6–6–6 window | `site/play/combat.mjs` → `COMBAT_BALANCE` | `simulateDuel` event ordering and random source |
 | Two-skill combat styles, greatsword charge/damage, parry and shield block | `site/play/combat-skills.mjs` → `COMBAT_SKILLS`, `COMBAT_LOADOUTS` | `simulateDuel` turn rules; do not add duplicate skill flags |\n| Named enemy stats and opponent rotation | `site/play/combat.mjs` → `OPPONENTS` | Fight renderer |
-| Matching scene assets | `site/play/combat.mjs` → `COMBAT_ART` | Simulation math; never use wrong art |
+| Matching scene assets | `site/play/combat-art.mjs` → `COMBAT_ART`, `combatArtworkForEvent`; `site/play/assets/combat/*.webp` | Never render a wrong weapon, defense or victory state; test mapping and actual file bytes |
 | Alpha/normal cycle, same/cross-zone travel, preparation | `site/play/engine.mjs` → `TIMING_PROFILE`, `TIMING_PROFILES` | Offline settle and migration |
 | Planner 1..8 amount range | `site/play/engine.mjs` → `SCHEDULE_BALANCE` (UI derives options) | `validPlannedDuration` and two UI editors |
 | Queue slot cap | `site/play/engine.mjs` → `MAX_WAGONS` **plus structural QA** | Do not assume layout/loop boundaries auto-adjust |
@@ -36,11 +36,11 @@ From repo root:
 
 ```sh
 node --check site/play/engine.mjs
-node --check site/play/combat.mjs\nnode --check site/play/combat-skills.mjs
+node --check site/play/combat.mjs\nnode --check site/play/combat-art.mjs\nnode --check site/play/combat-skills.mjs
 node --check site/play/loot.mjs
 node --check site/play/production.mjs
 node --check site/play/attributes.mjs
-node --test tools/test_game_engine.mjs tools/test_game_ui.mjs tools/test_combat.mjs
+node --test tools/test_game_engine.mjs tools/test_game_ui.mjs tools/test_combat.mjs tools/test_combat_art.mjs
 python tools/check_pages_site.py
 python tools/check_project_protocol.py
 ```

@@ -1,6 +1,6 @@
 # Fighting and raiding visual events — owner direction (2026-11-21)
 
-**Status:** Approved visual direction. PR #94 now provides an alpha deterministic solo duel resolver with real hit/block/dodge/damage/finisher results and twenty-second textual event playback. The event-specific image gallery and all raid/clan battle simulations are **not yet implemented**.
+**Status:** Fighting already simulates real alternating attack/defense turns with two weapon styles. This feature branch adds **12 real original static WebP paintings** in `site/play/assets/combat/` and an action/actor/outcome selector in `site/play/combat-art.mjs`, including separate greatsword and sword-and-shield victories and defeats. Offline raid/clan battle simulations and a comprehensive per-opponent/event art library remain **unimplemented**.
 
 ## Distinguish visual systems
 
@@ -15,10 +15,10 @@
 2. Keep the visual selection in an independent mapping from event type to available artwork variants. When new images are commissioned, add them to the registry without changing combat math, XP, inventory, or save logic. Repeated events may use multiple paintings but only **correct-type** paintings.
 3. Events progress autonomously; the user remains a spectator and can close the game. No clicks per strike, no mana/stamina/energy requirements. Events must not change gameplay timing simply because an image takes longer to show.
 4. A long offline absence cannot replay millions of individual scenes. The simulator resolves the activity efficiently and displays a bounded retrospective/report when the player returns, while the online view can present the currently relevant event art.
-5. Author and optimize original paintings for the existing iron-and-parchment grimdark art style: 16:9, good mobile readability, local compressed assets, descriptive alt text. The commissioned face-off illustration can be the **opening** frame; event-specific paintings are future content.
-6. No fake event-stream implementation: until combat rules exist, Fighting is transparently labelled a progression prototype and shows a **temporary existing battle illustration**. The generated high-resolution two-warriors face-off image is currently delivered in the chat, **not** bundled into GitHub Pages. It needs an actual verified repo asset before the site may claim to display it.
+5. Use original grimdark 16:9 WebP paintings stored locally, with descriptive alt text. The first 12 images now implement the duel opening, wind-up, matching attack/miss, trained guards and both weapon-style win/loss results. Some images are concept-sheet crops and can later be replaced with more detailed originals without touching combat math.
+6. In Fighting, **show the event image in the main scene**. The Chronicle contains **event text, numeric attack/defense rolls and damage only**, never copied pictures or a repeated story paragraph above it. The duel strip may show a short action label and special skull dice, but not duplicate narration. Unillustrated new skills get the neutral arena tableau, not a false block/hit.
 
-**Open for later approval:** opponent-power matching, actual hit/block logic, which ability determines a pictured event, recovery/death, raid state machine, rewards, and art/intensity options. Do not infer them from graphics alone.
+**Remaining work:** matching opponent power dynamically, persistent wounds/recovery, meaningful raid/clan mechanics, encounter rewards, player-selectable art intensity, and more distinct event variants. Existing hit/guard/damage and ability-art mappings are playable alpha mechanics; all balance remains provisional.
 
 ## Combat is the centerpiece (owner clarification, 2026-11-21)
 
