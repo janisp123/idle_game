@@ -102,6 +102,12 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   for (const id of ["playerDie1","playerDie2","playerDie3","enemyDie1","enemyDie2","enemyDie3"])
     assert.ok(html.includes('id="' + id + '"'),"both fighters get three distinct visible dice");
   assert.match(html, /id="combatLoadout"/, "a player can equip one of the two combat styles");
+  assert.match(html, /<details id="alphaTools"/,
+    "alpha tools must fold away rather than occupy normal phone space");
+  for(const id of ["alphaReset","alphaDay","alphaSpeed","alphaStatus"])
+    assert.ok(html.includes('id="' + id + '"'),"alpha switch target: "+id);
+  assert.match(queueCss,/\.alpha-toggle input:checked/,
+    "3 alpha test controls must have visually meaningful on/off states");
   assert.match(html, /id="combatSkillsText"/, "the two equipped skills are visible");
   for (const id of ["resultPanel","combatReadout","playerResult","enemyResult",
     "workReadout","workResultTokens","resultNotice"])
@@ -187,7 +193,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   };
   globalThis.localStorage = {
     getItem: key => store.get(key) ?? null,
-    setItem: (key, value) => store.set(key, String(value))
+    setItem: (key, value) => store.set(key, String(value)),
+    removeItem: key => store.delete(key)
   };
   let allowRouteOverride = false;
   let overrideConfirmations = 0;
@@ -195,6 +202,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   let masterConfirmations = 0;
   let allowEnchant = false;
   let enchantConfirmations = 0;
+  let allowAlphaReset = false;
+  let alphaResetConfirmations = 0;
   globalThis.window = {
     addEventListener(event, handler) { handlers.set("window:" + event, handler); },
     setInterval(handler) { tick = handler; },
@@ -202,6 +211,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       if (prompt.startsWith("THE MASTER'S DUE")) {
         masterConfirmations++;
         return allowMasterTribute;
+      }
+      if (prompt.startsWith("RESET ALL PROGRESS?")) {
+        alphaResetConfirmations++;
+        return allowAlphaReset;
       }
       if (prompt.startsWith("ENCHANT ")) {
         enchantConfirmations++;
@@ -936,6 +949,72 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(enchanted.enchantments.right_glove,0);
     assert.equal(elements.get("enchantWeapon").disabled,true);
     assert.equal(elements.get("enchantArmour").disabled,true);
+
+    // Alpha Tools: a reset and one-day test are momentary switches, while
+    // ×10 is sticky and its companion virtual clock survives reloads.
+    assert.equal(elements.get("alphaSpeed").checked,false);
+    const mine={...newGame(now),activity:"mining",
+      wagons:[{activity:"mining",plannedMs:null}]};
+    const mineJson=JSON.stringify(mine);
+    store.set(SAVE_KEY,mineJson);
+    handlers.get("window:storage")({key:SAVE_KEY,newValue:mineJson});
+    elements.get("alphaSpeed").checked=true;
+    elements.get("alphaSpeed").fire("change");
+    assert.equal(elements.get("alphaSpeed").checked,true);
+    assert.equal(JSON.parse(store.get("idle-game-alpha-clock-v1")).speed,10);
+    const beforeFast=JSON.parse(store.get(SAVE_KEY)).settledAtMs;
+    now+=1000;
+    tick();
+    const afterFast=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(afterFast.settledAtMs-beforeFast,10_000,
+      "all mining work must accrue ten times faster while switched on");
+    assert.equal(afterFast.skills.mining.level,1);
+    elements.get("alphaSpeed").checked=false;
+    elements.get("alphaSpeed").fire("change");
+    assert.equal(elements.get("alphaSpeed").checked,false);
+    assert.equal(JSON.parse(store.get("idle-game-alpha-clock-v1")).speed,1);
+    now+=1000;
+    tick();
+    const afterNormal=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(afterNormal.settledAtMs-afterFast.settledAtMs,1000,
+      "normal-speed toggle must restore exactly 1x without rewinding");
+
+    elements.get("alphaDay").checked=true;
+    elements.get("alphaDay").fire("change");
+    const afterDay=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(elements.get("alphaDay").checked,false,
+      "the 24-hour testing switch returns OFF after exactly one run");
+    assert.equal(afterDay.settledAtMs-afterNormal.settledAtMs,86_400_000);
+    assert.equal(afterDay.skills.mining.level,1,
+      "one-day testing may fill but never auto-level the skill");
+    assert.equal(afterDay.skills.mining.xp,200,
+      "XP must still obey the original per-skill Skill Master cap");
+    assert.ok(afterDay.items.stone>0,"one day makes real mine loot");
+    assert.equal(JSON.parse(store.get("idle-game-alpha-clock-v1")).speed,1);
+    assert.match(elements.get("alphaStatus").textContent,/24 hours/);
+    const savedBeforeCancelledReset=store.get(SAVE_KEY);
+    elements.get("alphaReset").checked=true;
+    elements.get("alphaReset").fire("change");
+    assert.equal(elements.get("alphaReset").checked,false);
+    assert.equal(alphaResetConfirmations,1);
+    assert.equal(store.get(SAVE_KEY),savedBeforeCancelledReset,
+      "cancel cannot delete any progress");
+    allowAlphaReset=true;
+    elements.get("alphaReset").checked=true;
+    elements.get("alphaReset").fire("change");
+    assert.equal(alphaResetConfirmations,2);
+    assert.equal(elements.get("alphaReset").checked,false);
+    assert.equal(store.has("idle-game-alpha-clock-v1"),false,
+      "full reset removes acceleration and virtual-time offset");
+    const reset=JSON.parse(store.get(SAVE_KEY));
+    assert.deepEqual(reset,newGame(now),
+      "reset restores every starting default including levels, stats, scrolls and route");
+    assert.equal(reset.skills.mining.level,1);
+    assert.equal(reset.items.stone,0);
+    assert.equal(reset.enchantments.weapon,0);
+    assert.equal(elements.get("alphaSpeed").checked,false);
+    assert.equal(elements.get("alphaDay").checked,false);
+    assert.match(elements.get("alphaStatus").textContent,/Progress reset/);
   } finally {
     Date.now = originalNow;
     Math.random = originalRandom;
