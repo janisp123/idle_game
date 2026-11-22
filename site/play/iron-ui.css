@@ -962,3 +962,13 @@ footer p{color:#aa9680}
 @media(prefers-reduced-motion:reduce) {
   .result-token {animation:none}
 }
+
+/* Four fixed armour tiers; the stat strip appears only when ARMOUR is opened. */
+.gear-stats {
+  padding:7px 9px 10px;margin:0 7px 7px;
+  border-top:1px solid #745237;color:#bfe0b4;
+  background:linear-gradient(90deg,rgba(38,26,17,.4),rgba(12,11,9,.1));
+  font:700 10px/1.55 Georgia,serif;letter-spacing:.025em;
+  font-variant-numeric:tabular-nums;overflow-wrap:anywhere;
+}
+@media(max-width:390px) {.gear-stats{font-size:9px;padding:6px 5px}}
