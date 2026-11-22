@@ -22,7 +22,7 @@ Let `A` be attacker, `D` defender; `clamp(x, lo, hi)` limits the value to that r
 6. If no finisher: `damage = max(1, round(baseDamage + STR_A × damagePerStrength + Skill_A × damagePerSkill))`; defaults `6 + 0.5×STR + 1.4×Skill`. Apply `HP_D = max(0, HP_D − damage)`. Emit `strike`, `wound` when at/below half HP, or `collapse` on HP=0. End with `victory`/`defeat` or `stalemate` after the exchange limit.
 7. The next exchange swaps attacker and defender; all events are **actual resolved outcomes**, not randomly chosen captions.
 
-**Exact control of odds:** the accuracy / dodge **coefficients** above are currently literals in `simulateDuel`; `COMBAT_BALANCE` holds the main rates and damage costs. When implementing Combat V2, **move all remaining coefficients into named balance settings** and write tests for them. Do not silently pretend that this was done. Any change to random draw order can change replayed deterministic duel outcomes.
+**Exact control of odds:** all V1 accuracy, dodge, opening bonus, HP, damage and timing coefficients above live in **one `COMBAT_BALANCE` object**, including `accuracyPerDex=.012`, `accuracyPerSkill=.015`, `openingAccuracyBonus=.10`, `dodgePerDex=.006`, `minDodgeChance=.03` and `maxDodgeChance=.42`. To tune these numbers, change that object, not the duel algorithm. Any change to random draw order can change replayed deterministic duel outcomes.
 
 ### Playback, offline and consequences
 
