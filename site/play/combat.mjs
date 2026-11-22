@@ -174,6 +174,27 @@ const finisherText=Object.freeze({
   sword_shield: {player:"Your final thrust pierces the enemy's guard and ends the duel.",
     enemy:"drives a ruthless final thrust through your guard."}
 });
+/** Calculate weapon damage once; blocks and parries use the SAME physical power. */
+function basePhysicalDamage(a) {
+  const raw=COMBAT_BALANCE.baseDamage+a.str*COMBAT_BALANCE.damagePerStrength+
+    a.skill*COMBAT_BALANCE.damagePerSkill+a.attackEnchant;
+  return Math.max(1,Math.round(raw*a.attackAbility.damageMultiplier));
+}
+function guardedImpactDamage(attacker,defender,type) {
+  // A guard is already a successful defense roll. Never make another "block
+  // chance" roll: the attack's nature controls how much force gets through.
+  const through=type==="block"?attacker.attackAbility.blockDamagePct:
+    type==="parry"?attacker.attackAbility.parryDamagePct:0;
+  if (!Number.isFinite(through) || through<0 || through>100)
+    throw new RangeError("Invalid weapon guard penetration");
+  const impact=Math.round(basePhysicalDamage(attacker)*through/100);
+  // Armour and slot enchants may absorb all transmitted impact. Unlike a
+  // direct landed hit, a clean block need not force a minimum 1 HP of damage.
+  const protectedImpact=Math.max(0,Math.round(impact*
+    (100-defender.gear.physicalReductionPct)/100)-
+    (defender.gear.defenseEnchant??0));
+  return Math.min(defender.hp,protectedImpact);
+}
 function resolveTurn(a,d,turn,random) {
   const attackDice=rollSkullDice(random);
   const defenseDice=rollSkullDice(random);
@@ -198,12 +219,15 @@ function resolveTurn(a,d,turn,random) {
     const evasion=!d.defenseAbility || gap>=d.gear.dodgeMargin;
     const type=evasion?"dodge":d.defenseAbility.result;
     if(evasion)d.opening=true;
-    const prose=evasion?"dodges the blow":type==="block"?"stops the blow with a shield":
+    const damage=evasion?0:guardedImpactDamage(a,d,type);
+    d.hp-=damage;
+    const prose=evasion?"dodges the blow":type==="block"?"catches the blow with a shield":
       "parries with the greatsword";
-    return {type,...meta,text:d.id==="player"?
-      "You "+prose+" as "+a.name+" attacks.":
-      d.name+" "+(evasion?"dodges":"blocks"===type?"blocks":"parries")+
-        " your "+a.attackAbility.name+"."};
+    const impact=damage?" The impact deals "+damage+" damage.":" No damage gets through.";
+    return {type,...meta,damage,hpAfter:d.hp,text:d.id==="player"?
+      "You "+prose+" as "+a.name+" attacks."+impact:
+      d.name+" "+(evasion?"dodges":type==="block"?"blocks":"parries")+
+        " your "+a.attackAbility.name+"."+impact};
   }
   if(tripleSix(attackDice) && attackTotal-defenseTotal>=COMBAT_BALANCE.criticalFinisherMargin) {
     d.hp=0;
@@ -212,9 +236,7 @@ function resolveTurn(a,d,turn,random) {
         a.name+" "+finisherText[a.loadout].enemy+
           " The pit wardens carry you to safety.")};
   }
-  const raw=COMBAT_BALANCE.baseDamage+a.str*COMBAT_BALANCE.damagePerStrength+
-    a.skill*COMBAT_BALANCE.damagePerSkill+a.attackEnchant;
-  const baseDamage=Math.max(1,Math.round(raw*a.attackAbility.damageMultiplier));
+  const baseDamage=basePhysicalDamage(a);
   // Armour mitigates a LANDED physical hit; the 6–6–6 finisher remains an
   // exceptional opposed-roll event, not arbitrarily rewritten as N damage.
   // Slot enchantments are small flat bonuses, not extra dice or guaranteed
