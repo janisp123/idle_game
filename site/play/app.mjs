@@ -6,7 +6,7 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout
-} from "./engine.mjs?v=20261122-combat-scenes1";
+} from "./engine.mjs?v=20261122-compact1";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-combat-scenes1";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-combat-scenes1";
@@ -122,7 +122,8 @@ for (const { id, name } of ATTRIBUTES) {
   const row = document.createElement("div");
   row.className = "character-attribute-row";
   const label = document.createElement("span");
-  label.textContent = id + " · " + name;
+  label.textContent = id;
+  label.title = name;
   const value = document.createElement("strong");
   value.textContent = "10";
   row.append(label, value);
@@ -278,7 +279,7 @@ const durationUnitMs = unit => unit === "days" ? DAY_MS :
   unit === "hours" ? HOUR_MS : MINUTE_MS;
 function renderWagons() {
   const wagons = state.wagons ?? [];
-  ui.wagonQueue.hidden = wagons.length === 0;
+  ui.wagonQueue.hidden = wagons.length < 2;
   const signature = JSON.stringify([wagons, state.transition?.targetActivity, state.activity]);
   if (signature === lastWagonSignature) {
     updateWagonSkillLabels();
@@ -466,11 +467,10 @@ ui.queueConfirm.addEventListener("click", () => {
 function renderMaster() {
   const offer = skillMasterOffer(state);
   const count = offer.ready.length;
-  ui.masterStatus.textContent = count
-    ? number(count) + " skill" + (count === 1 ? " is" : "s are") + " ready to advance."
-    : offer.blocked.length
-      ? "The Master awaits proof of your work. Keep gathering."
-      : "Your skills are still gathering experience.";
+  ui.masterStatus.hidden = true; // No repeated readiness instructions on the small screen.
+  ui.visitMaster.disabled = count === 0;
+  ui.visitMaster.title = count === 0 ? "No skills ready to level up" : "";
+  if (!count) ui.masterAudience.hidden = true;
   ui.visitMaster.textContent = count ? "Seek the Master · " + number(count) + " ready" : "Seek the Master";
   ui.visitMaster.setAttribute("aria-expanded", String(!ui.masterAudience.hidden));
   if (ui.masterAudience.hidden) return;
@@ -507,6 +507,7 @@ function renderMaster() {
 }
 
 ui.visitMaster.addEventListener("click", () => {
+  if (ui.visitMaster.disabled) return;
   ui.masterAudience.hidden = !ui.masterAudience.hidden;
   render();
 });

@@ -716,3 +716,15 @@ footer p{color:#aa9680}
    owns every combat sentence and numeric damage/roll. */
 #activityDescription[hidden] {display:none !important}
 .illustration img {transition:opacity .15s ease-out}
+
+/* Mobile-first clean surface: hidden controls must not reserve visible space. */
+#masterStatus[hidden], #wagonQueue[hidden] {display:none !important}
+.master-visit:disabled {
+  opacity:.38;filter:grayscale(.55);cursor:not-allowed;
+  box-shadow:none;border-color:#574639;
+}
+.master-visit:disabled:hover {background:linear-gradient(150deg,#623a23,#291b13);border-color:#574639}
+@media(max-width:520px) {
+  .character-attribute-row {padding:4px 6px}
+  .scene-bottom {padding-block:9px}
+}

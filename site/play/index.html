@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261122-combat-scenes1">
-  <script type="module" src="./app.mjs?v=20261122-combat-scenes1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261122-compact1">
+  <script type="module" src="./app.mjs?v=20261122-compact1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -26,7 +26,6 @@
       <div>
         <p class="eyebrow">✣ THE FIRST EMBER · THE LONG VIGIL</p>
         <h1>THE <em>LONG VIGIL</em></h1>
-        <p>Your skills and attributes grow through the activities you choose.</p>
       </div>
       <div class="status-pill" id="saveStatus" role="status">Local save</div>
     </div>
@@ -39,7 +38,6 @@
             <div class="portrait" aria-hidden="true"><span class="portrait-emblem">✥</span></div>
             <div>
               <h2 id="character-heading">Wanderer</h2>
-              <p class="attribute">Your name, your path.</p>
             </div>
           </div>
           <div class="player-name-edit">
@@ -49,14 +47,12 @@
               <button id="saveName" type="button" class="small-button">Save</button>
             </div>
           </div>
-          <p class="hint">No overall character level. Five attributes grow through time spent working.</p>
           <div id="characterAttributes" class="character-attributes" aria-label="Character attributes"></div>
           <div class="combat-loadout-control">
             <label for="combatLoadout">Combat style · Two equipped skills</label>
             <select id="combatLoadout" aria-label="Choose combat equipment and skills"></select>
             <p class="hint" id="combatSkillsText">One attack skill and one defense skill.</p>
           </div>
-          <p class="hint">STR Strength · DEX Dexterity · END Endurance · INT Intelligence · WIL Willpower. Attribute growth is uncapped; each new point takes longer.</p>
         </section>
 
         <section class="panel skill-focus" aria-labelledby="skill-heading">
@@ -65,13 +61,11 @@
           <div class="skill-meta"><span id="skillTitle">Choose an activity</span><strong id="skillLevel">—</strong></div>
           <div class="meter skill-meter" aria-label="XP toward next skill level"><span id="skillFill"></span></div>
           <p class="hint" id="skillXp">Each activity has independent XP.</p>
-          <p class="hint">XP stops at 100%. The Master alone can teach the next level.</p>
         </section>
 
         <section class="panel skill-master" aria-labelledby="masterHeading">
           <p class="section-index">THE PRICE OF MASTERY</p>
           <h2 id="masterHeading" class="engraved-title">THE SKILL MASTER</h2>
-          <p class="master-voice">“Experience is only the beginning. Your spoils shall be my due. Are you ready to surrender them for knowledge?”</p>
           <p class="hint" id="masterStatus">No skills are ready for the Master yet.</p>
           <button id="visitMaster" class="activity-start master-visit" type="button" aria-controls="masterAudience" aria-expanded="false">Seek the Master</button>
           <div id="masterAudience" class="master-audience" hidden>
@@ -119,7 +113,6 @@
               <button type="button" id="queueCancel" class="activity-start">Cancel</button>
             </div>
           </div>
-          <p class="hint">Use ▶ to start now, ↻ to schedule a duration, or ↑ to schedule until ready for a level-up. The final hourglass works forever. Choose ↑ Until LvL Up! to stop when XP and required resources are ready for the Skill Master; training is never automatic. Minutes are available for alpha testing.</p>
         </section>
 
 
@@ -176,10 +169,6 @@
         </section>
       </aside>
     </div>
-    <footer>
-      <p><strong>Early prototype.</strong> Activities repeat automatically; resources and attributes grow through productive time. Each skill's XP stops at one level's threshold. Visit the Skill Master to surrender that skill's XP and all remaining spoils, in return for one level. There is no game currency. Smelting, alchemy, carpentry, masonry and cooking consume available raw materials. Combat uses automatic alternating turns with one attack skill and one defense skill per fighter. Original action and outcome paintings change with combat events. The Chronicle alone holds narration, rolls and damage. Clan combat and additional art variants are still in development.</p>
-      <p>All progress is stored in this browser only. Clearing site data or switching devices will lose this character. No account or server save yet.</p>
-    </footer>
   </main>
 </body>
 </html>

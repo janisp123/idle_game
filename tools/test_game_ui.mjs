@@ -27,6 +27,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   const queueCss = readFileSync(new URL("../site/play/iron-ui.css", import.meta.url), "utf8");
   assert.match(html, /id="characterAttributes"/, "five visible stats belong to the character panel");
   assert.match(html, /id="combatPanel"/, "only combat receives a dedicated event panel");
+  for (const oldCopy of ["Early prototype.", "Use ▶ to start now", "Attribute growth is uncapped",
+    "STR Strength · DEX Dexterity", "No overall character level"]) {
+    assert.ok(!html.includes(oldCopy), "remove redundant mobile tutorial text: " + oldCopy);
+  }
   assert.match(html, /id="combatDice"/, "real dice results have a dedicated UI");
   assert.match(html, /id="combatLoadout"/, "a player can equip one of the two combat styles");
   assert.match(html, /id="combatSkillsText"/, "the two equipped skills are visible");
@@ -42,7 +46,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261122-combat-scenes1/,
+  assert.match(html, /app\.mjs\?v=20261122-compact1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -67,7 +71,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261122-combat-scenes1/,
+  assert.match(html, /iron-ui\.css\?v=20261122-compact1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -191,11 +195,14 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(alchemy.children[0].children[1].textContent.includes("Potions (uses Herbs)"));
     assert.ok(cooking.children[0].children[1].textContent.includes("Meals (uses Fish)"));
     assert.equal(elements.get("character-heading").textContent, "Marauder");
+    assert.equal(elements.get("visitMaster").disabled, true,
+      "Skill Master stays visibly dim until an actual skill can advance");
+    assert.equal(elements.get("masterStatus").hidden, true,
+      "no readiness tutorial appears above disabled Skill Master");
     const statRows = elements.get("characterAttributes").children;
     assert.equal(statRows.length, 5, "all five attributes render on the character");
     assert.deepEqual(statRows.map(row => row.children[0].textContent),
-      ["STR · Strength", "DEX · Dexterity", "END · Endurance",
-        "INT · Intelligence", "WIL · Willpower"]);
+      ["STR", "DEX", "END", "INT", "WIL"]);
     assert.deepEqual(statRows.map(row => row.children[1].textContent),
       ["10", "10", "10", "10", "10"], "old save starts at baseline stats");
     assert.ok(buttons.every(b => b.children[0].children[3].className === "activity-stat-gains"),
@@ -240,7 +247,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(state.activity, null, "first Start must not instantly work");
     assert.equal(state.transition.targetActivity, "mining");
     assert.deepEqual(state.wagons, [{ activity: "mining", plannedMs: null }]);
-    assert.equal(elements.get("wagonQueue").hidden, false);
+    assert.equal(elements.get("wagonQueue").hidden, true,
+      "a single Forever activity should not waste screen space with a route");
     assert.equal(elements.get("wagonList").children.length, 1);
     let miningQueueLabel = elements.get("wagonList").children[0].children[0];
     assert.equal(miningQueueLabel.textContent, "Mining LvL 1,00",
@@ -301,6 +309,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       "rarer ore must remain locked until the Master teaches the new level");
     const visitMaster = elements.get("visitMaster");
     assert.match(visitMaster.textContent, /1 ready/);
+    assert.equal(visitMaster.disabled, false, "a ready skill unlocks the Master");
     visitMaster.fire("click");
     assert.equal(elements.get("masterAudience").hidden, false);
     assert.equal(visitMaster.getAttribute("aria-expanded"), "true");
@@ -324,6 +333,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(state.items.stone, 0, "Master takes every stone");
     assert.equal(state.items.hide, 8, "hunting resources stay untouched");
     assert.equal(elements.get("masterAudience").hidden, true);
+    assert.equal(visitMaster.disabled, true, "Master dims again after advancement");
     assert.match(mining.children[0].children[1].textContent, /Copper ore/,
       "the Master's lesson activates new mineral types");
     const rows = elements.get("resourceList").children.filter(row => row.className === "item");
