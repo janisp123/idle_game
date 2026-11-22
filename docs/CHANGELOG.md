@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-22 — Four-tier armour, weights and meaningful combat penalties (chat, PR #111)
+
+- Merged [PR #111](https://github.com/janisp123/idle_game/pull/111) into main at `00f98855b6b21dad9992c50d3784c0d0c8cdd476`. The equipment chooser now offers exactly None / Robe / Leather / Plate in each of 11 body slots, with consistent part names and individually configured weights; Greatsword 5kg, Sword 2kg, Shield 5kg.
+- Full suits weigh None 0kg, Robe 6kg, Leather 12kg, Plate 30kg. Physical hit mitigation 0/4/22/50% respectively. Body coverage sums to 100%, preventing mixed-slot stat stacking; combined weapon+armour encumbrance affects real 3d6 initiative and evasion/dodge, while preserving all existing roll fairness. The collapsed armour menu displays compact weight, movement, physical reduction, dodge rating and asterisked future magic resistance.
+- Magic resistance deliberately has **no current effect** without a magic attack system (Robe 45%, Leather 12%, Plate/None 0% proposed targets). Activity switching/travel timing unchanged under pending GAME-012. No extra combat RNG, resource cost, crafting, reset, currency or level changes.
+- Migrates old V7 clothing/iron names and retains old combat-session gearless snapshots without retroactive buffs, following OFF-001. Targeted combat, engine/save and UI tests passed [site CI 45039519384](https://github.com/janisp123/idle_game/actions/runs/45039519384), [protocol 45039519353](https://github.com/janisp123/idle_game/actions/runs/45039519353). [Main Pages 45039568400](https://github.com/janisp123/idle_game/actions/runs/45039568400) deployed successfully; fresh public HTTP 200 contained the new stats panel. Android layout review pending.
+
+
 ## 2026-11-22 — Replace Chronicle with visual action results everywhere (chat, PR #109)
 
 - Merged [PR #109](https://github.com/janisp123/idle_game/pull/109) into main at `e24de4413226c252da59d2424f38ee67c59b652e`. Removed tall scrollable Chronicle and its inactive styles. Replaced it with one narrow, responsive result strip below activity scene.
