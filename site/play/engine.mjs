@@ -9,7 +9,7 @@ export {
 } from "./attributes.mjs?v=20261122-mastery1";
 import {
   validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS
-} from "./combat.mjs?v=20261122-dice-duels1";
+} from "./combat.mjs?v=20261122-glory1";
 import {
   GLORY_SCROLL_ID, GLORY_RULES, blankEnchantments, normalizeEnchantments,
   enchantBonus, enchantSlot, gloryEligibilityWindow, attachGloryTracker,
