@@ -1,5 +1,15 @@
 # Current working checkpoint
 
+## Latest verified — four-tier armour counter balance & encumbrance (2026-11-22, PR #111)
+
+- **Main:** `00f98855b6b21dad9992c50d3784c0d0c8cdd476` after [PR #111](https://github.com/janisp123/idle_game/pull/111). No competing open PR during merge.
+- **Validation/deploy:** Final PR head `cfda8c7b111e6e05f27a8de966cbd61b280fd781` passed [site CI 45039519384](https://github.com/janisp123/idle_game/actions/runs/45039519384) and [protocol 45039519353](https://github.com/janisp123/idle_game/actions/runs/45039519353). Main [Pages deployment 45039568400](https://github.com/janisp123/idle_game/actions/runs/45039568400) succeeded. Fresh public `/play/?verify=armor-rps-20261122` returned HTTP 200 with `gearStats` and existing `armourChoice` in the game HTML. Android visual layout remains owner QA.
+- **Shipped:** exactly four choices None / Robe / Leather / Plate for each of 11 armour slots. Family-specific consistent names and per-piece kg, plus weapon kg (5kg Greatsword, 2kg Sword and 5kg Shield). Full armour suits: None 0kg, Robe 6kg, Leather 12kg, Plate 30kg. Combat physical-hit reduction 0/4/22/50%, defender evasion 3/0/2/−3, armour-adjusted dodge margin, and total carried-weight penalty to initiative. Combat mobility is calculated/displayed; **actual activity travel timing unchanged pending GAME-012**. Magic resistance 0/45/12/0% is **future-only** until magic attack types exist; don't call RPS complete yet.
+- **Safe migration:** Old V7 hood, cloth, tunic, wraps, trousers, worn choices map to Robe; old iron maps to Plate only when level-eligible. Level gates: Robe/None Lv1, Leather Fighting Lv5, Plate Fighting Lv12. New gear effective on the next frozen Fighting session; old offline intervals settle under previous snapshot, and pre-gear saved sessions keep original no-gear math on both sides. No saves, items, XP, RNG rolls, queue, or gain penalties changed.
+- **Sources:** `site/play/armour.mjs`, `combat.mjs`, `engine.mjs`, `app.mjs`, `index.html`, `iron-ui.css`, [mechanics/ARMOUR.md](mechanics/ARMOUR.md); targeted engine/combat/mobile UI tests.
+- **Next:** Owner reviews the selector and combat trade-offs in [Play Now](https://janisp123.github.io/idle_game/play/). Magic combat, balancing NPC loadouts, actual travel speed and PVP need separately authorized systems, tests and design; GAME-012 remains BLOCKED.
+
+
 ## Latest verified — Chronicle replaced by compact truthful results, PR #109 (2026-11-22)
 
 - **Main:** `e24de4413226c252da59d2424f38ee67c59b652e` after [PR #109](https://github.com/janisp123/idle_game/pull/109), preserving earlier 11-slot armour and dice-combat feature releases. No other open PR at the final merge.
