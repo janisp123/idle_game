@@ -1,6 +1,6 @@
 # Combat formulas — PLAYABLE two-skill V2 alpha
 
-**Live gameplay and tuning:** [combat.mjs](../../site/play/combat.mjs) → `COMBAT_BALANCE`, `OPPONENTS`, `COMBAT_ART`; [combat-skills.mjs](../../site/play/combat-skills.mjs) → `COMBAT_SKILLS` and `COMBAT_LOADOUTS`. [engine.mjs](../../site/play/engine.mjs) handles save V7, frozen stats, and switching a combat style. [app.mjs](../../site/play/app.mjs) displays the chosen skill pair and actual rolls.
+**Live gameplay and tuning:** [combat.mjs](../../site/play/combat.mjs) → `COMBAT_BALANCE`, `OPPONENTS`, `COMBAT_ART`; [combat-skills.mjs](../../site/play/combat-skills.mjs) → `COMBAT_SKILLS` and `COMBAT_LOADOUTS`. [engine.mjs](../../site/play/engine.mjs) handles save V7, frozen stats, and switching a combat style. [app.mjs](../../site/play/app.mjs) shows the matched cinematic scene; **the Chronicle alone** contains event narration, attack/defense rolls and damage figures, with no image attachments or duplicate story block.
 
 ## Two skills per fighter (first two presets)
 
@@ -74,7 +74,7 @@ This produces the owner's desired trade-off: **huge but slow swings versus quick
 - Changing combat style during a duel settles elapsed productive time first, then starts a **fresh duel** with the new selected skill pair (no XP/resource reset). Away time never silently upgrades effective skills or attributes (OFF-001).
 - Long offline stretches update the Fighting observation clock in bounded work and reconstruct **only the currently observable bout** from its seed. There is **no fabricated historical kill report**.
 - Defeat ends the current illustrated/narrated bout; it does not delete XP, items, stats, account, gear or character. Full resurrection downtime and equipment systems are NOT implemented.
-- The scene illustration is still an **arena background**. `COMBAT_ART` maps only `engage` to an accurate currently available image. **No event-specific hit, block, parry, gore or finisher paintings** are yet in the repository, and none may be falsely substituted.
+- **Original event paintings are implemented for the two active loadouts:** 12 960×540 WebP files in `site/play/assets/combat/`. The pure `site/play/combat-art.mjs` registry (`COMBAT_ART`, `combatArtworkForEvent`) picks scenes by **real event type, actor, attacker weapon, defender's trained guard ability, and final player victory/defeat**. Four distinct outcome images exist: Greatsword victory/defeat and Sword & Shield victory/defeat. For an unillustrated defense/ability, it returns an honest neutral arena tableau (`exact:false`), never a picture showing the wrong skill. Some defeat/miss crops from original concept art are lower-detail and can be improved individually later.
 
 ## Change and expansion map
 
@@ -84,4 +84,4 @@ This produces the owner's desired trade-off: **huge but slow swings versus quick
 - Add new skill: define it in `COMBAT_SKILLS` with a role and corresponding attributes, then add or modify `COMBAT_LOADOUTS`. For a new animation event type, update event parsing, UI and original art registry.
 - Tests: [test_combat.mjs](../../tools/test_combat.mjs) for independent rolls, charge, shield/parry/fallback probabilities, rare finishers, V6→V7 migration and multi-decade offline safety; [test_game_ui.mjs](../../tools/test_game_ui.mjs) for choice, screen, persistence and no duplicate retroactive gains.
 
-**Not yet implemented:** individual combat ability XP/leveling, skill cooldowns beyond wind-up, physical equipment inventory, raid and clan actions, ally rescues/revives, permanent wounds and exact painting per blow. Those require subsequent owner-approved mechanics; the alpha values are intentionally simple and editable.
+**Not yet implemented:** individual combat ability XP/leveling, skill cooldowns beyond wind-up, physical equipment inventory, raid and clan actions, ally rescues/revives, permanent wounds and an exhaustive per-outcome/per-opponent art library. Those require subsequent owner-approved mechanics; the alpha values are intentionally simple and editable.
