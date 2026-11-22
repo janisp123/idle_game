@@ -1,5 +1,13 @@
 # Current working checkpoint
 
+## Latest verified — 24-hour Alpha idle simulation is a button (2026-11-22, PR #123)
+
+- **Owner correction:** [PR #123](https://github.com/janisp123/idle_game/pull/123) merged on main at `70d760706e27016198b32b375c3edd1f22f50713`. Changed **only Test 24 hours idle** from a switch into a normal, compact `<button type="button">` in the already-collapsed ALPHA TOOLS panel. Every click advances virtual time by exactly 24 hours through the same real `enterGame` engine settlement. No checked state, no auto-switch-off, and no change to game balance/save state/timing math. Confirmed Reset and persistent ×10 controls remain switches.
+- **Verification:** Final head `215be668e23272de6d8c77fa56daaa217359d50c` passed [website CI 45059022718](https://github.com/janisp123/idle_game/actions/runs/45059022718) and [protocol CI 45059022707](https://github.com/janisp123/idle_game/actions/runs/45059022707); [main Pages 45059080203](https://github.com/janisp123/idle_game/actions/runs/45059080203) deployed successfully. Fresh public raw HTML at `/play/?verify=alpha-day-button1` returned HTTP 200, included the new `app.mjs?v=20261122-alpha-day-button1` and `iron-ui.css?v=20261122-alpha-day-button1`, included the correct `<button id="alphaDay">` and both retained switches, and had no old day-toggle checkbox. Actual on-device visual QA is still Owner's.
+- **Regression coverage:** Browser smoke explicitly checks the button is not an input and pressing it twice advances two separate exact 24-hour intervals; Reset cancellation/confirmation and ×10 off/on are unchanged. [Mechanics](mechanics/ALPHA_TOOLS.md) and [decision ALPHA-TOOLS-002](DECISIONS.md) updated on the same feature PR.
+- **Next:** Owner can refresh [Play Now](https://janisp123.github.io/idle_game/play/) and click the 24h button repeatedly to inspect offline progression. The action is permanent, not a preview.
+
+
 ## Latest verified — Alpha Tools testing switches (2026-11-22, PR #121)
 
 - **Live main:** `99d1f05646eb9b4c51c297e3e63ffb0399808989` after [PR #121](https://github.com/janisp123/idle_game/pull/121); reviewed final changed files/open PRs and passed merge gates.
