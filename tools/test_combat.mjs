@@ -99,7 +99,7 @@ test("greatsword heavy damage exceeds sword thrust when both connect", () => {
 });
 
 test("6-6-6 executes only when a clean hit meets the vulnerability threshold", () => {
-  const enemy = {...great,name:"Weak Rival",end:0,str:0,dex:0,skill:0,defenseSkill:null};
+  const enemy = {...great,loadout:"sword_shield",name:"Weak Rival",end:0,str:0,dex:0,skill:0,defenseSkill:null};
   const player = {...shield,str:12,name:"Player"};
   let i=0;
   const rolls=[0,0.99, 0.999, 0,0.99,0.999,0.999,0.999];
