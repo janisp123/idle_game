@@ -1,6 +1,14 @@
 # Changelog — verified completed work
 
 
+## 2026-11-22 — 24-hour idle test changed from switch to button (chat, PR #123)
+
+- Merged [PR #123](https://github.com/janisp123/idle_game/pull/123) at `70d760706e27016198b32b375c3edd1f22f50713`. **Test 24 hours idle** is now a proper button in collapsed Alpha Tools, not a checkbox/toggle. Each click simulates one exact 24-hour offline interval through unchanged saved-clock and engine logic; subsequent clicks add another full day. Reset stays a confirmed one-shot switch and ×10 speed stays a persistent on/off switch.
+- Existing V7 saves, skill caps, Master confirmation, resources, progress, UI compactness, and physical combat formulas are unchanged. Updated browser smoke tests to explicitly reject the old checkbox and verify consecutive button clicks, plus refreshed app/style cache keys.
+- Final PR head `215be668e23272de6d8c77fa56daaa217359d50c` passed [website CI 45059022718](https://github.com/janisp123/idle_game/actions/runs/45059022718) and [protocol 45059022707](https://github.com/janisp123/idle_game/actions/runs/45059022707). Main [Pages 45059080203](https://github.com/janisp123/idle_game/actions/runs/45059080203) deployed successfully. Fresh HTTP 200 public raw HTML confirmed both new cache versions and a real `<button id="alphaDay">` alongside the retained reset/speed switches, without the old checkbox. On-device visual check remains Owner's.
+
+
+
 ## 2026-11-22 — Three compact Alpha Tools switches (chat, PR #121)
 
 - Merged [PR #121](https://github.com/janisp123/idle_game/pull/121) to `main` at `99d1f05646eb9b4c51c297e3e63ffb0399808989`. Added a **collapsed ALPHA TOOLS panel** below resources with 3 native on/off switches: **Reset all progress** (explicit confirmation, fresh local character; skills start at Lv1 and stats at 10), **Test 24 hours idle** (one actual engine `enterGame` settlement for one logical day), **Activity speed ×10** (persistent and reversible toggle for productive activity, movement, preparation and Fighting, including time while browser is closed).
