@@ -1,5 +1,14 @@
 # Current working checkpoint
 
+## Latest verified — Chronicle replaced by compact truthful results, PR #109 (2026-11-22)
+
+- **Main:** `e24de4413226c252da59d2424f38ee67c59b652e` after [PR #109](https://github.com/janisp123/idle_game/pull/109), preserving earlier 11-slot armour and dice-combat feature releases. No other open PR at the final merge.
+- **Validation:** Final PR head `b524551e43a853a770897acd1a3bd5c25c7a569e` passed [Idle Game website CI 45035957327](https://github.com/janisp123/idle_game/actions/runs/45035957327) and [Project Protocol Preflight 45035957253](https://github.com/janisp123/idle_game/actions/runs/45035957253). Main [GitHub Pages 45036036618](https://github.com/janisp123/idle_game/actions/runs/45036036618) successfully deployed. Fresh public `/play/?verify=compact-results1` HTTP 200 readback confirmed `resultPanel`, `workReadout`, both `playerResult` and `enemyResult`, with NO legacy `logList`. Android visual assessment is still for Owner.
+- **Implemented:** Removed large Chronicle everywhere. Combat now shows only latest real action result (red `-HP` on the losing side, DODGED/BLOCKED/PARRIED/MISSED on correct side, terse victory/defeat), never before dice finish. Work shows real green resource/XP deltas, red consumed ingredients, and no imaginary failure results. Very compact notification space instead of scrolling message history. Displayed previous resolved combat event persists while new dice roll.
+- **Truthfulness:** No actual healing skills or failed-mining mechanics were introduced. Genuine future `heals` event map is presentation-compatible, but never invented. No RNG, XP, loot, save, schedule or offline settlement rules changed; offline reports show genuine batch totals. Implementation and tests: `site/play/result-readout.mjs`, `site/play/app.mjs`, `site/play/index.html`, `site/play/iron-ui.css`, `tools/test_game_ui.mjs`, [mechanics/RESULTS.md](mechanics/RESULTS.md).
+- **Next:** Owner phone review of the compact results strip on [Play Now](https://janisp123.github.io/idle_game/play/). Future real failures/healing or armour combat modifiers require separate decisions; GAME-012 remains BLOCKED.
+
+
 ## Latest verified — fixed, level-gated armour wardrobe (2026-11-22, PR #107)
 
 - **Main:** `e24b20b5f43ae41ff8c3fe99d4bc6bcfc2f1312f` after [PR #107](https://github.com/janisp123/idle_game/pull/107). No competing open PR at final merge.

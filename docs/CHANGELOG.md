@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-22 — Replace Chronicle with visual action results everywhere (chat, PR #109)
+
+- Merged [PR #109](https://github.com/janisp123/idle_game/pull/109) into main at `e24de4413226c252da59d2424f38ee67c59b652e`. Removed tall scrollable Chronicle and its inactive styles. Replaced it with one narrow, responsive result strip below activity scene.
+- Fighting: player on left, enemy on right; real red `-N HP` on the side damaged; DODGED/BLOCKED/PARRIED/MISSED on relevant side, status words for finish/outcome. Precomputed result withheld through animated 3d6 attack and defense; previous resolved result remains. No fake finisher damage amount or healing.
+- Other activities: green `+N` resources / XP, red real crafting inputs consumed, based on real live/offline settlement reports. Neutral `NO NEW GAINS` instead of pretending failed mining exists. The UI does not store result logs or change XP/loot, timing, inventory or combat/save formulas.
+- Passed final-head [website CI 45035957327](https://github.com/janisp123/idle_game/actions/runs/45035957327) and [protocol 45035957253](https://github.com/janisp123/idle_game/actions/runs/45035957253). Main [Pages 45036036618](https://github.com/janisp123/idle_game/actions/runs/45036036618) deployed; new HTML confirmed at public `/play/?verify=compact-results1` with HTTP 200 and no `logList`. Android visual review still pending.
+
+
 ## 2026-11-22 — Fixed 11-slot armour wardrobe (chat, PR #107)
 
 - Merged [PR #107](https://github.com/janisp123/idle_game/pull/107) into main at `e24b20b5f43ae41ff8c3fe99d4bc6bcfc2f1312f`. A collapsible bronze original equipment board beneath the character's weapon-style control has eleven independently selectable slots (head, chest, leggings, two shoulders, two armguards, two gloves, two boots), using a single dropdown for the selected slot.
