@@ -3,7 +3,7 @@
  * defense dice animation, then one revealed move. No RNG or saved data here.
  * The real combat engine remains the authority for opponents, roles and time.
  */
-import { COMBAT_BALANCE, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=20261122-dice-duels1";
+import { COMBAT_BALANCE, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=20261122-guard-impact1";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const step = (icon, label) => ({ icon, label });

@@ -6,11 +6,13 @@
 export const COMBAT_SKILLS = Object.freeze({
   heavy_swing: Object.freeze({
     id: "heavy_swing", name: "Heavy Swing", role: "attack",
-    windupMs: 1_800, attackBonus: 3, damageMultiplier: 1.9
+    windupMs: 1_800, attackBonus: 3, damageMultiplier: 1.9,
+    blockDamagePct: 25, parryDamagePct: 35
   }),
   thrust: Object.freeze({
     id: "thrust", name: "Thrust", role: "attack",
-    windupMs: 0, attackBonus: 2, damageMultiplier: 1
+    windupMs: 0, attackBonus: 2, damageMultiplier: 1,
+    blockDamagePct: 10, parryDamagePct: 15
   }),
   blade_guard: Object.freeze({
     id: "blade_guard", name: "Blade Guard", role: "defense",

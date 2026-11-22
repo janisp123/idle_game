@@ -14,7 +14,15 @@ export function combatReadoutForEvent(event) {
   const sides = { player: [], enemy: [] };
   if (!event || typeof event !== "object") return sides;
 
-  if (safePositive(event.damage) && (event.target === "player" || event.target === "enemy")) {
+  // A block/parry is still a successful guard even when impact transmits
+  // damage: show BOTH the named defense and the real HP loss on that side.
+  if (["block","parry"].includes(event.type) &&
+      (event.target === "player" || event.target === "enemy")) {
+    sides[event.target].push(token(event.type === "block"?"BLOCKED":"PARRIED","guard"));
+    if (safePositive(event.damage))
+      sides[event.target].push(token("-" + event.damage,"damage","HP"));
+  } else if (safePositive(event.damage) &&
+      (event.target === "player" || event.target === "enemy")) {
     sides[event.target].push(token("-" + event.damage, "damage", "HP"));
   } else if (event.type === "finisher" &&
       (event.target === "player" || event.target === "enemy")) {

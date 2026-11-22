@@ -87,8 +87,10 @@ test("trained shield guard beats blade parry, untrained stat defense is weaker",
   assert.equal(blade.defenseSkill,"blade_guard");
   assert.ok(["strike","wound","collapse"].includes(bare.type));
   assert.equal(bare.defenseSkill,null);
-  assert.equal(sh.damage,0);
-  assert.equal(blade.damage,0);
+  assert.equal(sh.damage,1,"shield stops the thrust, but one impact damage gets through");
+  assert.equal(blade.damage,2,"parried thrust transmits more impact than a shield");
+  assert.equal(sh.hpAfter,29);
+  assert.equal(blade.hpAfter,28);
   assert.ok(bare.damage>0);
   assert.deepEqual(bare.attackDice,[4,4,4]);
   assert.deepEqual(bare.defenseDice,[4,4,4]);
@@ -103,15 +105,17 @@ test("greatsword single hit is heavier than sword thrust, both actions cost a tu
   assert.equal(heavy.turn,1);
   assert.equal(heavy.attackSkill,"heavy_swing");
 });
-test("miss is a real blunder even with high stat margin; block and dodge inflict no damage",()=>{
+test("miss and dodge avoid all damage; successful guards can transmit impact",()=>{
   const miss=firstTurn(great,shield,1,1);
   assert.equal(miss.type,"miss");
   assert.equal(miss.damage,0);
   const block=firstTurn(shield,shield,4,4);
-  assert.equal(block.damage,0);
+  assert.equal(block.type,"block");
+  assert.equal(block.damage,1);
   const dodge=firstTurn(shield,{...great,defenseSkill:null},4,6);
+  assert.equal(dodge.type,"dodge");
   assert.equal(dodge.damage,0);
-  assert.ok(["dodge","parry"].includes(dodge.type));
+  assert.equal(dodge.hpAfter,30);
 });
 test("6–6–6 is a finisher only if the attacker overcomes defense",()=>{
   const fatal=simulateDuel(great,shield,withSequence(
@@ -138,6 +142,79 @@ test("a duel never creates more than three attack attempts per side",()=>{
     }
   }
 });
+test("Heavy Swing and Thrust use their own fixed chip rates, never extra block rolls",()=>{
+  assert.deepEqual([
+    COMBAT_SKILLS.heavy_swing.blockDamagePct,COMBAT_SKILLS.heavy_swing.parryDamagePct,
+    COMBAT_SKILLS.thrust.blockDamagePct,COMBAT_SKILLS.thrust.parryDamagePct
+  ],[25,35,10,15]);
+  assert.equal(COMBAT_SKILLS.shield_block.defenseBonus,5,
+    "shield's +5 defense score is not nerfed");
+  assert.equal(COMBAT_SKILLS.blade_guard.defenseBonus,2,
+    "parry's +2 defense score is unchanged");
+
+  const heavyBlocked=firstTurn(great,shield,4,5);
+  const heavyParried=firstTurn(great,great,4,5);
+  assert.equal(heavyBlocked.type,"block");
+  assert.equal(heavyParried.type,"parry");
+  assert.equal(heavyBlocked.damage,6,"24 raw Heavy Swing ×25% shield leak");
+  assert.equal(heavyParried.damage,8,"24 raw Heavy Swing ×35% parry leak");
+  assert.equal(heavyBlocked.hpAfter,24);
+  assert.equal(heavyParried.hpAfter,22);
+  const thrustBlocked=firstTurn(shield,shield,4,4);
+  const thrustParried=firstTurn(shield,great,4,4);
+  assert.equal(thrustBlocked.type,"block");
+  assert.equal(thrustParried.type,"parry");
+  assert.equal(thrustBlocked.damage,1,"12 raw Thrust ×10% shield leak");
+  assert.equal(thrustParried.damage,2,"12 raw Thrust ×15% parry leak");
+  assert.deepEqual(heavyBlocked.attackDice,[4,4,4]);
+  assert.deepEqual(heavyBlocked.defenseDice,[5,5,5]);
+  assert.deepEqual(heavyParried.attackDice,[4,4,4]);
+  assert.deepEqual(heavyParried.defenseDice,[5,5,5]);
+  assert.equal(heavyBlocked.attackTotal,15);
+  assert.equal(heavyBlocked.defenseTotal,20);
+});
+
+test("armour and flat defense enchant reduce guarded impact; defense can absorb all chip",()=>{
+  const wear=(f,tier,enchant=0)=>({...f,gear:{
+    ...armourStats(Object.fromEntries(ARMOUR_SLOTS.map(x=>[x.id,tier])),f.loadout),
+    defenseEnchant:enchant
+  }});
+  const plateShield=firstTurn(great,wear(shield,"plate"),4,5);
+  assert.equal(plateShield.type,"block");
+  assert.equal(plateShield.damage,3,
+    "full Plate halves transmitted heavy impact after the successful guard");
+  const protectedShield=firstTurn(great,wear(shield,"plate",5),4,5);
+  assert.equal(protectedShield.type,"block");
+  assert.equal(protectedShield.damage,0,
+    "defense enchant may absorb the remaining impact without inventing min-1 damage");
+  assert.equal(protectedShield.hpAfter,30);
+  const robeParry=firstTurn(great,wear(great,"robe"),4,5);
+  assert.equal(robeParry.type,"parry");
+  assert.equal(robeParry.damage,8);
+  const critical=firstTurn(great,shield,6,1);
+  assert.equal(critical.type,"finisher","special triple-six outcome remains unchanged");
+  assert.equal(critical.damage,0,"do not invent chip HP for a finisher");
+});
+
+test("new gear requires a larger defense margin for an actual zero-damage dodge",()=>{
+  const wear=(f,tier)=>({...f,gear:armourStats(
+    Object.fromEntries(ARMOUR_SLOTS.map(slot=>[slot.id,tier])),f.loadout)});
+  assert.deepEqual(["none","robe","leather","plate"].map(x=>
+    wear(great,x).gear.dodgeMargin),[6,9,8,99]);
+  const moderate=firstTurn(shield,wear(great,"robe"),3,5);
+  const exceptional=firstTurn(shield,wear(great,"robe"),3,6);
+  assert.equal(moderate.type,"parry");
+  assert.ok(moderate.damage>0);
+  assert.equal(exceptional.type,"dodge");
+  assert.equal(exceptional.damage,0);
+  // Existing, already frozen sessions retain their previous dodge thresholds.
+  const beforeUpdate={...wear(great,"robe"),gear:{
+    ...wear(great,"robe").gear,dodgeMargin:5}};
+  const oldRoll=firstTurn(shield,beforeUpdate,3,5);
+  assert.equal(oldRoll.type,"dodge",
+    "do not retroactively replace a saved duel's frozen dodge margin");
+});
+
 test("physical armor counters real hits; evasion and weight alter actual opposed rolls",()=>{
   const wear=(f,tier)=>({...f,gear:armourStats(
     Object.fromEntries(ARMOUR_SLOTS.map(slot=>[slot.id,tier])),f.loadout)});
@@ -153,9 +230,14 @@ test("physical armor counters real hits; evasion and weight alter actual opposed
   assert.ok(plate.attackTotal===leather.attackTotal);
   assert.ok(plate.defenseTotal<leather.defenseTotal,
     "full Plate lowers the defender's opposed defense/dodge score");
-  const leatherAvoid=firstTurn(shield,wear(great,"leather"),4,5);
+  const leatherGuard=firstTurn(shield,wear(great,"leather"),4,5);
+  const leatherAvoid=firstTurn(shield,wear(great,"leather"),4,6);
   const plateAvoid=firstTurn(shield,wear(great,"plate"),4,5);
-  assert.equal(leatherAvoid.type,"dodge");
+  assert.equal(leatherGuard.type,"parry",
+    "a moderate successful defense is no longer automatically a dodge");
+  assert.ok(leatherGuard.damage>0,"guard impact still applies through Leather");
+  assert.equal(leatherAvoid.type,"dodge","large defensive margin may still dodge");
+  assert.equal(leatherAvoid.damage,0);
   assert.notEqual(plateAvoid.type,"dodge",
     "Plate must nearly eliminate successful dodges");
   const equalFighters={...shield,name:"Equal"};

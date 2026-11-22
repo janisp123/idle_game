@@ -33,6 +33,22 @@ test("compact results use only real event/report values and correct combat side"
     assert.deepEqual(combatReadoutForEvent({type,actor:"enemy",target:"player",damage:0}),
       {player:[{value,tone:"guard",label:""}],enemy:[]});
   }
+  for(const [type,label] of [["block","BLOCKED"],["parry","PARRIED"]]) {
+    assert.deepEqual(combatReadoutForEvent({type,actor:"enemy",target:"player",
+      damage:6,hpAfter:24}),{
+      player:[{value:label,tone:"guard",label:""},
+        {value:"-6",tone:"damage",label:"HP"}],
+      enemy:[]},type+" chip damage must show both defense and red HP on the defender");
+    assert.deepEqual(combatReadoutForEvent({type,actor:"player",target:"enemy",
+      damage:2,hpAfter:28}),{
+      player:[],enemy:[{value:label,tone:"guard",label:""},
+        {value:"-2",tone:"damage",label:"HP"}]
+    },type+" damage goes on opponent side, not the attacker");
+  }
+  assert.deepEqual(combatReadoutForEvent({type:"dodge",actor:"enemy",
+    target:"player",damage:0}),{
+    player:[{value:"DODGED",tone:"guard",label:""}],enemy:[]},
+    "dodge remains zero damage");
   assert.deepEqual(combatReadoutForEvent({type:"miss",actor:"enemy",target:"player",damage:0}),
     {player:[],enemy:[{value:"MISSED",tone:"guard",label:""}]});
   assert.deepEqual(combatReadoutForEvent({type:"finisher",actor:"player",target:"enemy",hpAfter:0,damage:0}),
@@ -114,7 +130,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261122-glory1/,
+  assert.match(html, /app\.mjs\?v=20261122-guard-impact1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
