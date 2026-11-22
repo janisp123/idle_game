@@ -100,12 +100,6 @@ a:focus-visible, button:focus-visible { outline: 2px solid #dfbe8c; outline-offs
 .return-panel { border-color:#946547; background:linear-gradient(150deg,#493025,#201811); }
 .return-panel h2 { color:#edc9a0; }
 .return-panel p:not(.section-index) { font-size:14px; color:#e0cbb0; }
-.log-header { display:flex; align-items:center; justify-content:space-between; }
-.log-header h2 { margin-bottom:0; }
-.log-mark { color:#b2634a; font-size:30px; }
-.chronicle ul { margin:17px 0 0; padding:0; list-style:none; }
-.chronicle li { padding:9px 0 9px 19px; position:relative; border-top:1px solid rgba(167,120,86,.16); color:#d1bca2; font-size:14px; }
-.chronicle li::before { content:"✣"; position:absolute; left:0; color:#966749; font-size:11px; }
 .tester { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:15px 17px; border:1px dashed #604536; background:rgba(52,32,24,.27); }
 .tester strong { font:800 11px system-ui,sans-serif; letter-spacing:.08em; color:#c8a887; text-transform:uppercase; }
 .tester p { margin:3px 0 0; color:var(--muted); font:12px/1.55 system-ui,sans-serif; }

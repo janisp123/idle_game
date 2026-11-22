@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261122-fixed-armour1">
-  <script type="module" src="./app.mjs?v=20261122-fixed-armour1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261122-results1">
+  <script type="module" src="./app.mjs?v=20261122-results1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -184,15 +184,23 @@
           <div class="meter activity-meter" id="activityProgress" role="progressbar" aria-label="Current activity progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="actionFill"></span></div>
         </section>
 
-        <section class="panel chronicle" aria-labelledby="logHeading">
-          <div class="log-header">
-            <div>
-              <p class="section-index">V · THE CHRONICLE</p>
-              <h2 id="logHeading" class="engraved-title">THE CHRONICLE</h2>
+        <section id="resultPanel" class="result-panel" aria-label="Latest activity result">
+          <div id="combatReadout" class="result-combat" hidden aria-label="Latest resolved combat action">
+            <div class="result-side result-side-player">
+              <span class="result-side-name">YOU</span>
+              <div id="playerResult" class="result-tokens" aria-label="Your combat result"></div>
             </div>
-            <span class="log-mark" aria-hidden="true">✣</span>
+            <span class="result-versus" aria-hidden="true">✣</span>
+            <div class="result-side result-side-enemy">
+              <span class="result-side-name">ENEMY</span>
+              <div id="enemyResult" class="result-tokens" aria-label="Enemy combat result"></div>
+            </div>
           </div>
-          <ul id="logList" aria-live="polite"><li>Choose a work activity to begin your journey.</li></ul>
+          <div id="workReadout" class="result-work" aria-label="Latest completed work">
+            <span id="workResultTitle" class="result-activity-name">READY</span>
+            <div id="workResultTokens" class="result-tokens" aria-label="Resources and experience gained"></div>
+          </div>
+          <p id="resultNotice" class="result-notice" role="status" aria-live="polite"></p>
         </section>
 
 

@@ -11,6 +11,7 @@ import {
 import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-dice-duels1";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-dice-duels1";
 import { combatFlowState } from "./combat-flow.mjs?v=20261122-action-flow1";
+import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, armourOption, armourUnlocked }
   from "./armour.mjs?v=20261122-fixed-armour1";
 const $ = id => document.getElementById(id);
@@ -50,7 +51,10 @@ const ui = {
   queuePlannerHint: $("queuePlannerHint"), queueAmountLabel: $("queueAmountLabel"),
   queueAmount: $("queueAmount"), queueUnit: $("queueUnit"),
   queueConfirm: $("queueConfirm"), queueCancel: $("queueCancel"),
-  logList: $("logList"),
+  resultCombat: $("combatReadout"), resultWork: $("workReadout"),
+  playerResult: $("playerResult"), enemyResult: $("enemyResult"),
+  workResultTitle: $("workResultTitle"), workResultTokens: $("workResultTokens"),
+  resultNotice: $("resultNotice"),
   banner: $("sceneBanner"), saveStatus: $("saveStatus")
 };
 const number = value => new Intl.NumberFormat("en-GB").format(value);
@@ -128,13 +132,6 @@ function renderArmour() {
       ". Choose this armour slot");
   }
 }
-// Combat descriptions, actual rolled values and numeric damage belong ONLY
-// in the Chronicle. The image panel is a cinematic illustration + short label.
-export function combatChronicleLine(event) {
-  if (!event.attackDice) return event.text; // Initiative includes BOTH genuine rolls.
-  return event.text + " · ATK " + event.attackDice.join("–") + " = " + event.attackTotal +
-    " · DEF " + event.defenseDice.join("–") + " = " + event.defenseTotal;
-}
 const FACE_GLYPHS = Object.freeze(["⚀","⚁","⚂","⚃","⚄","⚅"]);
 // Animated previews never affect the already-resolved deterministic game dice.
 function previewFace(seed, bout, step, frame, index) {
@@ -206,8 +203,10 @@ function showCombatFlow(flow) {
     "Automatic fighting: " + flow.steps[flow.current].label);
 }
 
-const messages = [];
 let state;
+// Readouts are transient observations, never fabricated save fields or history.
+let latestWorkResult = null;
+const visibleTokenSignatures = new Map();
 let lastSavedAt = 0;
 let storageWorks = true;
 let planningActivity = null;
@@ -356,26 +355,51 @@ function writeSave() {
 }
 
 function message(text) {
-  messages.unshift(text);
-  if (messages.length > 7) messages.length = 7;
-  ui.logList.replaceChildren(...messages.map(line => {
-    const item = document.createElement("li");
-    item.textContent = line;
-    return item;
-  }));
+  // A single compact notification for actions/errors, not a scrollable history.
+  ui.resultNotice.textContent = text;
 }
 
-function lootSummary(report) {
-  if (!report || !report.activity) return "No new resources collected.";
-  if (report.activity === "fighting") return ""; // Real combat steps own the chronicle.
-  if (ACTIVITIES[report.activity].item === null)
-    return report.completed ? "Practised " + ACTIVITIES[report.activity].title.toLowerCase() + "." : "";
-  if (!report.gainedItems) return "No new resources collected.";
-  const amounts = report.items ?? { [report.item]: report.gainedItems };
-  const found = Object.entries(amounts)
-    .filter(([, amount]) => amount > 0)
-    .map(([item, amount]) => number(amount) + " " + ITEM_LABELS[item].toLowerCase());
-  return found.length ? "You gathered " + found.join(", ") + "." : "No new resources collected.";
+/** Repaint only when the actual resolved values change (no 250ms flashing). */
+function drawResultTokens(container, tokens) {
+  const signature = JSON.stringify(tokens);
+  if (visibleTokenSignatures.get(container) === signature) return;
+  visibleTokenSignatures.set(container, signature);
+  const nodes = tokens.map(result => {
+    const item = document.createElement("span");
+    item.className = "result-token";
+    item.setAttribute("data-tone", result.tone);
+    const value = document.createElement("strong");
+    value.textContent = result.value;
+    item.append(value);
+    if (result.label) {
+      const label = document.createElement("small");
+      label.textContent = result.label;
+      item.append(label);
+    }
+    return item;
+  });
+  container.replaceChildren(...nodes);
+}
+
+function renderResults(combat, revealed) {
+  ui.resultCombat.hidden = !combat;
+  ui.resultWork.hidden = Boolean(combat);
+  if (combat) {
+    // Before actual rolls resolve, retain ONLY the previous known result.
+    const actualEvent = revealed ? combat.event :
+      combat.events[Math.max(0,combat.step - 1)];
+    const result = combatReadoutForEvent(actualEvent);
+    drawResultTokens(ui.playerResult,result.player);
+    drawResultTokens(ui.enemyResult,result.enemy);
+  } else {
+    const last = latestWorkResult?.activity === state.activity &&
+      (!state.transition || state.transition.phase === "finishing")
+      ? latestWorkResult : null;
+    ui.workResultTitle.textContent = last?.title ??
+      (state.transition ? "Changing activity" : state.activity
+        ? ACTIVITIES[state.activity].title : "Ready");
+    drawResultTokens(ui.workResultTokens,last?.tokens ?? []);
+  }
 }
 
 function reportProgress(outcome) {
@@ -383,8 +407,11 @@ function reportProgress(outcome) {
   let gained = false;
   for (const report of outcome.reports ?? [outcome.report ?? outcome]) {
     if (!report?.completed) continue;
-    const summary = lootSummary(report);
-    if (summary) message(summary);
+    const result = workReadoutForReport(report, ITEM_LABELS, ACTIVITIES);
+    if (result) {
+      latestWorkResult = result;
+      ui.resultNotice.textContent = "";
+    }
     gained = true;
   }
   return gained;
@@ -818,6 +845,7 @@ function render() {
   ui.combatDiceStage.hidden = true;
   ui.combatDice.hidden = true;
   let imageEvent = null;
+  let combatRevealed = false;
   if (combat) {
     const event = combat.event;
     const rollingPhase = event.type === "initiative" || Boolean(event.attackDice);
@@ -825,6 +853,7 @@ function render() {
     const revealAt = windup + (event.type === "initiative"
       ? COMBAT_BALANCE.initiativeAnimationMs : COMBAT_BALANCE.attackAnimationMs);
     const revealed = !rollingPhase || combat.eventElapsedMs >= revealAt;
+    combatRevealed = revealed;
     const isRolling = rollingPhase && combat.eventElapsedMs >= windup && !revealed;
     const showTray = rollingPhase && combat.eventElapsedMs >= windup &&
       combat.eventElapsedMs < revealAt + 2_000;
@@ -850,13 +879,14 @@ function render() {
     ui.combatPanel.classList.toggle("finisher",revealed && event.type === "finisher");
     const key = state.combatSession.seed + ":" + combat.bout + ":" + combat.step;
     if (revealed && key !== lastCombatEventKey) {
-      message(combatChronicleLine(event));
+      ui.resultNotice.textContent = "";
       lastCombatEventKey = key;
     }
   } else {
     lastCombatEventKey = null;
     ui.combatTurns.textContent = "";
   }
+  renderResults(combat,combatRevealed);
   const sceneActivity = transition ? ACTIVITIES[transition.targetActivity] : current;
   if (!sceneActivity) {
     ui.sceneTag.textContent = "WAITING FOR ORDERS";
@@ -871,8 +901,8 @@ function render() {
     ui.sceneTag.textContent = transition ? "CHANGING PATH" : sceneActivity.zone.toUpperCase();
     ui.banner.textContent = transition ? "THE JOURNEY" : sceneActivity.title.toUpperCase();
     ui.heading.textContent = transition ? "Changing to " + sceneActivity.title : sceneActivity.title;
-    // No misleading prototype explanation or repeated combat narrative above
-    // the Chronicle. The arena art and short outcome label stand on their own.
+    // The arena picture and its short status stay; only factual color-coded
+    // results appear in the compact panel below, with no narrative history.
     ui.description.hidden = Boolean(combat);
     ui.description.textContent = combat ? "" : transition
       ? "Your character finishes their work, travels and prepares before the new task begins."
@@ -1025,7 +1055,12 @@ function start() {
   window.addEventListener("storage", event => {
     if (event.key === SAVE_KEY) {
       const newer = readSave(event.newValue);
-      if (newer) { state = newer; render(); message("Save updated from another tab."); }
+      if (newer) {
+        state = newer;
+        latestWorkResult = null; // another tab's loot cannot be asserted locally
+        render();
+        message("Save updated from another tab.");
+      }
     }
   });
   render();
