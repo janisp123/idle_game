@@ -704,26 +704,48 @@ function render() {
     ui.transitionProgress.setAttribute("aria-valuenow", String(Math.round(percent)));
     ui.transitionProgress.setAttribute("aria-label", phaseName);
   }
-  // The simulator returns one real typed event every 20 seconds. We present
-  // only that event, never invented victory/kill counts for long offline gaps.
+  // The scene stays on the last RESOLVED result while real dice roll.
+  // No early damage text, premature artwork or redundant work-cycle bar.
   const combat = current?.category === "combat" && !transition
     ? combatAtTime(state.combatSession) : null;
+  ui.activityProgress.hidden = Boolean(transition || combat);
   ui.combatPanel.hidden = !combat;
-  ui.combatDice.hidden = !combat || !combat.event.dice;
+  ui.combatDiceStage.hidden = true;
+  ui.combatDice.hidden = true;
+  let imageEvent = null;
   if (combat) {
     const event = combat.event;
+    const rollingPhase = event.type === "initiative" || Boolean(event.attackDice);
+    const windup = event.attackDice ? (COMBAT_SKILLS[event.attackSkill].windupMs ?? 0) : 0;
+    const revealAt = windup + (event.type === "initiative"
+      ? COMBAT_BALANCE.initiativeAnimationMs : COMBAT_BALANCE.attackAnimationMs);
+    const revealed = !rollingPhase || combat.eventElapsedMs >= revealAt;
+    const isRolling = rollingPhase && combat.eventElapsedMs >= windup && !revealed;
+    const showTray = rollingPhase && combat.eventElapsedMs >= windup &&
+      combat.eventElapsedMs < revealAt + 2_000;
+    ui.combatDiceStage.hidden = !showTray;
+    if (showTray) presentDice(combat,event,isRolling,revealed);
+    imageEvent = revealed ? event : combat.events[Math.max(0,combat.step - 1)];
+    const finishedTurns = revealed && event.turn ? event.turn :
+      (combat.events[Math.max(0,combat.step - 1)]?.turn ?? 0);
+    ui.combatTurns.textContent = Array.from({length:COMBAT_BALANCE.maxHalfTurns},
+      (_,i)=>i<finishedTurns?"◆":"◇").join(" ");
+    ui.combatEventTitle.textContent = "DUEL "+number(combat.bout)+" · "+
+      (!revealed ? (combat.eventElapsedMs < windup ? "PREPARING" : "DICE ROLLING") :
+        event.type === "initiative" ?
+          (event.actor === "player" ? "YOU ATTACK FIRST" : "ENEMY ATTACKS FIRST") :
+          event.type.toUpperCase());
+    ui.combatDice.hidden = !revealed || event.type !== "finisher";
+    ui.combatDice.textContent = event.type === "finisher" && revealed ? "6 · 6 · 6" : "";
+    ui.combatPanel.classList.toggle("finisher",revealed && event.type === "finisher");
     const key = state.combatSession.seed + ":" + combat.bout + ":" + combat.step;
-    ui.combatEventTitle.textContent = "DUEL " + number(combat.bout) +
-      " · " + event.type.toUpperCase();
-    ui.combatDice.hidden = !event.dice;
-    ui.combatDice.textContent = event.dice ? event.dice.join(" · ") : "";
-    ui.combatPanel.classList.toggle("finisher", event.type === "finisher");
-    if (key !== lastCombatEventKey) {
+    if (revealed && key !== lastCombatEventKey) {
       message(combatChronicleLine(event));
       lastCombatEventKey = key;
     }
   } else {
     lastCombatEventKey = null;
+    ui.combatTurns.textContent = "";
   }
   const sceneActivity = transition ? ACTIVITIES[transition.targetActivity] : current;
   if (!sceneActivity) {
@@ -749,20 +771,20 @@ function render() {
     // defender shield / player outcome. Other activities retain static art.
     const sceneId = transition ? transition.targetActivity : state.activity;
     const combatArt = combat ? combatArtworkForEvent(
-      combat.event, state.combatSession.player.loadout, combat.enemyLoadout) : null;
+      imageEvent, state.combatSession.player.loadout, combat.enemyLoadout) : null;
     const sceneAsset = sceneActivity.item === null
       ? (sceneActivity.category === "training" ? "masonry" : "cooking")
       : sceneId;
     const desiredImage = sceneId === "fighting"
-      ? "./assets/combat/" + (combatArt?.asset ?? "fight-engage") + ".webp?v=20261122-combat-scenes1"
-      : "./assets/" + sceneAsset + ".webp?v=20261122-combat-scenes1";
+      ? "./assets/combat/" + (combatArt?.asset ?? "fight-engage") + ".webp?v=20261122-dice-duels1"
+      : "./assets/" + sceneAsset + ".webp?v=20261122-dice-duels1";
     if (ui.sceneImage.getAttribute("src") !== desiredImage) {
       ui.sceneImage.onerror = () => {
         ui.sceneImage.onerror = null;
         ui.sceneImage.src = sceneId === "fighting"
-          ? "./assets/combat/fight-engage.webp?v=20261122-combat-scenes1"
+          ? "./assets/combat/fight-engage.webp?v=20261122-dice-duels1"
           : "./assets/" + (isHunt ? "hunting.webp" : "mining.webp") +
-            "?v=20261122-combat-scenes1";
+            "?v=20261122-dice-duels1";
       };
       ui.sceneImage.src = desiredImage;
     }
