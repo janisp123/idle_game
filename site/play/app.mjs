@@ -749,7 +749,7 @@ function render() {
     ? combatAtTime(state.combatSession) : null;
   ui.activityProgress.hidden = Boolean(transition || current?.category === "combat");
   ui.combatPanel.hidden = !combat;
-  showCombatFlow(combat ? combatFlowState(combat,state.combatSession.elapsedMs) : null);
+  showCombatFlow(combat ? combatFlowState(combat,state.combatSession) : null);
   ui.combatDiceStage.hidden = true;
   ui.combatDice.hidden = true;
   let imageEvent = null;
