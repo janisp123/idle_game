@@ -441,9 +441,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(masterConfirmations, 1);
     assert.equal(state.skills.mining.level, 1, "declining must not sacrifice inventory");
-    assert.match(elements.get("characterAttributes").children[0].textContent,/STR/,
-      "character attributes remain visible");
-    assert.equal(state.skills.mining.level,1);
+    assert.equal(elements.get("characterAttributes").children[0].children[1].textContent,
+      "10","declining does not award any permanent stat");
     assert.equal(state.items.stone, originalStone);
     allowMasterTribute = true;
     elements.get("masterConfirm").fire("click");
@@ -451,10 +450,11 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(masterConfirmations, 2);
     assert.deepEqual(state.skills.mining, {level:2,xp:0});
     const firstStat = elements.get("characterAttributes").children.find(row=>
-      row.textContent.includes("STR"));
+      row.children[0].textContent === "STR");
     assert.ok(firstStat,"character displays STR");
-    assert.match(firstStat.textContent,/STR/);
-    assert.match(firstStat.children.at(-1).title,/\+ 1 from claimed activity levels/,
+    assert.equal(firstStat.children[1].textContent,"11",
+      "confirmed Master claim adds one permanent STR");
+    assert.match(firstStat.children[1].title,/\+ 1 from claimed activity levels/,
       "visible stat includes the actual claimed Master bonus");
     assert.equal(miningQueueLabel.textContent, "Mining LvL 2,00",
       "Master advancement updates the queue level and clears percent without rebuilding");
