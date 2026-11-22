@@ -1,5 +1,20 @@
 # Changelog — verified completed work
 
+
+## 2026-11-22 — Three compact Alpha Tools switches (chat, PR #121)
+
+- Merged [PR #121](https://github.com/janisp123/idle_game/pull/121) to `main` at `99d1f05646eb9b4c51c297e3e63ffb0399808989`. Added a **collapsed ALPHA TOOLS panel** below resources with 3 native on/off switches: **Reset all progress** (explicit confirmation, fresh local character; skills start at Lv1 and stats at 10), **Test 24 hours idle** (one actual engine `enterGame` settlement for one logical day), **Activity speed ×10** (persistent and reversible toggle for productive activity, movement, preparation and Fighting, including time while browser is closed).
+- The reset and 24h switches are *momentary*: each automatically returns OFF after its action; the speed setting remains ON until turned OFF. A separate localStorage `idle-game-alpha-clock-v1` virtual-time anchor persists rate changes and simulation jumps without freezing old saves when switching back to 1×. Reset removes only our game clock alongside resetting game progress; unrelated local storage remains untouched.
+- Preserves the V7 character save schema, real loot/RNG, skill XP one-bar cap, permanent attributes, Glory/enchantments, honest offline results and manual Skill Master; these are alpha **local-only testing shortcuts** and not intended for future authoritative multiplayer.
+- Final PR-head [website CI 45057766384](https://github.com/janisp123/idle_game/actions/runs/45057766384) passed 107 tests, [protocol 45057766393](https://github.com/janisp123/idle_game/actions/runs/45057766393) passed, and main [Pages 45057867516](https://github.com/janisp123/idle_game/actions/runs/45057867516) deployed. Fresh public HTTP 200 raw HTML confirmed `app.mjs?v=20261122-alpha-tools1`, `iron-ui.css?v=20261122-alpha-tools1` and all three live controls. Owner phone UI QA pending.
+
+## 2026-11-22 — Partial physical impact through guards and rarer dodges (chat, PR #120)
+
+- Merged [PR #120](https://github.com/janisp123/idle_game/pull/120) at `c222e6778b5030f8df14c45cdb5ab42e4e399a96`. No second chance roll; retain original 3d6 defender success, Shield Block +5 and Blade Guard +2. Successful trained guards may transmit weapon-specific physical impact: **Heavy Swing 25% block / 35% parry**, **Thrust 10% block / 15% parry**; then armor/enchantment defense mitigates it, potentially completely. Real dodge/miss still take zero, without extra dice or changed 6–6–6 special event.
+- Raised **new** equipment dodge margin targets: None 6, Mage Robe 9, Leather 8, Plate 99. Existing frozen fighter snapshots retain historical margins. The compact left/right combat result now shows **BLOCKED / PARRIED** and real red `-HP` side-by-side after the dice reveal. No change to loot, enchanting odds, XP, game-save schema or offline eligibility.
+- Final-head [website CI 45056704789](https://github.com/janisp123/idle_game/actions/runs/45056704789) and [protocol 45056704797](https://github.com/janisp123/idle_game/actions/runs/45056704797) passed; [main Pages 45056821636](https://github.com/janisp123/idle_game/actions/runs/45056821636) successfully deployed. Current alpha UI also includes this combat change.
+
+
 ## 2026-11-22 — XP-eligible Fighting Glory Scrolls and risky fixed-slot enchants (chat, PR #118)
 
 - Merged [PR #118](https://github.com/janisp123/idle_game/pull/118) into main at `148e9a42c2ce2a482ee2aac8346ff993a7a1331f`. Real completed **player Fighting victories** that started before their frozen XP-earning window closes have an independent **50%** Glory Scroll chance; losses/draws and XP-ineligible bouts produce none. Older saved Fighting sessions start the reward cursor at the next fresh bout, preventing invented retroactive Glory.
