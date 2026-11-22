@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   ACTIVITIES, ITEM_KEYS, ITEM_LABELS, LOOT_TABLES, lootChances, PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions, SKILL_IDS, GAME_VERSION, SAVE_KEY, BASE_CYCLE_MS,
   ATTRIBUTES, ATTRIBUTE_IDS, ATTRIBUTE_BALANCE, ACTIVITY_STAT_WEIGHTS, attributeXP, attributeProgress, allAttributeProgress,
-  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, MINUTE_MS, HOUR_MS, DAY_MS, UNTIL_LEVEL_UP, MASTER_RESOURCE_MINIMUM, skillMasterReadiness, validQueuePlan, validPlannedDuration, queueStartActivity, queueInsertTimedActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
+  ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, SKILL_BALANCE, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, UNTIL_LEVEL_UP, MASTER_RESOURCE_MINIMUM, skillMasterReadiness, validQueuePlan, validPlannedDuration, queueStartActivity, queueInsertTimedActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
   enterGame, testOfflineDay, xpForLevel, levelFromXP, xpToNextLevel, skillSpoils, skillMasterOffer, learnFromMaster
 } from "../site/play/engine.mjs";
 
@@ -12,6 +12,31 @@ const YEAR = 365 * 24 * 60 * 60 * 1000;
 const choose = (s, a, now) => chooseActivity(s, a, now, midpoint);
 const finish = (s, now) => settle(s, now, midpoint);
 const enter = (s, now) => enterGame(s, now, midpoint);
+
+test("documented skill costs and duration choices come from shared balance tables", () => {
+  assert.deepEqual(SKILL_BALANCE, {
+    xpPerNextLevel: 40, efficiencyPerLevel: 0.02,
+    maxEfficiency: 2, batchVariation: 0.10
+  }, "preserve existing alpha balance while centralizing tuning");
+  assert.deepEqual(SCHEDULE_BALANCE,
+    { minDurationUnits: 1, maxDurationUnits: 8 });
+  for (const L of [1, 2, 10, 25, 100]) {
+    assert.equal(xpToNextLevel(L), SKILL_BALANCE.xpPerNextLevel * L);
+    const total = SKILL_BALANCE.xpPerNextLevel * (L - 1) * L / 2;
+    assert.equal(xpForLevel(L), total);
+    assert.equal(levelFromXP(total), L, "inverse tracks the same tuned formula");
+    if (L > 1) assert.equal(levelFromXP(total - 1), L - 1);
+  }
+  for (const unit of [MINUTE_MS, HOUR_MS, DAY_MS]) {
+    for (let n = SCHEDULE_BALANCE.minDurationUnits;
+      n <= SCHEDULE_BALANCE.maxDurationUnits; n++) {
+      assert.equal(validPlannedDuration(n * unit), true);
+    }
+    assert.equal(validPlannedDuration((SCHEDULE_BALANCE.maxDurationUnits + 1) * unit),
+      false, "no plan exceeds the single configured amount limit");
+  }
+  assert.equal(validPlannedDuration(30_000), false);
+});
 
 test("only individual activities have levels; character has a name but no level", () => {
   const state = newGame(0);
