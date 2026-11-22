@@ -10,6 +10,7 @@ import {
 
 import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-dice-duels1";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-dice-duels1";
+import { combatFlowState } from "./combat-flow.mjs?v=20261122-action-flow1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -28,6 +29,11 @@ const ui = {
   combatPanel: $("combatPanel"), combatEventTitle: $("combatEventTitle"),
   combatDice: $("combatDice"), combatTurns: $("combatTurns"),
   combatDiceStage: $("combatDiceStage"),
+  combatFlow: $("combatFlow"), combatFlowMeter: $("combatFlowMeter"), combatFlowFill: $("combatFlowFill"),
+  combatFlowSteps: Array.from({length:5},(_,i)=>$("combatFlowStep"+i)),
+  combatFlowIcons: Array.from({length:5},(_,i)=>$("combatFlowIcon"+i)),
+  combatFlowLabels: Array.from({length:5},(_,i)=>$("combatFlowLabel"+i)),
+  playerDiceTray: $("playerDiceTray"), enemyDiceTray: $("enemyDiceTray"),
   playerDiceLabel: $("playerDiceLabel"), enemyDiceLabel: $("enemyDiceLabel"),
   playerDiceTotal: $("playerDiceTotal"), enemyDiceTotal: $("enemyDiceTotal"),
   playerDie: [$("playerDie1"), $("playerDie2"), $("playerDie3")],
@@ -76,7 +82,9 @@ function previewFace(seed, bout, step, frame, index) {
   n ^= n >>> 13;
   return 1 + n % 6;
 }
-function presentDice(combat, event, isRolling, isRevealed) {
+// Two real, independent 3d6 checks: attacker rolls first on screen, then
+// defender. The engine already determined both rolls; these are only previews.
+function presentDice(combat, event, phase, isRevealed) {
   const initiative = event.type === "initiative";
   const left = initiative ? event.playerDice :
     event.actor === "player" ? event.attackDice : event.defenseDice;
@@ -90,19 +98,50 @@ function presentDice(combat, event, isRolling, isRevealed) {
     event.actor === "player" ? "YOU · ATTACK" : "YOU · DEFEND";
   ui.enemyDiceLabel.textContent = initiative ? "ENEMY · FIRST?" :
     event.actor === "enemy" ? "ENEMY · ATTACK" : "ENEMY · DEFEND";
+  const isPlayerAttacker = event.actor === "player";
+  const playerMode = isRevealed ? "done" : initiative ? "rolling" :
+    isPlayerAttacker ? (phase === "attack" ? "rolling" : "done") :
+      phase === "attack" ? "pending" : "rolling";
+  const enemyMode = isRevealed ? "done" : initiative ? "rolling" :
+    !isPlayerAttacker ? (phase === "attack" ? "rolling" : "done") :
+      phase === "attack" ? "pending" : "rolling";
   const frame = Math.floor(combat.eventElapsedMs / 250);
   for (let i = 0; i < 3; i++) {
-    const p = isRolling ? previewFace(state.combatSession.seed,combat.bout,combat.step,frame,i) : left[i];
-    const e = isRolling ? previewFace(state.combatSession.seed,combat.bout,combat.step,frame,i + 3) : right[i];
-    ui.playerDie[i].textContent = FACE_GLYPHS[p - 1];
-    ui.enemyDie[i].textContent = FACE_GLYPHS[e - 1];
-    ui.playerDie[i].title = String(p);
-    ui.enemyDie[i].title = String(e);
+    const playerFace = playerMode === "rolling"
+      ? previewFace(state.combatSession.seed,combat.bout,combat.step,frame,i) :
+      playerMode === "pending" ? 1 : left[i];
+    const enemyFace = enemyMode === "rolling"
+      ? previewFace(state.combatSession.seed,combat.bout,combat.step,frame,i + 3) :
+      enemyMode === "pending" ? 1 : right[i];
+    ui.playerDie[i].textContent = FACE_GLYPHS[playerFace - 1];
+    ui.enemyDie[i].textContent = FACE_GLYPHS[enemyFace - 1];
+    ui.playerDie[i].title = playerMode === "pending" ? "Waiting" : String(playerFace);
+    ui.enemyDie[i].title = enemyMode === "pending" ? "Waiting" : String(enemyFace);
   }
-  ui.playerDiceTotal.textContent = isRevealed ? String(leftScore) : "ROLLING";
-  ui.enemyDiceTotal.textContent = isRevealed ? String(rightScore) : "ROLLING";
-  ui.combatDiceStage.classList.toggle("rolling",isRolling);
+  ui.playerDiceTotal.textContent = playerMode === "done" ? String(leftScore) :
+    playerMode === "pending" ? "—" : "ROLLING";
+  ui.enemyDiceTotal.textContent = enemyMode === "done" ? String(rightScore) :
+    enemyMode === "pending" ? "—" : "ROLLING";
+  ui.playerDiceTray.classList.toggle("rolling",playerMode === "rolling");
+  ui.enemyDiceTray.classList.toggle("rolling",enemyMode === "rolling");
+  ui.playerDiceTray.classList.toggle("pending",playerMode === "pending");
+  ui.enemyDiceTray.classList.toggle("pending",enemyMode === "pending");
 }
+function showCombatFlow(flow) {
+  ui.combatFlow.hidden = !flow;
+  if (!flow) return;
+  for (let i = 0; i < flow.steps.length; i++) {
+    ui.combatFlowIcons[i].textContent = flow.steps[i].icon;
+    ui.combatFlowLabels[i].textContent = flow.steps[i].label;
+    ui.combatFlowSteps[i].setAttribute("data-state",
+      i < flow.current ? "done" : i === flow.current ? "active" : "upcoming");
+  }
+  ui.combatFlowFill.style.width = flow.percent.toFixed(2) + "%";
+  ui.combatFlowMeter.setAttribute("aria-valuenow",String(Math.round(flow.percent)));
+  ui.combatFlowMeter.setAttribute("aria-label",
+    "Automatic fighting: " + flow.steps[flow.current].label);
+}
+
 const messages = [];
 let state;
 let lastSavedAt = 0;
@@ -710,6 +749,7 @@ function render() {
     ? combatAtTime(state.combatSession) : null;
   ui.activityProgress.hidden = Boolean(transition || current?.category === "combat");
   ui.combatPanel.hidden = !combat;
+  showCombatFlow(combat ? combatFlowState(combat,state.combatSession) : null);
   ui.combatDiceStage.hidden = true;
   ui.combatDice.hidden = true;
   let imageEvent = null;
@@ -724,14 +764,19 @@ function render() {
     const showTray = rollingPhase && combat.eventElapsedMs >= windup &&
       combat.eventElapsedMs < revealAt + 2_000;
     ui.combatDiceStage.hidden = !showTray;
-    if (showTray) presentDice(combat,event,isRolling,revealed);
+    const halfway = windup + COMBAT_BALANCE.attackAnimationMs / 2;
+    const dicePhase = event.type === "initiative" ? "initiative" :
+      combat.eventElapsedMs < halfway ? "attack" : "defense";
+    if (showTray) presentDice(combat,event,dicePhase,revealed);
     imageEvent = revealed ? event : combat.events[Math.max(0,combat.step - 1)];
     const finishedTurns = revealed && event.turn ? event.turn :
       (combat.events[Math.max(0,combat.step - 1)]?.turn ?? 0);
     ui.combatTurns.textContent = Array.from({length:COMBAT_BALANCE.maxHalfTurns},
       (_,i)=>i<finishedTurns?"◆":"◇").join(" ");
+    const rollCaption = event.type === "initiative" ? "ROLLING FOR FIRST" :
+      combat.eventElapsedMs < halfway ? "ATTACK DICE ROLLING" : "DEFENSE DICE ROLLING";
     ui.combatEventTitle.textContent = "DUEL "+number(combat.bout)+" · "+
-      (!revealed ? (combat.eventElapsedMs < windup ? "PREPARING" : "DICE ROLLING") :
+      (!revealed ? (combat.eventElapsedMs < windup ? "PREPARING" : rollCaption) :
         event.type === "initiative" ?
           (event.actor === "player" ? "YOU ATTACK FIRST" : "ENEMY ATTACKS FIRST") :
           event.type.toUpperCase());

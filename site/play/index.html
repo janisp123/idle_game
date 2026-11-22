@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261122-duel-initiative1">
-  <script type="module" src="./app.mjs?v=20261122-duel-initiative1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261122-action-flow1">
+  <script type="module" src="./app.mjs?v=20261122-action-flow1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -126,7 +126,7 @@
             <img id="sceneImage" src="./assets/hunting.webp" alt="A grim warrior facing wolves in a dark forest" width="960" height="540">
             <div class="image-veil" aria-hidden="true"></div>
             <div id="combatDiceStage" class="combat-dice-stage" hidden aria-label="Combat dice rolls">
-              <div class="combat-roll-tray">
+              <div id="playerDiceTray" class="combat-roll-tray">
                 <strong id="playerDiceLabel">YOU</strong>
                 <div class="combat-dice-row" aria-label="Your three skull dice">
                   <span id="playerDie1" class="combat-die">⚀</span><span id="playerDie2" class="combat-die">⚀</span><span id="playerDie3" class="combat-die">⚀</span>
@@ -134,7 +134,7 @@
                 <small id="playerDiceTotal"></small>
               </div>
               <span class="combat-versus" aria-hidden="true">VS</span>
-              <div class="combat-roll-tray">
+              <div id="enemyDiceTray" class="combat-roll-tray">
                 <strong id="enemyDiceLabel">ENEMY</strong>
                 <div class="combat-dice-row" aria-label="Enemy's three skull dice">
                   <span id="enemyDie1" class="combat-die">⚀</span><span id="enemyDie2" class="combat-die">⚀</span><span id="enemyDie3" class="combat-die">⚀</span>
@@ -143,6 +143,16 @@
               </div>
             </div>
             <div class="image-caption" id="sceneCaption">THE WOLF ROAD</div>
+          </div>
+          <div id="combatFlow" class="combat-flow" hidden aria-label="Automatic combat action timeline">
+            <div class="combat-flow-steps" aria-hidden="true">
+              <span class="combat-flow-step" id="combatFlowStep0"><span class="combat-flow-icon" id="combatFlowIcon0">✦</span><span id="combatFlowLabel0">Ready</span></span>
+              <span class="combat-flow-step" id="combatFlowStep1"><span class="combat-flow-icon" id="combatFlowIcon1">⚄</span><span id="combatFlowLabel1">Roll dice</span></span>
+              <span class="combat-flow-step" id="combatFlowStep2"><span class="combat-flow-icon" id="combatFlowIcon2">⚄</span><span id="combatFlowLabel2">Defend</span></span>
+              <span class="combat-flow-step" id="combatFlowStep3"><span class="combat-flow-icon" id="combatFlowIcon3">⚔</span><span id="combatFlowLabel3">Move</span></span>
+              <span class="combat-flow-step" id="combatFlowStep4"><span class="combat-flow-icon" id="combatFlowIcon4">⌛</span><span id="combatFlowLabel4">Next battle</span></span>
+            </div>
+            <div id="combatFlowMeter" class="combat-flow-meter" role="progressbar" aria-label="Current combat action" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="combatFlowFill"></span></div>
           </div>
           <section id="wagonQueue" class="wagon-queue" hidden aria-label="Your activity route">
             <p class="wagon-queue-heading">YOUR ROUTE · THREE TASKS</p>

@@ -754,11 +754,12 @@ footer p{color:#aa9680}
   font:700 clamp(19px,4vw,27px)/1 Georgia,serif;color:#4d261d;
   font-variant-numeric:tabular-nums;
 }
-.combat-dice-stage.rolling .combat-die {
+.combat-roll-tray.rolling .combat-die {
   animation:combat-die-rock .35s ease-in-out infinite alternate;
   border-color:#e5b975;
 }
-.combat-dice-stage.rolling .combat-die:nth-child(even) {animation-direction:alternate-reverse}
+.combat-roll-tray.rolling .combat-die:nth-child(even) {animation-direction:alternate-reverse}
+.combat-roll-tray.pending .combat-die {opacity:.38;filter:grayscale(.65)}
 @keyframes combat-die-rock {
   from {transform:rotate(-12deg) scale(.93)}
   to {transform:rotate(12deg) scale(1.07)}
@@ -774,5 +775,49 @@ footer p{color:#aa9680}
   .combat-turns {letter-spacing:0;font-size:11px}
 }
 @media(prefers-reduced-motion:reduce) {
-  .combat-dice-stage.rolling .combat-die {animation:none}
+  .combat-roll-tray.rolling .combat-die {animation:none}
+}
+
+/* GAME-011: the actual combat action is always visible directly below the art.
+   Five compact stages repeat for each opposed attack; this is NOT a turn timer. */
+.combat-flow {
+  margin:0;padding:8px 8px 6px;
+  border-top:2px ridge #946a46;
+  background:linear-gradient(180deg,#25170f,#120c0b);
+}
+.combat-flow[hidden] {display:none !important}
+.combat-flow-steps {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
+.combat-flow-step {
+  min-width:0;min-height:49px;box-sizing:border-box;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  padding:5px 2px;border:1px solid #664b39;
+  background:linear-gradient(155deg,#302018,#1b110e);color:#9e8572;
+  text-align:center;font:700 clamp(9px,1vw,12px)/1.12 Georgia,serif;
+  overflow-wrap:anywhere;
+}
+.combat-flow-icon {font:19px/1 Georgia,serif;color:inherit}
+.combat-flow-step[data-state="done"] {
+  color:#d0a980;border-color:#927044;background:linear-gradient(155deg,#42291d,#241711);
+}
+.combat-flow-step[data-state="active"] {
+  color:#ffe0a4;border-color:#e1aa64;
+  background:linear-gradient(155deg,#744225,#351c13);
+  box-shadow:inset 0 0 0 1px #ad6b36,0 0 9px rgba(225,166,91,.4);
+}
+.combat-flow-meter {
+  height:5px;margin:6px 1px 1px;
+  border:1px solid #6b4a30;background:#0e0908;overflow:hidden;
+}
+.combat-flow-meter > span {
+  display:block;height:100%;width:0;
+  background:linear-gradient(90deg,#814324,#d1a05d,#ffd58d);
+}
+@media(max-width:400px) {
+  .combat-flow {padding:6px 5px 5px}
+  .combat-flow-steps {gap:2px}
+  .combat-flow-step {min-height:46px;font-size:9px;padding:3px 1px}
+  .combat-flow-icon {font-size:17px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .combat-flow-meter > span {transition:none}
 }
