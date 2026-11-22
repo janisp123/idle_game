@@ -8,14 +8,14 @@ import {
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice,
   GLORY_SCROLL_ID, GLORY_RULES, enchantEquipmentSlot
-} from "./engine.mjs?v=20261122-glory1";
+} from "./engine.mjs?v=20261122-guard-impact1";
 
-import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-glory1";
+import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-guard-impact1";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-dice-duels1";
-import { combatFlowState } from "./combat-flow.mjs?v=20261122-action-flow1";
+import { combatFlowState } from "./combat-flow.mjs?v=20261122-guard-impact1";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, armourOption, armourUnlocked, armourStats }
-  from "./armour.mjs?v=20261122-stat-gates1";
+  from "./armour.mjs?v=20261122-guard-impact1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
