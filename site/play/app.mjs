@@ -6,10 +6,11 @@ import {
   queueSetDuration, queueSwap, queueRemoveLast,
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
-  xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=20261122-mastery1";
+  xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice,
+  GLORY_SCROLL_ID, GLORY_RULES, enchantEquipmentSlot
+} from "./engine.mjs?v=20261122-glory1";
 
-import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-dice-duels1";
+import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-glory1";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-dice-duels1";
 import { combatFlowState } from "./combat-flow.mjs?v=20261122-action-flow1";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
@@ -22,6 +23,9 @@ const ui = {
   combatLoadout: $("combatLoadout"), combatSkillsText: $("combatSkillsText"),
   armourSlots: $("armourSlots"), armourChoice: $("armourChoice"),
   armourChoiceLabel: $("armourChoiceLabel"), gearStats: $("gearStats"),
+  gloryWallet: $("gloryWallet"), weaponEnchantRank: $("weaponEnchantRank"),
+  armourEnchantRank: $("armourEnchantRank"), enchantWeapon: $("enchantWeapon"),
+  enchantArmour: $("enchantArmour"),
   resourceList: $("resourceList"), choices: $("activityChoices"),
   openActivities: $("openActivities"), categories: $("activityCategories"),
   categoryChoices: $("activityCategoryChoices"), listScreen: $("activityListScreen"),
@@ -136,13 +140,24 @@ function renderArmour() {
     "%  ·  PHYS " + gear.physicalReductionPct + "%  ·  DODGE " +
     (gear.evasionScore >= 0 ? "+" : "") + gear.evasionScore +
     "  ·  MR* " + gear.magicResistancePct + "%";
-  ui.gearStats.title = "Physical damage reduction; DODGE modifies real 3d6 defense. " +
-    "Move is combat mobility; real travel times stay unchanged. " +
-    "MR is reserved for future magic damage.";
+  ui.gearStats.title = "Physical reduction, dodge and mobility are active. " +
+    "MR is reserved for future magic damage; slot enchantments add physical attack or defense.";
+  ui.gloryWallet.textContent = "✧ " + number(state.items[GLORY_SCROLL_ID]) + " Glory Scrolls";
+  ui.weaponEnchantRank.textContent = "Weapon · +" + state.enchantments.weapon + " ATK";
+  ui.armourEnchantRank.textContent = slot.name + " · +" +
+    state.enchantments[slot.id] + " DEF";
+  ui.enchantWeapon.disabled = state.items[GLORY_SCROLL_ID] === 0 ||
+    state.enchantments.weapon >= GLORY_RULES.maxRank;
+  ui.enchantArmour.disabled = state.items[GLORY_SCROLL_ID] === 0 ||
+    state.enchantments[slot.id] >= GLORY_RULES.maxRank;
+  for (const button of [ui.enchantWeapon,ui.enchantArmour]) {
+    button.title = "50% success · costs 1 Glory Scroll. Failure resets this slot to +0.";
+  }
   for (const part of ARMOUR_SLOTS) {
     const row = armourButtons.get(part.id);
     const picked = armourOption(part.id, state.armour[part.id]);
-    row.equipped.textContent = picked?.name ?? "—";
+    row.equipped.textContent = (picked?.name ?? "—") +
+      (state.enchantments[part.id] ? " +" + state.enchantments[part.id] : "");
     row.button.setAttribute("aria-pressed",String(part.id === selectedArmourSlot));
     row.button.setAttribute("aria-label",part.name+": "+(picked?.name ?? "none")+
       ". Choose this armour slot");
@@ -422,7 +437,10 @@ function reportProgress(outcome) {
   if (!outcome) return false;
   let gained = false;
   for (const report of outcome.reports ?? [outcome.report ?? outcome]) {
-    if (!report?.completed) continue;
+    if (!report?.completed && !report?.gainedGlory) continue;
+    if (report.gainedGlory)
+      message("✧ +" + number(report.gainedGlory) + " Glory Scroll" +
+        (report.gainedGlory===1 ? "" : "s"));
     const result = workReadoutForReport(report, ITEM_LABELS, ACTIVITIES);
     if (result) {
       latestWorkResult = result;
@@ -902,7 +920,8 @@ function render() {
     ui.combatPanel.classList.toggle("finisher",revealed && event.type === "finisher");
     const key = state.combatSession.seed + ":" + combat.bout + ":" + combat.step;
     if (revealed && key !== lastCombatEventKey) {
-      ui.resultNotice.textContent = "";
+      if (!ui.resultNotice.textContent.includes("Glory Scroll"))
+        ui.resultNotice.textContent = "";
       lastCombatEventKey = key;
     }
   } else {
@@ -1051,7 +1070,7 @@ function start() {
     const slot = ARMOUR_SLOT_BY_ID[selectedArmourSlot];
     const option = armourOption(slot.id, ui.armourChoice.value);
     if (!option || (state.armour[slot.id] !== option.id &&
-      !armourUnlocked(allAttributeProgress(state.attributeEffort),slot.id,option.id))) {
+      !armourUnlocked(effectiveAttributeProgress(state.attributeEffort,state.skills),slot.id,option.id))) {
       renderArmour();
       return;
     }
@@ -1061,6 +1080,25 @@ function start() {
     writeSave();
     render();
   });
+  function attemptEnchant(slot) {
+    const rank=state.enchantments[slot];
+    if (state.items[GLORY_SCROLL_ID]<1 || rank>=GLORY_RULES.maxRank) return;
+    const slotName=slot==="weapon" ? "Weapon" : ARMOUR_SLOT_BY_ID[slot].name;
+    if (!window.confirm("ENCHANT " + slotName.toUpperCase() + " +" + rank +
+        "?\\nUse 1 Glory Scroll. 50% success: +1 " +
+        (slot==="weapon"?"ATK":"DEF") +
+        ". 50% failure: this slot resets to +0. Continue?")) return;
+    const result=enchantEquipmentSlot(state,slot,Date.now());
+    state=result.state;
+    reportProgress(result);
+    message(result.enchantment.success
+      ? "✧ " + slotName + " enchanted to +" + result.enchantment.rank
+      : "✧ " + slotName + " enchant failed · reset to +0");
+    writeSave();
+    render();
+  }
+  ui.enchantWeapon.addEventListener("click",()=>attemptEnchant("weapon"));
+  ui.enchantArmour.addEventListener("click",()=>attemptEnchant(selectedArmourSlot));
   ui.saveName.addEventListener("click", () => {
     const chosen = ui.nameInput.value.trim().replace(/\s+/g, " ");
     if (!chosen || chosen.length > 40) {

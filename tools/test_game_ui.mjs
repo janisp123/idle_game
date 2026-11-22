@@ -97,6 +97,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   assert.match(html, /id="armourSlots"/);
   assert.match(html, /id="armourChoice"/, "one equipment dropdown handles the active slot");
   assert.match(html,/id="gearStats"/,"aggregate loadout stats appear inside existing compact armour panel");
+  for(const id of ["gloryWallet","weaponEnchantRank","armourEnchantRank",
+    "enchantWeapon","enchantArmour"])
+    assert.ok(html.includes('id="' + id + '"'),"fixed-slot enchant control: " + id);
+  assert.match(queueCss,/\.enchant-action:disabled/,"scroll-free enchant is visibly disabled");
   assert.match(queueCss, /grid-template-areas:[\s\S]*left_shoulder head right_shoulder/, "slots make a body-shaped grid");
   assert.doesNotMatch(html, /id="combatRolls"|id="combatEventText"/,
     "repeated fighting narration and rolls must not appear above Chronicle");
@@ -110,7 +114,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261122-mastery1/,
+  assert.match(html, /app\.mjs\?v=20261122-glory1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -135,7 +139,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261122-armour-balance1/,
+  assert.match(html, /iron-ui\.css\?v=20261122-glory1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -173,6 +177,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   let overrideConfirmations = 0;
   let allowMasterTribute = false;
   let masterConfirmations = 0;
+  let allowEnchant = false;
+  let enchantConfirmations = 0;
   globalThis.window = {
     addEventListener(event, handler) { handlers.set("window:" + event, handler); },
     setInterval(handler) { tick = handler; },
@@ -180,6 +186,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       if (prompt.startsWith("THE MASTER'S DUE")) {
         masterConfirmations++;
         return allowMasterTribute;
+      }
+      if (prompt.startsWith("ENCHANT ")) {
+        enchantConfirmations++;
+        return allowEnchant;
       }
       overrideConfirmations++;
       return allowRouteOverride;
@@ -208,6 +218,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="right_boot").length,1);
     assert.equal(elements.get("armourChoiceLabel").textContent,"Hood / helmet");
     assert.equal(elements.get("armourChoice").value,"robe");
+    assert.equal(elements.get("enchantWeapon").disabled,true,"no scroll, no weapon enchant");
+    assert.equal(elements.get("enchantArmour").disabled,true,"no scroll, no armour enchant");
+    assert.match(elements.get("gloryWallet").textContent,/0 Glory Scrolls/);
     assert.match(elements.get("gearStats").textContent,/11 kg.*MOVE 92%.*PHYS 4%.*MR\* 45%/,
       "starter robe and greatsword have truthful weight, mobility, protection and future magic values");
     assert.deepEqual(elements.get("armourChoice").children.map(o=>o.value),
@@ -872,7 +885,41 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(shieldDuel.combatSession.player.loadout,"sword_shield");
     assert.equal(shieldDuel.items.stone,arena.items.stone);
     assert.deepEqual(arena.items, fighting.items,
-      "visual combat creates no unapproved loot, deletion, or permanent death");
+      "visual combat creates no fabricated loot before an eligible victory completes");
+    // One selected slot, no generated gear list. Confirming is deliberate.
+    const withScroll={...shieldDuel,items:{...shieldDuel.items,glory_scroll:3}};
+    const jsonScroll=JSON.stringify(withScroll);
+    store.set(SAVE_KEY,jsonScroll);
+    handlers.get("window:storage")({key:SAVE_KEY,newValue:jsonScroll});
+    assert.match(elements.get("gloryWallet").textContent,/3 Glory Scrolls/);
+    assert.equal(elements.get("enchantWeapon").disabled,false);
+    assert.equal(elements.get("enchantArmour").disabled,false);
+    elements.get("enchantWeapon").fire("click");
+    assert.equal(enchantConfirmations,1,"the user can cancel before risk");
+    assert.equal(JSON.parse(store.get(SAVE_KEY)).items.glory_scroll,3);
+    allowEnchant=true;
+    Math.random=()=>0.25;
+    elements.get("enchantWeapon").fire("click");
+    let enchanted=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(enchanted.items.glory_scroll,2);
+    assert.equal(enchanted.enchantments.weapon,1);
+    assert.match(elements.get("weaponEnchantRank").textContent,/\+1 ATK/);
+    assert.match(elements.get("resultNotice").textContent,/enchanted to \+1/);
+    Math.random=()=>0.9;
+    elements.get("enchantWeapon").fire("click");
+    enchanted=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(enchanted.items.glory_scroll,1);
+    assert.equal(enchanted.enchantments.weapon,0,"failed slot enchant resets all rank");
+    assert.match(elements.get("resultNotice").textContent,/reset to \+0/);
+    Math.random=()=>0.25;
+    elements.get("enchantArmour").fire("click");
+    enchanted=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(enchanted.items.glory_scroll,0);
+    assert.equal(enchanted.enchantments.left_glove,1,
+      "selected armour slot, not entire armour type, gains DEF");
+    assert.equal(enchanted.enchantments.right_glove,0);
+    assert.equal(elements.get("enchantWeapon").disabled,true);
+    assert.equal(elements.get("enchantArmour").disabled,true);
   } finally {
     Date.now = originalNow;
     Math.random = originalRandom;

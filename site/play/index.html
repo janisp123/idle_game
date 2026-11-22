@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261122-armour-balance1">
-  <script type="module" src="./app.mjs?v=20261122-mastery1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261122-glory1">
+  <script type="module" src="./app.mjs?v=20261122-glory1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -54,13 +54,24 @@
             <p class="hint" id="combatSkillsText">One attack skill and one defense skill.</p>
           </div>
           <details id="armourCabinet" class="armour-cabinet">
-            <summary class="armour-summary">ARMOUR <span aria-hidden="true">✥</span></summary>
+            <summary class="armour-summary">EQUIPMENT <span aria-hidden="true">✥</span></summary>
             <div id="armourSlots" class="armour-slots" aria-label="Equipped armour slots"></div>
             <div class="armour-choice">
               <label id="armourChoiceLabel" for="armourChoice">Hood / helmet</label>
               <select id="armourChoice" aria-label="Choose armour for selected slot"></select>
             </div>
             <div id="gearStats" class="gear-stats" aria-label="Equipped weight, mobility and protections"></div>
+            <div class="enchant-tools" aria-label="Slot enchantments">
+              <strong class="glory-wallet" id="gloryWallet">✧ 0 Glory Scrolls</strong>
+              <div class="enchant-tool-row">
+                <span id="weaponEnchantRank">Weapon · +0 ATK</span>
+                <button type="button" id="enchantWeapon" class="enchant-action" disabled>✧ Enchant</button>
+              </div>
+              <div class="enchant-tool-row">
+                <span id="armourEnchantRank">Head · +0 DEF</span>
+                <button type="button" id="enchantArmour" class="enchant-action" disabled>✧ Enchant</button>
+              </div>
+            </div>
           </details>
         </section>
 
