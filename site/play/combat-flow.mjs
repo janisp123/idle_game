@@ -10,8 +10,9 @@ const step = (icon, label) => ({ icon, label });
 const NEXT_WINDOW_MS = 2_000;
 
 /** Pure, deterministic labels/progress for the currently observable duel. */
-export function combatFlowState(combat, elapsedMs) {
-  if (!combat || !Number.isFinite(elapsedMs)) return null;
+export function combatFlowState(combat, session) {
+  if (!combat || !session || !Number.isFinite(session.elapsedMs)) return null;
+  const elapsedMs = session.elapsedMs;
   const event = combat.event;
   const t = clamp(combat.eventElapsedMs, 0, COMBAT_BALANCE.eventMs);
   const nextEvent = combat.events[combat.step + 1];
