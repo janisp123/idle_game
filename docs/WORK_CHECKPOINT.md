@@ -1,5 +1,15 @@
 # Current working checkpoint
 
+## Latest verified — PR #96 mechanics handbook and edit points (2026-11-22)
+
+- **Main:** `ad8d387a08f9096e329cd2de99cb68bf26daf537`, merged [PR #96](https://github.com/janisp123/idle_game/pull/96). This supersedes the historical PR #94 main head below.
+- **Validation:** Final PR-head `520fca7bc9f3f7ef4726ee9077c8a27c77d1b705` passed [Idle Game website CI 45008477533](https://github.com/janisp123/idle_game/actions/runs/45008477533) and [protocol 45008477525](https://github.com/janisp123/idle_game/actions/runs/45008477525). Main [Pages deployment 45008521008](https://github.com/janisp123/idle_game/actions/runs/45008521008) passed; fresh public `/play/` readback was HTTP 200 with `app.mjs?v=20261122-mechanics1`. Manual phone interaction remains for owner review.
+- **Read before formulas:** [docs/mechanics/README.md](mechanics/README.md), linked from repository README and AGENTS. Its five chapters capture the **actual** skill XP/mastery/stat, rarity/crafting, combat, queue/offline/save formulas and a safe-tuning checklist. Current game code is source of truth; Owner decisions remain authoritative for intended behavior.
+- **Central settings:** `engine.mjs:SKILL_BALANCE` and `SCHEDULE_BALANCE`; `attributes.mjs:ATTRIBUTE_BALANCE`, `ACTIVITY_STAT_WEIGHTS`; `loot.mjs:LOOT_TABLES`; `production.mjs:PRODUCTION_RECIPES`; `combat.mjs:COMBAT_BALANCE` and `COMBAT_ART`; `engine.mjs:TIMING_PROFILES`. Existing balance values, save schema, offline semantics and combat RNG order unchanged.
+- **Pending design:** The user's requested **turn-based attacker roll → attacker skill → defender roll → defensive skill / weak stat fallback** is recorded in [combat mechanics](mechanics/COMBAT.md) as **V2 PLANNED**, not implemented. Combat V1, image backlog and clan features remain partial in GAME-011.
+- **Next smallest feature:** Design and approve Combat V2 attack/defense/skill priority formulas and tests, then implement in a separate small PR without rewriting the established XP/drop/queue formula foundations.
+
+
 ## Latest verified — PR #94 slow combat alpha (2026-11-21)
 
 - **Main:** `bb61a3ea9de7c48ec732b42a0779ab1b196f09af`, merged [PR #94](https://github.com/janisp123/idle_game/pull/94); this supersedes the old PR #85 head described below.
