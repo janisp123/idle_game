@@ -77,6 +77,12 @@ At equal STR=DEX=END=10 and Fighting level 1, the greatsword has **24 raw physic
 - For Fighting, **hide the old work-cycle progress bar** (it falsely looked like a strike timer). Place a responsive five-stage combat action timeline **immediately beneath the artwork**, with a highlighted active stage, completed and upcoming segments, and a small progress fill. Initiative, each opposed attack, the actual revealed move and next-duel preparation all have grounded labels. Each attack visually rolls the attacker's 3d6 first, then the defender's 3d6; both dice were already calculated by the unchanged deterministic engine. After both phases the matching art and compact numerical result are revealed. The bar adapts to whichever fighter attacks first, and to early duel endings; it does not imply a fixed alternation or a mandatory six turns. Six small completed-turn markers remain for duel history. Other activities retain their ordinary work progress bar. No extra XP, save fields, combat RNG, or offline replay is added.
 - Respect `prefers-reduced-motion` for the cosmetic dice wobble. The game's rolls still work without CSS animation or a constantly open tab.
 
+## Glory Scroll and equipment enchant combat effects
+
+[GLORY-001](ENCHANTMENTS.md) extends actual Fighting victories with an independent 50% Glory Scroll check when the current *Fighting XP bar* was still earnable as that bout began. Scroll awards require genuine reconstructed completed victories; losses/draws and XP-ineligible bouts yield none. This is not a fabricated offline kill-count estimate. Existing 3d6 attack/defense and victory rules stay intact.
+
+Each earned weapon enchant rank adds +1 to raw physical attack (before weapon-skill multiplier). Each armour-slot rank adds +1 to a flat physical protection total deducted **after** a landed hit's ordinary armour reduction, with minimum 1 HP inflicted. These bonuses do not alter dice values, defense roll odds, initiative, the 6–6–6 finisher, or magic resistance. Active combat freezes the effective ranks; equipping or enchanting a slot first settles previous rewards and starts a fresh duel only when effective gear changes.
+
 ## Data and persistence guarantees
 
 - The `combatLoadout` choice is stored in **V7 local save data**, along with the combat-session seed, elapsed Fighting time and original frozen fighter stats. V6 hammer/axe/sword prototype sessions migrate to the default **Greatsword** skill pair without losing elapsed time, RNG seed, attributes, items or skill levels. Existing local save key remains the same.
