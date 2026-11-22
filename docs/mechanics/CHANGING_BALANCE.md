@@ -24,7 +24,7 @@
 | Rare drop unlocks, weights, growth, caps | `site/play/loot.mjs` → `LOOT_TABLES` | `lootChances` and `allocateLoot` |
 | Recipes and relative choice weights | `site/play/production.mjs` → `PRODUCTION_RECIPES` | `produce` material-conservation algorithm |
 | Current solo combat timing, damage, hit/defense probabilities, 6–6–6 window | `site/play/combat.mjs` → `COMBAT_BALANCE` | `simulateDuel` event ordering and random source |
-| Named enemy stats and opponent rotation | `site/play/combat.mjs` → `OPPONENTS` | Fight renderer |
+| Two-skill combat styles, greatsword charge/damage, parry and shield block | `site/play/combat-skills.mjs` → `COMBAT_SKILLS`, `COMBAT_LOADOUTS` | `simulateDuel` turn rules; do not add duplicate skill flags |\n| Named enemy stats and opponent rotation | `site/play/combat.mjs` → `OPPONENTS` | Fight renderer |
 | Matching scene assets | `site/play/combat.mjs` → `COMBAT_ART` | Simulation math; never use wrong art |
 | Alpha/normal cycle, same/cross-zone travel, preparation | `site/play/engine.mjs` → `TIMING_PROFILE`, `TIMING_PROFILES` | Offline settle and migration |
 | Planner 1..8 amount range | `site/play/engine.mjs` → `SCHEDULE_BALANCE` (UI derives options) | `validPlannedDuration` and two UI editors |
@@ -36,7 +36,7 @@ From repo root:
 
 ```sh
 node --check site/play/engine.mjs
-node --check site/play/combat.mjs
+node --check site/play/combat.mjs\nnode --check site/play/combat-skills.mjs
 node --check site/play/loot.mjs
 node --check site/play/production.mjs
 node --check site/play/attributes.mjs
@@ -51,7 +51,7 @@ The protected-branch GitHub Actions checks are required in addition to any local
 
 - **Progression:** XP threshold L=1, 2, 10; inverse from cumulative XP; one-level XP cap; Master sacrifice once; stat total 100 XP/hour across every activity; point cost increases and no offline power upgrade.
 - **Resources:** rarity sums to one; tier locked before required rank; higher tiers replace lower; scarcity / missing ingredients never fabricate output; exact integer conservation after 20 years.
-- **Combat:** stable seeded outcomes; miss/block/dodge give zero damage; opponent's defense really controls attack result; 6–6–6 only on valid windows; no skill-free instant veteran victory; inactive activities have no combat skull dice.
+- **Combat:** stable seeded outcomes; greatsword wind-up vs instant thrust; exactly one attack plus one defense skill; shield block chance above blade parry above untrained fallback; separate attack and defense rolls; miss/block/parry/dodge deal zero damage; 6–6–6 only on valid vulnerable-hit windows; inactive activities have no combat skull dice; V6 save migration.
 - **Queue:** 1…8 amounts, minutes/hours/days and `untilLevelUp`; first-ready full cycle; correct transition order and productive time; no offline cap; no double rewards; no lost materials on old saves.
 - **UI/release:** browser tests for schedule editor amount parity and combat-only dice, correct asset version/paths, then live deployed page. If new original illustrations are added, verify the actual binaries, formats and meaningful event-image matching.
 
@@ -60,4 +60,4 @@ The protected-branch GitHub Actions checks are required in addition to any local
 - No hard-coded value changed in a test **instead of** updating the tested rule.
 - No silent rewrite of existing save schema, input/output keys or zeroing old progress.
 - No fake data (kills, clan contribution, hit artwork, offline recap) to make a prototype appear finished.
-- No copying a draft Combat V2 skill formula into current Fighting without designing, approving and testing the rule first.
+- No treating provisional Combat V2 alpha percentages as permanent Owner-approved balance values; change the explicit skill registry, update examples, and run regression tests.
