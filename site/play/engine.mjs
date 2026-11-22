@@ -7,7 +7,7 @@ export {
 } from "./attributes.mjs?v=20261121-attributes1";
 import {
   validCombatSession, startCombatSession, advanceCombatSession
-} from "./combat.mjs?v=20261121-combat-v1";
+} from "./combat.mjs?v=20261122-mechanics1";
 import { allAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261121-attributes1";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
