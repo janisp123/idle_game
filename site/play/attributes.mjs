@@ -86,6 +86,96 @@ for (const [activity, weights] of Object.entries(ACTIVITY_STAT_WEIGHTS)) {
   Object.freeze(weights);
 }
 
+/**
+ * Mastery-to-attribute bridge (alpha). Every activated skill level beyond
+ * starting level 1 grants one permanent character-stat point. There is no
+ * manual allocation, reroll, random draw, or second progression currency.
+ *
+ * Use the SAME per-activity weights already used by productive-time training.
+ * The 100-step smooth weighted round-robin wheel keeps awards monotone:
+ * a later level never removes a previously granted point. Repeating the
+ * wheel makes calculation O(number of activities), even after decades away.
+ * The skill level is the source of truth, avoiding extra save migrations or
+ * duplicate awards when visiting the Master / loading older V7 saves.
+ */
+export const MASTERY_ATTRIBUTE_BALANCE = Object.freeze({
+  pointsPerClaimedLevel: 1
+});
+const makeBlankBonus = () => Object.fromEntries(ATTRIBUTE_IDS.map(id => [id, 0]));
+const MASTERY_PREFIXES = Object.freeze(Object.fromEntries(
+  Object.entries(ACTIVITY_STAT_WEIGHTS).map(([activity, weights]) => {
+    const running = makeBlankBonus();
+    const deficit = makeBlankBonus();
+    const prefixes = [Object.freeze({ ...running })];
+    for (let step = 0; step < STAT_WEIGHT_TOTAL; step++) {
+      let chosen = null;
+      for (const id of ATTRIBUTE_IDS) {
+        if (!(weights[id] ?? 0)) continue;
+        deficit[id] += weights[id];
+        if (chosen === null || deficit[id] > deficit[chosen]) chosen = id;
+      }
+      if (chosen === null) throw new Error("No stat recipient: " + activity);
+      running[chosen]++;
+      deficit[chosen] -= STAT_WEIGHT_TOTAL;
+      prefixes.push(Object.freeze({ ...running }));
+    }
+    if (!ATTRIBUTE_IDS.every(id => running[id] === (weights[id] ?? 0)))
+      throw new Error("Mastery stat distribution must match activity weights: " + activity);
+    return [activity, Object.freeze(prefixes)];
+  })
+));
+
+/** Exact cumulative grant for this activity at an *activated* skill level. */
+export function masteryBonusesForSkill(activity, level) {
+  const prefixes = MASTERY_PREFIXES[activity];
+  if (!prefixes || !Number.isSafeInteger(level) || level < 1)
+    throw new RangeError("Unknown activity/skill level for mastery");
+  const earned = (level - 1) * MASTERY_ATTRIBUTE_BALANCE.pointsPerClaimedLevel;
+  if (!Number.isSafeInteger(earned)) throw new RangeError("Mastery point overflow");
+  const cycles = Math.floor(earned / STAT_WEIGHT_TOTAL);
+  const partial = prefixes[earned % STAT_WEIGHT_TOTAL];
+  const weights = ACTIVITY_STAT_WEIGHTS[activity];
+  return Object.fromEntries(ATTRIBUTE_IDS.map(id =>
+    [id, cycles * (weights[id] ?? 0) + partial[id]]));
+}
+
+export function masteryAwardForNextLevel(activity, level) {
+  const before = masteryBonusesForSkill(activity, level);
+  const after = masteryBonusesForSkill(activity, level + 1);
+  return Object.fromEntries(ATTRIBUTE_IDS.filter(id => after[id] > before[id])
+    .map(id => [id, after[id] - before[id]]));
+}
+
+export function totalMasteryAttributeBonuses(skills) {
+  if (!skills || typeof skills !== "object") throw new RangeError("Missing skills");
+  const total = makeBlankBonus();
+  for (const activity of Object.keys(ACTIVITY_STAT_WEIGHTS)) {
+    const points = masteryBonusesForSkill(activity, skills[activity]?.level);
+    for (const id of ATTRIBUTE_IDS) {
+      total[id] += points[id];
+      if (!Number.isSafeInteger(total[id]))
+        throw new RangeError("Character mastery attribute counter overflow");
+    }
+  }
+  return total;
+}
+
+/**
+ * Time-earned stat XP and claimed skill-rank points are complementary. Only
+ * activated skill levels count: a full XP bar, offline pending work, or a
+ * blocked Master visit never award the point.
+ */
+export function effectiveAttributeProgress(effort, skills) {
+  const fromTime = allAttributeProgress(effort);
+  const mastered = totalMasteryAttributeBonuses(skills);
+  return Object.fromEntries(ATTRIBUTE_IDS.map(id => {
+    const base = fromTime[id];
+    const value = base.value + mastered[id];
+    if (!Number.isSafeInteger(value)) throw new RangeError("Character stat overflow");
+    return [id, { ...base, value, baseValue: base.value, masteryBonus: mastered[id] }];
+  }));
+}
+
 const isNonnegativeSafeInteger = x => Number.isSafeInteger(x) && x >= 0;
 
 export function blankAttributeEffort() {
