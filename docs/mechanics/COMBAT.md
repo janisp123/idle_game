@@ -80,4 +80,6 @@ At equal STR=DEX=END=10 and Fighting level 1, the greatsword deals **24** on a c
 - Add new skill: define it in `COMBAT_SKILLS` with a role and corresponding attributes, then add or modify `COMBAT_LOADOUTS`. For a new animation event type, update event parsing, UI and original art registry.
 - Tests: [test_combat.mjs](../../tools/test_combat.mjs) for independent rolls, charge, shield/parry/fallback probabilities, rare finishers, V6→V7 migration and multi-decade offline safety; [test_game_ui.mjs](../../tools/test_game_ui.mjs) for choice, screen, persistence and no duplicate retroactive gains.
 
+**Armour selection (UI-only):** [Fixed armour wardrobe](ARMOUR.md) now saves a chosen preset for 11 independently selectable body slots; equipment grants no combat bonus yet, so the duel equations, fighting snapshot and offline balance above are unchanged. Future gear effects need separate owner-approved calibration and snapshot tests.
+
 **Not yet implemented:** an exact aggregate roll-free offline combat victory report, individual combat ability XP/leveling, skill cooldowns beyond wind-up, physical equipment inventory, raid and clan actions, ally rescues/revives, permanent wounds and an exhaustive per-outcome/per-opponent art library. Those require subsequent owner-approved mechanics; the alpha values are intentionally simple and editable.
