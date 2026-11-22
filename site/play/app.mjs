@@ -16,6 +16,8 @@ import { combatFlowState } from "./combat-flow.mjs?v=20261122-guard-impact1";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, armourOption, armourUnlocked, armourStats }
   from "./armour.mjs?v=20261122-guard-impact1";
+import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
+  setAlphaSpeed, advanceAlphaClock } from "./alpha-tools.mjs?v=20261122-alpha-tools1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -60,7 +62,9 @@ const ui = {
   playerResult: $("playerResult"), enemyResult: $("enemyResult"),
   workResultTitle: $("workResultTitle"), workResultTokens: $("workResultTokens"),
   resultNotice: $("resultNotice"),
-  banner: $("sceneBanner"), saveStatus: $("saveStatus")
+  banner: $("sceneBanner"), saveStatus: $("saveStatus"),
+  alphaReset: $("alphaReset"), alphaDay: $("alphaDay"), alphaSpeed: $("alphaSpeed"),
+  alphaStatus: $("alphaStatus")
 };
 const number = value => new Intl.NumberFormat("en-GB").format(value);
 // The planner and editable hourglass draw from the same validated duration
@@ -235,6 +239,20 @@ function showCombatFlow(flow) {
 }
 
 let state;
+let alphaClock = null;
+function gameNow() { return alphaTime(alphaClock,Date.now()); }
+function persistAlphaClock(clock) {
+  if (!storageWorks) return false;
+  try {
+    localStorage.setItem(ALPHA_CLOCK_KEY,JSON.stringify(clock));
+    alphaClock=clock;
+    ui.alphaSpeed.checked=clock.speed===10;
+    return true;
+  } catch {
+    ui.alphaStatus.textContent="Alpha speed is unavailable while device storage is blocked.";
+    return false;
+  }
+}
 // Readouts are transient observations, never fabricated save fields or history.
 let latestWorkResult = null;
 const visibleTokenSignatures = new Map();
@@ -554,7 +572,7 @@ function renderWagons() {
       readyShortcut.setAttribute("aria-label", readyShortcut.title);
       readyShortcut.hidden = wagon.plannedMs === UNTIL_LEVEL_UP;
       readyShortcut.addEventListener("click", () => {
-        applyQueueChange(queueSetDuration(state, i, UNTIL_LEVEL_UP, Date.now()),
+        applyQueueChange(queueSetDuration(state, i, UNTIL_LEVEL_UP, gameNow()),
           "Now scheduled until ready to level up.");
       });
       heading.append(readyShortcut);
@@ -586,7 +604,7 @@ function renderWagons() {
       const apply = () => {
         const plan = unit.value === UNTIL_LEVEL_UP ? UNTIL_LEVEL_UP :
           Number(amount.value) * durationUnitMs(unit.value);
-        applyQueueChange(queueSetDuration(state, i, plan, Date.now()),
+        applyQueueChange(queueSetDuration(state, i, plan, gameNow()),
           "Hourglass stop condition updated.");
       };
       amount.addEventListener("change", apply);
@@ -607,11 +625,11 @@ function renderWagons() {
       controls.append(button);
     };
     if (i > 0) control("←", "Move " + ACTIVITIES[wagon.activity].title + " earlier",
-      () => applyQueueChange(queueSwap(state, i - 1, Date.now()), "Route rearranged."));
+      () => applyQueueChange(queueSwap(state, i - 1, gameNow()), "Route rearranged."));
     if (i < wagons.length - 1) control("→", "Move " + ACTIVITIES[wagon.activity].title + " later",
-      () => applyQueueChange(queueSwap(state, i, Date.now()), "Route rearranged."));
+      () => applyQueueChange(queueSwap(state, i, gameNow()), "Route rearranged."));
     if (i === wagons.length - 1 && i > 0) control("Remove", "Remove final future hourglass",
-      () => applyQueueChange(queueRemoveLast(state, Date.now()), "Future hourglass removed."));
+      () => applyQueueChange(queueRemoveLast(state, gameNow()), "Future hourglass removed."));
     card.append(controls);
     return card;
   });
@@ -655,7 +673,7 @@ ui.queueConfirm.addEventListener("click", () => {
   const task = planningActivity;
   hideQueuePlanner();
   const startsImmediately = state.wagons.length === 1;
-  applyQueueChange(queueInsertTimedActivity(state, task, plan, Date.now()),
+  applyQueueChange(queueInsertTimedActivity(state, task, plan, gameNow()),
     startsImmediately
       ? "Starting " + ACTIVITIES[task].title.toLowerCase() +
         (plan === UNTIL_LEVEL_UP ? " until ready to level up, then returning to " :
@@ -722,7 +740,7 @@ ui.masterCancel.addEventListener("click", () => {
 ui.masterConfirm.addEventListener("click", () => {
   // Freeze the offer against the settled inventory before asking the player.
   // The next ordinary tick handles the time elapsed during confirmation.
-  const outcome = settle(state, Date.now());
+  const outcome = settle(state, gameNow());
   state = outcome.state;
   reportProgress(outcome);
   const offer = skillMasterOffer(state);
@@ -758,6 +776,7 @@ ui.masterConfirm.addEventListener("click", () => {
 function render() {
   const current = state.activity ? ACTIVITIES[state.activity] : null;
   ui.combatLoadout.value = state.combatLoadout;
+  ui.alphaSpeed.checked = alphaClock?.speed === 10;
   const chosen = COMBAT_LOADOUTS[state.combatLoadout];
   ui.combatSkillsText.textContent = "Attack: " +
     COMBAT_SKILLS[chosen.attackSkill].name + " · Defense: " +
@@ -986,17 +1005,17 @@ function render() {
 function tick() {
   if (document.visibilityState === "hidden") return;
   const before = state.transition;
-  const result = settle(state, Date.now());
+  const result = settle(state, gameNow());
   state = result.state;
   const gained = reportProgress(result);
   announceArrival(before);
-  if (gained || (before && !state.transition) || Date.now() - lastSavedAt > 3000) writeSave();
+  if (gained || (before && !state.transition) || gameNow() - lastSavedAt > 3000) writeSave();
   render();
 }
 
 function returnToGame() {
   const before = state.transition;
-  const result = enterGame(state, Date.now());
+  const result = enterGame(state, gameNow());
   state = result.state;
   reportProgress(result);
   announceArrival(before);
@@ -1015,8 +1034,8 @@ function startActivityNow(kind) {
   hideQueuePlanner();
   showActivityScreen("root", null);
   const result = state.wagons.length
-    ? requestActivityChange(state, kind, Date.now())
-    : queueStartActivity(state, kind, null, Date.now());
+    ? requestActivityChange(state, kind, gameNow())
+    : queueStartActivity(state, kind, null, gameNow());
   applyQueueChange(result, "Changing to " + ACTIVITIES[kind].title.toLowerCase() + " now.");
 }
 
@@ -1042,22 +1061,104 @@ function planActivity(kind, untilLevelUp = false) {
 
 function start() {
   let saved = null;
-  try { saved = localStorage.getItem(SAVE_KEY); } catch { storageWorks = false; }
+  let clockText = null;
+  try {
+    saved = localStorage.getItem(SAVE_KEY);
+    clockText = localStorage.getItem(ALPHA_CLOCK_KEY);
+  } catch { storageWorks = false; }
   state = saved ? readSave(saved) : null;
+  alphaClock = state ? parseAlphaClock(clockText) : null;
   if (!state) {
-    state = newGame();
+    // Invalid/new character saves must not inherit an old acceleration clock.
+    if (storageWorks) {
+      try { localStorage.removeItem(ALPHA_CLOCK_KEY); } catch { storageWorks = false; }
+    }
+    state = newGame(Date.now());
     if (saved) message("The previous save could not be read; a new character was created.");
     else message("Choose an activity. Your character will work without further clicks.");
     writeSave();
   } else {
-    const result = enterGame(state, Date.now());
+    const result = enterGame(state, gameNow());
     state = result.state;
     reportProgress(result);
     writeSave();
   }
 
+  // Alpha actions are presented as three switches. Destructive reset and
+  // one-day simulation act ONCE then automatically switch themselves off.
+  // Only ×10 speed is a persistent on/off mode.
+  ui.alphaReset.addEventListener("change", () => {
+    if (!ui.alphaReset.checked) return;
+    try {
+      if (!window.confirm("RESET ALL PROGRESS?\\n\\nDelete this device's character, " +
+        "all activity levels and XP, resources, attribute training, equipment, " +
+        "enchantments and route. No undo. Skills restart at Lv 1; stats at 10.")) return;
+      if (!storageWorks) {
+        ui.alphaStatus.textContent="Reset unavailable: device storage is blocked.";
+        return;
+      }
+      localStorage.removeItem(ALPHA_CLOCK_KEY);
+      alphaClock=null;
+      state=newGame(Date.now());
+      latestWorkResult=null;
+      lastCombatEventKey=null;
+      lastArmourOptionsKey=null;
+      lastWagonSignature=null;
+      selectedArmourSlot="head";
+      ui.masterAudience.hidden=true;
+      hideQueuePlanner();
+      showActivityScreen("root",null);
+      writeSave();
+      render();
+      ui.alphaStatus.textContent="Progress reset. Skills Lv 1 · Attributes 10.";
+    } catch {
+      ui.alphaStatus.textContent="Reset could not be saved. Check device storage.";
+    } finally {
+      ui.alphaReset.checked=false;
+    }
+  });
+  ui.alphaDay.addEventListener("change", () => {
+    if (!ui.alphaDay.checked) return;
+    try {
+      const realNow=Date.now();
+      const advanced=advanceAlphaClock(alphaClock,realNow,ALPHA_DAY_MS);
+      const result=enterGame(state,alphaTime(advanced,realNow));
+      if (!persistAlphaClock(advanced)) return;
+      state=result.state;
+      reportProgress(result);
+      writeSave();
+      render();
+      ui.alphaStatus.textContent="24 hours of idle activity simulated. No automatic level-ups.";
+    } catch {
+      ui.alphaStatus.textContent="Idle test could not complete. Save unchanged.";
+    } finally {
+      ui.alphaDay.checked=false;
+    }
+  });
+  ui.alphaSpeed.addEventListener("change", () => {
+    const newSpeed=ui.alphaSpeed.checked?10:1;
+    try {
+      const realNow=Date.now();
+      const result=settle(state,gameNow());
+      const nextClock=setAlphaSpeed(alphaClock,realNow,newSpeed);
+      if (!persistAlphaClock(nextClock)) {
+        ui.alphaSpeed.checked=alphaClock?.speed===10;
+        return;
+      }
+      state=result.state;
+      reportProgress(result);
+      writeSave();
+      render();
+      ui.alphaStatus.textContent=newSpeed===10?
+        "×10 activity speed ON — including movement, fighting and offline time.":
+        "Normal activity speed restored.";
+    } catch {
+      ui.alphaSpeed.checked=alphaClock?.speed===10;
+      ui.alphaStatus.textContent="Could not change testing speed.";
+    }
+  });
   ui.combatLoadout.addEventListener("change", () => {
-    const result = setCombatLoadout(state, ui.combatLoadout.value, Date.now());
+    const result = setCombatLoadout(state, ui.combatLoadout.value, gameNow());
     state = result.state;
     reportProgress(result);
     message("Combat style equipped: " + COMBAT_LOADOUTS[state.combatLoadout].name +
@@ -1074,7 +1175,7 @@ function start() {
       renderArmour();
       return;
     }
-    const outcome = setArmourChoice(state,slot.id,option.id,Date.now());
+    const outcome = setArmourChoice(state,slot.id,option.id,gameNow());
     state = outcome.state;
     reportProgress(outcome);
     writeSave();
@@ -1088,7 +1189,7 @@ function start() {
         "?\\nUse 1 Glory Scroll. 50% success: +1 " +
         (slot==="weapon"?"ATK":"DEF") +
         ". 50% failure: this slot resets to +0. Continue?")) return;
-    const result=enchantEquipmentSlot(state,slot,Date.now());
+    const result=enchantEquipmentSlot(state,slot,gameNow());
     state=result.state;
     reportProgress(result);
     message(result.enchantment.success
@@ -1115,6 +1216,10 @@ function start() {
   });
   window.addEventListener("pagehide", writeSave);
   window.addEventListener("storage", event => {
+    if (event.key === ALPHA_CLOCK_KEY) {
+      alphaClock=parseAlphaClock(event.newValue);
+      ui.alphaSpeed.checked=alphaClock?.speed===10;
+    }
     if (event.key === SAVE_KEY) {
       const newer = readSave(event.newValue);
       if (newer) {
