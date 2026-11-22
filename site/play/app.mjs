@@ -1117,8 +1117,7 @@ function start() {
       ui.alphaReset.checked=false;
     }
   });
-  ui.alphaDay.addEventListener("change", () => {
-    if (!ui.alphaDay.checked) return;
+  ui.alphaDay.addEventListener("click", () => {
     try {
       const realNow=Date.now();
       const advanced=advanceAlphaClock(alphaClock,realNow,ALPHA_DAY_MS);
@@ -1131,8 +1130,6 @@ function start() {
       ui.alphaStatus.textContent="24 hours of idle activity simulated. No automatic level-ups.";
     } catch {
       ui.alphaStatus.textContent="Idle test could not complete. Save unchanged.";
-    } finally {
-      ui.alphaDay.checked=false;
     }
   });
   ui.alphaSpeed.addEventListener("change", () => {
