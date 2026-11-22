@@ -51,9 +51,9 @@ export const ARMOUR_PIECES = Object.freeze({
  * for a successful defense to be shown as a DODGE instead of a block/parry.
  */
 export const ARMOUR_BALANCE = Object.freeze({
-  none: Object.freeze({ physical: 0, magic: 0, evasion: 3, dodgeMargin: 2 }),
-  robe: Object.freeze({ physical: 4, magic: 45, evasion: 0, dodgeMargin: 5 }),
-  leather: Object.freeze({ physical: 22, magic: 12, evasion: 2, dodgeMargin: 3 }),
+  none: Object.freeze({ physical: 0, magic: 0, evasion: 3, dodgeMargin: 6 }),
+  robe: Object.freeze({ physical: 4, magic: 45, evasion: 0, dodgeMargin: 9 }),
+  leather: Object.freeze({ physical: 22, magic: 12, evasion: 2, dodgeMargin: 8 }),
   plate: Object.freeze({ physical: 50, magic: 0, evasion: -3, dodgeMargin: 99 })
 });
 
