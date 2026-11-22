@@ -105,6 +105,9 @@ export function validCombatSession(session) {
   return session === null || Boolean(session && typeof session === "object" &&
     !Array.isArray(session) && validUnsigned(session.elapsedMs) &&
     validUnsigned(session.seed) && session.seed <= 0xffffffff &&
+    (session.gloryCursor === undefined && session.gloryEligibleUntilMs === undefined ||
+      validUnsigned(session.gloryCursor) && validUnsigned(session.gloryEligibleUntilMs) &&
+      session.gloryCursor <= Math.floor(session.elapsedMs/BOUT_MS)+1) &&
     (()=>{try{validateFighter(session.player);return true;}catch{return false;}})());
 }
 export function startCombatSession(player, seed) {
