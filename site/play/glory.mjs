@@ -14,7 +14,7 @@
  * length (20 years away is not 20 years of eligible bouts).
  */
 import { ARMOUR_SLOTS } from "./armour.mjs?v=20261122-stat-gates1";
-import { BOUT_MS, combatAtTime, seededCombatRandom } from "./combat.mjs?v=20261122-dice-duels1";
+import { BOUT_MS, combatAtTime, seededCombatRandom } from "./combat.mjs?v=20261122-glory1";
 export const GLORY_SCROLL_ID = "glory_scroll";
 export const GLORY_RULES = Object.freeze({
   winDropChance: 0.5, enchantSuccessChance: 0.5,
