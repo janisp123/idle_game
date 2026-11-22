@@ -1,5 +1,17 @@
 # Changelog — verified completed work
 
+
+## 2026-11-22 — Two equipped skills per fighter: Greatsword and Sword & Shield (chat; PR #98)
+
+- **Merged:** [PR #98](https://github.com/janisp123/idle_game/pull/98), commit `3372699bba75b92254a6889b4b1147acd733a099`.
+- **Live rules:** Exactly two automatic combat abilities per fighter (one offensive, one defensive). Greatsword has **Heavy Swing** (one full charge turn, high damage) and **Blade Guard** (weaker parry). Sword & Shield has **Thrust** (immediate normal damage) and **Shield Block** (much stronger block). Player and named enemies use the same independent attacker/defender roll resolution; the fallback without a defensive skill is substantially weaker. 6–6–6 still only triggers on a clean hit against a vulnerable target.
+- **Tuning:** New source of truth `site/play/combat-skills.mjs` has `COMBAT_SKILLS` and `COMBAT_LOADOUTS`; shared combat calculations remain in `site/play/combat.mjs:COMBAT_BALANCE`. Detailed current coefficients, examples, skill design limits and expansion instructions in [combat handbook](mechanics/COMBAT.md).
+- **UX and persistence:** Character panel includes combat-style selector; Fighting event panel shows actual attack and defense rolls. V7 local-save migration preserves old V6 duel session time, seed and frozen stats, existing XP/items/skills, offline progress and scheduling. Changing styles during a live duel settles old progress first and begins a fresh bout without deleting rewards.
+- **Evidence:** Final PR-head GitHub Actions [Idle Game website 45010154510](https://github.com/janisp123/idle_game/actions/runs/45010154510) and [Project Protocol Preflight 45010154550](https://github.com/janisp123/idle_game/actions/runs/45010154550) passed. Main [Pages deployment 45010230109](https://github.com/janisp123/idle_game/actions/runs/45010230109) completed successfully; fresh public `/play/` HTTP 200 returned the new `20261122-two-skills1` script, loadout selector and rolls display.
+- **Not included:** Unique hit/block/finisher art, individual combat ability XP, real weapon inventory, cooldown abilities beyond wind-up, clan/raid action logic, persistent injury or offline kill counts. All new combat balance values are provisional alpha values, not immutable Owner decisions.
+
+
+
 ## 2026-11-22 — Canonical mechanics formulas and centralized tuning (chat; PR #96)
 
 - **Merged:** [PR #96](https://github.com/janisp123/idle_game/pull/96), main commit `ad8d387a08f9096e329cd2de99cb68bf26daf537`. Created [docs/mechanics/README.md](mechanics/README.md) and five linked guides for implemented XP/stat costs, skill-gated rarity/crafting, current solo Combat V1 (explicitly separate from intended turn-based V2), scheduling/offline/saves and safe balance changes.

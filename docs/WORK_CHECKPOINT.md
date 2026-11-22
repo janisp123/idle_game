@@ -1,5 +1,17 @@
 # Current working checkpoint
 
+
+## Latest verified — two-skill combat loadouts, PR #98 (2026-11-22)
+
+- **Main gameplay release:** `3372699bba75b92254a6889b4b1147acd733a099`, merged [PR #98](https://github.com/janisp123/idle_game/pull/98), superseding the historical PR #96/94 heads below.
+- **Checks:** final PR head `aa9229de8205b10c4591c4b6adf7e9d64471021d` passed [Idle Game website 45010154510](https://github.com/janisp123/idle_game/actions/runs/45010154510) and [Project Protocol Preflight 45010154550](https://github.com/janisp123/idle_game/actions/runs/45010154550). Main [GitHub Pages 45010230109](https://github.com/janisp123/idle_game/actions/runs/45010230109) succeeded; fresh public /play/ HTTP 200 confirmed `20261122-two-skills1` and the `combatLoadout` / `combatRolls` UI elements.
+- **Mechanic:** Two automatic skills per fighter, exactly one offensive and one defensive: Greatsword Heavy Swing (charge turn, huge hit) + Blade Guard (weak blade parry); Sword & Shield Thrust (immediate ordinary hit) + Shield Block (strong). Independently rolled attacker check and defender check; when no defensive skill, low stat-based dodge/parry remains. Three skull dice preserved for rare vulnerable-hit 6–6–6 finisher. New skill definitions in `site/play/combat-skills.mjs` are single-source and extensible; probabilities in `COMBAT_BALANCE`. NPCs use the same resolver.
+- **Saves/offline:** `GAME_VERSION=7`, migrate V1–V6 without deleting items, skill XP, stats, schedule, combat seed or time. `combatLoadout` player choice saved; changing it while fighting settles first, then begins a fresh duel. Combat remains a separate observational timeline and 20-year offline settlement stays bounded.
+- **Handbook:** [docs/mechanics/COMBAT.md](mechanics/COMBAT.md) reflects the real implemented V2 alpha (not aspirational text); skill expansion and tuning rules in [docs/mechanics/CHANGING_BALANCE.md](mechanics/CHANGING_BALANCE.md).
+- **Limits / next action:** No independent levels for new automatic combat abilities, equipment inventory, user-facing exact-event paintings, clan raids, rescues, sustained injuries or historical offline combat totals. Owner should test the live selector and opponent combat flow on Android. Next small approved work should be the exact illustration mapping or skill progression **only after** specific owner direction; do not infer it from this merge.
+
+
+
 ## Latest verified — PR #96 mechanics handbook and edit points (2026-11-22)
 
 - **Main:** `ad8d387a08f9096e329cd2de99cb68bf26daf537`, merged [PR #96](https://github.com/janisp123/idle_game/pull/96). This supersedes the historical PR #94 main head below.
