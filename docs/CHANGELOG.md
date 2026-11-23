@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-23 — Fixed visible enchant ranks and made weapon choice match armour wardrobe (chat, PR #125)
+
+- [PR #125](https://github.com/janisp123/idle_game/pull/125) merged into main at `ac40bbe2267cc43120beaf260555414a5c44b2f3`. The reported symptom was Glory Scroll spent but no obvious +1 on selected gear. Saved enchantment ranks and original combat bonuses already worked; the presentation was incomplete (old weapon dropdown displayed no rank, armour text buried +N, gear summary omitted ATK/DEF). Fixed visible **gold enchant rank badge** for weapon and each individual armour slot, including after save/reload and equipment-style changes, and added honest in-panel SUCCESS vs FAILED feedback.
+- The old full-width combat-style select above the character's equipment has become two engraved weapon cards inside folded Equipment, using existing Greatsword and Sword & Shield presets and original weights/skill choices. A small ✧ rank summary appears only when enchanted, and real `ATK +N` / `DEF +N` totals appear in the compact gear strip. Keeps mobile screen clear when folded; no new gear item database.
+- No changes to 50/50 scroll drops or enchants, one-scroll cost on both success and failure, defence/damage formula, V7 saves, frozen offline combat, character growth, or Alpha Tools. UI regression now explicitly tests both success and failure, saves, independently enchanted body slots and two selectable weapon cards.
+- Final-head [website CI 45114041042](https://github.com/janisp123/idle_game/actions/runs/45114041042) and [protocol 45114041034](https://github.com/janisp123/idle_game/actions/runs/45114041034) passed; main [Pages 45114129201](https://github.com/janisp123/idle_game/actions/runs/45114129201) deployed. Public fresh raw HTML HTTP 200 confirmed the new app/CSS cache versions and card/feedback UI; Owner's phone visual QA pending.
+
+
 
 ## 2026-11-22 — 24-hour idle test changed from switch to button (chat, PR #123)
 
