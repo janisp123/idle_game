@@ -1,5 +1,13 @@
 # Changelog — verified completed work
 
+## 2026-11-23 — Single equipment edit target and transparent enchant chance (chat, PR #129)
+
+- [PR #129](https://github.com/janisp123/idle_game/pull/129) merged at `ad0c04a8fd18256a092759e50c3dfae5b943d190`. Former equipment editor simultaneously allowed selected weapon and selected armour, each with a separate Enchant action. Now there is **one shared selected equipment slot**, one matching equipment-type editor, and one Enchant button; switching to a weapon or armour card deselects the other category, so an old hidden target cannot be enchanted accidentally.
+- A compact clickable **50% ⓘ** button immediately before Enchant shows all actual current odds: base 50%, no active modifiers (+0 points), final 50%, one scroll regardless of outcome, current rank and success +1 physical ATK/DEF, failure resetting that same slot to +0, unaffected other slots, +20 cap. Confirmation names the exact item before any scroll is spent. No unimplemented attribute/skill/gear odds or gameplay formula changes were invented.
+- Preserved two existing weapon styles and source gear weights, independently saved body slots, visible +N on slot titles but hidden +0, original 50/50 engine drop/enchant rules, unchanged Glory inventory and V7 save schema, offline/frozen combat and Alpha Tools. The editor defaults to HEAD on page load (no persistent selection migration).
+- Final-head [website CI 45137614128](https://github.com/janisp123/idle_game/actions/runs/45137614128) passed all **107 tests** and [protocol 45137614117](https://github.com/janisp123/idle_game/actions/runs/45137614117) passed. Main [Pages 45137742085](https://github.com/janisp123/idle_game/actions/runs/45137742085) deployed successfully. Fresh public HTML HTTP 200 confirmed new app/style versions, one Enchant button, clickable chance disclosure, and absence of both old buttons. Owner's physical mobile visual QA pending.
+
+
 ## 2026-11-23 — Inline +N on enchanted equipment names; hide all zero levels (chat, PR #127)
 
 - [PR #127](https://github.com/janisp123/idle_game/pull/127) merged at `b689b6efd8c6f0f208d5ef035faa47846c7ea7bf`. Following Owner's Android screenshot, removed the extra enchant badge rows: `HEAD +1`, `L GLOVE +1` and `Greatsword +1` now appear **directly on their equipment title line**, gold and compact. Unenchanted pieces have no `+0`. Unused weapon/armor +0 enchant labels and +0 gear totals are hidden; actual positive enchant attributes and completed-success or failed feedback remain visible.
