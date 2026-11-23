@@ -97,7 +97,9 @@ for (const loadout of Object.values(COMBAT_LOADOUTS)) {
     .reduce((sum,part)=>sum+part.kg,0) + " kg";
   const enchant = document.createElement("span");
   enchant.className = "slot-enchant-rank";
-  button.append(glyph,caption,weight,enchant);
+  enchant.hidden = true;
+  caption.append(enchant);
+  button.append(glyph,caption,weight);
   button.addEventListener("click", () => {
     if (state.combatLoadout === loadout.id) return;
     const result = setCombatLoadout(state,loadout.id,gameNow());
@@ -132,7 +134,8 @@ for (const slot of ARMOUR_SLOTS) {
   const enchant = document.createElement("span");
   enchant.className = "slot-enchant-rank";
   enchant.hidden = true;
-  button.append(glyph,caption,equipped,enchant);
+  caption.append(enchant);
+  button.append(glyph,caption,equipped);
   button.addEventListener("click", () => {
     selectedArmourSlot = slot.id;
     render();
@@ -176,7 +179,8 @@ function renderArmour() {
   ui.gearStats.textContent = gear.totalKg + " kg  ·  MOVE " + gear.mobilityPct +
     "%  ·  PHYS " + gear.physicalReductionPct + "%  ·  DODGE " +
     (gear.evasionScore >= 0 ? "+" : "") + gear.evasionScore +
-    "  ·  ATK +" + magic.attack + "  ·  DEF +" + magic.defense +
+    (magic.attack > 0 ? "  ·  ATK +" + magic.attack : "") +
+    (magic.defense > 0 ? "  ·  DEF +" + magic.defense : "") +
     "  ·  MR* " + gear.magicResistancePct + "%";
   const totalRanks = Object.values(state.enchantments).reduce((sum,n)=>sum+n,0);
   ui.enchantTotal.textContent = "✧ +" + totalRanks;
@@ -184,18 +188,20 @@ function renderArmour() {
   for (const [id,parts] of weaponButtons) {
     const chosen = id === state.combatLoadout;
     parts.button.setAttribute("aria-pressed",String(chosen));
+    const rank = state.enchantments.weapon;
     parts.button.setAttribute("aria-label",COMBAT_LOADOUTS[id].name +
-      ", weapon enchant +" + state.enchantments.weapon +
-      " attack. " + (chosen?"Equipped":"Equip weapon"));
-    parts.enchant.textContent = "✧ +" + state.enchantments.weapon + " ATK";
+      (rank > 0 ? ", enchanted +" + rank : "") +
+      ". " + (chosen?"Equipped":"Equip weapon"));
+    parts.enchant.textContent = rank > 0 ? " +" + rank : "";
+    parts.enchant.hidden = rank === 0;
   }
   ui.gearStats.title = "Physical reduction, dodge and mobility are active. " +
     "MR is reserved for future magic damage; slot enchantments add physical attack or defense.";
   ui.gloryWallet.textContent = "✧ " + number(state.items[GLORY_SCROLL_ID]) + " Glory Scrolls";
   ui.weaponEnchantRank.textContent = COMBAT_LOADOUTS[state.combatLoadout].name +
-    " · +" + state.enchantments.weapon + " ATK";
-  ui.armourEnchantRank.textContent = slot.name + " · +" +
-    state.enchantments[slot.id] + " DEF";
+    (state.enchantments.weapon > 0 ? " +" + state.enchantments.weapon : "");
+  ui.armourEnchantRank.textContent = slot.name +
+    (state.enchantments[slot.id] > 0 ? " +" + state.enchantments[slot.id] : "");
   ui.enchantWeapon.disabled = state.items[GLORY_SCROLL_ID] === 0 ||
     state.enchantments.weapon >= GLORY_RULES.maxRank;
   ui.enchantArmour.disabled = state.items[GLORY_SCROLL_ID] === 0 ||
@@ -208,11 +214,12 @@ function renderArmour() {
     const picked = armourOption(part.id, state.armour[part.id]);
     row.equipped.textContent = picked?.name ?? "—";
     const rank=state.enchantments[part.id];
-    row.enchant.textContent = "✧ +" + rank + " DEF";
+    row.enchant.textContent = rank > 0 ? " +" + rank : "";
     row.enchant.hidden = rank === 0;
     row.button.setAttribute("aria-pressed",String(part.id === selectedArmourSlot));
-    row.button.setAttribute("aria-label",part.name+": "+(picked?.name ?? "none")+
-      ", enchant +" + rank + " defense. Choose this armour slot");
+    row.button.setAttribute("aria-label",part.name +
+      (rank > 0 ? " +" + rank : "") + ": " + (picked?.name ?? "none") +
+      ". Choose this armour slot");
   }
 }
 const FACE_GLYPHS = Object.freeze(["⚀","⚁","⚂","⚃","⚄","⚅"]);
