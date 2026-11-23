@@ -128,9 +128,16 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   assert.match(html, /id="armourSlots"/);
   assert.match(html, /id="armourChoice"/, "one equipment dropdown handles the active slot");
   assert.match(html,/id="gearStats"/,"aggregate loadout stats appear inside existing compact armour panel");
-  for(const id of ["gloryWallet","weaponEnchantRank","armourEnchantRank",
-    "enchantWeapon","enchantArmour","enchantFeedback","enchantTotal"])
-    assert.ok(html.includes('id="' + id + '"'),"fixed-slot enchant control: " + id);
+  for(const id of ["equipmentEditor","equipmentEditHeading","armourEditor",
+    "weaponEditor","gloryWallet","enchantSelected","enchantChance",
+    "enchantChanceBreakdown","enchantChanceDetails","enchantFeedback","enchantTotal"])
+    assert.ok(html.includes('id="' + id + '"'),"one-slot editor control: " + id);
+  assert.doesNotMatch(html,/id="enchantWeapon"|id="enchantArmour"/,
+    "the old simultaneous weapon/armour enchant buttons must not exist");
+  assert.match(html,/<button type="button" id="enchantChance"[^>]*aria-expanded="false"/,
+    "chance button starts collapsed and opens the full risk breakdown");
+  assert.match(queueCss,/\.enchant-breakdown\s*\{/,
+    "chance breakdown uses a compact details panel");
   assert.match(queueCss,/\.enchant-action:disabled/,"scroll-free enchant is visibly disabled");
   assert.match(queueCss,/\.weapon-slots\s*\{/,"weapon choices use a card grid");
   assert.match(queueCss,/\.slot-enchant-rank\s*\{/,
@@ -152,7 +159,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261123-inline-enchants1/,
+  assert.match(html, /app\.mjs\?v=20261123-single-editor1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -177,7 +184,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261123-inline-enchants1/,
+  assert.match(html, /iron-ui\.css\?v=20261123-single-editor1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -188,7 +195,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
   const elements = new Map(ids.map(id => [id, new FakeElement()]));
   // Mirror the hidden HTML attribute in the minimal fake DOM.
-  elements.get("masterAudience").hidden = true;
+  for (const id of ["masterAudience","weaponEditor","enchantChanceBreakdown",
+    "enchantFeedback"]) elements.get(id).hidden = true;
+  // Fake elements do not parse initial HTML attributes.
+  elements.get("enchantChance").setAttribute("aria-expanded","false");
   const originalNow = Date.now;
   const originalRandom = Math.random;
   Math.random = () => 0.5; // avoid stochastic 0-item single-cycle rewards in UI assertions
@@ -253,7 +263,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     const weaponChoices=elements.get("weaponSlots").children;
     assert.deepEqual(weaponChoices.map(button=>button.getAttribute("data-loadout")),
       ["greatsword","sword_shield"],"selectable loadouts become engraved weapon cards");
-    assert.equal(weaponChoices[0].getAttribute("aria-pressed"),"true");
+    assert.equal(weaponChoices[0].getAttribute("aria-pressed"),"false",
+      "worn weapon is not another selected editor while HEAD is active");
+    assert.equal(weaponChoices[0].getAttribute("data-equipped"),"true",
+      "equipped style remains identifiable without selecting its editor");
     assert.equal(weaponChoices[1].getAttribute("aria-pressed"),"false");
     assert.match(weaponChoices[0].children[1].textContent,/Greatsword/);
     assert.equal(weaponChoices[0].children[2].textContent,"5 kg");
@@ -265,24 +278,40 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       "zero enchant must not display +0 next to weapon name");
     assert.equal(weaponChoices[1].children[1].children[0].hidden,true);
     assert.match(elements.get("combatSkillsText").textContent,/Heavy Swing.*Blade Guard/);
-    assert.equal(weaponChoices[0].getAttribute("aria-pressed"),"true");
     assert.equal(elements.get("enchantTotal").hidden,true,"empty enchant badge hidden when unequipped");
     const armourGrid = elements.get("armourSlots").children;
-    assert.equal(armourGrid.length,12,"eleven armour slots plus the central emblem");
     const armourButtons = armourGrid.slice(0,11);
+    const selectedCount=()=>[...weaponChoices,...armourButtons].filter(button=>
+      button.getAttribute("aria-pressed")==="true").length;
+    assert.equal(selectedCount(),1,"only one equipment card total may be active");
+    assert.equal(elements.get("equipmentEditHeading").textContent,"HEAD");
+    assert.equal(elements.get("armourEditor").hidden,false);
+    assert.equal(elements.get("weaponEditor").hidden,true);
+    assert.equal(elements.get("enchantChance").textContent,"50% ⓘ");
+    assert.equal(elements.get("enchantChance").getAttribute("aria-expanded"),"false");
+    assert.equal(elements.get("enchantChanceBreakdown").hidden,true);
+    elements.get("enchantChance").fire("click");
+    assert.equal(elements.get("enchantChanceBreakdown").hidden,false);
+    assert.equal(elements.get("enchantChance").getAttribute("aria-expanded"),"true");
+    assert.match(elements.get("enchantChanceDetails").textContent,/Base success chance: 50%/);
+    assert.match(elements.get("enchantChanceDetails").textContent,/Active chance modifiers: none \(0 percentage points\)/);
+    assert.match(elements.get("enchantChanceDetails").textContent,/Final success chance: 50%/);
+    assert.match(elements.get("enchantChanceDetails").textContent,/Cost per attempt: 1 Glory Scroll/);
+    assert.match(elements.get("enchantChanceDetails").textContent,/Failure: this slot resets to \+0/);
+    assert.match(elements.get("enchantChanceDetails").textContent,/Maximum|No attributes/);
+    assert.equal(armourGrid.length,12,"eleven armour slots plus the central emblem");
     assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="left_glove").length,1);
     assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="right_glove").length,1);
     assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="left_boot").length,1);
     assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="right_boot").length,1);
     assert.equal(elements.get("armourChoiceLabel").textContent,"Hood / helmet");
     assert.equal(elements.get("armourChoice").value,"robe");
-    assert.equal(elements.get("enchantWeapon").disabled,true,"no scroll, no weapon enchant");
-    assert.equal(elements.get("enchantArmour").disabled,true,"no scroll, no armour enchant");
+    assert.equal(elements.get("enchantSelected").disabled,true,
+      "no scroll: the one shared enchant button is disabled");
+    assert.match(elements.get("enchantSelected").getAttribute("aria-label"),/only HEAD/);
     assert.match(elements.get("gloryWallet").textContent,/0 Glory Scrolls/);
-    assert.equal(elements.get("weaponEnchantRank").textContent,
-      "Two-handed Greatsword","empty weapon enchant control omits +0");
-    assert.equal(elements.get("armourEnchantRank").textContent,"Hood / helmet",
-      "empty armour enchant control shows the selected slot, but omits +0");
+    assert.equal(elements.get("equipmentEditHeading").textContent,"HEAD",
+      "selected slot title has no +0");
     assert.doesNotMatch(elements.get("gearStats").textContent,/ATK \+0|DEF \+0/,
       "unused bonuses must not clutter the equipment stat strip");
     assert.ok(armourButtons.every(button =>
@@ -304,6 +333,11 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     const leftGloveButton=armourButtons.find(b=>b.getAttribute("data-slot")==="left_glove");
     leftGloveButton.fire("click");
     assert.equal(leftGloveButton.getAttribute("aria-pressed"),"true");
+    assert.equal(selectedCount(),1,"choosing armour clears all weapon selection");
+    assert.equal(elements.get("equipmentEditHeading").textContent,"L GLOVE");
+    assert.equal(elements.get("enchantChanceBreakdown").hidden,true,
+      "changing edit slot closes the previous slot's chance explanation");
+    assert.equal(elements.get("enchantChance").getAttribute("aria-expanded"),"false");
     assert.equal(elements.get("armourChoiceLabel").textContent,"Left glove");
     assert.deepEqual(elements.get("armourChoice").children.map(o=>o.disabled),
       [false,false,false,true],
@@ -947,6 +981,14 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(swapped.combatSession,null,"new style starts a new duel");
     assert.equal(shieldWeapon.getAttribute("aria-pressed"),"true");
     assert.equal(weaponChoices[0].getAttribute("aria-pressed"),"false");
+    assert.equal(leftGloveButton.getAttribute("aria-pressed"),"false",
+      "choosing weapon clears the previously selected armour slot");
+    assert.equal(selectedCount(),1,"one selected slot across both equipment categories");
+    assert.equal(elements.get("armourEditor").hidden,true,
+      "armour item selector is unavailable while editing weapon");
+    assert.equal(elements.get("weaponEditor").hidden,false);
+    assert.equal(elements.get("equipmentEditHeading").textContent,"WEAPON");
+    assert.equal(elements.get("weaponEditor").textContent,"Sword & Shield");
     assert.match(elements.get("combatSkillsText").textContent,/Thrust.*Shield Block/);
     now += COMBAT_BALANCE.eventMs;
     tick();
@@ -961,18 +1003,31 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     store.set(SAVE_KEY,jsonScroll);
     handlers.get("window:storage")({key:SAVE_KEY,newValue:jsonScroll});
     assert.match(elements.get("gloryWallet").textContent,/3 Glory Scrolls/);
-    assert.equal(elements.get("enchantWeapon").disabled,false);
-    assert.equal(elements.get("enchantArmour").disabled,false);
-    elements.get("enchantWeapon").fire("click");
+    assert.equal(elements.get("enchantSelected").disabled,false);
+    assert.match(elements.get("enchantSelected").getAttribute("aria-label"),/only WEAPON/,
+      "enchant action is bound to the single selected slot");
+    // A hidden armour dropdown must not be able to modify an old body slot.
+    const beforeHiddenInput=store.get(SAVE_KEY);
+    elements.get("armourChoice").value="none";
+    elements.get("armourChoice").fire("change");
+    assert.equal(store.get(SAVE_KEY),beforeHiddenInput);
+    elements.get("enchantChance").fire("click");
+    assert.match(elements.get("enchantChanceDetails").textContent,/Selected slot: WEAPON/);
+    assert.match(elements.get("enchantChanceDetails").textContent,/Success: \+1 on this slot \(\+1 ATK/);
+    assert.match(elements.get("enchantChanceDetails").textContent,/Failure: this slot resets to \+0/);
+    elements.get("enchantSelected").fire("click");
     assert.equal(enchantConfirmations,1,"the user can cancel before risk");
     assert.equal(JSON.parse(store.get(SAVE_KEY)).items.glory_scroll,3);
     allowEnchant=true;
     Math.random=()=>0.25;
-    elements.get("enchantWeapon").fire("click");
+    elements.get("enchantSelected").fire("click");
     let enchanted=JSON.parse(store.get(SAVE_KEY));
     assert.equal(enchanted.items.glory_scroll,2);
     assert.equal(enchanted.enchantments.weapon,1);
-    assert.match(elements.get("weaponEnchantRank").textContent,/Sword & Shield \+1/);
+    assert.equal(elements.get("equipmentEditHeading").textContent,"WEAPON +1");
+    assert.match(elements.get("enchantChanceDetails").textContent,/Selected slot: WEAPON \+1/);
+    assert.match(elements.get("enchantChanceDetails").textContent,/Success: \+2 on this slot/);
+    assert.match(elements.get("enchantChanceDetails").textContent,/lose 1 existing rank/);
     assert.equal(shieldWeapon.children[1].children[0].textContent," +1",
       "weapon title must show its +1 directly, not in an extra badge row");
     assert.equal(shieldWeapon.children[1].children[0].hidden,false);
@@ -992,7 +1047,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(shieldWeapon.children[1].children[0].textContent," +1");
     assert.match(elements.get("gearStats").textContent,/ATK \+1/);
     Math.random=()=>0.9;
-    elements.get("enchantWeapon").fire("click");
+    elements.get("enchantSelected").fire("click");
     enchanted=JSON.parse(store.get(SAVE_KEY));
     assert.equal(enchanted.items.glory_scroll,1);
     assert.equal(enchanted.enchantments.weapon,0,"failed slot enchant resets all rank");
@@ -1000,11 +1055,22 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.match(elements.get("enchantFeedback").textContent,/FAILED.*reset to \+0/);
     assert.equal(shieldWeapon.children[1].children[0].hidden,true);
     assert.equal(shieldWeapon.children[1].children[0].textContent,"");
-    assert.doesNotMatch(elements.get("weaponEnchantRank").textContent,/\+0/,
-      "after a failed roll, the zero rank disappears from the card and label");
+    assert.equal(elements.get("equipmentEditHeading").textContent,"WEAPON",
+      "after a failed roll, the zero rank disappears from selected-slot title");
     assert.equal(elements.get("enchantTotal").hidden,true);
+    leftGloveButton.fire("click");
+    assert.equal(selectedCount(),1,"weapon selection cleared before armour attempt");
+    assert.equal(shieldWeapon.getAttribute("aria-pressed"),"false");
+    assert.equal(leftGloveButton.getAttribute("aria-pressed"),"true");
+    assert.equal(elements.get("armourEditor").hidden,false);
+    assert.equal(elements.get("weaponEditor").hidden,true);
+    assert.equal(elements.get("equipmentEditHeading").textContent,"L GLOVE");
+    assert.equal(elements.get("enchantChanceBreakdown").hidden,true);
+    assert.equal(elements.get("enchantFeedback").hidden,true,
+      "old weapon failure must not appear under new armour slot");
+    assert.match(elements.get("enchantSelected").getAttribute("aria-label"),/only L GLOVE/);
     Math.random=()=>0.25;
-    elements.get("enchantArmour").fire("click");
+    elements.get("enchantSelected").fire("click");
     enchanted=JSON.parse(store.get(SAVE_KEY));
     assert.equal(enchanted.items.glory_scroll,0);
     assert.equal(enchanted.enchantments.left_glove,1,
@@ -1025,8 +1091,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     handlers.get("window:storage")({key:SAVE_KEY,newValue:savedArmour});
     assert.equal(leftGloveButton.children[1].children[0].textContent," +1",
       "armour-card inline rank remains after saving and loading");
-    assert.equal(elements.get("enchantWeapon").disabled,true);
-    assert.equal(elements.get("enchantArmour").disabled,true);
+    assert.equal(elements.get("enchantSelected").disabled,true,
+      "the one enchant action is disabled when all scrolls are spent");
 
     // Alpha Tools: a reset and one-day test are momentary switches, while
     // ×10 is sticky and its companion virtual clock survives reloads.

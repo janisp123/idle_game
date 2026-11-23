@@ -148,8 +148,9 @@ def check():
                 "resultPanel", "combatReadout", "playerResult", "enemyResult",
                 "workReadout", "workResultTokens",
                 "skillTitle", "skillLevel", "skillXp", "skillFill", "nameInput", "saveName", "gearStats",
-                "gloryWallet", "weaponEnchantRank", "armourEnchantRank",
-                "enchantWeapon", "enchantArmour"}.issubset(game_parser.ids), "Missing essential gameplay UI"
+                "gloryWallet", "equipmentEditor", "equipmentEditHeading", "armourEditor", "weaponEditor",
+                "enchantSelected", "enchantChance", "enchantChanceBreakdown",
+                "enchantChanceDetails"}.issubset(game_parser.ids), "Missing essential gameplay UI"
         assert not ({"level", "xpText", "xpFill", "lifetimeXp"} & game_parser.ids), (
             "Character must have no global level or XP widget"
         )
