@@ -1,5 +1,14 @@
 # Current working checkpoint
 
+## Latest verified — enchant level inline with equipment names (2026-11-23, PR #127)
+
+- **Live main:** `b689b6efd8c6f0f208d5ef035faa47846c7ea7bf` from [PR #127](https://github.com/janisp123/idle_game/pull/127); no open competing PR.
+- **Owner's phone screenshot refinement:** Enchantment rank appears directly **beside the slot title**, e.g. `HEAD +1`, `L GLOVE +1` or `Two-handed Greatsword +1`. Gold `+N` text is an inline child of the slot name instead of a separate badge row. Every rank 0 is completely hidden in the slot grid and weapon names, in the enchant buttons' status labels, and in the gear stats totals; actual positive `ATK +N`/`DEF +N` remain visible. This reduces vertical space on mobile.
+- **No mechanics changed:** Same existing saved 12 slot ranks, shared weapon slot across the two styles, independently enchanted armour pieces, Glory scroll spend/chance, 50% failure resetting only chosen slot, XP/gear/offline/Skill Master rules, V7 saved character schema, and original equipment styles.
+- **Validation:** Final PR head `40f1cf083024441ca419586689413c87e8ab6ebb` passed [website CI 45117631298](https://github.com/janisp123/idle_game/actions/runs/45117631298) (**107 tests**) and [protocol 45117631345](https://github.com/janisp123/idle_game/actions/runs/45117631345). Main [Pages 45117740319](https://github.com/janisp123/idle_game/actions/runs/45117740319) successfully deployed. Fresh public `/play/?verify=inline-enchants-20261123` raw HTML returned HTTP 200 with `app.mjs?v=20261123-inline-enchants1`, matching updated stylesheet and no old `+0` default enchant control labels. Actual phone visual QA remains with Owner.
+- **Next:** Owner refreshes [Play Now](https://janisp123.github.io/idle_game/play/), opens Equipment, and checks a successful slot enchant shows `HEAD +1` (or the selected slot) and no `+0` clutter anywhere. Future enchant stat requirements remain GAME-013.
+
+
 ## Latest verified — Enchant rank visibly equipped; weapon cards match armour (2026-11-23, PR #125)
 
 - **Live main:** `ac40bbe2267cc43120beaf260555414a5c44b2f3` after [PR #125](https://github.com/janisp123/idle_game/pull/125); no competing open PR at merge.
