@@ -101,7 +101,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "current combat action has a distinct highlighted state");
   for (const id of ["playerDie1","playerDie2","playerDie3","enemyDie1","enemyDie2","enemyDie3"])
     assert.ok(html.includes('id="' + id + '"'),"both fighters get three distinct visible dice");
-  assert.match(html, /id="combatLoadout"/, "a player can equip one of the two combat styles");
+  assert.match(html, /id="weaponSlots"/,
+    "weapon selection is now an engraved two-card equipment group");
+  assert.doesNotMatch(html,/id="combatLoadout"/,
+    "remove the old separate weapon dropdown that did not display enchant ranks");
   assert.match(html, /<details id="alphaTools"/,
     "alpha tools must fold away rather than occupy normal phone space");
   for(const id of ["alphaReset","alphaDay","alphaSpeed","alphaStatus"])
@@ -126,9 +129,12 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   assert.match(html, /id="armourChoice"/, "one equipment dropdown handles the active slot");
   assert.match(html,/id="gearStats"/,"aggregate loadout stats appear inside existing compact armour panel");
   for(const id of ["gloryWallet","weaponEnchantRank","armourEnchantRank",
-    "enchantWeapon","enchantArmour"])
+    "enchantWeapon","enchantArmour","enchantFeedback","enchantTotal"])
     assert.ok(html.includes('id="' + id + '"'),"fixed-slot enchant control: " + id);
   assert.match(queueCss,/\.enchant-action:disabled/,"scroll-free enchant is visibly disabled");
+  assert.match(queueCss,/\.weapon-slots\s*\{/,"weapon choices use a card grid");
+  assert.match(queueCss,/\.slot-enchant-rank\s*\{/,
+    "each piece has a dedicated visible rank badge");
   assert.match(queueCss, /grid-template-areas:[\s\S]*left_shoulder head right_shoulder/, "slots make a body-shaped grid");
   assert.doesNotMatch(html, /id="combatRolls"|id="combatEventText"/,
     "repeated fighting narration and rolls must not appear above Chronicle");
@@ -142,7 +148,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261122-alpha-day-button1/,
+  assert.match(html, /app\.mjs\?v=20261123-enchant-ui1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -167,7 +173,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261122-alpha-day-button1/,
+  assert.match(html, /iron-ui\.css\?v=20261123-enchant-ui1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -240,10 +246,18 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.doesNotMatch(html, /<option value="8">8<\/option>/,
       "planner must not carry a duplicated static 1..8 range");
     assert.ok(tick, "game tick must start");
-    assert.deepEqual(elements.get("combatLoadout").children.map(option => option.value),
-      ["greatsword","sword_shield"],"selectable loadouts come from the skill registry");
+    const weaponChoices=elements.get("weaponSlots").children;
+    assert.deepEqual(weaponChoices.map(button=>button.getAttribute("data-loadout")),
+      ["greatsword","sword_shield"],"selectable loadouts become engraved weapon cards");
+    assert.equal(weaponChoices[0].getAttribute("aria-pressed"),"true");
+    assert.equal(weaponChoices[1].getAttribute("aria-pressed"),"false");
+    assert.match(weaponChoices[0].children[1].textContent,/Greatsword/);
+    assert.equal(weaponChoices[0].children[2].textContent,"5 kg");
+    assert.equal(weaponChoices[1].children[2].textContent,"7 kg");
+    assert.equal(weaponChoices[0].children[3].textContent,"✧ +0 ATK");
     assert.match(elements.get("combatSkillsText").textContent,/Heavy Swing.*Blade Guard/);
-    assert.equal(elements.get("combatLoadout").value,"greatsword");
+    assert.equal(weaponChoices[0].getAttribute("aria-pressed"),"true");
+    assert.equal(elements.get("enchantTotal").hidden,true,"empty enchant badge hidden when unequipped");
     const armourGrid = elements.get("armourSlots").children;
     assert.equal(armourGrid.length,12,"eleven armour slots plus the central emblem");
     const armourButtons = armourGrid.slice(0,11);
@@ -907,12 +921,13 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("combatTurns").textContent.includes("◆"),true);
     assert.equal(arena.skills.fighting.level, 1);
     assert.equal(arena.combatSession.player.loadout,"greatsword");
-    const picker = elements.get("combatLoadout");
-    picker.value = "sword_shield";
-    picker.fire("change");
+    const shieldWeapon=weaponChoices.find(x=>x.getAttribute("data-loadout")==="sword_shield");
+    shieldWeapon.fire("click");
     const swapped = JSON.parse(store.get(SAVE_KEY));
     assert.equal(swapped.combatLoadout,"sword_shield");
     assert.equal(swapped.combatSession,null,"new style starts a new duel");
+    assert.equal(shieldWeapon.getAttribute("aria-pressed"),"true");
+    assert.equal(weaponChoices[0].getAttribute("aria-pressed"),"false");
     assert.match(elements.get("combatSkillsText").textContent,/Thrust.*Shield Block/);
     now += COMBAT_BALANCE.eventMs;
     tick();
@@ -939,13 +954,30 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(enchanted.items.glory_scroll,2);
     assert.equal(enchanted.enchantments.weapon,1);
     assert.match(elements.get("weaponEnchantRank").textContent,/\+1 ATK/);
-    assert.match(elements.get("resultNotice").textContent,/enchanted to \+1/);
+    assert.equal(shieldWeapon.children[3].textContent,"✧ +1 ATK",
+      "weapon card, not just transient result text, must show the saved +1 rank");
+    assert.equal(weaponChoices[0].children[3].textContent,"✧ +1 ATK",
+      "weapon enchant belongs to the slot and persists across either weapon style");
+    assert.equal(elements.get("enchantTotal").hidden,false);
+    assert.equal(elements.get("enchantTotal").textContent,"✧ +1");
+    assert.match(elements.get("gearStats").textContent,/ATK \+1\s+·\s+DEF \+0/);
+    assert.match(elements.get("enchantFeedback").textContent,/SUCCESS.*\+1 ATK/);
+    assert.equal(elements.get("enchantFeedback").getAttribute("data-outcome"),"success");
+    assert.match(elements.get("resultNotice").textContent,/SUCCESS.*\+1/);
+    // A reload of the same saved character must retain the visible rank.
+    const savedSuccess=store.get(SAVE_KEY);
+    handlers.get("window:storage")({key:SAVE_KEY,newValue:savedSuccess});
+    assert.equal(shieldWeapon.children[3].textContent,"✧ +1 ATK");
+    assert.match(elements.get("gearStats").textContent,/ATK \+1/);
     Math.random=()=>0.9;
     elements.get("enchantWeapon").fire("click");
     enchanted=JSON.parse(store.get(SAVE_KEY));
     assert.equal(enchanted.items.glory_scroll,1);
     assert.equal(enchanted.enchantments.weapon,0,"failed slot enchant resets all rank");
-    assert.match(elements.get("resultNotice").textContent,/reset to \+0/);
+    assert.match(elements.get("resultNotice").textContent,/FAILED.*reset to \+0/);
+    assert.match(elements.get("enchantFeedback").textContent,/FAILED.*reset to \+0/);
+    assert.equal(shieldWeapon.children[3].textContent,"✧ +0 ATK");
+    assert.equal(elements.get("enchantTotal").hidden,true);
     Math.random=()=>0.25;
     elements.get("enchantArmour").fire("click");
     enchanted=JSON.parse(store.get(SAVE_KEY));
@@ -953,6 +985,18 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(enchanted.enchantments.left_glove,1,
       "selected armour slot, not entire armour type, gains DEF");
     assert.equal(enchanted.enchantments.right_glove,0);
+    assert.equal(leftGloveButton.children[3].textContent,"✧ +1 DEF",
+      "selected armour card must visibly gain +1 DEF on successful enchant");
+    assert.equal(leftGloveButton.children[3].hidden,false);
+    assert.match(elements.get("gearStats").textContent,/DEF \+1/);
+    assert.equal(elements.get("enchantTotal").textContent,"✧ +1");
+    assert.match(elements.get("enchantFeedback").textContent,/SUCCESS.*\+1 DEF/);
+    assert.equal(armourButtons.find(x=>x.getAttribute("data-slot")==="right_glove").children[3].hidden,true,
+      "enchant only changes the chosen body slot");
+    const savedArmour=store.get(SAVE_KEY);
+    handlers.get("window:storage")({key:SAVE_KEY,newValue:savedArmour});
+    assert.equal(leftGloveButton.children[3].textContent,"✧ +1 DEF",
+      "armour-card rank remains after saving and loading");
     assert.equal(elements.get("enchantWeapon").disabled,true);
     assert.equal(elements.get("enchantArmour").disabled,true);
 
