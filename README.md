@@ -1,63 +1,48 @@
-# Idle Game — Browser Game Engineering Library
+# Idle Game
 
-A public hobby project with **two parallel purposes**:
+*An evolving dark-fantasy idle RPG and open browser-game engineering project.*
 
-1. **Build an original idle fantasy browser RPG** with mobile portrait controls, atmospheric static illustrations, automated activities, cooperative play and unlimited offline progression.
-2. **Maintain a public learning library** explaining practical browser-game mechanics and engineering techniques, including approaches we will never use ourselves.
+Idle Game is an independent hobby project exploring a slower-paced fantasy RPG built around meaningful progression and respect for the player's time. Choose a path, let the world move, and return when it suits you.
 
-The repository contains the public engineering research library **and a playable, browser-local alpha** with 41 activities, time-based attributes, autonomous Fighting duels, schedules and unlimited offline settlement. Combat art and clan battles are still incomplete; multiplayer accounts are not implemented.
+**This project is actively evolving.** Mechanics, content, visuals and long-term plans may change as ideas are tested. The current build is an experiment, not a promise of a fixed final feature set.
 
-## Project website
+## Play the current alpha
 
-The [Idle Game landing page](https://janisp123.github.io/idle_game/) introduces the game concept and engineering library; **Play Now** leads to the [first playable prototype](https://janisp123.github.io/idle_game/play/) after its branch is approved, merged and deployed.
+- **[Play in your browser](https://janisp123.github.io/idle_game/play/)**
+- **[Visit the project website](https://janisp123.github.io/idle_game/)**
 
-The source lives in `site/`. The [Pages workflow](.github/workflows/pages.yml) validates it on pull requests and publishes that folder after approved changes are merged into `main` (when GitHub Pages is configured to use GitHub Actions). No external site generator or paid hosting is required.
+The playable alpha lets you explore an early version of the world and its systems. Expect changes, rough edges and ongoing balancing. Progress is currently stored **locally in your browser**; there are no online accounts or cross-device save synchronization. This is not yet a finished or production-ready game.
 
-## Test every playable build in the browser
+## Guiding ideas
 
-The landing page has an enabled **Play Now** link to `site/play/index.html` (public route after merge: `https://janisp123.github.io/idle_game/play/`). Future playable changes must update this served browser game. No download-and-open workflow.
+- **Progress at your own pace.** The game is designed for players who may step away for long periods rather than check in every day.
+- **A world worth returning to.** Different activities, character development and encounters should create lasting choices without demanding constant attention.
+- **Atmosphere over noise.** Original dark-fantasy artwork and a readable, mobile-friendly interface matter as much as the underlying rules.
+- **Build carefully, change when needed.** Gameplay decisions are tested and revised; ideas are not guaranteed features.
 
-The GitHub Pages workflow deploys all of `site/` after approved merges to `main`, and the site checker enforces that the button points to a real local entrypoint when present. The owner should be told that deployment can take a short time after merge, and the live link should be verified before claiming it works. A first playable **prototype only** has been implemented; full combat, multiplayer, equipment and persistent online accounts are not yet present. Owner approval is still required for new gameplay scope and merges (see `docs/DECISIONS.md` SITE-001 and MVP-001).
+These are design goals, not a final roadmap. For current implementation details, use the mechanics documentation and repository history rather than this overview.
+
+## Open engineering library
+
+The repository also hosts a public collection of research, examples and practical lessons from building browser games. Some techniques are useful as general references even when they are not chosen for Idle Game.
+
+| Resource | What it covers |
+| --- | --- |
+| [Engineering research](docs/RESEARCH_LIBRARY.md) | Topics and evidence for browser-game development |
+| [Implementation examples](docs/USEFUL_EXAMPLES.md) | Algorithms, trade-offs and reusable patterns |
+| [Mechanics handbook](docs/mechanics/README.md) | Current implemented rules and tuning references |
+| [Design notes](docs/BRAINSTORM.md) | Explorations and possibilities, not commitments |
+| [Owner decisions](docs/DECISIONS.md) | Agreed project direction and boundaries |
+| [Active tasks](docs/TD_LIST.md) | Work currently tracked for development |
+| [Working checkpoint](docs/WORK_CHECKPOINT.md) | Verified progress, limitations and handoffs |
+| [Changelog](docs/CHANGELOG.md) | Completed changes and supporting evidence |
+
+## Development and contributions
+
+The source for the public website and browser alpha lives in `site/`. Changes are developed through reviewed pull requests with automated checks; the public site is deployed with GitHub Pages.
+
+For project procedures, see [AGENTS.md](AGENTS.md) and the [agent protocol](docs/AGENT_PROTOCOL.md). Research notes are not authorization to implement features. The game is an ongoing hobby project, not a commercial launch announcement.
 
 ## License
 
-This project is **open-source software** under the [MIT License](LICENSE.md). Feel free to read, use, modify, and share the code, including in commercial projects, as long as you keep the required copyright and license notice.
-
-Original third-party materials, if added later, remain subject to their own licenses.
-
-## Explore
-
-| Resource | Purpose |
-| --- | --- |
-| [Research library](docs/RESEARCH_LIBRARY.md) | Purpose, topic index, article standards and relevance labels |
-| [Useful implementation examples](docs/USEFUL_EXAMPLES.md) | Standalone algorithms, tradeoffs and implementation sketches |
-| [Technical article template](docs/library/ENTRY_TEMPLATE.md) | Consistent format for future educational guides |
-| [Mechanics handbook — exact live formulas and balance settings](docs/mechanics/README.md) | Source-of-truth map for XP, drops, combat, scheduling, saves and how to tune values safely |
-| [Game brainstorm](docs/BRAINSTORM.md) | Design possibilities, directions, rejected ideas and open questions |
-| [Durable decisions](docs/DECISIONS.md) | Owner-approved project decisions |
-| [Development tasks](docs/TD_LIST.md) | Actual authorized implementation tasks |
-| [Working checkpoint](docs/WORK_CHECKPOINT.md) | Verified current status, limits and handoff for chat/CW/Codex |
-| [Completed milestones](docs/CHANGELOG.md) | Merged repository work, with PRs and evidence |
-| [Security policy](SECURITY.md) | Public site security boundary and responsible reporting guidance |
-
-## Two different kinds of relevance
-
-A technique can be valuable to browser-game developers **even when it doesn't suit our own game**. Entries use `FIT`, `ADAPT`, `NOT-FIT` and `UNDECIDED` tags **only to assess our game**. Evidence labels distinguish untested design notes, prototypes, executed tests and benchmarks.
-
-## Documentation principles
-
-The public guides are independently written explanations and original illustrative examples. They do not name particular games consulted while researching, link to outside research repositories, or reproduce third-party code/artwork. No claims of testing are made without real test results. If third-party software is ever integrated into the game, applicable copyright licenses and mandatory notices must be respected.
-
-## Chat / CW / Codex coordination
-
-Read [AGENTS.md](AGENTS.md) and the [agent protocol](docs/AGENT_PROTOCOL.md) before taking project actions, beginning with current remote `main:docs/TD_LIST.md`. The owner approves changes. Brainstorming and library materials **do not** authorize gameplay implementation.
-
-## Playable alpha controls and limits
-
-Use **Activities** to select Fighting, gathering, crafting, training or leisure; configure a three-activity route with a final **Forever** task. Active **alpha testing timings** run full work cycles at 10 seconds each; normal activity durations and transitions are preserved in the engine. Every activity has an independent skill XP bar, capped until the player confirms Skill Master training. Five uncapped time-based attributes (STR/DEX/END/INT/WIL) grow through productive work.
-
-**Fighting V2 alpha** resolves named-foe duels in automatic alternating turns. Each fighter has **one attack ability and one defense ability**: Greatsword uses slow, heavy Heavy Swing and weaker Blade Guard; Sword & Shield uses fast Thrust and much stronger Shield Block. Separate attack and defense rolls determine the actual strikes, blocks, parries and misses, including rare 6–6–6 finisher events. The player can switch equipped styles. Twelve original **event- and weapon-matched static combat illustrations** now play in the main scene, including Greatsword/Sword & Shield victory and defeat images; the Chronicle alone contains attack/defense rolls, damage and narration; additional art variants remain future work; independent combat-ability leveling, permanent injuries, gear inventory, and clan warfare are still future work. Current equations and provisional skill balance are in the [combat mechanics page](docs/mechanics/COMBAT.md).
-
-Progress is saved in **browser localStorage only** and settled in bounded batches after absence. There is no cross-device account sync or server anti-cheat. See the [mechanics handbook](docs/mechanics/README.md) for the actual formulas, every tunable value, save invariants and regression tests.
-
-**Visual design:** see [Visual language](docs/VISUAL_LANGUAGE.md) for the shared grimdark artwork and UI rules. The approved activity paintings live in `site/play/assets/hunting.webp` and `site/play/assets/mining.webp`; the original flat vector placeholders have been removed.
+The project's original code is released under the [MIT License](LICENSE.md). Any third-party materials, if incorporated, remain subject to their applicable terms.
