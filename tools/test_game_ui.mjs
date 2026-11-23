@@ -134,7 +134,11 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   assert.match(queueCss,/\.enchant-action:disabled/,"scroll-free enchant is visibly disabled");
   assert.match(queueCss,/\.weapon-slots\s*\{/,"weapon choices use a card grid");
   assert.match(queueCss,/\.slot-enchant-rank\s*\{/,
-    "each piece has a dedicated visible rank badge");
+    "every slot uses compact inline rank styling");
+  assert.match(queueCss,/\.slot-enchant-rank\s*\{[^}]*display:inline;/s,
+    "the enchant level must sit next to the slot name, not in another row");
+  assert.doesNotMatch(html,/Weapon · \+0 ATK|Head · \+0 DEF/,
+    "no +0 enchantment labels in the default equipment layout");
   assert.match(queueCss, /grid-template-areas:[\s\S]*left_shoulder head right_shoulder/, "slots make a body-shaped grid");
   assert.doesNotMatch(html, /id="combatRolls"|id="combatEventText"/,
     "repeated fighting narration and rolls must not appear above Chronicle");
@@ -148,7 +152,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261123-enchant-ui1/,
+  assert.match(html, /app\.mjs\?v=20261123-inline-enchants1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -173,7 +177,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261123-enchant-ui1/,
+  assert.match(html, /iron-ui\.css\?v=20261123-inline-enchants1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -254,7 +258,12 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.match(weaponChoices[0].children[1].textContent,/Greatsword/);
     assert.equal(weaponChoices[0].children[2].textContent,"5 kg");
     assert.equal(weaponChoices[1].children[2].textContent,"7 kg");
-    assert.equal(weaponChoices[0].children[3].textContent,"✧ +0 ATK");
+    assert.equal(weaponChoices[0].children.length,3,
+      "weapon card has no standalone enchantment row");
+    assert.equal(weaponChoices[0].children[1].children[0].hidden,true);
+    assert.equal(weaponChoices[0].children[1].children[0].textContent,"",
+      "zero enchant must not display +0 next to weapon name");
+    assert.equal(weaponChoices[1].children[1].children[0].hidden,true);
     assert.match(elements.get("combatSkillsText").textContent,/Heavy Swing.*Blade Guard/);
     assert.equal(weaponChoices[0].getAttribute("aria-pressed"),"true");
     assert.equal(elements.get("enchantTotal").hidden,true,"empty enchant badge hidden when unequipped");
@@ -270,6 +279,16 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("enchantWeapon").disabled,true,"no scroll, no weapon enchant");
     assert.equal(elements.get("enchantArmour").disabled,true,"no scroll, no armour enchant");
     assert.match(elements.get("gloryWallet").textContent,/0 Glory Scrolls/);
+    assert.equal(elements.get("weaponEnchantRank").textContent,
+      "Two-handed Greatsword","empty weapon enchant control omits +0");
+    assert.equal(elements.get("armourEnchantRank").textContent,"Head",
+      "empty armour enchant control omits +0");
+    assert.doesNotMatch(elements.get("gearStats").textContent,/ATK \+0|DEF \+0/,
+      "unused bonuses must not clutter the equipment stat strip");
+    assert.ok(armourButtons.every(button =>
+      button.children[1].children[0].hidden &&
+      button.children[1].children[0].textContent === ""),
+      "all eleven baseline armour slots hide +0 beside their labels");
     assert.match(elements.get("gearStats").textContent,/11 kg.*MOVE 92%.*PHYS 4%.*MR\* 45%/,
       "starter robe and greatsword have truthful weight, mobility, protection and future magic values");
     assert.deepEqual(elements.get("armourChoice").children.map(o=>o.value),
@@ -953,21 +972,24 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     let enchanted=JSON.parse(store.get(SAVE_KEY));
     assert.equal(enchanted.items.glory_scroll,2);
     assert.equal(enchanted.enchantments.weapon,1);
-    assert.match(elements.get("weaponEnchantRank").textContent,/\+1 ATK/);
-    assert.equal(shieldWeapon.children[3].textContent,"✧ +1 ATK",
-      "weapon card, not just transient result text, must show the saved +1 rank");
-    assert.equal(weaponChoices[0].children[3].textContent,"✧ +1 ATK",
-      "weapon enchant belongs to the slot and persists across either weapon style");
+    assert.match(elements.get("weaponEnchantRank").textContent,/Sword & Shield \+1/);
+    assert.equal(shieldWeapon.children[1].children[0].textContent," +1",
+      "weapon title must show its +1 directly, not in an extra badge row");
+    assert.equal(shieldWeapon.children[1].children[0].hidden,false);
+    assert.equal(weaponChoices[0].children[1].children[0].textContent," +1",
+      "the shared weapon slot keeps its rank when switching weapon style");
     assert.equal(elements.get("enchantTotal").hidden,false);
     assert.equal(elements.get("enchantTotal").textContent,"✧ +1");
-    assert.match(elements.get("gearStats").textContent,/ATK \+1\s+·\s+DEF \+0/);
+    assert.match(elements.get("gearStats").textContent,/ATK \+1/);
+    assert.doesNotMatch(elements.get("gearStats").textContent,/DEF \+0/,
+      "show only positive enchant bonuses");
     assert.match(elements.get("enchantFeedback").textContent,/SUCCESS.*\+1 ATK/);
     assert.equal(elements.get("enchantFeedback").getAttribute("data-outcome"),"success");
     assert.match(elements.get("resultNotice").textContent,/SUCCESS.*\+1/);
     // A reload of the same saved character must retain the visible rank.
     const savedSuccess=store.get(SAVE_KEY);
     handlers.get("window:storage")({key:SAVE_KEY,newValue:savedSuccess});
-    assert.equal(shieldWeapon.children[3].textContent,"✧ +1 ATK");
+    assert.equal(shieldWeapon.children[1].children[0].textContent," +1");
     assert.match(elements.get("gearStats").textContent,/ATK \+1/);
     Math.random=()=>0.9;
     elements.get("enchantWeapon").fire("click");
@@ -976,7 +998,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(enchanted.enchantments.weapon,0,"failed slot enchant resets all rank");
     assert.match(elements.get("resultNotice").textContent,/FAILED.*reset to \+0/);
     assert.match(elements.get("enchantFeedback").textContent,/FAILED.*reset to \+0/);
-    assert.equal(shieldWeapon.children[3].textContent,"✧ +0 ATK");
+    assert.equal(shieldWeapon.children[1].children[0].hidden,true);
+    assert.equal(shieldWeapon.children[1].children[0].textContent,"");
+    assert.doesNotMatch(elements.get("weaponEnchantRank").textContent,/\+0/,
+      "after a failed roll, the zero rank disappears from the card and label");
     assert.equal(elements.get("enchantTotal").hidden,true);
     Math.random=()=>0.25;
     elements.get("enchantArmour").fire("click");
@@ -985,18 +1010,21 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(enchanted.enchantments.left_glove,1,
       "selected armour slot, not entire armour type, gains DEF");
     assert.equal(enchanted.enchantments.right_glove,0);
-    assert.equal(leftGloveButton.children[3].textContent,"✧ +1 DEF",
-      "selected armour card must visibly gain +1 DEF on successful enchant");
-    assert.equal(leftGloveButton.children[3].hidden,false);
+    assert.equal(leftGloveButton.children[1].textContent,"L GLOVE");
+    assert.equal(leftGloveButton.children.length,3,
+      "armour rank lives inline with slot name and takes no extra card row");
+    assert.equal(leftGloveButton.children[1].children[0].textContent," +1",
+      "slot heading reads L GLOVE +1 after successful enchant");
+    assert.equal(leftGloveButton.children[1].children[0].hidden,false);
     assert.match(elements.get("gearStats").textContent,/DEF \+1/);
     assert.equal(elements.get("enchantTotal").textContent,"✧ +1");
     assert.match(elements.get("enchantFeedback").textContent,/SUCCESS.*\+1 DEF/);
-    assert.equal(armourButtons.find(x=>x.getAttribute("data-slot")==="right_glove").children[3].hidden,true,
+    assert.equal(armourButtons.find(x=>x.getAttribute("data-slot")==="right_glove").children[1].children[0].hidden,true,
       "enchant only changes the chosen body slot");
     const savedArmour=store.get(SAVE_KEY);
     handlers.get("window:storage")({key:SAVE_KEY,newValue:savedArmour});
-    assert.equal(leftGloveButton.children[3].textContent,"✧ +1 DEF",
-      "armour-card rank remains after saving and loading");
+    assert.equal(leftGloveButton.children[1].children[0].textContent," +1",
+      "armour-card inline rank remains after saving and loading");
     assert.equal(elements.get("enchantWeapon").disabled,true);
     assert.equal(elements.get("enchantArmour").disabled,true);
 
