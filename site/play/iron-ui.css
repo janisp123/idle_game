@@ -698,12 +698,11 @@ footer p{color:#aa9680}
   font:10px/1.3 Georgia,serif;text-align:center;
 }
 .armour-section-label {margin:8px 13px 0}
+/* Rank lives inline with HEAD / L GLOVE / weapon name, never as an extra row.
+   Empty +0 ranks are hidden; existing card heights remain compact on phones. */
 .slot-enchant-rank {
-  display:inline-block;max-width:100%;padding:2px 5px;
-  border:1px solid #9a793d;border-radius:2px;
-  background:linear-gradient(#5d4526,#291d11);
-  color:#f4d38c;font:700 10px/1.25 Georgia,serif;
-  letter-spacing:.015em;font-variant-numeric:tabular-nums;
+  display:inline;white-space:nowrap;color:#f4ce82;
+  font:700 1em/1 Georgia,serif;font-variant-numeric:tabular-nums;
 }
 .slot-enchant-rank[hidden],.enchant-total[hidden],.enchant-feedback[hidden] {display:none}
 .enchant-total {
@@ -721,7 +720,6 @@ footer p{color:#aa9680}
 @media(max-width:390px) {
   .weapon-slot-name{font-size:11px}
   .weapon-slot{min-height:72px;padding:4px}
-  .slot-enchant-rank{font-size:9px;padding:2px 4px}
 }
 /* No story paragraph or attack-number duplicate in the scene: Chronicle
    owns every combat sentence and numeric damage/roll. */
