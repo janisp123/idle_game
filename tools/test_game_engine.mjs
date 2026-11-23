@@ -194,9 +194,9 @@ test("Glory Scroll item, fixed equipment slots and 50/50 enchant failure have ex
   assert.equal(GLORY_RULES.winDropChance,0.5);
   assert.equal(GLORY_RULES.enchantSuccessChance,0.5);
   assert.equal(base.items.glory_scroll,0);
-  assert.equal(ENCHANT_SLOTS.length,12,"one weapon plus eleven independent armour slots");
-  assert.deepEqual(ENCHANT_SLOTS.slice(1),ARMOUR_SLOTS.map(x=>x.id));
-  assert.deepEqual(Object.values(base.enchantments),Array(12).fill(0));
+  assert.equal(ENCHANT_SLOTS.length,13,"weapon, shield and eleven independent armour slots");
+  assert.deepEqual(ENCHANT_SLOTS.slice(2),ARMOUR_SLOTS.map(x=>x.id));
+  assert.deepEqual(Object.values(base.enchantments),Array(13).fill(0));
   assert.throws(()=>enchantEquipmentSlot(base,"weapon",0,()=>0),RangeError);
   const funded={...base,items:{...base.items,glory_scroll:4}};
   const gained=enchantEquipmentSlot(funded,"weapon",0,()=>0.49);
@@ -1742,4 +1742,28 @@ test("Fighting is a distinct first activity and does not manufacture simulated c
   delete oldV5.skills.fighting;
   assert.deepEqual(readSave(oldV5).skills.fighting, { level: 1, xp: 0 },
     "existing V5 saves safely acquire the new Fighting skill");
+});
+
+test("slot mastery is sequential, funded, permanent, and separate from scrolls",async()=>{
+  const {characterLevel,GRADES,conditionBonuses,slotBonus}=await import("../site/play/equipment-rules.mjs");
+  const {trainEquipmentSlot}=await import("../site/play/engine.mjs");
+  let s=newGame(0);
+  assert.equal(characterLevel(s.skills),1);
+  const old={...s};delete old.slotMastery;
+  assert.equal(readSave(JSON.stringify(old)).slotMastery.shield,0);
+  assert.equal(trainEquipmentSlot(s,"shield",0,0).trained,undefined);
+  Object.assign(s.items,{log:10000,stone:10000,hide:10000,ingot:10000});
+  s=trainEquipmentSlot(s,"shield",0,0).state;
+  assert.equal(s.items.log,9995);
+  assert.equal(trainEquipmentSlot(s,"shield",0,0).trained,undefined);
+  assert.equal(trainEquipmentSlot(s,"shield",1,0).trained,undefined);
+  for(let rank=1;rank<GRADES.length;rank++) {
+    s.skills.mining.level=GRADES[rank].level;
+    s=trainEquipmentSlot(s,"shield",rank,0).state;
+  }
+  assert.equal(readSave(JSON.stringify(s)).slotMastery.shield,7);
+  assert.equal(s.enchantments.shield,0);
+  assert.equal(conditionBonuses(s).shield,21);
+  assert.equal(trainEquipmentSlot(s,"shield",7,0).trained,undefined);
+  assert.deepEqual(slotBonus("weapon",2),{attack:2,defense:0,durability:4});
 });

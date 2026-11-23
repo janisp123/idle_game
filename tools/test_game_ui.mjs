@@ -169,7 +169,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261123-short-duel1/,
+  assert.match(html, /app\.mjs\?v=gear-v1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -194,7 +194,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261123-short-duel1/,
+  assert.match(html, /iron-ui\.css\?v=gear-v1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -272,7 +272,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(tick, "game tick must start");
     const weaponChoices=elements.get("weaponSlots").children;
     assert.deepEqual(weaponChoices.map(button=>button.getAttribute("data-loadout")),
-      ["greatsword","sword_shield"],"selectable loadouts become engraved weapon cards");
+      ["greatsword","sword_shield","hammer"],"selectable loadouts become engraved weapon cards");
     assert.equal(weaponChoices[0].getAttribute("aria-pressed"),"false",
       "worn weapon is not another selected editor while HEAD is active");
     assert.equal(weaponChoices[0].getAttribute("data-equipped"),"true",
@@ -987,6 +987,15 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("combatTurns").textContent.includes("◆"),true);
     assert.equal(arena.skills.fighting.level, 1);
     assert.equal(arena.combatSession.player.loadout,"greatsword");
+    now+=COMBAT_BALANCE.eventMs*COMBAT_BALANCE.slotsPerBout-1-afterAttack.combatSession.elapsedMs;
+    tick();
+    const recovered=combatAtTime(JSON.parse(store.get(SAVE_KEY)).combatSession).event;
+    for(const side of ["player","enemy"]) {
+      const f=recovered.vitals[side];
+      assert.equal(elements.get(side+"HP").value,f.maxHP);
+      assert.equal(elements.get(side+"Armour").value,f.maxArmour);
+      if(f.hp<f.maxHP) assert.ok(elements.get(side+"HPText").textContent.includes("(+"+(f.maxHP-f.hp)+")"));
+    }
     const shieldWeapon=weaponChoices.find(x=>x.getAttribute("data-loadout")==="sword_shield");
     shieldWeapon.fire("click");
     const swapped = JSON.parse(store.get(SAVE_KEY));

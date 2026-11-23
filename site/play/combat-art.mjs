@@ -32,6 +32,7 @@ export const COMBAT_ART = Object.freeze({
 });
 
 const STYLE_NAMES = Object.freeze({
+  hammer:"Two-handed hammer",
   greatsword: "Two-handed greatsword",
   sword_shield: "Sword and shield"
 });

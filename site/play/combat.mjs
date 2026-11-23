@@ -10,11 +10,11 @@
  * combat-skills.mjs; paintings in combat-art.mjs. No DOM or timers here.
  */
 import { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
-  from "./combat-skills.mjs?v=20261122-guard-impact1";
-import { armourStats, initialArmour } from "./armour.mjs?v=20261122-guard-impact1";
+  from "./combat-skills.mjs?v=gear-v1";
+import { armourStats, initialArmour } from "./armour.mjs?v=gear-v1";
 export { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
-  from "./combat-skills.mjs?v=20261122-guard-impact1";
-export { COMBAT_ART } from "./combat-art.mjs?v=20261122-dice-duels1";
+  from "./combat-skills.mjs?v=gear-v1";
+export { COMBAT_ART } from "./combat-art.mjs?v=gear-v1";
 
 export const COMBAT_BALANCE = Object.freeze({
   eventMs: 25_000,                    // Each phase lingers; no rapid slideshow.
@@ -43,7 +43,7 @@ const OPPONENTS = Object.freeze([
   ["Varrik the Loud", "sword_shield", 10, 9, 10, 1],
   ["Odran Ironjaw", "greatsword", 13, 7, 13, 2],
   ["Kest the Crow", "sword_shield", 8, 13, 9, 1],
-  ["Brann of the Ash", "greatsword", 12, 11, 11, 2]
+  ["Brann of the Ash", "hammer", 12, 11, 11, 2]
 ]);
 const validUnsigned = value => Number.isSafeInteger(value) && value >= 0;
 const validStat = value => Number.isFinite(value) && value >= 0 &&
@@ -74,7 +74,7 @@ const validGear = gear => gear && typeof gear === "object" && !Array.isArray(gea
    "initiativePenalty","mobilityPct","totalKg","armourKg","weaponKg"].every(k =>
      typeof gear[k] === "number" && Number.isFinite(gear[k])) &&
   (gear.defenseEnchant === undefined || (Number.isSafeInteger(gear.defenseEnchant) &&
-    gear.defenseEnchant >= 0 && gear.defenseEnchant <= 220)) &&
+    gear.defenseEnchant >= 0 && gear.defenseEnchant <= 10000)) &&
   gear.physicalReductionPct >= 0 && gear.physicalReductionPct <= 60 &&
   gear.magicResistancePct >= 0 && gear.magicResistancePct <= 55 &&
   gear.evasionScore >= -4 && gear.evasionScore <= 4 &&
@@ -91,8 +91,10 @@ function validateFighter(f) {
     (f.defenseSkill !== undefined && f.defenseSkill !== null &&
       COMBAT_SKILLS[f.defenseSkill]?.role !== "defense") ||
     (f.gear !== undefined && !validGear(f.gear)) ||
+    (f.conditionBonus!==undefined && (!f.conditionBonus ||
+      !["weapon","body","shield"].every(k=>Number.isSafeInteger(f.conditionBonus[k])&&f.conditionBonus[k]>=0&&f.conditionBonus[k]<=10000))) ||
     (f.attackEnchant !== undefined && (!Number.isSafeInteger(f.attackEnchant) ||
-      f.attackEnchant < 0 || f.attackEnchant > 20)))
+      f.attackEnchant < 0 || f.attackEnchant > 10000)))
     throw new RangeError("Invalid fighter");
 }
 export function makeOpponent(bout) {
@@ -143,7 +145,12 @@ const LEGACY_NO_BONUS = Object.freeze({ physicalReductionPct:0, magicResistanceP
 function normalize(f,id) {
   const abilities=COMBAT_LOADOUTS[f.loadout];
   const maxHP=Math.max(1,Math.round(COMBAT_BALANCE.baseHP+f.end*COMBAT_BALANCE.hpPerEndurance));
-  return {...f,id,maxHP,hp:maxHP,opening:false,
+  const bonus=f.conditionBonus??{};
+  const shieldMax=f.loadout==="sword_shield"?10+(bonus.shield??0):0;
+  const bodyMax=(f.gear?.armourKg??0)>0 ? 4+(f.gear.physicalReductionPct??0)+(bonus.body??0) : 0;
+  const weaponMax=16+(bonus.weapon??0);
+  return {...f,id,maxHP,hp:maxHP,opening:false,weaponMax,weapon:weaponMax,
+    bodyMax,body:bodyMax,shieldMax,shield:shieldMax,
     attackEnchant:f.attackEnchant??0,
     gear:f.gear??LEGACY_NO_BONUS,
     attackAbility:COMBAT_SKILLS[abilities.attackSkill],
@@ -185,6 +192,7 @@ function initiative(player,enemy,random) {
       (playerTotal===enemyTotal?"Tie broken by quickness. ":"")+starter};
 }
 const finisherText=Object.freeze({
+  hammer:{player:"Your hammer breaks through the enemy guard.",enemy:"breaks through your guard with a hammer."},
   greatsword: {player:"You tear through the opponent's guard in one devastating greatsword blow.",
     enemy:"tears through your guard with a devastating greatsword blow."},
   sword_shield: {player:"Your final thrust pierces the enemy's guard and ends the duel.",
@@ -194,7 +202,24 @@ const finisherText=Object.freeze({
 function basePhysicalDamage(a) {
   const raw=COMBAT_BALANCE.baseDamage+a.str*COMBAT_BALANCE.damagePerStrength+
     a.skill*COMBAT_BALANCE.damagePerSkill+a.attackEnchant;
-  return Math.max(1,Math.round(raw*a.attackAbility.damageMultiplier));
+  return Math.max(1,Math.round(raw*a.attackAbility.damageMultiplier*(0.55+0.45*a.weapon/a.weaponMax)));
+}
+function armourFraction(fighter) {
+  const max=fighter.bodyMax+fighter.shieldMax;
+  return max?(fighter.body+fighter.shield)/max:1;
+}
+function vitals(f) {
+  return {hp:f.hp,maxHP:f.maxHP,armour:f.body+f.shield,maxArmour:f.bodyMax+f.shieldMax,
+    weapon:f.weapon,weaponMax:f.weaponMax,shield:f.shield,shieldMax:f.shieldMax};
+}
+function wearOnContact(a,d,event) {
+  if(event.type==="miss" || event.type==="dodge") return;
+  const force=basePhysicalDamage(a);
+  const pressure={hammer:0.24,greatsword:0.16,sword_shield:0.09}[a.loadout];
+  const struck=event.type==="block"?"shield":event.type==="parry"?"weapon":"body";
+  d[struck]=Math.max(0,d[struck]-Math.max(1,Math.ceil(force*pressure)));
+  a.weapon=Math.max(0,a.weapon-Math.max(1,Math.ceil(force/14)));
+  if(event.type==="block" && d.shield>0) d.opening=true;
 }
 function guardedImpactDamage(attacker,defender,type) {
   // A guard is already a successful defense roll. Never make another "block
@@ -203,12 +228,15 @@ function guardedImpactDamage(attacker,defender,type) {
     type==="parry"?attacker.attackAbility.parryDamagePct:0;
   if (!Number.isFinite(through) || through<0 || through>100)
     throw new RangeError("Invalid weapon guard penetration");
-  const impact=Math.round(basePhysicalDamage(attacker)*through/100);
+  const guardCondition=type==="block" && defender.shieldMax ? defender.shield/defender.shieldMax :
+    defender.weapon/defender.weaponMax;
+  const transmitted=1-(1-through/100)*guardCondition;
+  const impact=Math.round(basePhysicalDamage(attacker)*transmitted);
   // Armour and slot enchants may absorb all transmitted impact. Unlike a
   // direct landed hit, a clean block need not force a minimum 1 HP of damage.
   const protectedImpact=Math.max(0,Math.round(impact*
-    (100-defender.gear.physicalReductionPct)/100)-
-    (defender.gear.defenseEnchant??0));
+    (100-defender.gear.physicalReductionPct*armourFraction(defender))/100)-
+    Math.round((defender.gear.defenseEnchant??0)*armourFraction(defender)));
   return Math.min(defender.hp,protectedImpact);
 }
 function resolveTurn(a,d,turn,random) {
@@ -219,7 +247,8 @@ function resolveTurn(a,d,turn,random) {
   const attackTotal=sum(attackDice)+scoreStats(a,"attack")+
     (a.attackAbility.attackBonus??0)+(opening?COMBAT_BALANCE.counterOpeningBonus:0);
   const defenseTotal=sum(defenseDice)+scoreStats(d,"defense")+
-    (d.defenseAbility?.defenseBonus??-COMBAT_BALANCE.untrainedDefensePenalty)+
+    (d.defenseAbility?Math.round(d.defenseAbility.defenseBonus*
+      (d.shieldMax?d.shield/d.shieldMax:d.weapon/d.weaponMax)):-COMBAT_BALANCE.untrainedDefensePenalty)+
     d.gear.evasionScore;
   const meta={actor:a.id,target:d.id,turn,attackSkill:a.attackAbility.id,
     defenseSkill:d.defenseAbility?.id??null,attackDice,defenseDice,
@@ -238,7 +267,7 @@ function resolveTurn(a,d,turn,random) {
     const damage=evasion?0:guardedImpactDamage(a,d,type);
     d.hp-=damage;
     const prose=evasion?"dodges the blow":type==="block"?"catches the blow with a shield":
-      "parries with the greatsword";
+      "parries the blow";
     const impact=damage?" The impact deals "+damage+" damage.":" No damage gets through.";
     return {type,...meta,damage,hpAfter:d.hp,text:d.id==="player"?
       "You "+prose+" as "+a.name+" attacks."+impact:
@@ -258,8 +287,8 @@ function resolveTurn(a,d,turn,random) {
   // Slot enchantments are small flat bonuses, not extra dice or guaranteed
   // misses. Defence applies only after a physical hit beats the guard.
   const damage=Math.max(1,
-    Math.round(baseDamage*(100-d.gear.physicalReductionPct)/100)-
-      (d.gear.defenseEnchant??0));
+    Math.round(baseDamage*(100-d.gear.physicalReductionPct*armourFraction(d))/100)-
+      Math.round((d.gear.defenseEnchant??0)*armourFraction(d)));
   d.hp=Math.max(0,d.hp-damage);
   const type=d.hp===0?"collapse":d.hp<=d.maxHP/2?"wound":"strike";
   return {type,...meta,damage,hpAfter:d.hp,
@@ -275,11 +304,14 @@ export function simulateDuel(player,opponent,random) {
   if(typeof random!=="function")throw new RangeError("Invalid random source");
   const p=normalize(player,"player"),e=normalize(opponent,"enemy");
   const start=initiative(p,e,random);
-  const events=[start];
+  const snapshot=()=>({player:vitals(p),enemy:vitals(e)});
+  const events=[{...start,vitals:snapshot()}];
   for(let t=0;t<COMBAT_BALANCE.maxHalfTurns&&p.hp>0&&e.hp>0;t++) {
     const a=(t%2===0)===(start.actor==="player")?p:e;
     const d=a===p?e:p;
-    events.push(resolveTurn(a,d,t+1,random));
+    const event=resolveTurn(a,d,t+1,random);
+    wearOnContact(a,d,event);
+    events.push({...event,vitals:snapshot()});
   }
   let outcome=e.hp===0?"victory":p.hp===0?"defeat":"stalemate";
   if(outcome==="stalemate") {
@@ -296,7 +328,7 @@ export function simulateDuel(player,opponent,random) {
       "You are defeated. The pit wardens retrieve you. Your progress is safe.":
       "At the final horn, you yield. "+e.name+" wins the decision.")
     :"The duel ends even. Both warriors stand at the final horn.";
-  events.push({type:outcome,actor:null,target:null,damage:0,text:finalText});
+  events.push({type:outcome,actor:null,target:null,damage:0,text:finalText,vitals:snapshot()});
   return {events,outcome,playerHP:p.hp,enemyHP:e.hp,enemy:e.name};
 }
 /** Rebuild only the observable duel, in bounded work over arbitrary time. */

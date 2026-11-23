@@ -59,6 +59,7 @@ export const ARMOUR_BALANCE = Object.freeze({
 
 /** Existing two selectable weapon styles. Sword and shield are two pieces. */
 export const WEAPON_PIECES = Object.freeze({
+  hammer:Object.freeze([Object.freeze({name:"War hammer",kg:6})]),
   greatsword: Object.freeze([Object.freeze({name:"Greatsword",kg:5})]),
   sword_shield: Object.freeze([
     Object.freeze({name:"Sword",kg:2}), Object.freeze({name:"Shield",kg:5})

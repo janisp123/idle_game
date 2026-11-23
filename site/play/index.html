@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261123-short-duel1">
-  <script type="module" src="./app.mjs?v=20261123-short-duel1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=gear-v1">
+  <script type="module" src="./app.mjs?v=gear-v1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -53,6 +53,7 @@
             <div class="weapon-cabinet" aria-label="Equipped weapon">
               <p class="equipment-section-label">WEAPONS</p>
               <div id="weaponSlots" class="weapon-slots" role="group" aria-label="Choose your weapon style"></div>
+              <button id="shieldSlot" type="button" class="small-button" hidden>Shield</button>
               <p class="weapon-skills" id="combatSkillsText">Heavy Swing · Blade Guard</p>
             </div>
             <p class="equipment-section-label armour-section-label">ARMOUR</p>
@@ -68,6 +69,8 @@
             <div id="gearStats" class="gear-stats" aria-label="Equipped weight, mobility and protections"></div>
             <div class="enchant-tools" aria-label="Enchant the one selected equipment slot">
               <strong class="glory-wallet" id="gloryWallet">✧ 0 Glory Scrolls</strong>
+              <p id="masteryInfo" class="gear-stats"></p>
+              <button id="trainSlot" type="button" class="small-button">Train mastery</button>
               <div class="enchant-tool-row">
                 <button type="button" id="enchantChance" class="enchant-chance"
                   aria-label="Show enchant chance calculation and failure consequences"
@@ -207,11 +210,17 @@
           <div id="combatReadout" class="result-combat" hidden aria-label="Latest resolved combat action">
             <div class="result-side result-side-player">
               <span class="result-side-name">YOU</span>
+              <label class="vital HP"><span id="playerHPText">Health</span><progress id="playerHP" aria-label="player Health"></progress></label>
+              <label class="vital Armour"><span id="playerArmourText">Armour</span><progress id="playerArmour" aria-label="player Armour"></progress></label>
+              <small id="playerWear" class="gear-wear"></small>
               <div id="playerResult" class="result-tokens" aria-label="Your combat result"></div>
             </div>
             <span class="result-versus" aria-hidden="true">✣</span>
             <div class="result-side result-side-enemy">
               <span class="result-side-name">ENEMY</span>
+              <label class="vital HP"><span id="enemyHPText">Health</span><progress id="enemyHP" aria-label="enemy Health"></progress></label>
+              <label class="vital Armour"><span id="enemyArmourText">Armour</span><progress id="enemyArmour" aria-label="enemy Armour"></progress></label>
+              <small id="enemyWear" class="gear-wear"></small>
               <div id="enemyResult" class="result-tokens" aria-label="Enemy combat result"></div>
             </div>
           </div>

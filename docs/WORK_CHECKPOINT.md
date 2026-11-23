@@ -1,5 +1,10 @@
 # Current working checkpoint
 
+## Combat durability and slot mastery — 2026-11-23
+
+Check the two bars through a blocked hammer strike and recovery. Equip Sword & Shield to access the shield editor. The F-grade purchase consumes five logs and five stone.
+
+
 ## Fighting timeline — 2026-11-23
 
 Duels start with initiative and finish with the outcome and recovery. The next opponent rolls immediately after recovery. Each bout now occupies eight 25-second slots (200 seconds). Existing Fighting saves retain their duel number, frozen stats and paid Glory cursor on conversion. Verify the transition from recovery to the next initiative in the live arena.
