@@ -7,6 +7,16 @@ import { combatFlowState } from "../site/play/combat-flow.mjs";
 import { combatReadoutForEvent, workReadoutForReport } from "../site/play/result-readout.mjs";
 import { newGame, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP, xpToNextLevel } from "../site/play/engine.mjs";
 
+test("the last recovery tick goes straight into the next initiative roll",()=>{
+  const session={seed:42,elapsedMs:COMBAT_BALANCE.eventMs*COMBAT_BALANCE.slotsPerBout-1,
+    player:{name:"Knight",loadout:"greatsword",str:10,dex:10,end:10,skill:1}};
+  const result=combatFlowState(combatAtTime(session),session);
+  assert.equal(result.steps.length,2);
+  assert.equal(result.steps[result.current].label,"Recover");
+  session.elapsedMs++;
+  const next=combatFlowState(combatAtTime(session),session);
+  assert.equal(next.steps[next.current].label,"Roll dice");
+});
 class FakeElement {
   children = [];
   listeners = new Map();
@@ -159,7 +169,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=20261123-single-editor1/,
+  assert.match(html, /app\.mjs\?v=20261123-short-duel1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -184,7 +194,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=20261123-single-editor1/,
+  assert.match(html, /iron-ui\.css\?v=20261123-short-duel1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -891,15 +901,16 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     handlers.get("window:storage")({ key: SAVE_KEY, newValue: json });
     assert.equal(elements.get("combatPanel").hidden, true,
       "no combat events are shown before the first fighting interval");
-    now += COMBAT_BALANCE.eventMs;
+    now += 1;
     tick();
+    handlers.get("window:pagehide")();
     const arena = JSON.parse(store.get(SAVE_KEY));
-    assert.ok(arena.combatSession && arena.combatSession.elapsedMs === COMBAT_BALANCE.eventMs);
+    assert.ok(arena.combatSession && arena.combatSession.elapsedMs === 1);
     assert.equal(elements.get("combatPanel").hidden,false);
     assert.equal(elements.get("combatFlow").hidden,false,
       "real fighting progress is visible immediately beneath the arena picture");
-    assert.equal(elements.get("combatFlowLabel1").textContent,"Roll dice");
-    assert.equal(elements.get("combatFlowStep1").attributes.get("data-state"),"active");
+    assert.equal(elements.get("combatFlowLabel0").textContent,"Roll dice");
+    assert.equal(elements.get("combatFlowStep0").attributes.get("data-state"),"active");
     assert.equal(elements.get("activityProgress").hidden,true,
       "the old activity work bar must never masquerade as an attack timer");
     assert.equal(elements.get("wagonQueue").hidden,true,"single Forever route stays out of the way");
@@ -918,15 +929,17 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       "fighting uses two-sided compact results");
     assert.notEqual(elements.get("playerDiceTotal").textContent,"ROLLING");
     assert.notEqual(elements.get("enemyDiceTotal").textContent,"ROLLING");
+    assert.equal(elements.get("combatFlowStep2").hidden,true);
     const initiativeState = JSON.parse(store.get(SAVE_KEY));
     const initiativeEvent = combatAtTime(initiativeState.combatSession).event;
-    assert.equal(elements.get("combatFlowLabel2").textContent,
+    assert.equal(elements.get("combatFlowLabel1").textContent,
       initiativeEvent.actor === "player" ? "You go first" : "Enemy first");
     assert.equal(Number(elements.get("playerDiceTotal").textContent),initiativeEvent.playerTotal);
     assert.equal(Number(elements.get("enemyDiceTotal").textContent),initiativeEvent.enemyTotal);
 
-    now += COMBAT_BALANCE.eventMs - COMBAT_BALANCE.initiativeAnimationMs - 250;
+    now += COMBAT_BALANCE.eventMs - COMBAT_BALANCE.initiativeAnimationMs - 251;
     tick();
+    assert.equal(elements.get("combatFlowStep4").hidden,false);
     const firstTurnState = JSON.parse(store.get(SAVE_KEY));
     const firstTurn = combatAtTime(firstTurnState.combatSession);
     assert.equal(firstTurn.event.turn,1);

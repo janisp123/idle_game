@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## Fighting timeline — 2026-11-23
+
+Duels start with initiative and finish with the outcome and recovery. The next opponent rolls immediately after recovery. Each bout now occupies eight 25-second slots (200 seconds). Existing Fighting saves retain their duel number, frozen stats and paid Glory cursor on conversion. Verify the transition from recovery to the next initiative in the live arena.
+
 ## Latest verified — one shared equipment editor and transparent enchant odds (2026-11-23, PR #129)
 
 - **Live main:** `ad0c04a8fd18256a092759e50c3dfae5b943d190` from [PR #129](https://github.com/janisp123/idle_game/pull/129); no competing open PR at merge.

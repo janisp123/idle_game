@@ -8,15 +8,15 @@ export {
   totalMasteryAttributeBonuses, effectiveAttributeProgress
 } from "./attributes.mjs?v=20261122-mastery1";
 import {
-  validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS
-} from "./combat.mjs?v=20261122-guard-impact1";
+  validCombatSession, migrateCombatTimeline, startCombatSession, advanceCombatSession, BOUT_MS
+} from "./combat.mjs?v=20261123-short-duel1";
 import {
   GLORY_SCROLL_ID, GLORY_RULES, blankEnchantments, normalizeEnchantments,
   enchantBonus, enchantSlot, gloryEligibilityWindow, attachGloryTracker,
   tallyGloryVictories
-} from "./glory.mjs?v=20261122-guard-impact1";
+} from "./glory.mjs?v=20261123-short-duel1";
 export { GLORY_SCROLL_ID, GLORY_RULES, ENCHANT_SLOTS, enchantBonus }
-  from "./glory.mjs?v=20261122-guard-impact1";
+  from "./glory.mjs?v=20261123-short-duel1";
 import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=20261122-guard-impact1";
 import { initialArmour, normalizeArmour, armourUnlocked, armourOption, armourStats } from "./armour.mjs?v=20261122-guard-impact1";
@@ -321,7 +321,7 @@ export function readSave(value) {
       // Migrate old V6 sword/axe/hammer prototype duels to the first real
       // two-skill greatsword loadout; keep time, RNG seed, stats and XP intact.
       combatSession: s.version >= 6 && s.combatSession ? {
-        ...s.combatSession,
+        ...migrateCombatTimeline(s.combatSession),
         player: s.version === 6 ? {
           name: s.combatSession.player.name,
           loadout: DEFAULT_COMBAT_LOADOUT,

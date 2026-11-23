@@ -8,11 +8,11 @@ import {
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice,
   GLORY_SCROLL_ID, GLORY_RULES, enchantEquipmentSlot, enchantBonus
-} from "./engine.mjs?v=20261122-guard-impact1";
+} from "./engine.mjs?v=20261123-short-duel1";
 
-import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-guard-impact1";
+import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261123-short-duel1";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-dice-duels1";
-import { combatFlowState } from "./combat-flow.mjs?v=20261122-guard-impact1";
+import { combatFlowState } from "./combat-flow.mjs?v=20261123-short-duel1";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, WEAPON_PIECES,
   armourOption, armourUnlocked, armourStats }
@@ -332,7 +332,9 @@ function presentDice(combat, event, phase, isRevealed) {
 function showCombatFlow(flow) {
   ui.combatFlow.hidden = !flow;
   if (!flow) return;
-  for (let i = 0; i < flow.steps.length; i++) {
+  for (let i = 0; i < ui.combatFlowSteps.length; i++) {
+    ui.combatFlowSteps[i].hidden = i >= flow.steps.length;
+    if (ui.combatFlowSteps[i].hidden) continue;
     ui.combatFlowIcons[i].textContent = flow.steps[i].icon;
     ui.combatFlowLabels[i].textContent = flow.steps[i].label;
     ui.combatFlowSteps[i].setAttribute("data-state",
@@ -542,7 +544,7 @@ function renderResults(combat, revealed) {
   if (combat) {
     // Before actual rolls resolve, retain ONLY the previous known result.
     const actualEvent = revealed ? combat.event :
-      combat.events[Math.max(0,combat.step - 1)];
+      combat.events[combat.step - 1];
     const result = combatReadoutForEvent(actualEvent);
     drawResultTokens(ui.playerResult,result.player);
     drawResultTokens(ui.enemyResult,result.enemy);
@@ -1027,9 +1029,9 @@ function render() {
     const dicePhase = event.type === "initiative" ? "initiative" :
       combat.eventElapsedMs < halfway ? "attack" : "defense";
     if (showTray) presentDice(combat,event,dicePhase,revealed);
-    imageEvent = revealed ? event : combat.events[Math.max(0,combat.step - 1)];
+    imageEvent = revealed ? event : combat.events[combat.step - 1];
     const finishedTurns = revealed && event.turn ? event.turn :
-      (combat.events[Math.max(0,combat.step - 1)]?.turn ?? 0);
+      (combat.events[combat.step - 1]?.turn ?? 0);
     ui.combatTurns.textContent = Array.from({length:COMBAT_BALANCE.maxHalfTurns},
       (_,i)=>i<finishedTurns?"◆":"◇").join(" ");
     const rollCaption = event.type === "initiative" ? "ROLLING FOR FIRST" :
@@ -1076,7 +1078,7 @@ function render() {
     // Every live turn selects its actual combat event / attacker weapon /
     // defender shield / player outcome. Other activities retain static art.
     const sceneId = transition ? transition.targetActivity : state.activity;
-    const combatArt = combat ? combatArtworkForEvent(
+    const combatArt = imageEvent ? combatArtworkForEvent(
       imageEvent, state.combatSession.player.loadout, combat.enemyLoadout) : null;
     const sceneAsset = sceneActivity.item === null
       ? (sceneActivity.category === "training" ? "masonry" : "cooking")

@@ -19,7 +19,7 @@ export { COMBAT_ART } from "./combat-art.mjs?v=20261122-dice-duels1";
 export const COMBAT_BALANCE = Object.freeze({
   eventMs: 25_000,                    // Each phase lingers; no rapid slideshow.
   maxHalfTurns: 6,                   // At most THREE attacks each, never fourteen.
-  slotsPerBout: 9,                   // Engage + initiative + six turns + aftermath.
+  slotsPerBout: 8,                   // Initiative + six turns + aftermath.
   initiativeAnimationMs: 3_500,
   attackAnimationMs: 3_500,          // Extra weapon windup is from COMBAT_SKILLS.
   startingStat: 10,
@@ -110,10 +110,26 @@ export function validCombatSession(session) {
       session.gloryCursor <= Math.floor(session.elapsedMs/BOUT_MS)+1) &&
     (()=>{try{validateFighter(session.player);return true;}catch{return false;}})());
 }
+// Drop the old opening slot while keeping the duel number and paid reward cursor.
+export function migrateCombatTimeline(session) {
+  if (session.timelineVersion === 2) return session;
+  const oldBoutMs = BOUT_MS + COMBAT_BALANCE.eventMs;
+  const elapsed = session.elapsedMs;
+  const converted = Math.floor(elapsed / oldBoutMs) * BOUT_MS +
+    Math.max(0, elapsed % oldBoutMs - COMBAT_BALANCE.eventMs);
+  const migrated = {...session, timelineVersion:2, elapsedMs:converted};
+  if (session.gloryEligibleUntilMs !== undefined) {
+    const end = session.gloryEligibleUntilMs;
+    // Preserve future eligibility time and the number of historically eligible duels.
+    migrated.gloryEligibleUntilMs = end > elapsed ? converted + (end - elapsed) :
+      Math.floor(end / oldBoutMs) * BOUT_MS + Math.min(end % oldBoutMs, BOUT_MS);
+  }
+  return migrated;
+}
 export function startCombatSession(player, seed) {
   validateFighter(player);
   if (!validUnsigned(seed)) throw new RangeError("Invalid combat seed");
-  return {elapsedMs:0,seed:seed>>>0,player:{...player}};
+  return {timelineVersion:2,elapsedMs:0,seed:seed>>>0,player:{...player}};
 }
 export function advanceCombatSession(session, elapsedMs) {
   if (!validCombatSession(session) || !session || !validUnsigned(elapsedMs))
@@ -258,11 +274,8 @@ export function simulateDuel(player,opponent,random) {
   validateFighter(player);validateFighter(opponent);
   if(typeof random!=="function")throw new RangeError("Invalid random source");
   const p=normalize(player,"player"),e=normalize(opponent,"enemy");
-  const events=[{type:"engage",actor:null,target:null,
-    text:"You face "+e.name+" in the fighting pit. "+
-      COMBAT_LOADOUTS[p.loadout].name+" against "+COMBAT_LOADOUTS[e.loadout].name+"."}];
   const start=initiative(p,e,random);
-  events.push(start);
+  const events=[start];
   for(let t=0;t<COMBAT_BALANCE.maxHalfTurns&&p.hp>0&&e.hp>0;t++) {
     const a=(t%2===0)===(start.actor==="player")?p:e;
     const d=a===p?e:p;
