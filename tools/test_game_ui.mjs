@@ -197,6 +197,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   // Mirror the hidden HTML attribute in the minimal fake DOM.
   for (const id of ["masterAudience","weaponEditor","enchantChanceBreakdown",
     "enchantFeedback"]) elements.get(id).hidden = true;
+  // Fake elements do not parse initial HTML attributes.
+  elements.get("enchantChance").setAttribute("aria-expanded","false");
   const originalNow = Date.now;
   const originalRandom = Math.random;
   Math.random = () => 0.5; // avoid stochastic 0-item single-cycle rewards in UI assertions
