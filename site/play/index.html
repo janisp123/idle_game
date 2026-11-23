@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261123-inline-enchants1">
-  <script type="module" src="./app.mjs?v=20261123-inline-enchants1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261123-single-editor1">
+  <script type="module" src="./app.mjs?v=20261123-single-editor1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -57,20 +57,25 @@
             </div>
             <p class="equipment-section-label armour-section-label">ARMOUR</p>
             <div id="armourSlots" class="armour-slots" aria-label="Equipped armour slots"></div>
-            <div class="armour-choice">
-              <label id="armourChoiceLabel" for="armourChoice">Hood / helmet</label>
-              <select id="armourChoice" aria-label="Choose armour for selected slot"></select>
+            <div id="equipmentEditor" class="equipment-editor" aria-label="Edit one selected equipment slot">
+              <p id="equipmentEditHeading" class="equipment-edit-heading">HEAD</p>
+              <div id="armourEditor" class="armour-choice">
+                <label id="armourChoiceLabel" for="armourChoice">Hood / helmet</label>
+                <select id="armourChoice" aria-label="Change item in selected armour slot"></select>
+              </div>
+              <p id="weaponEditor" class="weapon-editor-current" hidden>Two-handed Greatsword</p>
             </div>
             <div id="gearStats" class="gear-stats" aria-label="Equipped weight, mobility and protections"></div>
-            <div class="enchant-tools" aria-label="Slot enchantments">
+            <div class="enchant-tools" aria-label="Enchant the one selected equipment slot">
               <strong class="glory-wallet" id="gloryWallet">✧ 0 Glory Scrolls</strong>
               <div class="enchant-tool-row">
-                <span id="weaponEnchantRank">Weapon</span>
-                <button type="button" id="enchantWeapon" class="enchant-action" disabled>✧ Enchant</button>
+                <button type="button" id="enchantChance" class="enchant-chance"
+                  aria-label="Show enchant chance calculation and failure consequences"
+                  aria-expanded="false" aria-controls="enchantChanceBreakdown">50% <span aria-hidden="true">ⓘ</span></button>
+                <button type="button" id="enchantSelected" class="enchant-action" disabled>✧ Enchant</button>
               </div>
-              <div class="enchant-tool-row">
-                <span id="armourEnchantRank">Head</span>
-                <button type="button" id="enchantArmour" class="enchant-action" disabled>✧ Enchant</button>
+              <div id="enchantChanceBreakdown" class="enchant-breakdown" hidden>
+                <p id="enchantChanceDetails"></p>
               </div>
               <p id="enchantFeedback" class="enchant-feedback" role="status" aria-live="polite" hidden></p>
             </div>
