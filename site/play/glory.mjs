@@ -13,8 +13,8 @@
  * Thus reward settlement stays bounded by the finite XP window, not absence
  * length (20 years away is not 20 years of eligible bouts).
  */
-import { EQUIP_SLOTS, MAX_ENCHANT, slotBonus } from "./equipment-rules.mjs?v=gear-v1";
-import { BOUT_MS, combatAtTime, seededCombatRandom } from "./combat.mjs?v=gear-v1";
+import { EQUIP_SLOTS, MAX_ENCHANT, slotBonus } from "./equipment-rules.mjs?v=arena-v1";
+import { BOUT_MS, combatAtTime, seededCombatRandom } from "./combat.mjs?v=arena-v1";
 export const GLORY_SCROLL_ID = "glory_scroll";
 export const GLORY_RULES = Object.freeze({
   winDropChance: 0.5, enchantSuccessChance: 0.5,

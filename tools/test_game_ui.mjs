@@ -169,7 +169,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=gear-v1/,
+  assert.match(html, /app\.mjs\?v=arena-v1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -194,7 +194,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=gear-v1/,
+  assert.match(html, /iron-ui\.css\?v=arena-v1/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -272,7 +272,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.ok(tick, "game tick must start");
     const weaponChoices=elements.get("weaponSlots").children;
     assert.deepEqual(weaponChoices.map(button=>button.getAttribute("data-loadout")),
-      ["greatsword","sword_shield","hammer"],"selectable loadouts become engraved weapon cards");
+      ["greatsword","sword_shield","hammer","bow","staff","twin_blades"],"selectable loadouts become engraved weapon cards");
     assert.equal(weaponChoices[0].getAttribute("aria-pressed"),"false",
       "worn weapon is not another selected editor while HEAD is active");
     assert.equal(weaponChoices[0].getAttribute("data-equipped"),"true",
@@ -929,7 +929,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       "fighting uses two-sided compact results");
     assert.notEqual(elements.get("playerDiceTotal").textContent,"ROLLING");
     assert.notEqual(elements.get("enemyDiceTotal").textContent,"ROLLING");
-    assert.equal(elements.get("combatFlowStep2").hidden,true);
+    assert.equal(elements.get("combatFlowStep2").hidden,false);
     const initiativeState = JSON.parse(store.get(SAVE_KEY));
     const initiativeEvent = combatAtTime(initiativeState.combatSession).event;
     assert.equal(elements.get("combatFlowLabel1").textContent,
@@ -1190,4 +1190,36 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     delete globalThis.localStorage;
     delete globalThis.window;
   }
+});
+
+test("mobile recovery keeps both vital labels and bars aligned at equal widths", {skip:!process.env.GITHUB_ACTIONS}, async()=>{
+  const {execFileSync}=await import("node:child_process");
+  const fs=await import("node:fs");
+  const {tmpdir}=await import("node:os");
+  const {join}=await import("node:path");
+  const dir=fs.mkdtempSync(join(tmpdir(),"arena-layout-"));
+  try {
+    const source=fs.readFileSync("site/play/index.html","utf8");
+    const panel=source.slice(source.indexOf('<div id="combatReadout"'),source.indexOf('<div id="workReadout"')).replace(' hidden','');
+    const css=fs.readFileSync("site/play/iron-ui.css","utf8");
+    const page=join(dir,"arena.html");
+    fs.writeFileSync(page,`<style>${css}</style>${panel}<script>
+      enemyHPText.textContent="Health 129/129 (+129)";
+      enemyArmourText.textContent="Armour 118/118 (+118)";
+      playerHPText.textContent="Health 82/82";playerArmourText.textContent="Armour 26/26";
+      playerWear.textContent="Weapon +8 · 16/16";playerResult.textContent="VICTORY";
+      for (const width of [280,320,390]) {
+        combatReadout.style.width=width+"px";
+        for (const id of ["HP","Armour","HPText","ArmourText"]) {
+          const box=side=>document.getElementById(side+id).getBoundingClientRect();
+          const a=box("player"), b=box("enemy");
+          if(a.width<20 || Math.abs(a.y-b.y)>1 || Math.abs(a.width-b.width)>1) throw Error(id+" misaligned at "+width);
+        }
+      }
+      document.documentElement.dataset.passed="yes";
+    </script>`);
+    const dom=execFileSync("google-chrome",["--headless","--no-sandbox","--disable-dev-shm-usage","--disable-gpu",
+      "--user-data-dir="+join(dir,"profile"),"--dump-dom","file://"+page],{encoding:"utf8",stdio:["ignore","pipe","pipe"],timeout:30000});
+    assert.match(dom,/<html data-passed="yes">/);
+  } finally {fs.rmSync(dir,{recursive:true,force:true});}
 });

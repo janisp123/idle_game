@@ -1,6 +1,7 @@
-import { GRADES, characterLevel, masteryOffer, slotBonus } from "./equipment-rules.mjs?v=gear-v1";
+import { GRADES as difficultyGrades, benchmark, TERRAIN_ROLL_START, TERRAIN_REVEAL } from "./difficulty.mjs?v=arena-v1";
+import { GRADES, characterLevel, masteryOffer, slotBonus } from "./equipment-rules.mjs?v=arena-v1";
 import {
-  trainEquipmentSlot, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
+  setDifficulty, trainEquipmentSlot, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
   lootChances, recipeOptions, newGame, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
@@ -9,15 +10,15 @@ import {
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice,
   GLORY_SCROLL_ID, GLORY_RULES, enchantEquipmentSlot, enchantBonus
-} from "./engine.mjs?v=gear-v1";
+} from "./engine.mjs?v=arena-v1";
 
-import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=gear-v1";
-import { combatArtworkForEvent } from "./combat-art.mjs?v=gear-v1";
-import { combatFlowState } from "./combat-flow.mjs?v=gear-v1";
+import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=arena-v1";
+import { combatArtworkForEvent } from "./combat-art.mjs?v=arena-v1";
+import { combatFlowState } from "./combat-flow.mjs?v=arena-v1";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, WEAPON_PIECES,
   armourOption, armourUnlocked, armourStats }
-  from "./armour.mjs?v=gear-v1";
+  from "./armour.mjs?v=arena-v1";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
   setAlphaSpeed, advanceAlphaClock } from "./alpha-tools.mjs?v=20261122-alpha-tools1";
 const $ = id => document.getElementById(id);
@@ -90,7 +91,7 @@ for (const loadout of Object.values(COMBAT_LOADOUTS)) {
   button.setAttribute("data-loadout", loadout.id);
   const glyph = document.createElement("span");
   glyph.className = "armour-slot-symbol";
-  glyph.textContent = loadout.id === "greatsword" ? "⚔" : loadout.id==="hammer"?"⚒":"♜";
+  glyph.textContent = ({greatsword:"⚔", hammer:"⚒", sword_shield:"♜", bow:"➶", staff:"✦", twin_blades:"⚔"})[loadout.id];
   const caption = document.createElement("span");
   caption.className = "weapon-slot-name";
   caption.textContent = loadout.name;
@@ -244,7 +245,7 @@ function renderArmour() {
     parts.enchant.hidden = rank === 0;
   }
   ui.gearStats.title = "Physical reduction, dodge and mobility are active. " +
-    "MR is reserved for future magic damage; slot enchants add physical attack or defense.";
+    "MR reduces spell damage; slot enchants add physical attack or defense.";
   ui.gloryWallet.textContent = "✧ " + number(state.items[GLORY_SCROLL_ID]) + " Glory Scrolls";
   const chancePct=Math.round(GLORY_RULES.enchantSuccessChance*100);
   ui.enchantChance.textContent=chancePct + "% ⓘ";
@@ -490,12 +491,28 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
     weights.map(([stat, weight]) => stat + (weight >= 50 ? "++" : "+")).join(" · ");
   statGains.title = "Attribute XP share: " +
     weights.map(([stat, weight]) => stat + " " + weight + "%").join(", ");
-  body.append(titleRow, detail, rank, statGains);
+  const difficulty = document.createElement("select");
+  difficulty.setAttribute("aria-label", task.title + " difficulty");
+  difficulty.className = "activity-difficulty";
+  difficultyGrades.forEach((grade,tier) => {
+    const option = document.createElement("option");
+    option.value = String(tier);
+    option.textContent = tier ? grade + " · Level " + benchmark(tier).skill + " · Target stat " + benchmark(tier).stat : "0 · Non-grade";
+    difficulty.append(option);
+  });
+  difficulty.addEventListener("change", () => {
+    const result = setDifficulty(state,id,Number(difficulty.value),gameNow());
+    state = result.state;
+    reportProgress(result);
+    writeSave();
+    render();
+  });
+  body.append(titleRow, detail, rank, statGains, difficulty);
   row.append(body);
   activityRewardLabels.set(id, detail);
   activityLevelLabels.set(id, rank);
   categoryActivities.get(task.category in CATEGORY_LABELS ? task.category : "other").push(row);
-  activityButtons.set(id, { row, startButton, queueButton, levelButton });
+  activityButtons.set(id, { row, startButton, queueButton, levelButton, difficulty });
 }
 for (const item of ITEM_KEYS) {
   const row = document.createElement("div");
@@ -959,8 +976,10 @@ function render() {
     currentScheduledMeter.setAttribute("aria-valuenow", String(Math.round(clamped)));
     currentScheduledMeter.hidden = Boolean(state.transition);
   }
-  for (const [id, { row, startButton, queueButton, levelButton }] of activityButtons) {
+  for (const [id, { row, startButton, queueButton, levelButton, difficulty }] of activityButtons) {
     const skill = state.skills[id];
+    Array.from(difficulty.children).forEach((option,tier) => { option.disabled = skill.level < benchmark(tier).skill; });
+    difficulty.value = String(state.difficulties[id] ?? 0);
     activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level) +
       (skill.xp >= xpToNextLevel(skill.level) ? " · Master ready" : "");
     const available = lootChances(id, skill.level);
@@ -1080,6 +1099,18 @@ function render() {
           event.type.toUpperCase());
     ui.combatDice.hidden = !revealed || event.type !== "finisher";
     ui.combatDice.textContent = event.type === "finisher" && revealed ? "6 · 6 · 6" : "";
+    const choosingGround = event.type === "initiative" && combat.eventElapsedMs >= TERRAIN_ROLL_START && combat.eventElapsedMs < TERRAIN_REVEAL;
+    const groundKnown = event.type !== "initiative" || combat.eventElapsedMs >= TERRAIN_REVEAL;
+    if (choosingGround) {
+      ui.combatEventTitle.textContent = "DUEL " + number(combat.bout) + " · ROLLING TERRAIN";
+      ui.combatDice.hidden = false;
+      ui.combatDice.textContent = FACE_GLYPHS[Math.floor(combat.eventElapsedMs / 150) % 6];
+    }
+    const signed = value => value > 0 ? "+" + value : String(value);
+    $("combatGround").textContent = difficultyGrades[state.difficulties.fighting ?? 0] + " · " + combat.enemyRole + " · " +
+      COMBAT_LOADOUTS[combat.enemyLoadout].name + " · Full " + combat.enemyArmour +
+      (groundKnown ? " · " + FACE_GLYPHS[combat.zoneRoll-1] + " " + combat.terrain.name +
+        " · Attack: you " + signed(combat.playerTerrain) + ", enemy " + signed(combat.enemyTerrain) : "");
     ui.combatPanel.classList.toggle("finisher",revealed && event.type === "finisher");
     const key = state.combatSession.seed + ":" + combat.bout + ":" + combat.step;
     if (revealed && key !== lastCombatEventKey) {

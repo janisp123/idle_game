@@ -1767,3 +1767,25 @@ test("slot mastery is sequential, funded, permanent, and separate from scrolls",
   assert.equal(trainEquipmentSlot(s,"shield",7,0).trained,undefined);
   assert.deepEqual(slotBonus("weapon",2),{attack:2,defense:0,durability:4});
 });
+
+test("activity grades unlock independently every ten levels and survive reloading",async()=>{
+  const {setDifficulty}=await import("../site/play/engine.mjs");
+  const {workMultiplier,benchmark}=await import("../site/play/difficulty.mjs");
+  let state=newGame(0);
+  delete state.difficulties;
+  state=readSave(state);
+  assert.deepEqual(state.difficulties,{});
+  for(let tier=1;tier<=7;tier++) {
+    state.skills.mining.level=tier*10-1;
+    assert.throws(()=>setDifficulty(state,"mining",tier,0));
+    state.skills.mining.level++;
+    state=setDifficulty(state,"mining",tier,0).state;
+    assert.equal(readSave(state).difficulties.mining,tier);
+    assert.throws(()=>setDifficulty(state,"fighting",tier,0));
+    const model=benchmark(tier), weight={STR:100};
+    assert.ok(workMultiplier(tier,weight,{STR:{value:model.stat}})>1);
+    assert.ok(workMultiplier(tier,weight,{STR:{value:model.stat/2}})<1);
+  }
+  assert.equal(state.difficulties.fighting,undefined);
+  assert.throws(()=>setDifficulty(state,"mining",8,0));
+});

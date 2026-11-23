@@ -1,7 +1,7 @@
 /**
  * Fixed four-choice armour registry, tuned for a physical / evasion / magic
  * counter triangle. All values are provisional alpha design constants.
- * No drop generation, item stacks, magical attacks, or generic item database.
+ * No drop generation, item stacks, or generic item database.
  */
 export const ARMOUR_TIERS = Object.freeze(["none","robe","leather","plate"]);
 // Keep the saved `robe` key; only the visible category/part names change.
@@ -46,7 +46,7 @@ export const ARMOUR_PIECES = Object.freeze({
 });
 
 /** Full-set target profiles. Physical mitigation applies only on landed hits.
- * Magic resistance is reserved for future spell damage; no spells exist yet.
+ * Magic resistance mitigates incoming staff spells.
  * Evasion is a defense-roll score modifier; dodge margin controls the chance
  * for a successful defense to be shown as a DODGE instead of a block/parry.
  */
@@ -57,8 +57,9 @@ export const ARMOUR_BALANCE = Object.freeze({
   plate: Object.freeze({ physical: 50, magic: 0, evasion: -3, dodgeMargin: 99 })
 });
 
-/** Existing two selectable weapon styles. Sword and shield are two pieces. */
+/** Selectable weapon styles. Sword and shield are two pieces. */
 export const WEAPON_PIECES = Object.freeze({
+  bow:[{name:"Longbow",kg:2}], staff:[{name:"Mage Staff",kg:3}], twin_blades:[{name:"Paired Swords",kg:4}],
   hammer:Object.freeze([Object.freeze({name:"War hammer",kg:6})]),
   greatsword: Object.freeze([Object.freeze({name:"Greatsword",kg:5})]),
   sword_shield: Object.freeze([
