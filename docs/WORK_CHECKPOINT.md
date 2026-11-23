@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## Activity difficulty and terrain — 2026-11-23
+
+Check a level-10 activity at F, return to Non-grade, and compare the same weapon in an open field and dungeon. The combat readout shares rows for both fighters. The benchmark is provisional.
+
 ## Combat durability and slot mastery — 2026-11-23
 
 Check the two bars through a blocked hammer strike and recovery. Equip Sword & Shield to access the shield editor. The F-grade purchase consumes five logs and five stone.

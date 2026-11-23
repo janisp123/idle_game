@@ -3,7 +3,9 @@
  * defense dice animation, then one revealed move. No RNG or saved data here.
  * The real combat engine remains the authority for opponents, roles and time.
  */
-import { COMBAT_BALANCE, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=gear-v1";
+import { COMBAT_BALANCE, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=arena-v1";
+
+import { TERRAIN_ROLL_START, TERRAIN_REVEAL } from "./difficulty.mjs?v=arena-v1";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const step = (icon, label) => ({ icon, label });
@@ -38,9 +40,11 @@ export function combatFlowState(combat, session) {
   } else if (event.type === "initiative") {
     steps = [
       step("⚄", "Roll dice"),
-      step("⚑", event.actor === "player" ? "You go first" : "Enemy first")
+      step("⚑", t < COMBAT_BALANCE.initiativeAnimationMs ? "First attacker" : event.actor === "player" ? "You go first" : "Enemy first"),
+      step("⚄", "Terrain roll"),
+      step("✦", t >= TERRAIN_REVEAL ? combat.terrain.name : "Teleport")
     ];
-    current = t < COMBAT_BALANCE.initiativeAnimationMs ? 0 : 1;
+    current = t < COMBAT_BALANCE.initiativeAnimationMs ? 0 : t < TERRAIN_ROLL_START ? 1 : t < TERRAIN_REVEAL ? 2 : 3;
     percent = t / COMBAT_BALANCE.eventMs * 100;
   } else {
     // Some duels end before six attacks. Their outcome stays on screen for

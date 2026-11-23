@@ -62,3 +62,9 @@ Current cost parameters are 20 XP for the first point, then +20 XP **per success
 ## Things not implemented
 
 No player-controlled global XP pool, no manual attribute assignment, no account-based progression, no passive defensive combat bonus from `shield_drills` yet. Those require explicitly designed mechanics.
+
+### Per-activity difficulty
+
+Each activity starts at Non-grade (0). F, E, D, C, B, A and S unlock at that activity’s levels 10 through 70 in ten-level steps. A selection persists independently for each activity. Changing the active grade settles elapsed work and starts a new cycle at the selected grade.
+
+For grade index t above zero the provisional target stat is 10 + 4t. The activity-weighted average of effective attributes determines readiness. XP and raw gathering yield multiply by (1 + 0.18t) × min(1, (weighted stat / target)²). Recipe quantities and ingredient costs stay paired. Combat opponents use a fixed same-grade reference build. Older saves default to Non-grade.

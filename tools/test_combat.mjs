@@ -24,7 +24,7 @@ const firstTurn = (player,enemy,attack=4,defense=4) =>
 test("combat is bounded at six opposed turns, with two skills per fighter",()=>{
   assert.equal(COMBAT_BALANCE.maxHalfTurns,6);
   assert.equal(COMBAT_BALANCE.slotsPerBout,8);
-  assert.deepEqual(Object.keys(COMBAT_LOADOUTS).sort(),["greatsword","hammer","sword_shield"]);
+  assert.deepEqual(Object.keys(COMBAT_LOADOUTS).sort(),["bow","greatsword","hammer","staff","sword_shield","twin_blades"]);
   assert.equal(COMBAT_SKILLS.heavy_swing.role,"attack");
   assert.equal(COMBAT_SKILLS.blade_guard.role,"defense");
   assert.equal(COMBAT_SKILLS.shield_block.role,"defense");
@@ -471,5 +471,30 @@ test("contact wears both fighters' equipment; misses and clean dodges preserve i
     assert.ok(["miss","dodge"].includes(evaded.type));
     assert.equal(evaded.vitals.enemy.shield,evaded.vitals.enemy.shieldMax);
     assert.equal(evaded.vitals.player.weapon,evaded.vitals.player.weaponMax);
+  }
+});
+
+test("arena draws legal sets, all terrains and reproducible matchups at each grade",()=>{
+  const sets = new Set(), faces = new Set();
+  for(let seed=0;seed<180;seed++) {
+    const session=startCombatSession({...great,difficulty:seed%8},seed);
+    const duel=combatAtTime(session);
+    const repeat=combatAtTime(session);
+    assert.deepEqual(duel,repeat);
+    faces.add(duel.zoneRoll);
+    sets.add(duel.enemyRole+"/"+duel.enemyArmour);
+    assert.ok(duel.events.every(e=>!e.attackDice || Number.isFinite(e.attackTotal)));
+    assert.equal(duel.terrain.name,["Open field","Ruined courtyard","Dungeon passage"][Math.floor((duel.zoneRoll-1)/2)]);
+  }
+  assert.equal(faces.size,6);
+  assert.deepEqual([...sets].sort(),["Archer/leather","Breaker/leather","Breaker/plate","Duelist/leather","Duelist/plate","Mage/robe","Tank/plate","Vanguard/leather","Vanguard/plate"]);
+  const plate=Object.fromEntries(ARMOUR_SLOTS.map(slot=>[slot.id,"plate"]));
+  const tank={...shield,gear:armourStats(plate,"sword_shield")};
+  for(const loadout of ["bow","staff","sword_shield"]) {
+    const actor=loadout==="sword_shield"?tank:{...great,loadout};
+    const duel=roll=>simulateDuel(actor,shield,withSequence(6,6,6,1,1,1,4,4,4,3,3,3),roll);
+    const field=duel(1),dungeon=duel(6);
+    assert.deepEqual(field.events[0],dungeon.events[0]);
+    assert.equal(field.events[1].attackTotal-dungeon.events[1].attackTotal,loadout==="sword_shield"?-5:6);
   }
 });

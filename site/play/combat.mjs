@@ -10,11 +10,11 @@
  * combat-skills.mjs; paintings in combat-art.mjs. No DOM or timers here.
  */
 import { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
-  from "./combat-skills.mjs?v=gear-v1";
-import { armourStats, initialArmour } from "./armour.mjs?v=gear-v1";
+  from "./combat-skills.mjs?v=arena-v1";
+import { armourStats, initialArmour } from "./armour.mjs?v=arena-v1";
 export { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
-  from "./combat-skills.mjs?v=gear-v1";
-export { COMBAT_ART } from "./combat-art.mjs?v=gear-v1";
+  from "./combat-skills.mjs?v=arena-v1";
+export { COMBAT_ART } from "./combat-art.mjs?v=arena-v1";
 
 export const COMBAT_BALANCE = Object.freeze({
   eventMs: 25_000,                    // Each phase lingers; no rapid slideshow.
@@ -39,12 +39,16 @@ export const COMBAT_BALANCE = Object.freeze({
   initiativeRerolls: 3
 });
 export const BOUT_MS = COMBAT_BALANCE.eventMs * COMBAT_BALANCE.slotsPerBout;
-const OPPONENTS = Object.freeze([
-  ["Varrik the Loud", "sword_shield", 10, 9, 10, 1],
-  ["Odran Ironjaw", "greatsword", 13, 7, 13, 2],
-  ["Kest the Crow", "sword_shield", 8, 13, 9, 1],
-  ["Brann of the Ash", "hammer", 12, 11, 11, 2]
-]);
+import { benchmark, validTier, TERRAIN, terrainBonus } from "./difficulty.mjs?v=arena-v1";
+const ENCOUNTERS=[
+  {role:"Tank",weapon:"sword_shield",sets:["plate"]},
+  {role:"Vanguard",weapon:"greatsword",sets:["leather","plate"]},
+  {role:"Breaker",weapon:"hammer",sets:["leather","plate"]},
+  {role:"Archer",weapon:"bow",sets:["leather"]},
+  {role:"Mage",weapon:"staff",sets:["robe"]},
+  {role:"Duelist",weapon:"twin_blades",sets:["leather","plate"]}
+];
+const OPPONENTS = ["Varrik the Loud", "Odran Ironjaw", "Kest the Crow", "Brann of the Ash"];
 const validUnsigned = value => Number.isSafeInteger(value) && value >= 0;
 const validStat = value => Number.isFinite(value) && value >= 0 &&
   value <= Number.MAX_SAFE_INTEGER / 100;
@@ -88,6 +92,7 @@ function validateFighter(f) {
   if (!f || typeof f !== "object" || typeof f.name !== "string" || !f.name ||
     f.name.length > 40 || !validCombatLoadout(f.loadout) ||
     !["str","dex","end","skill"].every(k => validStat(f[k])) ||
+    (f.difficulty!==undefined && !validTier(f.difficulty)) ||
     (f.defenseSkill !== undefined && f.defenseSkill !== null &&
       COMBAT_SKILLS[f.defenseSkill]?.role !== "defense") ||
     (f.gear !== undefined && !validGear(f.gear)) ||
@@ -97,11 +102,18 @@ function validateFighter(f) {
       f.attackEnchant < 0 || f.attackEnchant > 10000)))
     throw new RangeError("Invalid fighter");
 }
-export function makeOpponent(bout) {
+export function makeOpponent(bout,tier=0,random=seededCombatRandom(bout)) {
   if (!validUnsigned(bout)) throw new RangeError("Invalid bout number");
-  const [name,loadout,str,dex,end,skill] = OPPONENTS[bout % OPPONENTS.length];
-  // Opponents use starter Robe gear, not fictional heavy armour they never own.
-  return {name,loadout,str,dex,end,skill,gear:armourStats(initialArmour(),loadout)};
+  const pick=list=>list[Math.floor(random()*list.length)];
+  const model=benchmark(tier),profile=pick(ENCOUNTERS),armour=pick(profile.sets);
+  const loadout=profile.weapon;
+  const pieces=Object.fromEntries(Object.keys(initialArmour()).map(id=>[id,armour]));
+  const stat=()=>model.stat+Math.floor(random()*5)-2;
+  return {name:OPPONENTS[bout%OPPONENTS.length],role:profile.role,armour,loadout,
+    str:stat(),dex:stat(),end:stat(),skill:model.skill,attackEnchant:model.enchant,
+    conditionBonus:{weapon:2*model.enchant,body:2*model.enchant,shield:2*model.enchant},
+    gear:{...armourStats(pieces,loadout),defenseEnchant:model.enchant}};
+
 }
 export function validCombatSession(session) {
   return session === null || Boolean(session && typeof session === "object" &&
@@ -192,6 +204,9 @@ function initiative(player,enemy,random) {
       (playerTotal===enemyTotal?"Tie broken by quickness. ":"")+starter};
 }
 const finisherText=Object.freeze({
+  bow:{player:"Your arrow ends the duel.",enemy:"lands the deciding shot."},
+  staff:{player:"Your arc bolt ends the duel.",enemy:"lands the deciding spell."},
+  twin_blades:{player:"Your twin cut ends the duel.",enemy:"lands the deciding cut."},
   hammer:{player:"Your hammer breaks through the enemy guard.",enemy:"breaks through your guard with a hammer."},
   greatsword: {player:"You tear through the opponent's guard in one devastating greatsword blow.",
     enemy:"tears through your guard with a devastating greatsword blow."},
@@ -215,7 +230,7 @@ function vitals(f) {
 function wearOnContact(a,d,event) {
   if(event.type==="miss" || event.type==="dodge") return;
   const force=basePhysicalDamage(a);
-  const pressure={hammer:0.24,greatsword:0.16,sword_shield:0.09}[a.loadout];
+  const pressure={hammer:0.24,greatsword:0.16,sword_shield:0.09,bow:0.08,staff:0.1,twin_blades:0.12}[a.loadout];
   const struck=event.type==="block"?"shield":event.type==="parry"?"weapon":"body";
   d[struck]=Math.max(0,d[struck]-Math.max(1,Math.ceil(force*pressure)));
   a.weapon=Math.max(0,a.weapon-Math.max(1,Math.ceil(force/14)));
@@ -235,7 +250,7 @@ function guardedImpactDamage(attacker,defender,type) {
   // Armour and slot enchants may absorb all transmitted impact. Unlike a
   // direct landed hit, a clean block need not force a minimum 1 HP of damage.
   const protectedImpact=Math.max(0,Math.round(impact*
-    (100-defender.gear.physicalReductionPct*armourFraction(defender))/100)-
+    (100-(attacker.loadout==="staff"?(defender.gear.magicResistancePct??0):defender.gear.physicalReductionPct)*armourFraction(defender))/100)-
     Math.round((defender.gear.defenseEnchant??0)*armourFraction(defender)));
   return Math.min(defender.hp,protectedImpact);
 }
@@ -244,7 +259,7 @@ function resolveTurn(a,d,turn,random) {
   const defenseDice=rollSkullDice(random);
   const opening=a.opening;
   a.opening=false;
-  const attackTotal=sum(attackDice)+scoreStats(a,"attack")+
+  const attackTotal=sum(attackDice)+a.terrainBonus+scoreStats(a,"attack")+
     (a.attackAbility.attackBonus??0)+(opening?COMBAT_BALANCE.counterOpeningBonus:0);
   const defenseTotal=sum(defenseDice)+scoreStats(d,"defense")+
     (d.defenseAbility?Math.round(d.defenseAbility.defenseBonus*
@@ -261,7 +276,7 @@ function resolveTurn(a,d,turn,random) {
   }
   if(attackTotal<=defenseTotal) {
     const gap=defenseTotal-attackTotal;
-    const evasion=!d.defenseAbility || gap>=d.gear.dodgeMargin;
+    const evasion=!d.defenseAbility || d.defenseAbility.result==="dodge" || gap>=d.gear.dodgeMargin;
     const type=evasion?"dodge":d.defenseAbility.result;
     if(evasion)d.opening=true;
     const damage=evasion?0:guardedImpactDamage(a,d,type);
@@ -287,7 +302,7 @@ function resolveTurn(a,d,turn,random) {
   // Slot enchantments are small flat bonuses, not extra dice or guaranteed
   // misses. Defence applies only after a physical hit beats the guard.
   const damage=Math.max(1,
-    Math.round(baseDamage*(100-d.gear.physicalReductionPct*armourFraction(d))/100)-
+    Math.round(baseDamage*(100-(a.loadout==="staff"?(d.gear.magicResistancePct??0):d.gear.physicalReductionPct)*armourFraction(d))/100)-
       Math.round((d.gear.defenseEnchant??0)*armourFraction(d)));
   d.hp=Math.max(0,d.hp-damage);
   const type=d.hp===0?"collapse":d.hp<=d.maxHP/2?"wound":"strike";
@@ -299,11 +314,14 @@ function resolveTurn(a,d,turn,random) {
         (d.hp===0?"You collapse.":"You struggle to recover.")};
 }
 /** At most six opposed attacks: initiative decides who goes first. */
-export function simulateDuel(player,opponent,random) {
+export function simulateDuel(player,opponent,random,zoneRoll=null) {
   validateFighter(player);validateFighter(opponent);
   if(typeof random!=="function")throw new RangeError("Invalid random source");
   const p=normalize(player,"player"),e=normalize(opponent,"enemy");
   const start=initiative(p,e,random);
+  const terrain=zoneRoll?TERRAIN[Math.floor((zoneRoll-1)/2)]:null;
+  p.terrainBonus=terrainBonus(p,terrain);
+  e.terrainBonus=terrainBonus(e,terrain);
   const snapshot=()=>({player:vitals(p),enemy:vitals(e)});
   const events=[{...start,vitals:snapshot()}];
   for(let t=0;t<COMBAT_BALANCE.maxHalfTurns&&p.hp>0&&e.hp>0;t++) {
@@ -337,14 +355,17 @@ export function combatAtTime(session) {
   const bout=Math.floor(session.elapsedMs/BOUT_MS);
   const inside=session.elapsedMs%BOUT_MS;
   const seed=(Math.imul(session.seed^(bout>>>0),2654435761)+(bout>>>16))>>>0;
-  const foe=makeOpponent(bout);
+  const foe=makeOpponent(bout,session.player.difficulty??0,seededCombatRandom((seed^0x35b6d119)>>>0));
   // A pre-gear V7 snapshot must not be retroactively upgraded on readback.
   // New sessions carry their frozen gear; old sessions retain legacy behavior
   // on BOTH sides of every reconstructed duel.
   if (session.player.gear === undefined) delete foe.gear;
-  const duel=simulateDuel(session.player,foe,seededCombatRandom(seed));
+  const zoneRoll=1+Math.floor(6*roll(seededCombatRandom((seed^0x749ae237)>>>0)));
+  const terrain=TERRAIN[Math.floor((zoneRoll-1)/2)];
+  const duel=simulateDuel(session.player,foe,seededCombatRandom(seed),zoneRoll);
   const step=Math.min(duel.events.length-1,Math.floor(inside/COMBAT_BALANCE.eventMs));
-  return {...duel,bout:bout+1,enemyLoadout:foe.loadout,
+  return {...duel,zoneRoll,terrain,enemyRole:foe.role,enemyArmour:foe.armour,
+    playerTerrain:terrainBonus(session.player,terrain),enemyTerrain:terrainBonus(foe,terrain),bout:bout+1,enemyLoadout:foe.loadout,
     step,eventElapsedMs:inside%COMBAT_BALANCE.eventMs,
     event:duel.events[step]};
 }

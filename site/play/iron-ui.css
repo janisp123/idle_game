@@ -1108,3 +1108,14 @@ footer p{color:#aa9680}
 .vital.Armour progress {accent-color:#af8c56}
 .gear-wear {display:block;color:#d8ba8c;font-size:11px}
 #shieldSlot[aria-pressed="true"] {outline:1px solid #bb925d}
+
+.activity-difficulty {max-width:100%;align-self:start;background:#241a14;color:#efdec4;border:1px solid #856440;padding:5px}
+.combat-panel {flex-wrap:wrap}
+.combat-ground {flex-basis:100%;grid-column:1/-1;margin:0;color:#dfc49a;font-size:.85rem}
+.result-combat {align-items:start;row-gap:3px}
+.result-side {display:grid;grid-row:1/span 7;grid-template-rows:subgrid;align-items:start;row-gap:inherit}
+.result-side-player {grid-column:1}
+.result-side-enemy {grid-column:3}
+.result-versus {grid-row:1/span 7;grid-column:2;align-self:center}
+.result-side .vital {display:grid;grid-row:span 2;grid-template-rows:subgrid;width:100%;margin:0}
+.result-side progress {min-width:0;max-width:100%}

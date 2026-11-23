@@ -9,17 +9,17 @@ export {
 } from "./attributes.mjs?v=20261122-mastery1";
 import {
   validCombatSession, migrateCombatTimeline, startCombatSession, advanceCombatSession, BOUT_MS
-} from "./combat.mjs?v=gear-v1";
+} from "./combat.mjs?v=arena-v1";
 import {
   GLORY_SCROLL_ID, GLORY_RULES, blankEnchantments, normalizeEnchantments,
   enchantBonus, enchantSlot, gloryEligibilityWindow, attachGloryTracker,
   tallyGloryVictories
-} from "./glory.mjs?v=gear-v1";
+} from "./glory.mjs?v=arena-v1";
 export { GLORY_SCROLL_ID, GLORY_RULES, ENCHANT_SLOTS, enchantBonus }
-  from "./glory.mjs?v=gear-v1";
+  from "./glory.mjs?v=arena-v1";
 import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
-  from "./combat-skills.mjs?v=gear-v1";
-import { initialArmour, normalizeArmour, armourUnlocked, armourOption, armourStats } from "./armour.mjs?v=gear-v1";
+  from "./combat-skills.mjs?v=arena-v1";
+import { initialArmour, normalizeArmour, armourUnlocked, armourOption, armourStats } from "./armour.mjs?v=arena-v1";
 import { effectiveAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261122-mastery1";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
@@ -110,7 +110,7 @@ export const ITEM_LABELS = Object.freeze({
   ...PRODUCTION_LABELS,
   [GLORY_SCROLL_ID]:"Glory Scrolls"
 });
-import { conditionBonuses, masteryRanks, masteryOffer } from "./equipment-rules.mjs?v=gear-v1";
+import { conditionBonuses, masteryRanks, masteryOffer } from "./equipment-rules.mjs?v=arena-v1";
 export function trainEquipmentSlot(state,slot,expectedRank,now=Date.now(),random=Math.random) {
   const result=settle(state,now,random);
   const offer=masteryOffer(result.state,slot);
@@ -120,6 +120,16 @@ export function trainEquipmentSlot(state,slot,expectedRank,now=Date.now(),random
   return {...result,trained:true,state:{...result.state,items,
     slotMastery:{...result.state.slotMastery,[slot]:offer.rank+1},
     combatSession:null}};
+}
+import { validTier, unlockLevel, workMultiplier } from "./difficulty.mjs?v=arena-v1";
+export function setDifficulty(state,id,tier,now=Date.now(),random=Math.random) {
+  if(!Object.hasOwn(ACTIVITIES,id)||!validTier(tier)||state.skills[id].level<unlockLevel(tier))
+    throw new RangeError("Difficulty locked");
+  const result=settle(state,now,random);
+  if((state.difficulties[id]??0)===tier) return result;
+  return {...result,state:{...result.state,difficulties:{...state.difficulties,[id]:tier},
+    combatSession:id==="fighting"?null:result.state.combatSession,
+    progressMs:result.state.activity===id?0:result.state.progressMs}};
 }
 export const ITEM_KEYS = Object.freeze(Object.keys(ITEM_LABELS));
 export const SKILL_IDS = Object.freeze(Object.keys(ACTIVITIES));
@@ -185,7 +195,7 @@ export function newGame(now = Date.now()) {
     combatSession: null,
     combatLoadout: DEFAULT_COMBAT_LOADOUT,
     armour: initialArmour(),
-    enchantments: blankEnchantments(), slotMastery:masteryRanks(),
+    difficulties:{}, enchantments: blankEnchantments(), slotMastery:masteryRanks(),
     // V1 global XP cannot be assigned to individual activities reliably.
     unattributedXP: 0,
     items: Object.fromEntries(ITEM_KEYS.map(key => [key, 0])),
@@ -293,6 +303,10 @@ export function readSave(value) {
                 : skill.level <= levelFromXP(skill.xp)));
           })) return null;
 
+    const difficulties=s.difficulties===undefined?{}:s.difficulties;
+    if(!difficulties || typeof difficulties!=="object" || Array.isArray(difficulties) ||
+      Object.entries(difficulties).some(([id,t])=>!Object.hasOwn(ACTIVITIES,id)||
+        !validTier(t)||(s.skills?.[id]?.level??1)<unlockLevel(t))) return null;
     const skills = blankSkills();
     if (!oldVersion) {
       for (const id of SKILL_IDS) {
@@ -329,7 +343,7 @@ export function readSave(value) {
       // Optional additive V7 field: older V7 and V1–V6 saves retain all
       // progression and simply begin with the free starter armour.
       armour: normalizeArmour(s.version === GAME_VERSION ? s.armour : null),
-      enchantments: normalizeEnchantments(s.enchantments), slotMastery:masteryRanks(s.slotMastery),
+      difficulties:{...difficulties}, enchantments: normalizeEnchantments(s.enchantments), slotMastery:masteryRanks(s.slotMastery),
       // Migrate old V6 sword/axe/hammer prototype duels to the first real
       // two-skill greatsword loadout; keep time, RNG seed, stats and XP intact.
       combatSession: s.version >= 6 && s.combatSession ? {
@@ -400,7 +414,7 @@ function variedTotal(base, random) {
   return whole + (fraction > 0 && roll() < fraction ? 1 : 0);
 }
 
-function settleWork(state, now, random, xpRandom = random) {
+function settleWork(state, now, random, frozenEffort, xpRandom = random) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
   const end = Math.max(state.settledAtMs, now);
   const elapsedMs = end - state.settledAtMs;
@@ -412,6 +426,9 @@ function settleWork(state, now, random, xpRandom = random) {
   // Attribute progress is based on productive time, not work cycles or
   // alpha timing. Master-capped skill XP does not stop attribute growth.
   next.attributeEffort = awardAttributeTime(state.attributeEffort, state.activity, elapsedMs);
+  const tier=state.difficulties[state.activity]??0;
+  const multiplier=tier?workMultiplier(tier,ACTIVITY_STAT_WEIGHTS[state.activity],
+    combatAttributeProgress(frozenEffort,state.skills)):1;
   let gloryResult = null;
   if (state.activity === "fighting") {
     // Snapshot effectiveness before this batch: offline-earned stats and XP
@@ -420,12 +437,12 @@ function settleWork(state, now, random, xpRandom = random) {
     const xpLeft=Math.max(0,xpToNextLevel(state.skills.fighting.level)-state.skills.fighting.xp);
     const efficiency=Math.min(SKILL_BALANCE.maxEfficiency,
       1+Math.max(0,state.skills.fighting.level-1)*SKILL_BALANCE.efficiencyPerLevel);
-    const nominalXP=ACTIVITIES.fighting.xp*efficiency;
+    const nominalXP=ACTIVITIES.fighting.xp*efficiency*multiplier;
     if (!session) {
-      const attrs = combatAttributeProgress(state.attributeEffort, state.skills);
+      const attrs = combatAttributeProgress(frozenEffort, state.skills);
       const bonus = enchantBonus(state.enchantments,state.combatLoadout);
       session = startCombatSession({
-        name: state.name,
+        difficulty:tier, name: state.name,
         loadout: state.combatLoadout,
         gear: {...armourStats(state.armour,state.combatLoadout),
           defenseEnchant:bonus.defense},
@@ -465,7 +482,7 @@ function settleWork(state, now, random, xpRandom = random) {
       // resource gatherers also bring home more material. Old-offline levels
       // stay frozen until the player explicitly trains with the Master.
       const efficiency = Math.min(SKILL_BALANCE.maxEfficiency,
-        1 + Math.max(0, prior.level - 1) * SKILL_BALANCE.efficiencyPerLevel);
+        1 + Math.max(0, prior.level - 1) * SKILL_BALANCE.efficiencyPerLevel)*multiplier;
       report.gainedItems = rules.item === null ? 0 :
         crafted ? productive : variedTotal(count * rules.yield * efficiency, random);
       // The Master owns the next level. Extra XP never banks, even if a
@@ -506,9 +523,9 @@ function settleWork(state, now, random, xpRandom = random) {
  * At most three transition phases and one old/full new-work batch are resolved,
  * regardless of whether the absence was minutes or decades.
  */
-function settleTransition(state, now, random) {
+function settleTransition(state, now, random, frozenEffort) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
-  if (!state.transition) return settleWork(state, now, random);
+  if (!state.transition) return settleWork(state, now, random, frozenEffort);
   const end = Math.max(now, state.settledAtMs);
   let next = state;
   const reports = [];
@@ -523,7 +540,7 @@ function settleTransition(state, now, random) {
     if (transition.phase === "finishing") {
       const needed = ACTIVITIES[next.activity].durationMs - next.progressMs;
       const take = Math.min(remaining, needed);
-      const work = settleWork(next, next.settledAtMs + take, random);
+      const work = settleWork(next, next.settledAtMs + take, random, frozenEffort);
       next = work.state;
       pushReport(work.report);
       remaining -= take;
@@ -551,7 +568,7 @@ function settleTransition(state, now, random) {
   }
 
   if (!next.transition) {
-    const work = settleWork(next, end, random);
+    const work = settleWork(next, end, random, frozenEffort);
     next = work.state;
     pushReport(work.report);
   }
@@ -621,7 +638,7 @@ export function skillMasterReadiness(state, skillId) {
  */
 export function settle(state, now = Date.now(), random = Math.random) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
-  if (!state.wagons?.length) return settleTransition(state, now, random);
+  if (!state.wagons?.length) return settleTransition(state, now, random, state.attributeEffort);
   const end = Math.max(now, state.settledAtMs);
   let next = state;
   const reports = [];
@@ -635,7 +652,7 @@ export function settle(state, now = Date.now(), random = Math.random) {
   for (let step = 0; step < 10; step++) {
     if (next.transition) {
       const untilReady = remainingTransitionMs(next);
-      const result = settleTransition(next, Math.min(end, next.settledAtMs + untilReady), random);
+      const result = settleTransition(next, Math.min(end, next.settledAtMs + untilReady), random, state.attributeEffort);
       next = result.state;
       addReports(result);
       if (next.transition) break;
@@ -643,7 +660,7 @@ export function settle(state, now = Date.now(), random = Math.random) {
     }
     const first = next.wagons[0];
     if (!first || first.plannedMs === null) {
-      const result = settleWork(next, end, random);
+      const result = settleWork(next, end, random, state.attributeEffort);
       next = result.state;
       addReports(result);
       break;
@@ -655,7 +672,7 @@ export function settle(state, now = Date.now(), random = Math.random) {
         const task = ACTIVITIES[first.activity];
         const possibleCycles = Math.floor((next.progressMs + end - next.settledAtMs) / task.durationMs);
         if (possibleCycles === 0) {
-          next = settleWork(next, end, random).state;
+          next = settleWork(next, end, random, state.attributeEffort).state;
           break;
         }
         const originalRoll = random();
@@ -669,13 +686,13 @@ export function settle(state, now = Date.now(), random = Math.random) {
         const xpRoll = ((Math.imul(seed, 2246822519) + 3266489917) >>> 0) /
           0x100000000;
         const atCycle = count => next.settledAtMs + count * task.durationMs - next.progressMs;
-        const probe = count => settleWork(next, atCycle(count), seededRoll(seed),
+        const probe = count => settleWork(next, atCycle(count), seededRoll(seed), state.attributeEffort,
           () => xpRoll);
         const finalResult = probe(possibleCycles);
         if (!skillMasterReadiness(finalResult.state, first.activity).ready) {
           // No crafting inputs or not enough loot/XP: stay on this task until
           // the condition really becomes true. Do not skip to Forever.
-          const tail = settleWork(finalResult.state, end, random);
+          const tail = settleWork(finalResult.state, end, random, state.attributeEffort);
           next = tail.state;
           addReports(finalResult);
           addReports(tail);
@@ -697,7 +714,7 @@ export function settle(state, now = Date.now(), random = Math.random) {
       }
     } else if (next.productiveElapsedMs < first.plannedMs) {
       const available = Math.min(end - next.settledAtMs, first.plannedMs - next.productiveElapsedMs);
-      const result = settleWork(next, next.settledAtMs + available, random);
+      const result = settleWork(next, next.settledAtMs + available, random, state.attributeEffort);
       next = { ...result.state, productiveElapsedMs: next.productiveElapsedMs + available };
       addReports(result);
       if (next.productiveElapsedMs < first.plannedMs) break;

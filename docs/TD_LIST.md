@@ -1,5 +1,9 @@
 # Active project tasks
 
+## Activity difficulty and terrain — 2026-11-23
+
+Activity grades and terrain — each activity has its own saved difficulty. Fighting rolls initiative and then arena terrain.
+
 ## Completed: combat durability and slot mastery — 2026-11-23
 
 Health and armour readouts, hammer combat, automatic recovery, derived character level, material-funded F–S slot mastery and per-rank enchant tuning. Consumable repairs or reinforcement remain future work.
