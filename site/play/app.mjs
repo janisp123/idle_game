@@ -1,5 +1,6 @@
+import { GRADES, characterLevel, masteryOffer, slotBonus } from "./equipment-rules.mjs?v=gear-v1";
 import {
-  SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
+  trainEquipmentSlot, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
   lootChances, recipeOptions, newGame, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
@@ -8,15 +9,15 @@ import {
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice,
   GLORY_SCROLL_ID, GLORY_RULES, enchantEquipmentSlot, enchantBonus
-} from "./engine.mjs?v=20261123-short-duel1";
+} from "./engine.mjs?v=gear-v1";
 
-import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261123-short-duel1";
-import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-dice-duels1";
-import { combatFlowState } from "./combat-flow.mjs?v=20261123-short-duel1";
+import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=gear-v1";
+import { combatArtworkForEvent } from "./combat-art.mjs?v=gear-v1";
+import { combatFlowState } from "./combat-flow.mjs?v=gear-v1";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, WEAPON_PIECES,
   armourOption, armourUnlocked, armourStats }
-  from "./armour.mjs?v=20261122-guard-impact1";
+  from "./armour.mjs?v=gear-v1";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
   setAlphaSpeed, advanceAlphaClock } from "./alpha-tools.mjs?v=20261122-alpha-tools1";
 const $ = id => document.getElementById(id);
@@ -89,7 +90,7 @@ for (const loadout of Object.values(COMBAT_LOADOUTS)) {
   button.setAttribute("data-loadout", loadout.id);
   const glyph = document.createElement("span");
   glyph.className = "armour-slot-symbol";
-  glyph.textContent = loadout.id === "greatsword" ? "⚔" : "♜";
+  glyph.textContent = loadout.id === "greatsword" ? "⚔" : loadout.id==="hammer"?"⚒":"♜";
   const caption = document.createElement("span");
   caption.className = "weapon-slot-name";
   caption.textContent = loadout.name;
@@ -122,7 +123,7 @@ for (const loadout of Object.values(COMBAT_LOADOUTS)) {
 // independent body slots. Selected is NOT synonymous with worn/equipped.
 let selectedEquipmentSlot = "head";
 function selectEquipmentSlot(slot) {
-  if (slot !== "weapon" && !ARMOUR_SLOT_BY_ID[slot])
+  if (slot !== "weapon" && slot !== "shield" && !ARMOUR_SLOT_BY_ID[slot])
     throw new RangeError("Unknown equipment slot");
   const changed=selectedEquipmentSlot !== slot;
   selectedEquipmentSlot=slot;
@@ -167,14 +168,23 @@ insignia.textContent = "✣";
 insignia.setAttribute("aria-hidden", "true");
 ui.armourSlots.append(insignia);
 
+function enchantDescription(bonus) {
+  return [[bonus.attack,"ATK"],[bonus.defense,"DEF"],[bonus.durability,"durability"]]
+    .filter(([n])=>n>0).map(([n,label])=>n+" "+label).join(", +");
+}
 function renderArmour() {
+  if(selectedEquipmentSlot==="shield" && state.combatLoadout!=="sword_shield") selectEquipmentSlot("weapon");
+  const editingShield=selectedEquipmentSlot==="shield";
+  $("shieldSlot").hidden=state.combatLoadout!=="sword_shield";
+  $("shieldSlot").setAttribute("aria-pressed",String(editingShield));
+  $("shieldSlot").textContent="Shield"+(state.enchantments.shield?" +"+state.enchantments.shield:"");
   const editingWeapon = selectedEquipmentSlot === "weapon";
   const slot = editingWeapon ? null : ARMOUR_SLOT_BY_ID[selectedEquipmentSlot];
   const selectedRank=state.enchantments[selectedEquipmentSlot];
-  const selectedName=editingWeapon ? "WEAPON" : slot.short;
+  const selectedName=editingWeapon ? "WEAPON" : editingShield ? "SHIELD" : slot.short;
   ui.equipmentEditHeading.textContent = selectedName +
     (selectedRank > 0 ? " +" + selectedRank : "");
-  ui.armourEditor.hidden = editingWeapon;
+  ui.armourEditor.hidden = !slot;
   ui.weaponEditor.hidden = !editingWeapon;
   ui.weaponEditor.textContent = COMBAT_LOADOUTS[state.combatLoadout].name;
 
@@ -202,8 +212,15 @@ function renderArmour() {
     ui.armourChoiceLabel.textContent = slot.name;
     ui.armourChoice.value = state.armour[slot.id];
   }
+  const offer=masteryOffer(state,selectedEquipmentSlot);
+  const grade=GRADES[offer.rank-1]?.grade??"Untrained";
+  const costs=offer.next?Object.entries(offer.next.cost).map(([id,n])=>ITEM_LABELS[id]+" "+number(state.items[id])+"/"+n).join(" · "):"";
+  $("masteryInfo").textContent="Character Lv "+characterLevel(state.skills)+" · Mastery "+grade+
+    (offer.next?" · "+offer.next.grade+" needs Lv "+offer.next.level+" · "+costs:"");
+  $("trainSlot").textContent=offer.next?"Train "+offer.next.grade+" · +3 durability":"S mastery complete";
+  $("trainSlot").disabled=!offer.available;
   const gear = armourStats(state.armour,state.combatLoadout);
-  const bonus = enchantBonus(state.enchantments);
+  const bonus = enchantBonus(state.enchantments,state.combatLoadout);
   ui.gearStats.textContent = gear.totalKg + " kg  ·  MOVE " + gear.mobilityPct +
     "%  ·  PHYS " + gear.physicalReductionPct + "%  ·  DODGE " +
     (gear.evasionScore >= 0 ? "+" : "") + gear.evasionScore +
@@ -232,7 +249,6 @@ function renderArmour() {
   const chancePct=Math.round(GLORY_RULES.enchantSuccessChance*100);
   ui.enchantChance.textContent=chancePct + "% ⓘ";
   ui.enchantChance.title="See the current enchant probability and risk";
-  const effect = editingWeapon ? "ATK" : "DEF";
   const successRank=selectedRank+1;
   const hasScroll=state.items[GLORY_SCROLL_ID]>0;
   ui.enchantSelected.disabled = !hasScroll || selectedRank >= GLORY_RULES.maxRank;
@@ -242,6 +258,7 @@ function renderArmour() {
   ui.enchantSelected.title = !hasScroll ? "Requires 1 Glory Scroll" :
     selectedRank>=GLORY_RULES.maxRank ? "Maximum enchantment rank reached" :
     "Chance " + chancePct + "%; failure resets " + selectedName + " to +0";
+  const nextBonus=slotBonus(selectedEquipmentSlot,successRank);
   const details=[
     "Selected slot: " + selectedName + (selectedRank>0?" +"+selectedRank:""),
     "Base success chance: " + chancePct + "%",
@@ -251,8 +268,7 @@ function renderArmour() {
     selectedRank >= GLORY_RULES.maxRank
       ? "At maximum enchant rank: +" + GLORY_RULES.maxRank + " (no further attempts)"
       : "Success: +" + successRank + " on this slot (+" +
-        (editingWeapon ? successRank*GLORY_RULES.attackPerRank :
-          successRank*GLORY_RULES.defensePerRank) + " " + effect + " total from this slot)",
+        enchantDescription(nextBonus) + " total from this slot)",
     "Failure: this slot resets to +0 (lose " + selectedRank + " existing rank" +
       (selectedRank===1?"":"s") + "); other slots stay unchanged",
     "No attributes, skill level, equipment type or current rank change the chance yet."
@@ -538,13 +554,33 @@ function drawResultTokens(container, tokens) {
   container.replaceChildren(...nodes);
 }
 
-function renderResults(combat, revealed) {
+function renderVitals(side,current,previous,recovering) {
+  const labels=[["HP","Health",current.hp,current.maxHP],["Armour","Armour",current.armour,current.maxArmour]];
+  for(const [key,name,end,max] of labels) {
+    const value=recovering?max:end;
+    $(side+key).max=Math.max(1,max);
+    $(side+key).value=value;
+    $(side+key+"Text").textContent=name+" "+value+"/"+max+(recovering && value>end?" (+"+(value-end)+")":"");
+  }
+  const changes=[];
+  for(const [key,label] of [["weapon","Weapon"],["shield","Shield"]]) {
+    const max=current[key+"Max"];
+    if(!max) continue;
+    const diff=recovering?max-current[key]:current[key]-(previous?.[key]??current[key]);
+    if(diff) changes.push(label+" "+(diff>0?"+":"")+diff+" · "+(recovering?max:current[key])+"/"+max);
+  }
+  $(side+"Wear").textContent=changes.join(" / ");
+}
+function renderResults(combat, revealed, recovering) {
   ui.resultCombat.hidden = !combat;
   ui.resultWork.hidden = Boolean(combat);
   if (combat) {
     // Before actual rolls resolve, retain ONLY the previous known result.
     const actualEvent = revealed ? combat.event :
       combat.events[combat.step - 1];
+    const visibleIndex=Math.max(0,combat.step-(revealed?0:1));
+    for(const side of ["player","enemy"])
+      renderVitals(side,combat.events[visibleIndex].vitals[side],combat.events[visibleIndex-1]?.vitals[side],recovering);
     const result = combatReadoutForEvent(actualEvent);
     drawResultTokens(ui.playerResult,result.player);
     drawResultTokens(ui.enemyResult,result.enemy);
@@ -1008,7 +1044,8 @@ function render() {
     ? combatAtTime(state.combatSession) : null;
   ui.activityProgress.hidden = Boolean(transition || current?.category === "combat");
   ui.combatPanel.hidden = !combat;
-  showCombatFlow(combat ? combatFlowState(combat,state.combatSession) : null);
+  const flow=combat ? combatFlowState(combat,state.combatSession) : null;
+  showCombatFlow(flow);
   ui.combatDiceStage.hidden = true;
   ui.combatDice.hidden = true;
   let imageEvent = null;
@@ -1054,7 +1091,7 @@ function render() {
     lastCombatEventKey = null;
     ui.combatTurns.textContent = "";
   }
-  renderResults(combat,combatRevealed);
+  renderResults(combat,combatRevealed,flow?.steps[flow.current].label==="Recover");
   const sceneActivity = transition ? ACTIVITIES[transition.targetActivity] : current;
   if (!sceneActivity) {
     ui.sceneTag.textContent = "WAITING FOR ORDERS";
@@ -1266,8 +1303,8 @@ function start() {
   });
   ui.armourChoice.addEventListener("change", () => {
     // Hidden armour editor can never mutate a second slot while weapon editing.
-    if (selectedEquipmentSlot === "weapon") return;
     const slot = ARMOUR_SLOT_BY_ID[selectedEquipmentSlot];
+    if (!slot) return;
     const option = armourOption(slot.id, ui.armourChoice.value);
     if (!option || (state.armour[slot.id] !== option.id &&
       !armourUnlocked(effectiveAttributeProgress(state.attributeEffort,state.skills),slot.id,option.id))) {
@@ -1279,6 +1316,16 @@ function start() {
     reportProgress(outcome);
     writeSave();
     render();
+  });
+  $("shieldSlot").addEventListener("click",()=>{selectEquipmentSlot("shield");render();});
+  $("trainSlot").addEventListener("click",()=>{
+    const slot=selectedEquipmentSlot;
+    const offer=masteryOffer(state,slot);
+    if(!offer.available) return;
+    if(!window.confirm("Train "+slot.replaceAll("_"," ")+" to "+offer.next.grade+"? Spend "+
+      Object.entries(offer.next.cost).map(([id,n])=>n+" "+ITEM_LABELS[id]).join(", ")+ ".")) return;
+    const result=trainEquipmentSlot(state,slot,offer.rank,gameNow());
+    state=result.state; reportProgress(result); writeSave(); render();
   });
   ui.enchantChance.addEventListener("click", () => {
     const expand=ui.enchantChanceBreakdown.hidden;
@@ -1292,13 +1339,12 @@ function start() {
     const rank=state.enchantments[slot];
     if (state.items[GLORY_SCROLL_ID]<1 || rank>=GLORY_RULES.maxRank) return;
     const name=slot==="weapon" ?
-      COMBAT_LOADOUTS[state.combatLoadout].name : ARMOUR_SLOT_BY_ID[slot].name;
-    const effect=slot==="weapon"?"ATK":"DEF";
+      COMBAT_LOADOUTS[state.combatLoadout].name : slot==="shield"?"Shield":ARMOUR_SLOT_BY_ID[slot].name;
     const pct=Math.round(GLORY_RULES.enchantSuccessChance*100);
     if (!window.confirm("ENCHANT " + name.toUpperCase() +
       (rank>0?" +"+rank:"") + "?\\n\\nChance: " + pct + "%." +
       "\\nCost: 1 Glory Scroll." +
-      "\\nSuccess: +" + (rank+1) + " " + effect + " on this slot." +
+      "\\nSuccess: +" + enchantDescription(slotBonus(slot,rank+1)) + " total on this slot." +
       "\\nFailure: this slot resets to +0 (lose " + rank +
         " existing rank" + (rank===1?"":"s") + ")." +
       "\\nOther slots remain unchanged. Continue?")) return;
@@ -1306,8 +1352,7 @@ function start() {
     state=result.state;
     reportProgress(result);
     const resultText = result.enchantment.success
-      ? "SUCCESS · " + name + " is now +" + result.enchantment.rank +
-        " " + effect
+      ? "SUCCESS · " + name + " is now +" + enchantDescription(slotBonus(slot,result.enchantment.rank))
       : "FAILED · " + name + " enchant reset to +0";
     message("✧ " + resultText);
     ui.enchantFeedback.textContent=resultText;

@@ -24,7 +24,7 @@ const firstTurn = (player,enemy,attack=4,defense=4) =>
 test("combat is bounded at six opposed turns, with two skills per fighter",()=>{
   assert.equal(COMBAT_BALANCE.maxHalfTurns,6);
   assert.equal(COMBAT_BALANCE.slotsPerBout,8);
-  assert.deepEqual(Object.keys(COMBAT_LOADOUTS).sort(),["greatsword","sword_shield"]);
+  assert.deepEqual(Object.keys(COMBAT_LOADOUTS).sort(),["greatsword","hammer","sword_shield"]);
   assert.equal(COMBAT_SKILLS.heavy_swing.role,"attack");
   assert.equal(COMBAT_SKILLS.blade_guard.role,"defense");
   assert.equal(COMBAT_SKILLS.shield_block.role,"defense");
@@ -455,4 +455,21 @@ test("Fighting earns time-based stats and capped XP even after 20 offline years"
   assert.ok(allAttributeProgress(out.state.attributeEffort).STR.value>10);
   assert.equal(out.state.skills.fighting.level,1);
   assert.deepEqual(readSave(JSON.stringify(out.state)),out.state);
+});
+
+test("contact wears both fighters' equipment; misses and clean dodges preserve it",()=>{
+  const tank={...great,loadout:"sword_shield"};
+  const slam=firstTurn({...great,loadout:"hammer"},tank,4,4);
+  const slash=firstTurn(great,tank,4,4);
+  assert.equal(slam.type,"block");
+  assert.ok(slam.vitals.enemy.shield<slash.vitals.enemy.shield);
+  assert.ok(slam.vitals.player.weapon<slam.vitals.player.weaponMax);
+  const heavier=firstTurn({...great,str:50,loadout:"hammer"},tank,4,4);
+  assert.ok(heavier.vitals.enemy.shield<slam.vitals.enemy.shield);
+  for(const [attack,defense] of [[1,1],[2,6]]) {
+    const evaded=firstTurn(great,tank,attack,defense);
+    assert.ok(["miss","dodge"].includes(evaded.type));
+    assert.equal(evaded.vitals.enemy.shield,evaded.vitals.enemy.shieldMax);
+    assert.equal(evaded.vitals.player.weapon,evaded.vitals.player.weaponMax);
+  }
 });

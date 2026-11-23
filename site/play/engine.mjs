@@ -9,17 +9,17 @@ export {
 } from "./attributes.mjs?v=20261122-mastery1";
 import {
   validCombatSession, migrateCombatTimeline, startCombatSession, advanceCombatSession, BOUT_MS
-} from "./combat.mjs?v=20261123-short-duel1";
+} from "./combat.mjs?v=gear-v1";
 import {
   GLORY_SCROLL_ID, GLORY_RULES, blankEnchantments, normalizeEnchantments,
   enchantBonus, enchantSlot, gloryEligibilityWindow, attachGloryTracker,
   tallyGloryVictories
-} from "./glory.mjs?v=20261123-short-duel1";
+} from "./glory.mjs?v=gear-v1";
 export { GLORY_SCROLL_ID, GLORY_RULES, ENCHANT_SLOTS, enchantBonus }
-  from "./glory.mjs?v=20261123-short-duel1";
+  from "./glory.mjs?v=gear-v1";
 import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
-  from "./combat-skills.mjs?v=20261122-guard-impact1";
-import { initialArmour, normalizeArmour, armourUnlocked, armourOption, armourStats } from "./armour.mjs?v=20261122-guard-impact1";
+  from "./combat-skills.mjs?v=gear-v1";
+import { initialArmour, normalizeArmour, armourUnlocked, armourOption, armourStats } from "./armour.mjs?v=gear-v1";
 import { effectiveAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261122-mastery1";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
@@ -110,6 +110,17 @@ export const ITEM_LABELS = Object.freeze({
   ...PRODUCTION_LABELS,
   [GLORY_SCROLL_ID]:"Glory Scrolls"
 });
+import { conditionBonuses, masteryRanks, masteryOffer } from "./equipment-rules.mjs?v=gear-v1";
+export function trainEquipmentSlot(state,slot,expectedRank,now=Date.now(),random=Math.random) {
+  const result=settle(state,now,random);
+  const offer=masteryOffer(result.state,slot);
+  if(!offer.available || offer.rank!==expectedRank) return result;
+  const items={...result.state.items};
+  for(const [id,n] of Object.entries(offer.next.cost)) items[id]-=n;
+  return {...result,trained:true,state:{...result.state,items,
+    slotMastery:{...result.state.slotMastery,[slot]:offer.rank+1},
+    combatSession:null}};
+}
 export const ITEM_KEYS = Object.freeze(Object.keys(ITEM_LABELS));
 export const SKILL_IDS = Object.freeze(Object.keys(ACTIVITIES));
 if (Object.keys(ACTIVITY_STAT_WEIGHTS).length !== SKILL_IDS.length ||
@@ -174,7 +185,7 @@ export function newGame(now = Date.now()) {
     combatSession: null,
     combatLoadout: DEFAULT_COMBAT_LOADOUT,
     armour: initialArmour(),
-    enchantments: blankEnchantments(),
+    enchantments: blankEnchantments(), slotMastery:masteryRanks(),
     // V1 global XP cannot be assigned to individual activities reliably.
     unattributedXP: 0,
     items: Object.fromEntries(ITEM_KEYS.map(key => [key, 0])),
@@ -217,6 +228,7 @@ export function readSave(value) {
               Number.isFinite(s.combatSession.player[k]) &&
               s.combatSession.player[k] >= 0))) ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
+        !masteryRanks(s.slotMastery) ||
         (s.enchantments !== undefined && normalizeEnchantments(s.enchantments) === null) ||
         (s.protectedItems !== undefined && (!Array.isArray(s.protectedItems) ||
           !s.protectedItems.every(key => typeof key === "string" && ITEM_KEYS.includes(key)))) ||
@@ -317,7 +329,7 @@ export function readSave(value) {
       // Optional additive V7 field: older V7 and V1–V6 saves retain all
       // progression and simply begin with the free starter armour.
       armour: normalizeArmour(s.version === GAME_VERSION ? s.armour : null),
-      enchantments: normalizeEnchantments(s.enchantments),
+      enchantments: normalizeEnchantments(s.enchantments), slotMastery:masteryRanks(s.slotMastery),
       // Migrate old V6 sword/axe/hammer prototype duels to the first real
       // two-skill greatsword loadout; keep time, RNG seed, stats and XP intact.
       combatSession: s.version >= 6 && s.combatSession ? {
@@ -411,13 +423,13 @@ function settleWork(state, now, random, xpRandom = random) {
     const nominalXP=ACTIVITIES.fighting.xp*efficiency;
     if (!session) {
       const attrs = combatAttributeProgress(state.attributeEffort, state.skills);
-      const bonus = enchantBonus(state.enchantments);
+      const bonus = enchantBonus(state.enchantments,state.combatLoadout);
       session = startCombatSession({
         name: state.name,
         loadout: state.combatLoadout,
         gear: {...armourStats(state.armour,state.combatLoadout),
           defenseEnchant:bonus.defense},
-        attackEnchant:bonus.attack,
+        attackEnchant:bonus.attack, conditionBonus:conditionBonuses(state),
         str: attrs.STR.value, dex: attrs.DEX.value, end: attrs.END.value,
         skill: state.skills.fighting.level
       }, state.settledAtMs >>> 0);

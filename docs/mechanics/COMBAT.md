@@ -1,5 +1,12 @@
 # Combat formulas — PLAYABLE two-skill V2 alpha
 
+## Armour and condition in the current arena
+
+Both fighters start at full health and condition. A landed blow wears body armour. A block wears the shield and a parry wears the defending weapon. All three also wear the attacking weapon. Misses and dodges cause zero wear. At equal strength the hammer applies the most guard wear, followed by the greatsword and sword. A shield that survives a block grants a counter opening on the next attack.
+
+The Armour bar totals remaining body and shield condition. Its remaining fraction scales physical mitigation and flat enchant protection. Guard condition also scales guard bonuses and penetration. At zero weapon condition, attacks retain 55% power. A duel's condition snapshots drive both the opposed rolls and the visible bars. Recovery shows the exact gain back to maximum health and condition. No repair materials are consumed between bouts.
+
+
 **Live gameplay and tuning:** [combat.mjs](../../site/play/combat.mjs) → `COMBAT_BALANCE`, `OPPONENTS`, `COMBAT_ART`; [combat-skills.mjs](../../site/play/combat-skills.mjs) → `COMBAT_SKILLS` and `COMBAT_LOADOUTS`. [engine.mjs](../../site/play/engine.mjs) handles save V7, frozen stats, and switching a combat style. [app.mjs](../../site/play/app.mjs) shows the matched cinematic scene; **the compact result strip** shows only truthful red HP damage, green healing when it actually exists, or short defense words on the correct side. There is no Chronicle/history. Exact dice/scores remain visible on the existing animated dice tray; see [Results](RESULTS.md).
 
 ## Two automatic abilities per fighter — unchanged loadouts, new 3d6 rolls

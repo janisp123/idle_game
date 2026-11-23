@@ -1,5 +1,10 @@
 # Active project tasks
 
+## Completed: combat durability and slot mastery — 2026-11-23
+
+Health and armour readouts, hammer combat, automatic recovery, derived character level, material-funded F–S slot mastery and per-rank enchant tuning. Consumable repairs or reinforcement remain future work.
+
+
 **Canonical location:** `docs/TD_LIST.md` on remote `main`.
 
 Only explicitly owner-approved tasks are included below. Discussion and brainstorm notes alone never authorize implementation.

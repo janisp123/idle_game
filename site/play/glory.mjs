@@ -13,14 +13,14 @@
  * Thus reward settlement stays bounded by the finite XP window, not absence
  * length (20 years away is not 20 years of eligible bouts).
  */
-import { ARMOUR_SLOTS } from "./armour.mjs?v=20261122-guard-impact1";
-import { BOUT_MS, combatAtTime, seededCombatRandom } from "./combat.mjs?v=20261123-short-duel1";
+import { EQUIP_SLOTS, MAX_ENCHANT, slotBonus } from "./equipment-rules.mjs?v=gear-v1";
+import { BOUT_MS, combatAtTime, seededCombatRandom } from "./combat.mjs?v=gear-v1";
 export const GLORY_SCROLL_ID = "glory_scroll";
 export const GLORY_RULES = Object.freeze({
   winDropChance: 0.5, enchantSuccessChance: 0.5,
-  maxRank: 20, attackPerRank: 1, defensePerRank: 1
+  maxRank: MAX_ENCHANT
 });
-export const ENCHANT_SLOTS = Object.freeze(["weapon",...ARMOUR_SLOTS.map(slot=>slot.id)]);
+export const ENCHANT_SLOTS = Object.freeze([...EQUIP_SLOTS]);
 const validRank = x => Number.isSafeInteger(x) && x >= 0 && x <= GLORY_RULES.maxRank;
 const validTime = x => Number.isSafeInteger(x) && x >= 0;
 export const blankEnchantments = () => Object.fromEntries(ENCHANT_SLOTS.map(id=>[id,0]));
@@ -33,14 +33,17 @@ export function normalizeEnchantments(value) {
   for (const slot of ENCHANT_SLOTS) if (raw[slot]!==undefined) next[slot]=raw[slot];
   return next;
 }
-export function enchantBonus(enchantments) {
+export function enchantBonus(enchantments,loadout="greatsword") {
   if (!enchantments || ENCHANT_SLOTS.some(k=>!validRank(enchantments[k])))
     throw new RangeError("Invalid enchantments");
-  const defense=ARMOUR_SLOTS.reduce((n,slot)=>n+enchantments[slot.id],0);
-  return Object.freeze({
-    attack: enchantments.weapon*GLORY_RULES.attackPerRank,
-    defense: defense*GLORY_RULES.defensePerRank
-  });
+  const total={attack:0,defense:0};
+  for(const slot of ENCHANT_SLOTS) {
+    if(slot==="shield" && loadout!=="sword_shield") continue;
+    const bonus=slotBonus(slot,enchantments[slot]);
+    total.attack+=bonus.attack;
+    total.defense+=bonus.defense;
+  }
+  return total;
 }
 export function enchantSlot(enchantments,slot,scrolls,roll) {
   if (!ENCHANT_SLOTS.includes(slot) || !Number.isSafeInteger(scrolls) || scrolls<=0 ||
