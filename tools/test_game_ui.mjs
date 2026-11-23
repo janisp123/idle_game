@@ -281,8 +281,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.match(elements.get("gloryWallet").textContent,/0 Glory Scrolls/);
     assert.equal(elements.get("weaponEnchantRank").textContent,
       "Two-handed Greatsword","empty weapon enchant control omits +0");
-    assert.equal(elements.get("armourEnchantRank").textContent,"Head",
-      "empty armour enchant control omits +0");
+    assert.equal(elements.get("armourEnchantRank").textContent,"Hood / helmet",
+      "empty armour enchant control shows the selected slot, but omits +0");
     assert.doesNotMatch(elements.get("gearStats").textContent,/ATK \+0|DEF \+0/,
       "unused bonuses must not clutter the equipment stat strip");
     assert.ok(armourButtons.every(button =>
