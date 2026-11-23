@@ -795,7 +795,8 @@ footer p{color:#aa9680}
   background:linear-gradient(180deg,#25170f,#120c0b);
 }
 .combat-flow[hidden] {display:none !important}
-.combat-flow-steps {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
+.combat-flow-step[hidden] {display:none}
+.combat-flow-steps {display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:3px}
 .combat-flow-step {
   min-width:0;min-height:49px;box-sizing:border-box;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;

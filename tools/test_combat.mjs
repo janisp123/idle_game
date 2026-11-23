@@ -19,11 +19,11 @@ const diceRoll = x => (x-1)/6+0.000001;
 const withSequence = (...faces) => {let i=0;return () => diceRoll(faces[i++]??4);};
 const firstTurn = (player,enemy,attack=4,defense=4) =>
   simulateDuel(player,enemy,withSequence(
-    6,6,6, 1,1,1, attack,attack,attack, defense,defense,defense)).events[2];
+    6,6,6, 1,1,1, attack,attack,attack, defense,defense,defense)).events[1];
 
 test("combat is bounded at six opposed turns, with two skills per fighter",()=>{
   assert.equal(COMBAT_BALANCE.maxHalfTurns,6);
-  assert.equal(COMBAT_BALANCE.slotsPerBout,9);
+  assert.equal(COMBAT_BALANCE.slotsPerBout,8);
   assert.deepEqual(Object.keys(COMBAT_LOADOUTS).sort(),["greatsword","sword_shield"]);
   assert.equal(COMBAT_SKILLS.heavy_swing.role,"attack");
   assert.equal(COMBAT_SKILLS.blade_guard.role,"defense");
@@ -44,28 +44,27 @@ test("each skull die is 1–6, independent, and 6–6–6 is possible",()=>{
 });
 test("initiative genuinely rolls THREE dice on BOTH sides, winner attacks first",()=>{
   const playerFirst=simulateDuel(great,shield,withSequence(6,6,6,1,1,1));
-  assert.equal(playerFirst.events[0].type,"engage");
-  assert.equal(playerFirst.events[1].type,"initiative");
-  assert.deepEqual(playerFirst.events[1].playerDice,[6,6,6]);
-  assert.deepEqual(playerFirst.events[1].enemyDice,[1,1,1]);
+  assert.equal(playerFirst.events[0].type,"initiative");
+  assert.deepEqual(playerFirst.events[0].playerDice,[6,6,6]);
+  assert.deepEqual(playerFirst.events[0].enemyDice,[1,1,1]);
+  assert.equal(playerFirst.events[0].actor,"player");
   assert.equal(playerFirst.events[1].actor,"player");
-  assert.equal(playerFirst.events[2].actor,"player");
-  assert.equal(playerFirst.events[2].turn,1);
+  assert.equal(playerFirst.events[1].turn,1);
   const enemyFirst=simulateDuel(great,shield,withSequence(1,1,1,6,6,6));
+  assert.equal(enemyFirst.events[0].actor,"enemy");
   assert.equal(enemyFirst.events[1].actor,"enemy");
-  assert.equal(enemyFirst.events[2].actor,"enemy");
-  assert.equal(enemyFirst.events[2].turn,1);
+  assert.equal(enemyFirst.events[1].turn,1);
 });
 test("ties reroll in bounded work; constant-RNG ties end safely by initiative skill",()=>{
   const duel=simulateDuel({...shield,name:"Knight A"},{...shield,name:"Knight B"},()=>.5);
-  assert.equal(duel.events[1].rerolls,COMBAT_BALANCE.initiativeRerolls);
-  assert.equal(duel.events[1].actor,"player");
+  assert.equal(duel.events[0].rerolls,COMBAT_BALANCE.initiativeRerolls);
+  assert.equal(duel.events[0].actor,"player");
   assert.ok(duel.events.length<=COMBAT_BALANCE.slotsPerBout);
 });
 test("each turn is one attack and independent three-dice defense, no charge-only turns",()=>{
   const duel=simulateDuel(great,shield,()=>.5);
   assert.deepEqual(duel,simulateDuel(great,shield,()=>.5));
-  assert.equal(duel.events[1].actor,"enemy", "quick sword starts ahead of heavy greatsword on tied dice");
+  assert.equal(duel.events[0].actor,"enemy", "quick sword starts ahead of heavy greatsword on tied dice");
   const actions=duel.events.filter(e=>e.turn);
   assert.equal(actions.length,6);
   assert.deepEqual(actions.map(e=>e.turn),[1,2,3,4,5,6]);
@@ -243,9 +242,9 @@ test("physical armor counters real hits; evasion and weight alter actual opposed
   const equalFighters={...shield,name:"Equal"};
   const heavy=simulateDuel(wear(equalFighters,"plate"),
     wear({...equalFighters,name:"Light"},"none"),()=>.5);
-  assert.equal(heavy.events[1].actor,"enemy",
+  assert.equal(heavy.events[0].actor,"enemy",
     "heavy encumbrance lowers the actual three-dice initiative total");
-  assert.equal(heavy.events[1].playerTotal<heavy.events[1].enemyTotal,true);
+  assert.equal(heavy.events[0].playerTotal<heavy.events[0].enemyTotal,true);
   const old=simulateDuel(great,shield,()=>.5);
   assert.equal(old.events.length>0,true,
     "pre-equipment combat fixtures keep original rules for old snapshots");
@@ -402,7 +401,20 @@ test("combat sessions are deterministic, persisted and O(1) after decades away",
   assert.ok(combatAtTime(years).bout>1_000_000);
   assert.equal(COMBAT_ART.engage,"fight-engage");
 });
-test("V6 save migration preserves frozen stats, duel time and items",()=>{
+test("legacy duel resumes at the same attack without paying completed bouts again",()=>{
+  const state=newGame(0);
+  const session=startCombatSession(great,12345);
+  delete session.timelineVersion;
+  state.combatSession={...session,elapsedMs:2*225_000+55_000,
+    gloryCursor:2,gloryEligibleUntilMs:2*225_000+80_000};
+  const saved=readSave(JSON.stringify(state));
+  assert.equal(saved.combatSession.elapsedMs,2*BOUT_MS+30_000);
+  assert.equal(combatAtTime(saved.combatSession).event.turn,1);
+  assert.equal(saved.combatSession.gloryCursor,2);
+  assert.equal(saved.combatSession.gloryEligibleUntilMs-saved.combatSession.elapsedMs,25_000);
+  assert.deepEqual(readSave(JSON.stringify(saved)),saved);
+});
+test("V6 save migration preserves frozen stats, active turn and items",()=>{
   const old=newGame(0);old.version=6;delete old.combatLoadout;
   old.name="Old Knight";old.items.stone=314;old.skills.fighting.level=11;
   old.combatSession={elapsedMs:83_000,seed:12345,
@@ -410,7 +422,7 @@ test("V6 save migration preserves frozen stats, duel time and items",()=>{
   const converted=readSave(JSON.stringify(old));
   assert.equal(converted.version,GAME_VERSION);
   assert.equal(converted.combatSession.player.loadout,"greatsword");
-  assert.equal(converted.combatSession.elapsedMs,83_000);
+  assert.equal(converted.combatSession.elapsedMs,58_000);
   assert.equal(converted.combatSession.seed,12345);
   assert.equal(converted.combatSession.player.str,19);
   assert.equal(converted.items.stone,314);
