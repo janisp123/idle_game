@@ -1209,7 +1209,10 @@ function start() {
       lastCombatEventKey=null;
       lastArmourOptionsKey=null;
       lastWagonSignature=null;
-      selectedArmourSlot="head";
+      selectedEquipmentSlot="head";
+      ui.enchantChanceBreakdown.hidden=true;
+      ui.enchantChance.setAttribute("aria-expanded","false");
+      ui.enchantFeedback.hidden=true;
       ui.masterAudience.hidden=true;
       hideQueuePlanner();
       showActivityScreen("root",null);
@@ -1260,7 +1263,9 @@ function start() {
     }
   });
   ui.armourChoice.addEventListener("change", () => {
-    const slot = ARMOUR_SLOT_BY_ID[selectedArmourSlot];
+    // Hidden armour editor can never mutate a second slot while weapon editing.
+    if (selectedEquipmentSlot === "weapon") return;
+    const slot = ARMOUR_SLOT_BY_ID[selectedEquipmentSlot];
     const option = armourOption(slot.id, ui.armourChoice.value);
     if (!option || (state.armour[slot.id] !== option.id &&
       !armourUnlocked(effectiveAttributeProgress(state.attributeEffort,state.skills),slot.id,option.id))) {
@@ -1273,30 +1278,43 @@ function start() {
     writeSave();
     render();
   });
-  function attemptEnchant(slot) {
+  ui.enchantChance.addEventListener("click", () => {
+    const expand=ui.enchantChanceBreakdown.hidden;
+    ui.enchantChanceBreakdown.hidden=!expand;
+    ui.enchantChance.setAttribute("aria-expanded",String(expand));
+  });
+  ui.enchantSelected.addEventListener("click", () => {
+    // ONE current selection is the sole target. No stale weapon + armour
+    // enchant controls or hidden edit state can spend a scroll elsewhere.
+    const slot=selectedEquipmentSlot;
     const rank=state.enchantments[slot];
     if (state.items[GLORY_SCROLL_ID]<1 || rank>=GLORY_RULES.maxRank) return;
-    const slotName=slot==="weapon" ? "Weapon" : ARMOUR_SLOT_BY_ID[slot].name;
-    if (!window.confirm("ENCHANT " + slotName.toUpperCase() + " +" + rank +
-        "?\\nUse 1 Glory Scroll. 50% success: +1 " +
-        (slot==="weapon"?"ATK":"DEF") +
-        ". 50% failure: this slot resets to +0. Continue?")) return;
+    const name=slot==="weapon" ?
+      COMBAT_LOADOUTS[state.combatLoadout].name : ARMOUR_SLOT_BY_ID[slot].name;
+    const effect=slot==="weapon"?"ATK":"DEF";
+    const pct=Math.round(GLORY_RULES.enchantSuccessChance*100);
+    if (!window.confirm("ENCHANT " + name.toUpperCase() +
+      (rank>0?" +"+rank:"") + "?\\n\\nChance: " + pct + "%." +
+      "\\nCost: 1 Glory Scroll." +
+      "\\nSuccess: +" + (rank+1) + " " + effect + " on this slot." +
+      "\\nFailure: this slot resets to +0 (lose " + rank +
+        " existing rank" + (rank===1?"":"s") + ")." +
+      "\\nOther slots remain unchanged. Continue?")) return;
     const result=enchantEquipmentSlot(state,slot,gameNow());
     state=result.state;
     reportProgress(result);
     const resultText = result.enchantment.success
-      ? "SUCCESS · " + slotName + " is now +" + result.enchantment.rank +
-        " " + (slot==="weapon"?"ATK":"DEF")
-      : "FAILED · " + slotName + " enchant reset to +0";
+      ? "SUCCESS · " + name + " is now +" + result.enchantment.rank +
+        " " + effect
+      : "FAILED · " + name + " enchant reset to +0";
     message("✧ " + resultText);
-    ui.enchantFeedback.textContent = resultText;
-    ui.enchantFeedback.setAttribute("data-outcome",result.enchantment.success?"success":"failure");
-    ui.enchantFeedback.hidden = false;
+    ui.enchantFeedback.textContent=resultText;
+    ui.enchantFeedback.setAttribute("data-outcome",
+      result.enchantment.success?"success":"failure");
+    ui.enchantFeedback.hidden=false;
     writeSave();
     render();
-  }
-  ui.enchantWeapon.addEventListener("click",()=>attemptEnchant("weapon"));
-  ui.enchantArmour.addEventListener("click",()=>attemptEnchant(selectedArmourSlot));
+  });
   ui.saveName.addEventListener("click", () => {
     const chosen = ui.nameInput.value.trim().replace(/\s+/g, " ");
     if (!chosen || chosen.length > 40) {
