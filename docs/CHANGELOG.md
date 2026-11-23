@@ -1,5 +1,12 @@
 # Changelog — verified completed work
 
+## 2026-11-23 — Inline +N on enchanted equipment names; hide all zero levels (chat, PR #127)
+
+- [PR #127](https://github.com/janisp123/idle_game/pull/127) merged at `b689b6efd8c6f0f208d5ef035faa47846c7ea7bf`. Following Owner's Android screenshot, removed the extra enchant badge rows: `HEAD +1`, `L GLOVE +1` and `Greatsword +1` now appear **directly on their equipment title line**, gold and compact. Unenchanted pieces have no `+0`. Unused weapon/armor +0 enchant labels and +0 gear totals are hidden; actual positive enchant attributes and completed-success or failed feedback remain visible.
+- No changes to random enchant chance or scroll cost, stat effects, combat, gear slots, offline or save schema. Browser regression tests cover +1 success, hiding +0 after failure, slot independence and preserved ranks on reload.
+- Final-head website [CI 45117631298](https://github.com/janisp123/idle_game/actions/runs/45117631298) passed 107 tests; [protocol 45117631345](https://github.com/janisp123/idle_game/actions/runs/45117631345) passed, and main [Pages 45117740319](https://github.com/janisp123/idle_game/actions/runs/45117740319) deployed successfully. Fresh public raw HTML HTTP 200 confirmed new JS/CSS query versions, with default +0 labels absent. Owner's mobile visual verification pending.
+
+
 ## 2026-11-23 — Fixed visible enchant ranks and made weapon choice match armour wardrobe (chat, PR #125)
 
 - [PR #125](https://github.com/janisp123/idle_game/pull/125) merged into main at `ac40bbe2267cc43120beaf260555414a5c44b2f3`. The reported symptom was Glory Scroll spent but no obvious +1 on selected gear. Saved enchantment ranks and original combat bonuses already worked; the presentation was incomplete (old weapon dropdown displayed no rank, armour text buried +N, gear summary omitted ATK/DEF). Fixed visible **gold enchant rank badge** for weapon and each individual armour slot, including after save/reload and equipment-style changes, and added honest in-panel SUCCESS vs FAILED feedback.
