@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=20261122-alpha-day-button1">
-  <script type="module" src="./app.mjs?v=20261122-alpha-day-button1"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=20261123-enchant-ui1">
+  <script type="module" src="./app.mjs?v=20261123-enchant-ui1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -48,13 +48,14 @@
             </div>
           </div>
           <div id="characterAttributes" class="character-attributes" aria-label="Character attributes"></div>
-          <div class="combat-loadout-control">
-            <label for="combatLoadout">Combat style · Two equipped skills</label>
-            <select id="combatLoadout" aria-label="Choose combat equipment and skills"></select>
-            <p class="hint" id="combatSkillsText">One attack skill and one defense skill.</p>
-          </div>
           <details id="armourCabinet" class="armour-cabinet">
-            <summary class="armour-summary">EQUIPMENT <span aria-hidden="true">✥</span></summary>
+            <summary class="armour-summary">EQUIPMENT <span id="enchantTotal" class="enchant-total" hidden></span><span aria-hidden="true">✥</span></summary>
+            <div class="weapon-cabinet" aria-label="Equipped weapon">
+              <p class="equipment-section-label">WEAPONS</p>
+              <div id="weaponSlots" class="weapon-slots" role="group" aria-label="Choose your weapon style"></div>
+              <p class="weapon-skills" id="combatSkillsText">Heavy Swing · Blade Guard</p>
+            </div>
+            <p class="equipment-section-label armour-section-label">ARMOUR</p>
             <div id="armourSlots" class="armour-slots" aria-label="Equipped armour slots"></div>
             <div class="armour-choice">
               <label id="armourChoiceLabel" for="armourChoice">Hood / helmet</label>
@@ -71,6 +72,7 @@
                 <span id="armourEnchantRank">Head · +0 DEF</span>
                 <button type="button" id="enchantArmour" class="enchant-action" disabled>✧ Enchant</button>
               </div>
+              <p id="enchantFeedback" class="enchant-feedback" role="status" aria-live="polite" hidden></p>
             </div>
           </details>
         </section>
