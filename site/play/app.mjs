@@ -7,14 +7,15 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice,
-  GLORY_SCROLL_ID, GLORY_RULES, enchantEquipmentSlot
+  GLORY_SCROLL_ID, GLORY_RULES, enchantEquipmentSlot, enchantBonus
 } from "./engine.mjs?v=20261122-guard-impact1";
 
 import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=20261122-guard-impact1";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=20261122-dice-duels1";
 import { combatFlowState } from "./combat-flow.mjs?v=20261122-guard-impact1";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
-import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, armourOption, armourUnlocked, armourStats }
+import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, WEAPON_PIECES,
+  armourOption, armourUnlocked, armourStats }
   from "./armour.mjs?v=20261122-guard-impact1";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
   setAlphaSpeed, advanceAlphaClock } from "./alpha-tools.mjs?v=20261122-alpha-tools1";
@@ -22,12 +23,13 @@ const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
   characterAttributes: $("characterAttributes"),
-  combatLoadout: $("combatLoadout"), combatSkillsText: $("combatSkillsText"),
+  weaponSlots: $("weaponSlots"), combatSkillsText: $("combatSkillsText"),
   armourSlots: $("armourSlots"), armourChoice: $("armourChoice"),
   armourChoiceLabel: $("armourChoiceLabel"), gearStats: $("gearStats"),
   gloryWallet: $("gloryWallet"), weaponEnchantRank: $("weaponEnchantRank"),
   armourEnchantRank: $("armourEnchantRank"), enchantWeapon: $("enchantWeapon"),
-  enchantArmour: $("enchantArmour"),
+  enchantArmour: $("enchantArmour"), enchantFeedback: $("enchantFeedback"),
+  enchantTotal: $("enchantTotal"),
   resourceList: $("resourceList"), choices: $("activityChoices"),
   openActivities: $("openActivities"), categories: $("activityCategories"),
   categoryChoices: $("activityCategoryChoices"), listScreen: $("activityListScreen"),
@@ -75,11 +77,38 @@ for (let n = SCHEDULE_BALANCE.minDurationUnits; n <= SCHEDULE_BALANCE.maxDuratio
   option.textContent = String(n);
   ui.queueAmount.append(option);
 }
+// The two existing combat styles are real equipment cards like armour slots,
+ // not a separate full-width form above the folded equipment panel.
+const weaponButtons = new Map();
 for (const loadout of Object.values(COMBAT_LOADOUTS)) {
-  const option = document.createElement("option");
-  option.value = loadout.id;
-  option.textContent = loadout.name;
-  ui.combatLoadout.append(option);
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "armour-slot weapon-slot";
+  button.setAttribute("data-loadout", loadout.id);
+  const glyph = document.createElement("span");
+  glyph.className = "armour-slot-symbol";
+  glyph.textContent = loadout.id === "greatsword" ? "⚔" : "♜";
+  const caption = document.createElement("span");
+  caption.className = "weapon-slot-name";
+  caption.textContent = loadout.name;
+  const weight = document.createElement("span");
+  weight.className = "weapon-slot-weight";
+  weight.textContent = WEAPON_PIECES[loadout.id]
+    .reduce((sum,part)=>sum+part.kg,0) + " kg";
+  const enchant = document.createElement("span");
+  enchant.className = "slot-enchant-rank";
+  button.append(glyph,caption,weight,enchant);
+  button.addEventListener("click", () => {
+    if (state.combatLoadout === loadout.id) return;
+    const result = setCombatLoadout(state,loadout.id,gameNow());
+    state = result.state;
+    reportProgress(result);
+    message("Equipped: " + loadout.name);
+    writeSave();
+    render();
+  });
+  weaponButtons.set(loadout.id,{button,enchant});
+  ui.weaponSlots.append(button);
 }
 // The user selects an engraved body slot, then uses ONE dropdown for its
 // fixed equipment choices. Both left/right pieces are independent. No item
@@ -100,12 +129,15 @@ for (const slot of ARMOUR_SLOTS) {
   caption.textContent = slot.short;
   const equipped = document.createElement("span");
   equipped.className = "armour-slot-item";
-  button.append(glyph, caption, equipped);
+  const enchant = document.createElement("span");
+  enchant.className = "slot-enchant-rank";
+  enchant.hidden = true;
+  button.append(glyph,caption,equipped,enchant);
   button.addEventListener("click", () => {
     selectedArmourSlot = slot.id;
     render();
   });
-  armourButtons.set(slot.id, {button, equipped});
+  armourButtons.set(slot.id, {button, equipped, enchant});
   ui.armourSlots.append(button);
 }
 const insignia = document.createElement("span");
@@ -140,14 +172,28 @@ function renderArmour() {
   ui.armourChoiceLabel.textContent = slot.name;
   ui.armourChoice.value = state.armour[slot.id];
   const gear = armourStats(state.armour,state.combatLoadout);
+  const magic = enchantBonus(state.enchantments);
   ui.gearStats.textContent = gear.totalKg + " kg  ·  MOVE " + gear.mobilityPct +
     "%  ·  PHYS " + gear.physicalReductionPct + "%  ·  DODGE " +
     (gear.evasionScore >= 0 ? "+" : "") + gear.evasionScore +
+    "  ·  ATK +" + magic.attack + "  ·  DEF +" + magic.defense +
     "  ·  MR* " + gear.magicResistancePct + "%";
+  const totalRanks = Object.values(state.enchantments).reduce((sum,n)=>sum+n,0);
+  ui.enchantTotal.textContent = "✧ +" + totalRanks;
+  ui.enchantTotal.hidden = totalRanks === 0;
+  for (const [id,parts] of weaponButtons) {
+    const chosen = id === state.combatLoadout;
+    parts.button.setAttribute("aria-pressed",String(chosen));
+    parts.button.setAttribute("aria-label",COMBAT_LOADOUTS[id].name +
+      ", weapon enchant +" + state.enchantments.weapon +
+      " attack. " + (chosen?"Equipped":"Equip weapon"));
+    parts.enchant.textContent = "✧ +" + state.enchantments.weapon + " ATK";
+  }
   ui.gearStats.title = "Physical reduction, dodge and mobility are active. " +
     "MR is reserved for future magic damage; slot enchantments add physical attack or defense.";
   ui.gloryWallet.textContent = "✧ " + number(state.items[GLORY_SCROLL_ID]) + " Glory Scrolls";
-  ui.weaponEnchantRank.textContent = "Weapon · +" + state.enchantments.weapon + " ATK";
+  ui.weaponEnchantRank.textContent = COMBAT_LOADOUTS[state.combatLoadout].name +
+    " · +" + state.enchantments.weapon + " ATK";
   ui.armourEnchantRank.textContent = slot.name + " · +" +
     state.enchantments[slot.id] + " DEF";
   ui.enchantWeapon.disabled = state.items[GLORY_SCROLL_ID] === 0 ||
@@ -160,11 +206,13 @@ function renderArmour() {
   for (const part of ARMOUR_SLOTS) {
     const row = armourButtons.get(part.id);
     const picked = armourOption(part.id, state.armour[part.id]);
-    row.equipped.textContent = (picked?.name ?? "—") +
-      (state.enchantments[part.id] ? " +" + state.enchantments[part.id] : "");
+    row.equipped.textContent = picked?.name ?? "—";
+    const rank=state.enchantments[part.id];
+    row.enchant.textContent = "✧ +" + rank + " DEF";
+    row.enchant.hidden = rank === 0;
     row.button.setAttribute("aria-pressed",String(part.id === selectedArmourSlot));
     row.button.setAttribute("aria-label",part.name+": "+(picked?.name ?? "none")+
-      ". Choose this armour slot");
+      ", enchant +" + rank + " defense. Choose this armour slot");
   }
 }
 const FACE_GLYPHS = Object.freeze(["⚀","⚁","⚂","⚃","⚄","⚅"]);
@@ -775,7 +823,6 @@ ui.masterConfirm.addEventListener("click", () => {
 
 function render() {
   const current = state.activity ? ACTIVITIES[state.activity] : null;
-  ui.combatLoadout.value = state.combatLoadout;
   ui.alphaSpeed.checked = alphaClock?.speed === 10;
   const chosen = COMBAT_LOADOUTS[state.combatLoadout];
   ui.combatSkillsText.textContent = "Attack: " +
@@ -1154,16 +1201,6 @@ function start() {
       ui.alphaStatus.textContent="Could not change testing speed.";
     }
   });
-  ui.combatLoadout.addEventListener("change", () => {
-    const result = setCombatLoadout(state, ui.combatLoadout.value, gameNow());
-    state = result.state;
-    reportProgress(result);
-    message("Combat style equipped: " + COMBAT_LOADOUTS[state.combatLoadout].name +
-      ". Two skills: " + ui.combatSkillsText.textContent +
-      ". A fresh duel begins if you were fighting.");
-    writeSave();
-    render();
-  });
   ui.armourChoice.addEventListener("change", () => {
     const slot = ARMOUR_SLOT_BY_ID[selectedArmourSlot];
     const option = armourOption(slot.id, ui.armourChoice.value);
@@ -1189,9 +1226,14 @@ function start() {
     const result=enchantEquipmentSlot(state,slot,gameNow());
     state=result.state;
     reportProgress(result);
-    message(result.enchantment.success
-      ? "✧ " + slotName + " enchanted to +" + result.enchantment.rank
-      : "✧ " + slotName + " enchant failed · reset to +0");
+    const resultText = result.enchantment.success
+      ? "SUCCESS · " + slotName + " is now +" + result.enchantment.rank +
+        " " + (slot==="weapon"?"ATK":"DEF")
+      : "FAILED · " + slotName + " enchant reset to +0";
+    message("✧ " + resultText);
+    ui.enchantFeedback.textContent = resultText;
+    ui.enchantFeedback.setAttribute("data-outcome",result.enchantment.success?"success":"failure");
+    ui.enchantFeedback.hidden = false;
     writeSave();
     render();
   }
