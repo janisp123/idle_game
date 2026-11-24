@@ -1,5 +1,13 @@
 # Changelog and task handoffs
 
+## GLAD-004 · STARTED · 2026-11-24
+
+Goal: Deliver five physical arenas and a seeded pre-bout 3d6 positioning roll.
+Branch: `codex/glad-004-tactical-arenas`.
+Last verified: GLAD-003 deployed and verified.
+Next action: Implement arena descriptors, selection and focused tests.
+Status: STARTED.
+
 ## GLAD-003 · DEPLOYED · 2026-11-24
 
 Goal: Implement the approved seeded physical arena resolver and connect its events to the existing arena and wallet.
