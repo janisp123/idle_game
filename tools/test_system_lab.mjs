@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { runLab,parseLabCli,LAB_MODULES } from './system-lab.mjs';
 import { simulateLoot,simulateCrafting } from './simulation/resources.mjs';
 import { simulateActivity,simulateAttributes,simulateMaster } from './simulation/progression.mjs';
-import { simulateEquipment,simulateEnchanting } from './simulation/equipment.mjs';
+import { simulateEquipment } from './simulation/equipment.mjs';
 import { simulateQueue,simulateSave } from './simulation/queue-save.mjs';
 import { allocateLoot,lootChances } from '../site/play/loot.mjs';
 import { produce } from '../site/play/production.mjs';
@@ -19,16 +19,16 @@ import { seededCombatRandom } from '../site/play/combat.mjs';
 
 test('the lab registry covers all production-backed modules and is deterministic',()=>{
   assert.deepEqual(Object.keys(LAB_MODULES).sort(),
-    ['combat','activity','loot','crafting','attributes','master','equipment','enchanting','queue','save'].sort());
+    ['combat','activity','loot','crafting','attributes','master','equipment','queue','save'].sort());
   const config=JSON.parse(readFileSync('tools/simulation/example-scenarios.json','utf8'));
   const before=JSON.stringify(config);
   const a=runLab(config),b=runLab(config);
   assert.deepEqual(a,b);
-  assert.equal(a.results.length,10);
+  assert.equal(a.results.length,9);
   assert.equal(JSON.stringify(config),before,'input config should not mutate');
   assert.equal(a.results[0].outcomes.victory+a.results[0].outcomes.defeat+a.results[0].outcomes.stalemate,1000);
   assert.equal(a.results[1].module,'activity');
-  assert.equal(a.results[9].validRoundtrip,true);
+  assert.equal(a.results[8].validRoundtrip,true);
 });
 
 test('loot simulator mirrors original allocation and eligible tier probabilities',()=>{
@@ -107,28 +107,6 @@ test('Skill Master report mirrors exact readiness and confirmed resource payment
   assert.equal(blocked.readiness.resourcesReady,false);
 });
 
-test('equipment rejects locked gear; exact source controls new loadout and protection',()=>{
-  const denied=simulateEquipment({slot:'chest',gear:'plate'});
-  assert.equal(denied.eligible,false);
-  assert.equal(denied.applied,false);
-  assert.match(denied.reason,/higher character attributes/);
-  const equipped=simulateEquipment({slot:'head',gear:'none',loadout:'sword_shield'});
-  assert.equal(equipped.applied,true);
-  const s=newGame(0);s.armour.head='none';s.combatLoadout='sword_shield';
-  assert.deepEqual(equipped.armourAfter,armourStats(s.armour,s.combatLoadout));
-  assert.equal(ARMOUR_SLOTS.length,11);
-});
-
-test('enchantment trials use real engine scroll consumption and reset risk',()=>{
-  const report=simulateEnchanting({slot:'weapon',trials:10000,attempts:3,seed:456});
-  assert.equal(report.totalScrollsSpent,30000);
-  assert.equal(report.successes+report.failures,30000);
-  assert.ok(report.successesPct>47 && report.successesPct<53);
-  assert.equal(Object.values(report.finalRankHistogram).reduce((a,b)=>a+b,0),10000);
-  assert.ok(report.resetFromPositiveRank>0);
-  assert.equal(report.sampleSequence.length,3);
-});
-
 test('queue simulated work and travel reproduce the same source settlement exactly',()=>{
   const args={route:[{activity:'mining',plannedMs:60000},
     {activity:'woodcutting',plannedMs:null}],elapsedMs:1234567,seed:6789,trials:1};
@@ -176,7 +154,6 @@ test('module input validation catches impossible configurations and secrets do n
   assert.throws(()=>simulateCrafting({inventory:{forged_item:1}}),RangeError);
   assert.throws(()=>simulateQueue({route:[{activity:'mining',plannedMs:null},{activity:'woodcutting'}]}),RangeError);
   assert.throws(()=>simulateActivity({activity:'fighting',level:1,difficulty:2}),RangeError);
-  assert.throws(()=>simulateEnchanting({slot:'weapon',attempts:0}),RangeError);
   assert.equal(readFileSync('site/play/index.html','utf8').includes('system-lab.mjs'),false);
   assert.equal(readFileSync('.github/workflows/pages.yml','utf8').includes('tools/system-lab.mjs'),false);
 });
@@ -185,8 +162,8 @@ test('CLI can run multi-scenario file, JSON input and list modules',()=>{
   const out=JSON.parse(execFileSync(process.execPath,
     ['tools/system-lab.mjs','--config','tools/simulation/example-scenarios.json'],
     {encoding:'utf8',maxBuffer:10*1024*1024}));
-  assert.equal(out.results.length,10);
-  assert.match(execFileSync(process.execPath,['tools/system-lab.mjs','--list'],{encoding:'utf8'}),/enchanting/);
+  assert.equal(out.results.length,9);
+  assert.match(execFileSync(process.execPath,['tools/system-lab.mjs','--list'],{encoding:'utf8'}),/equipment/);
   const folder=mkdtempSync(join(tmpdir(),'idle-lab-'));
   try {
     const file=join(folder,'scenario.json');
@@ -198,4 +175,12 @@ test('CLI can run multi-scenario file, JSON input and list modules',()=>{
   } finally {
     rmSync(folder,{recursive:true,force:true});
   }
+});
+
+test("equipment lab reports an actual smith purchase", () => {
+  const result = simulateEquipment({ slot: "arms", gear: "padded", coins: 100, quality: "common" });
+  assert.equal(result.purchased, true);
+  assert.equal(result.coins, 31);
+  assert.equal(result.equippedArmour.arms, "padded");
+  assert.ok(result.bonuses.defense > 0);
 });

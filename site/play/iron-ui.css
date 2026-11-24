@@ -851,12 +851,7 @@ footer p{color:#aa9680}
 }
 .armour-cabinet[open] .armour-summary {border-bottom:1px solid #674831}
 .armour-slots {
-  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
-  grid-template-areas:
-    "left_shoulder head right_shoulder"
-    "left_armguard chest right_armguard"
-    "left_glove legs right_glove"
-    "left_boot insignia right_boot";
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
   gap:5px;margin:10px 8px 8px;
 }
 .armour-slot {
@@ -1119,3 +1114,6 @@ footer p{color:#aa9680}
 .result-versus {grid-row:1/span 7;grid-column:2;align-self:center}
 .result-side .vital {display:grid;grid-row:span 2;grid-template-rows:subgrid;width:100%;margin:0}
 .result-side progress {min-width:0;max-width:100%}
+
+.smith-selects {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.smith-selects label,.smith-selects select {display:block;width:100%;min-width:0}

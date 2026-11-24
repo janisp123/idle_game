@@ -8,7 +8,7 @@ The eleven activities are Fighting, Hunting, Fishing, Foraging, Woodcutting, Min
 
 For one settlement batch of `N` full work cycles, `baseSpoils = N × ACTIVITIES[id].yield × skillEfficiency` (currently every resource-producing activity has base yield `1`). Calculate the batch's +/-10% varied total and stochastic integer rounding as documented in [Progression](PROGRESSION.md). There is **no per-cycle RNG replay** after a long offline absence.
 
-For gathering activities with a `LOOT_TABLES` entry, split that *fixed resulting total* among eligible rarity tiers. Rare items **replace** common items; never give free extra items. For other raw activities use the ordinary `item`. Training earns skill and attribute XP and produces no materials. Fighting earns XP and retains its temporary victory-only Glory Scroll reward.
+For gathering activities with a `LOOT_TABLES` entry, split that *fixed resulting total* among eligible rarity tiers. Rare items **replace** common items; never give free extra items. For other raw activities use the ordinary `item`. Training earns skill and attribute XP and produces no materials. Fighting earns XP and pays arena coins for victories.
 
 ## Weighted rarities / tier unlocks
 

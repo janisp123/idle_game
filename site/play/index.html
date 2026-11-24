@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=arena-v1">
-  <script type="module" src="./app.mjs?v=glad-001"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=glad-002">
+  <script type="module" src="./app.mjs?v=glad-002"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -49,39 +49,29 @@
           </div>
           <div id="characterAttributes" class="character-attributes" aria-label="Character attributes"></div>
           <details id="armourCabinet" class="armour-cabinet">
-            <summary class="armour-summary">EQUIPMENT <span id="enchantTotal" class="enchant-total" hidden></span><span aria-hidden="true">✥</span></summary>
+            <summary class="armour-summary">EQUIPMENT <span id="coinWallet">0 coins</span><span aria-hidden="true">✥</span></summary>
             <div class="weapon-cabinet" aria-label="Equipped weapon">
               <p class="equipment-section-label">WEAPONS</p>
               <div id="weaponSlots" class="weapon-slots" role="group" aria-label="Choose your weapon style"></div>
-              <button id="shieldSlot" type="button" class="small-button" hidden>Shield</button>
               <p class="weapon-skills" id="combatSkillsText">Heavy Swing · Blade Guard</p>
             </div>
             <p class="equipment-section-label armour-section-label">ARMOUR</p>
             <div id="armourSlots" class="armour-slots" aria-label="Equipped armour slots"></div>
-            <div id="equipmentEditor" class="equipment-editor" aria-label="Edit one selected equipment slot">
-              <p id="equipmentEditHeading" class="equipment-edit-heading">HEAD</p>
+            <div id="equipmentEditor" class="equipment-editor" aria-label="Smith shop">
+              <p id="equipmentEditHeading" class="equipment-edit-heading">Head</p>
               <div id="armourEditor" class="armour-choice">
-                <label id="armourChoiceLabel" for="armourChoice">Hood / helmet</label>
-                <select id="armourChoice" aria-label="Change item in selected armour slot"></select>
+                <label for="armourChoice">Armour family</label>
+                <select id="armourChoice"></select>
               </div>
-              <p id="weaponEditor" class="weapon-editor-current" hidden>Two-handed Greatsword</p>
+              <div class="smith-selects">
+                <label>Item grade <select id="itemGrade"></select></label>
+                <label>Quality <select id="itemQuality"></select></label>
+              </div>
+              <button id="smithBuy" class="small-button" type="button">Buy</button>
+              <button id="smithEquip" class="small-button" type="button" hidden>Equip</button>
+              <p id="smithStatus" role="status"></p>
             </div>
             <div id="gearStats" class="gear-stats" aria-label="Equipped weight, mobility and protections"></div>
-            <div class="enchant-tools" aria-label="Enchant the one selected equipment slot">
-              <strong class="glory-wallet" id="gloryWallet">✧ 0 Glory Scrolls</strong>
-              <p id="masteryInfo" class="gear-stats"></p>
-              <button id="trainSlot" type="button" class="small-button">Train mastery</button>
-              <div class="enchant-tool-row">
-                <button type="button" id="enchantChance" class="enchant-chance"
-                  aria-label="Show enchant chance calculation and failure consequences"
-                  aria-expanded="false" aria-controls="enchantChanceBreakdown">50% <span aria-hidden="true">ⓘ</span></button>
-                <button type="button" id="enchantSelected" class="enchant-action" disabled>✧ Enchant</button>
-              </div>
-              <div id="enchantChanceBreakdown" class="enchant-breakdown" hidden>
-                <p id="enchantChanceDetails"></p>
-              </div>
-              <p id="enchantFeedback" class="enchant-feedback" role="status" aria-live="polite" hidden></p>
-            </div>
           </details>
         </section>
 

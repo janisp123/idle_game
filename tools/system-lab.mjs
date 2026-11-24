@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { simulateBatch } from './combat-simulator.mjs';
 import { simulateLoot,simulateCrafting } from './simulation/resources.mjs';
 import { simulateActivity,simulateAttributes,simulateMaster } from './simulation/progression.mjs';
-import { simulateEquipment,simulateEnchanting } from './simulation/equipment.mjs';
+import { simulateEquipment } from './simulation/equipment.mjs';
 import { simulateQueue,simulateSave } from './simulation/queue-save.mjs';
 
 export const LAB_MODULES=Object.freeze({
@@ -23,7 +23,6 @@ export const LAB_MODULES=Object.freeze({
   attributes:simulateAttributes,
   master:simulateMaster,
   equipment:simulateEquipment,
-  enchanting:simulateEnchanting,
   queue:simulateQueue,
   save:simulateSave
 });

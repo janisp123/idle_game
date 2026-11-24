@@ -19,7 +19,6 @@ node tools/system-lab.mjs --list
 node tools/system-lab.mjs --config tools/simulation/example-scenarios.json > system-report.json
 node tools/system-lab.mjs --scenario '{"module":"loot","activity":"mining","level":25,"units":100,"trials":10000}' > loot-report.json
 node tools/system-lab.mjs --scenario '{"module":"activity","activity":"fighting","level":10,"difficulty":1,"elapsedMs":86400000,"trials":100}' > fighting-work.json
-node tools/system-lab.mjs --scenario '{"module":"enchanting","slot":"weapon","attempts":7,"trials":10000}' > enchanting-report.json
 node --test tools/test_system_lab.mjs
 ```
 
@@ -38,7 +37,6 @@ The separately installed `tools/combat-simulator.mjs` remains the canonical deta
 | `attributes` | `awardAttributeTime`, `effectiveAttributeProgress` | Stat XP and value from **productive** hours, live activity weight percentages, actual mastery bonus |
 | `master` | `skillMasterReadiness`, `skillMasterOffer`, `learnFromMaster` | Unclaimed XP bars, resource gate, exact tribute paid, explicit level claims, stat effects |
 | `equipment` | `setCombatLoadout`, `setArmourChoice`, `armourUnlocked`, `armourStats`, `masteryOffer`, `trainEquipmentSlot` | Weapon styles, legal armour swaps, slot-by-slot weight/coverage, mastery unlock costs, durability upgrades |
-| `enchanting` | `enchantEquipmentSlot`, `GLORY_RULES` | Real scroll success/failure chain, destroyed ranks, end-rank histograms and cost; simulated test scrolls never reach a player |
 | `queue` | `queueStartActivity`, `settle`, `MAX_WAGONS` | Actual route planning, finite and Forever tasks, preparation/travel, sequential work, years-long offline batch settlement |
 | `save` | `newGame`, `readSave` | Save schema/migration round-trip stability without writing into browser storage |
 
@@ -120,3 +118,5 @@ For a **local** inspection of an existing save, the `activity`, `master`, `equip
 4. Handle findings as **candidate issues**: describe scenario, seed, commit, statistical uncertainty, game impact and potential fixes. Ask the Owner to approve any gameplay/balance change separately.
 
 At every new chat/agent session, check the remote `main:docs/TD_LIST.md` first, then use this lab rather than re-deriving all rules or assuming historical balance values.
+
+The equipment module accepts a synthetic coin wallet and calls the production smith purchase operation. Use `gear`, `slot`, `itemGrade`, and `quality` to specify the item.

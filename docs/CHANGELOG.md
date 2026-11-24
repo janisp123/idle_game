@@ -1,5 +1,15 @@
 # Changelog and task handoffs
 
+## GLAD-002 · STARTED · 2026-11-24
+
+Goal: Implement the approved four-slot equipment, five physical styles, item grade and quality, arena coins, and smith purchases.
+Branch: `codex/glad-002-equipment-economy`.
+Draft: [PR #146](https://github.com/janisp123/idle_game/pull/146).
+Last verified: Three focused prize tests passed against real resolved wins, saved-wallet reload, negative-wallet rejection and a split twenty-year settlement. The temporary arena repeats a 256-bout schedule for a frozen build, so the same resolver supports exact bounded payouts and consistent split claims.
+Shop and combat integration: Five starter weapons, four armour slots, separate grade/quality, exact coin prizes, one-item editing, current-save reset and frozen equipment snapshots implemented. Focused engine, UI and simulator checks passed. Staged 390 px Play Now confirmed five weapons, four slots, one paid armour purchase and save/reload.
+Next action: Verify final PR checks, then merge and verify Pages.
+Status: IN_REVIEW.
+
 ## GLAD-001 · DEPLOYED · 2026-11-24
 
 Goal: Implement the approved three-attribute, eleven-activity survival foundation, connected recipes, and current-build Master, queue, save and offline behavior.

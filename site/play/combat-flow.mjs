@@ -3,9 +3,9 @@
  * defense dice animation, then one revealed move. No RNG or saved data here.
  * The real combat engine remains the authority for opponents, roles and time.
  */
-import { COMBAT_BALANCE, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=glad-001";
+import { COMBAT_BALANCE, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=glad-002";
 
-import { TERRAIN_ROLL_START, TERRAIN_REVEAL } from "./difficulty.mjs?v=arena-v1";
+import { TERRAIN_ROLL_START, TERRAIN_REVEAL } from "./difficulty.mjs?v=glad-002";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const step = (icon, label) => ({ icon, label });

@@ -5,11 +5,9 @@ import {
   rollSkullDice, seededCombatRandom, makeOpponent, startCombatSession,
   advanceCombatSession, simulateDuel, combatAtTime, validCombatSession
 } from "../site/play/combat.mjs";
-import {newGame, chooseActivity, settle, enterGame, readSave, setCombatLoadout, setArmourChoice,
+import {newGame, chooseActivity, settle, enterGame, readSave, setCombatLoadout, buyEquipment,
   GAME_VERSION, allAttributeProgress, effectiveAttributeProgress, learnFromMaster,
-  xpToNextLevel, GLORY_SCROLL_ID} from "../site/play/engine.mjs";
-import { gloryEligibilityWindow, tallyGloryVictories, GLORY_RULES }
-  from "../site/play/glory.mjs";
+  xpToNextLevel} from "../site/play/engine.mjs";
 import { ARMOUR_SLOTS, armourStats } from "../site/play/armour.mjs";
 
 const great={name:"Wanderer",loadout:"greatsword",str:10,dex:10,end:10,skill:1};
@@ -24,7 +22,7 @@ const firstTurn = (player,enemy,attack=4,defense=4) =>
 test("combat is bounded at six opposed turns, with two skills per fighter",()=>{
   assert.equal(COMBAT_BALANCE.maxHalfTurns,6);
   assert.equal(COMBAT_BALANCE.slotsPerBout,8);
-  assert.deepEqual(Object.keys(COMBAT_LOADOUTS).sort(),["bow","greatsword","hammer","staff","sword_shield","twin_blades"]);
+  assert.deepEqual(Object.keys(COMBAT_LOADOUTS).sort(),["bow","greatsword","hammer","spear","sword_shield"]);
   assert.equal(COMBAT_SKILLS.heavy_swing.role,"attack");
   assert.equal(COMBAT_SKILLS.blade_guard.role,"defense");
   assert.equal(COMBAT_SKILLS.shield_block.role,"defense");
@@ -173,10 +171,10 @@ test("Heavy Swing and Thrust use their own fixed chip rates, never extra block r
   assert.equal(heavyBlocked.defenseTotal,20);
 });
 
-test("armour and flat defense enchant reduce guarded impact; defense can absorb all chip",()=>{
+test("armour and flat gear defense reduce guarded impact; defense can absorb all chip",()=>{
   const wear=(f,tier,enchant=0)=>({...f,gear:{
     ...armourStats(Object.fromEntries(ARMOUR_SLOTS.map(x=>[x.id,tier])),f.loadout),
-    defenseEnchant:enchant
+    gearDefense:enchant
   }});
   const plateShield=firstTurn(great,wear(shield,"plate"),4,5);
   assert.equal(plateShield.type,"block");
@@ -251,16 +249,16 @@ test("physical armor counters real hits; evasion and weight alter actual opposed
 test("changing armour mid-Fighting preserves earned progression and refreshes frozen power",()=>{
   const init=chooseActivity(newGame(0),"fighting",0,()=>.5).state;
   init.items.stone=77;
+  init.coins=500;
   const before=settle(init,COMBAT_BALANCE.eventMs,()=>.5).state;
   assert.equal(before.combatSession.player.gear.physicalReductionPct,0);
-  before.attributeEffort.DEX = 3_600_000 * 60;
   const oldXP=before.skills.fighting.xp,oldEffort={...before.attributeEffort};
-  const changed=setArmourChoice(before,"chest","leather",COMBAT_BALANCE.eventMs,()=>.5).state;
+  const changed=buyEquipment(before,"torso:leather",{grade:2,quality:"fine"},COMBAT_BALANCE.eventMs,()=>.5).state;
   assert.equal(changed.combatSession,null,"equipping a different piece begins a new fight");
   assert.equal(changed.items.stone,77);
   assert.equal(changed.skills.fighting.xp,oldXP);
   assert.deepEqual(changed.attributeEffort,oldEffort);
-  assert.equal(changed.armour.chest,"leather");
+  assert.equal(changed.armour.torso,"leather");
   const later=settle(changed,2*COMBAT_BALANCE.eventMs,()=>.5).state;
   assert.equal(later.combatSession.player.gear.physicalReductionPct,7);
   assert.equal(later.combatSession.player.gear.totalKg>before.combatSession.player.gear.totalKg,true);
@@ -313,70 +311,17 @@ test("Skill Master raises stat immediately but restarts a Fighting duel only aft
   assert.deepEqual(readSave(JSON.stringify(next)),next);
 });
 
-test("Glory requires a real finished player victory and an XP-eligible bout",()=>{
-  assert.equal(GLORY_RULES.winDropChance,.5);
-  assert.equal(gloryEligibilityWindow(40,3,10000),140000);
-  assert.equal(gloryEligibilityWindow(0,3,10000),0);
-  assert.throws(()=>gloryEligibilityWindow(-1,3,10000),RangeError);
-
-  // Many different seeds exercise winning, losing, dropping and non-dropping
-  // without manufacturing any kill or applying fake win-rate estimates.
-  let victories=0,drops=0,nonDrops=0,defeats=0;
-  for(let seed=0;seed<100;seed++) {
-    const start=chooseActivity(newGame(seed),"fighting",seed,()=>.5).state;
-    const after=settle(start,seed+BOUT_MS,()=>.5);
-    const session=after.state.combatSession;
-    const observed=combatAtTime({...session,elapsedMs:BOUT_MS-1});
-    const scrolls=after.state.items[GLORY_SCROLL_ID];
-    const gained=after.report.gainedGlory;
-    assert.equal(gained,scrolls);
-    assert.ok(scrolls<=1);
-    if(observed.outcome!=="victory"){
-      defeats++;
-      assert.equal(scrolls,0,"loss/draw never drops a Glory Scroll");
-    } else {
-      victories++;
-      if(scrolls)drops++;else nonDrops++;
-    }
-    assert.equal(after.state.skills.fighting.level,1);
-    assert.equal(after.state.skills.fighting.xp,xpToNextLevel(1),
-      "XP may be full at the END even though the bout STARTED while earning XP");
-    assert.equal(after.state.combatSession.gloryCursor,1,
-      "reward cursor pays for the real duel exactly once");
-    const unchanged=settle(after.state,seed+BOUT_MS,()=>.5);
-    assert.equal(unchanged.state.items[GLORY_SCROLL_ID],scrolls);
-    assert.equal(unchanged.report.gainedGlory,0);
-    assert.deepEqual(readSave(JSON.stringify(after.state)),after.state);
-  }
-  assert.ok(victories>0&&defeats>0&&drops>0&&nonDrops>0,
-    "fighting actually has both won and lost duels and genuine 50% rewards");
-  const capped=newGame(0);
-  capped.skills.fighting.xp=xpToNextLevel(1);
-  const old=chooseActivity(capped,"fighting",0,()=>.5).state;
-  const noGlory=settle(old,20*YEAR,()=>.5).state;
-  assert.equal(noGlory.items[GLORY_SCROLL_ID],0,
-    "full Fighting XP before the next bout means NO Glory for all offline years");
-  assert.equal(noGlory.combatSession.gloryCursor,0);
-  const fresh=chooseActivity(newGame(0),"fighting",0,()=>.5).state;
-  const away=enterGame(fresh,20*YEAR,()=>.5).state;
-  const short=settle(fresh,20*BOUT_MS,()=>.5).state;
-  assert.equal(away.items[GLORY_SCROLL_ID],short.items[GLORY_SCROLL_ID],
-    "unlimited absence still counts exact actual victories only in XP-earning window");
-  assert.equal(away.combatSession.elapsedMs,20*YEAR);
-  assert.equal(away.combatSession.gloryCursor,short.combatSession.gloryCursor);
-});
-
-test("per-slot enchant adds small physical attack/defense but never extra dice",()=>{
+test("gear adds small physical attack/defense but never extra dice",()=>{
   const unguarded={...shield,name:"Untrained",defenseSkill:null};
   const basic=firstTurn(great,unguarded,5,1);
-  const enchanted=firstTurn({...great,attackEnchant:2},unguarded,5,1);
+  const enchanted=firstTurn({...great,gearAttack:2},unguarded,5,1);
   assert.ok(enchanted.damage>basic.damage,
-    "each enchant rank increases landed physical attack");
+    "gear power increases landed physical attack");
   assert.deepEqual(enchanted.attackDice,basic.attackDice);
   assert.deepEqual(enchanted.defenseDice,basic.defenseDice);
   const protectedHit=firstTurn(great,{...unguarded,
     gear:{...armourStats(Object.fromEntries(ARMOUR_SLOTS.map(x=>[x.id,"leather"])),
-      "sword_shield"),defenseEnchant:4}},5,1);
+      "sword_shield"),gearDefense:4}},5,1);
   const sameRobe=firstTurn(great,{...unguarded,
     gear:armourStats(Object.fromEntries(ARMOUR_SLOTS.map(x=>[x.id,"leather"])),
       "sword_shield")},5,1);
@@ -458,10 +403,10 @@ test("arena draws legal sets, all terrains and reproducible matchups at each gra
     assert.equal(duel.terrain.name,["Open field","Ruined courtyard","Dungeon passage"][Math.floor((duel.zoneRoll-1)/2)]);
   }
   assert.equal(faces.size,6);
-  assert.deepEqual([...sets].sort(),["Archer/leather","Breaker/leather","Breaker/plate","Duelist/leather","Duelist/plate","Mage/none","Tank/plate","Vanguard/leather","Vanguard/plate"]);
+  assert.deepEqual([...sets].sort(),["Archer/leather","Breaker/leather","Breaker/plate","Spearman/leather","Spearman/padded","Tank/plate","Vanguard/leather","Vanguard/plate"]);
   const plate=Object.fromEntries(ARMOUR_SLOTS.map(slot=>[slot.id,"plate"]));
   const tank={...shield,gear:armourStats(plate,"sword_shield")};
-  for(const loadout of ["bow","staff","sword_shield"]) {
+  for(const loadout of ["bow","sword_shield"]) {
     const actor=loadout==="sword_shield"?tank:{...great,loadout};
     const duel=roll=>simulateDuel(actor,shield,withSequence(6,6,6,1,1,1,4,4,4,3,3,3),roll);
     const field=duel(1),dungeon=duel(6);
