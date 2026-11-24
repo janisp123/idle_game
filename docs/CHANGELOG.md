@@ -1,5 +1,13 @@
 # Changelog and task handoffs
 
+## GLAD-PLAN-001 · STARTED · 2026-11-24
+
+Goal: Write an owner-requested, detailed Codex-ready implementation roadmap in remote `main:docs/TD_LIST.md` for the agreed realistic idle-gladiator redesign, including manageable functional batches, dependencies, meaningful gear progression, bounded offline simulations, and proportional test discipline. Documentation and task planning only; no playable code, testing configuration, saves or deployments changed.
+Branch: `docs/gladiator-rework-codex-roadmap-20261124`.
+Last verified: Read latest main task list, AGENTS, decisions, checkpoint, code registries, gameplay mechanics, tools' simulation instructions and open draft PR #141; documented conflicts with older 11-slot, five-stat, scroll, combat-dice and legacy save assumptions.
+Next action: Add detailed linked GLAD-001..GLAD-005 backlog batches in TD_LIST, update durable decisions and any contradictory standing guidance; verify scope, CI and PR; merge documentation if ready.
+Status: STARTED.
+
 ## ALPHA-FOCUS-001 · STARTED · 2026-11-24
 
 Goal: Add the Owner's golden rule across Idle Game development: this is early alpha and player test progress is disposable. Prioritize useful gameplay, fast iteration and correct core logic; do not spend resources implementing backward-compatible migration of prototype saves or preserving alpha equipment/enchants when redesigning them, unless explicitly requested. Existing local save functionality and offline behaviour remain testable, but do not treat test progress as production user data. No playable code changes.
