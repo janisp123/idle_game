@@ -1,11 +1,11 @@
 // Pure provisional arena rules. Distances, injuries and wear are game abstractions.
 export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 4 });
 const WEAPONS = Object.freeze({
-  bow: { move: "shot", type: "piercing", range: 2, power: 7, recovery: 2 },
+  bow: { move: "shot", ranged: true, type: "piercing", range: 2, power: 7, recovery: 2 },
   dagger: { move: "dagger", type: "piercing", range: 0, power: 4, recovery: 2 },
-  spear: { move: "thrust", type: "piercing", range: 1, power: 9, recovery: 2 },
+  spear: { move: "thrust", clearance: 1, type: "piercing", range: 1, power: 9, recovery: 2 },
   sword_shield: { move: "cut", type: "slashing", range: 0, power: 8, recovery: 2 },
-  greatsword: { move: "swing", type: "slashing", range: 1, power: 12, recovery: 3 },
+  greatsword: { move: "swing", clearance: 2, type: "slashing", range: 1, power: 12, recovery: 3 },
   hammer: { move: "hammer", type: "blunt", range: 0, power: 17, recovery: 4 }
 });
 const BASH = Object.freeze({ move: "shield_bash", type: "blunt", range: 0, power: 4, recovery: 3 });
@@ -72,6 +72,8 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
   const [you, foe] = actors;
   const roll = seededRandom(seed);
   const events = [];
+  let approachProgress = 0;
+  let retreatsLeft = terrain.retreatSpace ?? (terrain.retreat === false ? 0 : 3);
   let distance = Math.min(2, Math.max(0, terrain.startDistance ?? 2));
   const mobility = actor => actor.gear?.mobilityPct ?? 95;
   const record = (actor, target, type, extra = {}) => {
@@ -101,25 +103,35 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       const active = actor.loadout === "bow" && !bow ? WEAPONS.dagger : WEAPONS[actor.loadout];
       if (actor.recovery > 0) {
         actor.recovery--;
-        if (bow && distance < 2 && terrain.retreat !== false && mobility(actor) > mobility(target)) {
+        if (bow && distance < 2 && retreatsLeft > 0 && mobility(actor) > mobility(target)) {
           distance++;
+          approachProgress = 0;
+          retreatsLeft--;
           record(actor, target, "retreat");
         }
         continue;
       }
       if (distance > active.range) {
-        distance--;
+        approachProgress++;
+        if (approachProgress >= (terrain.approachSteps ?? 1)) {
+          distance--;
+          approachProgress = 0;
+        }
         record(actor, target, "approach");
         continue;
       }
       const attack = actor.counter && actor.shield.hp > 0 ? BASH : active;
       const counter = actor.counter;
       actor.counter = false;
-      actor.recovery = attack.recovery - 1;
+      actor.recovery = attack.recovery - 1 + Math.max(0, (attack.clearance ?? 0) - (terrain.clearance ?? 2));
       if (attack.move === "shot") actor.arrows--;
       const shortSpear = actor.loadout === "spear" && distance === 0;
+      const constriction = Math.max(0, (attack.clearance ?? 0) - (terrain.clearance ?? 2));
+      const obscuredShot = attack.ranged && distance > 0
+        ? (2 - (terrain.lineOfSight ?? 2)) * 0.15 +
+          (terrain.cover ?? 0) * (target.shield.hp > 0 ? 0.10 : 0.04) : 0;
       const aim = 0.72 + (actor.dex - target.dex) * 0.012 + (actor.skill - target.skill) * 0.004 +
-        (distance === 0 && bow ? -0.16 : 0) + (shortSpear ? -0.14 : 0);
+        (distance === 0 && bow ? -0.16 : 0) + (shortSpear ? -0.14 : 0) - obscuredShot - constriction * 0.12;
       if (roll() >= Math.max(0.19, Math.min(0.96, aim))) {
         record(actor, target, "miss", { move: attack.move });
         continue;

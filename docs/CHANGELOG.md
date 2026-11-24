@@ -4,9 +4,10 @@
 
 Goal: Deliver five physical arenas and a seeded pre-bout 3d6 positioning roll.
 Branch: `codex/glad-004-tactical-arenas`.
-Last verified: GLAD-003 deployed and verified.
-Next action: Implement arena descriptors, selection and focused tests.
-Status: STARTED.
+Draft: [PR #150](https://github.com/janisp123/idle_game/pull/150).
+Last verified: Five geometry descriptors drive the same seeded arena selection in live play, offline payout and the simulator. Focused tests exercised 16,000 selections, tied rolls, 6–6–6, seed parity, and each style’s terrain contrast. The handbook records 1,024 bouts per style and arena. Local suite: 101 passed and one existing optional skip in 1.79 seconds. Staged 390 px Play Now verified the three dice faces, selected terrain and live combat display.
+Next action: Verify final-head CI, then merge and verify Pages.
+Status: IN_REVIEW.
 
 ## GLAD-003 · DEPLOYED · 2026-11-24
 

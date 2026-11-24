@@ -25,4 +25,4 @@
 4. **Tune data, not formulas:** change named balance objects and content tables, rather than finding and replacing numeric literals in algorithms. Some changes alter save interpretation; use [change checklist](CHANGING_BALANCE.md).
 5. **Keep docs in the same PR as formula changes.** Update numerical examples, relevant tests, and `docs/CHANGELOG.md` when a new mechanic ships. No independent duplicate copies of “official” values in other documentation.
 
-**Latest audit:** 2026-11-24; baseline: deterministic physical solo Fighting alpha, three-wagon alpha schedule, skill XP capped until Skill Master, time-based three attributes, weighted loot/crafting, V10 local saves. This is a browser-local prototype; no server-authoritative multiplayer or clan battle settlement.
+**Latest audit:** 2026-11-24; baseline: deterministic physical solo Fighting alpha, three-wagon alpha schedule, skill XP capped until Skill Master, time-based three attributes, weighted loot/crafting, V11 local saves. This is a browser-local prototype; no server-authoritative multiplayer or clan battle settlement.

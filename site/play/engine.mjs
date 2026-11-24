@@ -10,7 +10,7 @@ export {
 } from "./attributes.mjs?v=glad-001";
 import {
   validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS
-} from "./combat.mjs?v=glad-003";
+} from "./combat.mjs?v=glad-004";
 import { COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
 import { ARMOUR_SLOTS, ARMOUR_TIERS, initialArmour, armourOption, armourStats } from "./armour.mjs?v=glad-003";
@@ -25,7 +25,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=glad-001";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 10;
+export const GAME_VERSION = 11;
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -91,7 +91,7 @@ function validEquipment(state) {
       (armour[id] === "none" || Object.hasOwn(equipment, id + ":" + armour[id]))));
 }
 
-import { validTier, unlockLevel, workMultiplier } from "./difficulty.mjs?v=glad-002";
+import { validTier, unlockLevel, workMultiplier } from "./difficulty.mjs?v=glad-004";
 export function setDifficulty(state,id,tier,now=Date.now(),random=Math.random) {
   if(!Object.hasOwn(ACTIVITIES,id)||!validTier(tier)||state.skills[id].level<unlockLevel(tier))
     throw new RangeError("Difficulty locked");

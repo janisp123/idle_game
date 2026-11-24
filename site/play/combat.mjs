@@ -1,5 +1,6 @@
+import { chooseArena } from "./arenas.mjs?v=glad-004";
 /** Seeded, bounded arena timeline shared by play, prizes and the simulator. */
-import { resolvePhysicalDuel } from "./physical-duel.mjs?v=glad-003";
+import { resolvePhysicalDuel } from "./physical-duel.mjs?v=glad-004";
 import { equippedCondition } from "./smith.mjs?v=glad-003";
 import { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
@@ -10,7 +11,7 @@ export { COMBAT_ART } from "./combat-art.mjs?v=glad-003";
 
 export const BOUT_MS = 200_000;
 export const RESURRECTION_MS = 20_000;
-import { benchmark, validTier, TERRAIN } from "./difficulty.mjs?v=glad-003";
+import { benchmark, validTier } from "./difficulty.mjs?v=glad-004";
 const ENCOUNTERS=[
   {role:"Tank",weapon:"sword_shield",sets:["plate"]},
   {role:"Vanguard",weapon:"greatsword",sets:["leather","plate"]},
@@ -114,16 +115,15 @@ export function combatAtTime(session) {
   const scheduledBout = bout % ARENA_SCHEDULE_BOUTS;
   const seed = Math.imul(session.seed ^ scheduledBout, 2654435761) >>> 0;
   const foe=makeOpponent(bout,session.player.difficulty??0,seededCombatRandom((seed^0x35b6d119)>>>0));
-  const terrain = TERRAIN[Math.floor(seededCombatRandom((seed ^ 0x749ae237) >>> 0)() * TERRAIN.length)];
-  const terrainRules = terrain.name === "Open field" ? { startDistance: 2 } :
-    terrain.name === "Dungeon passage" ? { startDistance: 0, retreat: false } : { startDistance: 1 };
-  const duel = resolvePhysicalDuel(session.player, foe, seed, terrainRules);
+  const positioning = chooseArena(session.player, foe, seededCombatRandom((seed ^ 0x749ae237) >>> 0));
+  const terrain = positioning.arena;
+  const duel = resolvePhysicalDuel(session.player, foe, seed, terrain);
   // The existing fixed arena schedule remains the unit of offline settlement.
   // Reserve the end of each bout for its outcome and automatic recovery.
   const eventMs = Math.floor((BOUT_MS - RESURRECTION_MS - 5_000) / (duel.events.length - 1));
   const step = Math.min(duel.events.length - 1, Math.floor(inside / eventMs));
   const recoveryMs = inside - step * eventMs;
-  return { ...duel, terrain, enemyRole: foe.role, enemyArmour: foe.armour,
+  return { ...duel, terrain, positioning, enemyRole: foe.role, enemyArmour: foe.armour,
     bout: bout + 1, enemyLoadout: foe.loadout, step, eventElapsedMs: recoveryMs,
     event: duel.events[step], progress: inside / BOUT_MS,
     recovering: inside >= BOUT_MS - RESURRECTION_MS };

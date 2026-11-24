@@ -15,7 +15,7 @@ test('the 10,000-bout runner resolves real production opponents, locations and e
   assert.equal(Object.values(output.byEnemyRole).reduce((a,b)=>a+b.battles,0),10000);
   assert.equal(Object.values(output.byEnemyLoadout).reduce((a,b)=>a+b.battles,0),10000);
   assert.deepEqual(Object.keys(output.byTerrain).sort(),
-    ['Dungeon passage','Open field','Ruined courtyard'].sort());
+    ['Open Field','Narrow Bridge','Ruined Streets','Walled Courtyard','Gatehouse Chamber'].sort());
   assert.ok(output.attacks.player > 0 && output.attacks.enemy > 0);
   assert.ok(output.winRatePct>=0 && output.winRatePct<=100);
   assert.equal(output.samples.length,0);

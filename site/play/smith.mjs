@@ -1,5 +1,5 @@
 import { ARMOUR_SLOTS, pieceProtection } from "./armour.mjs?v=glad-003";
-import { GRADES, validTier } from "./difficulty.mjs?v=glad-002";
+import { GRADES, validTier } from "./difficulty.mjs?v=glad-004";
 
 export const ITEM_GRADES = Object.freeze([...GRADES]);
 export const ITEM_QUALITIES = Object.freeze(["poor", "common", "fine", "masterwork"]);
