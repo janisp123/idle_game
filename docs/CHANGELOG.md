@@ -1,5 +1,15 @@
 # Changelog and task handoffs
 
+## SIM-001 · STARTED · 2026-11-24
+
+Goal: Permanent Node-only combat simulator for 10,000+ fast deterministic battles, importing the exact playable duel and reward modules (dice, terrain, enemy difficulty, equipment, enchanting, durability). Excluded from GitHub Pages; local developer CLI for chat/cw/codex.
+Branch: `tools/combat-simulator-10000-20261124`.
+Last verified: main `cd79727516e439a002a95af1ca69bd456b68023a`; production combatAtTime, armourStats, enchantBonus, conditionBonuses and tallyGloryVictories inspected; no simulator has been implemented yet.
+Pending: add CLI and unit/parity tests, wire required PR CI, document usage and boundary between displayed and frozen combat.
+Next action: implement tools/combat-simulator.mjs without copying combat rules; verify 10,000 deterministic bouts and saved-snapshot parity.
+Status: STARTED; checks NOT RUN. PR pending creation.
+
+
 ## HANDOFF-001 · STARTED · 2026-11-24
 
 Goal: Resume approved Idle Game work across chats using a pushed checkpoint.
