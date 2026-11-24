@@ -1,5 +1,13 @@
 # Changelog and task handoffs
 
+## GLAD-005 · STARTED · 2026-11-24
+
+Goal: Verify and finalize bounded offline combat, balance, and the playable gladiator loop.
+Branch: `codex/glad-005-offline-parity`.
+Last verified: GLAD-004 deployed and verified.
+Next action: Check the bounded wallet settlement and establish representative balance measurements.
+Status: STARTED.
+
 ## GLAD-004 · DEPLOYED · 2026-11-24
 
 Goal: Deliver five physical arenas and a seeded pre-bout 3d6 positioning roll.
