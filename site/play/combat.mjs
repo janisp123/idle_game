@@ -11,7 +11,7 @@
  */
 import { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=arena-v1";
-import { armourStats, initialArmour } from "./armour.mjs?v=arena-v1";
+import { armourStats, initialArmour } from "./armour.mjs?v=glad-001";
 export { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=arena-v1";
 export { COMBAT_ART } from "./combat-art.mjs?v=arena-v1";
@@ -45,7 +45,7 @@ const ENCOUNTERS=[
   {role:"Vanguard",weapon:"greatsword",sets:["leather","plate"]},
   {role:"Breaker",weapon:"hammer",sets:["leather","plate"]},
   {role:"Archer",weapon:"bow",sets:["leather"]},
-  {role:"Mage",weapon:"staff",sets:["robe"]},
+  {role:"Mage",weapon:"staff",sets:["none"]},
   {role:"Duelist",weapon:"twin_blades",sets:["leather","plate"]}
 ];
 const OPPONENTS = ["Varrik the Loud", "Odran Ironjaw", "Kest the Crow", "Brann of the Ash"];

@@ -21,9 +21,7 @@ export const ATTRIBUTE_BALANCE = Object.freeze({
 export const ATTRIBUTES = Object.freeze([
   Object.freeze({ id: "STR", name: "Strength" }),
   Object.freeze({ id: "DEX", name: "Dexterity" }),
-  Object.freeze({ id: "END", name: "Endurance" }),
-  Object.freeze({ id: "INT", name: "Intelligence" }),
-  Object.freeze({ id: "WIL", name: "Willpower" })
+  Object.freeze({ id: "END", name: "Endurance" })
 ]);
 export const ATTRIBUTE_IDS = Object.freeze(ATTRIBUTES.map(s => s.id));
 export const STAT_WEIGHT_TOTAL = 100;
@@ -32,49 +30,17 @@ const HOUR_MS = 3_600_000;
 // These are suggested character-fantasy mappings, NOT hard class restrictions.
 // No activity has a faster overall attribute-XP rate than another.
 export const ACTIVITY_STAT_WEIGHTS = Object.freeze({
-  fighting:           { STR: 30, DEX: 35, END: 25, WIL: 10 },
-  hunting:            { DEX: 45, END: 25, WIL: 30 },
-  mining:             { STR: 70, END: 30 },
-  woodcutting:        { STR: 65, END: 35 },
-  gathering:          { DEX: 40, INT: 30, WIL: 30 },
-  fishing:            { DEX: 35, END: 25, WIL: 40 },
-  smelting:           { STR: 30, END: 35, INT: 35 },
-  alchemy:            { DEX: 20, INT: 65, WIL: 15 },
-  carpentry:          { STR: 35, DEX: 45, INT: 20 },
-  masonry:            { STR: 50, DEX: 20, END: 30 },
-  cooking:            { DEX: 50, INT: 30, WIL: 20 },
-  highway_robbery:    { STR: 35, DEX: 40, WIL: 25 },
-  burglary:           { DEX: 70, INT: 20, WIL: 10 },
-  bandit_raiding:     { STR: 40, END: 35, WIL: 25 },
-  grave_robbing:      { STR: 20, DEX: 35, END: 25, INT: 20 },
-  kidnapping:         { STR: 35, DEX: 30, WIL: 35 },
-  extortion:          { STR: 25, INT: 25, WIL: 50 },
-  caravan_plundering: { STR: 40, DEX: 25, END: 35 },
-  cattle_rustling:    { STR: 35, DEX: 25, END: 40 },
-  assassination:      { DEX: 55, INT: 20, WIL: 25 },
-  slave_raiding:      { STR: 45, END: 30, WIL: 25 },
-  meditation:         { INT: 20, WIL: 80 },
-  weapons_training:   { STR: 40, DEX: 40, END: 20 },
-  body_training:      { STR: 55, END: 45 },
-  ancient_texts:      { INT: 80, WIL: 20 },
-  archery_practice:   { STR: 15, DEX: 60, WIL: 25 },
-  shield_drills:      { STR: 35, DEX: 15, END: 50 },
-  herbal_study:       { DEX: 10, INT: 70, WIL: 20 },
-  map_study:          { INT: 60, WIL: 40 },
-  rune_study:         { INT: 70, WIL: 30 },
-  breathing_exercises: { END: 30, WIL: 70 },
-  // Leisure remains a viable identity: reflective/social activity can develop
-  // mental resilience/understanding, without a mandatory grinding penalty.
-  ale_with_friends:    { INT: 40, WIL: 60 },
-  laughing_at_misery: { INT: 30, WIL: 70 },
-  tavern_stories:     { INT: 60, WIL: 40 },
-  listening_to_bards: { INT: 50, WIL: 50 },
-  dice_with_friends:  { DEX: 40, INT: 40, WIL: 20 },
-  sharing_a_meal:     { END: 50, WIL: 50 },
-  stargazing:         { INT: 50, WIL: 50 },
-  campfire_talk:      { INT: 40, WIL: 60 },
-  singing_old_songs:  { DEX: 30, WIL: 70 },
-  quiet_wandering:    { END: 50, WIL: 50 }
+  fighting:     { STR: 35, DEX: 35, END: 30 },
+  hunting:      { STR: 20, DEX: 45, END: 35 },
+  fishing:      { DEX: 60, END: 40 },
+  foraging:     { DEX: 60, END: 40 },
+  woodcutting:  { STR: 65, END: 35 },
+  mining:       { STR: 70, END: 30 },
+  smithing:     { STR: 50, DEX: 20, END: 30 },
+  construction: { STR: 50, DEX: 20, END: 30 },
+  cooking:      { DEX: 65, END: 35 },
+  farming:      { STR: 30, DEX: 20, END: 50 },
+  training:     { STR: 35, DEX: 35, END: 30 }
 });
 
 for (const [activity, weights] of Object.entries(ACTIVITY_STAT_WEIGHTS)) {

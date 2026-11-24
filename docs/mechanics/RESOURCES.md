@@ -2,11 +2,13 @@
 
 **Source/tuning:** [loot.mjs](../../site/play/loot.mjs) → `LOOT_TABLES`, [production.mjs](../../site/play/production.mjs) → `PRODUCTION_RECIPES`, [engine.mjs](../../site/play/engine.mjs) → `ACTIVITIES[id]` and `SKILL_BALANCE`. This is resource generation, **not simulated animal combat**.
 
+The eleven activities are Fighting, Hunting, Fishing, Foraging, Woodcutting, Mining, Smithing, Construction, Cooking, Farming, and Training.
+
 ## Total raw spoils
 
 For one settlement batch of `N` full work cycles, `baseSpoils = N × ACTIVITIES[id].yield × skillEfficiency` (currently every resource-producing activity has base yield `1`). Calculate the batch's +/-10% varied total and stochastic integer rounding as documented in [Progression](PROGRESSION.md). There is **no per-cycle RNG replay** after a long offline absence.
 
-For gathering activities with a `LOOT_TABLES` entry, split that *fixed resulting total* among eligible rarity tiers. Rare items **replace** common items; never give free extra items. For other raw activities use the ordinary `item`. Resource-free training, leisure, Fighting → zero item stacks, although those activities still earn skill and attribute XP.
+For gathering activities with a `LOOT_TABLES` entry, split that *fixed resulting total* among eligible rarity tiers. Rare items **replace** common items; never give free extra items. For other raw activities use the ordinary `item`. Training earns skill and attribute XP and produces no materials. Fighting earns XP and retains its temporary victory-only Glory Scroll reward.
 
 ## Weighted rarities / tier unlocks
 
@@ -17,7 +19,7 @@ weightAtLevel(t, L) = min(t.cap, t.weight + max(0, L − t.minLevel) × t.growth
 chance(t, L) = weightAtLevel(t, L) / sum(weightAtLevel(eligible tiers, L))
 ```
 
-For a concrete mining example, at activated level 2: Stone weight 100, Copper ore weight 10 → Stone chance **100/110**, Copper chance **10/110**. At level 1, only Stone unlocks. At level 10 Iron ore becomes eligible. The table itself controls level thresholds and how probabilities change; do not hand-code tiers into the UI.
+For a concrete mining example, at level 1, Stone has weight 100, Limestone 25 and Iron ore 25. Iron ore grows by 1 weight per activated Mining level above 1, capped at 55. The table itself controls level thresholds and how probabilities change; do not hand-code tiers into the UI.
 
 **Allocation:** `allocateLoot` samples higher tiers first, from the `remaining` batch with conditional probability `chanceTier / remainingChanceMass`; common stock takes the remainder. All output counts are **nonnegative integers summing to the original total**.
 
@@ -25,14 +27,9 @@ For a concrete mining example, at activated level 2: Stone weight 100, Copper or
 
 ## Ingredient-limited crafting
 
-`PRODUCTION_RECIPES` entries define `{input, output, label, minLevel, weight, growth, cap}`. Example: Smelting Copper ore → Ingot at level 1; Iron ore → Iron ingot at level 10; Silver ore → Silver ingot at level 25. Alchemy/Carpentry/Masonry/Cooking each have one input→one output initially.
+All initial recipes are available at skill level 1. Smithing consumes iron ore to make iron ingots. Construction consumes limestone and wood fuel together for mortar, or processes timber, stone, and hides into planks, blocks, and leather. Cooking makes rations from grain, meat, fish, or edible plants. Farming supplies grain and separate straw. These resources support the survival loop and leave room for future uses of rations, straw, and construction stock.
 
-1. Filter to **unlocked** recipes with `inventory[input] > 0`.
-2. `capacity = min(fullWorkCycles, sum(available eligible inputs))` (computed with bounded sums).
-3. For each eligible recipe, `recipeWeight = min(cap, weight + (L−minLevel) × growth)`. Allocate quotas with weighted, bounded binomial draws, respecting each `inventory[input]`.
-4. Redistribute any quota overflow to other inputs with spare eligible inventory; do not discard usable capacity just because a preferred ingredient ran out.
-5. Each completed recipe **consumes one actual input and produces one output**. `completed = sum(consumed counts) = sum(created counts) <= capacity`.
-6. Only *completed*, ingredient-backed cycles award skill XP; time spent on empty ingredients still earns attribute XP. Old inventory and outputs remain exact; no protection toggles or resource fabrication.
+Recipe definitions list one or more inputs and one output. Each craft consumes one of every listed input and creates one unit of output. The engine samples weighted quotas in bulk and fills unused work capacity from remaining eligible stock. Every quota is capped against stock after earlier allocations. Only completed crafts award skill XP. Time spent without ingredients still earns attribute XP.
 
 **Important:** `SKILL_BALANCE.maxEfficiency` applies to XP and **raw gathering**. It does **not** turn a single iron ore into two iron ingots. Production does not take the raw ±10% spoil variation.
 
@@ -42,6 +39,6 @@ For a concrete mining example, at activated level 2: Stone weight 100, Copper or
 - Change input/output unlock or crafting preference: edit `PRODUCTION_RECIPES`; add corresponding inventory/output labels through current module-derived mapping. Check shortages and conservation.
 - Change base XP or work duration: edit the specific `ACTIVITIES` row, **not** loot/crafting equations.
 - Change overall +/- variation or skill level efficiency: `SKILL_BALANCE` in engine.
-- Adding a new item or changing keys is a **save-schema migration task**, even if its weight formula stays the same.
+- Adding a new item or changing keys is a save-schema change. The survival update starts a new alpha save version.
 
 **Not implemented:** combat-simulated hunting, risk-based rare loot, quest substitution ratios, player trading or economy pricing.

@@ -1,5 +1,5 @@
 // Alpha tuning. Each row is the incremental bonus for that slot and rank.
-import { ARMOUR_SLOTS } from "./armour.mjs?v=arena-v1";
+import { ARMOUR_SLOTS } from "./armour.mjs?v=glad-001";
 export const EQUIP_SLOTS=["weapon","shield",...ARMOUR_SLOTS.map(slot=>slot.id)];
 export const MAX_ENCHANT=20;
 export const ENCHANT_STEPS=Object.fromEntries(EQUIP_SLOTS.map(slot=>[slot,

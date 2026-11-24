@@ -43,7 +43,7 @@ jobs:
           node --test tools/test_system_lab.mjs
       - name: Validate scenario input without accepting private saves
         env:
-          SCENARIO_INPUT: ${{ inputs.scenario || '{"scenarios":[{"module":"loot","activity":"mining","level":25,"units":100,"trials":250},{"module":"crafting","activity":"smelting","level":10,"workCycles":100,"inventory":{"copper_ore":100,"iron_ore":100},"trials":250}]}' }}
+          SCENARIO_INPUT: ${{ inputs.scenario || '{"scenarios":[{"module":"loot","activity":"mining","level":25,"units":100,"trials":250},{"module":"crafting","activity":"construction","level":10,"workCycles":100,"inventory":{"limestone":100,"fuel":70},"trials":250}]}' }}
         run: |
           node --input-type=module -e '
             import { writeFileSync,readFileSync } from "node:fs";

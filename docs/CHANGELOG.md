@@ -1,5 +1,14 @@
 # Changelog and task handoffs
 
+## GLAD-001 · STARTED · 2026-11-24
+
+Goal: Implement the approved three-attribute, eleven-activity survival foundation, connected recipes, and current-build Master, queue, save and offline behavior.
+Branch: `codex/glad-001-survival-foundation`.
+Draft: [PR #144](https://github.com/janisp123/idle_game/pull/144).
+Last verified: Focused catalogue, mortar, 20-year farm/cooking and grade S training/mining tests passed. The complete Node run had 115 passes and one existing optional browser-layout skip in 2.1 seconds. Project protocol, research links, static Pages checks and the source-backed example system lab passed. A 390 px Chromium session verified Play Now, the V7 reset notice, three visible stats, the Survival Work picker and Mining reload. Approximately 30 files changed since the previous full verification baseline.
+Next action: Verify the required GitHub workflows on this PR head, merge under AUTO-MERGE-001, then verify Pages and record the merge and deployment evidence.
+Status: IN_REVIEW / release checks pending.
+
 ## GLAD-PLAN-001 · STARTED · 2026-11-24
 
 Goal: Write an owner-requested, detailed Codex-ready implementation roadmap in remote `main:docs/TD_LIST.md` for the agreed realistic idle-gladiator redesign, including manageable functional batches, dependencies, meaningful gear progression, bounded offline simulations, and proportional test discipline. Documentation and task planning only; no playable code, testing configuration, saves or deployments changed.

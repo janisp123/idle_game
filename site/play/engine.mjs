@@ -1,15 +1,15 @@
 import {
   ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
-} from "./attributes.mjs?v=20261122-mastery1";
+} from "./attributes.mjs?v=glad-001";
 export {
   ATTRIBUTE_BALANCE, ATTRIBUTES, ATTRIBUTE_IDS, ACTIVITY_STAT_WEIGHTS,
   attributeXP, attributeProgress, allAttributeProgress,
   MASTERY_ATTRIBUTE_BALANCE, masteryBonusesForSkill, masteryAwardForNextLevel,
   totalMasteryAttributeBonuses, effectiveAttributeProgress
-} from "./attributes.mjs?v=20261122-mastery1";
+} from "./attributes.mjs?v=glad-001";
 import {
-  validCombatSession, migrateCombatTimeline, startCombatSession, advanceCombatSession, BOUT_MS
-} from "./combat.mjs?v=arena-v1";
+  validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS
+} from "./combat.mjs?v=glad-001";
 import {
   GLORY_SCROLL_ID, GLORY_RULES, blankEnchantments, normalizeEnchantments,
   enchantBonus, enchantSlot, gloryEligibilityWindow, attachGloryTracker,
@@ -19,19 +19,19 @@ export { GLORY_SCROLL_ID, GLORY_RULES, ENCHANT_SLOTS, enchantBonus }
   from "./glory.mjs?v=arena-v1";
 import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=arena-v1";
-import { initialArmour, normalizeArmour, armourUnlocked, armourOption, armourStats } from "./armour.mjs?v=arena-v1";
-import { effectiveAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=20261122-mastery1";
-import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=20261121-loot1";
-import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=20261121-no-resource-locks1";
-export { PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions } from "./production.mjs?v=20261121-no-resource-locks1";
-export { LOOT_TABLES, lootChances } from "./loot.mjs?v=20261121-loot1";
+import { initialArmour, normalizeArmour, armourUnlocked, armourOption, armourStats } from "./armour.mjs?v=glad-001";
+import { effectiveAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=glad-001";
+import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=glad-001";
+import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=glad-001";
+export { PRODUCTION_RECIPES, PRODUCTION_INPUTS, recipeOptions } from "./production.mjs?v=glad-001";
+export { LOOT_TABLES, lootChances } from "./loot.mjs?v=glad-001";
 /**
  * Tiny offline-capable prototype engine.
  * No DOM, storage, network, accounts or combat simulation dependencies.
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 7;
+export const GAME_VERSION = 8;
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -63,46 +63,17 @@ export const ACTIVITIES = Object.freeze({
     "Combat skill · automatic turn-based duels", 20, 3,
     "Fight worthy opponents in automatic turns. Attack rolls, guards, wounds and outcomes decide each illustrated scene.",
     "Fighting grounds", 1, "combat"),
-  hunting: task("Hunting", "Wolves", "hide", "Wolf hides", 12, 3, "Track, hunt, dress and carry a wolf back to camp.", "Wilds"),
-  mining: task("Mining", "Stone", "stone", "Stone", 15, 2, "Break rock, sort stone, load carts and haul it to storage.", "Quarry"),
-  woodcutting: task("Woodcutting", "Trees", "log", "Logs", 12, 2, "Fell, trim and carry timber to a stack.", "Forest"),
-  gathering: task("Gathering", "Wild plants", "herb", "Herbs", 8, 2, "Search, pick, clean and bundle useful plants.", "Wilds"),
-  fishing: task("Fishing", "River fish", "fish", "Fish", 10, 2, "Catch, clean and carry fish.", "River"),
-  smelting: task("Smelting", "Ore", "ingot", "Ingots", 20, 3, "Heat the furnace, process ore and cool ingots.", "Forge"),
-  alchemy: task("Potion making", "Herbal mixtures", "potion", "Potions", 15, 3, "Prepare ingredients, brew and bottle a potion.", "Workshop"),
-  carpentry: task("Carpentry", "Timber", "plank", "Planks", 15, 3, "Saw, shape and stack construction timber.", "Workshop"),
-  masonry: task("Masonry", "Stone", "block", "Stone blocks", 18, 3, "Cut, dress and stack building stone.", "Workshop"),
-  cooking: task("Cooking", "Meals", "meal", "Meals", 12, 2, "Prepare fuel, cook food and pack rations.", "Camp"),
-  highway_robbery: task("Highway robbery", "Travellers", "stolen_purse", "Stolen purses", 25, 3, "Ambush travellers, seize their purses and disappear into the woods.", "Road", 1, "outlaw"),
-  burglary: task("Burglary", "Homes", "valuables", "Stolen valuables", 35, 3, "Slip into a house, search for valuables and escape unseen.", "Settlement", 1, "outlaw"),
-  bandit_raiding: task("Bandit raiding", "Farmsteads", "raid_supplies", "Raided supplies", 60, 4, "Lead a violent raid and carry away seized provisions.", "Borderlands", 1, "outlaw"),
-  grave_robbing: task("Grave robbing", "Tombs", "relic", "Stolen relics", 40, 3, "Desecrate old graves in search of forgotten treasures.", "Graveyard", 1, "outlaw"),
-  kidnapping: task("Kidnapping", "Ransom targets", "ransom_claim", "Ransom claims", 75, 4, "Abduct a wealthy target and secure a ransom claim.", "Settlement", 1, "outlaw"),
-  extortion: task("Extortion", "Merchants", "protection_coin", "Extorted coins", 30, 3, "Intimidate merchants into paying protection money.", "Market", 1, "outlaw"),
-  caravan_plundering: task("Caravan plundering", "Caravans", "trade_goods", "Plundered goods", 70, 4, "Overwhelm a caravan and haul off its cargo.", "Trade road", 1, "outlaw"),
-  cattle_rustling: task("Cattle rustling", "Livestock", "stolen_cattle", "Stolen cattle", 45, 3, "Drive stolen livestock away from its owners.", "Pastures", 1, "outlaw"),
-  assassination: task("Assassination", "Contract targets", "contract_seal", "Contract seals", 90, 5, "Fulfil a ruthless contract and collect its proof.", "Stronghold", 1, "outlaw"),
-  slave_raiding: task("Slave raiding", "Villages", "faction_tribute", "Faction tribute", 90, 5, "Raid settlements to seize captives for a cruel faction; collect tribute for the deed.", "Borderlands", 1, "outlaw"),
-  meditation: task("Meditation", "Inner silence", null, "Skill practice · no resources", 12, 2, "Sit in stillness and cultivate discipline amid the world's cruelty.", "Sanctuary", 1, "training"),
-  weapons_training: task("Weapons training", "Blades and stances", null, "Skill practice · no resources", 20, 3, "Repeat cuts, parries and footwork until the movements become instinct.", "Training yard", 1, "training"),
-  body_training: task("Body training", "Strength and endurance", null, "Skill practice · no resources", 25, 3, "Lift stones, run hills and harden the body through deliberate practice.", "Training yard", 1, "training"),
-  ancient_texts: task("Reading ancient texts", "Forgotten lore", null, "Skill practice · no resources", 30, 3, "Study old manuscripts and wrest meaning from fading script.", "Library", 1, "training"),
-  archery_practice: task("Archery practice", "Bowmanship", null, "Skill practice · no resources", 20, 3, "Loose arrow after arrow and learn patience, aim and control.", "Range", 1, "training"),
-  shield_drills: task("Shield drills", "Guard and defence", null, "Skill practice · no resources", 20, 3, "Hold the line, practise blocks and strengthen the shield arm.", "Training yard", 1, "training"),
-  herbal_study: task("Herbal study", "Botanical knowledge", null, "Skill practice · no resources", 25, 3, "Compare dried specimens and learn the virtues and dangers of wild plants.", "Study", 1, "training"),
-  map_study: task("Studying maps", "Navigation", null, "Skill practice · no resources", 25, 3, "Trace old roads, passes and rivers across battered maps.", "Study", 1, "training"),
-  rune_study: task("Studying runes", "Runic lore", null, "Skill practice · no resources", 35, 3, "Copy weathered glyphs and decipher the marks of forgotten peoples.", "Library", 1, "training"),
-  breathing_exercises: task("Breathing exercises", "Composure", null, "Skill practice · no resources", 12, 2, "Steady the breath and practise calm before hardship.", "Sanctuary", 1, "training"),
-  ale_with_friends: task("Drinking ale with friends", "Companionship", null, "Skill practice · no resources", 20, 2, "Share a rough table, cheap ale and familiar company.", "Tavern", 1, "leisure"),
-  laughing_at_misery: task("Laughing at life's misery", "Dark humour", null, "Skill practice · no resources", 15, 2, "Laugh together at how thoroughly the world has gone to ruin.", "Tavern", 1, "leisure"),
-  tavern_stories: task("Telling tavern stories", "Storytelling", null, "Skill practice · no resources", 25, 2, "Trade unlikely tales of lost fortunes and narrow escapes.", "Tavern", 1, "leisure"),
-  listening_to_bards: task("Listening to bards", "Music appreciation", null, "Skill practice · no resources", 25, 2, "Listen to old ballads and remember that beauty survives.", "Tavern", 1, "leisure"),
-  dice_with_friends: task("Playing dice with friends", "Gamesmanship", null, "Skill practice · no resources", 20, 2, "Roll harmless dice for bragging rights and enjoy the company.", "Tavern", 1, "leisure"),
-  sharing_a_meal: task("Sharing a meal", "Fellowship", null, "Skill practice · no resources", 25, 2, "Pass bread around the fire and talk until the night grows quiet.", "Camp", 1, "leisure"),
-  stargazing: task("Stargazing", "Contemplation", null, "Skill practice · no resources", 30, 2, "Watch cold stars above the ruins and wonder at the world.", "Hills", 1, "leisure"),
-  campfire_talk: task("Talking by the fire", "Conversation", null, "Skill practice · no resources", 20, 2, "Sit close to the flames and speak of ordinary troubles.", "Camp", 1, "leisure"),
-  singing_old_songs: task("Singing old songs", "Singing", null, "Skill practice · no resources", 25, 2, "Raise a rough voice with others in songs no kingdom remembers.", "Tavern", 1, "leisure"),
-  quiet_wandering: task("Wandering without purpose", "Solitude", null, "Skill practice · no resources", 30, 2, "Walk empty lanes without an errand, a prize or a destination.", "Outskirts", 1, "leisure")
+  hunting: task("Hunting", "Game", "hide", "Hides", 12, 3, "Track and dress game for meat and hides.", "Wilds"),
+  fishing: task("Fishing", "River fish", "fish", "Fish", 10, 2, "Catch and clean fish for camp.", "River"),
+  foraging: task("Foraging", "Wild plants", "herb", "Edible plants", 8, 2, "Gather edible plants for rations.", "Wilds"),
+  woodcutting: task("Woodcutting", "Trees", "log", "Timber", 12, 2, "Cut timber and gather fuel.", "Forest"),
+  mining: task("Mining", "Rock and ore", "stone", "Stone", 15, 2, "Extract stone, iron ore and limestone.", "Quarry"),
+  smithing: task("Smithing", "Iron ore", "iron_ingot", "Iron ingots", 20, 3, "Smelt iron ore into ingots.", "Forge"),
+  construction: task("Construction", "Building materials", "mortar", "Mortar", 18, 3, "Prepare mortar, timber, stone and leather.", "Workshop"),
+  cooking: task("Cooking", "Food stocks", "ration", "Rations", 12, 2, "Cook and pack rations from available food.", "Camp"),
+  farming: task("Farming", "Grain crops", "grain", "Grain", 12, 2, "Harvest grain and collect straw.", "Fields"),
+  training: task("Training", "Physical drills", null, "Skill practice · no resources", 20, 3,
+    "Practise strength, footwork and endurance.", "Training yard", 1, "training")
 });
 export const ITEM_LABELS = Object.freeze({
   ...Object.fromEntries(Object.values(ACTIVITIES).filter(a => a.item !== null).map(a => [a.item, a.itemLabel])),
@@ -217,36 +188,22 @@ function scalePartialProgress(value, sourceMs, targetMs) {
   return Math.min(targetMs - 1, Math.floor((value / sourceMs) * targetMs));
 }
 
-/** Read old V1/V2 saves and migrate progress when alpha/normal mode changes. */
+/** Validate the current alpha save and restore its timing profile. */
 export function readSave(value) {
   try {
     const s = typeof value === "string" ? JSON.parse(value) : value;
-    if (!s || ![1, 2, 3, 4, 5, 6, GAME_VERSION].includes(s.version) ||
+    if (!s || s.version !== GAME_VERSION ||
         typeof s.name !== "string" || s.name.length > 40 ||
-        !s.items || typeof s.items !== "object" ||
-        (s.version >= 5 && !validAttributeEffort(s.attributeEffort)) ||
-        (s.version >= 6 && !Object.hasOwn(s, "combatSession")) ||
-        (s.version === GAME_VERSION && (!validCombatLoadout(s.combatLoadout) ||
-          !validCombatSession(s.combatSession))) ||
-        (s.version === 6 && s.combatSession !== null &&
-          (!s.combatSession || typeof s.combatSession !== "object" ||
-            !isCount(s.combatSession.elapsedMs) ||
-            !isCount(s.combatSession.seed) || s.combatSession.seed > 0xffffffff ||
-            !s.combatSession.player || typeof s.combatSession.player.name !== "string" ||
-            !["hammer", "axe", "sword", "spear"].includes(s.combatSession.player.weapon) ||
-            !["str", "dex", "end", "skill"].every(k =>
-              Number.isFinite(s.combatSession.player[k]) &&
-              s.combatSession.player[k] >= 0))) ||
+        !s.items || typeof s.items !== "object" || Array.isArray(s.items) ||
+        !validAttributeEffort(s.attributeEffort) ||
+        !validCombatLoadout(s.combatLoadout) || !validCombatSession(s.combatSession) ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
         !masteryRanks(s.slotMastery) ||
         (s.enchantments !== undefined && normalizeEnchantments(s.enchantments) === null) ||
-        (s.protectedItems !== undefined && (!Array.isArray(s.protectedItems) ||
-          !s.protectedItems.every(key => typeof key === "string" && ITEM_KEYS.includes(key)))) ||
         (s.activity !== null && !Object.hasOwn(ACTIVITIES, s.activity)) ||
         !isCount(s.progressMs) || !validTime(s.settledAtMs)) return null;
 
-    // V1/V2 used normal timings; V3 and later carry the selected timing profile.
-    const savedProfile = s.version >= 3 ? s.timingProfile : "normal";
+    const savedProfile = s.timingProfile;
     if (!Object.hasOwn(TIMING_PROFILES, savedProfile)) return null;
     const sourceTiming = TIMING_PROFILES[savedProfile];
     const sourceWorkMs = s.activity ? workDurationForProfile(ACTIVITIES[s.activity], savedProfile) : 0;
@@ -269,12 +226,7 @@ export function readSave(value) {
         return null;
     }
 
-    // Old V1–V3 single-activity saves become a one-wagon Forever queue.
-    // A saved transition already points at the intended first wagon.
-    const wagons = s.version < 3 || s.wagons === undefined
-      ? (transition ? [{ activity: transition.targetActivity, plannedMs: null }]
-        : s.activity ? [{ activity: s.activity, plannedMs: null }] : [])
-      : s.wagons;
+    const wagons = s.wagons;
     if (!Array.isArray(wagons) || wagons.length > MAX_WAGONS ||
         wagons.some((wagon, i) => !wagon || typeof wagon !== "object" ||
           Array.isArray(wagon) || !Object.hasOwn(ACTIVITIES, wagon.activity) ||
@@ -289,38 +241,18 @@ export function readSave(value) {
         (wagons.length && typeof wagons[0].plannedMs === "number" &&
           (s.productiveElapsedMs ?? 0) > wagons[0].plannedMs)) return null;
 
-    const oldVersion = s.version === 1;
-    if (oldVersion) {
-      if (!isCount(s.level) || s.level < 1 || !isCount(s.totalXP) ||
-          s.level > levelFromXP(s.totalXP)) return null;
-    } else if (!isCount(s.unattributedXP) || !s.skills || typeof s.skills !== "object" ||
-          !SKILL_IDS.every(id => {
-            const skill = s.skills[id];
-            return skill === undefined || (skill && typeof skill === "object" &&
-              isCount(skill.xp) && isCount(skill.level) && skill.level >= 1 &&
-              (s.version >= 4
-                ? skill.xp <= xpToNextLevel(skill.level)
-                : skill.level <= levelFromXP(skill.xp)));
-          })) return null;
+    if (!isCount(s.unattributedXP) || !s.skills || typeof s.skills !== "object" ||
+        SKILL_IDS.some(id => {
+          const skill = s.skills[id];
+          return !skill || !isCount(skill.xp) || !isCount(skill.level) ||
+            skill.level < 1 || skill.xp > xpToNextLevel(skill.level);
+        })) return null;
 
     const difficulties=s.difficulties===undefined?{}:s.difficulties;
     if(!difficulties || typeof difficulties!=="object" || Array.isArray(difficulties) ||
       Object.entries(difficulties).some(([id,t])=>!Object.hasOwn(ACTIVITIES,id)||
         !validTier(t)||(s.skills?.[id]?.level??1)<unlockLevel(t))) return null;
-    const skills = blankSkills();
-    if (!oldVersion) {
-      for (const id of SKILL_IDS) {
-        if (s.skills[id]) {
-          const old = s.skills[id];
-          // V1–V3 used cumulative lifetime skill XP and allowed years of XP
-          // banking. V4 uses ONLY progress within the current level; preserve
-          // the earned level and at most one ready level of saved progress.
-          const xp = s.version >= 4 ? old.xp :
-            Math.min(xpToNextLevel(old.level), Math.max(0, old.xp - xpForLevel(old.level)));
-          skills[id] = { xp, level: old.level };
-        }
-      }
-    }
+    const skills = Object.fromEntries(SKILL_IDS.map(id => [id, { ...s.skills[id] }]));
     let newProgressMs = s.activity
       ? scalePartialProgress(s.progressMs, sourceWorkMs, ACTIVITIES[s.activity].durationMs) : 0;
     const newTransition = transition ? { ...transition } : null;
@@ -338,25 +270,12 @@ export function readSave(value) {
     }
     return {
       version: GAME_VERSION, timingProfile: TIMING_PROFILE, name: s.name, skills,
-      attributeEffort: s.version >= 5 ? { ...s.attributeEffort } : blankAttributeEffort(),
-      combatLoadout: s.version === GAME_VERSION ? s.combatLoadout : DEFAULT_COMBAT_LOADOUT,
-      // Optional additive V7 field: older V7 and V1–V6 saves retain all
-      // progression and simply begin with the free starter armour.
-      armour: normalizeArmour(s.version === GAME_VERSION ? s.armour : null),
-      difficulties:{...difficulties}, enchantments: normalizeEnchantments(s.enchantments), slotMastery:masteryRanks(s.slotMastery),
-      // Migrate old V6 sword/axe/hammer prototype duels to the first real
-      // two-skill greatsword loadout; keep time, RNG seed, stats and XP intact.
-      combatSession: s.version >= 6 && s.combatSession ? {
-        ...migrateCombatTimeline(s.combatSession),
-        player: s.version === 6 ? {
-          name: s.combatSession.player.name,
-          loadout: DEFAULT_COMBAT_LOADOUT,
-          str: s.combatSession.player.str, dex: s.combatSession.player.dex,
-          end: s.combatSession.player.end, skill: s.combatSession.player.skill
-        } : { ...s.combatSession.player }
-      } : null,
-      // Legacy protectedItems are validated above but discarded: no resource locks remain.
-      unattributedXP: oldVersion ? s.totalXP : s.unattributedXP,
+      attributeEffort: { ...s.attributeEffort },
+      combatLoadout: s.combatLoadout,
+      armour: normalizeArmour(s.armour),
+      difficulties: { ...difficulties }, enchantments: normalizeEnchantments(s.enchantments),
+      slotMastery: masteryRanks(s.slotMastery), combatSession: s.combatSession,
+      unattributedXP: s.unattributedXP,
       items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
       activity: s.activity, progressMs: newProgressMs, transition: newTransition,
       wagons: wagons.map(w => ({ activity: w.activity, plannedMs: w.plannedMs })),

@@ -8,7 +8,6 @@
       "str": 14,
       "dex": 14,
       "end": 14,
-      "wil": 14,
       "armour": "leather",
       "trace": 1,
       "seed": 101
@@ -31,20 +30,19 @@
     },
     {
       "module": "crafting",
-      "activity": "smelting",
+      "activity": "construction",
       "level": 10,
       "workCycles": 100,
       "inventory": {
-        "copper_ore": 100,
-        "iron_ore": 100,
-        "silver_ore": 100
+        "limestone": 100,
+        "fuel": 70
       },
       "trials": 250,
       "seed": 101
     },
     {
       "module": "attributes",
-      "activity": "fighting",
+      "activity": "training",
       "elapsedMs": 3600000
     },
     {
@@ -60,7 +58,7 @@
       "module": "equipment",
       "loadout": "sword_shield",
       "slot": "head",
-      "gear": "robe"
+      "gear": "none"
     },
     {
       "module": "enchanting",

@@ -3,7 +3,7 @@
  * defense dice animation, then one revealed move. No RNG or saved data here.
  * The real combat engine remains the authority for opponents, roles and time.
  */
-import { COMBAT_BALANCE, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=arena-v1";
+import { COMBAT_BALANCE, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=glad-001";
 
 import { TERRAIN_ROLL_START, TERRAIN_REVEAL } from "./difficulty.mjs?v=arena-v1";
 

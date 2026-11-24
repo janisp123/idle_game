@@ -40,22 +40,22 @@ test('loot simulator mirrors original allocation and eligible tier probabilities
   assert.equal(Object.values(report.produced).reduce((x,y)=>x+y,0),args.units);
   const runs=simulateLoot({...args,trials:10000});
   assert.equal(runs.totalProduced,1400000);
-  assert.ok(runs.produced.silver_ore>0);
+  assert.ok(runs.produced.iron_ore>0);
   assert.ok(Math.abs(runs.observedPct.stone-100*lootChances('mining',25)[0].chance)<1.5);
   const locked=simulateLoot({activity:'mining',level:1,units:100,trials:10});
-  assert.deepEqual(Object.keys(locked.produced),['stone']);
+  assert.deepEqual(Object.keys(locked.produced).sort(),['iron_ore','limestone','stone']);
 });
 
 test('craft simulator uses real produce with exact conserved input and no phantom work',()=>{
-  const args={activity:'smelting',level:25,workCycles:90,
-    inventory:{copper_ore:70,iron_ore:45,silver_ore:20},seed:199,trials:1};
+  const args={activity:'construction',level:25,workCycles:90,
+    inventory:{limestone:70,fuel:45},seed:199,trials:1};
   const report=simulateCrafting(args);
   const expected=produce(args.activity,args.level,args.workCycles,args.inventory,seededCombatRandom(args.seed));
   assert.deepEqual(report.created,expected.created);
   assert.deepEqual(report.consumed,expected.consumed);
   assert.equal(report.averageCompletedPerBatch,expected.completed);
   assert.equal(Object.values(report.created).reduce((a,b)=>a+b,0),expected.completed);
-  const noMaterials=simulateCrafting({activity:'alchemy',inventory:{},workCycles:100,trials:1000});
+  const noMaterials=simulateCrafting({activity:'smithing',inventory:{},workCycles:100,trials:1000});
   assert.equal(noMaterials.averageCompletedPerBatch,0);
   assert.equal(noMaterials.blockedBatches,1000);
   assert.deepEqual(noMaterials.created,{});
@@ -78,7 +78,7 @@ test('offline activity matches exact production settle with frozen skill and no 
   assert.equal(output.firstTrial.settledAtMs,86400000);
   assert.equal(output.masterReadyCount,1);
   assert.equal(output.average.earnedXP,output.gainedXP);
-  const noTime=simulateActivity({activity:'gathering',elapsedMs:0,trials:2});
+  const noTime=simulateActivity({activity:'foraging',elapsedMs:0,trials:2});
   assert.deepEqual(noTime.firstTrial.itemChanges,{});
   assert.equal(noTime.gainedXP,0);
 });
@@ -90,7 +90,7 @@ test('attribute module uses real productive-time weights and mastery offsets',()
   const expected=awardAttributeTime(s.attributeEffort,'fighting',args.elapsedMs);
   assert.deepEqual(r.after,effectiveAttributeProgress(expected,s.skills));
   assert.equal(r.before.STR.value,effectiveAttributeProgress(s.attributeEffort,s.skills).STR.value);
-  assert.ok(r.gainedXP.STR>0 && r.gainedXP.DEX>r.gainedXP.WIL);
+  assert.ok(r.gainedXP.STR>0 && r.gainedXP.DEX>r.gainedXP.END);
 });
 
 test('Skill Master report mirrors exact readiness and confirmed resource payment',()=>{
