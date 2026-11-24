@@ -1,5 +1,11 @@
 # Agent instructions — Idle Game and public research library
 
+## Golden rule — ALPHA-FOCUS-001: do not overengineer disposable test progress
+
+**Owner-approved, 2026-11-24.** Idle Game is in **early alpha**. Current browser saves are local testing state, **not committed, production-grade player progression**. When redesigning armour slots, weapon styles, combat rules, enchantments or other prototype mechanics, prioritize a clean, correct implementation and iteration speed; **do not spend development time on backwards-compatibility migrations or preserving accumulated alpha test progress unless the Owner specifically asks for it**. A clearly communicated reset of disposable alpha progress is acceptable if needed. Do not invent preservation requirements or delay useful changes for hypothetical users.
+
+This does **not** mean the game has no save mechanism: existing save/load, normal offline operation, reproducibility, input safety and current-build correctness still must work and be tested. Do not reset any stored state as part of a documentation-only change; do not apply this relaxation after a real player-data retention or launch commitment without an explicit Owner decision. Keep fixes proportionate to the actual alpha scope.
+
 ## Core principle — QUAL-001: quality and security over quantity
 
 **Owner-approved, 2026-11-21.** Applies to game development, the public research library, and automated work. Prioritize correctness, security, maintainability, and genuinely useful results over speed, feature count, research volume, commits, or GitHub activity. Reject duplicate, superficial, unsafe or weakly supported additions; do not merge simply to meet a schedule. Validate what can be tested, label unverified claims honestly, review dependencies and changes for security/licensing risks, and prefer a smaller safe change or **no change** when evidence is insufficient. Never bypass required approval or safety checks for throughput. This principle does not authorize new features.
