@@ -1,5 +1,13 @@
 # Changelog and task handoffs
 
+## GLAD-001 · STARTED · 2026-11-24
+
+Goal: Implement the approved three-attribute, eleven-activity survival foundation, connected recipes, and current-build Master, queue, save and offline behavior.
+Branch: `codex/glad-001-survival-foundation`.
+Last verified: Remote main roadmap, checkpoint and Owner decisions reviewed. PR #143 merged. No GLAD implementation checks run yet.
+Next action: Open the draft PR, then verify the activity and attribute contract with focused engine tests and implement the playable slice.
+Status: STARTED.
+
 ## GLAD-PLAN-001 · STARTED · 2026-11-24
 
 Goal: Write an owner-requested, detailed Codex-ready implementation roadmap in remote `main:docs/TD_LIST.md` for the agreed realistic idle-gladiator redesign, including manageable functional batches, dependencies, meaningful gear progression, bounded offline simulations, and proportional test discipline. Documentation and task planning only; no playable code, testing configuration, saves or deployments changed.
