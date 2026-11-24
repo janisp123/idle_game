@@ -10,8 +10,8 @@ import { BOUT_MS, startCombatSession, combatAtTime } from '../site/play/combat.m
 import { COMBAT_LOADOUTS } from '../site/play/combat-skills.mjs';
 import { ARMOUR_SLOTS, ARMOUR_TIERS, armourStats, armourUnlocked } from '../site/play/armour.mjs';
 import { GRADES, benchmark, unlockLevel } from '../site/play/difficulty.mjs';
-import { ENCHANT_SLOTS, MAX_ENCHANT, blankEnchantments, enchantBonus, tallyGloryVictories } from '../site/play/glory.mjs';
-import { EQUIP_SLOTS, masteryRanks, conditionBonuses } from '../site/play/equipment-rules.mjs';
+import { ENCHANT_SLOTS, blankEnchantments, enchantBonus, tallyGloryVictories } from '../site/play/glory.mjs';
+import { EQUIP_SLOTS, MAX_ENCHANT, masteryRanks, conditionBonuses } from '../site/play/equipment-rules.mjs';
 
 const DEFAULT_SEED = 20261124;
 const DEFAULT_BATTLES = 10000;
