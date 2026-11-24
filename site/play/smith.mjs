@@ -1,3 +1,4 @@
+import { ARMOUR_SLOTS, pieceProtection } from "./armour.mjs?v=glad-003";
 import { GRADES, validTier } from "./difficulty.mjs?v=glad-002";
 
 export const ITEM_GRADES = Object.freeze([...GRADES]);
@@ -38,4 +39,19 @@ export function equipmentBonuses(state) {
   const defense = Object.entries(state.armour).reduce((sum, [slot, family]) =>
     family === "none" ? sum : sum + Math.ceil(itemPower(state.equipment[slot + ":" + family]) / 4), 0);
   return { attack, defense };
+}
+
+export function equippedCondition(armour, loadout, equipment) {
+  const weapon = equipment[loadout] ?? STARTER_ITEM;
+  const pieces = Object.fromEntries(ARMOUR_SLOTS.filter(slot => armour[slot.id] !== "none").map(slot => {
+    const family = armour[slot.id];
+    const id = slot.id + ":" + family;
+    return [slot.id, { ...conditionProfile(id, equipment[id] ?? STARTER_ITEM),
+      protection: pieceProtection(slot, family) }];
+  }));
+  return {
+    weapon: conditionProfile(loadout, weapon),
+    shield: loadout === "sword_shield" ? conditionProfile("shield", weapon) : null,
+    armour: pieces
+  };
 }

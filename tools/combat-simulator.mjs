@@ -1,5 +1,5 @@
 import { arenaReward } from '../site/play/arena-wallet.mjs';
-import { equipmentBonuses, STARTER_ITEM } from '../site/play/smith.mjs';
+import { equippedCondition, equipmentBonuses, STARTER_ITEM } from '../site/play/smith.mjs';
 /**
  * SIM-001: developer-only, zero-delay, deterministic combat harness.
  * This file lives in tools/, outside the GitHub Pages ./site deployment.
@@ -69,20 +69,11 @@ export function createPlayerSnapshot(options = {}) {
   const bonus = equipmentBonuses({ combatLoadout: loadout, armour, equipment });
   return { name:'Wanderer', difficulty, loadout, skill, str, dex, end,
     gear: { ...armourStats(armour, loadout), gearDefense: bonus.defense },
-    gearAttack: bonus.attack };
+    gearAttack: bonus.attack, condition: equippedCondition(armour, loadout, equipment) };
 
 }
 const increment = (obj, key, n = 1) => { obj[key] = (obj[key] ?? 0) + n; };
 const bucket = (obj, key) => obj[key] ??= { battles:0, victories:0, defeats:0, draws:0 };
-const captureRoll = (bucket, dice) => {
-  if (!Array.isArray(dice) || dice.length !== 3 || dice.some(v => !Number.isInteger(v) || v < 1 || v > 6))
-    throw new Error('Production combat returned invalid 3d6');
-  increment(bucket.sum, dice.reduce((a, b) => a + b, 0));
-  for (const face of dice) increment(bucket.faces, face);
-  bucket.rolls++;
-  if (dice.every(v => v === 6)) bucket.tripleSix++;
-};
-const newRollBucket = () => ({rolls:0,tripleSix:0,faces:{},sum:{}});
 const average = (sum, n) => n ? Math.round(sum / n * 100) / 100 : 0;
 const resultGroup = (group, outcome) => {
   group.battles++;
@@ -121,19 +112,12 @@ export function simulateBatch(options = {}) {
       stats:{STR:player.str, DEX:player.dex, END:player.end},
       gear:player.gear ?? null,
       gearAttack:player.gearAttack ?? 0,
-      conditionBonus:player.conditionBonus ?? null
+      condition:player.condition ?? null
     },
-    outcomes:{victory:0,defeat:0,stalemate:0},
+    outcomes:{victory:0,defeat:0,double_death:0},
     knockout:{player:0,enemy:0}, judge:{player:0,enemy:0,draw:0},
     byTerrain:{}, byEnemyRole:{}, byEnemyLoadout:{},
-    terrainD6:{},
-    initiative:{playerFirst:0,enemyFirst:0,rerollRounds:0},
     attacks:{player:0,enemy:0,types:{},finisher:0},
-    dice:{
-      playerInitiative:newRollBucket(), enemyInitiative:newRollBucket(),
-      playerAttack:newRollBucket(), enemyAttack:newRollBucket(),
-      playerDefense:newRollBucket(), enemyDefense:newRollBucket()
-    },
     averages:{
       attackEvents:0,playerRemainingHPpct:0,enemyRemainingHPpct:0,
       playerHPLost:0,enemyHPLost:0,playerArmourConditionLost:0,
@@ -146,29 +130,22 @@ export function simulateBatch(options = {}) {
     playerArmourLoss:0,enemyArmourLoss:0,playerWeaponLoss:0,enemyWeaponLoss:0};
   for (let i = 0; i < battles; i++) {
     const index = startBout + i;
-    // The same deterministic seed/bout, enemy generation, terrain D6 and
-    // opposed 3d6 used by the playable app. No async or wall-clock delay.
+    // The same seeded opponent, terrain and physical resolver as the playable app.
     const duel = combatAtTime({...session, elapsedMs:index * BOUT_MS});
     if (!duel) throw new Error('Production resolver returned no duel at ' + index);
     const outcome = duel.outcome;
-    increment(summary.terrainD6, duel.zoneRoll);
     increment(summary.outcomes, outcome);
     resultGroup(bucket(summary.byTerrain, duel.terrain.name), outcome);
     resultGroup(bucket(summary.byEnemyRole, duel.enemyRole), outcome);
     resultGroup(bucket(summary.byEnemyLoadout, duel.enemyLoadout), outcome);
     const first = duel.events[0], final = duel.events.at(-1);
-    if (first.actor === 'player') summary.initiative.playerFirst++;
-    else summary.initiative.enemyFirst++;
-    summary.initiative.rerollRounds += first.rerolls;
-    captureRoll(summary.dice.playerInitiative, first.playerDice);
-    captureRoll(summary.dice.enemyInitiative, first.enemyDice);
     const start = first.vitals, finish = final.vitals;
     const lostHP = side => start[side].hp - finish[side].hp;
     if (outcome === 'victory') {
-      if (duel.enemyHP === 0) summary.knockout.enemy++;
+      if (duel.reason === "knockout") summary.knockout.enemy++;
       else summary.judge.player++;
     } else if (outcome === 'defeat') {
-      if (duel.playerHP === 0) summary.knockout.player++;
+      if (duel.reason === "knockout") summary.knockout.player++;
       else summary.judge.enemy++;
     } else increment(summary.judge, 'draw');
     totals.playerPct += finish.player.hp / finish.player.maxHP * 100;
@@ -180,20 +157,17 @@ export function simulateBatch(options = {}) {
     totals.playerWeaponLoss += start.player.weapon - finish.player.weapon;
     totals.enemyWeaponLoss += start.enemy.weapon - finish.enemy.weapon;
     for (const event of duel.events) {
-      if (!event.turn) continue;
+      if (!event.move) continue;
       totals.turns++;
       increment(summary.attacks, event.actor);
       increment(summary.attacks.types, event.type);
       if (event.type === 'finisher') summary.attacks.finisher++;
-      captureRoll(summary.dice[event.actor === 'player' ? 'playerAttack' : 'enemyAttack'], event.attackDice);
-      captureRoll(summary.dice[event.actor === 'player' ? 'enemyDefense' : 'playerDefense'], event.defenseDice);
     }
     if (i < traces) summary.samples.push({
       bout:index + 1, outcome, enemyRole:duel.enemyRole,
       enemyLoadout:duel.enemyLoadout, enemyArmour:duel.enemyArmour,
-      terrain:duel.terrain.name, zoneRoll:duel.zoneRoll,
-      // These are THE real production events with initiative & opposed dice,
-      // health/armour/weapon condition after each turn, and final judgment.
+      terrain:duel.terrain.name,
+      // Actual events include condition changes and the final verdict.
       events:duel.events
     });
   }
@@ -201,7 +175,7 @@ export function simulateBatch(options = {}) {
     for (const group of Object.values(groups))
       group.winRatePct = average(group.victories * 100, group.battles);
   summary.winRatePct = average(summary.outcomes.victory * 100, battles);
-  summary.drawRatePct = average(summary.outcomes.stalemate * 100, battles);
+  summary.drawRatePct = average(summary.outcomes.double_death * 100, battles);
   summary.averages = {
     attackEvents:average(totals.turns, battles),
     playerRemainingHPpct:average(totals.playerPct, battles),
@@ -278,7 +252,7 @@ export const HELP = [
   ' --start-bout N            zero-based live bout index (default 0)',
   ' --snapshot FILE.json     local frozen combatSession/player JSON; no uploads',
   ' --config FILE.json       load scenario options from local JSON; cannot mix flags',
-  ' --trace N                include N full event/dice traces (max 100)',
+  ' --trace N                include N full event traces (max 100)',
   ' --help                   this guide',
   'Write JSON to a file with shell redirection: ... > combat-report.json',
   'IMPORTANT: Grade/stat build benchmarks are synthetic, not player progression.',

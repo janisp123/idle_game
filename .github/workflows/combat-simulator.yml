@@ -51,7 +51,7 @@ jobs:
             console.log(JSON.stringify({
               battles:r.battles, grade:r.difficulty, loadout:r.player.loadout,
               victories:r.outcomes.victory, defeats:r.outcomes.defeat,
-              draws:r.outcomes.stalemate, winRatePct:r.winRatePct,
+              doubleDeaths:r.outcomes.double_death, winRatePct:r.winRatePct,
               byTerrain:r.byTerrain, byEnemyRole:r.byEnemyRole
             }, null, 2));
           '

@@ -1,5 +1,14 @@
 # Changelog and task handoffs
 
+## GLAD-003 · STARTED · 2026-11-24
+
+Goal: Implement the approved seeded physical arena resolver and connect its events to the existing arena and wallet.
+Branch: `codex/glad-003-physical-combat`.
+Draft: [PR #148](https://github.com/janisp123/idle_game/pull/148).
+Last verified: Three focused tests passed for raw-HP timeout eligibility, deterministic finite bow ammo and dagger fallback, shield and armour breakage, and Masterwork condition. The resolver now drives the arena, frozen equipment, payouts and bounded resurrection time. Local regression suite: 98 passed, one optional layout skip. Staged 390 px Chromium verified Play Now, real vitals, terrain and the removal of per-exchange dice. The handbook records 256 seeded samples for each of 25 ordered equal-stat matchups.
+Next action: Verify final PR checks, then merge and verify Pages.
+Status: IN_REVIEW.
+
 ## GLAD-002 · DEPLOYED · 2026-11-24
 
 Goal: Implement the approved four-slot equipment, five physical styles, item grade and quality, arena coins, and smith purchases.

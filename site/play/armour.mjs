@@ -40,6 +40,10 @@ export function armourOption(slotId, optionId) {
   return ARMOUR_CHOICES[slotId].find(item => item.id === optionId) ?? null;
 }
 
+export function pieceProtection(slot, family) {
+  return slot.coverage * ARMOUR_BALANCE[family].physical / 100;
+}
+
 export function armourStats(armour, loadout) {
   if (!Object.hasOwn(WEAPON_PIECES, loadout)) throw new RangeError("Unknown weapon style");
   const weaponKg = WEAPON_PIECES[loadout].reduce((sum, piece) => sum + piece.kg, 0);
@@ -50,7 +54,7 @@ export function armourStats(armour, loadout) {
     const stats = ARMOUR_BALANCE[option.id];
     const coverage = slot.coverage / 100;
     armourKg += option.weightKg;
-    physical += stats.physical * coverage;
+    physical += pieceProtection(slot, option.id);
     evasion += stats.evasion * coverage;
     dodgeMargin += stats.dodgeMargin * coverage;
   }

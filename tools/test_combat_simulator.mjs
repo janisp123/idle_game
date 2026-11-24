@@ -8,27 +8,15 @@ import { BOUT_MS, combatAtTime, startCombatSession } from '../site/play/combat.m
 import { armourStats, ARMOUR_SLOTS } from '../site/play/armour.mjs';
 import { createPlayerSnapshot, parseCliArgs, simulateBatch } from './combat-simulator.mjs';
 
-test('the 10,000-bout runner resolves real production opponents, locations and dice', () => {
+test('the 10,000-bout runner resolves real production opponents, locations and events', () => {
   const output = simulateBatch({battles:10000,seed:20261124});
   assert.equal(Object.values(output.outcomes).reduce((a,b)=>a+b,0),10000);
   assert.equal(Object.values(output.byTerrain).reduce((a,b)=>a+b.battles,0),10000);
   assert.equal(Object.values(output.byEnemyRole).reduce((a,b)=>a+b.battles,0),10000);
   assert.equal(Object.values(output.byEnemyLoadout).reduce((a,b)=>a+b.battles,0),10000);
-  assert.equal(Object.values(output.terrainD6).reduce((a,b)=>a+b,0),10000);
   assert.deepEqual(Object.keys(output.byTerrain).sort(),
     ['Dungeon passage','Open field','Ruined courtyard'].sort());
-  assert.equal(output.dice.playerInitiative.rolls,10000);
-  assert.equal(output.dice.enemyInitiative.rolls,10000);
-  assert.equal(output.dice.playerAttack.rolls,output.attacks.player);
-  assert.equal(output.dice.enemyAttack.rolls,output.attacks.enemy);
-  assert.equal(output.dice.playerDefense.rolls,output.attacks.enemy);
-  assert.equal(output.dice.enemyDefense.rolls,output.attacks.player);
-  for (const bucket of Object.values(output.dice)) {
-    assert.equal(Object.values(bucket.faces).reduce((a,b)=>a+b,0),bucket.rolls*3);
-    assert.equal(Object.values(bucket.sum).reduce((a,b)=>a+b,0),bucket.rolls);
-    assert.ok(Object.keys(bucket.faces).every(face=>+face>=1 && +face<=6));
-    assert.ok(Object.keys(bucket.sum).every(sum=>+sum>=3 && +sum<=18));
-  }
+  assert.ok(output.attacks.player > 0 && output.attacks.enemy > 0);
   assert.ok(output.winRatePct>=0 && output.winRatePct<=100);
   assert.equal(output.samples.length,0);
 });
@@ -44,13 +32,11 @@ test('sampled traces equal the actual live combatAtTime events without a substit
     assert.equal(actual.bout,args.startBout+i+1);
     assert.equal(actual.outcome,expected.outcome);
     assert.equal(actual.terrain,expected.terrain.name);
-    assert.equal(actual.zoneRoll,expected.zoneRoll);
     assert.equal(actual.enemyRole,expected.enemyRole);
     assert.equal(actual.enemyLoadout,expected.enemyLoadout);
     assert.deepEqual(actual.events,expected.events);
-    assert.ok(actual.events[0].playerDice.every(x=>x>=1 && x<=6));
-    assert.ok(actual.events.filter(e=>e.turn).every(e=>e.attackDice.length===3 &&
-      e.defenseDice.length===3 && e.vitals.player.weapon>=0));
+    assert.equal(actual.events[0].type, "engage");
+    assert.equal(actual.events.at(-1).type, actual.outcome);
   }
   assert.deepEqual(simulateBatch(args),output);
 });
