@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { BOUT_MS, combatAtTime, startCombatSession } from '../site/play/combat.mjs';
 import { armourStats, ARMOUR_SLOTS } from '../site/play/armour.mjs';
 import { blankEnchantments, enchantBonus, tallyGloryVictories } from '../site/play/glory.mjs';
@@ -115,6 +117,26 @@ test('invalid grades, impossible gear, forged ranks and excessive runs fail safe
   assert.throws(()=>parseCliArgs(['--armour','robe','--armour','plate']),RangeError);
   assert.throws(()=>parseCliArgs(['--enchant','weapon:2,weapon:3']),RangeError);
   assert.throws(()=>parseCliArgs(['--snapshot','ignored.json','--grade','F']),/ENOENT/);
+});
+
+test('scenario JSON works via CLI and manual workflow never accepts uploaded saves',()=>{
+  const folder=mkdtempSync(join(tmpdir(),'idle-combat-sim-'));
+  try {
+    const config=join(folder,'scenario.json');
+    const args={battles:40,grade:'F',armour:'leather',seed:2323,trace:1};
+    writeFileSync(config,JSON.stringify(args),'utf8');
+    assert.deepEqual(parseCliArgs(['--config',config]),args);
+    assert.throws(()=>parseCliArgs(['--config',config,'--grade','S']),RangeError);
+    const raw=execFileSync(process.execPath,['tools/combat-simulator.mjs','--config',config],{encoding:'utf8'});
+    assert.deepEqual(JSON.parse(raw),simulateBatch(args));
+    const workflow=readFileSync('.github/workflows/combat-simulator.yml','utf8');
+    assert.match(workflow,/workflow_dispatch:/);
+    assert.match(workflow,/upload-artifact/);
+    assert.match(workflow,/"snapshot" in data/);
+    assert.ok(!workflow.includes('node -e \'eval'));
+  } finally {
+    rmSync(folder,{recursive:true,force:true});
+  }
 });
 
 test('CLI outputs JSON and remains outside the static website package',()=>{
