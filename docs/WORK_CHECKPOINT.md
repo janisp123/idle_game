@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## SIM-001 — Developer combat simulator, PR #138 (2026-11-24)
+
+Developer-only exact combat QA is being implemented in [PR #138](https://github.com/janisp123/idle_game/pull/138). Read `docs/CHANGELOG.md` at that PR head for completed milestones, exact CI evidence and one unfinished next action. The simulator imports the live resolver and produces 10,000+ no-delay dice, terrain, opponent, enchant, gear and condition metrics; the manual GitHub Actions runner exports a report artifact. The public site contains none of these tools. **Next:** wait for final-head checks, merge through AUTO-MERGE-001 if clear, then verify GitHub main and manual workflow availability. Do not change combat balance as part of SIM-001.
+
 For interrupted work, read the matching open PR’s branch changelog and its next action. Check recent task branches if a draft is missing. Verify the merge and deployment of a closed PR before selecting work.
 
 HANDOFF-001 is tracked in [PR #137](https://github.com/janisp123/idle_game/pull/137). Activity difficulty, terrain and mobile vital alignment shipped in [PR #134](https://github.com/janisp123/idle_game/pull/134) at `05e4ad05b5a928cdd0dfd30c2191324edf14219c` ([Pages deployment](https://github.com/janisp123/idle_game/actions/runs/45187500535)). Enemy calibration is a backlog item. Subsequent PRs #135 and #136 updated public descriptions and footer credit.
