@@ -1,0 +1,74 @@
+name: Developer Game Systems Lab
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Public test scenario JSON; default runs all modules. Never paste a real save.'
+        type: string
+        required: false
+        default: '{"module":"loot","activity":"mining","level":25,"units":100,"trials":10000}'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/system-lab.mjs'
+      - 'tools/simulation/**'
+      - 'tools/test_system_lab.mjs'
+      - '.github/workflows/system-lab.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  system-lab:
+    name: Verify real game system simulations
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - name: Run complete isolated production-parity tests
+        run: |
+          node --check tools/system-lab.mjs
+          node --test tools/test_system_lab.mjs
+      - name: Validate scenario input without accepting private saves
+        env:
+          SCENARIO_INPUT: ${{ inputs.scenario || '{"scenarios":[{"module":"loot","activity":"mining","level":25,"units":100,"trials":250},{"module":"crafting","activity":"smelting","level":10,"workCycles":100,"inventory":{"copper_ore":100,"iron_ore":100},"trials":250}]}' }}
+        run: |
+          node --input-type=module -e '
+            import { writeFileSync,readFileSync } from "node:fs";
+            const raw=process.env.SCENARIO_INPUT;
+            if(raw.length>30000)throw new Error("Scenario too long");
+            const value=JSON.parse(raw);
+            const check=(v,depth=0)=>{
+              if(depth>20)throw new Error("Scenario too deep");
+              if(v===null||typeof v!=="object")return;
+              if(Array.isArray(v)){if(v.length>100)throw new Error("Array too long");for(const x of v)check(x,depth+1);return;}
+              for(const [key,child] of Object.entries(v)){
+                if(["snapshot","state","combatSession","player","secret","token"].includes(key))
+                  throw new Error("No private player saves or credentials in public Actions");
+                check(child,depth+1);
+              }
+            };
+            check(value);
+            writeFileSync("system-lab-scenario.json",JSON.stringify(value),"utf8");
+          '
+      - name: Generate immutable system report from actual game modules
+        run: |
+          node tools/system-lab.mjs --config system-lab-scenario.json > system-lab-report.json
+          node --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            const r=JSON.parse(readFileSync("system-lab-report.json","utf8"));
+            console.log("System lab report:",r.reportType);
+            console.log("Modules:",(r.results??r.scenarios??[]).map(x=>x.module||"combat").join(", "));
+            console.log("Valid JSON; full report attached below.");
+          '
+      - name: Attach report, without modifying playable site
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: system-lab-${{ github.run_id }}-${{ github.run_attempt }}
+          path: system-lab-report.json
+          if-no-files-found: error
+          retention-days: 7
