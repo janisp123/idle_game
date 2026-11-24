@@ -4,8 +4,9 @@
 
 Goal: Implement the approved four-slot equipment, five physical styles, item grade and quality, arena coins, and smith purchases.
 Branch: `codex/glad-002-equipment-economy`.
-Last verified: GLAD-001 is deployed and the remote backlog identifies GLAD-002 next. No GLAD-002 tests run yet.
-Next action: Open draft PR, then trace arena win settlement and add wallet regression coverage.
+Draft: [PR #146](https://github.com/janisp123/idle_game/pull/146).
+Last verified: Focused prize tests match actual resolved wins, reject double settlement, and verify a split twenty-year settlement. The temporary arena repeats a 256-bout schedule for a frozen build, so the same resolver supports exact bounded payouts and consistent split claims.
+Next action: Integrate prize settlement into the saved wallet, then replace scroll and enchant flows with the four-slot equipment shop, wire real gear bonuses and verify the UI.
 Status: STARTED.
 
 ## GLAD-001 · DEPLOYED · 2026-11-24

@@ -1356,3 +1356,42 @@ test("GLAD-001 grade S training and mining keep capped offline skill XP and dist
     assert.deepEqual(readSave(JSON.stringify(result.state)), result.state);
   }
 });
+
+test("GLAD-002 arena rewards match resolved wins and are independent of settlement splits", async () => {
+  const { arenaReward, settleArenaPrizes } = await import("../site/play/arena-wallet.mjs");
+  const { BOUT_MS, combatAtTime, startCombatSession } = await import("../site/play/combat.mjs");
+  const player = { name: "Test fighter", loadout: "greatsword", difficulty: 1,
+    str: 24, dex: 24, end: 24, skill: 12 };
+  const initial = startCombatSession(player, 197);
+  const result = settleArenaPrizes({ ...initial, elapsedMs: 18 * BOUT_MS });
+  let wins = 0;
+  for (let bout = 1; bout <= 18; bout++) {
+    if (combatAtTime({ ...initial, elapsedMs: bout * BOUT_MS - 1 }).outcome === "victory") wins++;
+  }
+  assert.ok(wins > 0);
+  assert.equal(result.coins, wins * arenaReward(1));
+  const first = settleArenaPrizes({ ...initial, elapsedMs: 7 * BOUT_MS });
+  const second = settleArenaPrizes({ ...first.session, elapsedMs: 18 * BOUT_MS });
+  assert.equal(first.coins + second.coins, result.coins);
+  assert.equal(settleArenaPrizes(result.session).coins, 0);
+  assert.ok(arenaReward(7) > arenaReward(1) && arenaReward(1) > arenaReward(0));
+});
+
+test("GLAD-002 decades of prizes agree with the frozen arena schedule", async () => {
+  const { arenaReward, settleArenaPrizes } = await import("../site/play/arena-wallet.mjs");
+  const { ARENA_SCHEDULE_BOUTS, BOUT_MS, startCombatSession } = await import("../site/play/combat.mjs");
+  const initial = startCombatSession({ name: "Offline fighter", loadout: "greatsword",
+    difficulty: 0, str: 18, dex: 17, end: 16, skill: 10 }, 761);
+  const cycleMs = ARENA_SCHEDULE_BOUTS * BOUT_MS;
+  const cycles = Math.floor(20 * YEAR / cycleMs);
+  const tailMs = 19 * BOUT_MS;
+  const cycle = settleArenaPrizes({ ...initial, elapsedMs: cycleMs });
+  const tail = settleArenaPrizes({ ...initial, elapsedMs: tailMs });
+  const elapsedMs = cycles * cycleMs + tailMs;
+  const whole = settleArenaPrizes({ ...initial, elapsedMs });
+  assert.equal(whole.coins, cycles * cycle.coins + tail.coins);
+  assert.ok(whole.coins >= arenaReward(0));
+  const midpoint = settleArenaPrizes({ ...initial, elapsedMs: 37 * BOUT_MS });
+  const rest = settleArenaPrizes({ ...midpoint.session, elapsedMs });
+  assert.equal(midpoint.coins + rest.coins, whole.coins);
+});

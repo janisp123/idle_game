@@ -349,12 +349,17 @@ export function simulateDuel(player,opponent,random,zoneRoll=null) {
   events.push({type:outcome,actor:null,target:null,damage:0,text:finalText,vitals:snapshot()});
   return {events,outcome,playerHP:p.hp,enemyHP:e.hp,enemy:e.name};
 }
+// The interim arena repeats a seeded match schedule per frozen build. A full
+// schedule can be counted once when settling many years of exact prizes.
+export const ARENA_SCHEDULE_BOUTS = 256;
+
 /** Rebuild only the observable duel, in bounded work over arbitrary time. */
 export function combatAtTime(session) {
   if(!validCombatSession(session)||!session)return null;
   const bout=Math.floor(session.elapsedMs/BOUT_MS);
   const inside=session.elapsedMs%BOUT_MS;
-  const seed=(Math.imul(session.seed^(bout>>>0),2654435761)+(bout>>>16))>>>0;
+  const scheduledBout = bout % ARENA_SCHEDULE_BOUTS;
+  const seed = Math.imul(session.seed ^ scheduledBout, 2654435761) >>> 0;
   const foe=makeOpponent(bout,session.player.difficulty??0,seededCombatRandom((seed^0x35b6d119)>>>0));
   // A pre-gear V7 snapshot must not be retroactively upgraded on readback.
   // New sessions carry their frozen gear; old sessions retain legacy behavior
