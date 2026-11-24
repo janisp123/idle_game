@@ -1,5 +1,13 @@
 # Changelog and task handoffs
 
+## GLAD-003 · STARTED · 2026-11-24
+
+Goal: Implement the approved seeded physical arena resolver and connect its events to the existing arena and wallet.
+Branch: `codex/glad-003-physical-combat`.
+Last verified: GLAD-002 passed final checks and deployed.
+Next action: Build and test the bounded duel and verdict rules, then connect the arena, wallet and simulator.
+Status: STARTED.
+
 ## GLAD-002 · DEPLOYED · 2026-11-24
 
 Goal: Implement the approved four-slot equipment, five physical styles, item grade and quality, arena coins, and smith purchases.
