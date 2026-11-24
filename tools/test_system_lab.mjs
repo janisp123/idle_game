@@ -26,7 +26,7 @@ test('the lab registry covers all production-backed modules and is deterministic
   assert.deepEqual(a,b);
   assert.equal(a.results.length,9);
   assert.equal(JSON.stringify(config),before,'input config should not mutate');
-  assert.equal(a.results[0].outcomes.victory+a.results[0].outcomes.defeat+a.results[0].outcomes.stalemate,1000);
+  assert.equal(a.results[0].outcomes.victory+a.results[0].outcomes.defeat+a.results[0].outcomes.double_death,1000);
   assert.equal(a.results[1].module,'activity');
   assert.equal(a.results[8].validRoundtrip,true);
 });

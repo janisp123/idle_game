@@ -1,5 +1,5 @@
-import { GRADES as difficultyGrades, benchmark, TERRAIN_ROLL_START, TERRAIN_REVEAL } from "./difficulty.mjs?v=glad-002";
-import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote } from "./smith.mjs?v=glad-002";
+import { GRADES as difficultyGrades, benchmark } from "./difficulty.mjs?v=glad-002";
+import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote } from "./smith.mjs?v=glad-003";
 import {
   setDifficulty, buyEquipment, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
@@ -9,15 +9,15 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=glad-002";
+} from "./engine.mjs?v=glad-003";
 
-import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=glad-002";
-import { combatArtworkForEvent } from "./combat-art.mjs?v=arena-v1";
-import { combatFlowState } from "./combat-flow.mjs?v=glad-002";
-import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
+import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=glad-003";
+import { combatArtworkForEvent } from "./combat-art.mjs?v=glad-003";
+import { combatFlowState } from "./combat-flow.mjs?v=glad-003";
+import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=glad-003";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats }
-  from "./armour.mjs?v=glad-002";
+  from "./armour.mjs?v=glad-003";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
   setAlphaSpeed, advanceAlphaClock } from "./alpha-tools.mjs?v=20261122-alpha-tools1";
 const $ = id => document.getElementById(id);
@@ -41,17 +41,11 @@ const ui = {
   masterConfirm: $("masterConfirm"), masterCancel: $("masterCancel"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
   combatPanel: $("combatPanel"), combatEventTitle: $("combatEventTitle"),
-  combatDice: $("combatDice"), combatTurns: $("combatTurns"),
-  combatDiceStage: $("combatDiceStage"),
+  combatTurns: $("combatTurns"),
   combatFlow: $("combatFlow"), combatFlowMeter: $("combatFlowMeter"), combatFlowFill: $("combatFlowFill"),
   combatFlowSteps: Array.from({length:5},(_,i)=>$("combatFlowStep"+i)),
   combatFlowIcons: Array.from({length:5},(_,i)=>$("combatFlowIcon"+i)),
   combatFlowLabels: Array.from({length:5},(_,i)=>$("combatFlowLabel"+i)),
-  playerDiceTray: $("playerDiceTray"), enemyDiceTray: $("enemyDiceTray"),
-  playerDiceLabel: $("playerDiceLabel"), enemyDiceLabel: $("enemyDiceLabel"),
-  playerDiceTotal: $("playerDiceTotal"), enemyDiceTotal: $("enemyDiceTotal"),
-  playerDie: [$("playerDie1"), $("playerDie2"), $("playerDie3")],
-  enemyDie: [$("enemyDie1"), $("enemyDie2"), $("enemyDie3")],
   heading: $("scene-heading"), description: $("activityDescription"), actionFill: $("actionFill"),
   activityProgress: $("activityProgress"), transitionStatus: $("transitionStatus"),
   transitionPhase: $("transitionPhase"), transitionProgress: $("transitionProgress"), transitionFill: $("transitionFill"),
@@ -178,62 +172,6 @@ function renderArmour() {
   }
 }
 
-const FACE_GLYPHS = Object.freeze(["⚀","⚁","⚂","⚃","⚄","⚅"]);
-// Animated previews never affect the already-resolved deterministic game dice.
-function previewFace(seed, bout, step, frame, index) {
-  let n = (seed ^ Math.imul(bout + 1, 2654435761) ^
-    Math.imul(step + 1, 2246822519) ^ Math.imul(frame + 1, 3266489917) ^
-    Math.imul(index + 1, 668265263)) >>> 0;
-  n ^= n >>> 16;
-  n = Math.imul(n, 2246822519) >>> 0;
-  n ^= n >>> 13;
-  return 1 + n % 6;
-}
-// Two real, independent 3d6 checks: attacker rolls first on screen, then
-// defender. The engine already determined both rolls; these are only previews.
-function presentDice(combat, event, phase, isRevealed) {
-  const initiative = event.type === "initiative";
-  const left = initiative ? event.playerDice :
-    event.actor === "player" ? event.attackDice : event.defenseDice;
-  const right = initiative ? event.enemyDice :
-    event.actor === "enemy" ? event.attackDice : event.defenseDice;
-  const leftScore = initiative ? event.playerTotal :
-    event.actor === "player" ? event.attackTotal : event.defenseTotal;
-  const rightScore = initiative ? event.enemyTotal :
-    event.actor === "enemy" ? event.attackTotal : event.defenseTotal;
-  ui.playerDiceLabel.textContent = initiative ? "YOU · FIRST?" :
-    event.actor === "player" ? "YOU · ATTACK" : "YOU · DEFEND";
-  ui.enemyDiceLabel.textContent = initiative ? "ENEMY · FIRST?" :
-    event.actor === "enemy" ? "ENEMY · ATTACK" : "ENEMY · DEFEND";
-  const isPlayerAttacker = event.actor === "player";
-  const playerMode = isRevealed ? "done" : initiative ? "rolling" :
-    isPlayerAttacker ? (phase === "attack" ? "rolling" : "done") :
-      phase === "attack" ? "pending" : "rolling";
-  const enemyMode = isRevealed ? "done" : initiative ? "rolling" :
-    !isPlayerAttacker ? (phase === "attack" ? "rolling" : "done") :
-      phase === "attack" ? "pending" : "rolling";
-  const frame = Math.floor(combat.eventElapsedMs / 250);
-  for (let i = 0; i < 3; i++) {
-    const playerFace = playerMode === "rolling"
-      ? previewFace(state.combatSession.seed,combat.bout,combat.step,frame,i) :
-      playerMode === "pending" ? 1 : left[i];
-    const enemyFace = enemyMode === "rolling"
-      ? previewFace(state.combatSession.seed,combat.bout,combat.step,frame,i + 3) :
-      enemyMode === "pending" ? 1 : right[i];
-    ui.playerDie[i].textContent = FACE_GLYPHS[playerFace - 1];
-    ui.enemyDie[i].textContent = FACE_GLYPHS[enemyFace - 1];
-    ui.playerDie[i].title = playerMode === "pending" ? "Waiting" : String(playerFace);
-    ui.enemyDie[i].title = enemyMode === "pending" ? "Waiting" : String(enemyFace);
-  }
-  ui.playerDiceTotal.textContent = playerMode === "done" ? String(leftScore) :
-    playerMode === "pending" ? "—" : "ROLLING";
-  ui.enemyDiceTotal.textContent = enemyMode === "done" ? String(rightScore) :
-    enemyMode === "pending" ? "—" : "ROLLING";
-  ui.playerDiceTray.classList.toggle("rolling",playerMode === "rolling");
-  ui.enemyDiceTray.classList.toggle("rolling",enemyMode === "rolling");
-  ui.playerDiceTray.classList.toggle("pending",playerMode === "pending");
-  ui.enemyDiceTray.classList.toggle("pending",enemyMode === "pending");
-}
 function showCombatFlow(flow) {
   ui.combatFlow.hidden = !flow;
   if (!flow) return;
@@ -943,72 +881,41 @@ function render() {
     ui.transitionProgress.setAttribute("aria-valuenow", String(Math.round(percent)));
     ui.transitionProgress.setAttribute("aria-label", phaseName);
   }
-  // The scene stays on the last RESOLVED result while real dice roll.
-  // No early damage text, premature artwork or redundant work-cycle bar.
   const combat = current?.category === "combat" && !transition
     ? combatAtTime(state.combatSession) : null;
   ui.activityProgress.hidden = Boolean(transition || current?.category === "combat");
   ui.combatPanel.hidden = !combat;
   const flow=combat ? combatFlowState(combat,state.combatSession) : null;
   showCombatFlow(flow);
-  ui.combatDiceStage.hidden = true;
-  ui.combatDice.hidden = true;
   let imageEvent = null;
   let combatRevealed = false;
   if (combat) {
     const event = combat.event;
-    const rollingPhase = event.type === "initiative" || Boolean(event.attackDice);
-    const windup = event.attackDice ? (COMBAT_SKILLS[event.attackSkill].windupMs ?? 0) : 0;
-    const revealAt = windup + (event.type === "initiative"
-      ? COMBAT_BALANCE.initiativeAnimationMs : COMBAT_BALANCE.attackAnimationMs);
-    const revealed = !rollingPhase || combat.eventElapsedMs >= revealAt;
-    combatRevealed = revealed;
-    const isRolling = rollingPhase && combat.eventElapsedMs >= windup && !revealed;
-    const showTray = rollingPhase && combat.eventElapsedMs >= windup &&
-      combat.eventElapsedMs < revealAt + 2_000;
-    ui.combatDiceStage.hidden = !showTray;
-    const halfway = windup + COMBAT_BALANCE.attackAnimationMs / 2;
-    const dicePhase = event.type === "initiative" ? "initiative" :
-      combat.eventElapsedMs < halfway ? "attack" : "defense";
-    if (showTray) presentDice(combat,event,dicePhase,revealed);
-    imageEvent = revealed ? event : combat.events[combat.step - 1];
-    const finishedTurns = revealed && event.turn ? event.turn :
-      (combat.events[combat.step - 1]?.turn ?? 0);
-    ui.combatTurns.textContent = Array.from({length:COMBAT_BALANCE.maxHalfTurns},
-      (_,i)=>i<finishedTurns?"◆":"◇").join(" ");
-    const rollCaption = event.type === "initiative" ? "ROLLING FOR FIRST" :
-      combat.eventElapsedMs < halfway ? "ATTACK DICE ROLLING" : "DEFENSE DICE ROLLING";
-    ui.combatEventTitle.textContent = "DUEL "+number(combat.bout)+" · "+
-      (!revealed ? (combat.eventElapsedMs < windup ? "PREPARING" : rollCaption) :
-        event.type === "initiative" ?
-          (event.actor === "player" ? "YOU ATTACK FIRST" : "ENEMY ATTACKS FIRST") :
-          event.type.toUpperCase());
-    ui.combatDice.hidden = !revealed || event.type !== "finisher";
-    ui.combatDice.textContent = event.type === "finisher" && revealed ? "6 · 6 · 6" : "";
-    const choosingGround = event.type === "initiative" && combat.eventElapsedMs >= TERRAIN_ROLL_START && combat.eventElapsedMs < TERRAIN_REVEAL;
-    const groundKnown = event.type !== "initiative" || combat.eventElapsedMs >= TERRAIN_REVEAL;
-    if (choosingGround) {
-      ui.combatEventTitle.textContent = "DUEL " + number(combat.bout) + " · ROLLING TERRAIN";
-      ui.combatDice.hidden = false;
-      ui.combatDice.textContent = FACE_GLYPHS[Math.floor(combat.eventElapsedMs / 150) % 6];
-    }
-    const signed = value => value > 0 ? "+" + value : String(value);
-    $("combatGround").textContent = difficultyGrades[state.difficulties.fighting ?? 0] + " · " + combat.enemyRole + " · " +
-      COMBAT_LOADOUTS[combat.enemyLoadout].name + " · Full " + combat.enemyArmour +
-      (groundKnown ? " · " + FACE_GLYPHS[combat.zoneRoll-1] + " " + combat.terrain.name +
-        " · Attack: you " + signed(combat.playerTerrain) + ", enemy " + signed(combat.enemyTerrain) : "");
-    ui.combatPanel.classList.toggle("finisher",revealed && event.type === "finisher");
+    combatRevealed = true;
+    imageEvent = event;
+    ui.combatTurns.textContent = combat.recovering
+      ? (combat.playerHP === 0 ? "Resurrection and return" : "Arena recovery")
+      : event.distance;
+    const action = event.move ?? event.type;
+    const status = event.type === "double_death" ? "Both fighters executed" :
+      event.type === "finisher" ? "Decisive hit" : action.replaceAll("_", " ");
+    ui.combatEventTitle.textContent = "DUEL " + number(combat.bout) + " · " +
+      (event.actor === "player" ? "You · " : event.actor === "enemy" ? "Opponent · " : "") + status;
+    $("combatGround").textContent = difficultyGrades[state.difficulties.fighting ?? 0] + " · " +
+      combat.terrain.name + " · " + COMBAT_LOADOUTS[combat.enemyLoadout].name;
+    ui.combatPanel.classList.toggle("finisher", event.type === "finisher");
+    const broken = event.broken?.join(", ");
     const key = state.combatSession.seed + ":" + combat.bout + ":" + combat.step;
-    if (revealed && key !== lastCombatEventKey) {
-      if (!ui.resultNotice.textContent.startsWith("Arena winnings:"))
-        ui.resultNotice.textContent = "";
+    if (key !== lastCombatEventKey) {
+      if (broken) message("Broken equipment: " + broken);
+      else if (!ui.resultNotice.textContent.startsWith("Arena winnings:")) ui.resultNotice.textContent = "";
       lastCombatEventKey = key;
     }
   } else {
     lastCombatEventKey = null;
     ui.combatTurns.textContent = "";
   }
-  renderResults(combat,combatRevealed,flow?.steps[flow.current].label==="Recover");
+  renderResults(combat, combatRevealed, false);
   const sceneActivity = transition ? ACTIVITIES[transition.targetActivity] : current;
   if (!sceneActivity) {
     ui.sceneTag.textContent = "WAITING FOR ORDERS";
@@ -1134,7 +1041,7 @@ function start() {
       try { localStorage.removeItem(ALPHA_CLOCK_KEY); } catch { storageWorks = false; }
     }
     state = newGame(Date.now());
-    if (saved) message("Alpha progression was reset for the equipment update or because the previous save could not be read. A new character was created.");
+    if (saved) message("Alpha progression was reset for the combat update or because the previous save could not be read. A new character was created.");
     else message("Choose an activity. Your character will work without further clicks.");
     writeSave();
   } else {

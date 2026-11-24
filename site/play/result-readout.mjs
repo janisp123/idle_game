@@ -42,6 +42,9 @@ export function combatReadoutForEvent(event) {
     sides.player.push(token("VICTORY","gain"));
   } else if (event.type === "defeat") {
     sides.player.push(token("DEFEAT","damage"));
+  } else if (event.type === "double_death") {
+    sides.player.push(token("EXECUTED", "damage"));
+    sides.enemy.push(token("EXECUTED", "damage"));
   } else if (event.type === "stalemate") {
     sides.player.push(token("DRAW","neutral"));
   }

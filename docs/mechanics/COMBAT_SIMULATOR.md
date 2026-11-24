@@ -6,7 +6,7 @@ For the **other implemented game systems**, use [SIM-002 modular systems lab](SY
 
 ## What this does
 
-Run the **exact current playable Fighting resolver** on the same frozen fighter snapshot, without waiting for dice animations, scene changes, recovery screens, browser timeouts or real-time travel. The harness calls production `startCombatSession()` and `combatAtTime()` for every bout and never reimplements initiative, attack/defense, opponent selection, RNG, terrain, gear, hit/guard, finisher, HP, condition wear or verdict formulas. Every duel starts with full HP and equipment condition, as in the playable game. A separate simulated duel does not increment player stats, earn Skill Master levels or spend real resources.
+Run the **exact current playable Fighting resolver** on the same frozen fighter snapshot, without waiting for scene changes, recovery screens, browser timeouts or real-time travel. The harness calls production `startCombatSession()` and `combatAtTime()` for every bout and never reimplements initiative, attack/defense, opponent selection, RNG, terrain, gear, hit/guard, finisher, HP, condition wear or verdict formulas. Every duel starts with full HP and equipment condition, as in the playable game. A separate simulated duel does not increment player stats, earn Skill Master levels or spend real resources.
 
 Files under `tools/` **are not included in the deployed `site/` directory**. This is **not** a hidden privileged browser/admin route, secret backdoor or invisible developer account. The repository is public, so its source is openly inspectable, but public players cannot activate it through the website. Run it locally in Node 22+ after cloning the repository; future chat/CW/Codex agents should reuse this module instead of manually re-deriving combat rules.
 
@@ -51,13 +51,13 @@ The **default** is 10,000 non-grade, level-1 greatsword duels, no armour, Non-gr
 - `--grade Non-grade|F|E|D|C|B|A|S`: selected Fighting activity difficulty; enemies draw from the **real** six encounter profiles and their randomly assigned equipment.
 - `--loadout greatsword|sword_shield|hammer|bow|staff|twin_blades`: player weapon and automatic attack/defense skills.
 - `--armour none|padded|leather|plate`: base for all **four slots**; override individually using `--armour-slots head:plate,arms:leather`.
-- `--seed N`, `--start-bout N`: original 32-bit combat session seed and **zero-based** bout index. Selecting the same seed, frozen fighter, grade and bout yields exactly the same enemy, terrain and dice as the game.
+- `--seed N`, `--start-bout N`: original 32-bit combat session seed and **zero-based** bout index. Selecting the same seed, frozen fighter, grade and bout yields exactly the same enemy, terrain and outcomes as the game.
 - `--config scenario.json`: reuse a locally stored JSON object with the same keys as programmatic `simulateBatch()` options; no other flags may be combined with `--config`.
 - `--snapshot path.json`: read a **local** JSON frozen `combatSession`, a `{player, seed}` session or a bare frozen fighter object. If the session has an elapsed clock and seed, both are reused by default. Do not combine with synthetic equipment/stats/grade flags. File input and reports remain local unless you choose to share them. Never commit a player's personal save.
-- `--trace N`: attach the original production initiative and attack/defense events (with **individual dice faces**, scores, zone D6, damage, HP/armour/weapon condition after each exchange and outcome) for the first N sampled bouts; up to 100 to avoid a giant report. All other bouts contribute complete dice/attack aggregates.
+- `--trace N`: attach the actual physical events, HP, condition, and verdict for up to 100 sampled bouts.
 - `--battles N` supports 1 to 1,000,000; the program uses bounded per-bout work and stores only aggregate metrics plus optional trace samples. No `setTimeout`, animations, network or modifications to browser saves.
 
-The JSON report includes win/loss/draw rates, defeat versus knockout/judge decisions, distributions **by terrain, enemy role and enemy loadout**, initiative order/rerolls, action types (miss/dodge/block/parry/strike/wound/collapse/finisher), exact **3d6 face and sum histograms for both sides**, average HP and condition losses, and optional fully traceable duels. Dice for tied initiative rerolls are not individually exposed by production events; the report counts reroll rounds, and captures the actual **final initiative dice**, without guessing hidden earlier faces.
+The JSON report includes victories, defeats and double deaths, grouped by terrain, enemy role and style, with event counts, HP and condition changes, and exact victory coins.
 
 ## Validity and maintenance
 

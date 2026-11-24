@@ -40,7 +40,7 @@ const TYPE_TITLES = Object.freeze({
   engage: "ENGAGE", initiative: "INITIATIVE", charge: "HEAVY SWING · PREPARE",
   miss: "MISSED ATTACK", dodge: "DODGE", parry: "PARRY",
   block: "SHIELD BLOCK", strike: "CLEAN HIT", wound: "BLOODY WOUND",
-  collapse: "FINAL BLOW", finisher: "6–6–6 · FINISHER",
+  collapse: "FINAL BLOW", finisher: "DECISIVE HIT",
   victory: "VICTORY", defeat: "DEFEAT", stalemate: "STALEMATE"
 });
 const styleOf = (actor, playerLoadout, enemyLoadout) =>
@@ -69,7 +69,7 @@ export function combatArtworkForEvent(event, playerLoadout, enemyLoadout) {
     asset = COMBAT_ART.miss[styleOf(event.target, playerLoadout, enemyLoadout)];
   else if (type === "parry" || type === "block")
     asset = event.defenseSkill ? COMBAT_ART.guard[event.defenseSkill] : null;
-  else if (["strike", "wound", "collapse", "finisher"].includes(type))
+  else if (["hit", "strike", "wound", "collapse", "finisher"].includes(type))
     asset = COMBAT_ART.hit[styleOf(event.actor, playerLoadout, enemyLoadout)];
   // Do not fabricate an image for any new, unillustrated event.
   const exact = Boolean(asset);

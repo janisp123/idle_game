@@ -6,7 +6,7 @@ const WEAPONS = Object.freeze({
   spear: { move: "thrust", type: "piercing", range: 1, power: 9, recovery: 2 },
   sword_shield: { move: "cut", type: "slashing", range: 0, power: 8, recovery: 2 },
   greatsword: { move: "swing", type: "slashing", range: 1, power: 12, recovery: 3 },
-  hammer: { move: "hammer", type: "blunt", range: 0, power: 15, recovery: 4 }
+  hammer: { move: "hammer", type: "blunt", range: 0, power: 17, recovery: 4 }
 });
 const BASH = Object.freeze({ move: "shield_bash", type: "blunt", range: 0, power: 4, recovery: 3 });
 const BANDS = Object.freeze(["Close", "Reach", "Far"]);
@@ -79,6 +79,8 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       damage: 0, ...extra, vitals: { player: vitals(you), enemy: vitals(foe) } });
   };
 
+  record(null, null, "engage");
+
   for (let turn = 0; turn < PHYSICAL_RULES.turnLimit && you.hp && foe.hp; turn++) {
     const lead = (you.dex + mobility(you) / 10 + roll() * 5 >= foe.dex + mobility(foe) / 10 + roll() * 5) ? 0 : 1;
     for (const index of [lead, 1 - lead]) {
@@ -123,37 +125,38 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
         continue;
       }
       const guardRoll = roll();
-      const block = target.shield.hp > 0 && guardRoll < 0.55;
+      const block = target.shield.hp > 0 && guardRoll < (attack.type === "blunt" ? 0.50 : 0.40);
       const parry = !block && target.loadout === "greatsword" && target.weapon.hp > 0 &&
         target.recovery === 0 && guardRoll < 0.32;
       const intact = actor.weapon.hp > 0 || attack.move === "dagger" || attack === BASH;
       const base = (attack.power + actor.str * 0.3 + (actor.gearAttack ?? 0) * 0.65) *
-        (intact ? 1 : 0.55) * (shortSpear ? 0.73 : 1) * (counter && attack !== BASH ? 1.18 : 1);
+        (intact ? 1 : 0.55) * (shortSpear ? 0.82 : 1) * (counter && attack !== BASH ? 1.18 : 1);
       const vital = !block && !parry && guardRoll > 0.96;
       const impact = Math.max(1, Math.round(base * (vital ? 1.65 : 1) *
-        (block ? attack.type === "blunt" ? 0.62 : 0.19 : parry ? 0.35 : 1) *
+        (block ? attack.type === "blunt" ? 0.94 : 0.27 : parry ? 0.35 : 1) *
         (1 - Math.min(80, protection(target) * ARMOUR_FACTOR[attack.type]) / 100) -
         (target.gear?.gearDefense ?? 0) * 0.35));
       const damage = wound(actor, target, impact);
       const broken = [];
-      if (block && wear(target.shield, attack.type === "blunt" ? 11 : 5)) broken.push("shield");
+      if (block && wear(target.shield, attack.type === "blunt" ? 24 : 5)) broken.push("shield");
       else if (parry && wear(target.weapon, 4)) broken.push("guard weapon");
       else if (!block && !parry) {
         const armour = target.armour.find(item => item.hp > 0);
         if (armour && wear(armour, attack.type === "blunt" ? 9 : 5)) broken.push(armour.id);
       }
       if (intact && attack.move !== "dagger" && attack !== BASH && wear(actor.weapon, 3)) broken.push("attack weapon");
-      if (block && target.shield.hp > 0) target.counter = true;
+      if (block && target.shield.hp > 0) target.counter = attack.type !== "blunt" && guardRoll < 0.30;
       if (!block && !parry && damage >= 8 && attack.type !== "blunt") target.bleed = Math.max(target.bleed, 2);
       if (attack.type === "blunt" && (damage >= 8 || attack === BASH)) target.stagger = 1;
       record(actor, target, block ? "block" : parry ? "parry" : vital ? "finisher" : "hit",
-        { damage, move: attack.move, broken });
+        { damage, move: attack.move, broken, defenseSkill: block ? "shield_block" : parry ? "blade_guard" : null });
     }
   }
 
+  const reason = foe.hp && you.hp ? "timeout" : "knockout";
   const outcome = !foe.hp ? "victory" : !you.hp ? "defeat" : timeoutVerdict(you, foe);
   if (outcome !== "victory") you.hp = 0;
   if (outcome !== "defeat") foe.hp = 0;
-  record(null, null, outcome);
-  return { events, outcome, playerHP: you.hp, enemyHP: foe.hp, enemy: enemy.name };
+  record(null, null, outcome, { reason });
+  return { events, outcome, reason, playerHP: you.hp, enemyHP: foe.hp, enemy: enemy.name };
 }

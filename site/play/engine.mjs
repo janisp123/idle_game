@@ -1,4 +1,4 @@
-import { settleArenaPrizes } from "./arena-wallet.mjs?v=glad-002";
+import { settleArenaPrizes } from "./arena-wallet.mjs?v=glad-003";
 import {
   ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
 } from "./attributes.mjs?v=glad-001";
@@ -10,10 +10,10 @@ export {
 } from "./attributes.mjs?v=glad-001";
 import {
   validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS
-} from "./combat.mjs?v=glad-002";
+} from "./combat.mjs?v=glad-003";
 import { COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
-import { ARMOUR_SLOTS, ARMOUR_TIERS, initialArmour, armourOption, armourStats } from "./armour.mjs?v=glad-002";
+import { ARMOUR_SLOTS, ARMOUR_TIERS, initialArmour, armourOption, armourStats } from "./armour.mjs?v=glad-003";
 import { effectiveAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=glad-001";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=glad-001";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=glad-001";
@@ -25,7 +25,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=glad-001";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 9;
+export const GAME_VERSION = 10;
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -54,8 +54,8 @@ export const ACTIVITIES = Object.freeze({
   // Fighting is independent of hunting/raiding: real turn-by-turn attack and
   // defense outcomes drive an event-specific original illustration.
   fighting: task("Fighting", "Matched opponents", null,
-    "Combat skill · automatic turn-based duels", 20, 3,
-    "Fight worthy opponents in automatic turns. Attack rolls, guards, wounds and outcomes decide each illustrated scene.",
+    "Combat skill · automatic tactical duels", 20, 3,
+    "Fight in the arena. Distance, weapon actions, guards and injuries determine each illustrated scene.",
     "Fighting grounds", 1, "combat"),
   hunting: task("Hunting", "Game", "hide", "Hides", 12, 3, "Track and dress game for meat and hides.", "Wilds"),
   fishing: task("Fishing", "River fish", "fish", "Fish", 10, 2, "Catch and clean fish for camp.", "River"),
@@ -74,7 +74,7 @@ export const ITEM_LABELS = Object.freeze({
   ...EXTRA_LOOT_LABELS,
   ...PRODUCTION_LABELS
 });
-import { STARTER_ITEM, equipmentBonuses, isEquipmentItem, smithQuote } from "./smith.mjs?v=glad-002";
+import { STARTER_ITEM, equippedCondition, equipmentBonuses, isEquipmentItem, smithQuote } from "./smith.mjs?v=glad-003";
 
 const equipmentIds = new Set([
   ...Object.keys(COMBAT_LOADOUTS),
@@ -345,7 +345,7 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
 
   // Attribute progress is based on productive time, not work cycles or
   // alpha timing. Master-capped skill XP does not stop attribute growth.
-  next.attributeEffort = awardAttributeTime(state.attributeEffort, state.activity, elapsedMs);
+  let productiveMs = elapsedMs;
   const tier=state.difficulties[state.activity]??0;
   const multiplier=tier?workMultiplier(tier,ACTIVITY_STAT_WEIGHTS[state.activity],
     combatAttributeProgress(frozenEffort,state.skills)):1;
@@ -360,18 +360,22 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
         gear: {...armourStats(state.armour,state.combatLoadout),
           gearDefense:bonus.defense},
         gearAttack:bonus.attack,
+        condition: equippedCondition(state.armour, state.combatLoadout, state.equipment),
         str: attrs.STR.value, dex: attrs.DEX.value, end: attrs.END.value,
         skill: state.skills.fighting.level
       }, state.settledAtMs >>> 0);
     }
+    const fromElapsed = session.elapsedMs;
     session = advanceCombatSession(session, elapsedMs);
-    const prize = settleArenaPrizes(session);
+    const prize = settleArenaPrizes(session, fromElapsed);
+    productiveMs -= prize.downtimeMs;
     next.combatSession = prize.session;
     next.coins = safeAdd(state.coins, prize.coins);
     report.gainedCoins = prize.coins;
   }
   const rules = ACTIVITIES[state.activity]; // snapshot at start of this whole settlement
-  const totalMs = state.progressMs + elapsedMs;
+  next.attributeEffort = awardAttributeTime(state.attributeEffort, state.activity, productiveMs);
+  const totalMs = state.progressMs + productiveMs;
   const count = Math.floor(totalMs / rules.durationMs);
   next.progressMs = totalMs % rules.durationMs;
   if (count > 0) {

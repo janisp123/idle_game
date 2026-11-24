@@ -1,21 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { combatAtTime, COMBAT_BALANCE, COMBAT_SKILLS } from "../site/play/combat.mjs";
+import { combatAtTime, BOUT_MS } from "../site/play/combat.mjs";
 import { combatArtworkForEvent } from "../site/play/combat-art.mjs";
 import { combatFlowState } from "../site/play/combat-flow.mjs";
 import { combatReadoutForEvent, workReadoutForReport } from "../site/play/result-readout.mjs";
 import { newGame, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP, xpToNextLevel } from "../site/play/engine.mjs";
 
-test("the last recovery tick goes straight into the next initiative roll",()=>{
-  const session={seed:42,elapsedMs:COMBAT_BALANCE.eventMs*COMBAT_BALANCE.slotsPerBout-1,
-    player:{name:"Knight",loadout:"greatsword",str:10,dex:10,end:10,skill:1}};
-  const result=combatFlowState(combatAtTime(session),session);
-  assert.equal(result.steps.length,2);
-  assert.equal(result.steps[result.current].label,"Recover");
-  session.elapsedMs++;
-  const next=combatFlowState(combatAtTime(session),session);
-  assert.equal(next.steps[next.current].label,"Roll dice");
+test("the final recovery tick leads into a fresh arena bout", () => {
+  const session = { seed: 42, elapsedMs: BOUT_MS - 1,
+    player: { name: "Knight", loadout: "greatsword", str: 10, dex: 10, end: 10, skill: 1 } };
+  const finalBout = combatAtTime(session);
+  assert.equal(combatFlowState(finalBout).current, 3);
+  const next = combatAtTime({ ...session, elapsedMs: BOUT_MS });
+  assert.equal(next.event.type, "engage");
+  assert.equal(combatFlowState(next).current, 0);
 });
 class FakeElement {
   children = [];
@@ -102,15 +101,12 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "STR Strength · DEX Dexterity", "No overall character level"]) {
     assert.ok(!html.includes(oldCopy), "remove redundant mobile tutorial text: " + oldCopy);
   }
-  assert.match(html, /id="combatDice"/, "real dice results have a dedicated UI");
-  assert.match(html, /id="combatDiceStage"/, "both combat dice trays appear above arena scene");
+  assert.doesNotMatch(html, /id="combatDice|id="playerDie/);
   assert.match(html, /id="combatFlow"/, "the fighting action timeline sits below the illustration");
   assert.ok(html.indexOf('id="combatFlow"') > html.indexOf('id="sceneImage"'));
   assert.ok(html.indexOf('id="combatFlow"') < html.indexOf('id="scene-heading"'));
   assert.match(queueCss, /\.combat-flow-step\[data-state="active"\]/,
     "current combat action has a distinct highlighted state");
-  for (const id of ["playerDie1","playerDie2","playerDie3","enemyDie1","enemyDie2","enemyDie3"])
-    assert.ok(html.includes('id="' + id + '"'),"both fighters get three distinct visible dice");
   assert.match(html, /id="weaponSlots"/,
     "weapon selection is now an engraved two-card equipment group");
   assert.doesNotMatch(html,/id="combatLoadout"/,
@@ -153,7 +149,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=glad-002/,
+  assert.match(html, /app\.mjs\?v=glad-003/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -275,8 +271,6 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(fightingCards.length, 1);
     assert.equal(elements.get("combatPanel").hidden, true,
       "ordinary activity selection has no simulated fight");
-    assert.equal(elements.get("combatDice").hidden, true,
-      "dice appear only on actual vulnerable-hit rolls");
     assert.equal(fightingCards[0].children[0].children[0].children[0].textContent, "Fighting");
     assert.match(fightingCards[0].children[0].children[3].textContent, /STR.*DEX|DEX.*STR/,
       "Fighting shows its stat bonuses");
@@ -779,93 +773,24 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(elements.get("combatPanel").hidden,false);
     assert.equal(elements.get("combatFlow").hidden,false,
       "real fighting progress is visible immediately beneath the arena picture");
-    assert.equal(elements.get("combatFlowLabel0").textContent,"Roll dice");
-    assert.equal(elements.get("combatFlowStep0").attributes.get("data-state"),"active");
-    assert.equal(elements.get("activityProgress").hidden,true,
-      "the old activity work bar must never masquerade as an attack timer");
-    assert.equal(elements.get("wagonQueue").hidden,true,"single Forever route stays out of the way");
-    assert.equal(elements.get("combatDiceStage").hidden,false,
-      "initiative starts with three animated dice on both sides");
-    assert.match(elements.get("combatEventTitle").textContent,/ROLLING FOR FIRST/);
-    assert.match(elements.get("sceneImage").src,/assets\/combat\/fight-engage\.webp/,
-      "neutral fight art remains until BOTH initiative rolls resolve");
-    assert.deepEqual(elements.get("playerResult").children,[],
-      "before initiative resolves there is no manufactured result");
-    assert.deepEqual(elements.get("enemyResult").children,[]);
-    now += COMBAT_BALANCE.initiativeAnimationMs + 250;
+    assert.equal(elements.get("combatFlowLabel0").textContent,"Engage");
+    assert.equal(elements.get("activityProgress").hidden,true);
+    assert.equal(elements.get("wagonQueue").hidden,true);
+    assert.match(elements.get("sceneImage").src,/fight-engage\.webp/);
+    now += 8_000;
     tick();
-    assert.match(elements.get("combatEventTitle").textContent,/YOU ATTACK FIRST|ENEMY ATTACKS FIRST/);
-    assert.equal(elements.get("combatReadout").hidden,false,
-      "fighting uses two-sided compact results");
-    assert.notEqual(elements.get("playerDiceTotal").textContent,"ROLLING");
-    assert.notEqual(elements.get("enemyDiceTotal").textContent,"ROLLING");
-    assert.equal(elements.get("combatFlowStep2").hidden,false);
-    const initiativeState = JSON.parse(store.get(SAVE_KEY));
-    const initiativeEvent = combatAtTime(initiativeState.combatSession).event;
-    assert.equal(elements.get("combatFlowLabel1").textContent,
-      initiativeEvent.actor === "player" ? "You go first" : "Enemy first");
-    assert.equal(Number(elements.get("playerDiceTotal").textContent),initiativeEvent.playerTotal);
-    assert.equal(Number(elements.get("enemyDiceTotal").textContent),initiativeEvent.enemyTotal);
-
-    now += COMBAT_BALANCE.eventMs - COMBAT_BALANCE.initiativeAnimationMs - 251;
-    tick();
-    assert.equal(elements.get("combatFlowStep4").hidden,false);
-    const firstTurnState = JSON.parse(store.get(SAVE_KEY));
-    const firstTurn = combatAtTime(firstTurnState.combatSession);
-    assert.equal(firstTurn.event.turn,1);
-    const initialFlow = combatFlowState(firstTurn,firstTurnState.combatSession);
-    assert.equal(initialFlow.steps[1].label,"Attack dice");
-    assert.equal(initialFlow.steps[2].label,"Defense dice");
-    assert.equal(initialFlow.steps[3].label,
-      firstTurn.event.actor === "player" ? "Your attack" : "Enemy attack");
-    assert.equal(elements.get("combatFlowLabel3").textContent,initialFlow.steps[3].label);
-    assert.match(elements.get("sceneImage").src,/assets\/combat\/fight-engage\.webp/,
-      "an attack image cannot be seen before dice are done rolling");
-    const rollOrWindup = elements.get("combatEventTitle").textContent;
-    assert.match(rollOrWindup,/DICE ROLLING|PREPARING/);
-    const windupMs = COMBAT_SKILLS[firstTurn.event.attackSkill].windupMs ?? 0;
-    const halfwayMs = windupMs + COMBAT_BALANCE.attackAnimationMs / 2 + 100;
-    now += halfwayMs;
-    tick();
-    assert.equal(elements.get("combatFlowStep2").attributes.get("data-state"),"active",
-      "defense dice roll is separately shown for every attack");
-    const attackerScore = firstTurn.event.attackTotal;
-    assert.equal(elements.get(firstTurn.event.actor === "player" ?
-      "playerDiceTotal" : "enemyDiceTotal").textContent,String(attackerScore),
-      "attacker finishes rolling before defender; no damage/art reveal");
-    assert.equal(elements.get(firstTurn.event.actor === "player" ?
-      "enemyDiceTotal" : "playerDiceTotal").textContent,"ROLLING");
-    assert.match(elements.get("sceneImage").src,/assets\/combat\/fight-engage\.webp/);
-    now += windupMs + COMBAT_BALANCE.attackAnimationMs + 250 - halfwayMs;
-    tick();
-    assert.equal(elements.get("combatFlowStep3").attributes.get("data-state"),"active",
-      "resolved move gets its own highlighted stage");
-    const afterAttack = JSON.parse(store.get(SAVE_KEY));
-    const resolved = combatAtTime(afterAttack.combatSession);
-    const picture = combatArtworkForEvent(resolved.event,"greatsword",resolved.enemyLoadout);
-    assert.ok(elements.get("sceneImage").src.includes(
-      "/assets/combat/" + picture.asset + ".webp"),
-      "matching result image appears only AFTER actual attack and defense dice resolve");
+    const resolved = combatAtTime(JSON.parse(store.get(SAVE_KEY)).combatSession);
+    const picture = combatArtworkForEvent(resolved.event, "greatsword", resolved.enemyLoadout);
+    assert.ok(elements.get("sceneImage").src.includes("/assets/combat/" + picture.asset + ".webp"));
     const displayed = combatReadoutForEvent(resolved.event);
     for (const [side,id] of [["player","playerResult"],["enemy","enemyResult"]]) {
       assert.deepEqual(elements.get(id).children.map(node => ({
-        value:node.children[0].textContent,
-        tone:node.getAttribute("data-tone"),
+        value:node.children[0].textContent, tone:node.getAttribute("data-tone"),
         label:node.children[1]?.textContent ?? ""
-      })),displayed[side],"resolved event displays on the correct side, without a log");
+      })), displayed[side]);
     }
-    assert.equal(elements.get("combatTurns").textContent.includes("◆"),true);
     assert.equal(arena.skills.fighting.level, 1);
     assert.equal(arena.combatSession.player.loadout,"greatsword");
-    now+=COMBAT_BALANCE.eventMs*COMBAT_BALANCE.slotsPerBout-1-afterAttack.combatSession.elapsedMs;
-    tick();
-    const recovered=combatAtTime(JSON.parse(store.get(SAVE_KEY)).combatSession).event;
-    for(const side of ["player","enemy"]) {
-      const f=recovered.vitals[side];
-      assert.equal(elements.get(side+"HP").value,f.maxHP);
-      assert.equal(elements.get(side+"Armour").value,f.maxArmour);
-      if(f.hp<f.maxHP) assert.ok(elements.get(side+"HPText").textContent.includes("(+"+(f.maxHP-f.hp)+")"));
-    }
     const shieldWeapon=weaponChoices.find(x=>x.getAttribute("data-loadout")==="sword_shield");
     shieldWeapon.fire("click");
     const swapped = JSON.parse(store.get(SAVE_KEY));
@@ -880,7 +805,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
       "armour item selector is unavailable while editing weapon");
     assert.match(elements.get("equipmentEditHeading").textContent,/Sword & Shield/);
     assert.match(elements.get("combatSkillsText").textContent,/Thrust.*Shield Block/);
-    now += COMBAT_BALANCE.eventMs;
+    now += 5_000;
     tick();
     const shieldDuel = JSON.parse(store.get(SAVE_KEY));
     assert.equal(shieldDuel.combatSession.player.loadout,"sword_shield");
