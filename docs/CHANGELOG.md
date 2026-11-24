@@ -1,4 +1,12 @@
-# Changelog — verified completed work
+# Changelog and task handoffs
+
+## HANDOFF-001 · STARTED · 2026-11-24
+
+Goal: Resume approved Idle Game work across chats using a pushed checkpoint.
+Branch: `protocol/resumable-task-handoff`.
+Last verified: The current instructions require special wording and the backlog still describes shipped combat as missing.
+Still pending: Update the rules, reconcile PR #134 and verify recovery from GitHub alone.
+Next action: Replace the old continuation instructions in AGENTS.md and the shared protocol.
 
 ## 2026-11-23 — Single equipment edit target and transparent enchant chance (chat, PR #129)
 
