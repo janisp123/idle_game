@@ -4,7 +4,9 @@
 
 **Documentation roadmap prepared in [PR #143](https://github.com/janisp123/idle_game/pull/143), NOT gameplay implementation.** The main task list `docs/TD_LIST.md` owns the complete design contract and five ordered, non-micro Codex batches. This design supersedes later work on old five-stat/41-activity/11-slot/magic/enchanting/attack-dice mechanics; currently deployed source code still implements those until replaced. Target: 3 attributes, 11 survival activities, 5 weapons with counters, 4 armour slots, item grade + Poor/Common/Fine/Masterwork, coins from victories, equipment HP/breakage, injury, bow ammo + dagger fallback, five physical environments using probabilistic 3d6 selection, idle-safe outcomes and eventually clan-donatable resources (no clan code).
 
-**NEXT:** [PR #144](https://github.com/janisp123/idle_game/pull/144) is the GLAD-001 implementation. See its branch changelog for local test and mobile smoke results. Verify required checks on the final head, then merge and verify the playable Pages deployment before closing GLAD-001. GLAD-002 follows after approval and verified deployment. PR #141 was closed without merging.
+**GLAD-001 DEPLOYED:** [PR #144](https://github.com/janisp123/idle_game/pull/144) merged at `75edea258827e6df0f0dc01629933b3d54b8b32b` after final-head website, protocol, combat simulator and systems lab checks passed. [Pages deployment 45422209235](https://github.com/janisp123/idle_game/actions/runs/45422209235) succeeded. Live assets matched main, and mobile Play Now verified the reset notice, three attributes, Survival Work and Mining save/reload. See the changelog for checks and run IDs.
+
+**NEXT:** GLAD-002 after Owner implementation approval. The currently playable equipment and duel flow continue until their scheduled batches replace them. PR #141 was closed without merging.
 
 ## SIM-002 — Modular game systems lab, PR #139 (2026-11-24)
 

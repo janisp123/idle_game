@@ -1,13 +1,15 @@
 # Changelog and task handoffs
 
-## GLAD-001 · STARTED · 2026-11-24
+## GLAD-001 · DEPLOYED · 2026-11-24
 
 Goal: Implement the approved three-attribute, eleven-activity survival foundation, connected recipes, and current-build Master, queue, save and offline behavior.
 Branch: `codex/glad-001-survival-foundation`.
-Draft: [PR #144](https://github.com/janisp123/idle_game/pull/144).
+Release: [PR #144](https://github.com/janisp123/idle_game/pull/144).
 Last verified: Focused catalogue, mortar, 20-year farm/cooking and grade S training/mining tests passed. The complete Node run had 115 passes and one existing optional browser-layout skip in 2.1 seconds. Project protocol, research links, static Pages checks and the source-backed example system lab passed. A 390 px Chromium session verified Play Now, the V7 reset notice, three visible stats, the Survival Work picker and Mining reload. Approximately 30 files changed since the previous full verification baseline.
-Next action: Verify the required GitHub workflows on this PR head, merge under AUTO-MERGE-001, then verify Pages and record the merge and deployment evidence.
-Status: IN_REVIEW / release checks pending.
+Final head: `7dcf731c3d99a844f792eab0b15ef2314610a5fe`. Passed [website](https://github.com/janisp123/idle_game/actions/runs/45422058013), [protocol](https://github.com/janisp123/idle_game/actions/runs/45422058021), [combat simulator](https://github.com/janisp123/idle_game/actions/runs/45422057635), and [systems lab](https://github.com/janisp123/idle_game/actions/runs/45422057820). The website validation and simulator jobs each took 16 seconds, and the other jobs each took 7 seconds.
+Merged: `75edea258827e6df0f0dc01629933b3d54b8b32b`. [Pages deployment](https://github.com/janisp123/idle_game/actions/runs/45422209235) passed. Live asset readback matched main and the 390 px Play Now smoke passed against the public site.
+Next action: Begin GLAD-002 when the Owner approves implementation.
+Status: DEPLOYED.
 
 ## GLAD-PLAN-001 · STARTED · 2026-11-24
 
