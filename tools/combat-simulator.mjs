@@ -1,0 +1,302 @@
+/**
+ * SIM-001: developer-only, zero-delay, deterministic combat harness.
+ * This file lives in tools/, outside the GitHub Pages ./site deployment.
+ * NEVER fork combat formulas here; combatAtTime is the playable resolver.
+ */
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { BOUT_MS, startCombatSession, combatAtTime } from '../site/play/combat.mjs';
+import { COMBAT_LOADOUTS } from '../site/play/combat-skills.mjs';
+import { ARMOUR_SLOTS, ARMOUR_TIERS, armourStats, armourUnlocked } from '../site/play/armour.mjs';
+import { GRADES, benchmark, unlockLevel } from '../site/play/difficulty.mjs';
+import { ENCHANT_SLOTS, MAX_ENCHANT, blankEnchantments, enchantBonus, tallyGloryVictories } from '../site/play/glory.mjs';
+import { EQUIP_SLOTS, masteryRanks, conditionBonuses } from '../site/play/equipment-rules.mjs';
+
+const DEFAULT_SEED = 20261124;
+const DEFAULT_BATTLES = 10000;
+const MAX_BATTLES = 1000000;
+const MAX_TRACES = 100;
+const ARMOUR_IDS = ARMOUR_SLOTS.map(slot => slot.id);
+const intIn = (value, low, high, name) => {
+  if (!Number.isSafeInteger(value) || value < low || value > high)
+    throw new RangeError(name + ' must be an integer from ' + low + ' to ' + high);
+  return value;
+};
+const rankEntries = (values, allowed, ceiling, name) => {
+  if (!values || typeof values !== 'object' || Array.isArray(values))
+    throw new RangeError('Invalid ' + name);
+  for (const [key, value] of Object.entries(values)) {
+    if (!allowed.includes(key)) throw new RangeError('Unknown ' + name + ' slot: ' + key);
+    intIn(value, 0, ceiling, name + ' ' + key);
+  }
+  return values;
+};
+const parseGrade = grade => {
+  if (Number.isInteger(grade) && grade >= 0 && grade < GRADES.length) return grade;
+  const found = GRADES.findIndex(g => g.toLowerCase() === String(grade).toLowerCase());
+  if (found < 0) throw new RangeError('Unknown difficulty: ' + grade);
+  return found;
+};
+const uniform = (armour, slots = {}) => {
+  if (!ARMOUR_TIERS.includes(armour)) throw new RangeError('Unknown armour: ' + armour);
+  rankEntries(Object.fromEntries(Object.keys(slots).map(k => [k, 0])), ARMOUR_IDS, 0, 'armour');
+  const all = Object.fromEntries(ARMOUR_IDS.map(id => [id, armour]));
+  for (const [slot, tier] of Object.entries(slots)) {
+    if (!ARMOUR_TIERS.includes(tier)) throw new RangeError('Unknown armour on ' + slot);
+    all[slot] = tier;
+  }
+  return all;
+};
+
+/** Build the SAME frozen fighter fields as engine.mjs's startCombatSession. */
+export function createPlayerSnapshot(options = {}) {
+  const difficulty = parseGrade(options.grade ?? 'Non-grade');
+  const target = benchmark(difficulty);
+  const skill = intIn(options.skill ?? target.skill, unlockLevel(difficulty), 100000, 'Fighting skill');
+  const str = intIn(options.str ?? target.stat, 0, 100000, 'STR');
+  const dex = intIn(options.dex ?? target.stat, 0, 100000, 'DEX');
+  const end = intIn(options.end ?? target.stat, 0, 100000, 'END');
+  const wil = intIn(options.wil ?? target.stat, 0, 100000, 'WIL');
+  const loadout = options.loadout ?? 'greatsword';
+  if (!Object.hasOwn(COMBAT_LOADOUTS, loadout)) throw new RangeError('Unknown loadout');
+  const armour = uniform(options.armour ?? 'robe', options.armourSlots ?? {});
+  const attributes = { STR:str, DEX:dex, END:end, WIL:wil };
+  for (const slot of ARMOUR_SLOTS)
+    if (!armourUnlocked(attributes, slot.id, armour[slot.id]))
+      throw new RangeError('Locked armour ' + slot.id + ':' + armour[slot.id] +
+        ' — increase the required character attribute');
+  const inputEnchantments = rankEntries(options.enchantments ?? {}, ENCHANT_SLOTS, MAX_ENCHANT, 'enchant');
+  const enchantments = { ...blankEnchantments(), ...inputEnchantments };
+  const inputMastery = rankEntries(options.mastery ?? {}, EQUIP_SLOTS, 7, 'mastery');
+  const slotMastery = masteryRanks(inputMastery);
+  if (!slotMastery) throw new RangeError('Invalid slot mastery');
+  const bonus = enchantBonus(enchantments, loadout);
+  const gear = { ...armourStats(armour, loadout), defenseEnchant:bonus.defense };
+  const conditionBonus = conditionBonuses({armour, enchantments, slotMastery});
+  return {
+    name:'Wanderer', difficulty, loadout, skill, str, dex, end,
+    gear, attackEnchant:bonus.attack, conditionBonus
+  };
+}
+const increment = (obj, key, n = 1) => { obj[key] = (obj[key] ?? 0) + n; };
+const bucket = (obj, key) => obj[key] ??= { battles:0, victories:0, defeats:0, draws:0 };
+const captureRoll = (bucket, dice) => {
+  if (!Array.isArray(dice) || dice.length !== 3 || dice.some(v => !Number.isInteger(v) || v < 1 || v > 6))
+    throw new Error('Production combat returned invalid 3d6');
+  increment(bucket.sum, dice.reduce((a, b) => a + b, 0));
+  for (const face of dice) increment(bucket.faces, face);
+  bucket.rolls++;
+  if (dice.every(v => v === 6)) bucket.tripleSix++;
+};
+const newRollBucket = () => ({rolls:0,tripleSix:0,faces:{},sum:{}});
+const average = (sum, n) => n ? Math.round(sum / n * 100) / 100 : 0;
+const resultGroup = (group, outcome) => {
+  group.battles++;
+  increment(group, outcome === 'victory' ? 'victories' :
+    outcome === 'defeat' ? 'defeats' : 'draws');
+};
+
+/**
+ * Resolve exactly one production bout per index. elapsedMs selects a seeded
+ * duel, NOT a real-world wait. Each game duel starts fully recovered.
+ * A snapshot may be a player object, {player}, or a saved combatSession.
+ */
+export function simulateBatch(options = {}) {
+  const battles = intIn(options.battles ?? DEFAULT_BATTLES, 1, MAX_BATTLES, 'battles');
+  const traces = intIn(options.trace ?? 0, 0, Math.min(MAX_TRACES, battles), 'trace');
+  const saved = options.snapshot;
+  const combatSession = saved?.combatSession ?? saved?.state?.combatSession ??
+    (saved?.player && saved.seed !== undefined ? saved : null);
+  const player = saved ? (combatSession?.player ?? saved.player ?? saved) : createPlayerSnapshot(options);
+  const seed = intIn(options.seed ?? combatSession?.seed ?? DEFAULT_SEED, 0, 0xffffffff, 'seed');
+  const startBout = intIn(options.startBout ??
+    (combatSession ? Math.floor(combatSession.elapsedMs / BOUT_MS) : 0),
+    0, Math.floor(Number.MAX_SAFE_INTEGER / BOUT_MS) - battles, 'start bout');
+  const gloryEligibleBouts = intIn(options.gloryEligibleBouts ?? 0, 0, battles, 'eligible Glory bouts');
+  const session = startCombatSession(player, seed); // production validation
+  const summary = {
+    source:'site/play/combat.mjs:combatAtTime',
+    mode:'Developer-only; no animation, timers, save mutation, or balance overrides',
+    battles, seed, startBout, difficulty:GRADES[player.difficulty ?? 0],
+    player: {
+      loadout:player.loadout, skill:player.skill,
+      stats:{STR:player.str, DEX:player.dex, END:player.end},
+      gear:player.gear ?? null,
+      attackEnchant:player.attackEnchant ?? 0,
+      conditionBonus:player.conditionBonus ?? null
+    },
+    outcomes:{victory:0,defeat:0,stalemate:0},
+    knockout:{player:0,enemy:0}, judge:{player:0,enemy:0,draw:0},
+    byTerrain:{}, byEnemyRole:{}, byEnemyLoadout:{},
+    initiative:{playerFirst:0,enemyFirst:0,rerollRounds:0},
+    attacks:{player:0,enemy:0,types:{},finisher:0},
+    dice:{
+      playerInitiative:newRollBucket(), enemyInitiative:newRollBucket(),
+      playerAttack:newRollBucket(), enemyAttack:newRollBucket(),
+      playerDefense:newRollBucket(), enemyDefense:newRollBucket()
+    },
+    averages:{
+      attackEvents:0,playerRemainingHPpct:0,enemyRemainingHPpct:0,
+      playerHPLost:0,enemyHPLost:0,playerArmourConditionLost:0,
+      enemyArmourConditionLost:0,playerWeaponConditionLost:0,
+      enemyWeaponConditionLost:0
+    },
+    glory:null, samples:[]
+  };
+  const totals = {turns:0,playerPct:0,enemyPct:0,playerLoss:0,enemyLoss:0,
+    playerArmourLoss:0,enemyArmourLoss:0,playerWeaponLoss:0,enemyWeaponLoss:0};
+  for (let i = 0; i < battles; i++) {
+    const index = startBout + i;
+    // The same deterministic seed/bout, enemy generation, terrain D6 and
+    // opposed 3d6 used by the playable app. No async or wall-clock delay.
+    const duel = combatAtTime({...session, elapsedMs:index * BOUT_MS});
+    if (!duel) throw new Error('Production resolver returned no duel at ' + index);
+    const outcome = duel.outcome;
+    increment(summary.outcomes, outcome);
+    resultGroup(bucket(summary.byTerrain, duel.terrain.name), outcome);
+    resultGroup(bucket(summary.byEnemyRole, duel.enemyRole), outcome);
+    resultGroup(bucket(summary.byEnemyLoadout, duel.enemyLoadout), outcome);
+    const first = duel.events[0], final = duel.events.at(-1);
+    if (first.actor === 'player') summary.initiative.playerFirst++;
+    else summary.initiative.enemyFirst++;
+    summary.initiative.rerollRounds += first.rerolls;
+    captureRoll(summary.dice.playerInitiative, first.playerDice);
+    captureRoll(summary.dice.enemyInitiative, first.enemyDice);
+    const start = first.vitals, finish = final.vitals;
+    const lostHP = side => start[side].hp - finish[side].hp;
+    if (outcome === 'victory') {
+      increment(summary.knockout, duel.enemyHP === 0 ? 'enemy' : 'never');
+      if (duel.enemyHP > 0) increment(summary.judge, 'player');
+    } else if (outcome === 'defeat') {
+      increment(summary.knockout, duel.playerHP === 0 ? 'player' : 'never');
+      if (duel.playerHP > 0) increment(summary.judge, 'enemy');
+    } else increment(summary.judge, 'draw');
+    totals.playerPct += finish.player.hp / finish.player.maxHP * 100;
+    totals.enemyPct += finish.enemy.hp / finish.enemy.maxHP * 100;
+    totals.playerLoss += lostHP('player');
+    totals.enemyLoss += lostHP('enemy');
+    totals.playerArmourLoss += start.player.armour - finish.player.armour;
+    totals.enemyArmourLoss += start.enemy.armour - finish.enemy.armour;
+    totals.playerWeaponLoss += start.player.weapon - finish.player.weapon;
+    totals.enemyWeaponLoss += start.enemy.weapon - finish.enemy.weapon;
+    for (const event of duel.events) {
+      if (!event.turn) continue;
+      totals.turns++;
+      increment(summary.attacks, event.actor);
+      increment(summary.attacks.types, event.type);
+      if (event.type === 'finisher') summary.attacks.finisher++;
+      captureRoll(summary.dice[event.actor === 'player' ? 'playerAttack' : 'enemyAttack'], event.attackDice);
+      captureRoll(summary.dice[event.actor === 'player' ? 'enemyDefense' : 'playerDefense'], event.defenseDice);
+    }
+    if (i < traces) summary.samples.push({
+      bout:index + 1, outcome, enemyRole:duel.enemyRole,
+      enemyLoadout:duel.enemyLoadout, enemyArmour:duel.enemyArmour,
+      terrain:duel.terrain.name, zoneRoll:duel.zoneRoll,
+      // These are THE real production events with initiative & opposed dice,
+      // health/armour/weapon condition after each turn, and final judgment.
+      events:duel.events
+    });
+  }
+  summary.winRatePct = average(summary.outcomes.victory * 100, battles);
+  summary.drawRatePct = average(summary.outcomes.stalemate * 100, battles);
+  summary.averages = {
+    attackEvents:average(totals.turns, battles),
+    playerRemainingHPpct:average(totals.playerPct, battles),
+    enemyRemainingHPpct:average(totals.enemyPct, battles),
+    playerHPLost:average(totals.playerLoss, battles),
+    enemyHPLost:average(totals.enemyLoss, battles),
+    playerArmourConditionLost:average(totals.playerArmourLoss, battles),
+    enemyArmourConditionLost:average(totals.enemyArmourLoss, battles),
+    playerWeaponConditionLost:average(totals.playerWeaponLoss, battles),
+    enemyWeaponConditionLost:average(totals.enemyWeaponLoss, battles)
+  };
+  // Fully optional: ask the existing production Glory module to resolve
+  // eligible completed victories and 50% drops. No fictional offline XP.
+  if (gloryEligibleBouts) {
+    const tracked = {...session,elapsedMs:(startBout + battles) * BOUT_MS,
+      gloryCursor:startBout,
+      gloryEligibleUntilMs:(startBout + gloryEligibleBouts) * BOUT_MS};
+    const rewards = tallyGloryVictories(tracked);
+    summary.glory = {
+      eligibleBouts:gloryEligibleBouts,
+      eligibleVictories:rewards.eligibleVictories,
+      scrolls:rewards.scrolls,
+      note:'Uses the exact production XP-eligibility window and reward RNG; no automatic enchanting'
+    };
+  }
+  return summary;
+}
+const pairList = (raw, name, asInteger = false) => {
+  const out = {};
+  if (!raw) return out;
+  for (const part of raw.split(',')) {
+    const at = part.indexOf(':');
+    if (at <= 0 || at === part.length - 1) throw new RangeError('Invalid ' + name + ' pair: ' + part);
+    const slot = part.slice(0, at).trim(), val = part.slice(at + 1).trim();
+    if (Object.hasOwn(out, slot)) throw new RangeError('Duplicate ' + name + ' slot: ' + slot);
+    out[slot] = asInteger ? Number(val) : val;
+  }
+  return out;
+};
+export function parseCliArgs(args) {
+  const flags = {
+    '--battles':'battles','--seed':'seed','--start-bout':'startBout',
+    '--grade':'grade','--loadout':'loadout','--armour':'armour',
+    '--armour-slots':'armourSlots','--enchant':'enchantments',
+    '--mastery':'mastery','--skill':'skill','--str':'str',
+    '--dex':'dex','--end':'end','--wil':'wil',
+    '--trace':'trace','--glory-eligible-bouts':'gloryEligibleBouts',
+    '--snapshot':'snapshot'
+  };
+  const numeric = new Set(['battles','seed','startBout','skill','str','dex','end','wil','trace','gloryEligibleBouts']);
+  const out = {};
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--help' || arg === '-h') {out.help=true;continue;}
+    const key = flags[arg];
+    if (!key || i + 1 >= args.length || args[i+1].startsWith('--'))
+      throw new RangeError('Unknown or incomplete option: ' + arg);
+    if (Object.hasOwn(out, key)) throw new RangeError('Repeated option: ' + arg);
+    const value = args[++i];
+    out[key] = numeric.has(key) ? Number(value) :
+      key === 'armourSlots' ? pairList(value, 'armour', false) :
+      key === 'enchantments' || key === 'mastery' ? pairList(value, key, true) :
+      key === 'snapshot' ? JSON.parse(readFileSync(resolve(value), 'utf8')) : value;
+  }
+  if (out.snapshot && ['grade','loadout','armour','armourSlots','enchantments','mastery','skill',
+      'str','dex','end','wil'].some(k => Object.hasOwn(out,k)))
+    throw new RangeError('--snapshot supplies the frozen fighter; do not mix build options');
+  return out;
+}
+export const HELP = [
+  'Developer-only combat simulator (exact game resolver; no animation or delays).',
+  'Run from repository root: node tools/combat-simulator.mjs --battles 10000',
+  'Options:',
+  ' --battles N              number of duels (default 10000; max 1000000)',
+  ' --grade Non-grade|F|E|D|C|B|A|S  opponent difficulty (default Non-grade)',
+  ' --loadout greatsword|sword_shield|hammer|bow|staff|twin_blades',
+  ' --armour none|robe|leather|plate   all 11 body slots (default robe)',
+  ' --armour-slots head:plate,chest:leather   overrides individual body slots',
+  ' --enchant weapon:2,head:1,shield:3  actual per-slot enchant ranks',
+  ' --mastery weapon:1,head:2         actual per-slot mastery grades',
+  ' --skill N --str N --dex N --end N --wil N  default: grade benchmarks',
+  ' --seed N                  live combat session RNG seed (default 20261124)',
+  ' --start-bout N            zero-based live bout index (default 0)',
+  ' --snapshot FILE.json     local frozen combatSession/player JSON; no uploads',
+  ' --glory-eligible-bouts N  optional real XP-eligible drop window',
+  ' --trace N                include N full event/dice traces (max 100)',
+  ' --help                   this guide',
+  'Write JSON to a file with shell redirection: ... > combat-report.json',
+  'IMPORTANT: Grade/stat build benchmarks are synthetic, not player progression.',
+  'Saved snapshots use real frozen player stats; gear locks apply to generated builds.'
+].join('\n');
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    const args = parseCliArgs(process.argv.slice(2));
+    console.log(args.help ? HELP : JSON.stringify(simulateBatch(args), null, 2));
+  } catch (err) {
+    console.error('Combat simulator:', err.message);
+    process.exitCode = 1;
+  }
+}
