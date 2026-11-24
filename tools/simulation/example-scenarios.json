@@ -1,0 +1,92 @@
+{
+  "scenarios": [
+    {
+      "module": "combat",
+      "battles": 1000,
+      "grade": "F",
+      "skill": 10,
+      "str": 14,
+      "dex": 14,
+      "end": 14,
+      "wil": 14,
+      "armour": "leather",
+      "trace": 1,
+      "seed": 101
+    },
+    {
+      "module": "activity",
+      "activity": "woodcutting",
+      "level": 1,
+      "elapsedMs": 86400000,
+      "trials": 20,
+      "seed": 101
+    },
+    {
+      "module": "loot",
+      "activity": "mining",
+      "level": 25,
+      "units": 100,
+      "trials": 250,
+      "seed": 101
+    },
+    {
+      "module": "crafting",
+      "activity": "smelting",
+      "level": 10,
+      "workCycles": 100,
+      "inventory": {
+        "copper_ore": 100,
+        "iron_ore": 100,
+        "silver_ore": 100
+      },
+      "trials": 250,
+      "seed": 101
+    },
+    {
+      "module": "attributes",
+      "activity": "fighting",
+      "elapsedMs": 3600000
+    },
+    {
+      "module": "master",
+      "activity": "mining",
+      "xp": 40,
+      "inventory": {
+        "stone": 5
+      },
+      "claim": true
+    },
+    {
+      "module": "equipment",
+      "loadout": "sword_shield",
+      "slot": "head",
+      "gear": "robe"
+    },
+    {
+      "module": "enchanting",
+      "slot": "weapon",
+      "attempts": 5,
+      "trials": 50,
+      "seed": 101
+    },
+    {
+      "module": "queue",
+      "route": [
+        {
+          "activity": "mining",
+          "plannedMs": 60000
+        },
+        {
+          "activity": "woodcutting",
+          "plannedMs": null
+        }
+      ],
+      "elapsedMs": 3600000,
+      "trials": 10,
+      "seed": 101
+    },
+    {
+      "module": "save"
+    }
+  ]
+}
