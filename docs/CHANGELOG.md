@@ -4,8 +4,9 @@
 
 Goal: Implement the approved seeded physical arena resolver and connect its events to the existing arena and wallet.
 Branch: `codex/glad-003-physical-combat`.
-Last verified: GLAD-002 passed final checks and deployed.
-Next action: Build and test the bounded duel and verdict rules, then connect the arena, wallet and simulator.
+Draft: [PR #148](https://github.com/janisp123/idle_game/pull/148).
+Last verified: Three focused tests passed for raw-HP timeout eligibility, deterministic finite bow ammo and dagger fallback, shield and armour breakage, and Masterwork condition. The draft resolver still operates separately from the playable arena.
+Next action: Wire equipped condition profiles and the physical event timeline into combatAtTime, the arena UI and the wallet. Then measure representative equal-stat matchups and verify the final PR.
 Status: STARTED.
 
 ## GLAD-002 · DEPLOYED · 2026-11-24
