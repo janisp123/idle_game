@@ -12,6 +12,7 @@
 | [Glory Scrolls and slot enchanting](ENCHANTMENTS.md) — 50% real win loot and 50% reset risk | [Enchantments](ENCHANTMENTS.md) | `site/play/glory.mjs`, `engine.mjs:enchantEquipmentSlot` |
 | [Equipment by attributes](ARMOUR.md) — STR / DEX / WIL, weight and physical counters | [Armour](ARMOUR.md) | `site/play/armour.mjs`; `engine.mjs:setArmourChoice` | 
 | Playable two-skill turn-based Fighting V2 alpha | [Combat](COMBAT.md) | `site/play/combat.mjs` → `COMBAT_BALANCE`, `OPPONENTS`; `site/play/combat-skills.mjs` → `COMBAT_SKILLS`, `COMBAT_LOADOUTS`; `site/play/combat-art.mjs` → `COMBAT_ART` |
+| [Developer-only modular systems lab](SYSTEM_LAB.md) — real offline work, loot, crafting, attributes, mastery, equipment, enchanting, queue and saves | [Scenarios and parity](SYSTEM_LAB.md) | `tools/system-lab.mjs`, `tools/simulation/*.mjs`; imports actual engine and resource functions, outside public site |
 | [Developer-only combat simulator](COMBAT_SIMULATOR.md) — 10,000+ real, zero-delay duels with dice/terrain/enchants | [Simulation and parity](COMBAT_SIMULATOR.md) | `tools/combat-simulator.mjs` imports production `combatAtTime`, `armourStats`, `enchantBonus`, `conditionBonuses`, `tallyGloryVictories`; runs outside the published site |
 | Alpha-only testing switches — reset, 24h idle, ×10 clock | [Alpha Tools](ALPHA_TOOLS.md) | `site/play/alpha-tools.mjs`, `app.mjs` |
 | Work cycles, switches, schedule, offline and saves | [Scheduling & offline](SCHEDULING.md) | `site/play/engine.mjs` → `TIMING_PROFILE`, `TIMING_PROFILES`, `SCHEDULE_BALANCE`, `MAX_WAGONS` |
