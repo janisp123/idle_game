@@ -1,4 +1,4 @@
-import { settleArenaPrizes } from "./arena-wallet.mjs?v=glad-003";
+import { settleArenaPrizes } from "./arena-wallet.mjs?v=glad-005";
 import {
   ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
 } from "./attributes.mjs?v=glad-001";
@@ -372,6 +372,10 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
     next.combatSession = prize.session;
     next.coins = safeAdd(state.coins, prize.coins);
     report.gainedCoins = prize.coins;
+    if (prize.bouts || prize.downtimeMs) {
+      const { session: _session, ...arena } = prize;
+      report.arena = arena;
+    }
   }
   const rules = ACTIVITIES[state.activity]; // snapshot at start of this whole settlement
   next.attributeEffort = awardAttributeTime(state.attributeEffort, state.activity, productiveMs);
@@ -435,7 +439,7 @@ function settleTransition(state, now, random, frozenEffort) {
   let next = state;
   const reports = [];
   const pushReport = report => {
-    if (report.completed || report.gainedCoins) reports.push(report);
+    if (report.completed || report.arena) reports.push(report);
   };
   let remaining = end - next.settledAtMs;
 
@@ -549,7 +553,7 @@ export function settle(state, now = Date.now(), random = Math.random) {
   const reports = [];
   const addReports = outcome => {
     for (const report of outcome.reports ?? [outcome.report]) {
-      if (report?.completed || report?.gainedCoins) reports.push(report);
+      if (report?.completed || report?.arena) reports.push(report);
     }
   };
   // Three productive segments + at most three transitions; the loop is
@@ -758,7 +762,14 @@ export function requestActivityChange(state, targetActivity, now = Date.now(), r
 /** Returning is only a catch-up. No level or skill improvement applies automatically. */
 export function enterGame(state, now = Date.now(), random = Math.random) {
   const outcome = settle(state, now, random);
-  return { ...outcome, levelsGained: {} };
+  const reports = (outcome.reports ?? [outcome.report]).flatMap(report => report?.arena ? [report.arena] : []);
+  let offlineArena;
+  if (reports.length) {
+    const fields = ["bouts", "victories", "defeats", "doubleDeaths", "downtimeMs", "sampledBouts", "coins"];
+    offlineArena = Object.fromEntries(fields.map(key =>
+      [key, reports.reduce((sum, report) => sum + report[key], 0)]));
+  }
+  return { ...outcome, levelsGained: {}, ...(offlineArena ? { offlineArena } : {}) };
 }
 
 /** All items that a particular skill can produce, including locked rare tiers. */

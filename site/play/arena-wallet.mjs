@@ -17,7 +17,7 @@ export function settleArenaPrizes(session, fromElapsed = (session?.prizeCursor ?
   const count = complete - cursor;
   const repeats = Math.floor(count / ARENA_SCHEDULE_BOUTS);
   const extra = count % ARENA_SCHEDULE_BOUTS;
-  let victories = 0;
+  const outcomesCount = { victory: 0, defeat: 0, double_death: 0 };
   let downtimeMs = 0;
   const outcomes = new Map();
   function outcomeAt(index) {
@@ -34,13 +34,15 @@ export function settleArenaPrizes(session, fromElapsed = (session?.prizeCursor ?
   // once, and use those same positions for the partial remaining schedule.
   for (let offset = 0; offset < Math.min(count, ARENA_SCHEDULE_BOUTS); offset++) {
     const tally = repeats + Number(offset < extra);
-    if (outcomeAt(cursor + offset) === "victory") victories += tally;
-    else downtimeMs += tally * RESURRECTION_MS;
+    const outcome = outcomeAt(cursor + offset);
+    outcomesCount[outcome] += tally;
+    if (outcome !== "victory") downtimeMs += tally * RESURRECTION_MS;
   }
   downtimeMs += partialDowntime(session.elapsedMs) - partialDowntime(fromElapsed);
   return {
     session: { ...session, prizeCursor: complete },
-    downtimeMs,
-    coins: victories * arenaReward(session.player.difficulty ?? 0)
+    downtimeMs, sampledBouts: outcomes.size, bouts: count, victories: outcomesCount.victory,
+    defeats: outcomesCount.defeat, doubleDeaths: outcomesCount.double_death,
+    coins: outcomesCount.victory * arenaReward(session.player.difficulty ?? 0)
   };
 }

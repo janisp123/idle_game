@@ -4,9 +4,10 @@
 
 Goal: Verify and finalize bounded offline combat, balance, and the playable gladiator loop.
 Branch: `codex/glad-005-offline-parity`.
-Last verified: GLAD-004 deployed and verified.
-Next action: Check the bounded wallet settlement and establish representative balance measurements.
-Status: STARTED.
+Draft: [PR #152](https://github.com/janisp123/idle_game/pull/152).
+Last verified: Local suite 103 passed and one existing optional layout skip, 1.78 seconds. Focused twenty-year split/reload and three-wagon tests passed. Each long frozen arena settlement resolves at most 256 sampled bouts and reports its modeled outcome and coins. Browser Play Now at 390 and 1440 px verified the counts, shop, offline estimate and balance reload. The handbook publishes 13,760 seeded production duels and the grade/quality and terrain findings.
+Next action: Verify final-head CI, then merge and verify public Pages.
+Status: IN_REVIEW.
 
 ## GLAD-004 · DEPLOYED · 2026-11-24
 

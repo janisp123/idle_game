@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { BOUT_MS, combatAtTime } from "../site/play/combat.mjs";
-import { newGame, chooseActivity, settle, enterGame, readSave, setCombatLoadout,
+import { ARENA_SCHEDULE_BOUTS, BOUT_MS, combatAtTime } from "../site/play/combat.mjs";
+import { newGame, chooseActivity, settle, enterGame, readSave, setCombatLoadout, queueStartActivity, HOUR_MS,
   buyEquipment, allAttributeProgress, learnFromMaster, effectiveAttributeProgress, xpToNextLevel } from "../site/play/engine.mjs";
 const YEAR = 365 * 24 * 3_600_000;
 const STEP_MS = 5_000;
@@ -114,4 +114,39 @@ test("resurrection costs productive time and keeps paid rewards and the frozen g
   assert.equal(returned.coins, beginReturn.coins);
   assert.deepEqual(returned.combatSession.player.condition, session.player.condition);
   assert.equal(combatAtTime(returned.combatSession).event.type, "engage");
+});
+
+test("GLAD-005 offline arena summary conserves results, coins and productive time across reloads", () => {
+  const start = chooseActivity(newGame(42), "fighting", 42, () => .5).state;
+  const end = 42 + 20 * YEAR;
+  const whole = enterGame(start, end, () => .5);
+  const splitAt = 42 + 43 * BOUT_MS - 7_000;
+  const first = enterGame(start, splitAt, () => .5);
+  const second = enterGame(readSave(JSON.stringify(first.state)), end, () => .5);
+  const { bouts, victories, defeats, doubleDeaths, coins, downtimeMs } = whole.offlineArena;
+  assert.ok(whole.offlineArena.sampledBouts <= ARENA_SCHEDULE_BOUTS);
+  assert.equal(bouts, Math.floor((end - 42) / BOUT_MS));
+  assert.equal(victories + defeats + doubleDeaths, bouts);
+  assert.equal(coins, victories * 12);
+  assert.equal(whole.state.coins, coins);
+  assert.equal(second.state.coins, whole.state.coins);
+  assert.equal(first.offlineArena.downtimeMs + second.offlineArena.downtimeMs, downtimeMs);
+  assert.deepEqual(second.state.attributeEffort, whole.state.attributeEffort);
+  assert.equal(enterGame(whole.state, end, () => .5).offlineArena, undefined);
+});
+
+test("GLAD-005 a twenty-year three-wagon claim preserves crafting inputs and frozen arena gear", () => {
+  const queue = (state, id, duration) => queueStartActivity(state, id, duration, 0, () => .5).state;
+  const start = queue(queue(queue(newGame(0), "farming", null), "cooking", HOUR_MS), "fighting", HOUR_MS);
+  const result = enterGame(readSave(JSON.stringify(start)), 20 * YEAR, () => .5);
+  assert.deepEqual(result.reports.map(report => report.activity), ["farming", "cooking", "fighting"]);
+  const [farm, cooking] = result.reports;
+  assert.equal(cooking.consumed.grain, farm.items.grain);
+  assert.equal(result.state.items.ration, farm.items.grain);
+  assert.equal(result.state.items.straw, farm.items.straw);
+  assert.equal(result.state.combatSession.player.str, 10);
+  assert.deepEqual(result.state.equipment, start.equipment);
+  assert.ok(result.offlineArena.sampledBouts <= ARENA_SCHEDULE_BOUTS);
+  assert.equal(result.state.coins, result.offlineArena.victories * 12);
+  assert.ok(Object.values(result.state.skills).every(skill => skill.level === 1));
 });

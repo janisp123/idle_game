@@ -35,9 +35,8 @@ Open [Developer Combat Simulator](https://github.com/janisp123/idle_game/actions
   "str": 14,
   "dex": 14,
   "end": 14,
-  "wil": 14,
-  "enchantments": {"weapon": 2, "head": 1},
-  "mastery": {"weapon": 1},
+  "itemGrade": 1,
+  "quality": "fine",
   "trace": 2
 }
 ```
@@ -46,10 +45,10 @@ The run uses Node 22 and the same `--config` JSON entrypoint. It prints the head
 
 **Privacy:** GitHub Actions runs and reports are visible in this public repository. Enter only fictional/test stats there; the cloud workflow explicitly rejects `snapshot` data. For personal/saved player state, use the local `--snapshot` mode only.
 
-The **default** is 10,000 non-grade, level-1 greatsword duels, no armour, Non-grade Poor equipment and reproducible seed `20261124`. Each grade uses the **actual** `benchmark()` values for skill and STR/DEX/END, and the actual level unlock; this is a **synthetic reference build** and does not claim real players automatically earn these stats. Override the three stats and Fighting skill to assess realistic progression. Generated gear honors actual stat unlock requirements, so an illegal build (e.g. full Plate with STR 10) is rejected instead of being silently treated as equippable.
+The **default** is 10,000 non-grade, level-1 greatsword duels, no armour, Non-grade Poor equipment and reproducible seed `20261124`. Each grade uses the **actual** `benchmark()` values for skill and STR/DEX/END, and the actual level unlock; this is a **synthetic reference build** and does not claim real players automatically earn these stats. Override the three stats and Fighting skill to assess realistic progression.
 
-- `--grade Non-grade|F|E|D|C|B|A|S`: selected Fighting activity difficulty; enemies draw from the **real** six encounter profiles and their randomly assigned equipment.
-- `--loadout greatsword|sword_shield|hammer|bow|staff|twin_blades`: player weapon and automatic attack/defense skills.
+- `--grade Non-grade|F|E|D|C|B|A|S`: selected Fighting activity difficulty; enemies draw from the **real** five encounter profiles and their randomly assigned equipment.
+- `--loadout greatsword|sword_shield|hammer|bow|spear`: player weapon and automatic attack/defense skills.
 - `--armour none|padded|leather|plate`: base for all **four slots**; override individually using `--armour-slots head:plate,arms:leather`.
 - `--seed N`, `--start-bout N`: original 32-bit combat session seed and **zero-based** bout index. Selecting the same seed, frozen fighter, grade and bout yields exactly the same enemy, terrain and outcomes as the game.
 - `--config scenario.json`: reuse a locally stored JSON object with the same keys as programmatic `simulateBatch()` options; no other flags may be combined with `--config`.
@@ -61,10 +60,10 @@ The JSON report includes victories, defeats and double deaths, grouped by terrai
 
 ## Validity and maintenance
 
-1. **Parity source:** `site/play/combat.mjs:combatAtTime`, which internally calls `makeOpponent`, seeded RNG, `simulateDuel`, the grade and terrain module. Equipment comes from `armourStats`; saved enchant totals from `enchantBonus`; condition upgrades from `conditionBonuses`. Optional Glory uses `tallyGloryVictories`. **Never clone formulas into the simulator**.
+1. **Parity source:** `site/play/combat.mjs:combatAtTime`, which internally calls `makeOpponent`, seeded positioning and `resolvePhysicalDuel`. Equipment comes from `armourStats`, `equipmentBonuses`, and `equippedCondition`. Victory coins use `arenaReward`. **Never clone formulas into the simulator**.
 2. **Regression check:** `node --test tools/test_combat_simulator.mjs`. Required CI also runs a full 10,000-bout simulation and compares sample event traces byte-for-byte against production. Never tune game combat solely to force a target win rate without an Owner decision.
 3. **Interpretation:** A 10,000-bout sample is a deterministic scenario, **not a global probability proof**. Compare several seeds, weapons, armours and grades before recommending a balance adjustment. Changes in the actual game automatically change simulator outcomes; there is no independent combat calibration file to update.
-4. **Scope:** This measures one-on-one duels and their real effects, **not** real-time UI behavior, skills earned during a session, full economic loot/crafting, raids, team tactics, future magic systems, or an accurate 20-year roll-free offline aggregate. Those require separate mechanics and tests.
+4. **Scope:** This measures one-on-one duels and their real effects, **not** real-time UI behavior, skills earned during a session, full economic loot/crafting, raids, team tactics, the offline aggregate or the browser UI. Those require separate mechanics and tests.
 
 When starting later balance research: read current remote `main:docs/TD_LIST.md` first, then project instructions, this page, and use the CLI. Store only useful reviewed benchmark findings, never unverified win-rate claims.
 

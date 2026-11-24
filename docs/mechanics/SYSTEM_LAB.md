@@ -24,13 +24,13 @@ node --test tools/test_system_lab.mjs
 
 Every output is JSON. Each module identifies its **exact production source functions**. Multiple scenarios can be run together by passing a JSON object containing `"scenarios": [ ... ]` (up to 20). `"seed"` makes results reproducible; `"trials"` repeats independent synthetic trials (up to 10,000).
 
-The separately installed `tools/combat-simulator.mjs` remains the canonical detailed combat CLI for 10,000+ battles and manual GitHub Actions reports. `"module":"combat"` in this lab calls **that exact simulator** without duplicating the combat algorithm, including 3d6, enemy archetypes, terrain, armour/enchant, HP, guard durability and optional Glory.
+The separately installed `tools/combat-simulator.mjs` remains the canonical detailed combat CLI for 10,000+ battles and manual GitHub Actions reports. `"module":"combat"` in this lab calls **that exact simulator** without duplicating the combat algorithm, including pre-bout positioning, terrain, condition, injuries, and victory coins.
 
 ## Implemented modules and supported conditions
 
 | Module | Directly imports live production functions | What it measures |
 | --- | --- | --- |
-| `combat` | `simulateBatch` → `combatAtTime`, `armourStats`, `enchantBonus`, `tallyGloryVictories` | Real duels, grade/stat matching, 3d6, all terrains, full armours/enchants and per-event condition loss; use `battles:10000` |
+| `combat` | `simulateBatch` → `combatAtTime`, `armourStats`, `equipmentBonuses`, `arenaReward` | Real duels, grade/stat matching, pre-bout rolls, all five arenas, item grade and quality and per-event condition loss; use `battles:10000` |
 | `activity` | `chooseActivity`, `setDifficulty`, `settle`, `skillMasterReadiness`, `effectiveAttributeProgress` | Offline skill work, XP cap, materials, rarity via actual settlement, crafting inputs, Glory during Fighting, stat growth, grade effects. **Instant activity selection for focused analysis**; use `queue` to measure travel |
 | `loot` | `lootChances`, `allocateLoot` | Rare-tier probabilities versus observed item shares, level gates, strict material conservation; supports 10,000 batches |
 | `crafting` | `recipeOptions`, `produce` | Work capacity, unlocked recipes, exact consumed/created inventory, missing ingredients, weighted outputs, no fabricated materials |
@@ -91,12 +91,12 @@ For equipment, pass `slot`, `gear`, `loadout`, optionally `masterySlot`, `train:
     "baseline": {
       "module": "combat", "battles": 10000, "seed": 200,
       "grade": "F", "loadout": "greatsword", "armour": "leather",
-      "skill": 10, "str": 14, "dex": 14, "end": 14, "wil": 14
+      "skill": 10, "str": 14, "dex": 14, "end": 14
     },
     "variant": {
       "module": "combat", "battles": 10000, "seed": 200,
       "grade": "F", "loadout": "sword_shield", "armour": "leather",
-      "skill": 10, "str": 14, "dex": 14, "end": 14, "wil": 14
+      "skill": 10, "str": 14, "dex": 14, "end": 14
     }
   }
 }

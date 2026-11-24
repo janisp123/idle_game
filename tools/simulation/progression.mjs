@@ -2,7 +2,7 @@
  * Exact productive time, offline catch-up, XP caps, skill-master, attribute growth.
  * Game engine is authoritative; artificial test states are explicitly labeled.
  */
-import { ACTIVITIES, SKILL_IDS, chooseActivity, setDifficulty, settle,
+import { ACTIVITIES, SKILL_IDS, chooseActivity, setDifficulty, enterGame,
   skillMasterOffer, learnFromMaster, xpToNextLevel, skillMasterReadiness } from '../../site/play/engine.mjs';
 import { awardAttributeTime, effectiveAttributeProgress, ACTIVITY_STAT_WEIGHTS } from '../../site/play/attributes.mjs';
 import { count,choose,trials,sourceSeed,seededState,addCounts,average,histogram,assertConserved,deltas } from './common.mjs';
@@ -18,7 +18,7 @@ export function simulateActivity(options={}) {
   const chosenLevel=base.skills[activity].level;
   if (tier>0 && chosenLevel<tier*10) throw new RangeError('Difficulty locked for skill '+activity);
   if (options.state!==undefined && options.xp!==undefined) throw new RangeError('Cannot change XP on a saved state; create a synthetic one');
-  const result={module:'activity',source:'site/play/engine.mjs:chooseActivity+settle',
+  const result={module:'activity',source:'site/play/engine.mjs:chooseActivity+enterGame',
     mode:'real productive-time engine batch; starting an activity is immediate in this test (not an actual travel simulation)',
     activity,elapsedMs,trials:runs,startingLevel:chosenLevel,difficulty:tier,
     completed:0,gainedXP:0,gainedCoins:0,items:{},consumed:{},
@@ -29,7 +29,7 @@ export function simulateActivity(options={}) {
     let started=chooseActivity(s,activity,s.settledAtMs,rng).state;
     if(tier) started=setDifficulty(started,activity,tier,started.settledAtMs,rng).state;
     const before=structuredClone(started);
-    const out=settle(started,started.settledAtMs+elapsedMs,rng);
+    const out=enterGame(started,started.settledAtMs+elapsedMs,rng);
     const after=out.state;
     const reports=out.reports??[out.report];
     let completed=0,xp=0,coins=0;
@@ -55,7 +55,7 @@ export function simulateActivity(options={}) {
     for(const [id,value] of Object.entries(stats))
       result.endingStatValues[id]=(result.endingStatValues[id]??0)+value.value;
     if(i===0) result.firstTrial={
-      report:out.report,finishedSkills:{[activity]:skill},
+      report:out.report,offlineArena:out.offlineArena ?? null,finishedSkills:{[activity]:skill},
       itemChanges:deltas(before.items,after.items),statProgress:stats,
       readiness:offer,productiveElapsedMs:after.productiveElapsedMs,
       settledAtMs:after.settledAtMs,
