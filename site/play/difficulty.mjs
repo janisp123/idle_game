@@ -4,7 +4,7 @@ export const unlockLevel=tier=>tier===0?1:tier*10;
 export const validTier=tier=>Number.isInteger(tier)&&tier>=0&&tier<GRADES.length;
 export function benchmark(tier) {
   if(!validTier(tier)) throw new RangeError("Invalid difficulty");
-  return {skill:unlockLevel(tier),stat:10+4*tier,enchant:tier};
+  return {skill:unlockLevel(tier),stat:10+4*tier,gearPower:tier};
 }
 export function workMultiplier(tier,weights,attributes) {
   if(!tier) return 1;
@@ -20,6 +20,6 @@ export const TERRAIN_ROLL_START=5500;
 export const TERRAIN_REVEAL=9000;
 export function terrainBonus(f,terrain) {
   if(!terrain) return 0;
-  if(["bow","staff"].includes(f.loadout)) return terrain.ranged;
+  if(f.loadout === "bow") return terrain.ranged;
   return terrain.melee+((f.gear?.mobilityPct??100)<80?terrain.heavy:0);
 }

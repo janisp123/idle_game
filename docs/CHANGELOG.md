@@ -6,8 +6,9 @@ Goal: Implement the approved four-slot equipment, five physical styles, item gra
 Branch: `codex/glad-002-equipment-economy`.
 Draft: [PR #146](https://github.com/janisp123/idle_game/pull/146).
 Last verified: Three focused prize tests passed against real resolved wins, saved-wallet reload, negative-wallet rejection and a split twenty-year settlement. The temporary arena repeats a 256-bout schedule for a frozen build, so the same resolver supports exact bounded payouts and consistent split claims.
-Next action: Replace the still-present scroll and enchant flows with the four-slot equipment shop, wire real gear bonuses and verify the UI. The wallet is integrated on the draft branch; it is not shown in the current UI.
-Status: STARTED.
+Shop and combat integration: Five starter weapons, four armour slots, separate grade/quality, exact coin prizes, one-item editing, current-save reset and frozen equipment snapshots implemented. Focused engine, UI and simulator checks passed. Staged 390 px Play Now confirmed five weapons, four slots, one paid armour purchase and save/reload.
+Next action: Verify final PR checks, then merge and verify Pages.
+Status: IN_REVIEW.
 
 ## GLAD-001 · DEPLOYED · 2026-11-24
 

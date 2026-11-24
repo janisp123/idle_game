@@ -6,11 +6,9 @@ import {
    MASTERY_ATTRIBUTE_BALANCE, masteryBonusesForSkill, masteryAwardForNextLevel,
    totalMasteryAttributeBonuses, effectiveAttributeProgress,
   ZONE_TRAVEL_MS, SAME_ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, TIMING_PROFILE, MAX_WAGONS, SKILL_BALANCE, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, UNTIL_LEVEL_UP, MASTER_RESOURCE_MINIMUM, skillMasterReadiness, validQueuePlan, validPlannedDuration, queueStartActivity, queueInsertTimedActivity, queueSetDuration, queueSwap, queueRemoveLast, activityDuration, newGame, readSave, settle, chooseActivity, requestActivityChange,
-  enterGame, testOfflineDay, xpForLevel, levelFromXP, xpToNextLevel, skillSpoils, skillMasterOffer, learnFromMaster, setArmourChoice,
-  GLORY_SCROLL_ID, GLORY_RULES, ENCHANT_SLOTS, enchantEquipmentSlot, enchantBonus
+  enterGame, testOfflineDay, xpForLevel, levelFromXP, xpToNextLevel, skillSpoils, skillMasterOffer, learnFromMaster, setArmourChoice, buyEquipment
 } from "../site/play/engine.mjs";
-import { ARMOUR_SLOTS, ARMOUR_CHOICES, ARMOUR_REQUIREMENTS, ARMOUR_TIER_LABELS, ARMOUR_TIERS,
-  initialArmour, armourOption, armourUnlocked, armourStats, WEAPON_PIECES, ARMOUR_PIECES } from "../site/play/armour.mjs";
+import { ARMOUR_SLOTS, ARMOUR_TIERS, armourStats } from "../site/play/armour.mjs";
 import { xpForAttributeValue } from "../site/play/attributes.mjs";
 import { ALPHA_CLOCK_KEY, ALPHA_SPEED, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
   setAlphaSpeed, advanceAlphaClock } from "../site/play/alpha-tools.mjs";
@@ -152,13 +150,7 @@ test("existing skill levels grant derived mastery stats once without changing cu
   assert.deepEqual(totalMasteryAttributeBonuses(restored.skills),expected);
   assert.deepEqual(effectiveAttributeProgress(restored.attributeEffort,restored.skills),before,
     "reading save again cannot duplicate earned points");
-  assert.equal(armourUnlocked(before,"chest","plate"),true,
-    "mining mastery STR may independently unlock Plate gear");
-  assert.equal(armourUnlocked(before,"chest","leather"),false,
-    "unused DEX never rises from Mining or Meditation");
-  const plate=setArmourChoice(existing,"chest","plate",0).state;
-  assert.equal(plate.armour.chest,"plate");
-  assert.equal(plate.skills.fighting.level,1);
+
 });
 
 test("Skill Master grants one stat point only on explicit confirmed level advancement",()=>{
@@ -185,52 +177,6 @@ test("Skill Master grants one stat point only on explicit confirmed level advanc
     "cannot claim the same level's permanent stat reward twice");
 });
 
-test("Glory Scroll item, fixed equipment slots and 50/50 enchant failure have exact costs",()=>{
-  const base=newGame(0);
-  assert.equal(GLORY_SCROLL_ID,"glory_scroll");
-  assert.equal(GLORY_RULES.winDropChance,0.5);
-  assert.equal(GLORY_RULES.enchantSuccessChance,0.5);
-  assert.equal(base.items.glory_scroll,0);
-  assert.equal(ENCHANT_SLOTS.length,13,"weapon, shield and eleven independent armour slots");
-  assert.deepEqual(ENCHANT_SLOTS.slice(2),ARMOUR_SLOTS.map(x=>x.id));
-  assert.deepEqual(Object.values(base.enchantments),Array(13).fill(0));
-  assert.throws(()=>enchantEquipmentSlot(base,"weapon",0,()=>0),RangeError);
-  const funded={...base,items:{...base.items,glory_scroll:4}};
-  const gained=enchantEquipmentSlot(funded,"weapon",0,()=>0.49);
-  assert.equal(gained.enchantment.success,true);
-  assert.equal(gained.state.enchantments.weapon,1);
-  assert.equal(gained.state.items.glory_scroll,3);
-  assert.equal(enchantBonus(gained.state.enchantments).attack,1);
-  assert.equal(enchantBonus(gained.state.enchantments).defense,0);
-  const second=enchantEquipmentSlot(gained.state,"weapon",0,()=>0.49);
-  assert.equal(second.state.enchantments.weapon,2);
-  const failed=enchantEquipmentSlot(second.state,"weapon",0,()=>0.5);
-  assert.equal(failed.enchantment.success,false);
-  assert.equal(failed.enchantment.before,2);
-  assert.equal(failed.enchantment.rank,0,"failure destroys ALL ranks on this slot");
-  assert.equal(failed.state.items.glory_scroll,1,"every attempt spends one scroll");
-  assert.equal(enchantBonus(failed.state.enchantments).attack,0);
-  const glove=enchantEquipmentSlot(failed.state,"left_glove",0,()=>0.05);
-  assert.equal(glove.state.enchantments.left_glove,1);
-  assert.equal(glove.state.enchantments.right_glove,0);
-  assert.equal(enchantBonus(glove.state.enchantments).defense,1);
-  assert.equal(glove.state.items.glory_scroll,0);
-  assert.throws(()=>enchantEquipmentSlot(glove.state,"left_glove",0,()=>0),RangeError);
-  const reloaded=readSave(JSON.stringify(glove.state));
-  assert.deepEqual(reloaded,glove.state);
-  const preFeature={...funded};delete preFeature.enchantments;
-  const migrated=readSave(preFeature);
-  assert.deepEqual(migrated.enchantments,base.enchantments);
-  assert.equal(migrated.items.glory_scroll,4);
-  const oldItems={...funded,items:{...funded.items}};delete oldItems.items.glory_scroll;
-  assert.equal(readSave(oldItems).items.glory_scroll,0,"old V7 missing scroll remains valid");
-  assert.equal(readSave({...funded,enchantments:{weapon:-1}}),null);
-  assert.equal(readSave({...funded,enchantments:{unknown_slot:1}}),null);
-  assert.equal(readSave({...funded,enchantments:{weapon:GLORY_RULES.maxRank+1}}),null);
-  assert.deepEqual(funded.items,{...base.items,glory_scroll:4},
-    "failed/successful enchant transactions never mutate the original state");
-});
-
 test("only individual activities have levels; character has a name but no level", () => {
   const state = newGame(0);
   assert.equal(state.version, GAME_VERSION);
@@ -239,59 +185,8 @@ test("only individual activities have levels; character has a name but no level"
   assert.equal(Object.hasOwn(state, "level"), false);
   assert.equal(Object.hasOwn(state, "totalXP"), false);
   assert.ok(SKILL_IDS.length >= 10);
-  assert.ok(ITEM_KEYS.length >= 15, "rare resources have separate stack keys");
+  assert.ok(ITEM_KEYS.length >= 14, "rare resources have separate stack keys");
   for (const id of SKILL_IDS) assert.deepEqual(state.skills[id], { level: 1, xp: 0 });
-});
-
-test("four standardized armor tiers total 11 pieces with sane weight, mobility and counters", () => {
-  const base=newGame(0);
-  assert.equal(ARMOUR_SLOTS.length,11);
-  assert.deepEqual(Object.keys(base.armour).sort(),ARMOUR_SLOTS.map(x=>x.id).sort());
-  assert.deepEqual(ARMOUR_TIERS,["none","leather","plate"]);
-  assert.deepEqual(base.armour,initialArmour());
-  for(const group of ["gloves","boots","armguards","shoulders"])
-    assert.equal(ARMOUR_SLOTS.filter(x=>x.group===group).length,2,group);
-  const coverage=ARMOUR_SLOTS.reduce((sum,slot)=>sum+ARMOUR_PIECES[slot.group].coverage,0);
-  assert.equal(coverage,100,"per-slot coverage may not compound 11 entire set bonuses");
-  for(const slot of ARMOUR_SLOTS) {
-    assert.deepEqual(ARMOUR_CHOICES[slot.group].map(x=>x.id),ARMOUR_TIERS);
-    const stats=allAttributeProgress(base.attributeEffort);
-    assert.ok(armourUnlocked(stats,slot.id,"none"));
-    assert.equal(armourUnlocked(stats,slot.id,"robe"),false);
-    assert.equal(armourUnlocked(stats,slot.id,"plate"),false);
-    assert.equal(armourUnlocked(stats,slot.id,"leather"),
-      ARMOUR_REQUIREMENTS.leather.byGroup[slot.group]<=10);
-    for(const piece of ARMOUR_CHOICES[slot.group]) assert.ok(piece.weightKg>=0);
-  }
-  const totals={};
-  for(const tier of ARMOUR_TIERS) {
-    const clothing=Object.fromEntries(ARMOUR_SLOTS.map(slot=>[slot.id,tier]));
-    totals[tier]=armourStats(clothing,"greatsword");
-  }
-  assert.deepEqual(ARMOUR_TIERS.map(t=>totals[t].armourKg),[0,12,30]);
-  assert.deepEqual(ARMOUR_TIERS.map(t=>totals[t].physicalReductionPct),[0,22,50]);
-  assert.deepEqual(ARMOUR_TIERS.map(t=>totals[t].magicResistancePct),[0,12,0]);
-  assert.deepEqual(ARMOUR_TIERS.map(t=>totals[t].evasionScore),[3,2,-3]);
-  assert.deepEqual(ARMOUR_TIERS.map(t=>totals[t].mobilityPct),[97,87,72],
-    "full plate must move far slower than robe, leather or no armor");
-  assert.deepEqual(WEAPON_PIECES.sword_shield.map(w=>w.kg),[2,5]);
-  assert.deepEqual(WEAPON_PIECES.greatsword.map(w=>w.kg),[5]);
-  assert.equal(armourStats(base.armour,"sword_shield").totalKg,7);
-  const mixed={...base.armour,chest:"plate"};
-  assert.equal(armourStats(mixed,"greatsword").armourKg,9.5);
-  assert.equal(armourStats(mixed,"greatsword").physicalReductionPct,17);
-  assert.equal(armourStats(mixed,"greatsword").magicResistancePct,0);
-  assert.throws(()=>armourStats({...base.armour,head:"bogus"},"greatsword"),RangeError);
-});
-
-test("armour uses physical stat gates and leaves a single equipped slot changed", () => {
-  const base = newGame(0);
-  assert.throws(() => setArmourChoice(base, "chest", "plate", 0), RangeError);
-  assert.throws(() => setArmourChoice(base, "head", "robe", 0), RangeError);
-  const equipped = setArmourChoice(base, "left_glove", "leather", 0).state;
-  assert.equal(equipped.armour.left_glove, "leather");
-  assert.equal(equipped.armour.right_glove, "none");
-  assert.deepEqual(readSave(JSON.stringify(equipped)), equipped);
 });
 
 test("mastery offers collect every possible skill spoil, including rare stock", () => {
@@ -1259,30 +1154,6 @@ test("Fighting is a distinct first activity and does not manufacture simulated c
   assert.equal(readSave(oldV5), null, "required current-build skills cannot be missing");
 });
 
-test("slot mastery is sequential, funded, permanent, and separate from scrolls",async()=>{
-  const {characterLevel,GRADES,conditionBonuses,slotBonus}=await import("../site/play/equipment-rules.mjs");
-  const {trainEquipmentSlot}=await import("../site/play/engine.mjs");
-  let s=newGame(0);
-  assert.equal(characterLevel(s.skills),1);
-  const old={...s};delete old.slotMastery;
-  assert.equal(readSave(JSON.stringify(old)).slotMastery.shield,0);
-  assert.equal(trainEquipmentSlot(s,"shield",0,0).trained,undefined);
-  Object.assign(s.items,{log:10000,stone:10000,hide:10000,ingot:10000});
-  s=trainEquipmentSlot(s,"shield",0,0).state;
-  assert.equal(s.items.log,9995);
-  assert.equal(trainEquipmentSlot(s,"shield",0,0).trained,undefined);
-  assert.equal(trainEquipmentSlot(s,"shield",1,0).trained,undefined);
-  for(let rank=1;rank<GRADES.length;rank++) {
-    s.skills.mining.level=GRADES[rank].level;
-    s=trainEquipmentSlot(s,"shield",rank,0).state;
-  }
-  assert.equal(readSave(JSON.stringify(s)).slotMastery.shield,7);
-  assert.equal(s.enchantments.shield,0);
-  assert.equal(conditionBonuses(s).shield,21);
-  assert.equal(trainEquipmentSlot(s,"shield",7,0).trained,undefined);
-  assert.deepEqual(slotBonus("weapon",2),{attack:2,defense:0,durability:4});
-});
-
 test("activity grades unlock independently every ten levels and survive reloading",async()=>{
   const {setDifficulty}=await import("../site/play/engine.mjs");
   const {workMultiplier,benchmark}=await import("../site/play/difficulty.mjs");
@@ -1406,4 +1277,35 @@ test("GLAD-002 arena wins reach the saved wallet once", async () => {
   assert.equal(loaded.coins, result.state.coins);
   assert.equal(finish(loaded, at).state.coins, loaded.coins);
   assert.equal(readSave({ ...loaded, coins: -1 }), null);
+});
+
+test("GLAD-002 sells independent equipment grades and qualities that improve real power", async () => {
+  const shop = await import("../site/play/smith.mjs");
+  const state = { ...newGame(0), coins: 1000 };
+  const item = { grade: 1, quality: "fine" };
+  const quote = shop.smithQuote(state, "greatsword", item);
+  assert.ok(quote.cost > 0 && quote.available);
+  assert.ok(shop.itemPower(item) > shop.itemPower({ grade: 0, quality: "fine" }));
+  assert.ok(shop.itemPower(item) > shop.itemPower({ grade: 1, quality: "common" }));
+  assert.equal(shop.conditionProfile("greatsword", { grade: 1, quality: "masterwork" }).breakable, false);
+});
+
+test("GLAD-002 four slots and five weapon styles support real purchases", () => {
+  assert.deepEqual(ARMOUR_SLOTS.map(s => s.id), ["head", "torso", "arms", "legs"]);
+  assert.deepEqual(ARMOUR_TIERS, ["none", "padded", "leather", "plate"]);
+  const start = { ...newGame(0), coins: 300 };
+  assert.deepEqual(Object.keys(start.equipment).sort(), ["bow", "greatsword", "hammer", "spear", "sword_shield"]);
+  assert.throws(() => setArmourChoice(start, "arms", "leather", 0), RangeError);
+  const purchased = buyEquipment(start, "arms:leather", { grade: 1, quality: "common" }, 0);
+  assert.equal(purchased.purchased, true);
+  assert.equal(purchased.state.armour.arms, "leather");
+  assert.equal(purchased.state.coins, 181);
+  assert.ok(armourStats(purchased.state.armour, start.combatLoadout).physicalReductionPct > 0);
+  const retry = buyEquipment(readSave(JSON.stringify(purchased.state)), "arms:leather",
+    { grade: 1, quality: "common" }, 0);
+  assert.equal(retry.purchased, undefined);
+  assert.deepEqual(retry.state, purchased.state);
+  assert.equal(buyEquipment(retry.state, "arms:leather", { grade: 7, quality: "common" }, 0).purchased, undefined);
+  const forged = { ...retry.state, armour: { ...retry.state.armour, torso: "plate" } };
+  assert.equal(readSave(forged), null);
 });

@@ -10,10 +10,10 @@
  * combat-skills.mjs; paintings in combat-art.mjs. No DOM or timers here.
  */
 import { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
-  from "./combat-skills.mjs?v=arena-v1";
-import { armourStats, initialArmour } from "./armour.mjs?v=glad-001";
+  from "./combat-skills.mjs?v=glad-002";
+import { armourStats, initialArmour } from "./armour.mjs?v=glad-002";
 export { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
-  from "./combat-skills.mjs?v=arena-v1";
+  from "./combat-skills.mjs?v=glad-002";
 export { COMBAT_ART } from "./combat-art.mjs?v=arena-v1";
 
 export const COMBAT_BALANCE = Object.freeze({
@@ -39,14 +39,13 @@ export const COMBAT_BALANCE = Object.freeze({
   initiativeRerolls: 3
 });
 export const BOUT_MS = COMBAT_BALANCE.eventMs * COMBAT_BALANCE.slotsPerBout;
-import { benchmark, validTier, TERRAIN, terrainBonus } from "./difficulty.mjs?v=arena-v1";
+import { benchmark, validTier, TERRAIN, terrainBonus } from "./difficulty.mjs?v=glad-002";
 const ENCOUNTERS=[
   {role:"Tank",weapon:"sword_shield",sets:["plate"]},
   {role:"Vanguard",weapon:"greatsword",sets:["leather","plate"]},
   {role:"Breaker",weapon:"hammer",sets:["leather","plate"]},
   {role:"Archer",weapon:"bow",sets:["leather"]},
-  {role:"Mage",weapon:"staff",sets:["none"]},
-  {role:"Duelist",weapon:"twin_blades",sets:["leather","plate"]}
+  {role:"Spearman",weapon:"spear",sets:["padded","leather"]}
 ];
 const OPPONENTS = ["Varrik the Loud", "Odran Ironjaw", "Kest the Crow", "Brann of the Ash"];
 const validUnsigned = value => Number.isSafeInteger(value) && value >= 0;
@@ -74,13 +73,12 @@ export function seededCombatRandom(seed) {
   };
 }
 const validGear = gear => gear && typeof gear === "object" && !Array.isArray(gear) &&
-  ["physicalReductionPct","magicResistancePct","evasionScore","dodgeMargin",
+  ["physicalReductionPct","evasionScore","dodgeMargin",
    "initiativePenalty","mobilityPct","totalKg","armourKg","weaponKg"].every(k =>
      typeof gear[k] === "number" && Number.isFinite(gear[k])) &&
-  (gear.defenseEnchant === undefined || (Number.isSafeInteger(gear.defenseEnchant) &&
-    gear.defenseEnchant >= 0 && gear.defenseEnchant <= 10000)) &&
+  (gear.gearDefense === undefined || (Number.isSafeInteger(gear.gearDefense) &&
+    gear.gearDefense >= 0 && gear.gearDefense <= 10000)) &&
   gear.physicalReductionPct >= 0 && gear.physicalReductionPct <= 60 &&
-  gear.magicResistancePct >= 0 && gear.magicResistancePct <= 55 &&
   gear.evasionScore >= -4 && gear.evasionScore <= 4 &&
   gear.dodgeMargin >= 1 && gear.dodgeMargin <= 99 &&
   gear.initiativePenalty >= 0 && gear.initiativePenalty <= 4 &&
@@ -98,8 +96,8 @@ function validateFighter(f) {
     (f.gear !== undefined && !validGear(f.gear)) ||
     (f.conditionBonus!==undefined && (!f.conditionBonus ||
       !["weapon","body","shield"].every(k=>Number.isSafeInteger(f.conditionBonus[k])&&f.conditionBonus[k]>=0&&f.conditionBonus[k]<=10000))) ||
-    (f.attackEnchant !== undefined && (!Number.isSafeInteger(f.attackEnchant) ||
-      f.attackEnchant < 0 || f.attackEnchant > 10000)))
+    (f.gearAttack !== undefined && (!Number.isSafeInteger(f.gearAttack) ||
+      f.gearAttack < 0 || f.gearAttack > 10000)))
     throw new RangeError("Invalid fighter");
 }
 export function makeOpponent(bout,tier=0,random=seededCombatRandom(bout)) {
@@ -110,9 +108,9 @@ export function makeOpponent(bout,tier=0,random=seededCombatRandom(bout)) {
   const pieces=Object.fromEntries(Object.keys(initialArmour()).map(id=>[id,armour]));
   const stat=()=>model.stat+Math.floor(random()*5)-2;
   return {name:OPPONENTS[bout%OPPONENTS.length],role:profile.role,armour,loadout,
-    str:stat(),dex:stat(),end:stat(),skill:model.skill,attackEnchant:model.enchant,
-    conditionBonus:{weapon:2*model.enchant,body:2*model.enchant,shield:2*model.enchant},
-    gear:{...armourStats(pieces,loadout),defenseEnchant:model.enchant}};
+    str:stat(),dex:stat(),end:stat(),skill:model.skill,gearAttack:model.gearPower,
+    conditionBonus:{weapon:2*model.gearPower,body:2*model.gearPower,shield:2*model.gearPower},
+    gear:{...armourStats(pieces,loadout),gearDefense:model.gearPower}};
 
 }
 export function validCombatSession(session) {
@@ -121,26 +119,7 @@ export function validCombatSession(session) {
     validUnsigned(session.seed) && session.seed <= 0xffffffff &&
     (session.prizeCursor === undefined || validUnsigned(session.prizeCursor) &&
       session.prizeCursor <= Math.floor(session.elapsedMs / BOUT_MS)) &&
-    (session.gloryCursor === undefined && session.gloryEligibleUntilMs === undefined ||
-      validUnsigned(session.gloryCursor) && validUnsigned(session.gloryEligibleUntilMs) &&
-      session.gloryCursor <= Math.floor(session.elapsedMs/BOUT_MS)+1) &&
     (()=>{try{validateFighter(session.player);return true;}catch{return false;}})());
-}
-// Drop the old opening slot while keeping the duel number and paid reward cursor.
-export function migrateCombatTimeline(session) {
-  if (session.timelineVersion === 2) return session;
-  const oldBoutMs = BOUT_MS + COMBAT_BALANCE.eventMs;
-  const elapsed = session.elapsedMs;
-  const converted = Math.floor(elapsed / oldBoutMs) * BOUT_MS +
-    Math.max(0, elapsed % oldBoutMs - COMBAT_BALANCE.eventMs);
-  const migrated = {...session, timelineVersion:2, elapsedMs:converted};
-  if (session.gloryEligibleUntilMs !== undefined) {
-    const end = session.gloryEligibleUntilMs;
-    // Preserve future eligibility time and the number of historically eligible duels.
-    migrated.gloryEligibleUntilMs = end > elapsed ? converted + (end - elapsed) :
-      Math.floor(end / oldBoutMs) * BOUT_MS + Math.min(end % oldBoutMs, BOUT_MS);
-  }
-  return migrated;
 }
 export function startCombatSession(player, seed) {
   validateFighter(player);
@@ -154,7 +133,7 @@ export function advanceCombatSession(session, elapsedMs) {
   if (!validUnsigned(total)) throw new RangeError("Combat clock exceeded safe range");
   return {...session,elapsedMs:total};
 }
-const LEGACY_NO_BONUS = Object.freeze({ physicalReductionPct:0, magicResistancePct:0,
+const LEGACY_NO_BONUS = Object.freeze({ physicalReductionPct:0,
   evasionScore:0,dodgeMargin:COMBAT_BALANCE.dodgeMargin,initiativePenalty:0 });
 function normalize(f,id) {
   const abilities=COMBAT_LOADOUTS[f.loadout];
@@ -165,7 +144,7 @@ function normalize(f,id) {
   const weaponMax=16+(bonus.weapon??0);
   return {...f,id,maxHP,hp:maxHP,opening:false,weaponMax,weapon:weaponMax,
     bodyMax,body:bodyMax,shieldMax,shield:shieldMax,
-    attackEnchant:f.attackEnchant??0,
+    gearAttack:f.gearAttack??0,
     gear:f.gear??LEGACY_NO_BONUS,
     attackAbility:COMBAT_SKILLS[abilities.attackSkill],
     defenseAbility:f.defenseSkill===null?null:
@@ -207,8 +186,7 @@ function initiative(player,enemy,random) {
 }
 const finisherText=Object.freeze({
   bow:{player:"Your arrow ends the duel.",enemy:"lands the deciding shot."},
-  staff:{player:"Your arc bolt ends the duel.",enemy:"lands the deciding spell."},
-  twin_blades:{player:"Your twin cut ends the duel.",enemy:"lands the deciding cut."},
+  spear:{player:"Your thrust ends the duel.",enemy:"lands the deciding thrust."},
   hammer:{player:"Your hammer breaks through the enemy guard.",enemy:"breaks through your guard with a hammer."},
   greatsword: {player:"You tear through the opponent's guard in one devastating greatsword blow.",
     enemy:"tears through your guard with a devastating greatsword blow."},
@@ -218,7 +196,7 @@ const finisherText=Object.freeze({
 /** Calculate weapon damage once; blocks and parries use the SAME physical power. */
 function basePhysicalDamage(a) {
   const raw=COMBAT_BALANCE.baseDamage+a.str*COMBAT_BALANCE.damagePerStrength+
-    a.skill*COMBAT_BALANCE.damagePerSkill+a.attackEnchant;
+    a.skill*COMBAT_BALANCE.damagePerSkill+a.gearAttack;
   return Math.max(1,Math.round(raw*a.attackAbility.damageMultiplier*(0.55+0.45*a.weapon/a.weaponMax)));
 }
 function armourFraction(fighter) {
@@ -232,7 +210,7 @@ function vitals(f) {
 function wearOnContact(a,d,event) {
   if(event.type==="miss" || event.type==="dodge") return;
   const force=basePhysicalDamage(a);
-  const pressure={hammer:0.24,greatsword:0.16,sword_shield:0.09,bow:0.08,staff:0.1,twin_blades:0.12}[a.loadout];
+  const pressure={hammer:0.24,greatsword:0.16,sword_shield:0.09,bow:0.08,spear:0.12}[a.loadout];
   const struck=event.type==="block"?"shield":event.type==="parry"?"weapon":"body";
   d[struck]=Math.max(0,d[struck]-Math.max(1,Math.ceil(force*pressure)));
   a.weapon=Math.max(0,a.weapon-Math.max(1,Math.ceil(force/14)));
@@ -249,11 +227,11 @@ function guardedImpactDamage(attacker,defender,type) {
     defender.weapon/defender.weaponMax;
   const transmitted=1-(1-through/100)*guardCondition;
   const impact=Math.round(basePhysicalDamage(attacker)*transmitted);
-  // Armour and slot enchants may absorb all transmitted impact. Unlike a
+  // Armour and gear bonuses may absorb all transmitted impact. Unlike a
   // direct landed hit, a clean block need not force a minimum 1 HP of damage.
   const protectedImpact=Math.max(0,Math.round(impact*
-    (100-(attacker.loadout==="staff"?(defender.gear.magicResistancePct??0):defender.gear.physicalReductionPct)*armourFraction(defender))/100)-
-    Math.round((defender.gear.defenseEnchant??0)*armourFraction(defender)));
+    (100-defender.gear.physicalReductionPct*armourFraction(defender))/100)-
+    Math.round((defender.gear.gearDefense??0)*armourFraction(defender)));
   return Math.min(defender.hp,protectedImpact);
 }
 function resolveTurn(a,d,turn,random) {
@@ -301,11 +279,11 @@ function resolveTurn(a,d,turn,random) {
   const baseDamage=basePhysicalDamage(a);
   // Armour mitigates a LANDED physical hit; the 6–6–6 finisher remains an
   // exceptional opposed-roll event, not arbitrarily rewritten as N damage.
-  // Slot enchantments are small flat bonuses, not extra dice or guaranteed
+  // Equipment improvements add flat bonuses, not extra dice or guaranteed
   // misses. Defence applies only after a physical hit beats the guard.
   const damage=Math.max(1,
-    Math.round(baseDamage*(100-(a.loadout==="staff"?(d.gear.magicResistancePct??0):d.gear.physicalReductionPct)*armourFraction(d))/100)-
-      Math.round((d.gear.defenseEnchant??0)*armourFraction(d)));
+    Math.round(baseDamage*(100-d.gear.physicalReductionPct*armourFraction(d))/100)-
+      Math.round((d.gear.gearDefense??0)*armourFraction(d)));
   d.hp=Math.max(0,d.hp-damage);
   const type=d.hp===0?"collapse":d.hp<=d.maxHP/2?"wound":"strike";
   return {type,...meta,damage,hpAfter:d.hp,

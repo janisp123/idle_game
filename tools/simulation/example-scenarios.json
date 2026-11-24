@@ -58,14 +58,10 @@
       "module": "equipment",
       "loadout": "sword_shield",
       "slot": "head",
-      "gear": "none"
-    },
-    {
-      "module": "enchanting",
-      "slot": "weapon",
-      "attempts": 5,
-      "trials": 50,
-      "seed": 101
+      "gear": "padded",
+      "coins": 200,
+      "itemGrade": 1,
+      "quality": "common"
     },
     {
       "module": "queue",

@@ -133,7 +133,7 @@ def check():
     if play_entry.is_file():
         play_root = SITE / "play"
         required_game = ("index.html", "app.mjs", "engine.mjs", "loot.mjs", "production.mjs", "game.css", "iron-ui.css",
-                         "assets/hunting.webp", "assets/mining.webp", "result-readout.mjs", "armour.mjs", "glory.mjs")
+                         "assets/hunting.webp", "assets/mining.webp", "result-readout.mjs", "armour.mjs", "smith.mjs", "arena-wallet.mjs")
         for name in required_game:
             asset = play_root / name
             assert asset.is_file() and asset.stat().st_size, f"Missing game asset: {name}"
@@ -148,9 +148,8 @@ def check():
                 "resultPanel", "combatReadout", "playerResult", "enemyResult",
                 "workReadout", "workResultTokens",
                 "skillTitle", "skillLevel", "skillXp", "skillFill", "nameInput", "saveName", "gearStats",
-                "gloryWallet", "equipmentEditor", "equipmentEditHeading", "armourEditor", "weaponEditor",
-                "enchantSelected", "enchantChance", "enchantChanceBreakdown",
-                "enchantChanceDetails"}.issubset(game_parser.ids), "Missing essential gameplay UI"
+                "coinWallet", "equipmentEditor", "equipmentEditHeading", "armourEditor",
+                "smithBuy", "itemGrade", "itemQuality"}.issubset(game_parser.ids), "Missing essential gameplay UI"
         assert not ({"level", "xpText", "xpFill", "lifetimeXp"} & game_parser.ids), (
             "Character must have no global level or XP widget"
         )

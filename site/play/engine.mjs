@@ -10,17 +10,10 @@ export {
 } from "./attributes.mjs?v=glad-001";
 import {
   validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS
-} from "./combat.mjs?v=glad-001";
-import {
-  GLORY_SCROLL_ID, GLORY_RULES, blankEnchantments, normalizeEnchantments,
-  enchantBonus, enchantSlot, gloryEligibilityWindow, attachGloryTracker,
-  tallyGloryVictories
-} from "./glory.mjs?v=arena-v1";
-export { GLORY_SCROLL_ID, GLORY_RULES, ENCHANT_SLOTS, enchantBonus }
-  from "./glory.mjs?v=arena-v1";
-import { DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
-  from "./combat-skills.mjs?v=arena-v1";
-import { initialArmour, normalizeArmour, armourUnlocked, armourOption, armourStats } from "./armour.mjs?v=glad-001";
+} from "./combat.mjs?v=glad-002";
+import { COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
+  from "./combat-skills.mjs?v=glad-002";
+import { ARMOUR_SLOTS, ARMOUR_TIERS, initialArmour, armourOption, armourStats } from "./armour.mjs?v=glad-002";
 import { effectiveAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=glad-001";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=glad-001";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=glad-001";
@@ -32,7 +25,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=glad-001";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 8;
+export const GAME_VERSION = 9;
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -79,21 +72,26 @@ export const ACTIVITIES = Object.freeze({
 export const ITEM_LABELS = Object.freeze({
   ...Object.fromEntries(Object.values(ACTIVITIES).filter(a => a.item !== null).map(a => [a.item, a.itemLabel])),
   ...EXTRA_LOOT_LABELS,
-  ...PRODUCTION_LABELS,
-  [GLORY_SCROLL_ID]:"Glory Scrolls"
+  ...PRODUCTION_LABELS
 });
-import { conditionBonuses, masteryRanks, masteryOffer } from "./equipment-rules.mjs?v=arena-v1";
-export function trainEquipmentSlot(state,slot,expectedRank,now=Date.now(),random=Math.random) {
-  const result=settle(state,now,random);
-  const offer=masteryOffer(result.state,slot);
-  if(!offer.available || offer.rank!==expectedRank) return result;
-  const items={...result.state.items};
-  for(const [id,n] of Object.entries(offer.next.cost)) items[id]-=n;
-  return {...result,trained:true,state:{...result.state,items,
-    slotMastery:{...result.state.slotMastery,[slot]:offer.rank+1},
-    combatSession:null}};
+import { STARTER_ITEM, equipmentBonuses, isEquipmentItem, smithQuote } from "./smith.mjs?v=glad-002";
+
+const equipmentIds = new Set([
+  ...Object.keys(COMBAT_LOADOUTS),
+  ...ARMOUR_SLOTS.flatMap(slot => ARMOUR_TIERS.slice(1).map(family => slot.id + ":" + family))
+]);
+
+function validEquipment(state) {
+  const { equipment, armour } = state;
+  return Boolean(equipment && typeof equipment === "object" && !Array.isArray(equipment) &&
+    armour && typeof armour === "object" && Object.keys(armour).length === ARMOUR_SLOTS.length &&
+    Object.keys(COMBAT_LOADOUTS).every(id => Object.hasOwn(equipment, id)) &&
+    Object.entries(equipment).every(([id, item]) => equipmentIds.has(id) && isEquipmentItem(item)) &&
+    ARMOUR_SLOTS.every(({ id }) => armourOption(id, armour[id]) &&
+      (armour[id] === "none" || Object.hasOwn(equipment, id + ":" + armour[id]))));
 }
-import { validTier, unlockLevel, workMultiplier } from "./difficulty.mjs?v=arena-v1";
+
+import { validTier, unlockLevel, workMultiplier } from "./difficulty.mjs?v=glad-002";
 export function setDifficulty(state,id,tier,now=Date.now(),random=Math.random) {
   if(!Object.hasOwn(ACTIVITIES,id)||!validTier(tier)||state.skills[id].level<unlockLevel(tier))
     throw new RangeError("Difficulty locked");
@@ -168,7 +166,8 @@ export function newGame(now = Date.now()) {
     coins: 0,
     combatLoadout: DEFAULT_COMBAT_LOADOUT,
     armour: initialArmour(),
-    difficulties:{}, enchantments: blankEnchantments(), slotMastery:masteryRanks(),
+    difficulties: {},
+    equipment: Object.fromEntries(Object.keys(COMBAT_LOADOUTS).map(id => [id, STARTER_ITEM])),
     // V1 global XP cannot be assigned to individual activities reliably.
     unattributedXP: 0,
     items: Object.fromEntries(ITEM_KEYS.map(key => [key, 0])),
@@ -200,8 +199,7 @@ export function readSave(value) {
         !validAttributeEffort(s.attributeEffort) || !isCount(s.coins) ||
         !validCombatLoadout(s.combatLoadout) || !validCombatSession(s.combatSession) ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
-        !masteryRanks(s.slotMastery) ||
-        (s.enchantments !== undefined && normalizeEnchantments(s.enchantments) === null) ||
+        !validEquipment(s) ||
         (s.activity !== null && !Object.hasOwn(ACTIVITIES, s.activity)) ||
         !isCount(s.progressMs) || !validTime(s.settledAtMs)) return null;
 
@@ -275,9 +273,9 @@ export function readSave(value) {
       attributeEffort: { ...s.attributeEffort },
       combatLoadout: s.combatLoadout,
       coins: s.coins,
-      armour: normalizeArmour(s.armour),
-      difficulties: { ...difficulties }, enchantments: normalizeEnchantments(s.enchantments),
-      slotMastery: masteryRanks(s.slotMastery), combatSession: s.combatSession,
+      armour: { ...s.armour },
+      equipment: Object.fromEntries(Object.entries(s.equipment).map(([id, item]) => [id, { grade: item.grade, quality: item.quality }])),
+      difficulties: { ...difficulties }, combatSession: s.combatSession,
       unattributedXP: s.unattributedXP,
       items: Object.fromEntries(ITEM_KEYS.map(key => [key, s.items[key] ?? 0])),
       activity: s.activity, progressMs: newProgressMs, transition: newTransition,
@@ -342,7 +340,7 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
   const elapsedMs = end - state.settledAtMs;
   const next = { ...state, skills: { ...state.skills }, items: { ...state.items }, settledAtMs: end };
   const report = { activity: state.activity, elapsedMs, completed: 0, gainedXP: 0,
-    item: null, gainedItems: 0, gainedGlory: 0, gainedCoins: 0, items: {}, consumed: {} };
+    item: null, gainedItems: 0, gainedCoins: 0, items: {}, consumed: {} };
   if (!state.activity || elapsedMs === 0) return { state: next, report };
 
   // Attribute progress is based on productive time, not work cycles or
@@ -351,40 +349,23 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
   const tier=state.difficulties[state.activity]??0;
   const multiplier=tier?workMultiplier(tier,ACTIVITY_STAT_WEIGHTS[state.activity],
     combatAttributeProgress(frozenEffort,state.skills)):1;
-  let gloryResult = null;
   if (state.activity === "fighting") {
-    // Snapshot effectiveness before this batch: offline-earned stats and XP
-    // cannot make any of this absent interval's duels stronger (OFF-001).
     let session = state.combatSession;
-    const xpLeft=Math.max(0,xpToNextLevel(state.skills.fighting.level)-state.skills.fighting.xp);
-    const efficiency=Math.min(SKILL_BALANCE.maxEfficiency,
-      1+Math.max(0,state.skills.fighting.level-1)*SKILL_BALANCE.efficiencyPerLevel);
-    const nominalXP=ACTIVITIES.fighting.xp*efficiency*multiplier;
     if (!session) {
       const attrs = combatAttributeProgress(frozenEffort, state.skills);
-      const bonus = enchantBonus(state.enchantments,state.combatLoadout);
+      const bonus = equipmentBonuses(state);
       session = startCombatSession({
         difficulty:tier, name: state.name,
         loadout: state.combatLoadout,
         gear: {...armourStats(state.armour,state.combatLoadout),
-          defenseEnchant:bonus.defense},
-        attackEnchant:bonus.attack, conditionBonus:conditionBonuses(state),
+          gearDefense:bonus.defense},
+        gearAttack:bonus.attack,
         str: attrs.STR.value, dex: attrs.DEX.value, end: attrs.END.value,
         skill: state.skills.fighting.level
       }, state.settledAtMs >>> 0);
-      session=attachGloryTracker(session,
-        gloryEligibilityWindow(xpLeft,nominalXP,ACTIVITIES.fighting.durationMs,state.progressMs));
-    } else if (session.gloryCursor === undefined) {
-      // Legacy sessions never retroactively earn fictitious Glory.
-      // Start at the next fresh bout, under the unchanged fighter snapshot.
-      const firstFreshBout=Math.floor(session.elapsedMs/BOUT_MS)+1;
-      session=attachGloryTracker(session,gloryEligibilityWindow(
-        xpLeft,nominalXP,ACTIVITIES.fighting.durationMs,state.progressMs,
-        session.elapsedMs),firstFreshBout);
     }
-    session=advanceCombatSession(session,elapsedMs);
-    gloryResult=tallyGloryVictories(session);
-    const prize = settleArenaPrizes(gloryResult.session);
+    session = advanceCombatSession(session, elapsedMs);
+    const prize = settleArenaPrizes(session);
     next.combatSession = prize.session;
     next.coins = safeAdd(state.coins, prize.coins);
     report.gainedCoins = prize.coins;
@@ -432,12 +413,7 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
     // attributes remain a separate, universally accessible progression path.
     // Offline skill effectiveness stays frozen at the last activated level.
   }
-  if (gloryResult?.scrolls) {
-    report.gainedGlory=gloryResult.scrolls;
-    report.items[GLORY_SCROLL_ID]=gloryResult.scrolls;
-    report.gainedItems+=gloryResult.scrolls;
-    next.items[GLORY_SCROLL_ID]=safeAdd(next.items[GLORY_SCROLL_ID],gloryResult.scrolls);
-  }
+
   // A full XP bar cannot level here, on return or when the tab stays open.
   return { state: next, report };
 }
@@ -455,7 +431,7 @@ function settleTransition(state, now, random, frozenEffort) {
   let next = state;
   const reports = [];
   const pushReport = report => {
-    if (report.completed || report.gainedGlory || report.gainedCoins) reports.push(report);
+    if (report.completed || report.gainedCoins) reports.push(report);
   };
   let remaining = end - next.settledAtMs;
 
@@ -520,7 +496,7 @@ function remainingTransitionMs(state) {
 
 const emptyReport = (state, elapsedMs) => ({
   activity: state.activity, elapsedMs, completed: 0, gainedXP: 0,
-  item: null, gainedItems: 0, gainedGlory: 0, gainedCoins: 0, items: {}, consumed: {}
+  item: null, gainedItems: 0, gainedCoins: 0, items: {}, consumed: {}
 });
 
 
@@ -569,7 +545,7 @@ export function settle(state, now = Date.now(), random = Math.random) {
   const reports = [];
   const addReports = outcome => {
     for (const report of outcome.reports ?? [outcome.report]) {
-      if (report?.completed || report?.gainedGlory || report?.gainedCoins) reports.push(report);
+      if (report?.completed || report?.gainedCoins) reports.push(report);
     }
   };
   // Three productive segments + at most three transitions; the loop is
@@ -848,47 +824,29 @@ export function setCombatLoadout(state, loadout, now = Date.now(), random = Math
       ? null : result.state.combatSession } };
 }
 
-/**
- * Stat-gated gear selection. Settle earned work under the OLD frozen gear
- * before checking post-settlement attributes; a newly qualified player may
- * equip after logging in without visiting the Skill Master. Existing gear
- * selection is a no-op even if it predates this attribute rule.
- * A real change resets only the active Fighting duel; no XP/items are lost.
- */
-export function setArmourChoice(state, slot, item, now = Date.now(), random = Math.random) {
-  if (!armourOption(slot,item)) throw new RangeError("Unknown armour choice");
+export function setArmourChoice(state, slot, family, now = Date.now(), random = Math.random) {
+  if (!armourOption(slot, family) ||
+      family !== "none" && !Object.hasOwn(state.equipment, slot + ":" + family))
+    throw new RangeError("Armour is not owned");
   const result = settle(state, now, random);
-  if (result.state.armour[slot] === item) return result;
-  const attributes = combatAttributeProgress(result.state.attributeEffort, result.state.skills);
-  if (!armourUnlocked(attributes,slot,item))
-    throw new RangeError("Armour requires higher character attributes");
-  return { ...result, state: {
-    ...result.state, armour: { ...result.state.armour, [slot]: item },
-    combatSession: result.state.activity === "fighting" && !result.state.transition
-      ? null : result.state.combatSession
-  } };
+  if (result.state.armour[slot] === family) return result;
+  return { ...result, state: { ...result.state,
+    armour: { ...result.state.armour, [slot]: family }, combatSession: null } };
 }
 
-/**
- * Spend exactly one Glory Scroll on a selected weapon or armour BODY SLOT.
- * First settle all earned Fighting loot using the previous frozen enchants;
- * then apply one independent 50/50 roll. Failure resets only that slot rank.
- * No gear instances, generated item database, gold, or skill levels involved.
- */
-export function enchantEquipmentSlot(state, slot, now = Date.now(), random = Math.random) {
-  if (!Number.isSafeInteger(now) || now<0) throw new RangeError("Invalid clock");
-  if (state.items[GLORY_SCROLL_ID] < 1) throw new RangeError("Need a Glory Scroll");
-  const result=settle(state,now,random);
-  const attempted=enchantSlot(result.state.enchantments,slot,
-    result.state.items[GLORY_SCROLL_ID],random);
-  const nextItems={...result.state.items,
-    [GLORY_SCROLL_ID]:attempted.remainingScrolls};
-  const modified=attempted.rank!==attempted.before;
-  const next={...result.state,
-    items:nextItems,enchantments:attempted.enchantments,
-    combatSession:modified && result.state.activity==="fighting" && !result.state.transition
-      ? null : result.state.combatSession};
-  return {...result,state:next,enchantment:{slot,...attempted}};
+export function buyEquipment(state, id, target, now = Date.now(), random = Math.random) {
+  if (!equipmentIds.has(id) || !isEquipmentItem(target)) throw new RangeError("Unknown equipment");
+  const result = settle(state, now, random);
+  const quote = smithQuote(result.state, id, target);
+  if (!quote.available) return result;
+  const slot = id.split(":")[0];
+  const armour = Object.hasOwn(result.state.armour, slot)
+    ? { ...result.state.armour, [slot]: id.split(":")[1] } : result.state.armour;
+  const current = result.state;
+  return { ...result, purchased: true, state: { ...current, armour,
+    coins: current.coins - quote.cost, equipment: { ...current.equipment,
+      [id]: { grade: target.grade, quality: target.quality } },
+    combatSession: null } };
 }
 
 /** Legacy instant selection helper retained for historical engine fixtures only; the UI uses requestActivityChange. */

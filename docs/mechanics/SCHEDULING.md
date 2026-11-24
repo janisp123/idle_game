@@ -54,7 +54,7 @@ There is no **offline time cap** or mandatory daily login. Attribute effort and 
 
 ## Saves and migration
 
-- `SAVE_KEY = "idle-game-prototype-v1"` stays the same. `readSave` accepts V8. Earlier alpha saves start fresh with a reset notice.
+- `SAVE_KEY = "idle-game-prototype-v1"` stays the same. `readSave` accepts V9. Earlier alpha saves start fresh with a reset notice.
 - Saved values include individual skill XP/levels, `attributeEffort`, items, current activity, partial work, transition phase, wagon route, productive-period progress, timestamp, and `combatSession`.
 - Current-build progress across timing-profile changes is scaled **proportionally** to preserve the fraction of the unfinished work cycle or transition phase. Item totals, skill levels, XP and routes are not reset.
 - Inventory is available to eligible recipes. Skill Master action deliberately forfeits the selected skills' output resources only after confirmation.

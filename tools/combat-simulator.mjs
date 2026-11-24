@@ -1,3 +1,5 @@
+import { arenaReward } from '../site/play/arena-wallet.mjs';
+import { equipmentBonuses, STARTER_ITEM } from '../site/play/smith.mjs';
 /**
  * SIM-001: developer-only, zero-delay, deterministic combat harness.
  * This file lives in tools/, outside the GitHub Pages ./site deployment.
@@ -8,10 +10,8 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BOUT_MS, startCombatSession, combatAtTime } from '../site/play/combat.mjs';
 import { COMBAT_LOADOUTS } from '../site/play/combat-skills.mjs';
-import { ARMOUR_SLOTS, ARMOUR_TIERS, armourStats, armourUnlocked } from '../site/play/armour.mjs';
+import { ARMOUR_SLOTS, ARMOUR_TIERS, armourStats } from '../site/play/armour.mjs';
 import { GRADES, benchmark, unlockLevel } from '../site/play/difficulty.mjs';
-import { ENCHANT_SLOTS, blankEnchantments, enchantBonus, tallyGloryVictories } from '../site/play/glory.mjs';
-import { EQUIP_SLOTS, MAX_ENCHANT, masteryRanks, conditionBonuses } from '../site/play/equipment-rules.mjs';
 
 const DEFAULT_SEED = 20261124;
 const DEFAULT_BATTLES = 10000;
@@ -60,23 +60,17 @@ export function createPlayerSnapshot(options = {}) {
   const loadout = options.loadout ?? 'greatsword';
   if (!Object.hasOwn(COMBAT_LOADOUTS, loadout)) throw new RangeError('Unknown loadout');
   const armour = uniform(options.armour ?? 'none', options.armourSlots ?? {});
-  const attributes = { STR:str, DEX:dex, END:end };
-  for (const slot of ARMOUR_SLOTS)
-    if (!armourUnlocked(attributes, slot.id, armour[slot.id]))
-      throw new RangeError('Locked armour ' + slot.id + ':' + armour[slot.id] +
-        ' — increase the required character attribute');
-  const inputEnchantments = rankEntries(options.enchantments ?? {}, ENCHANT_SLOTS, MAX_ENCHANT, 'enchant');
-  const enchantments = { ...blankEnchantments(), ...inputEnchantments };
-  const inputMastery = rankEntries(options.mastery ?? {}, EQUIP_SLOTS, 7, 'mastery');
-  const slotMastery = masteryRanks(inputMastery);
-  if (!slotMastery) throw new RangeError('Invalid slot mastery');
-  const bonus = enchantBonus(enchantments, loadout);
-  const gear = { ...armourStats(armour, loadout), defenseEnchant:bonus.defense };
-  const conditionBonus = conditionBonuses({armour, enchantments, slotMastery});
-  return {
-    name:'Wanderer', difficulty, loadout, skill, str, dex, end,
-    gear, attackEnchant:bonus.attack, conditionBonus
-  };
+  const spec = { grade: options.itemGrade ?? STARTER_ITEM.grade, quality: options.quality ?? STARTER_ITEM.quality };
+  const equipment = Object.fromEntries([
+    [loadout, spec],
+    ...Object.entries(armour).filter(([, family]) => family !== 'none')
+      .map(([slot, family]) => [slot + ':' + family, spec])
+  ]);
+  const bonus = equipmentBonuses({ combatLoadout: loadout, armour, equipment });
+  return { name:'Wanderer', difficulty, loadout, skill, str, dex, end,
+    gear: { ...armourStats(armour, loadout), gearDefense: bonus.defense },
+    gearAttack: bonus.attack };
+
 }
 const increment = (obj, key, n = 1) => { obj[key] = (obj[key] ?? 0) + n; };
 const bucket = (obj, key) => obj[key] ??= { battles:0, victories:0, defeats:0, draws:0 };
@@ -112,12 +106,10 @@ export function simulateBatch(options = {}) {
   const startBout = intIn(options.startBout ??
     (combatSession ? Math.floor(combatSession.elapsedMs / BOUT_MS) : 0),
     0, Math.floor(Number.MAX_SAFE_INTEGER / BOUT_MS) - battles, 'start bout');
-  const gloryEligibleBouts = intIn(options.gloryEligibleBouts ?? 0, 0, battles, 'eligible Glory bouts');
   const session = startCombatSession(player, seed); // production validation
   const generatedBuild = saved ? null : {
     armourSlots:uniform(options.armour ?? 'none', options.armourSlots ?? {}),
-    enchantments:{...blankEnchantments(),...(options.enchantments ?? {})},
-    mastery:masteryRanks(options.mastery ?? {})
+    itemGrade: options.itemGrade ?? 0, quality: options.quality ?? "poor"
   };
   const summary = {
     source:'site/play/combat.mjs:combatAtTime',
@@ -128,7 +120,7 @@ export function simulateBatch(options = {}) {
       loadout:player.loadout, skill:player.skill,
       stats:{STR:player.str, DEX:player.dex, END:player.end},
       gear:player.gear ?? null,
-      attackEnchant:player.attackEnchant ?? 0,
+      gearAttack:player.gearAttack ?? 0,
       conditionBonus:player.conditionBonus ?? null
     },
     outcomes:{victory:0,defeat:0,stalemate:0},
@@ -148,7 +140,7 @@ export function simulateBatch(options = {}) {
       enemyArmourConditionLost:0,playerWeaponConditionLost:0,
       enemyWeaponConditionLost:0
     },
-    glory:null, samples:[]
+    samples:[]
   };
   const totals = {turns:0,playerPct:0,enemyPct:0,playerLoss:0,enemyLoss:0,
     playerArmourLoss:0,enemyArmourLoss:0,playerWeaponLoss:0,enemyWeaponLoss:0};
@@ -221,20 +213,7 @@ export function simulateBatch(options = {}) {
     playerWeaponConditionLost:average(totals.playerWeaponLoss, battles),
     enemyWeaponConditionLost:average(totals.enemyWeaponLoss, battles)
   };
-  // Fully optional: ask the existing production Glory module to resolve
-  // eligible completed victories and 50% drops. No fictional offline XP.
-  if (gloryEligibleBouts) {
-    const tracked = {...session,elapsedMs:(startBout + battles) * BOUT_MS,
-      gloryCursor:startBout,
-      gloryEligibleUntilMs:(startBout + gloryEligibleBouts) * BOUT_MS};
-    const rewards = tallyGloryVictories(tracked);
-    summary.glory = {
-      eligibleBouts:gloryEligibleBouts,
-      eligibleVictories:rewards.eligibleVictories,
-      scrolls:rewards.scrolls,
-      note:'Uses the exact production XP-eligibility window and reward RNG; no automatic enchanting'
-    };
-  }
+  summary.coins = summary.outcomes.victory * arenaReward(player.difficulty ?? 0);
   return summary;
 }
 const pairList = (raw, name, asInteger = false) => {
@@ -260,13 +239,13 @@ export function parseCliArgs(args) {
   const flags = {
     '--battles':'battles','--seed':'seed','--start-bout':'startBout',
     '--grade':'grade','--loadout':'loadout','--armour':'armour',
-    '--armour-slots':'armourSlots','--enchant':'enchantments',
-    '--mastery':'mastery','--skill':'skill','--str':'str',
+    '--armour-slots':'armourSlots','--item-grade':'itemGrade','--quality':'quality',
+    '--skill':'skill','--str':'str',
     '--dex':'dex','--end':'end',
-    '--trace':'trace','--glory-eligible-bouts':'gloryEligibleBouts',
+    '--trace':'trace',
     '--snapshot':'snapshot'
   };
-  const numeric = new Set(['battles','seed','startBout','skill','str','dex','end','trace','gloryEligibleBouts']);
+  const numeric = new Set(['battles','seed','startBout','skill','str','dex','end','trace','itemGrade']);
   const out = {};
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -278,10 +257,9 @@ export function parseCliArgs(args) {
     const value = args[++i];
     out[key] = numeric.has(key) ? Number(value) :
       key === 'armourSlots' ? pairList(value, 'armour', false) :
-      key === 'enchantments' || key === 'mastery' ? pairList(value, key, true) :
       key === 'snapshot' ? JSON.parse(readFileSync(resolve(value), 'utf8')) : value;
   }
-  if (out.snapshot && ['grade','loadout','armour','armourSlots','enchantments','mastery','skill',
+  if (out.snapshot && ['grade','loadout','armour','armourSlots','itemGrade','quality','skill',
       'str','dex','end'].some(k => Object.hasOwn(out,k)))
     throw new RangeError('--snapshot supplies the frozen fighter; do not mix build options');
   return out;
@@ -292,17 +270,14 @@ export const HELP = [
   'Options:',
   ' --battles N              number of duels (default 10000; max 1000000)',
   ' --grade Non-grade|F|E|D|C|B|A|S  opponent difficulty (default Non-grade)',
-  ' --loadout greatsword|sword_shield|hammer|bow|staff|twin_blades',
-  ' --armour none|leather|plate   all 11 body slots (default none)',
-  ' --armour-slots head:plate,chest:leather   overrides individual body slots',
-  ' --enchant weapon:2,head:1,shield:3  actual per-slot enchant ranks',
-  ' --mastery weapon:1,head:2         actual per-slot mastery grades',
+  ' --loadout greatsword|sword_shield|hammer|bow|spear',
+  ' --armour none|padded|leather|plate   all 11 body slots (default none)',
+  ' --armour-slots head:plate,torso:leather   overrides individual body slots',
   ' --skill N --str N --dex N --end N  default: grade benchmarks',
   ' --seed N                  live combat session RNG seed (default 20261124)',
   ' --start-bout N            zero-based live bout index (default 0)',
   ' --snapshot FILE.json     local frozen combatSession/player JSON; no uploads',
   ' --config FILE.json       load scenario options from local JSON; cannot mix flags',
-  ' --glory-eligible-bouts N  optional real XP-eligible drop window',
   ' --trace N                include N full event/dice traces (max 100)',
   ' --help                   this guide',
   'Write JSON to a file with shell redirection: ... > combat-report.json',

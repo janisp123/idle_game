@@ -1,24 +1,23 @@
-import { GRADES as difficultyGrades, benchmark, TERRAIN_ROLL_START, TERRAIN_REVEAL } from "./difficulty.mjs?v=arena-v1";
-import { GRADES, characterLevel, masteryOffer, slotBonus } from "./equipment-rules.mjs?v=arena-v1";
+import { GRADES as difficultyGrades, benchmark, TERRAIN_ROLL_START, TERRAIN_REVEAL } from "./difficulty.mjs?v=glad-002";
+import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote } from "./smith.mjs?v=glad-002";
 import {
-  setDifficulty, trainEquipmentSlot, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
+  setDifficulty, buyEquipment, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
   lootChances, recipeOptions, newGame, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
-  xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice,
-  GLORY_SCROLL_ID, GLORY_RULES, enchantEquipmentSlot, enchantBonus
-} from "./engine.mjs?v=glad-001";
+  xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
+} from "./engine.mjs?v=glad-002";
 
-import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=glad-001";
+import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=glad-002";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=arena-v1";
-import { combatFlowState } from "./combat-flow.mjs?v=arena-v1";
+import { combatFlowState } from "./combat-flow.mjs?v=glad-002";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
-import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, WEAPON_PIECES,
-  armourOption, armourUnlocked, armourStats }
-  from "./armour.mjs?v=glad-001";
+import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
+  armourOption, armourStats }
+  from "./armour.mjs?v=glad-002";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
   setAlphaSpeed, advanceAlphaClock } from "./alpha-tools.mjs?v=20261122-alpha-tools1";
 const $ = id => document.getElementById(id);
@@ -27,13 +26,10 @@ const ui = {
   characterAttributes: $("characterAttributes"),
   weaponSlots: $("weaponSlots"), combatSkillsText: $("combatSkillsText"),
   armourSlots: $("armourSlots"), armourChoice: $("armourChoice"),
-  armourChoiceLabel: $("armourChoiceLabel"), armourEditor: $("armourEditor"),
-  weaponEditor: $("weaponEditor"), equipmentEditHeading: $("equipmentEditHeading"),
-  gearStats: $("gearStats"), gloryWallet: $("gloryWallet"),
-  enchantSelected: $("enchantSelected"), enchantChance: $("enchantChance"),
-  enchantChanceBreakdown: $("enchantChanceBreakdown"),
-  enchantChanceDetails: $("enchantChanceDetails"),
-  enchantFeedback: $("enchantFeedback"), enchantTotal: $("enchantTotal"),
+  armourEditor: $("armourEditor"),
+  equipmentEditHeading: $("equipmentEditHeading"), gearStats: $("gearStats"),
+  coinWallet: $("coinWallet"), itemGrade: $("itemGrade"), itemQuality: $("itemQuality"),
+  smithBuy: $("smithBuy"), smithEquip: $("smithEquip"), smithStatus: $("smithStatus"),
   resourceList: $("resourceList"), choices: $("activityChoices"),
   openActivities: $("openActivities"), categories: $("activityCategories"),
   categoryChoices: $("activityCategoryChoices"), listScreen: $("activityListScreen"),
@@ -83,210 +79,102 @@ for (let n = SCHEDULE_BALANCE.minDurationUnits; n <= SCHEDULE_BALANCE.maxDuratio
 }
 // The two existing combat styles are real equipment cards like armour slots,
  // not a separate full-width form above the folded equipment panel.
+let selectedEquipmentSlot = "head";
+let selectedFamily = "padded";
 const weaponButtons = new Map();
-for (const loadout of Object.values(COMBAT_LOADOUTS)) {
+const armourButtons = new Map();
+const titleCase = value => value[0].toUpperCase() + value.slice(1);
+
+function addOption(select, value, label) {
+  const option = document.createElement("option");
+  option.value = String(value);
+  option.textContent = label;
+  select.append(option);
+}
+
+function shopTarget() {
+  return selectedEquipmentSlot === "weapon" ? state.combatLoadout :
+    selectedFamily === "none" ? null : selectedEquipmentSlot + ":" + selectedFamily;
+}
+
+function resetSmithSelection() {
+  const item = state.equipment[shopTarget()] ?? STARTER_ITEM;
+  ui.itemGrade.value = String(item.grade);
+  ui.itemQuality.value = item.quality;
+  ui.smithStatus.textContent = "";
+}
+
+function equipmentButton(parent, label, className, activate) {
   const button = document.createElement("button");
   button.type = "button";
-  button.className = "armour-slot weapon-slot";
-  button.setAttribute("data-loadout", loadout.id);
-  const glyph = document.createElement("span");
-  glyph.className = "armour-slot-symbol";
-  glyph.textContent = ({greatsword:"⚔", hammer:"⚒", sword_shield:"♜", bow:"➶", staff:"✦", twin_blades:"⚔"})[loadout.id];
-  const caption = document.createElement("span");
-  caption.className = "weapon-slot-name";
-  caption.textContent = loadout.name;
-  const weight = document.createElement("span");
-  weight.className = "weapon-slot-weight";
-  weight.textContent = WEAPON_PIECES[loadout.id]
-    .reduce((sum,part)=>sum+part.kg,0) + " kg";
-  const enchant = document.createElement("span");
-  enchant.className = "slot-enchant-rank";
-  enchant.hidden = true;
-  caption.append(enchant);
-  button.append(glyph,caption,weight);
-  button.addEventListener("click", () => {
-    const selectionChanged = selectEquipmentSlot("weapon");
-    if (state.combatLoadout === loadout.id) {
-      if (selectionChanged) render();
-      return;
-    }
-    const result = setCombatLoadout(state,loadout.id,gameNow());
+  button.textContent = label;
+  button.className = className;
+  button.addEventListener("click", activate);
+  parent.append(button);
+  return button;
+}
+
+for (const [id, loadout] of Object.entries(COMBAT_LOADOUTS)) {
+  const button = equipmentButton(ui.weaponSlots, loadout.name, "weapon-slot", () => {
+    const result = setCombatLoadout(state, id, gameNow());
     state = result.state;
+    selectedEquipmentSlot = "weapon";
+    resetSmithSelection();
     reportProgress(result);
-    message("Equipped: " + loadout.name);
     writeSave();
     render();
   });
-  weaponButtons.set(loadout.id,{button,enchant});
-  ui.weaponSlots.append(button);
+  button.setAttribute("data-loadout", id);
+  weaponButtons.set(id, button);
 }
-// One shared edit selection across the single weapon slot and all eleven
-// independent body slots. Selected is NOT synonymous with worn/equipped.
-let selectedEquipmentSlot = "head";
-function selectEquipmentSlot(slot) {
-  if (slot !== "weapon" && slot !== "shield" && !ARMOUR_SLOT_BY_ID[slot])
-    throw new RangeError("Unknown equipment slot");
-  const changed=selectedEquipmentSlot !== slot;
-  selectedEquipmentSlot=slot;
-  if (changed) {
-    // Never show the previous slot's warning or success message for this slot.
-    ui.enchantChanceBreakdown.hidden=true;
-    ui.enchantChance.setAttribute("aria-expanded","false");
-    ui.enchantFeedback.hidden=true;
-  }
-  return changed;
-}
-let lastArmourOptionsKey = null;
-const armourButtons = new Map();
 for (const slot of ARMOUR_SLOTS) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "armour-slot";
-  button.setAttribute("data-slot", slot.id);
-  const glyph = document.createElement("span");
-  glyph.className = "armour-slot-symbol";
-  glyph.textContent = slot.icon;
-  const caption = document.createElement("span");
-  caption.className = "armour-slot-caption";
-  caption.textContent = slot.short;
-  const equipped = document.createElement("span");
-  equipped.className = "armour-slot-item";
-  const enchant = document.createElement("span");
-  enchant.className = "slot-enchant-rank";
-  enchant.hidden = true;
-  caption.append(enchant);
-  button.append(glyph,caption,equipped);
-  button.addEventListener("click", () => {
-    selectEquipmentSlot(slot.id);
+  const button = equipmentButton(ui.armourSlots, slot.name, "armour-slot", () => {
+    selectedEquipmentSlot = slot.id;
+    selectedFamily = state.armour[slot.id];
+    resetSmithSelection();
     render();
   });
-  armourButtons.set(slot.id, {button, equipped, enchant});
-  ui.armourSlots.append(button);
+  button.setAttribute("data-slot", slot.id);
+  armourButtons.set(slot.id, button);
 }
-const insignia = document.createElement("span");
-insignia.className = "armour-insignia";
-insignia.textContent = "✣";
-insignia.setAttribute("aria-hidden", "true");
-ui.armourSlots.append(insignia);
+for (const { id, name } of ARMOUR_CHOICES.head) addOption(ui.armourChoice, id, name);
+ITEM_GRADES.forEach((grade, index) => addOption(ui.itemGrade, index, grade));
+ITEM_QUALITIES.forEach(quality => addOption(ui.itemQuality, quality, titleCase(quality)));
+const selectedSpec = () => ({ grade: Number(ui.itemGrade.value), quality: ui.itemQuality.value });
 
-function enchantDescription(bonus) {
-  return [[bonus.attack,"ATK"],[bonus.defense,"DEF"],[bonus.durability,"durability"]]
-    .filter(([n])=>n>0).map(([n,label])=>n+" "+label).join(", +");
-}
 function renderArmour() {
-  if(selectedEquipmentSlot==="shield" && state.combatLoadout!=="sword_shield") selectEquipmentSlot("weapon");
-  const editingShield=selectedEquipmentSlot==="shield";
-  $("shieldSlot").hidden=state.combatLoadout!=="sword_shield";
-  $("shieldSlot").setAttribute("aria-pressed",String(editingShield));
-  $("shieldSlot").textContent="Shield"+(state.enchantments.shield?" +"+state.enchantments.shield:"");
-  const editingWeapon = selectedEquipmentSlot === "weapon";
-  const slot = editingWeapon ? null : ARMOUR_SLOT_BY_ID[selectedEquipmentSlot];
-  const selectedRank=state.enchantments[selectedEquipmentSlot];
-  const selectedName=editingWeapon ? "WEAPON" : editingShield ? "SHIELD" : slot.short;
-  ui.equipmentEditHeading.textContent = selectedName +
-    (selectedRank > 0 ? " +" + selectedRank : "");
+  const slot = ARMOUR_SLOT_BY_ID[selectedEquipmentSlot];
+  const id = shopTarget();
+  const item = state.equipment[id];
+  const quote = id ? smithQuote(state, id, selectedSpec()) : null;
+  const name = slot ? slot.name : COMBAT_LOADOUTS[state.combatLoadout].name;
+  ui.equipmentEditHeading.textContent = name + (item ?
+    " · " + ITEM_GRADES[item.grade] + " " + titleCase(item.quality) : "");
   ui.armourEditor.hidden = !slot;
-  ui.weaponEditor.hidden = !editingWeapon;
-  ui.weaponEditor.textContent = COMBAT_LOADOUTS[state.combatLoadout].name;
+  ui.armourChoice.value = selectedFamily;
+  ui.itemGrade.disabled = !id;
+  ui.itemQuality.disabled = !id;
+  ui.smithBuy.disabled = !quote?.available;
+  ui.smithBuy.textContent = quote?.cost ?
+    (item ? "Improve" : "Buy and equip") + " · " + number(quote.cost) + " coins" : "Choose an improvement";
+  ui.smithEquip.hidden = !slot || (id && !item);
+  ui.smithEquip.disabled = !slot || state.armour[slot.id] === selectedFamily;
+  ui.smithEquip.textContent = selectedFamily === "none" ? "Unequip" : "Equip owned armour";
+  ui.coinWallet.textContent = number(state.coins) + " coins";
 
-  if (slot) {
-    const attributes = effectiveAttributeProgress(state.attributeEffort, state.skills);
-    const key = slot.id + ":" + ATTRIBUTES.map(({ id }) => attributes[id].value).join(":") +
-      ":" + state.armour[slot.id];
-    if (lastArmourOptionsKey !== key) {
-      const options = ARMOUR_CHOICES[slot.group].map(piece => {
-        const opt = document.createElement("option");
-        opt.value = piece.id;
-        const eligible = armourUnlocked(attributes,slot.id,piece.id);
-        // Already-worn V7 gear survives this stat requirement.
-        const legacyEquipped = !eligible && state.armour[slot.id] === piece.id;
-        opt.disabled = !eligible && !legacyEquipped;
-        const gate = piece.requirement;
-        opt.textContent = piece.name + " · " + piece.weightKg + " kg" +
-          (gate ? " · " + gate.stat + " " + gate.min : "") +
-          (legacyEquipped ? " · Previously equipped" : "");
-        return opt;
-      });
-      ui.armourChoice.replaceChildren(...options);
-      lastArmourOptionsKey = key;
-    }
-    ui.armourChoiceLabel.textContent = slot.name;
-    ui.armourChoice.value = state.armour[slot.id];
+  const gear = armourStats(state.armour, state.combatLoadout);
+  const bonus = equipmentBonuses(state);
+  ui.gearStats.textContent = gear.totalKg + " kg · Move " + gear.mobilityPct +
+    "% · Armour " + gear.physicalReductionPct + "% · Attack +" + bonus.attack +
+    " · Guard +" + bonus.defense;
+  for (const [style, button] of weaponButtons) {
+    button.setAttribute("data-equipped", String(style === state.combatLoadout));
+    button.setAttribute("aria-pressed", String(!slot && style === state.combatLoadout));
   }
-  const offer=masteryOffer(state,selectedEquipmentSlot);
-  const grade=GRADES[offer.rank-1]?.grade??"Untrained";
-  const costs=offer.next?Object.entries(offer.next.cost).map(([id,n])=>ITEM_LABELS[id]+" "+number(state.items[id])+"/"+n).join(" · "):"";
-  $("masteryInfo").textContent="Character Lv "+characterLevel(state.skills)+" · Mastery "+grade+
-    (offer.next?" · "+offer.next.grade+" needs Lv "+offer.next.level+" · "+costs:"");
-  $("trainSlot").textContent=offer.next?"Train "+offer.next.grade+" · +3 durability":"S mastery complete";
-  $("trainSlot").disabled=!offer.available;
-  const gear = armourStats(state.armour,state.combatLoadout);
-  const bonus = enchantBonus(state.enchantments,state.combatLoadout);
-  ui.gearStats.textContent = gear.totalKg + " kg  ·  MOVE " + gear.mobilityPct +
-    "%  ·  PHYS " + gear.physicalReductionPct + "%  ·  DODGE " +
-    (gear.evasionScore >= 0 ? "+" : "") + gear.evasionScore +
-    (bonus.attack > 0 ? "  ·  ATK +" + bonus.attack : "") +
-    (bonus.defense > 0 ? "  ·  DEF +" + bonus.defense : "") +
-    "  ·  MR* " + gear.magicResistancePct + "%";
-  const totalRanks = Object.values(state.enchantments).reduce((sum,n)=>sum+n,0);
-  ui.enchantTotal.textContent = "✧ +" + totalRanks;
-  ui.enchantTotal.hidden = totalRanks === 0;
-  for (const [id,parts] of weaponButtons) {
-    const equipped = id === state.combatLoadout;
-    const selected = editingWeapon && equipped;
-    parts.button.setAttribute("aria-pressed",String(selected));
-    parts.button.setAttribute("data-equipped",String(equipped));
-    const rank = state.enchantments.weapon;
-    parts.button.setAttribute("aria-label",COMBAT_LOADOUTS[id].name +
-      (rank > 0 ? ", enchanted +" + rank : "") +
-      ". " + (selected ? "Selected equipment slot" :
-        equipped ? "Equipped; select weapon slot" : "Equip and select weapon slot"));
-    parts.enchant.textContent = rank > 0 ? " +" + rank : "";
-    parts.enchant.hidden = rank === 0;
-  }
-  ui.gearStats.title = "Physical reduction, dodge and mobility are active. " +
-    "MR reduces spell damage; slot enchants add physical attack or defense.";
-  ui.gloryWallet.textContent = "✧ " + number(state.items[GLORY_SCROLL_ID]) + " Glory Scrolls";
-  const chancePct=Math.round(GLORY_RULES.enchantSuccessChance*100);
-  ui.enchantChance.textContent=chancePct + "% ⓘ";
-  ui.enchantChance.title="See the current enchant probability and risk";
-  const successRank=selectedRank+1;
-  const hasScroll=state.items[GLORY_SCROLL_ID]>0;
-  ui.enchantSelected.disabled = !hasScroll || selectedRank >= GLORY_RULES.maxRank;
-  ui.enchantSelected.setAttribute("aria-label","Enchant only " + selectedName +
-    (selectedRank>0?" +"+selectedRank:"") +
-    "; " + chancePct + "% success, costs one Glory Scroll");
-  ui.enchantSelected.title = !hasScroll ? "Requires 1 Glory Scroll" :
-    selectedRank>=GLORY_RULES.maxRank ? "Maximum enchantment rank reached" :
-    "Chance " + chancePct + "%; failure resets " + selectedName + " to +0";
-  const nextBonus=slotBonus(selectedEquipmentSlot,successRank);
-  const details=[
-    "Selected slot: " + selectedName + (selectedRank>0?" +"+selectedRank:""),
-    "Base success chance: " + chancePct + "%",
-    "Active chance modifiers: none (0 percentage points)",
-    "Final success chance: " + chancePct + "%",
-    "Cost per attempt: 1 Glory Scroll (success or failure)",
-    selectedRank >= GLORY_RULES.maxRank
-      ? "At maximum enchant rank: +" + GLORY_RULES.maxRank + " (no further attempts)"
-      : "Success: +" + successRank + " on this slot (+" +
-        enchantDescription(nextBonus) + " total from this slot)",
-    "Failure: this slot resets to +0 (lose " + selectedRank + " existing rank" +
-      (selectedRank===1?"":"s") + "); other slots stay unchanged",
-    "No attributes, skill level, equipment type or current rank change the chance yet."
-  ];
-  ui.enchantChanceDetails.textContent=details.join("\n");
   for (const part of ARMOUR_SLOTS) {
-    const row = armourButtons.get(part.id);
-    const picked = armourOption(part.id, state.armour[part.id]);
-    row.equipped.textContent = picked?.name ?? "—";
-    const rank=state.enchantments[part.id];
-    row.enchant.textContent = rank > 0 ? " +" + rank : "";
-    row.enchant.hidden = rank === 0;
-    row.button.setAttribute("aria-pressed",
-      String(part.id === selectedEquipmentSlot));
-    row.button.setAttribute("aria-label",part.name +
-      (rank > 0 ? " +" + rank : "") + ": " + (picked?.name ?? "none") +
-      ". Select this one equipment slot");
+    const button = armourButtons.get(part.id);
+    button.textContent = part.name + " · " + armourOption(part.id, state.armour[part.id]).name;
+    button.setAttribute("aria-pressed", String(part.id === selectedEquipmentSlot));
   }
 }
 
@@ -616,14 +504,12 @@ function reportProgress(outcome) {
   if (!outcome) return false;
   let gained = false;
   for (const report of outcome.reports ?? [outcome.report ?? outcome]) {
-    if (!report?.completed && !report?.gainedGlory) continue;
-    if (report.gainedGlory)
-      message("✧ +" + number(report.gainedGlory) + " Glory Scroll" +
-        (report.gainedGlory===1 ? "" : "s"));
+    if (!report?.completed && !report?.gainedCoins) continue;
+    if (report.gainedCoins) message("Arena winnings: +" + number(report.gainedCoins) + " coins");
     const result = workReadoutForReport(report, ITEM_LABELS, ACTIVITIES);
     if (result) {
       latestWorkResult = result;
-      ui.resultNotice.textContent = "";
+      if (!report.gainedCoins) ui.resultNotice.textContent = "";
     }
     gained = true;
   }
@@ -1114,7 +1000,7 @@ function render() {
     ui.combatPanel.classList.toggle("finisher",revealed && event.type === "finisher");
     const key = state.combatSession.seed + ":" + combat.bout + ":" + combat.step;
     if (revealed && key !== lastCombatEventKey) {
-      if (!ui.resultNotice.textContent.includes("Glory Scroll"))
+      if (!ui.resultNotice.textContent.startsWith("Arena winnings:"))
         ui.resultNotice.textContent = "";
       lastCombatEventKey = key;
     }
@@ -1248,7 +1134,7 @@ function start() {
       try { localStorage.removeItem(ALPHA_CLOCK_KEY); } catch { storageWorks = false; }
     }
     state = newGame(Date.now());
-    if (saved) message("Alpha progression was reset for the survival update or because the previous save could not be read. A new character was created.");
+    if (saved) message("Alpha progression was reset for the equipment update or because the previous save could not be read. A new character was created.");
     else message("Choose an activity. Your character will work without further clicks.");
     writeSave();
   } else {
@@ -1266,7 +1152,7 @@ function start() {
     try {
       if (!window.confirm("RESET ALL PROGRESS?\\n\\nDelete this device's character, " +
         "all activity levels and XP, resources, attribute training, equipment, " +
-        "enchantments and route. No undo. Skills restart at Lv 1; stats at 10.")) return;
+        "coins and route. No undo. Skills restart at Lv 1; stats at 10.")) return;
       if (!storageWorks) {
         ui.alphaStatus.textContent="Reset unavailable: device storage is blocked.";
         return;
@@ -1276,12 +1162,10 @@ function start() {
       state=newGame(Date.now());
       latestWorkResult=null;
       lastCombatEventKey=null;
-      lastArmourOptionsKey=null;
       lastWagonSignature=null;
-      selectedEquipmentSlot="head";
-      ui.enchantChanceBreakdown.hidden=true;
-      ui.enchantChance.setAttribute("aria-expanded","false");
-      ui.enchantFeedback.hidden=true;
+      selectedEquipmentSlot = "head";
+      selectedFamily = "padded";
+      resetSmithSelection();
       ui.masterAudience.hidden=true;
       hideQueuePlanner();
       showActivityScreen("root",null);
@@ -1331,64 +1215,29 @@ function start() {
       ui.alphaStatus.textContent="Could not change testing speed.";
     }
   });
+  resetSmithSelection();
   ui.armourChoice.addEventListener("change", () => {
-    // Hidden armour editor can never mutate a second slot while weapon editing.
-    const slot = ARMOUR_SLOT_BY_ID[selectedEquipmentSlot];
-    if (!slot) return;
-    const option = armourOption(slot.id, ui.armourChoice.value);
-    if (!option || (state.armour[slot.id] !== option.id &&
-      !armourUnlocked(effectiveAttributeProgress(state.attributeEffort,state.skills),slot.id,option.id))) {
-      renderArmour();
-      return;
-    }
-    const outcome = setArmourChoice(state,slot.id,option.id,gameNow());
-    state = outcome.state;
-    reportProgress(outcome);
+    if (!armourOption(selectedEquipmentSlot, ui.armourChoice.value)) return;
+    selectedFamily = ui.armourChoice.value;
+    resetSmithSelection();
+    renderArmour();
+  });
+  ui.itemGrade.addEventListener("change", renderArmour);
+  ui.itemQuality.addEventListener("change", renderArmour);
+  ui.smithEquip.addEventListener("click", () => {
+    if (ui.smithEquip.disabled) return;
+    const result = setArmourChoice(state, selectedEquipmentSlot, selectedFamily, gameNow());
+    state = result.state;
+    reportProgress(result);
     writeSave();
     render();
   });
-  $("shieldSlot").addEventListener("click",()=>{selectEquipmentSlot("shield");render();});
-  $("trainSlot").addEventListener("click",()=>{
-    const slot=selectedEquipmentSlot;
-    const offer=masteryOffer(state,slot);
-    if(!offer.available) return;
-    if(!window.confirm("Train "+slot.replaceAll("_"," ")+" to "+offer.next.grade+"? Spend "+
-      Object.entries(offer.next.cost).map(([id,n])=>n+" "+ITEM_LABELS[id]).join(", ")+ ".")) return;
-    const result=trainEquipmentSlot(state,slot,offer.rank,gameNow());
-    state=result.state; reportProgress(result); writeSave(); render();
-  });
-  ui.enchantChance.addEventListener("click", () => {
-    const expand=ui.enchantChanceBreakdown.hidden;
-    ui.enchantChanceBreakdown.hidden=!expand;
-    ui.enchantChance.setAttribute("aria-expanded",String(expand));
-  });
-  ui.enchantSelected.addEventListener("click", () => {
-    // ONE current selection is the sole target. No stale weapon + armour
-    // enchant controls or hidden edit state can spend a scroll elsewhere.
-    const slot=selectedEquipmentSlot;
-    const rank=state.enchantments[slot];
-    if (state.items[GLORY_SCROLL_ID]<1 || rank>=GLORY_RULES.maxRank) return;
-    const name=slot==="weapon" ?
-      COMBAT_LOADOUTS[state.combatLoadout].name : slot==="shield"?"Shield":ARMOUR_SLOT_BY_ID[slot].name;
-    const pct=Math.round(GLORY_RULES.enchantSuccessChance*100);
-    if (!window.confirm("ENCHANT " + name.toUpperCase() +
-      (rank>0?" +"+rank:"") + "?\\n\\nChance: " + pct + "%." +
-      "\\nCost: 1 Glory Scroll." +
-      "\\nSuccess: +" + enchantDescription(slotBonus(slot,rank+1)) + " total on this slot." +
-      "\\nFailure: this slot resets to +0 (lose " + rank +
-        " existing rank" + (rank===1?"":"s") + ")." +
-      "\\nOther slots remain unchanged. Continue?")) return;
-    const result=enchantEquipmentSlot(state,slot,gameNow());
-    state=result.state;
+  ui.smithBuy.addEventListener("click", () => {
+    if (ui.smithBuy.disabled) return;
+    const result = buyEquipment(state, shopTarget(), selectedSpec(), gameNow());
+    state = result.state;
     reportProgress(result);
-    const resultText = result.enchantment.success
-      ? "SUCCESS · " + name + " is now +" + enchantDescription(slotBonus(slot,result.enchantment.rank))
-      : "FAILED · " + name + " enchant reset to +0";
-    message("✧ " + resultText);
-    ui.enchantFeedback.textContent=resultText;
-    ui.enchantFeedback.setAttribute("data-outcome",
-      result.enchantment.success?"success":"failure");
-    ui.enchantFeedback.hidden=false;
+    ui.smithStatus.textContent = result.purchased ? "Equipment ready." : "Purchase unavailable.";
     writeSave();
     render();
   });

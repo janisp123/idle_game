@@ -6,8 +6,6 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { BOUT_MS, combatAtTime, startCombatSession } from '../site/play/combat.mjs';
 import { armourStats, ARMOUR_SLOTS } from '../site/play/armour.mjs';
-import { blankEnchantments, enchantBonus, tallyGloryVictories } from '../site/play/glory.mjs';
-import { conditionBonuses, masteryRanks } from '../site/play/equipment-rules.mjs';
 import { createPlayerSnapshot, parseCliArgs, simulateBatch } from './combat-simulator.mjs';
 
 test('the 10,000-bout runner resolves real production opponents, locations and dice', () => {
@@ -57,65 +55,26 @@ test('sampled traces equal the actual live combatAtTime events without a substit
   assert.deepEqual(simulateBatch(args),output);
 });
 
-test('gear, mixed armour, enchantment and mastery use production source functions', () => {
-  const options={grade:'D',loadout:'sword_shield',armour:'leather',
-    armourSlots:{head:'plate',chest:'plate'},str:22,dex:22,end:22,
-    enchantments:{weapon:3,shield:2,head:4,chest:2},mastery:{weapon:1,head:3,shield:1}};
-  const player=createPlayerSnapshot(options);
-  const armour=Object.fromEntries(ARMOUR_SLOTS.map(x=>[x.id,options.armourSlots[x.id]??options.armour]));
-  const ench={...blankEnchantments(),...options.enchantments};
-  const mastery=masteryRanks(options.mastery);
-  const bonus=enchantBonus(ench,options.loadout);
-  assert.equal(player.attackEnchant,bonus.attack);
-  assert.equal(player.gear.defenseEnchant,bonus.defense);
-  assert.deepEqual(player.gear,{...armourStats(armour,options.loadout),defenseEnchant:bonus.defense});
-  assert.deepEqual(player.conditionBonus,conditionBonuses({armour,enchantments:ench,slotMastery:mastery}));
-  assert.equal(player.difficulty,3);
-  const output=simulateBatch({...options,battles:100,seed:112,trace:1});
-  assert.equal(output.player.attackEnchant,3);
-  assert.equal(output.playerBuild.enchantments.head,4);
-  assert.equal(output.playerBuild.mastery.head,3);
-  assert.equal(output.playerBuild.armourSlots.chest,'plate');
-  assert.ok(output.player.conditionBonus.body>0);
-  assert.ok(output.samples[0].events.at(-1).vitals.player.armour>=0);
-});
-
 test('saved session snapshots preserve frozen power, start bout, seed and exact outcome',()=>{
   const player=createPlayerSnapshot({grade:'F',loadout:'greatsword',armour:'leather',
-    enchantments:{weapon:2,head:1},skill:10,str:14,dex:14,end:14});
+    itemGrade:2,quality:"fine",skill:10,str:14,dex:14,end:14});
   const session={...startCombatSession(player,3377),elapsedMs:8*BOUT_MS+1200};
   const output=simulateBatch({snapshot:{combatSession:session},battles:30,trace:1});
   assert.equal(output.startBout,8);
   assert.equal(output.seed,3377);
-  assert.equal(output.player.attackEnchant,2);
+  assert.equal(output.player.gearAttack,11);
   assert.equal(output.playerBuild,null);
   assert.deepEqual(output.samples[0].events,
     combatAtTime({...session,elapsedMs:8*BOUT_MS}).events);
 });
 
-test('optional Glory drops match the unchanged production reward resolver',()=>{
-  const opts={battles:30,seed:421,gloryEligibleBouts:13,startBout:5};
-  const output=simulateBatch(opts);
-  const session=startCombatSession(createPlayerSnapshot(opts),opts.seed);
-  const result=tallyGloryVictories({...session,elapsedMs:35*BOUT_MS,
-    gloryCursor:5,gloryEligibleUntilMs:18*BOUT_MS});
-  assert.equal(output.glory.eligibleVictories,result.eligibleVictories);
-  assert.equal(output.glory.scrolls,result.scrolls);
-  assert.equal(output.glory.eligibleBouts,13);
-  assert.equal(simulateBatch({battles:30}).glory,null);
-});
-
 test('invalid grades, impossible gear, forged ranks and excessive runs fail safely',()=>{
   assert.throws(()=>createPlayerSnapshot({grade:'T'}),RangeError);
-  assert.throws(()=>createPlayerSnapshot({grade:'F',armour:'plate'}),/Locked armour/);
-  assert.throws(()=>createPlayerSnapshot({enchantments:{weapon:21}}),RangeError);
-  assert.throws(()=>createPlayerSnapshot({mastery:{weapon:8}}),RangeError);
   assert.throws(()=>createPlayerSnapshot({armourSlots:{unlisted:'plate'}}),RangeError);
   assert.throws(()=>simulateBatch({battles:1000001}),RangeError);
   assert.throws(()=>simulateBatch({battles:10,trace:11}),RangeError);
   assert.throws(()=>parseCliArgs(['--unknown','123']),RangeError);
-  assert.throws(()=>parseCliArgs(['--armour','robe','--armour','plate']),RangeError);
-  assert.throws(()=>parseCliArgs(['--enchant','weapon:2,weapon:3']),RangeError);
+  assert.throws(()=>parseCliArgs(['--armour','padded','--armour','plate']),RangeError);
   assert.throws(()=>parseCliArgs(['--snapshot','ignored.json','--grade','F']),/ENOENT/);
 });
 

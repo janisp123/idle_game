@@ -21,7 +21,7 @@ export function simulateActivity(options={}) {
   const result={module:'activity',source:'site/play/engine.mjs:chooseActivity+settle',
     mode:'real productive-time engine batch; starting an activity is immediate in this test (not an actual travel simulation)',
     activity,elapsedMs,trials:runs,startingLevel:chosenLevel,difficulty:tier,
-    completed:0,gainedXP:0,gainedGlory:0,items:{},consumed:{},
+    completed:0,gainedXP:0,gainedCoins:0,items:{},consumed:{},
     endingSkillXP:{min:Infinity,max:0},masterReadyCount:0,masterBlockedCount:0,
     endingLevels:{},endingStatValues:{},firstTrial:null};
   for(let i=0;i<runs;i++){
@@ -32,16 +32,16 @@ export function simulateActivity(options={}) {
     const out=settle(started,started.settledAtMs+elapsedMs,rng);
     const after=out.state;
     const reports=out.reports??[out.report];
-    let completed=0,xp=0,glory=0;
+    let completed=0,xp=0,coins=0;
     for(const rep of reports){
       if(!rep) continue;
       completed+=rep.completed??0;
       xp+=rep.gainedXP??0;
-      glory+=rep.gainedGlory??0;
+      coins+=rep.gainedCoins??0;
       addCounts(result.items,rep.items??{});
       addCounts(result.consumed,rep.consumed??{});
     }
-    result.completed+=completed;result.gainedXP+=xp;result.gainedGlory+=glory;
+    result.completed+=completed;result.gainedXP+=xp;result.gainedCoins+=coins;
     const skill=after.skills[activity];
     assertConserved(skill.level===before.skills[activity].level,'skill auto-leveled offline');
     assertConserved(skill.xp>=before.skills[activity].xp && skill.xp<=xpToNextLevel(skill.level),'invalid offline XP cap');
@@ -66,7 +66,7 @@ export function simulateActivity(options={}) {
   result.average={
     completed:average(result.completed,runs),
     earnedXP:average(result.gainedXP,runs),
-    glory:average(result.gainedGlory,runs),
+    coins:average(result.gainedCoins,runs),
     endingStatValues:Object.fromEntries(Object.entries(result.endingStatValues).map(([k,v])=>[k,average(v,runs)]))
   };
   return result;

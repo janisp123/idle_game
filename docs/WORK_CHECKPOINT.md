@@ -6,7 +6,7 @@
 
 **GLAD-001 DEPLOYED:** [PR #144](https://github.com/janisp123/idle_game/pull/144) merged at `75edea258827e6df0f0dc01629933b3d54b8b32b` after final-head website, protocol, combat simulator and systems lab checks passed. [Pages deployment 45422209235](https://github.com/janisp123/idle_game/actions/runs/45422209235) succeeded. Live assets matched main, and mobile Play Now verified the reset notice, three attributes, Survival Work and Mining save/reload. See the changelog for checks and run IDs.
 
-**NEXT:** GLAD-002 after Owner implementation approval. The currently playable equipment and duel flow continue until their scheduled batches replace them. PR #141 was closed without merging.
+**NEXT:** Verify final checks and Pages for GLAD-002 in [PR #146](https://github.com/janisp123/idle_game/pull/146), then GLAD-003. The currently playable equipment and duel flow continue until their scheduled batches replace them. PR #141 was closed without merging.
 
 ## SIM-002 — Modular game systems lab, PR #139 (2026-11-24)
 

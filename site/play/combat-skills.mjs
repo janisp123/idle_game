@@ -5,10 +5,7 @@
  */
 export const COMBAT_SKILLS = Object.freeze({
   arrow:{id:"arrow",name:"Aimed Shot",role:"attack",windupMs:1200,attackBonus:2,damageMultiplier:1.1,blockDamagePct:8,parryDamagePct:12},
-  spell:{id:"spell",name:"Arc Bolt",role:"attack",windupMs:1600,attackBonus:1,damageMultiplier:1.25,blockDamagePct:22,parryDamagePct:25},
-  twin_cut:{id:"twin_cut",name:"Twin Cut",role:"attack",windupMs:0,attackBonus:3,damageMultiplier:1.15,blockDamagePct:12,parryDamagePct:18},
   sidestep:{id:"sidestep",name:"Sidestep",role:"defense",defenseBonus:1,result:"dodge"},
-  cross_guard:{id:"cross_guard",name:"Cross Guard",role:"defense",defenseBonus:2,result:"parry"},
   hammer_blow:Object.freeze({id:"hammer_blow",name:"Hammer Blow",role:"attack",
     windupMs:2100,attackBonus:1,damageMultiplier:1.65,blockDamagePct:30,parryDamagePct:35}),
   haft_guard:Object.freeze({id:"haft_guard",name:"Haft Guard",role:"defense",defenseBonus:1,result:"parry"}),
@@ -34,7 +31,7 @@ export const COMBAT_SKILLS = Object.freeze({
 
 export const COMBAT_LOADOUTS = Object.freeze({
   greatsword: Object.freeze({
-    id: "greatsword", name: "Two-handed Greatsword",
+    id: "greatsword", name: "Greatsword",
     attackSkill: "heavy_swing", defenseSkill: "blade_guard",
     weapon: "greatsword", initiativeBonus: -2
   }),
@@ -43,11 +40,10 @@ export const COMBAT_LOADOUTS = Object.freeze({
     attackSkill: "thrust", defenseSkill: "shield_block",
     weapon: "sword", initiativeBonus: 1
   }),
-  hammer:Object.freeze({id:"hammer",name:"Two-handed Hammer",attackSkill:"hammer_blow",
+  hammer:Object.freeze({id:"hammer",name:"War Hammer",attackSkill:"hammer_blow",
     defenseSkill:"haft_guard",weapon:"hammer",initiativeBonus:-3}),
-  bow:{id:"bow",name:"Longbow",weapon:"bow",attackSkill:"arrow",defenseSkill:"sidestep",initiativeBonus:1},
-  staff:{id:"staff",name:"Mage Staff",weapon:"staff",attackSkill:"spell",defenseSkill:"sidestep",initiativeBonus:-1},
-  twin_blades:{id:"twin_blades",name:"Dual Swords",weapon:"swords",attackSkill:"twin_cut",defenseSkill:"cross_guard",initiativeBonus:2}
+  bow:{id:"bow",name:"Bow",weapon:"bow",attackSkill:"arrow",defenseSkill:"sidestep",initiativeBonus:1},
+  spear:{id:"spear",name:"Spear",weapon:"spear",attackSkill:"thrust",defenseSkill:"haft_guard",initiativeBonus:2}
 });
 export const DEFAULT_COMBAT_LOADOUT = "greatsword";
 export const validCombatLoadout = id => typeof id === "string" &&
