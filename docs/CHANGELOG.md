@@ -1,5 +1,13 @@
 # Changelog and task handoffs
 
+## ALPHA-FOCUS-001 · STARTED · 2026-11-24
+
+Goal: Add the Owner's golden rule across Idle Game development: this is early alpha and player test progress is disposable. Prioritize useful gameplay, fast iteration and correct core logic; do not spend resources implementing backward-compatible migration of prototype saves or preserving alpha equipment/enchants when redesigning them, unless explicitly requested. Existing local save functionality and offline behaviour remain testable, but do not treat test progress as production user data. No playable code changes.
+Branch: `docs/alpha-disposable-progress-rule-20261124`.
+Last verified: Golden rule added to `AGENTS.md` and `docs/DECISIONS.md`, read back from the remote branch. [PR #142](https://github.com/janisp123/idle_game/pull/142) is documentation-only; no `site/` or saved-state changes. Existing [PR #141](https://github.com/janisp123/idle_game/pull/141) is an independent combat design draft.
+Next action: Verify final-head project protocol CI, merge if passed, and read rule back from remote main.
+Status: IN_REVIEW.
+
 ## SIM-002 · MERGED AND VERIFIED · 2026-11-24
 
 Goal: Expand the developer-only SIM-001 combat harness into a modular reproducible testing lab importing **actual production game functions**, not rewriting mechanics: combat, activity/offline settlement, loot, crafting, progression/mastery, equipment/enchants, queue/transitions and save validation. Report distributions and invariants for evidence-based future balance discussions. User explicitly forbids modifying playable game code or player saves.
