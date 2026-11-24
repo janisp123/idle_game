@@ -1,5 +1,7 @@
 # SIM-001 — Developer combat simulator (10,000+ real duels)
 
+For the **other implemented game systems**, use [SIM-002 modular systems lab](SYSTEM_LAB.md). It reuses this combat harness rather than cloning its rules.
+
 **Status:** Developer QA, not player-facing. **Canonical CLI:** [tools/combat-simulator.mjs](../../tools/combat-simulator.mjs). **Parity tests:** [tools/test_combat_simulator.mjs](../../tools/test_combat_simulator.mjs).
 
 ## What this does
