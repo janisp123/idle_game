@@ -2,7 +2,7 @@
 
 ## SIM-002 — Modular game systems lab, PR #139 (2026-11-24)
 
-Approved developer-only test lab for all major implemented gameplay systems. [PR #139](https://github.com/janisp123/idle_game/pull/139) adds `tools/system-lab.mjs`, ten real-game modules, a source map, deterministic scenarios, direct source/parity tests and a manually runnable Actions workflow. Main gameplay files under `site/` were not touched. Follow the **SIM-002 entry** in the PR's `docs/CHANGELOG.md` for the latest tested SHA and the next uncompleted action. Final-head checks and merge verification remain pending.
+**MERGED AND VERIFIED.** [PR #139](https://github.com/janisp123/idle_game/pull/139) landed on main at `24dcf4385841135102fce96f2bfe552dc77c6723`. `tools/system-lab.mjs` now has ten developer-only real-game modules, deterministic scenarios, direct parity tests and an on-demand GitHub Actions report generator. Final-head [systems CI 45309633370](https://github.com/janisp123/idle_game/actions/runs/45309633370) and [protocol 45309633387](https://github.com/janisp123/idle_game/actions/runs/45309633387) passed. No game `site/` files changed; no deploy needed. See [the usage guide](mechanics/SYSTEM_LAB.md). **Next:** use the lab to benchmark real conditions, then seek Owner approval before any balance change. No unfinished SIM-002 implementation remains.
 
 ## SIM-001 — Developer combat simulator merged, PR #138 (2026-11-24)
 
