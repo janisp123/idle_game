@@ -1395,3 +1395,15 @@ test("GLAD-002 decades of prizes agree with the frozen arena schedule", async ()
   const rest = settleArenaPrizes({ ...midpoint.session, elapsedMs });
   assert.equal(midpoint.coins + rest.coins, whole.coins);
 });
+
+test("GLAD-002 arena wins reach the saved wallet once", async () => {
+  const { BOUT_MS } = await import("../site/play/combat.mjs");
+  const state = choose(newGame(42), "fighting", 42).state;
+  const at = 42 + BOUT_MS * 20;
+  const result = finish(state, at);
+  assert.ok(result.state.coins > 0);
+  const loaded = readSave(JSON.stringify(result.state));
+  assert.equal(loaded.coins, result.state.coins);
+  assert.equal(finish(loaded, at).state.coins, loaded.coins);
+  assert.equal(readSave({ ...loaded, coins: -1 }), null);
+});

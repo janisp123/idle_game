@@ -1,3 +1,4 @@
+import { settleArenaPrizes } from "./arena-wallet.mjs?v=glad-002";
 import {
   ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
 } from "./attributes.mjs?v=glad-001";
@@ -164,6 +165,7 @@ export function newGame(now = Date.now()) {
     skills: blankSkills(),
     attributeEffort: blankAttributeEffort(),
     combatSession: null,
+    coins: 0,
     combatLoadout: DEFAULT_COMBAT_LOADOUT,
     armour: initialArmour(),
     difficulties:{}, enchantments: blankEnchantments(), slotMastery:masteryRanks(),
@@ -195,7 +197,7 @@ export function readSave(value) {
     if (!s || s.version !== GAME_VERSION ||
         typeof s.name !== "string" || s.name.length > 40 ||
         !s.items || typeof s.items !== "object" || Array.isArray(s.items) ||
-        !validAttributeEffort(s.attributeEffort) ||
+        !validAttributeEffort(s.attributeEffort) || !isCount(s.coins) ||
         !validCombatLoadout(s.combatLoadout) || !validCombatSession(s.combatSession) ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
         !masteryRanks(s.slotMastery) ||
@@ -272,6 +274,7 @@ export function readSave(value) {
       version: GAME_VERSION, timingProfile: TIMING_PROFILE, name: s.name, skills,
       attributeEffort: { ...s.attributeEffort },
       combatLoadout: s.combatLoadout,
+      coins: s.coins,
       armour: normalizeArmour(s.armour),
       difficulties: { ...difficulties }, enchantments: normalizeEnchantments(s.enchantments),
       slotMastery: masteryRanks(s.slotMastery), combatSession: s.combatSession,
@@ -339,7 +342,7 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
   const elapsedMs = end - state.settledAtMs;
   const next = { ...state, skills: { ...state.skills }, items: { ...state.items }, settledAtMs: end };
   const report = { activity: state.activity, elapsedMs, completed: 0, gainedXP: 0,
-    item: null, gainedItems: 0, gainedGlory: 0, items: {}, consumed: {} };
+    item: null, gainedItems: 0, gainedGlory: 0, gainedCoins: 0, items: {}, consumed: {} };
   if (!state.activity || elapsedMs === 0) return { state: next, report };
 
   // Attribute progress is based on productive time, not work cycles or
@@ -381,7 +384,10 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
     }
     session=advanceCombatSession(session,elapsedMs);
     gloryResult=tallyGloryVictories(session);
-    next.combatSession=gloryResult.session;
+    const prize = settleArenaPrizes(gloryResult.session);
+    next.combatSession = prize.session;
+    next.coins = safeAdd(state.coins, prize.coins);
+    report.gainedCoins = prize.coins;
   }
   const rules = ACTIVITIES[state.activity]; // snapshot at start of this whole settlement
   const totalMs = state.progressMs + elapsedMs;
@@ -449,7 +455,7 @@ function settleTransition(state, now, random, frozenEffort) {
   let next = state;
   const reports = [];
   const pushReport = report => {
-    if (report.completed || report.gainedGlory) reports.push(report);
+    if (report.completed || report.gainedGlory || report.gainedCoins) reports.push(report);
   };
   let remaining = end - next.settledAtMs;
 
@@ -514,7 +520,7 @@ function remainingTransitionMs(state) {
 
 const emptyReport = (state, elapsedMs) => ({
   activity: state.activity, elapsedMs, completed: 0, gainedXP: 0,
-  item: null, gainedItems: 0, gainedGlory: 0, items: {}, consumed: {}
+  item: null, gainedItems: 0, gainedGlory: 0, gainedCoins: 0, items: {}, consumed: {}
 });
 
 
@@ -563,7 +569,7 @@ export function settle(state, now = Date.now(), random = Math.random) {
   const reports = [];
   const addReports = outcome => {
     for (const report of outcome.reports ?? [outcome.report]) {
-      if (report?.completed || report?.gainedGlory) reports.push(report);
+      if (report?.completed || report?.gainedGlory || report?.gainedCoins) reports.push(report);
     }
   };
   // Three productive segments + at most three transitions; the loop is

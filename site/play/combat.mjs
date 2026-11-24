@@ -119,6 +119,8 @@ export function validCombatSession(session) {
   return session === null || Boolean(session && typeof session === "object" &&
     !Array.isArray(session) && validUnsigned(session.elapsedMs) &&
     validUnsigned(session.seed) && session.seed <= 0xffffffff &&
+    (session.prizeCursor === undefined || validUnsigned(session.prizeCursor) &&
+      session.prizeCursor <= Math.floor(session.elapsedMs / BOUT_MS)) &&
     (session.gloryCursor === undefined && session.gloryEligibleUntilMs === undefined ||
       validUnsigned(session.gloryCursor) && validUnsigned(session.gloryEligibleUntilMs) &&
       session.gloryCursor <= Math.floor(session.elapsedMs/BOUT_MS)+1) &&

@@ -5,8 +5,8 @@
 Goal: Implement the approved four-slot equipment, five physical styles, item grade and quality, arena coins, and smith purchases.
 Branch: `codex/glad-002-equipment-economy`.
 Draft: [PR #146](https://github.com/janisp123/idle_game/pull/146).
-Last verified: Focused prize tests match actual resolved wins, reject double settlement, and verify a split twenty-year settlement. The temporary arena repeats a 256-bout schedule for a frozen build, so the same resolver supports exact bounded payouts and consistent split claims.
-Next action: Integrate prize settlement into the saved wallet, then replace scroll and enchant flows with the four-slot equipment shop, wire real gear bonuses and verify the UI.
+Last verified: Three focused prize tests passed against real resolved wins, saved-wallet reload, negative-wallet rejection and a split twenty-year settlement. The temporary arena repeats a 256-bout schedule for a frozen build, so the same resolver supports exact bounded payouts and consistent split claims.
+Next action: Replace the still-present scroll and enchant flows with the four-slot equipment shop, wire real gear bonuses and verify the UI. The wallet is integrated on the draft branch; it is not shown in the current UI.
 Status: STARTED.
 
 ## GLAD-001 · DEPLOYED · 2026-11-24
