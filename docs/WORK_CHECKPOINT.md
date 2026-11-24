@@ -12,7 +12,9 @@
 
 **GLAD-004 DEPLOYED:** [PR #150](https://github.com/janisp123/idle_game/pull/150) merged at `7ea38da`; [Pages](https://github.com/janisp123/idle_game/actions/runs/45434804788) and live mobile positioning verified. Five tactical arenas use shared geometry and a pre-bout 3d6 selection bias.
 
-**NEXT:** Verify final-head checks and Pages for GLAD-005 in [PR #152](https://github.com/janisp123/idle_game/pull/152). PR #141 was closed without merging.
+**GLAD-005 DEPLOYED:** [PR #152](https://github.com/janisp123/idle_game/pull/152) merged at `7b7c48f`. [Pages](https://github.com/janisp123/idle_game/actions/runs/45469642917) and live mobile and desktop verified.
+
+**NEXT:** Await Owner selection of a new scope. All five GLAD batches are complete. PR #141 was closed without merging.
 
 ## SIM-002 — Modular game systems lab, PR #139 (2026-11-24)
 
