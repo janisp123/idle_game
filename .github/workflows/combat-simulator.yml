@@ -1,0 +1,64 @@
+name: Developer Combat Simulator
+
+on:
+  workflow_dispatch:
+    inputs:
+      config:
+        description: 'Scenario JSON (all CLI options; never include private player saves)'
+        type: string
+        required: true
+        default: '{"battles":10000,"grade":"F","loadout":"greatsword","armour":"leather","skill":10,"str":14,"dex":14,"end":14,"wil":14,"trace":2}'
+  pull_request:
+    branches: [main]
+    paths:
+      - "tools/combat-simulator.mjs"
+      - "tools/test_combat_simulator.mjs"
+      - ".github/workflows/combat-simulator.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  fast-combat-batch:
+    name: Simulate full production duels
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Validate public scenario and create local config
+        env:
+          SCENARIO_JSON: ${{ inputs.config || '{"battles":10000,"trace":2}' }}
+        run: |
+          node --input-type=module -e '
+            import { writeFileSync } from "node:fs";
+            const data = JSON.parse(process.env.SCENARIO_JSON);
+            if (!data || typeof data !== "object" || Array.isArray(data))
+              throw new Error("Scenario must be a JSON object");
+            if ("snapshot" in data)
+              throw new Error("Do not upload personal player snapshots to a public GitHub Actions run");
+            writeFileSync("combat-scenario.json", JSON.stringify(data), "utf8");
+          '
+      - name: Run exact no-delay battles and publish concise summary
+        run: |
+          node --check tools/combat-simulator.mjs
+          node tools/combat-simulator.mjs --config combat-scenario.json > combat-report.json
+          node --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            const r = JSON.parse(readFileSync("combat-report.json", "utf8"));
+            console.log(JSON.stringify({
+              battles:r.battles, grade:r.difficulty, loadout:r.player.loadout,
+              victories:r.outcomes.victory, defeats:r.outcomes.defeat,
+              draws:r.outcomes.stalemate, winRatePct:r.winRatePct,
+              byTerrain:r.byTerrain, byEnemyRole:r.byEnemyRole
+            }, null, 2));
+          '
+      - name: Attach detailed reproducible battle report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: combat-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: combat-report.json
+          if-no-files-found: error
+          retention-days: 7

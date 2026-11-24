@@ -1,5 +1,16 @@
 # Changelog and task handoffs
 
+## SIM-001 · STARTED · 2026-11-24
+
+Goal: Permanent Node-only combat simulator for 10,000+ fast deterministic battles, importing the exact playable duel and reward modules (dice, terrain, enemy difficulty, equipment, enchanting, durability). Excluded from GitHub Pages; local developer CLI for chat/cw/codex.
+Branch: `tools/combat-simulator-10000-20261124`.
+Last verified: [draft PR #138](https://github.com/janisp123/idle_game/pull/138) created after the pushed STARTED entry, and production source code was read from remote main `cd79727516e439a002a95af1ca69bd456b68023a`. The Node-only `tools/combat-simulator.mjs` imports production `combatAtTime`, equipment stats, enchants, durability and optional Glory; no balance formulas were copied or modified. CLI accepts 10,000+ real deterministic bouts, mixed 11-slot armour, per-slot enchants/mastery, grade, seeds, frozen sessions and full event traces. Developer-only manual Actions workflow emits a JSON artifact without shipping simulator code to Pages.
+Tests: `tools/test_combat_simulator.mjs` includes 10,000-bout dice, terrain and outcome assertions; sample live-event parity; saved snapshot, equipment/enchant/mastery, optional Glory, CLI JSON configuration and safe input tests. [Website CI run 45308335352](https://github.com/janisp123/idle_game/actions/runs/45308335352), [protocol 45308335285](https://github.com/janisp123/idle_game/actions/runs/45308335285) and [developer simulator 45308335279](https://github.com/janisp123/idle_game/actions/runs/45308335279) passed on `c93ea619...`; documentation-only follow-up commit requires final-head checks.
+Pending: confirm final-head CI, mark PR ready, merge if all AUTO-MERGE-001 gates remain met; verify file readback on main and that `site/` excludes the simulator. Manual workflow can then be dispatched on main.
+Next action: check all three workflow runs for the PR's final head and merge only after success.
+Status: IMPLEMENTED / IN REVIEW, not yet merged.
+
+
 ## HANDOFF-001 · STARTED · 2026-11-24
 
 Goal: Resume approved Idle Game work across chats using a pushed checkpoint.

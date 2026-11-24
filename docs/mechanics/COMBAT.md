@@ -122,6 +122,10 @@ Each earned weapon enchant rank adds +1 to raw physical attack (before weapon-sk
 - Defeat ends the current illustrated/narrated bout; it does not delete XP, items, stats, account, gear or character. Full resurrection downtime and equipment systems are NOT implemented.
 - **Original event paintings are implemented for the two active loadouts:** 12 960×540 WebP files in `site/play/assets/combat/`. The pure `site/play/combat-art.mjs` registry (`COMBAT_ART`, `combatArtworkForEvent`) picks scenes by **real event type, actor, attacker weapon, defender's trained guard ability, and final player victory/defeat**. Four distinct outcome images exist: Greatsword victory/defeat and Sword & Shield victory/defeat. For an unillustrated defense/ability, it returns an honest neutral arena tableau (`exact:false`), never a picture showing the wrong skill. Some defeat/miss crops from original concept art are lower-detail and can be improved individually later.
 
+## Fast, exact developer battle simulation
+
+For reproducible 10,000+ zero-delay duels with the **actual production combat resolver**, dice, locations, equipment, per-slot enchants, HP and condition wear, see [SIM-001](COMBAT_SIMULATOR.md) and `tools/combat-simulator.mjs`. It is a Node-only QA tool outside the published site; no combat numbers are copied into it.
+
 ## Change and expansion map
 
 - Edit offensive damage, within-turn wind-up, attack score: `COMBAT_SKILLS.heavy_swing` or `COMBAT_SKILLS.thrust`.
