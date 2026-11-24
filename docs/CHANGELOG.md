@@ -1,14 +1,14 @@
 # Changelog and task handoffs
 
-## SIM-002 · STARTED · 2026-11-24
+## SIM-002 · MERGED AND VERIFIED · 2026-11-24
 
 Goal: Expand the developer-only SIM-001 combat harness into a modular reproducible testing lab importing **actual production game functions**, not rewriting mechanics: combat, activity/offline settlement, loot, crafting, progression/mastery, equipment/enchants, queue/transitions and save validation. Report distributions and invariants for evidence-based future balance discussions. User explicitly forbids modifying playable game code or player saves.
 Branch: `tools/modular-system-simulator-20261124`.
 Last verified: [PR #139](https://github.com/janisp123/idle_game/pull/139) created from the pushed STARTED entry. Added a source-of-truth `tools/system-lab.mjs` runner reusing SIM-001 combat and 9 additional modules (activity/offline, loot, crafting, attributes, Master, equipment, enchanting, queue and saves), each importing production functions. Configs and cross-module comparisons are deterministic and no `site/` file was changed. All module paths are documented in `docs/mechanics/SYSTEM_LAB.md`, with a manual + PR workflow producing reports. Public Actions disallows private saves.
 Evidence: [Developer Game Systems Lab run 45309453197](https://github.com/janisp123/idle_game/actions/runs/45309453197) PASS on `c627fdda...`: 13 tests, including 10,000 rare-loot batches, 10,000 three-attempt enchantment trials, 20-year offline queues, source parity, cache-less reproducible CLI, statistical comparisons and save integrity. Report artifact `system-lab-45309453197-1` uploaded. [Protocol run 45309453148](https://github.com/janisp123/idle_game/actions/runs/45309453148) PASS. Subsequent decision/checkpoint-only commits require final-head rechecks.
-Remaining: verify latest branch CI, scope/diff against unchanged `site/**`, merge using AUTO-MERGE-001 if safe, and confirm files and Actions workflow on main. Website build itself is unchanged.
-Next action: check PR #139 final-head CI and main/open PR status, mark ready, merge, verify source and report workflow.
-Status: IMPLEMENTED / IN REVIEW, not yet merged.
+**Closeout:** [PR #139](https://github.com/janisp123/idle_game/pull/139) MERGED by squash into main at `24dcf4385841135102fce96f2bfe552dc77c6723`. Final-head [Developer Game Systems Lab 45309633370](https://github.com/janisp123/idle_game/actions/runs/45309633370) and [Project Protocol Preflight 45309633387](https://github.com/janisp123/idle_game/actions/runs/45309633387) both PASS. Main readback verified all 10 modules, CI, instructions and static-game separation. The PR has a [verified closure comment](https://github.com/janisp123/idle_game/pull/139#issuecomment-7119739430). No `site/**` code changed, no gameplay rebalance and no Pages deployment required.
+**Next action:** Use `node tools/system-lab.mjs --config tools/simulation/example-scenarios.json` or the remote Developer Game Systems Lab workflow for any new gameplay balance research. Record findings as evidence and request Owner approval before changing live rules.
+Status: DONE / MERGED, independent developer-only tool available on main.
 
 
 ## SIM-001 · STARTED · 2026-11-24
