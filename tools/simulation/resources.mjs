@@ -29,10 +29,10 @@ export function simulateLoot(options={}) {
     invariant:'every real batch conserved, locked tiers never produced'};
 }
 export function simulateCrafting(options={}) {
-  const activity=choose(options.activity??'smelting',Object.keys(PRODUCTION_RECIPES),'craft activity');
+  const activity=choose(options.activity??'smithing',Object.keys(PRODUCTION_RECIPES),'craft activity');
   const level=count(options.level??1,'skill level',100000,1);
   const workCycles=count(options.workCycles??100,'work cycles',100000000,0);
-  const inventory=inputInventory(options.inventory??{copper_ore:100});
+  const inventory=inputInventory(options.inventory??{iron_ore:100});
   const available=recipeOptions(activity,level);
   const runs=trials(options),consumed={},created={};
   let min=Infinity,max=0,blocked=0;
@@ -41,7 +41,7 @@ export function simulateCrafting(options={}) {
     const out=produce(activity,level,workCycles,frozen,sourceSeed(options,i));
     assertConserved(JSON.stringify(inventory)===JSON.stringify(frozen),'crafting mutated input');
     assertConserved(out.completed<=workCycles,'crafting overfilled capacity');
-    assertConserved(total(out.consumed)===out.completed && total(out.created)===out.completed,'crafting resource conservation');
+    assertConserved(total(out.consumed)>=out.completed && total(out.created)===out.completed,'crafting resource conservation');
     for(const [item,n] of Object.entries(out.consumed)) {
       assertConserved(n <= (inventory[item]??0),'crafting consumed unavailable input '+item);
     }

@@ -1789,3 +1789,24 @@ test("activity grades unlock independently every ten levels and survive reloadin
   assert.equal(state.difficulties.fighting,undefined);
   assert.throws(()=>setDifficulty(state,"mining",8,0));
 });
+
+test("GLAD-001 exposes eleven survival activities and three physical attributes", () => {
+  assert.deepEqual(SKILL_IDS, [
+    "fighting", "hunting", "fishing", "foraging", "woodcutting", "mining",
+    "smithing", "construction", "cooking", "farming", "training"
+  ]);
+  assert.deepEqual(ATTRIBUTE_IDS, ["STR", "DEX", "END"]);
+  assert.deepEqual(ACTIVITY_STAT_WEIGHTS.training, { STR: 35, DEX: 35, END: 30 });
+  assert.deepEqual(skillSpoils("training"), []);
+});
+
+test("GLAD-001 mortar requires and consumes both limestone and fuel", () => {
+  const initial = choose(newGame(0), "construction", 0).state;
+  initial.items.limestone = 4;
+  initial.items.fuel = 2;
+  const t = INITIAL_PREPARATION_MS + 10 * activityDuration("construction");
+  const { state } = finish(initial, t);
+  assert.equal(state.items.mortar, 2);
+  assert.equal(state.items.limestone, 2);
+  assert.equal(state.items.fuel, 0);
+});

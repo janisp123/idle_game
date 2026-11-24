@@ -60,7 +60,7 @@ export function createPlayerSnapshot(options = {}) {
   const wil = intIn(options.wil ?? target.stat, 0, 100000, 'WIL');
   const loadout = options.loadout ?? 'greatsword';
   if (!Object.hasOwn(COMBAT_LOADOUTS, loadout)) throw new RangeError('Unknown loadout');
-  const armour = uniform(options.armour ?? 'robe', options.armourSlots ?? {});
+  const armour = uniform(options.armour ?? 'none', options.armourSlots ?? {});
   const attributes = { STR:str, DEX:dex, END:end, WIL:wil };
   for (const slot of ARMOUR_SLOTS)
     if (!armourUnlocked(attributes, slot.id, armour[slot.id]))
@@ -117,7 +117,7 @@ export function simulateBatch(options = {}) {
   const session = startCombatSession(player, seed); // production validation
   const generatedBuild = saved ? null : {
     statGates:{WIL:options.wil ?? benchmark(parseGrade(options.grade ?? 'Non-grade')).stat},
-    armourSlots:uniform(options.armour ?? 'robe', options.armourSlots ?? {}),
+    armourSlots:uniform(options.armour ?? 'none', options.armourSlots ?? {}),
     enchantments:{...blankEnchantments(),...(options.enchantments ?? {})},
     mastery:masteryRanks(options.mastery ?? {})
   };
@@ -295,7 +295,7 @@ export const HELP = [
   ' --battles N              number of duels (default 10000; max 1000000)',
   ' --grade Non-grade|F|E|D|C|B|A|S  opponent difficulty (default Non-grade)',
   ' --loadout greatsword|sword_shield|hammer|bow|staff|twin_blades',
-  ' --armour none|robe|leather|plate   all 11 body slots (default robe)',
+  ' --armour none|leather|plate   all 11 body slots (default none)',
   ' --armour-slots head:plate,chest:leather   overrides individual body slots',
   ' --enchant weapon:2,head:1,shield:3  actual per-slot enchant ranks',
   ' --mastery weapon:1,head:2         actual per-slot mastery grades',

@@ -1,38 +1,36 @@
 /**
  * Input-limited processing. Prototype recipes are configurable and consume
- * one raw resource to create one finished resource. No fabricated materials.
+ * one or more raw resources to create one finished resource. No fabricated materials.
  *
  * Bounded batch calculation: never simulates every work cycle after an absence.
- * Higher unlocked outputs are selected automatically, not individually chosen.
+ * Eligible outputs are selected automatically.
  */
-import { sampleBinomial } from "./loot.mjs?v=20261121-loot1";
+import { sampleBinomial } from "./loot.mjs?v=glad-001";
 
-const recipe = (input, output, label, minLevel, weight, growth = 0, cap = weight) =>
-  Object.freeze({ input, output, label, minLevel, weight, growth, cap });
+const recipe = (inputs, output, label, weight = 100) =>
+  Object.freeze({ inputs: Object.freeze(inputs), output, label, minLevel: 1, weight });
 
 export const PRODUCTION_RECIPES = Object.freeze({
-  smelting: Object.freeze([
-    recipe("copper_ore", "ingot", "Copper ingots", 1, 100),
-    recipe("iron_ore", "iron_ingot", "Iron ingots", 10, 25, 0.5, 55),
-    recipe("silver_ore", "silver_ingot", "Silver ingots", 25, 8, 0.4, 34)
+  smithing: Object.freeze([recipe(["iron_ore"], "iron_ingot", "Iron ingots")]),
+  construction: Object.freeze([
+    recipe(["limestone", "fuel"], "mortar", "Mortar"),
+    recipe(["log"], "plank", "Planks"),
+    recipe(["stone"], "block", "Stone blocks"),
+    recipe(["hide"], "leather", "Leather")
   ]),
-  // Initial one-ingredient prototype recipes. Higher-tier recipes and more
-  // complex ingredients require separate balance/design approval.
-  alchemy: Object.freeze([recipe("herb", "potion", "Potions", 1, 100)]),
-  carpentry: Object.freeze([recipe("log", "plank", "Planks", 1, 100)]),
-  masonry: Object.freeze([recipe("stone", "block", "Stone blocks", 1, 100)]),
-  cooking: Object.freeze([recipe("fish", "meal", "Meals", 1, 100)])
+  cooking: Object.freeze([
+    recipe(["grain"], "ration", "Rations"),
+    recipe(["meat"], "ration", "Rations"),
+    recipe(["fish"], "ration", "Rations"),
+    recipe(["herb"], "ration", "Rations")
+  ])
 });
 export const PRODUCTION_INPUTS = Object.freeze([...new Set(
-  Object.values(PRODUCTION_RECIPES).flatMap(list => list.map(r => r.input))
+  Object.values(PRODUCTION_RECIPES).flatMap(list => list.flatMap(r => r.inputs))
 )]);
 export const PRODUCTION_LABELS = Object.freeze(Object.fromEntries(
   Object.values(PRODUCTION_RECIPES).flatMap(list => list.map(r => [r.output, r.label]))
 ));
-
-function weight(recipe, level) {
-  return Math.min(recipe.cap, recipe.weight + (level - recipe.minLevel) * recipe.growth);
-}
 
 export function recipeOptions(activity, level) {
   if (!Number.isSafeInteger(level) || level < 1) throw new RangeError("Invalid skill level");
@@ -52,41 +50,31 @@ export function produce(activity, level, workCycles, inventory, random = Math.ra
   if (!Number.isSafeInteger(workCycles) || workCycles < 0 ||
       !inventory || typeof inventory !== "object")
     throw new RangeError("Invalid production request");
-  const options = recipeOptions(activity, level).filter(r =>
-    Number.isSafeInteger(inventory[r.input]) && inventory[r.input] > 0
-  );
   const consumed = {}, created = {};
-  if (!workCycles || !options.length) return { completed: 0, consumed, created };
-  let capacity = 0;
-  for (const r of options) capacity = Math.min(workCycles, capacity + Math.min(workCycles, inventory[r.input]));
-  let remaining = capacity;
-  let remainingWeight = options.reduce((n, r) => n + weight(r, level), 0);
-  const units = new Map();
-  for (let i = options.length - 1; i >= 0; i--) {
-    const r = options[i];
-    const available = inventory[r.input];
-    const share = i === 0 ? remaining :
-      sampleBinomial(remaining, Math.min(1, weight(r, level) / remainingWeight), random);
-    const used = Math.min(available, share);
-    units.set(r.input, used);
-    remaining -= used;
-    remainingWeight -= weight(r, level);
+  const stock = item => Number.isSafeInteger(inventory[item]) && inventory[item] > 0
+    ? inventory[item] - (consumed[item] ?? 0) : 0;
+  const capacity = recipe => Math.min(...recipe.inputs.map(stock));
+  const options = recipeOptions(activity, level).filter(r => capacity(r) > 0);
+  let remaining = workCycles;
+  let remainingWeight = options.reduce((sum, recipe) => sum + recipe.weight, 0);
+
+  function craft(recipe, quota) {
+    const count = Math.min(quota, capacity(recipe));
+    if (!count) return;
+    for (const item of recipe.inputs) consumed[item] = (consumed[item] ?? 0) + count;
+    created[recipe.output] = (created[recipe.output] ?? 0) + count;
+    remaining -= count;
   }
-  // When the preferred input runs out, continue with any other unlocked stock.
-  if (remaining) for (const r of options) {
-    const spare = Math.max(0, inventory[r.input] - (units.get(r.input) ?? 0));
-    const used = Math.min(remaining, spare);
-    units.set(r.input, (units.get(r.input) ?? 0) + used);
-    remaining -= used;
+
+  for (const recipe of options) {
     if (!remaining) break;
+    craft(recipe, sampleBinomial(remaining, recipe.weight / remainingWeight, random));
+    remainingWeight -= recipe.weight;
   }
-  let completed = 0;
-  for (const r of options) {
-    const count = units.get(r.input) ?? 0;
-    if (!count) continue;
-    consumed[r.input] = count;
-    created[r.output] = count;
-    completed += count;
+  // Fill unused work capacity with eligible stock left after the weighted pass.
+  for (const recipe of options) {
+    if (!remaining) break;
+    craft(recipe, remaining);
   }
-  return { completed, consumed, created };
+  return { completed: workCycles - remaining, consumed, created };
 }

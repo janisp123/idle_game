@@ -11,30 +11,21 @@ const tier = (item, label, minLevel, weight, growth = 0, cap = weight) =>
 
 export const LOOT_TABLES = Object.freeze({
   hunting: Object.freeze([
-    tier("hide", "Wolf hides", 1, 100),
-    tier("dire_hide", "Dire wolf hides", 8, 6, 0.8, 38),
-    tier("beast_trophy", "Beast trophies", 25, 1, 0.45, 22)
+    tier("hide", "Hides", 1, 50),
+    tier("meat", "Meat", 1, 50)
   ]),
   mining: Object.freeze([
     tier("stone", "Stone", 1, 100),
-    tier("copper_ore", "Copper ore", 2, 10, 0.4, 32),
-    tier("iron_ore", "Iron ore", 10, 5, 0.7, 40),
-    tier("silver_ore", "Silver ore", 25, 1, 0.5, 25)
-  ]),
-  gathering: Object.freeze([
-    tier("herb", "Herbs", 1, 100),
-    tier("moonleaf", "Moonleaf", 7, 6, 0.5, 30),
-    tier("shadowroot", "Shadowroot", 22, 1, 0.4, 18)
+    tier("limestone", "Limestone", 1, 25),
+    tier("iron_ore", "Iron ore", 1, 25, 1, 55)
   ]),
   woodcutting: Object.freeze([
-    tier("log", "Logs", 1, 100),
-    tier("hardwood", "Hardwood", 10, 7, 0.65, 30),
-    tier("elderwood", "Elderwood", 30, 1, 0.35, 15)
+    tier("log", "Timber", 1, 75),
+    tier("fuel", "Wood fuel", 1, 25)
   ]),
-  fishing: Object.freeze([
-    tier("fish", "Fish", 1, 100),
-    tier("river_trout", "River trout", 9, 7, 0.6, 30),
-    tier("silverfish", "Silverfish", 28, 1, 0.35, 17)
+  farming: Object.freeze([
+    tier("grain", "Grain", 1, 70),
+    tier("straw", "Straw", 1, 30)
   ])
 });
 

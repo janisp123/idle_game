@@ -1,12 +1,10 @@
 /**
- * Fixed four-choice armour registry, tuned for a physical / evasion / magic
- * counter triangle. All values are provisional alpha design constants.
+ * Temporary physical armour registry for the existing duel system. All values are provisional alpha design constants.
  * No drop generation, item stacks, or generic item database.
  */
-export const ARMOUR_TIERS = Object.freeze(["none","robe","leather","plate"]);
-// Keep the saved `robe` key; only the visible category/part names change.
+export const ARMOUR_TIERS = Object.freeze(["none","leather","plate"]);
 export const ARMOUR_TIER_LABELS = Object.freeze({
-  none:"None", robe:"Mage Robe", leather:"Leather", plate:"Plate"
+  none:"None", leather:"Leather", plate:"Plate"
 });
 /**
  * Gear is gated by CHARACTER ATTRIBUTES, never by Fighting/skill level.
@@ -16,9 +14,6 @@ export const ARMOUR_TIER_LABELS = Object.freeze({
  */
 export const ARMOUR_REQUIREMENTS = Object.freeze({
   none:null,
-  robe:Object.freeze({ stat:"WIL", byGroup:Object.freeze({
-    head:10,shoulders:10,chest:10,armguards:10,gloves:10,legs:10,boots:10
-  })}),
   leather:Object.freeze({ stat:"DEX", byGroup:Object.freeze({
     head:11,shoulders:11,chest:12,armguards:11,gloves:10,legs:12,boots:11
   })}),
@@ -29,20 +24,20 @@ export const ARMOUR_REQUIREMENTS = Object.freeze({
 
 /** Per PIECE weights (kilograms); paired slots count twice. */
 export const ARMOUR_PIECES = Object.freeze({
-  head: Object.freeze({ coverage: 12, kg: [0, 0.4, 0.7, 2.8],
-    names: ["None","Mage Hood","Leather Mask","Plate Helm"] }),
-  shoulders: Object.freeze({ coverage: 8, kg: [0, 0.3, 1, 2.2],
-    names: ["None","Mage Mantle","Leather Spaulder","Plate Pauldron"] }),
-  chest: Object.freeze({ coverage: 33, kg: [0, 2.4, 4, 9.5],
-    names: ["None","Mage Robe","Leather Jerkin","Plate Cuirass"] }),
-  armguards: Object.freeze({ coverage: 5, kg: [0, 0.2, 0.5, 1.7],
-    names: ["None","Mage Sleeves","Leather Bracer","Plate Vambrace"] }),
-  gloves: Object.freeze({ coverage: 2.5, kg: [0, 0.15, 0.3, 0.6],
-    names: ["None","Mage Gloves","Leather Gloves","Plate Gauntlets"] }),
-  legs: Object.freeze({ coverage: 16, kg: [0, 1.2, 2, 5.5],
-    names: ["None","Mage Leggings","Leather Leggings","Plate Cuisses"] }),
-  boots: Object.freeze({ coverage: 4, kg: [0, 0.35, 0.85, 1.6],
-    names: ["None","Mage Footwraps","Leather Boots","Plate Sabatons"] })
+  head: Object.freeze({ coverage: 12, kg: [0, 0.7, 2.8],
+    names: ["None","Leather Mask","Plate Helm"] }),
+  shoulders: Object.freeze({ coverage: 8, kg: [0, 1, 2.2],
+    names: ["None","Leather Spaulder","Plate Pauldron"] }),
+  chest: Object.freeze({ coverage: 33, kg: [0, 4, 9.5],
+    names: ["None","Leather Jerkin","Plate Cuirass"] }),
+  armguards: Object.freeze({ coverage: 5, kg: [0, 0.5, 1.7],
+    names: ["None","Leather Bracer","Plate Vambrace"] }),
+  gloves: Object.freeze({ coverage: 2.5, kg: [0, 0.3, 0.6],
+    names: ["None","Leather Gloves","Plate Gauntlets"] }),
+  legs: Object.freeze({ coverage: 16, kg: [0, 2, 5.5],
+    names: ["None","Leather Leggings","Plate Cuisses"] }),
+  boots: Object.freeze({ coverage: 4, kg: [0, 0.85, 1.6],
+    names: ["None","Leather Boots","Plate Sabatons"] })
 });
 
 /** Full-set target profiles. Physical mitigation applies only on landed hits.
@@ -52,7 +47,6 @@ export const ARMOUR_PIECES = Object.freeze({
  */
 export const ARMOUR_BALANCE = Object.freeze({
   none: Object.freeze({ physical: 0, magic: 0, evasion: 3, dodgeMargin: 6 }),
-  robe: Object.freeze({ physical: 4, magic: 45, evasion: 0, dodgeMargin: 9 }),
   leather: Object.freeze({ physical: 22, magic: 12, evasion: 2, dodgeMargin: 8 }),
   plate: Object.freeze({ physical: 50, magic: 0, evasion: -3, dodgeMargin: 99 })
 });
@@ -97,7 +91,7 @@ export const ARMOUR_SLOT_BY_ID = Object.freeze(Object.fromEntries(
   ARMOUR_SLOTS.map(slot => [slot.id, slot])
 ));
 export function initialArmour() {
-  return Object.fromEntries(ARMOUR_SLOTS.map(slot => [slot.id, "robe"]));
+  return Object.fromEntries(ARMOUR_SLOTS.map(slot => [slot.id, "none"]));
 }
 export function armourOption(slotId, optionId) {
   const slot = ARMOUR_SLOT_BY_ID[slotId];
@@ -113,22 +107,11 @@ export function armourUnlocked(attributes, slotId, optionId) {
   return Number.isSafeInteger(actual) && actual >= min;
 }
 
-/** Preserve prior V7 clothing by converting its tier once, on save read.
- * Old, already equipped selections are grandfathered until explicitly swapped:
- * loading a character must NEVER delete prior valid gear because an attribute
- * requirement changed. New selections still use armourUnlocked.
- */
-const LEGACY_ROBE = Object.freeze({
-  head:"hood", shoulders:"cloth", chest:"tunic", armguards:"wraps",
-  gloves:"cloth", legs:"trousers", boots:"worn"
-});
 export function normalizeArmour(value) {
   const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
   const base = initialArmour();
   for (const slot of ARMOUR_SLOTS) {
-    const oldId = source[slot.id];
-    const id = oldId === "iron" ? "plate" :
-      oldId === LEGACY_ROBE[slot.group] ? "robe" : oldId;
+    const id = source[slot.id];
     if (typeof id === "string" && armourOption(slot.id,id))
       base[slot.id] = id;
   }

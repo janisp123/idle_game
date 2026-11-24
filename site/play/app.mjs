@@ -10,15 +10,15 @@ import {
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice,
   GLORY_SCROLL_ID, GLORY_RULES, enchantEquipmentSlot, enchantBonus
-} from "./engine.mjs?v=arena-v1";
+} from "./engine.mjs?v=glad-001";
 
-import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=arena-v1";
+import { combatAtTime, COMBAT_BALANCE, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=glad-001";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=arena-v1";
 import { combatFlowState } from "./combat-flow.mjs?v=arena-v1";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=20261122-results1";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES, WEAPON_PIECES,
   armourOption, armourUnlocked, armourStats }
-  from "./armour.mjs?v=arena-v1";
+  from "./armour.mjs?v=glad-001";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
   setAlphaSpeed, advanceAlphaClock } from "./alpha-tools.mjs?v=20261122-alpha-tools1";
 const $ = id => document.getElementById(id);
@@ -191,7 +191,7 @@ function renderArmour() {
 
   if (slot) {
     const attributes = effectiveAttributeProgress(state.attributeEffort, state.skills);
-    const key = slot.id + ":" + ["STR","DEX","WIL"].map(id => attributes[id].value).join(":") +
+    const key = slot.id + ":" + ATTRIBUTES.map(({ id }) => attributes[id].value).join(":") +
       ":" + state.armour[slot.id];
     if (lastArmourOptionsKey !== key) {
       const options = ARMOUR_CHOICES[slot.group].map(piece => {
@@ -392,7 +392,7 @@ let currentScheduledFill = null;
 let lastCombatEventKey = null;
 
 const CATEGORY_LABELS = Object.freeze({
-  combat: "Fighting", craft: "Honest Work", outlaw: "Outlaw Path", training: "Training & Knowledge", leisure: "Tavern & Leisure", clan: "Clan Activities", other: "Other Activities"
+  combat: "Fighting", craft: "Survival Work", training: "Training"
 });
 const categoryActivities = new Map(Object.keys(CATEGORY_LABELS).map(id => [id, []]));
 let selectedCategory = null;
@@ -985,7 +985,7 @@ function render() {
     const available = lootChances(id, skill.level);
     const recipes = recipeOptions(id, skill.level);
     activityRewardLabels.get(id).textContent = recipes.length
-      ? recipes.map(t => `${t.label} (uses ${ITEM_LABELS[t.input]})`).join(" · ")
+      ? [...new Set(recipes.map(t => `${t.label} (uses ${t.inputs.map(id => ITEM_LABELS[id]).join(" + ")})`))].join(" · ")
       : available.length ? available.map(t => t.label).join(" · ")
       : ACTIVITIES[id].itemLabel;
     const workingHere = state.activity === id && (!transition || transition.phase === "finishing");
@@ -1148,9 +1148,8 @@ function render() {
     const sceneId = transition ? transition.targetActivity : state.activity;
     const combatArt = imageEvent ? combatArtworkForEvent(
       imageEvent, state.combatSession.player.loadout, combat.enemyLoadout) : null;
-    const sceneAsset = sceneActivity.item === null
-      ? (sceneActivity.category === "training" ? "masonry" : "cooking")
-      : sceneId;
+    const sceneAsset = ({ foraging: "gathering", smithing: "smelting",
+      construction: "masonry", farming: "gathering", training: "masonry" })[sceneId] ?? sceneId;
     const desiredImage = sceneId === "fighting"
       ? "./assets/combat/" + (combatArt?.asset ?? "fight-engage") + ".webp?v=20261122-dice-duels1"
       : "./assets/" + sceneAsset + ".webp?v=20261122-dice-duels1";
@@ -1249,7 +1248,7 @@ function start() {
       try { localStorage.removeItem(ALPHA_CLOCK_KEY); } catch { storageWorks = false; }
     }
     state = newGame(Date.now());
-    if (saved) message("The previous save could not be read; a new character was created.");
+    if (saved) message("Alpha progression was reset for the survival update or because the previous save could not be read. A new character was created.");
     else message("Choose an activity. Your character will work without further clicks.");
     writeSave();
   } else {
