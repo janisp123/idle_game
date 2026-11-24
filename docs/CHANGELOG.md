@@ -1,13 +1,15 @@
 # Changelog and task handoffs
 
-## GLAD-004 · STARTED · 2026-11-24
+## GLAD-004 · DEPLOYED · 2026-11-24
 
 Goal: Deliver five physical arenas and a seeded pre-bout 3d6 positioning roll.
 Branch: `codex/glad-004-tactical-arenas`.
-Draft: [PR #150](https://github.com/janisp123/idle_game/pull/150).
+Release: [PR #150](https://github.com/janisp123/idle_game/pull/150).
 Last verified: Five geometry descriptors drive the same seeded arena selection in live play, offline payout and the simulator. Focused tests exercised 16,000 selections, tied rolls, 6–6–6, seed parity, and each style’s terrain contrast. The handbook records 1,024 bouts per style and arena. Local suite: 101 passed and one existing optional skip in 1.79 seconds. Staged 390 px Play Now verified the three dice faces, selected terrain and live combat display.
-Next action: Verify final-head CI, then merge and verify Pages.
-Status: IN_REVIEW.
+Final head: `244a243e86aed6a2fdcfafa49623aeb446901621`. Passed [website](https://github.com/janisp123/idle_game/actions/runs/45434366035), [protocol](https://github.com/janisp123/idle_game/actions/runs/45434365676), [combat simulator](https://github.com/janisp123/idle_game/actions/runs/45434365799), and [systems lab](https://github.com/janisp123/idle_game/actions/runs/45434365786). Final gameplay commit changed 23 files from the STARTED checkpoint.
+Merged: `7ea38da442f3ee65aed8d3304d52e4bba2038151`. The automatic Pages run was absent; [manual Pages run](https://github.com/janisp123/idle_game/actions/runs/45434804788) passed on the exact merge SHA. Live files matched main, and 390 px Play Now confirmed the pre-bout placement roll and arena.
+Next action: GLAD-005 after Owner implementation approval.
+Status: DEPLOYED.
 
 ## GLAD-003 · DEPLOYED · 2026-11-24
 

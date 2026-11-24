@@ -10,7 +10,9 @@
 
 **GLAD-003 DEPLOYED:** [PR #148](https://github.com/janisp123/idle_game/pull/148) merged at `e999517`; [Pages deployment](https://github.com/janisp123/idle_game/actions/runs/45432751889) and live mobile combat verified. The physical resolver now serves play, coins and the developer simulator.
 
-**NEXT:** Verify final-head checks and Pages for GLAD-004 in [PR #150](https://github.com/janisp123/idle_game/pull/150). PR #141 was closed without merging.
+**GLAD-004 DEPLOYED:** [PR #150](https://github.com/janisp123/idle_game/pull/150) merged at `7ea38da`; [Pages](https://github.com/janisp123/idle_game/actions/runs/45434804788) and live mobile positioning verified. Five tactical arenas use shared geometry and a pre-bout 3d6 selection bias.
+
+**NEXT:** GLAD-005 after Owner implementation approval. PR #141 was closed without merging.
 
 ## SIM-002 — Modular game systems lab, PR #139 (2026-11-24)
 
