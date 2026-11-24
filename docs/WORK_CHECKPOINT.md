@@ -8,7 +8,9 @@
 
 **GLAD-002 DEPLOYED:** [PR #146](https://github.com/janisp123/idle_game/pull/146) merged at `7df47cc`; [Pages deployment](https://github.com/janisp123/idle_game/actions/runs/45429384799) and live mobile purchase/reload verified. Four slots, five styles, arena coins and the smith replace Glory Scrolls and enchanting. See the changelog for final-head checks.
 
-**NEXT:** Verify final-head checks and Pages for GLAD-003 in [PR #148](https://github.com/janisp123/idle_game/pull/148). PR #141 was closed without merging.
+**GLAD-003 DEPLOYED:** [PR #148](https://github.com/janisp123/idle_game/pull/148) merged at `e999517`; [Pages deployment](https://github.com/janisp123/idle_game/actions/runs/45432751889) and live mobile combat verified. The physical resolver now serves play, coins and the developer simulator.
+
+**NEXT:** GLAD-004 after Owner implementation approval. PR #141 was closed without merging.
 
 ## SIM-002 — Modular game systems lab, PR #139 (2026-11-24)
 

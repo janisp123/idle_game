@@ -1,13 +1,15 @@
 # Changelog and task handoffs
 
-## GLAD-003 · STARTED · 2026-11-24
+## GLAD-003 · DEPLOYED · 2026-11-24
 
 Goal: Implement the approved seeded physical arena resolver and connect its events to the existing arena and wallet.
 Branch: `codex/glad-003-physical-combat`.
-Draft: [PR #148](https://github.com/janisp123/idle_game/pull/148).
+Release: [PR #148](https://github.com/janisp123/idle_game/pull/148).
 Last verified: Three focused tests passed for raw-HP timeout eligibility, deterministic finite bow ammo and dagger fallback, shield and armour breakage, and Masterwork condition. The resolver now drives the arena, frozen equipment, payouts and bounded resurrection time. Local regression suite: 98 passed, one optional layout skip. Staged 390 px Chromium verified Play Now, real vitals, terrain and the removal of per-exchange dice. The handbook records 256 seeded samples for each of 25 ordered equal-stat matchups.
-Next action: Verify final PR checks, then merge and verify Pages.
-Status: IN_REVIEW.
+Final head: `4a0f219cf2ac61001d2447e1b112e85dae01e2e9`. Passed [website](https://github.com/janisp123/idle_game/actions/runs/45432598498), [protocol](https://github.com/janisp123/idle_game/actions/runs/45432598438), [combat simulator](https://github.com/janisp123/idle_game/actions/runs/45432598459), and [systems lab](https://github.com/janisp123/idle_game/actions/runs/45432598444). Local suite: 98 passed, one optional layout skip, 1.58 seconds. Final gameplay commit changed 28 files from the previous checkpoint.
+Merged: `e9995177110aaea3442e12aba1a047ad4af32e20`. [Pages deployment](https://github.com/janisp123/idle_game/actions/runs/45432751889) succeeded. Public assets matched main, and live 390 px Play Now showed the physical battle, terrain and resolved vitals.
+Next action: GLAD-004 after Owner implementation approval.
+Status: DEPLOYED.
 
 ## GLAD-002 · DEPLOYED · 2026-11-24
 
