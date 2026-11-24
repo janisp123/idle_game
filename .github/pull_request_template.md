@@ -16,4 +16,6 @@
 - [ ] Included exact commit, handoff, blockers and next action.
 - [ ] Did not merge or publish without owner authorization.
 
+- [ ] For owner-directed work, pushed the STARTED journal before implementation and updated the task entry at milestones.
+
 ## Evidence and one next action

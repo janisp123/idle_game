@@ -1,5 +1,13 @@
 # Current working checkpoint
 
+For interrupted work, read the matching open PR’s branch changelog and its next action. Check recent task branches if a draft is missing. Verify the merge and deployment of a closed PR before selecting work.
+
+HANDOFF-001 is tracked in [PR #137](https://github.com/janisp123/idle_game/pull/137). Activity difficulty, terrain and mobile vital alignment shipped in [PR #134](https://github.com/janisp123/idle_game/pull/134) at `05e4ad05b5a928cdd0dfd30c2191324edf14219c` ([Pages deployment](https://github.com/janisp123/idle_game/actions/runs/45187500535)). Enemy calibration is a backlog item. Subsequent PRs #135 and #136 updated public descriptions and footer credit.
+
+# Historical checkpoints
+
+The entries below describe earlier milestones and test suggestions.
+
 ## Activity difficulty and terrain — 2026-11-23
 
 Check a level-10 activity at F, return to Non-grade, and compare the same weapon in an open field and dungeon. The combat readout shares rows for both fighters. The benchmark is provisional.

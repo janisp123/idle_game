@@ -16,7 +16,7 @@ A task list entry is not authorization to implement it. For approved changes use
 
 When the Owner and agent have **already agreed on the specific work to implement**, completing it also grants standing permission to merge the resulting PR **without a separate “merge” message** after *all* of these are verified:
 
-1. Scope is unambiguous and matches the prior owner agreement; changed files, behavior and side effects are reviewed. A task entry, brainstorm, research finding, unattended automation or a lone “continue” is **not** owner agreement.
+1. Scope is unambiguous and matches the prior owner agreement; changed files, behavior and side effects are reviewed. A task entry, brainstorm, research finding, unattended automation or a resume request without an identifiable approved task cannot authorize new scope.
 2. Relevant tests/required branch checks **pass on the final PR head**. Do not skip failing, pending, missing or insufficient checks; add targeted checks when needed. Confirm no data-loss, security, licensing or other material quality issue.
 3. Check current remote `main`, open PRs and deployment expectations immediately before merging. Reconcile overlaps or dependencies and re-run checks after revisions. Never merge stale overlapping PRs that would undo merged changes.
 4. There is **no unresolved conflict, important trade-off, risky/destructive change, new design choice, governance/policy change beyond explicitly requested scope, or other decision requiring the Owner**. If any exists, **stop and ask**. Preserve existing OFF-001, privacy, user-save and release requirements.
@@ -24,14 +24,11 @@ When the Owner and agent have **already agreed on the specific work to implement
 
 This authorization covers ordinary agreed gameplay, fixes, documentation and art PRs when the gate passes; it does **not** grant permission to start unapproved tasks, modify third-party accounts, delete data, deploy unrelated services, or perform a risky release. It complements, rather than weakens, QUAL-001. The existing **research-only** auto-merge allowlist remains a separate, narrower standing authorization for hourly unattended research.
 
-## Owner command convention — "continue" (2026-11-18)
+## Resuming approved work (HANDOFF-001)
 
-This applies to project work by **chat**, **cw** and **codex**, including after a tool or usage-limit interruption. The phrase is not automatic authorization to code:
+When the Owner asks to keep working in ordinary language, recover the latest pushed milestone and take the next unfinished action within the approved scope. No special wording or repeat approval is needed. A status question, plan-only request, “RO” or “read only” means inspect and report without writing. If no approved unfinished task is identifiable, say so. Ask only when a real ambiguity or a decision requiring the Owner remains.
 
-- **"Continue" (alone): READ-ONLY preflight.** Fetch current remote `main:docs/TD_LIST.md` first, read this file, checkpoint, decisions, relevant evidence and open PRs; identify the last verified state and any conflicts. Reply with the specific task/ID, what was completed, what remains, the smallest next change, tests/risks and **"Should I proceed?"** Do **not** modify files, create branches/PRs, commit, merge, publish or perform external actions until the Owner answers.
-- **"Continue and implement":** The Owner explicitly authorizes execution of an already-approved, clearly identified scope. Still do the full preflight, check conflicts and proceed only with previously approved decisions; stop to request approval for new choices, changed scope, ambiguous repository/task, destructive actions, merges or releases requiring separate approval.
-- **"Check status":** Read-only status report; no implementation and no approval question required unless an ambiguity prevents a meaningful answer.
-- If the project or task is ambiguous, ask which one; do not invent a handoff. Usage limits resetting never trigger automatic work.
+Before implementing an approved task, push its STARTED changelog entry and open a draft PR. Follow the recovery and closeout procedure in [the shared protocol](docs/AGENT_PROTOCOL.md#resuming-approved-work-handoff-001). This applies across chat, cw and codex.
 
 ## Project-specific rules
 

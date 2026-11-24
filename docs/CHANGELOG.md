@@ -1,4 +1,18 @@
-# Changelog — verified completed work
+# Changelog and task handoffs
+
+## HANDOFF-001 · STARTED · 2026-11-24
+
+Goal: Resume approved Idle Game work across chats using a pushed checkpoint.
+Branch: `protocol/resumable-task-handoff`.
+[PR #137 and verified closeout](https://github.com/janisp123/idle_game/pull/137)
+
+Last verified: STARTED was pushed before the rule edits, and the draft PR was discoverable on GitHub.
+Still pending at this revision: final-head checks and verified documentation merge. The linked PR records closure.
+Next action: Read the PR head and journal from a fresh repository lookup, verify checks, then merge. No Pages deployment is required.
+
+## 2026-11-23 · DEPLOYED · Activity difficulty and terrain
+
+[PR #134](https://github.com/janisp123/idle_game/pull/134) shipped per-activity difficulty, terrain rolls and aligned mobile Health and Armour. [Pages verified](https://github.com/janisp123/idle_game/actions/runs/45187500535) for `05e4ad05b5a928cdd0dfd30c2191324edf14219c`. Balance calibration remains open.
 
 ## 2026-11-23 — Single equipment edit target and transparent enchant chance (chat, PR #129)
 
