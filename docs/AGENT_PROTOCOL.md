@@ -7,7 +7,7 @@
 - `AGENTS.md`: mandatory project rules.
 - `docs/TD_LIST.md`: **only active backlog**; the version on remote `main` is authoritative.
 - `docs/WORK_CHECKPOINT.md`: current verified state, revision, blockers and next action.
-- `docs/CHANGELOG.md`: verified completed work.
+- `docs/CHANGELOG.md`: task journal and verified release history.
 - `docs/DECISIONS.md`: approved durable owner decisions, including superseding history.
 - `docs/PROJECT_PLAYBOOK.md`: reusable lessons, not tasks.
 - `docs/AGENT_PROTOCOL.md`: shared convention.
@@ -22,21 +22,20 @@
 
 Read-only queries do not need a new branch. Never claim an unavailable action happened or another agent is working in the background.
 
-## Owner command semantics — "continue" (approved 2026-11-18)
+## Resuming approved work (HANDOFF-001)
 
-These commands apply to project work across **chat**, **cw** and **codex**. A lone "continue" does not override preflight, approvals, or product/release safeguards.
+When the Owner asks to keep working in ordinary language, recover the latest pushed milestone and take the next unfinished action within the approved scope. No special wording or repeat approval is needed. A status question, plan-only request, “RO” or “read only” means inspect and report without writing. If no approved unfinished task is identifiable, say so. Ask only when a real ambiguity or a decision requiring the Owner remains.
 
-| Owner message | Required behavior |
-| --- | --- |
-| **Continue** | **READ ONLY.** Fetch current remote `main:docs/TD_LIST.md` first; read `AGENTS.md`, checkpoint, decisions, latest code/commits and relevant open PRs. State the exact last verified task/ID, completed versus pending work, planned smallest next change, tests, risks and blockers. Ask **"Should I proceed?"**. Do not edit any files, create branches/PRs, commit, push, merge, deploy, publish or take external actions before a reply. |
-| **Continue and implement** | After the same preflight, proceed within the owner's **previously approved scope** only; stop for new decisions, uncertainty, scope changes, risky/destructive action, merges or releases that separately require permission. |
-| **Check status** | Read-only facts; do not implement or prompt for execution approval unless clarification is needed to identify the project. |
+1. **Start.** After read-only preflight, use a task ID and a named branch. Before implementation, commit and push a `STARTED` entry at the top of `docs/CHANGELOG.md` with the date, approved goal, branch, last verified result, remaining work or blocker, and one concrete next action. Open a draft PR naming the ID immediately. Link it from the next checkpoint. If a push fails, identify the last confirmed remote state.
+2. **Save.** At each meaningful milestone, push the work and update the same entry together. Record what actually passed or failed. Include the next command or decision when known. The remote branch and PR identify the revision. Only pushed work is recoverable from another workspace.
+3. **Recover.** After the remote task-list read, inspect the checkpoint on main and open PRs including drafts. Read the matching task entry at the PR head. If interrupted between push and PR creation, check recent remote task branches for a STARTED entry. Match the scope to the request, check commits, changed files and checks, then resume at the first unfinished action. If the PR has merged, inspect the merge and any required deployment before treating old pending text as current. Backlog candidates alone do not identify a task in progress.
+4. **Close.** Link the PR from the changelog and reconcile the checkpoint and backlog before merge. Record MERGED with the actual SHA in the linked PR after merge and DEPLOYED with the verified run for playable changes. If interrupted here, the next agent verifies the outstanding release. Carry confirmed outcomes into the main changelog on the next journal update. A documentation-only change ends at verified merge. Keep significant historical entries.
 
-If multiple repositories/tasks could match, identify the ambiguity instead of guessing. A usage-limit reset does not create a background job or authorize an agent to resume automatically. These meanings apply to project coordination; ordinary requests to continue writing non-project text are unaffected.
+Read-only requests create no journal entries. The separate unattended research allowlist retains its own scope.
 
 ## AUTO-MERGE-001 — agreed work may merge when verified
 
-The Owner granted standing approval on 2026-11-21: if the specific work was agreed, fully completed and tested, the PR is ready on the final head, and there is no conflict or decision requiring the Owner, merge without asking again. Read the full five-gate checklist in `AGENTS.md` first. If any gate fails, stop and request the needed decision. Confirm merged source on `main` and live deployment separately. This rule **does not** change the read-only semantics of a bare `Continue`.
+The Owner granted standing approval on 2026-11-21: if the specific work was agreed, fully completed and tested, the PR is ready on the final head, and there is no conflict or decision requiring the Owner, merge without asking again. Read the full five-gate checklist in `AGENTS.md` first. If any gate fails, stop and request the needed decision. Confirm merged source on `main` and live deployment separately.
 
 ## Agent names and task attribution
 

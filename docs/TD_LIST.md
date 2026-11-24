@@ -1,13 +1,6 @@
 # Active project tasks
 
-## Activity difficulty and terrain — 2026-11-23
-
-Activity grades and terrain — each activity has its own saved difficulty. Fighting rolls initiative and then arena terrain.
-
-## Completed: combat durability and slot mastery — 2026-11-23
-
-Health and armour readouts, hammer combat, automatic recovery, derived character level, material-funded F–S slot mastery and per-rank enchant tuning. Consumable repairs or reinforcement remain future work.
-
+Current work is identified by the task ID and changelog entry on its remote branch or draft PR. Use the checkpoint for verified releases.
 
 **Canonical location:** `docs/TD_LIST.md` on remote `main`.
 
@@ -18,11 +11,11 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## GAME-006 — Skill-gated probabilistic encounters and resources
 - **Goal:** Progress hunting, mining, gathering and processing outcomes within a single activity; players never manually choose creature, vein or ore quality.
 - **Acceptance criteria:** Data-driven level thresholds and probability weights; low-tier results remain available; higher tiers grow more likely with relevant skill levels; crafting automatically consumes available real inventory ingredients without resource-lock toggles or fabricated stock; encounter difficulty respects combat ability; offline resolution uses frozen skill levels and scales over long absences; deterministic balance and rarity tests.
-- **Status:** PARTIAL (PR #43 merged skill-weighted raw loot; PR #44 merged Smelting (its former protection mechanic was removed in PR #82); PR #54 merged ingredient-consuming Alchemy, Carpentry, Masonry and Cooking. Actual combat, encounter difficulty/risk and calibrated probability balancing are still not implemented).
+- **Status:** PARTIAL (PR #43 merged skill-weighted raw loot; PR #44 merged Smelting (its former protection mechanic was removed in PR #82); PR #54 merged ingredient-consuming Alchemy, Carpentry, Masonry and Cooking. Fighting and per-activity difficulty gates shipped through PR #134. Enemy benchmarks remain provisional and probability calibration remains open).
 - **Dependencies:** GAME-005, OFF-001.
 - **Added by:** chat
 - **Requested by:** Owner (2026-11-21).
-- **Implemented by:** chat (partial work merged in PRs #43, #44 and #54; combat and balance work remain).
+- **Implemented by:** chat (partial work merged in PRs #43, #44 and #54; PR #134 added graded combat, with balance calibration still open).
 
 ## GAME-009 — Reversible race transformation design and implementation
 - **Goal:** Eventually support one character beginning Human, able to become Undead and return to Human via resource-consuming rituals; no permanent race lock.
