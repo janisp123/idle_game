@@ -1,5 +1,11 @@
 # Current working checkpoint
 
+## GLAD-PLAN-001 — owner-approved gladiator rework roadmap (2026-11-24)
+
+**Documentation roadmap prepared in [PR #143](https://github.com/janisp123/idle_game/pull/143), NOT gameplay implementation.** The main task list `docs/TD_LIST.md` owns the complete design contract and five ordered, non-micro Codex batches. This design supersedes later work on old five-stat/41-activity/11-slot/magic/enchanting/attack-dice mechanics; currently deployed source code still implements those until replaced. Target: 3 attributes, 11 survival activities, 5 weapons with counters, 4 armour slots, item grade + Poor/Common/Fine/Masterwork, coins from victories, equipment HP/breakage, injury, bow ammo + dagger fallback, five physical environments using probabilistic 3d6 selection, idle-safe outcomes and eventually clan-donatable resources (no clan code).
+
+**NEXT:** After this documentation PR is verified and merged, Codex should begin **GLAD-001** only when the Owner requests implementation; then in order GLAD-002 → GLAD-003 → GLAD-004 → GLAD-005. Each batch is one integrated playable PR. Start with remote main TD and the branch STARTED journal; targeted tests after coherent edits, full required CI once on final head, Pages verification after each playable merge; no redundant full suite after each line/commit. ALPHA-FOCUS-001: disposable test progress; no old-save migration. Existing draft PR #141 holds an earlier partial combat-timeout note; it is not the complete redesign spec.
+
 ## SIM-002 — Modular game systems lab, PR #139 (2026-11-24)
 
 **MERGED AND VERIFIED.** [PR #139](https://github.com/janisp123/idle_game/pull/139) landed on main at `24dcf4385841135102fce96f2bfe552dc77c6723`. `tools/system-lab.mjs` now has ten developer-only real-game modules, deterministic scenarios, direct parity tests and an on-demand GitHub Actions report generator. Final-head [systems CI 45309633370](https://github.com/janisp123/idle_game/actions/runs/45309633370) and [protocol 45309633387](https://github.com/janisp123/idle_game/actions/runs/45309633387) passed. No game `site/` files changed; no deploy needed. See [the usage guide](mechanics/SYSTEM_LAB.md). **Next:** use the lab to benchmark real conditions, then seek Owner approval before any balance change. No unfinished SIM-002 implementation remains.
