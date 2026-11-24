@@ -1,14 +1,16 @@
 # Changelog and task handoffs
 
-## GLAD-005 · STARTED · 2026-11-24
+## GLAD-005 · DEPLOYED · 2026-11-24
 
 Goal: Verify and finalize bounded offline combat, balance, and the playable gladiator loop.
 Branch: `codex/glad-005-offline-parity`.
-Draft: [PR #152](https://github.com/janisp123/idle_game/pull/152).
+Release: [PR #152](https://github.com/janisp123/idle_game/pull/152).
 Last verified: Local suite 103 passed and one existing optional layout skip, 1.78 seconds. Focused twenty-year split/reload and three-wagon tests passed. Each long frozen arena settlement resolves at most 256 sampled bouts and reports its modeled outcome and coins. Browser Play Now at 390 and 1440 px verified the counts, shop, offline estimate and balance reload. The handbook publishes 13,760 seeded production duels and the grade/quality and terrain findings.
 Equipment feedback: dark charcoal weapon cards and native pickers, bronze equipped state, and a regular four-slot armour grid.
-Next action: Verify final-head CI, then merge and verify public Pages.
-Status: IN_REVIEW.
+Final head: `b63cb8b87ca0c61cab80f6f0dc2f215aeb849ff7`. Passed [website](https://github.com/janisp123/idle_game/actions/runs/45469351491), [combat simulator and benchmark](https://github.com/janisp123/idle_game/actions/runs/45469351320), [protocol](https://github.com/janisp123/idle_game/actions/runs/45469351327), and [systems lab](https://github.com/janisp123/idle_game/actions/runs/45469351464).
+Merged: `7b7c48fe91c37bacae9e2b6e491f462d4250a8c8`. [Pages deployment](https://github.com/janisp123/idle_game/actions/runs/45469642917) passed. Public assets matched main and live 390/1440 px tests verified the dark equipment controls, slot placement, offline estimate and wallet reload.
+Next action: Await Owner selection of a new scope. The five GLAD batches are complete.
+Status: DEPLOYED.
 
 ## GLAD-004 · DEPLOYED · 2026-11-24
 
