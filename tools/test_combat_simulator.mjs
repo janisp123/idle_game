@@ -14,6 +14,7 @@ test('the 10,000-bout runner resolves real production opponents, locations and d
   assert.equal(Object.values(output.byTerrain).reduce((a,b)=>a+b.battles,0),10000);
   assert.equal(Object.values(output.byEnemyRole).reduce((a,b)=>a+b.battles,0),10000);
   assert.equal(Object.values(output.byEnemyLoadout).reduce((a,b)=>a+b.battles,0),10000);
+  assert.equal(Object.values(output.terrainD6).reduce((a,b)=>a+b,0),10000);
   assert.deepEqual(Object.keys(output.byTerrain).sort(),
     ['Dungeon passage','Open field','Ruined courtyard'].sort());
   assert.equal(output.dice.playerInitiative.rolls,10000);
@@ -70,6 +71,9 @@ test('gear, mixed armour, enchantment and mastery use production source function
   assert.equal(player.difficulty,3);
   const output=simulateBatch({...options,battles:100,seed:112,trace:1});
   assert.equal(output.player.attackEnchant,3);
+  assert.equal(output.playerBuild.enchantments.head,4);
+  assert.equal(output.playerBuild.mastery.head,3);
+  assert.equal(output.playerBuild.armourSlots.chest,'plate');
   assert.ok(output.player.conditionBonus.body>0);
   assert.ok(output.samples[0].events.at(-1).vitals.player.armour>=0);
 });
@@ -82,6 +86,7 @@ test('saved session snapshots preserve frozen power, start bout, seed and exact 
   assert.equal(output.startBout,8);
   assert.equal(output.seed,3377);
   assert.equal(output.player.attackEnchant,2);
+  assert.equal(output.playerBuild,null);
   assert.deepEqual(output.samples[0].events,
     combatAtTime({...session,elapsedMs:8*BOUT_MS}).events);
 });
