@@ -1,14 +1,16 @@
 # Changelog and task handoffs
 
-## GLAD-002 · STARTED · 2026-11-24
+## GLAD-002 · DEPLOYED · 2026-11-24
 
 Goal: Implement the approved four-slot equipment, five physical styles, item grade and quality, arena coins, and smith purchases.
 Branch: `codex/glad-002-equipment-economy`.
-Draft: [PR #146](https://github.com/janisp123/idle_game/pull/146).
+Release: [PR #146](https://github.com/janisp123/idle_game/pull/146).
 Last verified: Three focused prize tests passed against real resolved wins, saved-wallet reload, negative-wallet rejection and a split twenty-year settlement. The temporary arena repeats a 256-bout schedule for a frozen build, so the same resolver supports exact bounded payouts and consistent split claims.
 Shop and combat integration: Five starter weapons, four armour slots, separate grade/quality, exact coin prizes, one-item editing, current-save reset and frozen equipment snapshots implemented. Focused engine, UI and simulator checks passed. Staged 390 px Play Now confirmed five weapons, four slots, one paid armour purchase and save/reload.
-Next action: Verify final PR checks, then merge and verify Pages.
-Status: IN_REVIEW.
+Final head: `0ba47afb89b2b44a41ba977524e5821022b16910`. Passed [website](https://github.com/janisp123/idle_game/actions/runs/45429083021), [protocol](https://github.com/janisp123/idle_game/actions/runs/45429082396), [combat simulator](https://github.com/janisp123/idle_game/actions/runs/45429082215), and [systems lab](https://github.com/janisp123/idle_game/actions/runs/45429083345). Local Node suite: 112 passed and one optional layout test skipped in 1.34 seconds. Final gameplay head includes 37 changed files from the last focused checkpoint.
+Merged: `7df47cc9d6031569da0b181b780c6fb27eff13ef`. [Pages deployment](https://github.com/janisp123/idle_game/actions/runs/45429384799) passed. Public asset readback matched main. Live 390 px Play Now verified the four slots, five styles, armour purchase, wallet and reload.
+Next action: GLAD-003 physical combat after Owner implementation approval.
+Status: DEPLOYED.
 
 ## GLAD-001 · DEPLOYED · 2026-11-24
 
