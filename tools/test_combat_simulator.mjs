@@ -37,7 +37,7 @@ test('the 10,000-bout runner resolves real production opponents, locations and d
 
 test('sampled traces equal the actual live combatAtTime events without a substitute resolver', () => {
   const args={battles:50,grade:'F',loadout:'hammer',armour:'leather',
-    skill:10,str:14,dex:14,end:14,wil:14,seed:892,trace:3,startBout:4};
+    skill:10,str:14,dex:14,end:14,seed:892,trace:3,startBout:4};
   const output=simulateBatch(args);
   const session=startCombatSession(createPlayerSnapshot(args),args.seed);
   for (let i=0;i<output.samples.length;i++) {
@@ -59,7 +59,7 @@ test('sampled traces equal the actual live combatAtTime events without a substit
 
 test('gear, mixed armour, enchantment and mastery use production source functions', () => {
   const options={grade:'D',loadout:'sword_shield',armour:'leather',
-    armourSlots:{head:'plate',chest:'plate'},str:22,dex:22,end:22,wil:22,
+    armourSlots:{head:'plate',chest:'plate'},str:22,dex:22,end:22,
     enchantments:{weapon:3,shield:2,head:4,chest:2},mastery:{weapon:1,head:3,shield:1}};
   const player=createPlayerSnapshot(options);
   const armour=Object.fromEntries(ARMOUR_SLOTS.map(x=>[x.id,options.armourSlots[x.id]??options.armour]));
@@ -82,7 +82,7 @@ test('gear, mixed armour, enchantment and mastery use production source function
 
 test('saved session snapshots preserve frozen power, start bout, seed and exact outcome',()=>{
   const player=createPlayerSnapshot({grade:'F',loadout:'greatsword',armour:'leather',
-    enchantments:{weapon:2,head:1},skill:10,str:14,dex:14,end:14,wil:14});
+    enchantments:{weapon:2,head:1},skill:10,str:14,dex:14,end:14});
   const session={...startCombatSession(player,3377),elapsedMs:8*BOUT_MS+1200};
   const output=simulateBatch({snapshot:{combatSession:session},battles:30,trace:1});
   assert.equal(output.startBout,8);

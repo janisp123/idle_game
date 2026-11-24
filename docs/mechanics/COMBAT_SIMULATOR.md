@@ -14,7 +14,7 @@ Files under `tools/` **are not included in the deployed `site/` directory**. Thi
 
 ```sh
 node tools/combat-simulator.mjs --battles 10000
-node tools/combat-simulator.mjs --battles 10000 --seed 7241 --grade F --loadout greatsword --armour leather --skill 10 --str 14 --dex 14 --end 14 --wil 14
+node tools/combat-simulator.mjs --battles 10000 --seed 7241 --grade F --loadout greatsword --armour leather --skill 10 --str 14 --dex 14 --end 14
 node tools/combat-simulator.mjs --battles 10000 --grade D --loadout sword_shield --armour leather --armour-slots head:plate,chest:plate --str 22 --dex 22 --end 22 --wil 22 --enchant weapon:3,shield:2,head:4,chest:2 --mastery weapon:1,head:3,shield:1
 node tools/combat-simulator.mjs --battles 10000 --grade S --armour plate --enchant weapon:7 --trace 2 > combat-report.json
 node tools/combat-simulator.mjs --snapshot ./frozen-session.json --battles 10000 --trace 2
@@ -48,12 +48,12 @@ The run uses Node 22 and the same `--config` JSON entrypoint. It prints the head
 
 **Privacy:** GitHub Actions runs and reports are visible in this public repository. Enter only fictional/test stats there; the cloud workflow explicitly rejects `snapshot` data. For personal/saved player state, use the local `--snapshot` mode only.
 
-The **default** is 10,000 non-grade, level-1 greatsword duels, default robes, no enchants/mastery and reproducible seed `20261124`. Each grade uses the **actual** `benchmark()` values for skill and STR/DEX/END/WIL, and the actual level unlock; this is a **synthetic reference build** and does not claim real players automatically earn these stats. Override the four stats and Fighting skill to assess realistic progression. Generated gear honors actual stat unlock requirements, so an illegal build (e.g. full Plate with STR 10) is rejected instead of being silently treated as equippable.
+The **default** is 10,000 non-grade, level-1 greatsword duels, no armour, no enchants/mastery and reproducible seed `20261124`. Each grade uses the **actual** `benchmark()` values for skill and STR/DEX/END, and the actual level unlock; this is a **synthetic reference build** and does not claim real players automatically earn these stats. Override the three stats and Fighting skill to assess realistic progression. Generated gear honors actual stat unlock requirements, so an illegal build (e.g. full Plate with STR 10) is rejected instead of being silently treated as equippable.
 
 - `--grade Non-grade|F|E|D|C|B|A|S`: selected Fighting activity difficulty; enemies draw from the **real** six encounter profiles and their randomly assigned equipment.
 - `--loadout greatsword|sword_shield|hammer|bow|staff|twin_blades`: player weapon and automatic attack/defense skills.
-- `--armour none|robe|leather|plate`: base for all **11 slots**; override individually using `--armour-slots head:plate,left_glove:leather`.
-- `--enchant weapon:2,head:1,shield:3` and `--mastery weapon:1,head:2`: real saved per-slot bonuses, including weapon attack, body/shield defense, maximum durability and normal condition wear. `--wil` handles robe requirements. Enchants are **fixed** for each frozen combat snapshot; the simulator never fabricates scrolls or auto-enchants gear between fights.
+- `--armour none|leather|plate`: base for all **11 slots**; override individually using `--armour-slots head:plate,left_glove:leather`.
+- `--enchant weapon:2,head:1,shield:3` and `--mastery weapon:1,head:2`: real saved per-slot bonuses, including weapon attack, body/shield defense, maximum durability and normal condition wear. Enchants are **fixed** for each frozen combat snapshot; the simulator never fabricates scrolls or auto-enchants gear between fights.
 - `--seed N`, `--start-bout N`: original 32-bit combat session seed and **zero-based** bout index. Selecting the same seed, frozen fighter, grade and bout yields exactly the same enemy, terrain and dice as the game.
 - `--config scenario.json`: reuse a locally stored JSON object with the same keys as programmatic `simulateBatch()` options; no other flags may be combined with `--config`.
 - `--snapshot path.json`: read a **local** JSON frozen `combatSession`, a `{player, seed}` session or a bare frozen fighter object. If the session has an elapsed clock and seed, both are reused by default. Do not combine with synthetic equipment/stats/grade flags. File input and reports remain local unless you choose to share them. Never commit a player's personal save.

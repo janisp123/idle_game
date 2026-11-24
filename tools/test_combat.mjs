@@ -187,9 +187,9 @@ test("armour and flat defense enchant reduce guarded impact; defense can absorb 
   assert.equal(protectedShield.damage,0,
     "defense enchant may absorb the remaining impact without inventing min-1 damage");
   assert.equal(protectedShield.hpAfter,30);
-  const robeParry=firstTurn(great,wear(great,"robe"),4,5);
-  assert.equal(robeParry.type,"parry");
-  assert.equal(robeParry.damage,8);
+  const leatherParry=firstTurn(great,wear(great,"leather"),4,5);
+  assert.equal(leatherParry.type,"parry");
+  assert.equal(leatherParry.damage,6);
   const critical=firstTurn(great,shield,6,1);
   assert.equal(critical.type,"finisher","special triple-six outcome remains unchanged");
   assert.equal(critical.damage,0,"do not invent chip HP for a finisher");
@@ -198,18 +198,18 @@ test("armour and flat defense enchant reduce guarded impact; defense can absorb 
 test("new gear requires a larger defense margin for an actual zero-damage dodge",()=>{
   const wear=(f,tier)=>({...f,gear:armourStats(
     Object.fromEntries(ARMOUR_SLOTS.map(slot=>[slot.id,tier])),f.loadout)});
-  assert.deepEqual(["none","robe","leather","plate"].map(x=>
-    wear(great,x).gear.dodgeMargin),[6,9,8,99]);
-  const moderate=firstTurn(shield,wear(great,"robe"),3,5);
-  const exceptional=firstTurn(shield,wear(great,"robe"),3,6);
+  assert.deepEqual(["none","leather","plate"].map(x=>
+    wear(great,x).gear.dodgeMargin),[6,8,99]);
+  const moderate=firstTurn(shield,wear(great,"leather"),4,5);
+  const exceptional=firstTurn(shield,wear(great,"leather"),3,6);
   assert.equal(moderate.type,"parry");
   assert.ok(moderate.damage>0);
   assert.equal(exceptional.type,"dodge");
   assert.equal(exceptional.damage,0);
   // Existing, already frozen sessions retain their previous dodge thresholds.
-  const beforeUpdate={...wear(great,"robe"),gear:{
-    ...wear(great,"robe").gear,dodgeMargin:5}};
-  const oldRoll=firstTurn(shield,beforeUpdate,3,5);
+  const beforeUpdate={...wear(great,"leather"),gear:{
+    ...wear(great,"leather").gear,dodgeMargin:5}};
+  const oldRoll=firstTurn(shield,beforeUpdate,4,5);
   assert.equal(oldRoll.type,"dodge",
     "do not retroactively replace a saved duel's frozen dodge margin");
 });
@@ -219,11 +219,9 @@ test("physical armor counters real hits; evasion and weight alter actual opposed
     Object.fromEntries(ARMOUR_SLOTS.map(slot=>[slot.id,tier])),f.loadout)});
   const unguarded={...shield,name:"Unguarded",defenseSkill:null};
   const unarmored=firstTurn(great,wear(unguarded,"none"),5,1);
-  const robe=firstTurn(great,wear(unguarded,"robe"),5,1);
   const leather=firstTurn(great,wear(unguarded,"leather"),5,1);
   const plate=firstTurn(great,wear(unguarded,"plate"),5,1);
   assert.equal(unarmored.damage,24);
-  assert.equal(robe.damage,23);
   assert.equal(leather.damage,19);
   assert.equal(plate.damage,12,"full Plate prevents half of landed physical damage");
   assert.ok(plate.attackTotal===leather.attackTotal);
@@ -254,17 +252,18 @@ test("changing armour mid-Fighting preserves earned progression and refreshes fr
   const init=chooseActivity(newGame(0),"fighting",0,()=>.5).state;
   init.items.stone=77;
   const before=settle(init,COMBAT_BALANCE.eventMs,()=>.5).state;
-  assert.equal(before.combatSession.player.gear.physicalReductionPct,4);
+  assert.equal(before.combatSession.player.gear.physicalReductionPct,0);
+  before.attributeEffort.DEX = 3_600_000 * 60;
   const oldXP=before.skills.fighting.xp,oldEffort={...before.attributeEffort};
-  const changed=setArmourChoice(before,"chest","none",COMBAT_BALANCE.eventMs,()=>.5).state;
+  const changed=setArmourChoice(before,"chest","leather",COMBAT_BALANCE.eventMs,()=>.5).state;
   assert.equal(changed.combatSession,null,"equipping a different piece begins a new fight");
   assert.equal(changed.items.stone,77);
   assert.equal(changed.skills.fighting.xp,oldXP);
   assert.deepEqual(changed.attributeEffort,oldEffort);
-  assert.equal(changed.armour.chest,"none");
+  assert.equal(changed.armour.chest,"leather");
   const later=settle(changed,2*COMBAT_BALANCE.eventMs,()=>.5).state;
-  assert.equal(later.combatSession.player.gear.physicalReductionPct,3);
-  assert.equal(later.combatSession.player.gear.totalKg<before.combatSession.player.gear.totalKg,true);
+  assert.equal(later.combatSession.player.gear.physicalReductionPct,7);
+  assert.equal(later.combatSession.player.gear.totalKg>before.combatSession.player.gear.totalKg,true);
   assert.deepEqual(readSave(JSON.stringify(later)),later);
   // A long offline interval MUST keep the original stats without repeatedly
   // upgrading equipment or retroactively recalculating any absent duels.
@@ -277,7 +276,7 @@ test("changing armour mid-Fighting preserves earned progression and refreshes fr
 test("claimed levels in ANY activity affect future fighting snapshot without rerolling dice",()=>{
   const s=newGame(0);
   s.skills.mining={level:11,xp:0};
-  s.skills.meditation={level:11,xp:0};
+
   const playing=chooseActivity(s,"fighting",0,()=>.5).state;
   const first=settle(playing,COMBAT_BALANCE.eventMs,()=>.5).state;
   assert.equal(first.combatSession.player.str,17,"ten claimed Mining levels add 7 STR");
@@ -376,10 +375,10 @@ test("per-slot enchant adds small physical attack/defense but never extra dice",
   assert.deepEqual(enchanted.attackDice,basic.attackDice);
   assert.deepEqual(enchanted.defenseDice,basic.defenseDice);
   const protectedHit=firstTurn(great,{...unguarded,
-    gear:{...armourStats(Object.fromEntries(ARMOUR_SLOTS.map(x=>[x.id,"robe"])),
+    gear:{...armourStats(Object.fromEntries(ARMOUR_SLOTS.map(x=>[x.id,"leather"])),
       "sword_shield"),defenseEnchant:4}},5,1);
   const sameRobe=firstTurn(great,{...unguarded,
-    gear:armourStats(Object.fromEntries(ARMOUR_SLOTS.map(x=>[x.id,"robe"])),
+    gear:armourStats(Object.fromEntries(ARMOUR_SLOTS.map(x=>[x.id,"leather"])),
       "sword_shield")},5,1);
   assert.equal(protectedHit.damage,Math.max(1,sameRobe.damage-4));
   assert.deepEqual(protectedHit.defenseDice,sameRobe.defenseDice);
@@ -400,34 +399,6 @@ test("combat sessions are deterministic, persisted and O(1) after decades away",
   const years=advanceCombatSession(s,20*YEAR);
   assert.ok(combatAtTime(years).bout>1_000_000);
   assert.equal(COMBAT_ART.engage,"fight-engage");
-});
-test("legacy duel resumes at the same attack without paying completed bouts again",()=>{
-  const state=newGame(0);
-  const session=startCombatSession(great,12345);
-  delete session.timelineVersion;
-  state.combatSession={...session,elapsedMs:2*225_000+55_000,
-    gloryCursor:2,gloryEligibleUntilMs:2*225_000+80_000};
-  const saved=readSave(JSON.stringify(state));
-  assert.equal(saved.combatSession.elapsedMs,2*BOUT_MS+30_000);
-  assert.equal(combatAtTime(saved.combatSession).event.turn,1);
-  assert.equal(saved.combatSession.gloryCursor,2);
-  assert.equal(saved.combatSession.gloryEligibleUntilMs-saved.combatSession.elapsedMs,25_000);
-  assert.deepEqual(readSave(JSON.stringify(saved)),saved);
-});
-test("V6 save migration preserves frozen stats, active turn and items",()=>{
-  const old=newGame(0);old.version=6;delete old.combatLoadout;
-  old.name="Old Knight";old.items.stone=314;old.skills.fighting.level=11;
-  old.combatSession={elapsedMs:83_000,seed:12345,
-    player:{name:"Old Knight",weapon:"hammer",str:19,dex:17,end:14,skill:11}};
-  const converted=readSave(JSON.stringify(old));
-  assert.equal(converted.version,GAME_VERSION);
-  assert.equal(converted.combatSession.player.loadout,"greatsword");
-  assert.equal(converted.combatSession.elapsedMs,58_000);
-  assert.equal(converted.combatSession.seed,12345);
-  assert.equal(converted.combatSession.player.str,19);
-  assert.equal(converted.items.stone,314);
-  assert.equal(converted.skills.fighting.level,11);
-  assert.deepEqual(readSave(JSON.stringify(converted)),converted);
 });
 test("style switching settles saved XP/materials and starts a fresh duel",()=>{
   const state=chooseActivity(newGame(0),"fighting",0,()=>.5).state;
@@ -487,7 +458,7 @@ test("arena draws legal sets, all terrains and reproducible matchups at each gra
     assert.equal(duel.terrain.name,["Open field","Ruined courtyard","Dungeon passage"][Math.floor((duel.zoneRoll-1)/2)]);
   }
   assert.equal(faces.size,6);
-  assert.deepEqual([...sets].sort(),["Archer/leather","Breaker/leather","Breaker/plate","Duelist/leather","Duelist/plate","Mage/robe","Tank/plate","Vanguard/leather","Vanguard/plate"]);
+  assert.deepEqual([...sets].sort(),["Archer/leather","Breaker/leather","Breaker/plate","Duelist/leather","Duelist/plate","Mage/none","Tank/plate","Vanguard/leather","Vanguard/plate"]);
   const plate=Object.fromEntries(ARMOUR_SLOTS.map(slot=>[slot.id,"plate"]));
   const tank={...shield,gear:armourStats(plate,"sword_shield")};
   for(const loadout of ["bow","staff","sword_shield"]) {

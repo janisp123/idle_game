@@ -57,11 +57,10 @@ export function createPlayerSnapshot(options = {}) {
   const str = intIn(options.str ?? target.stat, 0, 100000, 'STR');
   const dex = intIn(options.dex ?? target.stat, 0, 100000, 'DEX');
   const end = intIn(options.end ?? target.stat, 0, 100000, 'END');
-  const wil = intIn(options.wil ?? target.stat, 0, 100000, 'WIL');
   const loadout = options.loadout ?? 'greatsword';
   if (!Object.hasOwn(COMBAT_LOADOUTS, loadout)) throw new RangeError('Unknown loadout');
   const armour = uniform(options.armour ?? 'none', options.armourSlots ?? {});
-  const attributes = { STR:str, DEX:dex, END:end, WIL:wil };
+  const attributes = { STR:str, DEX:dex, END:end };
   for (const slot of ARMOUR_SLOTS)
     if (!armourUnlocked(attributes, slot.id, armour[slot.id]))
       throw new RangeError('Locked armour ' + slot.id + ':' + armour[slot.id] +
@@ -116,7 +115,6 @@ export function simulateBatch(options = {}) {
   const gloryEligibleBouts = intIn(options.gloryEligibleBouts ?? 0, 0, battles, 'eligible Glory bouts');
   const session = startCombatSession(player, seed); // production validation
   const generatedBuild = saved ? null : {
-    statGates:{WIL:options.wil ?? benchmark(parseGrade(options.grade ?? 'Non-grade')).stat},
     armourSlots:uniform(options.armour ?? 'none', options.armourSlots ?? {}),
     enchantments:{...blankEnchantments(),...(options.enchantments ?? {})},
     mastery:masteryRanks(options.mastery ?? {})
@@ -264,11 +262,11 @@ export function parseCliArgs(args) {
     '--grade':'grade','--loadout':'loadout','--armour':'armour',
     '--armour-slots':'armourSlots','--enchant':'enchantments',
     '--mastery':'mastery','--skill':'skill','--str':'str',
-    '--dex':'dex','--end':'end','--wil':'wil',
+    '--dex':'dex','--end':'end',
     '--trace':'trace','--glory-eligible-bouts':'gloryEligibleBouts',
     '--snapshot':'snapshot'
   };
-  const numeric = new Set(['battles','seed','startBout','skill','str','dex','end','wil','trace','gloryEligibleBouts']);
+  const numeric = new Set(['battles','seed','startBout','skill','str','dex','end','trace','gloryEligibleBouts']);
   const out = {};
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -284,7 +282,7 @@ export function parseCliArgs(args) {
       key === 'snapshot' ? JSON.parse(readFileSync(resolve(value), 'utf8')) : value;
   }
   if (out.snapshot && ['grade','loadout','armour','armourSlots','enchantments','mastery','skill',
-      'str','dex','end','wil'].some(k => Object.hasOwn(out,k)))
+      'str','dex','end'].some(k => Object.hasOwn(out,k)))
     throw new RangeError('--snapshot supplies the frozen fighter; do not mix build options');
   return out;
 }
@@ -299,7 +297,7 @@ export const HELP = [
   ' --armour-slots head:plate,chest:leather   overrides individual body slots',
   ' --enchant weapon:2,head:1,shield:3  actual per-slot enchant ranks',
   ' --mastery weapon:1,head:2         actual per-slot mastery grades',
-  ' --skill N --str N --dex N --end N --wil N  default: grade benchmarks',
+  ' --skill N --str N --dex N --end N  default: grade benchmarks',
   ' --seed N                  live combat session RNG seed (default 20261124)',
   ' --start-bout N            zero-based live bout index (default 0)',
   ' --snapshot FILE.json     local frozen combatSession/player JSON; no uploads',

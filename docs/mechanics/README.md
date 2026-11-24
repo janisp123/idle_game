@@ -6,11 +6,11 @@
 
 | Mechanic | Exact formula and invariants | Executable source / tuning |
 | --- | --- | --- |
-| Skill XP, automatic mastery stats, STR/DEX/END/INT/WIL | [Progression](PROGRESSION.md) | `site/play/engine.mjs` → `SKILL_BALANCE`, `ACTIVITIES`, `MASTER_RESOURCE_MINIMUM`; `site/play/attributes.mjs` → `ATTRIBUTE_BALANCE`, `ACTIVITY_STAT_WEIGHTS` |
+| Skill XP, automatic mastery stats, STR/DEX/END | [Progression](PROGRESSION.md) | `site/play/engine.mjs` → `SKILL_BALANCE`, `ACTIVITIES`, `MASTER_RESOURCE_MINIMUM`; `site/play/attributes.mjs` → `ATTRIBUTE_BALANCE`, `ACTIVITY_STAT_WEIGHTS` |
 | Skill-gated drops, rarity, crafting | [Resources](RESOURCES.md) | `site/play/loot.mjs` → `LOOT_TABLES`; `site/play/production.mjs` → `PRODUCTION_RECIPES`; engine `SKILL_BALANCE.batchVariation` |
 | [Compact action results](RESULTS.md) — fighting and all work | [Results](RESULTS.md) | `site/play/result-readout.mjs`, `site/play/app.mjs` |
 | [Glory Scrolls and slot enchanting](ENCHANTMENTS.md) — 50% real win loot and 50% reset risk | [Enchantments](ENCHANTMENTS.md) | `site/play/glory.mjs`, `engine.mjs:enchantEquipmentSlot` |
-| [Equipment by attributes](ARMOUR.md) — STR / DEX / WIL, weight and physical counters | [Armour](ARMOUR.md) | `site/play/armour.mjs`; `engine.mjs:setArmourChoice` | 
+| [Equipment by attributes](ARMOUR.md) — STR / DEX, weight and physical counters | [Armour](ARMOUR.md) | `site/play/armour.mjs`; `engine.mjs:setArmourChoice` |
 | Playable two-skill turn-based Fighting V2 alpha | [Combat](COMBAT.md) | `site/play/combat.mjs` → `COMBAT_BALANCE`, `OPPONENTS`; `site/play/combat-skills.mjs` → `COMBAT_SKILLS`, `COMBAT_LOADOUTS`; `site/play/combat-art.mjs` → `COMBAT_ART` |
 | [Developer-only modular systems lab](SYSTEM_LAB.md) — real offline work, loot, crafting, attributes, mastery, equipment, enchanting, queue and saves | [Scenarios and parity](SYSTEM_LAB.md) | `tools/system-lab.mjs`, `tools/simulation/*.mjs`; imports actual engine and resource functions, outside public site |
 | [Developer-only combat simulator](COMBAT_SIMULATOR.md) — 10,000+ real, zero-delay duels with dice/terrain/enchants | [Simulation and parity](COMBAT_SIMULATOR.md) | `tools/combat-simulator.mjs` imports production `combatAtTime`, `armourStats`, `enchantBonus`, `conditionBonuses`, `tallyGloryVictories`; runs outside the published site |
@@ -26,4 +26,4 @@
 4. **Tune data, not formulas:** change named balance objects and content tables, rather than finding and replacing numeric literals in algorithms. Some changes alter save interpretation; use [change checklist](CHANGING_BALANCE.md).
 5. **Keep docs in the same PR as formula changes.** Update numerical examples, relevant tests, and `docs/CHANGELOG.md` when a new mechanic ships. No independent duplicate copies of “official” values in other documentation.
 
-**Latest audit:** 2026-11-22; baseline: deterministic two-skill solo Fighting V2 alpha, three-wagon alpha schedule, skill XP capped until Skill Master, time-based five attributes, weighted loot/crafting, V7 local saves. This is a browser-local prototype; no server-authoritative multiplayer or clan battle settlement.
+**Latest audit:** 2026-11-24; baseline: deterministic two-skill solo Fighting V2 alpha, three-wagon alpha schedule, skill XP capped until Skill Master, time-based three attributes, weighted loot/crafting, V8 local saves. This is a browser-local prototype; no server-authoritative multiplayer or clan battle settlement.

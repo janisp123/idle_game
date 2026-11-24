@@ -5,9 +5,9 @@
 Goal: Implement the approved three-attribute, eleven-activity survival foundation, connected recipes, and current-build Master, queue, save and offline behavior.
 Branch: `codex/glad-001-survival-foundation`.
 Draft: [PR #144](https://github.com/janisp123/idle_game/pull/144).
-Last verified: Focused GLAD-001 catalogue and mortar tests, the example system-lab scenarios, and the static Pages check passed. Existing regression fixtures for retired activities, armour and saves still fail. No final-head verification or deployment yet.
-Next action: Update the existing regression fixtures for the three-stat survival build, verify queue/save and 20-year offline routes, update the mechanics handbook, and stage mobile Play Now QA before final CI.
-Status: STARTED / gameplay slice in progress.
+Last verified: Focused catalogue, mortar, 20-year farm/cooking and grade S training/mining tests passed. The complete Node run had 115 passes and one existing optional browser-layout skip in 2.1 seconds. Project protocol, research links, static Pages checks and the source-backed example system lab passed. A 390 px Chromium session verified Play Now, the V7 reset notice, three visible stats, the Survival Work picker and Mining reload. Approximately 30 files changed since the previous full verification baseline.
+Next action: Verify the required GitHub workflows on this PR head, merge under AUTO-MERGE-001, then verify Pages and record the merge and deployment evidence.
+Status: IN_REVIEW / release checks pending.
 
 ## GLAD-PLAN-001 · STARTED · 2026-11-24
 

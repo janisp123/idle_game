@@ -93,10 +93,10 @@ test("compact results use only real event/report values and correct combat side"
     "fighting uses the real combat event result, not a fake loot readout");
 });
 
-test("real browser-app entrypoint renders skill UI and migrates old saved character", async () => {
+test("real browser-app entrypoint renders skill UI and reloads a current saved character", async () => {
   const html = readFileSync(new URL("../site/play/index.html", import.meta.url), "utf8");
   const queueCss = readFileSync(new URL("../site/play/iron-ui.css", import.meta.url), "utf8");
-  assert.match(html, /id="characterAttributes"/, "five visible stats belong to the character panel");
+  assert.match(html, /id="characterAttributes"/, "three visible stats belong to the character panel");
   assert.match(html, /id="combatPanel"/, "only combat receives a dedicated event panel");
   for (const oldCopy of ["Early prototype.", "Use ▶ to start now", "Attribute growth is uncapped",
     "STR Strength · DEX Dexterity", "No overall character level"]) {
@@ -169,7 +169,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=arena-v1/,
+  assert.match(html, /app\.mjs\?v=glad-001/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -215,9 +215,8 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
   let now = 2_000_000_000_000;
   let tick = null;
   const store = new Map([[SAVE_KEY, JSON.stringify({
-    version: 1, name: "Marauder", level: 2, totalXP: 85,
-    items: { hide: 8, stone: 4 }, activity: null,
-    progressMs: 0, settledAtMs: now
+    ...newGame(now), name: "Marauder", unattributedXP: 85,
+    items: { ...newGame(now).items, hide: 8, stone: 4 }
   })]]);
   const handlers = new Map();
   globalThis.document = {
@@ -315,7 +314,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="left_boot").length,1);
     assert.equal(armourButtons.filter(b=>b.getAttribute("data-slot")==="right_boot").length,1);
     assert.equal(elements.get("armourChoiceLabel").textContent,"Hood / helmet");
-    assert.equal(elements.get("armourChoice").value,"robe");
+    assert.equal(elements.get("armourChoice").value,"none");
     assert.equal(elements.get("enchantSelected").disabled,true,
       "no scroll: the one shared enchant button is disabled");
     assert.match(elements.get("enchantSelected").getAttribute("aria-label"),/only HEAD/);
@@ -328,16 +327,14 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       button.children[1].children[0].hidden &&
       button.children[1].children[0].textContent === ""),
       "all eleven baseline armour slots hide +0 beside their labels");
-    assert.match(elements.get("gearStats").textContent,/11 kg.*MOVE 92%.*PHYS 4%.*MR\* 45%/,
-      "starter robe and greatsword have truthful weight, mobility, protection and future magic values");
+    assert.match(elements.get("gearStats").textContent,/5 kg.*MOVE 97%.*PHYS 0%.*MR\* 0%/,
+      "starter armour and greatsword have truthful weight, mobility, protection and future magic values");
     assert.deepEqual(elements.get("armourChoice").children.map(o=>o.value),
-      ["none","robe","leather","plate"],"exactly four standardized choices");
+      ["none","leather","plate"],"three transitional armour families");
     assert.deepEqual(elements.get("armourChoice").children.map(o=>o.disabled),
-      [false,false,true,true],"unmet character stats disable gear choices");
-    assert.match(elements.get("armourChoice").children[1].textContent,/Mage Hood.*WIL 10/,
-      "mage equipment requires Willpower, not a combat skill");
-    assert.match(elements.get("armourChoice").children[2].textContent,/Leather Mask.*DEX 11/);
-    assert.match(elements.get("armourChoice").children[3].textContent,/Plate Helm.*STR 13/);
+      [false,true,true],"unmet character stats disable gear choices");
+    assert.match(elements.get("armourChoice").children[1].textContent,/Leather Mask.*DEX 11/);
+    assert.match(elements.get("armourChoice").children[2].textContent,/Plate Helm.*STR 13/);
     assert.ok(elements.get("armourChoice").children.every(o=>
       !o.textContent.includes("Fighting Lv")),"gear must never require skill levels");
     const leftGloveButton=armourButtons.find(b=>b.getAttribute("data-slot")==="left_glove");
@@ -350,13 +347,13 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(elements.get("enchantChance").getAttribute("aria-expanded"),"false");
     assert.equal(elements.get("armourChoiceLabel").textContent,"Left glove");
     assert.deepEqual(elements.get("armourChoice").children.map(o=>o.disabled),
-      [false,false,false,true],
+      [false,false,true],
       "Leather gloves unlock with DEX 10, independently of Fighting level");
     elements.get("armourChoice").value="none";
     elements.get("armourChoice").fire("change");
     let gearSave=JSON.parse(store.get(SAVE_KEY));
     assert.equal(gearSave.armour.left_glove,"none");
-    assert.equal(gearSave.armour.right_glove,"robe",
+    assert.equal(gearSave.armour.right_glove,"none",
       "equipping one glove cannot replace the other glove");
     assert.equal(gearSave.items.hide,8,"armour choices do not spend gathered inventory");
     elements.get("armourChoice").value="plate";
@@ -364,9 +361,9 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     gearSave=JSON.parse(store.get(SAVE_KEY));
     assert.equal(gearSave.armour.left_glove,"none",
       "a forged dropdown selection cannot bypass the STR requirement");
-    elements.get("armourChoice").value="robe";
+    elements.get("armourChoice").value="none";
     elements.get("armourChoice").fire("change");
-    assert.equal(JSON.parse(store.get(SAVE_KEY)).armour.left_glove,"robe");
+    assert.equal(JSON.parse(store.get(SAVE_KEY)).armour.left_glove,"none");
 
     const openActivities = elements.get("openActivities");
     const categoryScreen = elements.get("activityCategories");
@@ -376,7 +373,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(categoryScreen.hidden, true);
     assert.equal(listScreen.hidden, true);
     assert.deepEqual(categories.map(b => b.textContent),
-      ["Fighting", "Honest Work", "Outlaw Path", "Training & Knowledge", "Tavern & Leisure", "Clan Activities", "Other Activities"]);
+      ["Fighting", "Survival Work", "Training"]);
     assert.doesNotMatch(html, />Choose a path<|CHOOSE YOUR PATH/i,
       "the redundant choose-a-path heading is removed");
     openActivities.fire("click");
@@ -394,50 +391,33 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.match(fightingCards[0].children[0].children[3].textContent, /STR.*DEX|DEX.*STR/,
       "Fighting shows its stat bonuses");
     elements.get("backToCategories").fire("click");
-    categories[3].fire("click");
-    assert.equal(elements.get("activityCategoryTitle").textContent, "Training & Knowledge");
-    assert.equal(elements.get("activityChoices").children.length, 10);
-    assert.ok(elements.get("activityChoices").children.some(b => b.children[0]?.children[0]?.children[0]?.textContent === "Meditation"));
-    elements.get("backToCategories").fire("click");
-    categories[4].fire("click");
-    assert.equal(elements.get("activityCategoryTitle").textContent, "Tavern & Leisure");
-    assert.equal(elements.get("activityChoices").children.length, 10);
-    assert.ok(elements.get("activityChoices").children.some(b => b.children[0]?.children[0]?.children[0]?.textContent === "Drinking ale with friends"));
-    elements.get("backToCategories").fire("click");
-    categories[5].fire("click");
-    assert.equal(elements.get("activityCategoryTitle").textContent, "Clan Activities");
-    assert.equal(elements.get("activityChoices").children[0].textContent, "No activities here yet.");
-    elements.get("backToCategories").fire("click");
-    assert.equal(categoryScreen.hidden, false);
     categories[2].fire("click");
-    let buttons = elements.get("activityChoices").children.filter(node => node.className === "activity");
-    assert.equal(buttons.length, 10, "outlaw activities live in their own category");
-    assert.equal(buttons.some(b => b.children[0].children[0].children[0].textContent === "Highway robbery"), true);
+    assert.equal(elements.get("activityCategoryTitle").textContent, "Training");
+    assert.equal(elements.get("activityChoices").children.length, 1);
+    assert.equal(elements.get("activityChoices").children[0].children[0].children[0].children[0].textContent, "Training");
     elements.get("backToCategories").fire("click");
     categories[1].fire("click");
-    buttons = elements.get("activityChoices").children.filter(node => node.className === "activity");
-    assert.equal(buttons.length, 10, "honest activities live in their own category");
-    assert.equal(buttons.some(b => b.children[0].children[0].children[0].textContent === "Highway robbery"), false,
-      "outlaw tasks must not leak into Honest Work");
+    const buttons = elements.get("activityChoices").children.filter(node => node.className === "activity");
+    assert.equal(buttons.length, 9, "nine survival activities plus Fighting and Training");
     assert.equal(buttons.every(b => !/\\d+\\s*(min|sec)|per cycle/i.test(
       b.children[0].children[1].textContent
     )), true, "activity buttons must not reveal cycle rates");
     assert.ok(buttons.every(b => b.children[0].children[2].textContent === "Skill level 1"));
-    const alchemy = buttons.find(b => b.children[0].children[0].children[0].textContent === "Potion making");
+    const smithing = buttons.find(b => b.children[0].children[0].children[0].textContent === "Smithing");
     const cooking = buttons.find(b => b.children[0].children[0].children[0].textContent === "Cooking");
-    assert.ok(alchemy.children[0].children[1].textContent.includes("Potions (uses Herbs)"));
-    assert.ok(cooking.children[0].children[1].textContent.includes("Meals (uses Fish)"));
+    assert.ok(smithing.children[0].children[1].textContent.includes("Iron ingots (uses Iron ore)"));
+    assert.ok(cooking.children[0].children[1].textContent.includes("Rations (uses Fish)"));
     assert.equal(elements.get("character-heading").textContent, "Marauder");
     assert.equal(elements.get("visitMaster").disabled, true,
       "Skill Master stays visibly dim until an actual skill can advance");
     assert.equal(elements.get("masterStatus").hidden, true,
       "no readiness tutorial appears above disabled Skill Master");
     const statRows = elements.get("characterAttributes").children;
-    assert.equal(statRows.length, 5, "all five attributes render on the character");
+    assert.equal(statRows.length, 3, "all three attributes render on the character");
     assert.deepEqual(statRows.map(row => row.children[0].textContent),
-      ["STR", "DEX", "END", "INT", "WIL"]);
+      ["STR", "DEX", "END"]);
     assert.deepEqual(statRows.map(row => row.children[1].textContent),
-      ["10", "10", "10", "10", "10"], "old save starts at baseline stats");
+      ["10", "10", "10"], "old save starts at baseline stats");
     assert.ok(buttons.every(b => b.children[0].children[3].className === "activity-stat-gains"),
       "every activity displays attribute rewards");
     assert.match(buttons.find(b => b.children[0].children[0].children[0].textContent === "Mining")
@@ -587,21 +567,21 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(state.items.hide, 8, "hunting resources stay untouched");
     assert.equal(elements.get("masterAudience").hidden, true);
     assert.equal(visitMaster.disabled, true, "Master dims again after advancement");
-    assert.match(mining.children[0].children[1].textContent, /Copper ore/,
-      "the Master's lesson activates new mineral types");
+    assert.match(mining.children[0].children[1].textContent, /Iron ore/,
+      "mining lists its working smithing input");
     const rows = elements.get("resourceList").children.filter(row => row.className === "item");
     assert.equal(rows.length, ITEM_KEYS.length);
     assert.ok(rows.every(row => row.children.length === 2),
       "all resource rows contain only the item name and quantity, with no protection controls");
     assert.ok(rows.every(row => row.children.every(child => child.className !== "resource-lock")));
     assert.equal(Object.hasOwn(state, "protectedItems"), false, "new saves contain no resource locks");
-    const hidesRow = rows.find(row => row.children[0]?.textContent === "Wolf hides");
+    const hidesRow = rows.find(row => row.children[0]?.textContent === "Hides");
     assert.ok(hidesRow, "hunting spoil must have an inventory row");
-    const copperRow = rows.find(row => row.children[0]?.textContent === "Copper ore");
+    const copperRow = rows.find(row => row.children[0]?.textContent === "Iron ore");
     assert.ok(copperRow, "rare resources must have an inventory row");
     assert.equal(copperRow.hidden, true, "zero inventory quantities remain hidden");
     const stoneRow = rows.find(row => row.children[0]?.textContent === "Stone");
-    assert.ok(stoneRow, "masonry ingredients still have visible quantities");
+    assert.ok(stoneRow, "construction ingredients still have visible quantities");
     assert.equal(elements.has("returnPanel"), false, "no welcome-back report panel");
     assert.equal(elements.has("dismissReturn"), false, "no popup dismiss control");
     assert.ok(elements.get("workResultTokens").children.some(node =>
@@ -612,20 +592,20 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
 
     // The chosen activity receives the requested duration, not Mining.
     openActivities.fire("click");
-    categories[3].fire("click");
-    const meditation = elements.get("activityChoices").children.find(
-      b => b.children[0]?.children[0]?.children[0]?.textContent === "Meditation");
-    const meditationActions = meditation.children[0].children[0].children[1];
-    const meditationStart = meditationActions.children[0];
-    const meditationSchedule = meditationActions.children[1];
-    const meditationLevelUp = meditationActions.children[2];
-    assert.equal(meditationStart.textContent, "▶");
-    assert.equal(meditationSchedule.textContent, "↻");
-    assert.equal(meditationLevelUp.textContent, "↑");
-    assert.equal(meditationLevelUp.disabled, false);
+    categories[2].fire("click");
+    const training = elements.get("activityChoices").children.find(
+      b => b.children[0]?.children[0]?.children[0]?.textContent === "Training");
+    const trainingActions = training.children[0].children[0].children[1];
+    const trainingStart = trainingActions.children[0];
+    const trainingSchedule = trainingActions.children[1];
+    const trainingLevelUp = trainingActions.children[2];
+    assert.equal(trainingStart.textContent, "▶");
+    assert.equal(trainingSchedule.textContent, "↻");
+    assert.equal(trainingLevelUp.textContent, "↑");
+    assert.equal(trainingLevelUp.disabled, false);
     // A visible ↑ opens the existing scheduler with mastery readiness selected.
     const routeBeforePlanning = store.get(SAVE_KEY);
-    meditationLevelUp.fire("click");
+    trainingLevelUp.fire("click");
     assert.equal(elements.get("queuePlanner").hidden, false);
     assert.equal(elements.get("queueUnit").value, UNTIL_LEVEL_UP);
     assert.equal(elements.get("queueAmount").hidden, true);
@@ -642,14 +622,14 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.equal(store.get(SAVE_KEY), routeBeforePlanning,
       "cancelling a proposed level-up schedule never changes the actual queue");
     openActivities.fire("click");
-    categories[3].fire("click");
-    meditationSchedule.fire("click");
+    categories[2].fire("click");
+    trainingSchedule.fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "mining");
     assert.equal(state.transition, null, "planning alone does not interrupt mining");
     assert.equal(elements.get("queuePlanner").hidden, false);
     assert.match(elements.get("queuePlannerTitle").textContent,
-      /how long should Meditation run/i, "new duration is for selected task");
+      /how long should Training run/i, "new duration is for selected task");
     assert.match(elements.get("queuePlannerHint").textContent,
       /Mining resumes Forever/);
     // Planner offers mastery readiness without a meaningless numeric count.
@@ -667,10 +647,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     elements.get("queueConfirm").fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
     assert.deepEqual(state.wagons, [
-      { activity: "meditation", plannedMs: MINUTE_MS },
+      { activity: "training", plannedMs: MINUTE_MS },
       { activity: "mining", plannedMs: null }
     ]);
-    assert.equal(state.transition.targetActivity, "meditation");
+    assert.equal(state.transition.targetActivity, "training");
     assert.equal(elements.get("queuePlanner").hidden, true);
     assert.equal(elements.get("wagonList").children.length, 2);
     const changingCard = elements.get("wagonList").children[0];
@@ -691,32 +671,32 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     now += ZONE_TRAVEL_MS + PREPARATION_MS;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.equal(state.activity, "meditation");
+    assert.equal(state.activity, "training");
     assert.equal(state.productiveElapsedMs, 0);
-    const activeMeditationMeter = elements.get("wagonList").children[0].children.find(
+    const activeTrainingMeter = elements.get("wagonList").children[0].children.find(
       c => c.className === "hourglass-schedule-progress");
-    assert.equal(activeMeditationMeter.hidden, false);
+    assert.equal(activeTrainingMeter.hidden, false);
     now += MINUTE_MS / 2;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.productiveElapsedMs, MINUTE_MS / 2);
-    assert.equal(activeMeditationMeter.getAttribute("aria-valuenow"), "50");
-    assert.equal(activeMeditationMeter.children[0].style.width, "50.00%");
+    assert.equal(activeTrainingMeter.getAttribute("aria-valuenow"), "50");
+    assert.equal(activeTrainingMeter.children[0].style.width, "50.00%");
     now += MINUTE_MS / 2;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
     assert.deepEqual(state.wagons, [{ activity: "mining", plannedMs: null }]);
     assert.equal(state.transition.phase, "moving");
-    assert.ok(state.skills.meditation.xp > 0);
+    assert.ok(state.skills.training.xp > 0);
     now += ZONE_TRAVEL_MS + PREPARATION_MS;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.equal(state.activity, "mining", "Mining resumes Forever only after Meditation's minute");
+    assert.equal(state.activity, "mining", "Mining resumes Forever only after Training's minute");
     assert.equal(state.transition, null);
     assert.equal(elements.get("workResultTitle").textContent,"Mining",
-      "after returning to Mining, do not display an old Meditation result");
+      "after returning to Mining, do not display an old Training result");
 
-    // Build a three-hourglass route: Hunting now (1 minute), Masonry next
+    // Build a three-hourglass route: Hunting now (1 minute), Construction next
     // (2 minutes), Mining Forever. Future schedule must not stop Hunting.
     openActivities.fire("click");
     categories[1].fire("click");
@@ -734,11 +714,11 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
 
     openActivities.fire("click");
     categories[1].fire("click");
-    const masonry = elements.get("activityChoices").children.find(
-      b => b.children[0]?.children[0]?.children[0]?.textContent === "Masonry");
-    const masonryActions = masonry.children[0].children[0].children[1];
-    masonryActions.children[1].fire("click");
-    assert.match(elements.get("queuePlannerTitle").textContent, /Masonry run/);
+    const construction = elements.get("activityChoices").children.find(
+      b => b.children[0]?.children[0]?.children[0]?.textContent === "Construction");
+    const constructionActions = construction.children[0].children[0].children[1];
+    constructionActions.children[1].fire("click");
+    assert.match(elements.get("queuePlannerTitle").textContent, /Construction run/);
     assert.match(elements.get("queuePlannerHint").textContent,
       /after Hunting finishes/);
     elements.get("queueAmount").value = "2";
@@ -747,7 +727,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     state = JSON.parse(store.get(SAVE_KEY));
     assert.deepEqual(state.wagons, [
       { activity: "hunting", plannedMs: MINUTE_MS },
-      { activity: "masonry", plannedMs: 2 * MINUTE_MS },
+      { activity: "construction", plannedMs: 2 * MINUTE_MS },
       { activity: "mining", plannedMs: null }
     ]);
     assert.equal(state.activity, "hunting", "adding future task does not stop current work");
@@ -764,7 +744,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
       ["wagon-name", "wagon-name", "wagon-name"],
       "titles start together without a blank image area");
     assert.deepEqual(rendered.map(card => card.children[0].textContent.replace(/ LvL .*/, "")),
-      ["Hunting", "Masonry", "Mining"]);
+      ["Hunting", "Construction", "Mining"]);
     for (const card of rendered) {
       assert.match(card.children[0].textContent, / LvL [1-9]\d*,(?:\d{2}|100)$/,
         "all three cards show the current XP fraction, even queued and Forever slots");
@@ -778,10 +758,10 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     assert.deepEqual(rendered.map(card => card.children[4].className),
       ["wagon-controls", "wagon-controls", "wagon-controls"],
       "all bottom controls remain aligned");
-    assert.equal(masonryActions.children[1].textContent, "↻");
-    assert.equal(masonryActions.children[1].disabled, true);
-    assert.equal(masonryActions.children[2].textContent, "↑");
-    assert.equal(masonryActions.children[2].disabled, true);
+    assert.equal(constructionActions.children[1].textContent, "↻");
+    assert.equal(constructionActions.children[1].disabled, true);
+    assert.equal(constructionActions.children[2].textContent, "↑");
+    assert.equal(constructionActions.children[2].disabled, true);
 
     // Mastery condition is selectable directly on a future compact queue card.
     const futureDuration = elements.get("wagonList").children[1].children[3];
@@ -831,7 +811,7 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     const secondControls = secondCard.children[secondCard.children.length - 1];
     secondControls.children[1].fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.deepEqual(state.wagons.map(w => w.activity), ["hunting", "mining", "masonry"]);
+    assert.deepEqual(state.wagons.map(w => w.activity), ["hunting", "mining", "construction"]);
     assert.equal(state.wagons[1].plannedMs, 2 * MINUTE_MS);
     assert.equal(state.activity, "hunting");
     assert.equal(state.transition, null);
@@ -872,16 +852,16 @@ test("real browser-app entrypoint renders skill UI and migrates old saved charac
     openActivities.fire("click");
     categories[1].fire("click");
     const savedRoute = JSON.stringify(state.wagons);
-    masonryActions.children[0].fire("click");
+    constructionActions.children[0].fire("click");
     assert.equal(overrideConfirmations, 1);
     assert.equal(JSON.stringify(JSON.parse(store.get(SAVE_KEY)).wagons), savedRoute);
     const earnedHuntingXP = state.skills.hunting.xp;
     const previousItems = { ...state.items };
     allowRouteOverride = true;
-    masonryActions.children[0].fire("click");
+    constructionActions.children[0].fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.deepEqual(state.wagons, [{ activity: "masonry", plannedMs: null }]);
-    assert.equal(state.transition.targetActivity, "masonry");
+    assert.deepEqual(state.wagons, [{ activity: "construction", plannedMs: null }]);
+    assert.equal(state.transition.targetActivity, "construction");
     assert.equal(state.skills.hunting.xp, earnedHuntingXP);
     assert.deepEqual(state.items, previousItems);
     elements.get("nameInput").value = "The Black Rider";

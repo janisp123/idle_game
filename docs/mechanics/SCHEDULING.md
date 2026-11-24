@@ -50,14 +50,14 @@ When only one Forever wagon exists, scheduling a new finite activity inserts it 
 
 The engine processes route boundaries chronologically with a small, **fixed upper bound** on segments, independent of offline years. Each finite/Forever chunk is settled in bulk. To find readiness, it tests whether XP+resources are possible by the end of the available full cycles, then binary-searches for the **first eligible full cycle**, using **repeatable seeded randomness across probes** so the condition is monotone. Ingredient depletion blocks progress until resources really exist; no phantom items.
 
-There is no **offline time cap** or mandatory daily login. Attribute effort and item stocks continue without an XP-level cap; skill XP stops at one current-level bar. Effective **skill levels, attributes and the entire combat character/equipment snapshot stay frozen** during an absent batch (OFF-001). Equipment changes settle prior earned time under the old gear before starting a new duel. Existing V7 sessions lacking the new gear snapshot still use their original no-gear duel rules, not retroactive bonuses. The Skill Master still requires player confirmation.
+There is no **offline time cap** or mandatory daily login. Attribute effort and item stocks continue without an XP-level cap; skill XP stops at one current-level bar. Effective **skill levels, attributes and the entire combat character/equipment snapshot stay frozen** during an absent batch (OFF-001). Equipment changes settle prior earned time under the old gear before starting a new duel. The Skill Master still requires player confirmation.
 
 ## Saves and migration
 
-- `SAVE_KEY = "idle-game-prototype-v1"` is unchanged for migration. Current `GAME_VERSION=7`; `readSave` accepts older versions 1–6 with validation, and preserves current V7 saves. Optional V7 armour data is migrated from the old iron/cloth/hood labels to the new four-tier selectable gear without dropping progress.
+- `SAVE_KEY = "idle-game-prototype-v1"` stays the same. `readSave` accepts V8. Earlier alpha saves start fresh with a reset notice.
 - Saved values include individual skill XP/levels, `attributeEffort`, items, current activity, partial work, transition phase, wagon route, productive-period progress, timestamp, and `combatSession`.
-- Old progress across timing-profile changes is scaled **proportionally** to preserve the fraction of the unfinished work cycle or transition phase. Item totals, skill levels, XP and routes are not reset.
-- Old protection flags are **validated then discarded**. No resource-lock system. Skill Master action deliberately forfeits the selected skills' output resources only after confirmation.
+- Current-build progress across timing-profile changes is scaled **proportionally** to preserve the fraction of the unfinished work cycle or transition phase. Item totals, skill levels, XP and routes are not reset.
+- Inventory is available to eligible recipes. Skill Master action deliberately forfeits the selected skills' output resources only after confirmation.
 - This is **browser localStorage**, not backed up or synchronized. The app is not anti-cheat-secure; a future authoritative multiplayer server requires a separate system.
 
 ## What to edit and what needs extra work
