@@ -252,6 +252,13 @@ const pairList = (raw, name, asInteger = false) => {
   return out;
 };
 export function parseCliArgs(args) {
+  if (args[0] === '--config') {
+    if (args.length !== 2) throw new RangeError('--config must be the only option');
+    const raw = JSON.parse(readFileSync(resolve(args[1]), 'utf8'));
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+      throw new RangeError('Config must contain a JSON object');
+    return raw;
+  }
   const flags = {
     '--battles':'battles','--seed':'seed','--start-bout':'startBout',
     '--grade':'grade','--loadout':'loadout','--armour':'armour',
@@ -296,6 +303,7 @@ export const HELP = [
   ' --seed N                  live combat session RNG seed (default 20261124)',
   ' --start-bout N            zero-based live bout index (default 0)',
   ' --snapshot FILE.json     local frozen combatSession/player JSON; no uploads',
+  ' --config FILE.json       load scenario options from local JSON; cannot mix flags',
   ' --glory-eligible-bouts N  optional real XP-eligible drop window',
   ' --trace N                include N full event/dice traces (max 100)',
   ' --help                   this guide',
