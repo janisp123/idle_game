@@ -32,6 +32,8 @@ Before implementing an approved task, push its STARTED changelog entry and open 
 
 ## Project-specific rules
 
+**Developer-only game systems lab:** For repeatable source-of-truth tests of current combat, offline activity settlement, loot, crafting, attributes, Master, equipment/enchanting, queue transitions and saves, run `node tools/system-lab.mjs --config tools/simulation/example-scenarios.json` and read [docs/mechanics/SYSTEM_LAB.md](docs/mechanics/SYSTEM_LAB.md). Add new systems as standalone adapters importing the live game logic. These tools must remain outside `site/`; do not copy balance formulas, modify real saves, introduce hidden admin routes or treat test findings as authorization to change gameplay.
+
 **Developer-only combat simulator:** For repeated 100/10,000+ battle balance checks, use `node tools/combat-simulator.mjs --battles 10000` (see [docs/mechanics/COMBAT_SIMULATOR.md](docs/mechanics/COMBAT_SIMULATOR.md)). It imports the production combat resolver, gear and enchant functions; do not duplicate dice/damage equations. The tools/ file is excluded from the public Pages site; no hidden browser backdoor or admin control is allowed.
 
 **Mechanics source map:** Before changing XP, stats, loot, crafting, Fighting, scheduling, timings or offline-save formulas, read [docs/mechanics/README.md](docs/mechanics/README.md) and the relevant linked mechanic page. The handbook explains **implemented code**, with tuning constants and tests; `site/play/*.mjs` remains the executable source of truth, while Owner decisions in `docs/DECISIONS.md` govern intended mechanics. Update the handbook **in the same PR** as any formula change, and identify migration implications; do not implement brainstormed Combat V2 numbers as current facts.
