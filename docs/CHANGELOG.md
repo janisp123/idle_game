@@ -1,5 +1,13 @@
 # Changelog and task handoffs
 
+## COMBAT-TIMEOUT-001 · STARTED · 2026-11-24
+
+Goal: Preserve the Owner's agreed future tactical-Fighting outcome rule in durable documentation for chat, CW and Codex: combat death at 0 HP; bounded battle timer; at timeout compare actual remaining HP (not percentages); a fighter cannot win just by running or having higher starting HP without landing HP damage; equal remaining HP triggers guards shooting both fighters dead, two losses. Keep implementation, exact duration, rewards, AI movement and migration out of this documentation-only scope.
+Branch: `docs/combat-timeout-guards-20261124`.
+Last verified: Main's `docs/TD_LIST.md`, `AGENTS.md`, `docs/WORK_CHECKPOINT.md`, `docs/DECISIONS.md`, and existing combat rules inspected; this entry marks approved rule recording, not a playable gameplay change.
+Next action: Add the owner-approved design decision and a concise coding handoff with edge cases, clearly distinguishing current live combat from proposed tactical rules; verify the docs and PR before merging.
+Status: STARTED / documentation only.
+
 ## SIM-002 · MERGED AND VERIFIED · 2026-11-24
 
 Goal: Expand the developer-only SIM-001 combat harness into a modular reproducible testing lab importing **actual production game functions**, not rewriting mechanics: combat, activity/offline settlement, loot, crafting, progression/mastery, equipment/enchants, queue/transitions and save validation. Report distributions and invariants for evidence-based future balance discussions. User explicitly forbids modifying playable game code or player saves.
