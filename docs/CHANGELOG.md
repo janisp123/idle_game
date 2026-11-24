@@ -1,5 +1,13 @@
 # Changelog and task handoffs
 
+## GLAD-002 · STARTED · 2026-11-24
+
+Goal: Implement the approved four-slot equipment, five physical styles, item grade and quality, arena coins, and smith purchases.
+Branch: `codex/glad-002-equipment-economy`.
+Last verified: GLAD-001 is deployed and the remote backlog identifies GLAD-002 next. No GLAD-002 tests run yet.
+Next action: Open draft PR, then trace arena win settlement and add wallet regression coverage.
+Status: STARTED.
+
 ## GLAD-001 · DEPLOYED · 2026-11-24
 
 Goal: Implement the approved three-attribute, eleven-activity survival foundation, connected recipes, and current-build Master, queue, save and offline behavior.
