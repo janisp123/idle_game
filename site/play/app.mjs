@@ -9,7 +9,7 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=glad-004";
+} from "./engine.mjs?v=glad-005";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=glad-004";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=glad-003";
@@ -449,6 +449,12 @@ function reportProgress(outcome) {
       latestWorkResult = result;
       if (!report.gainedCoins) ui.resultNotice.textContent = "";
     }
+    gained = true;
+  }
+  if (outcome.offlineArena?.bouts) {
+    const { bouts, victories, coins } = outcome.offlineArena;
+    message("Offline arena estimate: " + number(victories) + " wins in " + number(bouts) +
+      " bouts · +" + number(coins) + " coins");
     gained = true;
   }
   return gained;
@@ -919,7 +925,7 @@ function render() {
     const key = state.combatSession.seed + ":" + combat.bout + ":" + combat.step;
     if (key !== lastCombatEventKey) {
       if (broken) message("Broken equipment: " + broken);
-      else if (!ui.resultNotice.textContent.startsWith("Arena winnings:")) ui.resultNotice.textContent = "";
+      else if (!/^(Arena winnings:|Offline arena estimate:)/.test(ui.resultNotice.textContent)) ui.resultNotice.textContent = "";
       lastCombatEventKey = key;
     }
   } else {

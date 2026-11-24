@@ -7,12 +7,13 @@ on:
         description: 'Scenario JSON (all CLI options; never include private player saves)'
         type: string
         required: true
-        default: '{"battles":10000,"grade":"F","loadout":"greatsword","armour":"leather","skill":10,"str":14,"dex":14,"end":14,"wil":14,"trace":2}'
+        default: '{"battles":10000,"grade":"F","loadout":"greatsword","armour":"leather","skill":10,"str":14,"dex":14,"end":14,"trace":2}'
   pull_request:
     branches: [main]
     paths:
       - "tools/combat-simulator.mjs"
       - "tools/test_combat_simulator.mjs"
+      - "tools/gladiator-benchmark.mjs"
       - ".github/workflows/combat-simulator.yml"
 
 permissions:
@@ -55,10 +56,14 @@ jobs:
               byTerrain:r.byTerrain, byEnemyRole:r.byEnemyRole
             }, null, 2));
           '
-      - name: Attach detailed reproducible battle report
+      - name: Run the representative gladiator benchmark
+        run: node tools/gladiator-benchmark.mjs > gladiator-benchmark.json
+      - name: Attach detailed reproducible battle reports
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: combat-report-${{ github.run_id }}-${{ github.run_attempt }}
-          path: combat-report.json
+          path: |
+            combat-report.json
+            gladiator-benchmark.json
           if-no-files-found: error
           retention-days: 7

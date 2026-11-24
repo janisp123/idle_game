@@ -16,7 +16,7 @@ A battle ends at zero HP or after 32 action rounds. At timeout, higher **raw HP*
 
 ## Timeline and payouts
 
-The fixed 200-second bout timeline reserves the final 20 seconds for recovery or resurrection. The 256-bout seeded schedule makes exact offline settlement bounded. It counts actual victories and productive time without replaying years of bouts. The save retains the frozen fighter, arena clock and prize cursor. V11 uses the five-arena schedule; prior alpha saves reset once with notice.
+The fixed 200-second bout timeline reserves the final 20 seconds for recovery or resurrection. The 256-bout seeded schedule makes exact offline settlement bounded. The offline report describes long absences as an estimate from the repeated schedule. A settlement inspects at most 256 bouts per frozen session, then multiplies whole-cycle counts and handles the remainder and partial resurrection window. The same model drives payouts and productive time. No unseen hit-by-hit events are reported. The save retains the frozen fighter, arena clock and prize cursor. V11 uses the five-arena schedule; prior alpha saves reset once with notice.
 
 Source of truth: `physical-duel.mjs`, `combat.mjs`, `arena-wallet.mjs`, `smith.mjs`, and the Fighting path in `engine.mjs`.
 
@@ -43,3 +43,18 @@ Using production snapshots with equal base stats, full Non-grade Poor Leather, F
 | Gatehouse Chamber | Close start and low clearance | War Hammer won 807 here and 504 in Open Field |
 
 Each contrast used the production combat resolver and 256 seeded fights against each of four other equal-stat, Non-grade Poor Leather builds. The contrast shows a particular matchup and geometry effect. For example, Sword & Shield also performed strongly in the chamber in this sample.
+
+## GLAD-005 representative benchmark
+
+Run `node tools/gladiator-benchmark.mjs` to reproduce 13,760 resolved bouts with seed 20261124. The baseline is 64 bouts per ordered matchup in each of five arenas for equal-stat Non-grade Poor Leather builds. The separate upgrade sample rotates representative weapon and terrain pairings over Padded, Leather and Plate at Non-grade, F and E. It compares the full quality ladder at fixed item grade and attributes within each pairing.
+
+| Quality | Wins / 1,152 | Break events across both fighters | Coins per productive hour |
+| --- | ---: | ---: | ---: |
+| Poor | 532 | 517 | 210.1 |
+| Common | 626 | 415 | 233.9 |
+| Fine | 808 | 296 | 289.0 |
+| Masterwork | 913 | 106 | 321.6 |
+
+The baseline had 4,105 wins, 3,894 defeats and one double death. Across both sides it recorded 3,613 breaks, 2,971 bow outcomes with an empty quiver, 57,757 bleed ticks and 6,859 stagger events. The 106 break events in the Masterwork row came from the Common opponents. These are aggregate samples, with variation by opponent and arena.
+
+For a fixed Greatsword build in Walled Courtyard, Non-grade, F and E items won 33, 63 and 70 of 128 against an F Spear. Raising that opponent to E reduced those results to 0, 18 and 18. The current costs and power steps show a benefit in the sampled settings and remain provisional. Sword & Shield was strong overall, including 64 of 64 against Spear in Gatehouse Chamber, and won 23 of 64 against Bow in Open Field. The other four styles each had stronger and weaker pairings in the same matrix.

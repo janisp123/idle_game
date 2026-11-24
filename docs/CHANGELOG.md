@@ -1,5 +1,15 @@
 # Changelog and task handoffs
 
+## GLAD-005 · STARTED · 2026-11-24
+
+Goal: Verify and finalize bounded offline combat, balance, and the playable gladiator loop.
+Branch: `codex/glad-005-offline-parity`.
+Draft: [PR #152](https://github.com/janisp123/idle_game/pull/152).
+Last verified: Local suite 103 passed and one existing optional layout skip, 1.78 seconds. Focused twenty-year split/reload and three-wagon tests passed. Each long frozen arena settlement resolves at most 256 sampled bouts and reports its modeled outcome and coins. Browser Play Now at 390 and 1440 px verified the counts, shop, offline estimate and balance reload. The handbook publishes 13,760 seeded production duels and the grade/quality and terrain findings.
+Equipment feedback: dark charcoal weapon cards and native pickers, bronze equipped state, and a regular four-slot armour grid.
+Next action: Verify final-head CI, then merge and verify public Pages.
+Status: IN_REVIEW.
+
 ## GLAD-004 · DEPLOYED · 2026-11-24
 
 Goal: Deliver five physical arenas and a seeded pre-bout 3d6 positioning roll.
