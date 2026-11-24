@@ -19,6 +19,9 @@ on:
       - 'docs/mechanics/CHANGING_BALANCE.md'
       - 'docs/mechanics/COMBAT_SIMULATOR.md'
       - 'AGENTS.md'
+      - 'docs/DECISIONS.md'
+      - 'docs/CHANGELOG.md'
+      - 'docs/WORK_CHECKPOINT.md'
       - '.github/workflows/system-lab.yml'
 
 permissions:
