@@ -1117,3 +1117,13 @@ footer p{color:#aa9680}
 
 .smith-selects {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .smith-selects label,.smith-selects select {display:block;width:100%;min-width:0}
+
+/* Terrain identity and the fixed pre-bout roll. */
+.arena-positioning {display:flex;flex-wrap:wrap;gap:4px 12px;color:#e0c9ac;font-size:.85rem}
+.arena-positioning[hidden] {display:none}
+.arena-positioning span:last-child {flex-basis:100%}
+.combat-panel[data-arena="open_field"] .combat-ground {color:#c1d9b0}
+.combat-panel[data-arena="narrow_bridge"] .combat-ground {color:#abcddc}
+.combat-panel[data-arena="ruined_streets"] .combat-ground {color:#e2b09e}
+.combat-panel[data-arena="walled_courtyard"] .combat-ground {color:#e8cb94}
+.combat-panel[data-arena="gatehouse_chamber"] .combat-ground {color:#ccbae0}

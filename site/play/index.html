@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=glad-002">
-  <script type="module" src="./app.mjs?v=glad-003"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=glad-004">
+  <script type="module" src="./app.mjs?v=glad-004"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -171,6 +171,11 @@
             <p id="combatEventTitle" class="combat-event-title">THE FIGHTING PIT</p>
             <span id="combatTurns" class="combat-turns" aria-label="Duel turns"></span>
             <p id="combatGround" class="combat-ground"></p>
+            <div id="arenaPositioning" class="arena-positioning" aria-label="Pre-bout positioning">
+              <span id="playerPositioning"></span>
+              <span id="enemyPositioning"></span>
+              <span id="positioningResult"></span>
+            </div>
           </section>
           <div id="transitionStatus" class="transition-status" hidden>
             <p id="transitionPhase" class="transition-phase" role="status" aria-live="polite">Getting ready to start new activity</p>

@@ -1,4 +1,4 @@
-import { GRADES as difficultyGrades, benchmark } from "./difficulty.mjs?v=glad-002";
+import { GRADES as difficultyGrades, benchmark } from "./difficulty.mjs?v=glad-004";
 import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote } from "./smith.mjs?v=glad-003";
 import {
   setDifficulty, buyEquipment, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
@@ -9,9 +9,9 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=glad-003";
+} from "./engine.mjs?v=glad-004";
 
-import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=glad-003";
+import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=glad-004";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=glad-003";
 import { combatFlowState } from "./combat-flow.mjs?v=glad-003";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=glad-003";
@@ -901,8 +901,19 @@ function render() {
       event.type === "finisher" ? "Decisive hit" : action.replaceAll("_", " ");
     ui.combatEventTitle.textContent = "DUEL " + number(combat.bout) + " · " +
       (event.actor === "player" ? "You · " : event.actor === "enemy" ? "Opponent · " : "") + status;
+    const { positioning, terrain } = combat;
+    const faces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+    const showRoll = dice => dice.map(face => faces[face - 1]).join(" ");
+    const beforeMoves = event.type === "engage";
+    $("arenaPositioning").hidden = !beforeMoves;
+    $("playerPositioning").textContent = "You " + showRoll(positioning.playerDice) + " · " + positioning.playerTotal;
+    $("enemyPositioning").textContent = "Opponent " + showRoll(positioning.enemyDice) + " · " + positioning.enemyTotal;
+    $("positioningResult").textContent = !positioning.higher ? "Tied roll · neutral selection" :
+      (positioning.higher === "player" ? "Your higher roll favoured your arena preference" :
+        "The opponent's higher roll favoured their arena preference");
+    ui.combatPanel.setAttribute("data-arena", terrain.id);
     $("combatGround").textContent = difficultyGrades[state.difficulties.fighting ?? 0] + " · " +
-      combat.terrain.name + " · " + COMBAT_LOADOUTS[combat.enemyLoadout].name;
+      terrain.name + " · " + terrain.detail;
     ui.combatPanel.classList.toggle("finisher", event.type === "finisher");
     const broken = event.broken?.join(", ");
     const key = state.combatSession.seed + ":" + combat.bout + ":" + combat.step;
@@ -1041,7 +1052,7 @@ function start() {
       try { localStorage.removeItem(ALPHA_CLOCK_KEY); } catch { storageWorks = false; }
     }
     state = newGame(Date.now());
-    if (saved) message("Alpha progression was reset for the combat update or because the previous save could not be read. A new character was created.");
+    if (saved) message("Alpha progression was reset for the arena update or because the previous save could not be read. A new character was created.");
     else message("Choose an activity. Your character will work without further clicks.");
     writeSave();
   } else {

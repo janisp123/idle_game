@@ -12,6 +12,6 @@ Purchases settle prior work at the old frozen build, deduct coins once and start
 
 ## Arena prizes and saves
 
-Completed victories pay 12, 20, 32, 48, 68, 92, 122 or 158 coins from Non-grade through S. A saved cursor tracks the last paid bout, and double deaths and defeats pay zero. The interim resolver repeats 256 seeded bouts per frozen build. Settlement resolves at most a single period, counts repeats arithmetically, and uses the same outcomes in live and offline play. V10 saves record coins, owned gear, equipped armour, and the frozen combat snapshot. Earlier alpha saves reset once with a clear notice.
+Completed victories pay 12, 20, 32, 48, 68, 92, 122 or 158 coins from Non-grade through S. A saved cursor tracks the last paid bout, and double deaths and defeats pay zero. The interim resolver repeats 256 seeded bouts per frozen build. Settlement resolves at most a single period, counts repeats arithmetically, and uses the same outcomes in live and offline play. V11 saves record coins, owned gear, equipped armour, and the frozen combat snapshot. Earlier alpha saves reset once with a clear notice.
 
 Source: `site/play/armour.mjs`, `smith.mjs`, `arena-wallet.mjs` and `engine.mjs`.
