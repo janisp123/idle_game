@@ -115,10 +115,17 @@ export function simulateBatch(options = {}) {
     0, Math.floor(Number.MAX_SAFE_INTEGER / BOUT_MS) - battles, 'start bout');
   const gloryEligibleBouts = intIn(options.gloryEligibleBouts ?? 0, 0, battles, 'eligible Glory bouts');
   const session = startCombatSession(player, seed); // production validation
+  const generatedBuild = saved ? null : {
+    statGates:{WIL:options.wil ?? benchmark(parseGrade(options.grade ?? 'Non-grade')).stat},
+    armourSlots:uniform(options.armour ?? 'robe', options.armourSlots ?? {}),
+    enchantments:{...blankEnchantments(),...(options.enchantments ?? {})},
+    mastery:masteryRanks(options.mastery ?? {})
+  };
   const summary = {
     source:'site/play/combat.mjs:combatAtTime',
     mode:'Developer-only; no animation, timers, save mutation, or balance overrides',
     battles, seed, startBout, difficulty:GRADES[player.difficulty ?? 0],
+    playerBuild:generatedBuild,
     player: {
       loadout:player.loadout, skill:player.skill,
       stats:{STR:player.str, DEX:player.dex, END:player.end},
@@ -129,6 +136,7 @@ export function simulateBatch(options = {}) {
     outcomes:{victory:0,defeat:0,stalemate:0},
     knockout:{player:0,enemy:0}, judge:{player:0,enemy:0,draw:0},
     byTerrain:{}, byEnemyRole:{}, byEnemyLoadout:{},
+    terrainD6:{},
     initiative:{playerFirst:0,enemyFirst:0,rerollRounds:0},
     attacks:{player:0,enemy:0,types:{},finisher:0},
     dice:{
@@ -153,6 +161,7 @@ export function simulateBatch(options = {}) {
     const duel = combatAtTime({...session, elapsedMs:index * BOUT_MS});
     if (!duel) throw new Error('Production resolver returned no duel at ' + index);
     const outcome = duel.outcome;
+    increment(summary.terrainD6, duel.zoneRoll);
     increment(summary.outcomes, outcome);
     resultGroup(bucket(summary.byTerrain, duel.terrain.name), outcome);
     resultGroup(bucket(summary.byEnemyRole, duel.enemyRole), outcome);
@@ -166,11 +175,11 @@ export function simulateBatch(options = {}) {
     const start = first.vitals, finish = final.vitals;
     const lostHP = side => start[side].hp - finish[side].hp;
     if (outcome === 'victory') {
-      increment(summary.knockout, duel.enemyHP === 0 ? 'enemy' : 'never');
-      if (duel.enemyHP > 0) increment(summary.judge, 'player');
+      if (duel.enemyHP === 0) summary.knockout.enemy++;
+      else summary.judge.player++;
     } else if (outcome === 'defeat') {
-      increment(summary.knockout, duel.playerHP === 0 ? 'player' : 'never');
-      if (duel.playerHP > 0) increment(summary.judge, 'enemy');
+      if (duel.playerHP === 0) summary.knockout.player++;
+      else summary.judge.enemy++;
     } else increment(summary.judge, 'draw');
     totals.playerPct += finish.player.hp / finish.player.maxHP * 100;
     totals.enemyPct += finish.enemy.hp / finish.enemy.maxHP * 100;
@@ -198,6 +207,9 @@ export function simulateBatch(options = {}) {
       events:duel.events
     });
   }
+  for (const groups of [summary.byTerrain,summary.byEnemyRole,summary.byEnemyLoadout])
+    for (const group of Object.values(groups))
+      group.winRatePct = average(group.victories * 100, group.battles);
   summary.winRatePct = average(summary.outcomes.victory * 100, battles);
   summary.drawRatePct = average(summary.outcomes.stalemate * 100, battles);
   summary.averages = {
