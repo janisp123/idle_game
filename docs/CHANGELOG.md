@@ -1,5 +1,15 @@
 # Changelog and task handoffs
 
+## SIM-002 · STARTED · 2026-11-24
+
+Goal: Expand the developer-only SIM-001 combat harness into a modular reproducible testing lab importing **actual production game functions**, not rewriting mechanics: combat, activity/offline settlement, loot, crafting, progression/mastery, equipment/enchants, queue/transitions and save validation. Report distributions and invariants for evidence-based future balance discussions. User explicitly forbids modifying playable game code or player saves.
+Branch: `tools/modular-system-simulator-20261124`.
+Last verified: main `cac043afbaed806df6259d0ae8a93639408322fc`, PR #138 merged; production engine exports, resources, attribute, queue, equipment, reward APIs inspected. No open PRs. Combat simulator remains independent.
+Remaining: add scenario adapters and single CLI, deterministic seeds and input guardrails, parity/invariant tests, docs, CI/manual Actions report. No production `site/**` edits.
+Next action: implement developer-only modules under `tools/simulation/` with shared seeded scenario context and report schema; run real production API checks.
+Status: STARTED; tests NOT RUN, PR will be opened as draft.
+
+
 ## SIM-001 · STARTED · 2026-11-24
 
 Goal: Permanent Node-only combat simulator for 10,000+ fast deterministic battles, importing the exact playable duel and reward modules (dice, terrain, enemy difficulty, equipment, enchanting, durability). Excluded from GitHub Pages; local developer CLI for chat/cw/codex.
