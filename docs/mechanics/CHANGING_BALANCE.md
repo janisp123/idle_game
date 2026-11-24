@@ -30,6 +30,10 @@
 | Planner 1..8 amount range | `site/play/engine.mjs` → `SCHEDULE_BALANCE` (UI derives options) | `validPlannedDuration` and two UI editors |
 | Queue slot cap | `site/play/engine.mjs` → `MAX_WAGONS` **plus structural QA** | Do not assume layout/loop boundaries auto-adjust |
 
+## Reproducible evidence before a balance proposal
+
+Use the [modular game systems lab](SYSTEM_LAB.md) to capture before/after real-game scenarios for combat, loot, crafting, offline productivity, attributes, Skill Master, gear, enchanting, queue transitions and saves. Its adapters import production rules, do not change `site/play/**`, and report exact inputs, seeds, tested boundaries and actual numerical differences. Store findings as proposals until the Owner authorizes any gameplay adjustment.
+
 ## Tests that must stay green
 
 From repo root:

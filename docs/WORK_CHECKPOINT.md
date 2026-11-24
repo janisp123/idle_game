@@ -1,8 +1,12 @@
 # Current working checkpoint
 
-## SIM-001 — Developer combat simulator, PR #138 (2026-11-24)
+## SIM-002 — Modular game systems lab, PR #139 (2026-11-24)
 
-Developer-only exact combat QA is being implemented in [PR #138](https://github.com/janisp123/idle_game/pull/138). Read `docs/CHANGELOG.md` at that PR head for completed milestones, exact CI evidence and one unfinished next action. The simulator imports the live resolver and produces 10,000+ no-delay dice, terrain, opponent, enchant, gear and condition metrics; the manual GitHub Actions runner exports a report artifact. The public site contains none of these tools. **Next:** wait for final-head checks, merge through AUTO-MERGE-001 if clear, then verify GitHub main and manual workflow availability. Do not change combat balance as part of SIM-001.
+Approved developer-only test lab for all major implemented gameplay systems. [PR #139](https://github.com/janisp123/idle_game/pull/139) adds `tools/system-lab.mjs`, ten real-game modules, a source map, deterministic scenarios, direct source/parity tests and a manually runnable Actions workflow. Main gameplay files under `site/` were not touched. Follow the **SIM-002 entry** in the PR's `docs/CHANGELOG.md` for the latest tested SHA and the next uncompleted action. Final-head checks and merge verification remain pending.
+
+## SIM-001 — Developer combat simulator merged, PR #138 (2026-11-24)
+
+[PR #138](https://github.com/janisp123/idle_game/pull/138) merged into main at `cac043afbaed806df6259d0ae8a93639408322fc`; its 10,000-duel, zero-delay harness and manual report runner remain in developer-only `tools/`. SIM-002 extends it to other implemented gameplay systems rather than replacing it. No combat balance changed.
 
 For interrupted work, read the matching open PR’s branch changelog and its next action. Check recent task branches if a draft is missing. Verify the merge and deployment of a closed PR before selecting work.
 
