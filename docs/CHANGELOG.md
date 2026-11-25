@@ -2,11 +2,11 @@
 
 ## CLAN-WARFARE-001 · STARTED (2026-11-25, chat)
 
-Owner explicitly confirms Castle Warfare levels are permanent; defeats may deduct only XP toward the next level, floored at zero. Branch `docs/warfare-level-protection`, base `f56f587`. Record decision and acceptance tests in design/roadmap; no implementation authorization for the broader warfare system. Next update documents.
+Owner explicitly confirms Castle Warfare levels are permanent; defeats may deduct only XP toward the next level, floored at zero. Branch `docs/warfare-level-protection`, base `f56f587`. Record decision and acceptance tests in design/roadmap; no implementation authorization for the broader warfare system. Recorded CLAN-WARFARE-001 in DECISIONS, clan design, brainstorming and implementation roadmap, with loss-over-current-XP and repeated-zero-loss acceptance cases. Documentation only; next CI.
 
-## CLAN-IDEAS-001 · STARTED (2026-11-25, chat)
+## CLAN-IDEAS-001 · MERGED (2026-11-25, chat)
 
-Record Owner's clan building and optional daily PvE castle defence ideas in topical brainstorming notes; preserve their proposed status, separate open balance choices, and link the pre-server roadmap. Branch `docs/clan-castle-brainstorm`, base `dcc76b6`. Documentation only; no gameplay, permissions or server changes. Saved topical [castle and building brainstorming](brainstorm/GROUPS_AND_CLANS.md) and linked from the implementation roadmap. Includes separate Academy research, Hospital recovery, Barracks capacity, walls/turrets, daily optional PvE and XP zero floor, proposed screen/function placement, unresolved mechanics and offline validation. Next documentation checks.
+Record Owner's clan building and optional daily PvE castle defence ideas in topical brainstorming notes; preserve their proposed status, separate open balance choices, and link the pre-server roadmap. Branch `docs/clan-castle-brainstorm`, base `dcc76b6`. Documentation only; no gameplay, permissions or server changes. Saved topical [castle and building brainstorming](brainstorm/GROUPS_AND_CLANS.md) and linked from the implementation roadmap. Includes separate Academy research, Hospital recovery, Barracks capacity, walls/turrets, daily optional PvE and XP zero floor, proposed screen/function placement, unresolved mechanics and offline validation. Final head f8dc964 passed systems 45634839617 and protocol 45634839693; PR #172 merged f56f587. Documentation only.
 
 ## CLAN-PLAN-001 · MERGED (2026-11-25, chat)
 
