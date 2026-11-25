@@ -2,7 +2,7 @@
 
 ## ALPHA-ART-001 — pending draft PR #156
 
-Owner requested exact art integration. Branch `alpha/approved-verdict-art` contains registry activation and strict tests; original two binary files still need uploading. Both local ZIP hashes verified; GitHub DNS unavailable to container. Do not merge with missing assets or bypass checks. Current live V15 gameplay unaffected. Next upload both originals, then run final-head checks and deploy. See OUTCOME_ART_HANDOFF.md.
+Owner requested exact art integration. Branch `alpha/approved-verdict-art` contains registry activation and strict tests; original WebP blobs transferred via owner-suggested private Google Drive bridge and matched local Git blob hashes. Both committed to this branch with strict SHA-256/browser tests. Current live V15 gameplay unaffected. Next verify final-head checks and deploy. See OUTCOME_ART_HANDOFF.md.
 
 ## ALPHA-GEAR-001 — DEPLOYED (PR #154, 2026-11-25)
 
