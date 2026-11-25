@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## START-FIGHT-001 · STARTED (2026-11-25, chat)
+
+Owner explicitly approved new characters automatically starting lowest-difficulty Fighting, with starter equipment and offline continuation; valid returning saves untouched. Build on existing approved UI-COMPACT-001 PR #175 because both change HTML/UI tests; repair its stale CSS revision assertion. Use existing chooseActivity on fresh character only, including explicit alpha reset; start in arena without initial preparation delay, no balance/engine/save-format changes. No other brainstorm implemented. Next update app and tests.
+
 ## UI-COMPACT-001 · STARTED (2026-11-25, chat)
 
 Owner requests combined Skill Progress and Skill Master section and collapsible Resources. Branch `ui/compact-skill-resources`, base `152c54e`. Preserve existing XP display, Master controls, tribute, resource rendering, saves and all gameplay. Resources closed by default. Combined XP and Master controls in one section, native folded Resources retains resourceList, CSS revision updated, DOM and real browser checks added. Next final CI.
