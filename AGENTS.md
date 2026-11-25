@@ -1,5 +1,14 @@
 # Agent instructions — Idle Game and public research library
 
+## Mandatory research and simulation persistence — RESEARCH-SAVE-001 (2026-11-25)
+
+**Owner-approved; applies to chat, cw and codex. GitHub is the source of truth, not chat memory.** After every research or battle/game-system simulation session, including unsuccessful, negative, inconclusive or partial runs, save a durable, searchable record to the repository before reporting completion or moving to another task. Push meaningful milestones during long runs so a new chat can resume without reconstructing the conversation.
+
+- Record task/date, objective, baseline commit, candidate formulas/configuration, test command or harness path, seeds, sample counts, assumptions, numerical results (including failures), interpretation, limitations, unresolved questions and concrete next action. Preserve raw/structured results when useful for reanalysis; for large/repeated runs keep compact reproducible outputs rather than duplicating huge event logs. For external research record sources and provenance.
+- Save reports in the relevant maintained research/mechanics directory; keep executable developer-only harnesses/configuration under `tools/`. Link each report and its status from the changelog/checkpoint or relevant research index. Record whether evidence is local, pushed, in a PR, merged, or deployed; never claim unverified tests passed. For pending research branches give the exact branch/PR and paths so later chats can find them.
+- When starting a new chat or resuming work, use remote TD_LIST preflight, then the checkpoint, relevant open PRs, linked reports and executable source; do not rely on conversation memory or repeat completed research unnecessarily.
+- Keep private data, credentials and unnecessary personal conversation out of GitHub. Existing approval, CI, security and merge gates still apply. This rule mandates evidence preservation, not approval to change gameplay or merge unchecked work. If a push is blocked, disclose the blocker and last confirmed remote state rather than claiming it is saved.
+
 ## Golden rule — ALPHA-FOCUS-001: do not overengineer disposable test progress
 
 **Owner-approved, 2026-11-24.** Idle Game is in **early alpha**. Current browser saves are local testing state, **not committed, production-grade player progression**. When redesigning armour slots, weapon styles, combat rules, enchantments or other prototype mechanics, prioritize a clean, correct implementation and iteration speed; **do not spend development time on backwards-compatibility migrations or preserving accumulated alpha test progress unless the Owner specifically asks for it**. A clearly communicated reset of disposable alpha progress is acceptable if needed. Do not invent preservation requirements or delay useful changes for hypothetical users.
