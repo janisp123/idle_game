@@ -71,5 +71,5 @@ export function armourStats(armour, loadout) {
 /** Chance to evade an otherwise accurate strike; weight and intact gear
  * are separate. Bound the total to preserve physical counters. */
 export function dodgeChance(mobilityPct,gradedDodge=0){
-  return Math.min(.40,Math.max(0,mobilityPct-65)*.0045+Math.max(0,gradedDodge));
+  return Math.min(.40,Math.max(0,mobilityPct-65)*.0075+Math.max(0,gradedDodge));
 }
