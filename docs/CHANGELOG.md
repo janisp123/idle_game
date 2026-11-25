@@ -2,7 +2,7 @@
 
 ## GEAR-RESEARCH-001 · STARTED (2026-11-25, chat)
 
-Owner requests testing progressive grade bonuses for weapons and armour before Apprentice A3, particularly previous Masterwork versus next Poor. Branch `docs/gear-progression-balance-study`, base `0136237`. Research only: evaluate in-memory source-linked variants and save numerical results; no playable rules, save, economy or deployment changes. Proposed numbers require owner approval. Completed [numerical study](mechanics/GEAR_PROGRESSION_STUDY.md): 376,800 isolated source-linked duels, candidate grade bonuses and limitations. No game change; PR #179 review.
+Owner requests testing progressive grade bonuses for weapons and armour before Apprentice A3, particularly previous Masterwork versus next Poor. Branch `docs/gear-progression-balance-study`, base `0136237`. Research only: evaluate in-memory source-linked variants and save numerical results; no playable rules, save, economy or deployment changes. Proposed numbers require owner approval. Completed [numerical study](mechanics/GEAR_PROGRESSION_STUDY.md): 376,800 isolated source-linked duels, candidate grade bonuses and limitations. No game change; PR #179 review. [Grade matrix](mechanics/GEAR_GRADE_MATRIX.md) and `tools/gear-progression-matrix.mjs` saved (244,800 distinct bouts). Owner requested durability follow-up: compare breakage across all 32 stages, all five weapons, three armour families and five arenas; test alternative capacity and hammer/long-bout stress, preserve Masterwork and between-bout recovery. Next run source-linked sweep and save reproducible results; no runtime changes.
 
 ## APPRENTICE-A2 · MERGED (2026-11-25, chat)
 
