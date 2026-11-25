@@ -1,3 +1,4 @@
+import {purchaseThrough} from "./gear-test-fixture.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -1275,12 +1276,14 @@ test("GLAD-002 arena wins reach the saved wallet once", async () => {
   assert.equal(readSave({ ...loaded, coins: -1 }), null);
 });
 
-test("GLAD-002 sells independent equipment grades and qualities that improve real power", async () => {
+test("APPRENTICE-A3 sells only the next grade or quality that improves real power", async () => {
   const shop = await import("../site/play/smith.mjs");
   const state = { ...newGame(0), coins: 10000 };
   state.skills.fighting.level=5;
   const item = { grade: 1, quality: "fine" };
-  const quote = shop.smithQuote(state, "greatsword", item);
+  assert.equal(shop.smithQuote(state,"greatsword",item).available,false);
+  const previous=purchaseThrough(state,"greatsword",{grade:1,quality:"common"}).state;
+  const quote = shop.smithQuote(previous, "greatsword", item);
   assert.ok(quote.cost > 0 && quote.available);
   assert.ok(shop.itemPower(item) > shop.itemPower({ grade: 0, quality: "fine" }));
   assert.ok(shop.itemPower(item) > shop.itemPower({ grade: 1, quality: "common" }));
@@ -1294,7 +1297,8 @@ test("GLAD-002 four slots and five weapon styles support real purchases", () => 
   start.skills.fighting.level=5;
   assert.deepEqual(Object.keys(start.equipment).sort(), ["bow", "greatsword", "hammer", "spear", "sword_shield"]);
   assert.throws(() => setArmourChoice(start, "arms", "leather", 0), RangeError);
-  const purchased = buyEquipment(start, "arms:leather", { grade: 1, quality: "common" }, 0);
+  assert.equal(buyEquipment(start,"arms:leather",{grade:1,quality:"common"},0).purchased,undefined);
+  const purchased = purchaseThrough(start, "arms:leather", { grade: 1, quality: "common" }, 0);
   assert.equal(purchased.purchased, true);
   assert.equal(purchased.state.armour.arms, "leather");
   assert.equal(purchased.state.coins, 7431);
@@ -1311,23 +1315,24 @@ test("GLAD-002 four slots and five weapon styles support real purchases", () => 
 test("ALPHA-GEAR-001 purchase requires actual Fighting level and wallet, not weapon history",async()=>{
   const shop=await import("../site/play/smith.mjs");
   const s={...newGame(0),coins:10000000};
-  const target={grade:7,quality:"masterwork"};
-  const locked=shop.smithQuote(s,"greatsword",target);
+  const final={grade:7,quality:"masterwork"},target={grade:7,quality:"poor"};
+  assert.equal(shop.smithQuote(s,"greatsword",target).reason,"no_improvement");
+  s.skills.fighting.level=40;
+  const prior=purchaseThrough(s,"greatsword",{grade:6,quality:"masterwork"}).state;
+  const locked=shop.smithQuote(prior,"greatsword",target);
   assert.equal(locked.requiredFightingLevel,50);
   assert.equal(locked.affordable,true);
   assert.equal(locked.reason,"fighting_level");
-  assert.equal(buyEquipment(s,"greatsword",target,0).purchased,undefined);
-  s.skills.fighting.level=50;
-  const poor={...s,coins:1};
+  assert.equal(buyEquipment(prior,"greatsword",target,0).purchased,undefined);
+  prior.skills.fighting.level=50;
+  const poor={...prior,coins:1};
   assert.equal(shop.smithQuote(poor,"greatsword",target).reason,"coins");
   assert.equal(buyEquipment(poor,"greatsword",target,0).purchased,undefined);
-  const direct=buyEquipment(s,"greatsword",target,0).state;
-  let staged=s;
-  for(let grade=1;grade<=7;grade++)staged=buyEquipment(staged,"greatsword",{grade,quality:"common"},0).state;
-  staged=buyEquipment(staged,"greatsword",target,0).state;
-  assert.equal(staged.coins,direct.coins,"cumulative upgrades must not charge twice");
-  assert.deepEqual(staged.equipment.greatsword,target);
-  assert.equal(buyEquipment(staged,"greatsword",target,0).purchased,undefined);
+  assert.equal(buyEquipment(prior,"greatsword",final,0).purchased,undefined);
+  const staged=purchaseThrough(prior,"greatsword",final).state;
+  assert.equal(staged.coins,10000000-shop.equipmentPrice(final),"full credit must not charge twice");
+  assert.deepEqual(staged.equipment.greatsword,final);
+  assert.equal(buyEquipment(staged,"greatsword",final,0).purchased,undefined);
   const {arenaReward}=await import("../site/play/arena-wallet.mjs");
   const {BOUT_MS}=await import("../site/play/combat.mjs");
   assert.ok(shop.equipmentPrice({grade:7,quality:"poor"})>Math.floor(30*86400000/BOUT_MS)*arenaReward(0));
