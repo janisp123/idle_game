@@ -2,7 +2,7 @@
 import {execFileSync} from "node:child_process";
 const ref="01362378d8aefcec3aa1fa4bb73116d9457237c3",names=["armour","difficulty","combat-skills","expertise","arenas","smith","physical-duel","combat-verdict","combat-art","combat","arena-wallet","attributes","loot","production","apprentice","engine"];
 const src=Object.fromEntries(names.map(n=>[n,execFileSync("git",["show",ref+":site/play/"+n+".mjs"],{encoding:"utf8"})]));
-function run(src,selected){
+function run(src,selected,mode='moderate'){
 
 
 
@@ -43,7 +43,7 @@ function install(mode){
  modules.smith=load("smith",s);
  modules["physical-duel"]=load("physical-duel",duel);
  for(const n of ["combat-verdict","combat-art","combat","arena-wallet","attributes","loot","production","apprentice","engine"]){
- let source=src[n];if(n==="arena-wallet")source=patch(source,"[12, 20, 32, 48, 68, 92, 122, 158]","[12, 20, 34, 52, 76, 112, 165, 245]");if(n==="engine")source=patch(source,'export const TIMING_PROFILE = "alpha";','export const TIMING_PROFILE = "normal";');
+ let source=src[n];if(n==="arena-wallet")source=patch(source,"[12, 20, 32, 48, 68, 92, 122, 158]",mode==="targeted"?"[12, 20, 32, 48, 68, 92, 122, 185]":"[12, 20, 34, 52, 76, 112, 165, 245]");if(n==="engine")source=patch(source,'export const TIMING_PROFILE = "alpha";','export const TIMING_PROFILE = "normal";');
  modules[n]=load(n,source);}
  return {engine:modules.engine,attrs:modules.attributes,smith:modules.smith,combat:modules.combat,armour:modules.armour,difficulty:modules.difficulty,wallet:modules["arena-wallet"]};
 }
@@ -192,5 +192,6 @@ const m=install("credit");
 return scenarios.map(([loadout,family])=>trajectory(m,{id:"daily",days:180,claimHours:24,mixed:false,farm:false,loadout,family},20261201));
 
 }
-const selected=process.argv.slice(2).length?process.argv.slice(2).map(x=>x.split("/")):undefined;
-console.log(JSON.stringify(run(src,selected),null,2));
+const args=process.argv.slice(2).filter(x=>x!=='--targeted');
+const selected=args.length?args.map(x=>x.split('/')):undefined;
+console.log(JSON.stringify(run(src,selected,process.argv.includes('--targeted')?'targeted':'moderate'),null,2));
