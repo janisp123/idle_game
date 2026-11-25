@@ -42,3 +42,8 @@ Recipe definitions list one or more inputs and one output. Each craft consumes o
 - Adding a new item or changing keys is a save-schema change. The survival update starts a new alpha save version.
 
 **Not implemented:** combat-simulated hunting, risk-based rare loot, quest substitution ratios, player trading or economy pricing.
+
+
+## CAP-001 — resource reward boundary
+
+A full skill XP bar stops all additional loot, rare drops, crafting output and ingredient consumption for that activity. Cap crossing commits only the first full rewarding cycle; later queued work may consume previously earned materials. Full XP qualifies for Master even if all eligible output was consumed; the confirmed claim still forfeits remaining owned output. No inventory protection, no retroactive deletion, no free ingredients.
