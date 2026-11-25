@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=glad-005-equipment">
-  <script type="module" src="./app.mjs?v=alpha-art-001"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=char-stats-001">
+  <script type="module" src="./app.mjs?v=char-stats-001"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -51,7 +51,12 @@
               <button id="saveName" type="button" class="small-button">Save</button>
             </div>
           </div>
-          <div id="characterAttributes" class="character-attributes" aria-label="Character attributes"></div>
+          <details id="characterStatsPanel" class="armour-cabinet character-stats-panel">
+            <summary class="armour-summary">CHARACTER STATS <span aria-hidden="true">✥</span></summary>
+            <div id="characterAttributes" class="character-attributes" aria-label="Character attributes"></div>
+            <p id="characterStatsNotice" class="stat-breakdown-note"></p>
+            <div id="characterStatsBreakdown" class="stat-breakdown" aria-label="Detailed character statistics"></div>
+          </details>
           <details id="armourCabinet" class="armour-cabinet">
             <summary class="armour-summary">EQUIPMENT <span id="coinWallet">0 coins</span><span aria-hidden="true">✥</span></summary>
             <div class="weapon-cabinet" aria-label="Equipped weapon">

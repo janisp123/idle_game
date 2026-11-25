@@ -111,15 +111,30 @@ try{
     assert.equal(result.s.expertise.leather,4213*14400000);assert.equal(result.s.expertise.plate,0);
     assert.match(result.status,/100,000/);assert.ok(result.overflow<=2,"horizontal page overflow: "+result.overflow);
     await shot("alpha-"+width);
+    const statView=await evaluate(`(()=>{
+      const panel=document.getElementById("characterStatsPanel"),equipment=document.getElementById("armourCabinet");
+      panel.open=true;equipment.open=true;panel.dispatchEvent(new Event("toggle"));
+      const sheet=document.getElementById("characterStatsBreakdown"),before=sheet.textContent;
+      document.querySelector('[data-loadout="bow"]').click();
+      const after=sheet.textContent;
+      return {open:panel.open,equipment:equipment.open,before,after,overflow:document.documentElement.scrollWidth-innerWidth};
+    })()`);
+    assert.ok(statView.open&&statView.equipment);
+    assert.match(statView.before,/Damage · swing/);
+    assert.match(statView.after,/Damage · shot/);
+    assert.match(statView.after,/Damage · dagger/);
+    assert.notEqual(statView.before,statView.after);
+    assert.ok(statView.overflow<=2,"stat sheet horizontal overflow");
+    await shot("stats-"+width);
     await navigate("persist-"+width);
     assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})).coins`),200000);
     for(const mode of ["impressive_victory","humiliation"]){
       // Only synthetic saves created by production functions in this temporary
       // browser. Pick an actual resolved qualifying final event, never fake it.
       const setup=await evaluate(`(async()=>{
-        const e=await import("./engine.mjs?v=alpha-gear-a8");
-        const a=await import("./alpha-tools.mjs?v=alpha-gear-a9");
-        const c=await import("./combat.mjs?v=alpha-gear-a8");
+        const e=await import("./engine.mjs?v=char-stats-001");
+        const a=await import("./alpha-tools.mjs?v=char-stats-001");
+        const c=await import("./combat.mjs?v=char-stats-001");
         const v=await import("./combat-verdict.mjs?v=alpha-gear-a5");
         const mode=${JSON.stringify(mode)},now=Date.now(),start=now-c.BOUT_MS+1;
         let s=e.newGame(start);

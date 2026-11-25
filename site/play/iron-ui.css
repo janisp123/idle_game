@@ -997,3 +997,16 @@ footer p{color:#aa9680}
 .equipment-editor select:disabled {opacity:.6}
 .smith-selects label {color:#d3b79b;font:600 12px/1.4 Georgia,serif}
 .smith-selects select {margin-top:3px}
+
+/* CHAR-STATS-001 — independent collapsible read-only build sheet. */
+.character-stats-panel .character-attributes {margin:10px 8px}
+.stat-breakdown {padding:0 8px 8px;min-width:0}
+.stat-breakdown-group {border-top:1px solid #674831;padding:9px 0;min-width:0}
+.stat-breakdown-group h3 {display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:1rem;margin:0 0 6px;color:#f1cb92}
+.stat-breakdown-group h3 strong {font-variant-numeric:tabular-nums;white-space:nowrap}
+.stat-breakdown-line {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;padding:3px 0;font-size:.83rem;line-height:1.3}
+.stat-breakdown-line span {overflow-wrap:anywhere;color:#c7b89e}
+.stat-breakdown-line strong {text-align:right;color:#f1cb92;font-variant-numeric:tabular-nums}
+.stat-breakdown-line .stat-negative {color:#e79c87}
+.stat-breakdown-note {font-size:.78rem;line-height:1.4;color:#b9a78d;margin:6px 8px}
+.stat-breakdown-group .stat-breakdown-note {margin:6px 0 0}

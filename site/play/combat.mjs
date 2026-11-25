@@ -1,6 +1,6 @@
 import { chooseArena } from "./arenas.mjs?v=glad-004";
 /** Seeded, bounded arena timeline shared by play, prizes and the simulator. */
-import { resolvePhysicalDuel } from "./physical-duel.mjs?v=alpha-gear-a8";
+import { resolvePhysicalDuel } from "./physical-duel.mjs?v=char-stats-001";
 import { equippedCondition,equipmentBonuses,validTrainingKit } from "./smith.mjs?v=alpha-gear-a8";
 import { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";

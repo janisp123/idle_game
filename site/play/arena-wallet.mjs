@@ -1,4 +1,4 @@
-import { ARENA_SCHEDULE_BOUTS, BOUT_MS, RESURRECTION_MS, combatAtTime, validCombatSession } from "./combat.mjs?v=alpha-gear-a8";
+import { ARENA_SCHEDULE_BOUTS, BOUT_MS, RESURRECTION_MS, combatAtTime, validCombatSession } from "./combat.mjs?v=char-stats-001";
 import { validTier } from "./difficulty.mjs?v=alpha-gear-a2";
 
 const WIN_PRIZES = Object.freeze([12, 20, 32, 48, 68, 92, 122, 158]);

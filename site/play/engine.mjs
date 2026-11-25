@@ -1,5 +1,5 @@
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
-import { settleArenaPrizes } from "./arena-wallet.mjs?v=alpha-gear-a8";
+import { settleArenaPrizes } from "./arena-wallet.mjs?v=char-stats-001";
 import {
   ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
 } from "./attributes.mjs?v=glad-001";
@@ -11,7 +11,7 @@ export {
 } from "./attributes.mjs?v=glad-001";
 import {
   validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS, RESURRECTION_MS
-} from "./combat.mjs?v=alpha-gear-a8";
+} from "./combat.mjs?v=char-stats-001";
 import { COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
 import { ARMOUR_SLOTS, ARMOUR_TIERS, initialArmour, armourOption, armourStats } from "./armour.mjs?v=alpha-gear-a8";
@@ -354,7 +354,7 @@ export function activateExpertise(state){
     Object.keys(state.attributeEffort).some(id=>state.attributeEffort[id]!==state.attributeEffortActive[id]);
   return changed?{...state,expertiseActive:{...state.expertise},attributeEffortActive:{...state.attributeEffort}}:state;
 }
-function desiredArenaPlayer(state){
+export function desiredArenaPlayer(state){
   const attrs=combatAttributeProgress(state.attributeEffortActive,state.skills);
   const kit=trainingKit(state.armour,state.combatLoadout,state.equipment);
   const effects=trainingEffects(kit,state.combatLoadout,state.expertiseActive);
