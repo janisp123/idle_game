@@ -1,6 +1,6 @@
 # The Apprentice — progressive automation implementation plan
 
-**APPRENTICE-PLAN-001 — design only, 2026-11-25.** Owner requests a plan, not implementation. Scope: make experienced players need less attention, retain all five existing weapon classes, no separate apprentice grind, no paid automation or upkeep. No runtime changes. Implementation batches require explicit approval.
+**APPRENTICE-PLAN-001 — design and staged implementation, 2026-11-25.** Owner requested the plan, then approved starting implementation. A1 foundation is in PR #177; later automation remains proposed. Scope: make experienced players need less attention, retain all five existing weapon classes, no separate apprentice grind, no paid automation or upkeep. Subsequent batches are scoped separately; do not assume provisional economy or feature thresholds approved.
 
 ## 1. Direction and unresolved policy
 
@@ -21,7 +21,7 @@ Recommended interpretation for approval: earnedLevels = sum over actual SKILL_ID
 | 125 | Follow clan material priorities | optional later proposal |
 | 150 | Repeat configured rotation | optional later proposal |
 
-Validate timing in normal profile for daily, weekly, mixed and combat-only players. No compulsory skill diversity or mandatory clan participation. Exact upper queue limit, level-count definition, thresholds beyond stated owner numbers, gear transition cost and target quality, donation order and tribute policy need confirmation. Current Master takes 100% of owned outputs of all ready skills; proposed 30% is NOT approved. Do not silently change it.
+Validate timing in normal profile for daily, weekly, mixed and combat-only players. No compulsory skill diversity or mandatory clan participation. Initial A1 uses the proposed five-slot maximum and earned level definition; thresholds beyond stated owner numbers, gear transition cost and target quality, donation order and tribute policy need confirmation. Current Master takes 100% of owned outputs of all ready skills; proposed 30% is NOT approved. Do not silently change it.
 
 ## 2. Placement and controls
 
@@ -41,7 +41,7 @@ Proposed module `site/play/apprentice.mjs` (pure policy/planning and orchestrati
 
 ## 3. Queue and offline semantics
 
-Current `site/play/engine.mjs` has MAX_WAGONS=3, save validation, queueStartActivity/queueInsertTimedActivity, a bounded 10-step settle loop and a final Forever wagon. Change all capacity checks and app enablement together. Keep an absolute tested bound; derive allowed slots from activated levels. Existing valid routes longer than newly allowed capacity must not be silently discarded: propose grandfathering saved route until edited/completed, or communicate an explicit alpha reset if approved. No duplication of activities, negative durations, or reward at capped XP. Re-evaluate settlement loop bound for max slots/transitions, test long offline catch-up and capped/zero-work segments; never per-cycle replay or unbounded rotation.
+Baseline before A1 `site/play/engine.mjs` had MAX_WAGONS=3, save validation, queueStartActivity/queueInsertTimedActivity, a bounded 10-step settle loop and a final Forever wagon. Change all capacity checks and app enablement together. Keep an absolute tested bound; derive allowed slots from activated levels. Existing valid routes longer than newly allowed capacity must not be silently discarded: propose grandfathering saved route until edited/completed, or communicate an explicit alpha reset if approved. No duplication of activities, negative durations, or reward at capped XP. Re-evaluate settlement loop bound for max slots/transitions, test long offline catch-up and capped/zero-work segments; never per-cycle replay or unbounded rotation.
 
 Login chores must not automatically fill multiple levels retroactively. First settle exactly once at old state and effective bonuses; cap stops rewards as today. Run configured unlocked chores at that settlement boundary, preserve time already lost to cap, then resume existing Forever/queue under new levels. Ordinary ticks do NOT run login-only automation. Decide whether visibility-return qualifies as login; recommend genuine entry/resume using a deduplicated logical session, not every tick, storage event, browser focus or retry. Alpha virtual day tests should invoke the same orchestration only when explicitly simulating a login.
 
@@ -84,4 +84,4 @@ A1–A5 can be developed before renting hosting; A6 fixture development possible
 
 ## 7. Verification and dependencies
 
-Read latest main before implementation. Existing pending PR #175 contains compact skill/resources UI and auto-first-entry combat; its website CI failed; do not assume deployed. Resolve that approved scope independently and retest before adding Apprentice UI. Current engine is V16 alpha; source audit used main 152c54e. No actual simulation run in this design task. Use existing tools/system-lab and production-backed simulation, add dedicated apprentice tests and browser smoke at 390/1440. Report actual normal-profile unlock times, logins saved, coins/tribute spent and progression impact; compare fixed seeds with baseline, never claim human enjoyment from simulations. After each independently approved batch, verify final-head CI, main and Pages; update backlog, decisions and checkpoint. The goal is fewer interventions, not faster forced leveling.
+Read latest main before implementation. PR #175 compact UI and auto-first-entry combat passed final website/system/protocol checks and merged 29d7bee; A1 is based on that merge. Verify Pages separately. Current engine is V16 alpha; source audit used main 152c54e. No actual simulation run in this design task. Use existing tools/system-lab and production-backed simulation, add dedicated apprentice tests and browser smoke at 390/1440. Report actual normal-profile unlock times, logins saved, coins/tribute spent and progression impact; compare fixed seeds with baseline, never claim human enjoyment from simulations. After each independently approved batch, verify final-head CI, main and Pages; update backlog, decisions and checkpoint. The goal is fewer interventions, not faster forced leveling.
