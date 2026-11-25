@@ -102,11 +102,11 @@ try{
     assert.equal(landing.href,"./play/");assert.ok(landing.width>0&&landing.height>=40&&landing.visible,"Play Now must be visible above the fold");
     assert.ok(landing.artWidth>0&&landing.overflow<=2,"landing overflow or missing art");
     await shot("landing-"+width);
-    const hobby=await evaluate(`(()=>{const section=document.getElementById("hobby");section.scrollIntoView({block:"start"});const box=section.querySelector("h2").getBoundingClientRect();return {copy:section.innerText,items:section.querySelectorAll("li").length,heading:box.top>=0&&box.bottom<=innerHeight,overflow:document.documentElement.scrollWidth-innerWidth};})()`);
+    const hobby=await evaluate(`(()=>{const section=document.getElementById("hobby");section.scrollIntoView({block:"start",behavior:"instant"});const box=section.querySelector("h2").getBoundingClientRect();return {copy:section.innerText,items:section.querySelectorAll("li").length,heading:box.top>=0&&box.bottom<=innerHeight,overflow:document.documentElement.scrollWidth-innerWidth};})()`);
     assert.match(hobby.copy,/It will always be 100% free/);
     assert.match(hobby.copy,/loss of progress are possible/);
     assert.match(hobby.copy,/No donations or financial contributions/);
-    assert.equal(hobby.items,5);assert.ok(hobby.heading&&hobby.overflow<=2,"hobby statement visible without horizontal overflow");
+    assert.equal(hobby.items,5);assert.ok(hobby.heading,"hobby heading in viewport: "+JSON.stringify(hobby));assert.ok(hobby.overflow<=2,"hobby horizontal overflow: "+hobby.overflow);
     await shot("hobby-"+width);
     await navigate("clean-"+width,{[saveKey]:null,[clockKey]:null});
     const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=11;s.name="Old alpha";return JSON.stringify(s);})()`);
