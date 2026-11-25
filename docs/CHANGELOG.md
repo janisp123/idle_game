@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## SIM-003 · STARTED (2026-11-25, chat)
+
+Owner approved simulator synchronization, automatic relevant gameplay triggers and current-game parity verification. Base 3002fb1 includes deployed CHAR-STATS-002; no open PRs at preflight. Keep gameplay and V15 unchanged. Reuse production kit builder, distinguish synthetic mastery assumptions, test actual frozen sessions and broaden CI source triggers while retaining manual full-balance audits. Next implement developer-only safeguards and verify.
+
 ## CHAR-STATS-002 · STARTED (2026-11-25, chat)
 
 Owner approved a compact character power overview with expandable source breakdowns and actual activity effects. Build on CHAR-STATS-001. Distinguish conditional combat inputs from outcome predictions, show actual equipment modifiers only, retain detailed calculations and independent Equipment panel. Preserve expanded rows when equipment changes. No gameplay or save changes. Implemented grouped compact summaries with native expandable source rows, initially closed, preserving open primary attack/details across weapon changes. Attack power measures the same move at the same STR with and without effective grade/quality modifiers (not damage dealt). Accuracy and armour dodge show actual raw bonuses before caps; detailed conditional rates remain underneath. Show all eleven activities using the existing skill efficiency constants and workMultiplier, with explicit zero direct equipment XP/yield bonus; distinguish recipes from resource gathering, Fighting recovery/coins from direct XP, and difficulty/readiness factors. No engine, save or balance changes. Browser test checks collapsed defaults and expansion retention. CI pending.
