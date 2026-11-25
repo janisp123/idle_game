@@ -66,7 +66,7 @@ async function navigate(label,storage=null){
     "if(location.href==="+JSON.stringify(url)+"){for(const [key,value] of Object.entries("+JSON.stringify(storage)+")){if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}}"}):null;
   const result=await send("Page.navigate",{url});
   assert.equal(result.errorText,undefined);
-  await until(()=>evaluate(`location.href===${JSON.stringify(url)}&&document.readyState==="complete"&&document.getElementById("weaponSlots")?.children.length>0`),"app loaded "+label);
+  await until(()=>evaluate(`location.href===${JSON.stringify(url)}&&document.readyState==="complete"&&document.getElementById("saveStatus")?.getAttribute("data-game-ready")==="true"`),"app loaded "+label);
   if(inject)await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:inject.identifier});
 }
 async function shot(name){
@@ -178,6 +178,18 @@ try{
     assert.match(pause.notice,/All rewards paused/);assert.equal(pause.reset,true);
     for(const key of ["items","attributeEffort","expertise","coins","skills"])assert.deepEqual(pause.before[key],pause.after[key]);
     await shot("capped-"+width);
+    const veteran=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=apprentice-a2");let s=e.newGame(Date.now());s.skills.fishing.level=51;s.skills.mining.xp=e.xpToNextLevel(1);s.items.stone=12;s.items.log=3;s.coins=50;return JSON.stringify(s);})()`);
+    await navigate("master-opt-in-"+width,{[saveKey]:veteran,[clockKey]:null});
+    const optIn=await evaluate(`(()=>{const el=document.getElementById("apprenticeAutoMaster"),key=${JSON.stringify(saveKey)};window.confirm=()=>false;el.click();const cancelled=!el.checked&&JSON.parse(localStorage.getItem(key)).apprenticeMasterConsent===0;window.confirm=()=>true;el.click();document.dispatchEvent(new Event("visibilitychange"));const s=JSON.parse(localStorage.getItem(key));return {cancelled,enabled:el.checked,disabled:el.disabled,s};})()`);
+    assert.ok(optIn.cancelled&&optIn.enabled&&!optIn.disabled);assert.equal(optIn.s.apprenticeMasterConsent,1);assert.equal(optIn.s.skills.mining.level,1);assert.equal(optIn.s.items.stone,12);
+    await navigate("master-claim-"+width);
+    const claimed=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),p=document.getElementById("apprenticeMasterReport");return {s,report:p.textContent,hidden:p.hidden};})()`);
+    assert.equal(claimed.s.skills.mining.level,2);assert.equal(claimed.s.skills.mining.xp,0);assert.equal(claimed.s.items.stone,0);assert.equal(claimed.s.items.log,3);assert.equal(claimed.s.coins,50);assert.equal(claimed.hidden,false);assert.match(claimed.report,/Mining LvL 2/);assert.match(claimed.report,/12 Stone/i);
+    await navigate("master-repeat-"+width);
+    assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})).skills.mining.level`),2);
+    assert.equal(await evaluate('document.getElementById("apprenticeMasterReport").hidden'),true);
+    await evaluate('document.getElementById("apprenticeAutoMaster").click()');
+    assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})).apprenticeMasterConsent`),0);
     for(const mode of ["impressive_victory","humiliation"]){
       // Only synthetic saves created by production functions in this temporary
       // browser. Pick an actual resolved qualifying final event, never fake it.
