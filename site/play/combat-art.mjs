@@ -4,7 +4,7 @@ import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
  * No simulation code or random choice occurs here. Only use images whose
  * weapon/action/outcome matches the real event. Chronicle remains text-only.
  *
- * All images are original, committed under assets/combat/*.webp (960x540).
+ * All images are original, under assets/combat/*.webp (action art 960x540; verdict art 960x640).
  * Future weapon variants belong here, never in app.mjs string conditionals.
  */
 export const COMBAT_ART = Object.freeze({
@@ -32,10 +32,9 @@ export const COMBAT_ART = Object.freeze({
   })
 });
 
-// Activate only after the exact owner-approved WebPs are committed and verified.
-// Until then use the truthful existing style-specific verdict art (or neutral).
-// See docs/mechanics/OUTCOME_ART_HANDOFF.md for the exact asset names and hashes.
-export const DOMINANCE_ART = Object.freeze({impressive_victory:null,humiliation:null});
+// Symbolic terminal verdict illustrations, independent of weapon style.
+// Exact approved WebP hashes are enforced by the art tests before release.
+export const DOMINANCE_ART = Object.freeze({impressive_victory:"impressive-victory",humiliation:"humiliation"});
 const STYLE_NAMES = Object.freeze({
   hammer:"Two-handed hammer",
   greatsword: "Two-handed greatsword",

@@ -140,6 +140,9 @@ try{
       const view=await evaluate(`(()=>{const $=id=>document.getElementById(id);$("combatPanel").scrollIntoView({block:"center"});
         return {title:$("combatEventTitle").textContent,result:$("playerResult").textContent,src:$("sceneImage").getAttribute("src"),
         overflow:document.documentElement.scrollWidth-innerWidth};})()`);
+      assert.equal(new URL(view.src,origin+"/play/").pathname,"/play/assets/combat/"+(mode==="impressive_victory"?"impressive-victory":"humiliation")+".webp");
+      assert.equal(await evaluate('document.getElementById("sceneImage").naturalWidth'),960);
+      assert.equal(await evaluate('document.getElementById("sceneImage").naturalHeight'),640);
       assert.ok(view.title.includes(setup.label),JSON.stringify(view));
       assert.ok(view.result.includes(setup.label),JSON.stringify(view));
       assert.ok(view.overflow<=2,"verdict horizontal overflow");
