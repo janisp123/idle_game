@@ -8,11 +8,20 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## CLAN-PLAN-001 — Pre-server clan development and implementation handoff
+
+- **Goal:** Prepare useful design and implementation specifications before the Owner rents a server; clearly map features to screens, functions and data ownership.
+- **Acceptance:** [CLAN_IMPLEMENTATION_PLAN.md](CLAN_IMPLEMENTATION_PLAN.md) records the source-backed resource map, proposed domain/API contracts, ordered offline design/testing and later deployment gates, unresolved decisions and security boundaries. Documentation only, no hosting commitment or gameplay change.
+- **Status:** IN_REVIEW — PR #171.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## CLAN-001 — Clan entry, membership and shared development
 
 - **Goal:** Separate Clan category with current clan, search and creation; enforce durable membership, leadership, donation and warehouse rules in [CLAN_DESIGN.md](CLAN_DESIGN.md).
 - **Acceptance:** Current alpha shows truthful availability; online implementation must authenticate identity, validate seven-day founding and rejoin eligibility, enforce one leader/one vice/five generals/fifteen officers, transactional daily contributions and building-only warehouse spending, no player withdrawals, real search and multi-account tests.
-- **Status:** PARTIAL/BLOCKED — [PR #170](https://github.com/janisp123/idle_game/pull/170) adds alpha navigation and design contract; real shared functionality requires owner-approved account/server architecture, permission and economy decisions.
+- **Status:** PARTIAL/BLOCKED — [PR #170](https://github.com/janisp123/idle_game/pull/170) adds alpha navigation and design contract; real shared functionality requires owner-approved account/server architecture, permission and economy decisions. PR #170 merged cd4e93d; Pages 45631544350 passed. Server-independent design, pure rules, fixtures, simulations, UI and local service testing can proceed in approved batches; see [implementation roadmap](CLAN_IMPLEMENTATION_PLAN.md).
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet (shared multiplayer).

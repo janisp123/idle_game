@@ -2,6 +2,8 @@
 
 **Status:** Owner-approved design, 2026-11-25. Real shared clans are not implemented. The current browser-only alpha exposes a Clan entry with an explicit availability notice. This document governs subsequent account-backed implementation, not a promise that the current UI works online.
 
+**Implementation handoff:** [CLAN_IMPLEMENTATION_PLAN.md](CLAN_IMPLEMENTATION_PLAN.md) maps screens, functions, data boundaries, pre-server work and later server integration. Prepare and test independently of rented hosting; no live multiplayer claim until integration is verified.
+
 ## Navigation and membership
 
 Clan is a standalone top-level category alongside Activities, not a combat/survival activity or queue slot. Opening it shows:
