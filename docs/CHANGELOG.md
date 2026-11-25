@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## SITE-003 · STARTED (2026-11-25, chat)
+
+Owner approved coordinated landing page, README and project-status refresh on `site/current-alpha-overview`, base `67f62e0`. Existing Pages 45589039287 succeeded; live landing and game returned HTTP 200 and the game has char-stats-002. Preserve artwork, Play Now, research library, all gameplay files and saves. Next update public copy and reconcile obsolete status, then verify changed files, mobile/desktop and deployment before closing.
+
 ## SIM-003 · STARTED (2026-11-25, chat)
 
 Owner approved simulator synchronization, automatic relevant gameplay triggers and current-game parity verification. Base 3002fb1 includes deployed CHAR-STATS-002; no open PRs at preflight. Keep gameplay and V15 unchanged. Reuse production kit builder, distinguish synthetic mastery assumptions, test actual frozen sessions and broaden CI source triggers while retaining manual full-balance audits. Implemented shared production kit/effects in synthetic snapshots (including trainingKit), explicit novice/trained baseline and per-track overrides; reject ignored saved-build overrides. Actual engine snapshot, save roundtrip, eight-bout outcome/trace/coin parity across 30 mixed-armour style/grade/expertise fixtures. Income policy uses desiredArenaPlayer (active not merely earned stats). Both workflow path filters cover recursive game modules except three standalone presentation-only modules, combat parity tests run directly in dedicated CI; full audit remains manual. No site changes, no save or balance changes. First CI: dedicated combat simulator passed, lab guard correctly detected combat.mjs re-exports combat-art.mjs, so retain that module in automatic trigger coverage. Re-run all final-head checks; no production edits.
