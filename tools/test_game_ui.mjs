@@ -767,6 +767,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     // A real running Fighting session (rather than a selected activity card)
     // displays the simulated result after productive time has passed.
     const fighting = newGame(now);
+    fighting.skills.fighting.level=2; // sufficient XP headroom to cross the bout boundary
     fighting.name = "The Black Rider";
     fighting.activity = "fighting";
     fighting.wagons = [{ activity: "fighting", plannedMs: null }];
@@ -799,7 +800,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
         label:node.children[1]?.textContent ?? ""
       })), displayed[side]);
     }
-    assert.equal(arena.skills.fighting.level, 1);
+    assert.equal(arena.skills.fighting.level, 2);
     assert.equal(arena.combatSession.player.loadout,"greatsword");
     const shieldWeapon=weaponChoices.find(x=>x.getAttribute("data-loadout")==="sword_shield");
     shieldWeapon.fire("click");
@@ -879,6 +880,9 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     const afterSecondDay=JSON.parse(store.get(SAVE_KEY));
     assert.equal(afterSecondDay.settledAtMs-afterDay.settledAtMs,86_400_000,
       "each button click simulates exactly one additional day");
+    assert.deepEqual(afterSecondDay.items,afterDay.items,"no capped loot on repeated 24h");
+    assert.deepEqual(afterSecondDay.attributeEffort,afterDay.attributeEffort,"no capped attribute XP");
+    assert.match(elements.get("skillXp").textContent,/All rewards paused/);
     assert.equal(afterSecondDay.skills.mining.level,1,
       "repeated 24h clicks still cannot level up automatically");
     assert.equal(elements.get("alphaTools").hidden,false);
