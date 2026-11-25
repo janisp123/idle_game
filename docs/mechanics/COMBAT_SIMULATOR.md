@@ -68,3 +68,7 @@ The JSON report includes victories, defeats and double deaths, grouped by terrai
 When starting later balance research: read current remote `main:docs/TD_LIST.md` first, then project instructions, this page, and use the CLI. Store only useful reviewed benchmark findings, never unverified win-rate claims.
 
 Use `--item-grade 2 --quality fine` to set the generated fighter’s item grade and quality. The report counts actual victory coins.
+
+## A3 expertise fixtures
+
+Synthetic generated snapshots default to fully trained gear so prior gear-only comparisons remain comparable; this is not a real new character's default. An explicit `expertiseHours` JSON object overrides individual tracks, e.g. `{"bow":4000,"greatsword":0,"plate":4000}` for a veteran archer trying an unfamiliar greatsword while retaining Plate experience. Unspecified tracks stay fully trained in synthetic fixtures. Use valid weapon/family IDs and nonnegative hours representable as safe integer quarter-ms units. `node tools/gladiator-benchmark.mjs` adds a 14,400-duel matched expertise matrix; real progression uses the separate `tools/simulation/build-progression.mjs` engine harness with earned counters starting at zero. See [COMBAT.md](COMBAT.md).

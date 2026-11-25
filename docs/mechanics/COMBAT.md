@@ -97,3 +97,24 @@ Readiness against actual randomly selected arena NPCs: each row 320 fights (five
 | 7 | 32.81% | 0.00% | 0.00% |
 
 S beat Non-grade in all 6,000 sampled equal-stat duels; at stat 150, S vs A/B/C won 81.5%/94.3%/99.25%. D/S readiness mismatches lost every sampled fight; no scripted result. Matched Leather wins ~32% against the NPC material mix, below a 50% broad target; Padded vs Plate, per-style bias, high-level quality and symmetric same-grade fairness need additional measurement after expertise. Early F vs Non-grade at stat 10 is stronger than the initial 75–85% one-grade target (92.45%); do not hide this. Grade factor provisional. Matrix comprises 36,000 gear and 2,880 readiness duels in addition to legacy 13,760 and the CI 10,000-bout scenario.
+
+## A3 — verified equipment expertise matrix
+
+Source: `node tools/gladiator-benchmark.mjs`, seed 20261124, [combat CI 45561154518](https://github.com/janisp123/idle_game/actions/runs/45561154518), verified head ff17713. Each row uses 1,200 production duels (five weapon styles × three armour families × five arenas × 16 seeds). Both builds use identical attributes, Fighting 50, same Masterwork item grade and same weapon/armour type. Player is fully trained; only opponent practice is varied. Trained control is an orientation-biased reference, not perfectly fair 50%.
+
+| Grade | Equal stats | Opponent unfamiliar with | Trained-side wins / 1200 | Win % |
+| --- | ---: | --- | ---: | ---: |
+| 0 | 10 | weapon | 733 | 61.08 |
+| 0 | 10 | armour | 733 | 61.08 |
+| 0 | 10 | both | 733 | 61.08 |
+| 0 | 10 | neither | 733 | 61.08 |
+| 3 | 62 | weapon | 1107 | 92.25 |
+| 3 | 62 | armour | 989 | 82.42 |
+| 3 | 62 | both | 1172 | 97.67 |
+| 3 | 62 | neither | 708 | 59.00 |
+| 7 | 150 | weapon | 1198 | 99.83 |
+| 7 | 150 | armour | 1155 | 96.25 |
+| 7 | 150 | both | 1200 | 100.00 |
+| 7 | 150 | neither | 691 | 57.58 |
+
+At S, 1,198/1,200 wins against a weapon novice, 1,155/1,200 against armour novice and 1,200/1,200 against both; equipment expertise clearly matters even when actual gear/stats are identical. Non-grade has no expertise penalty. Sampled 100% does not prove guaranteed outcome. Trained-versus-trained S win 57.58%, which still indicates side bias. At D/S matched NPC readiness, the earlier Leather-vs-material-mix imbalance remains to be calibrated. No claim that every style or family is equally effective. Reassess severity and fairness in final combined calibration, not by adding scripted outcomes.

@@ -54,7 +54,7 @@ There is no **offline time cap** or mandatory daily login. Attribute effort and 
 
 ## Saves and migration
 
-- `SAVE_KEY = "idle-game-prototype-v1"` stays the same. `readSave` accepts V11. Earlier alpha saves start fresh with a reset notice.
+- `SAVE_KEY = "idle-game-prototype-v1"` stays the same. `readSave` on the pending A3 branch accepts V13 (the live GLAD-005 release still uses V11). Earlier alpha saves start fresh with a reset notice on eventual release.
 - Saved values include individual skill XP/levels, `attributeEffort`, items, current activity, partial work, transition phase, wagon route, productive-period progress, timestamp, and `combatSession`.
 - Current-build progress across timing-profile changes is scaled **proportionally** to preserve the fraction of the unfinished work cycle or transition phase. Item totals, skill levels, XP and routes are not reset.
 - Inventory is available to eligible recipes. Skill Master action deliberately forfeits the selected skills' output resources only after confirmation.
@@ -67,3 +67,7 @@ There is no **offline time cap** or mandatory daily login. Attribute effort and 
 - Offered duration amounts: `SCHEDULE_BALANCE` (shared with UI); changes to previously valid plans can invalidate old saves, so **extend/backward-compatibly migrate** rather than shrink carelessly.
 - Number of queue slots: `MAX_WAGONS` is centralized **but not an isolated balance change**—the current UI layout, three-wagon tests and settlement iteration bounds assume three. Increasing this requires a separate tested structural/UI change. Do **not** casually set 5 and assume it works.
 - Phase ordering, offline freeze, Skill Master gate and never-ending final wagon are **core invariants**, not balance numbers.
+
+## A3 expertise and offline settlement (draft)
+
+Saved expertise earned/active maps and the session's actual frozen training kit keep weapon and armour practice separate from general activity skill. Only completed productive bouts earn expertise, excluding resurrection; abandoning a partial bout forfeits its pending practice. Every completed bout credits its saved kit, not newly selected equipment. `settle` uses the saved active map for the whole absence. Return/visible tick publishes earned practice, which changes effective equipment at the next completed bout boundary while retaining the old bout outcome, prize cursor, seed and other frozen stats. A settlement may split at one extra boundary, with each bounded arena segment; no replay per level or hour. Twenty-year split/reload and duplicate-credit tests passed. V13 saved maps and kit validate shape and bounds. See [ARMOUR.md](ARMOUR.md).

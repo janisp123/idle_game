@@ -226,3 +226,30 @@ Normal daily checkpoint detail:
 | 180 | 52 | 148/148/136 | 4167.81 | 50371/27289/99 | 64.78 | 3994156 | 3001321 | 992835 | 7/masterwork | S |
 
 **Interpretation:** Day 170 is near six months, cumulative wins fall from 99.5% to 64.78%, and the representative six-month stats now 148/148/136 (Fighting 52). Normal mixed/weekly do not reach S by day 180. Alpha daily reaches S Masterwork at day 106; first-month normal low-tier farming still cannot buy S. Keep A1 prices provisionally until expertise is introduced and measured. No optimal high-tier alpha farm search or multi-seed trajectory performed. See the combat matrix for grade separation and remaining style/material imbalances.
+
+## A3 — equipment expertise and six-month build
+
+Verified code head [ff17713](https://github.com/janisp123/idle_game/commit/ff1771316a0a174d97aac4d808b40cf26093ad78). All checks passed: [website 45561154525](https://github.com/janisp123/idle_game/actions/runs/45561154525) (102 tests), [systems lab 45561154499](https://github.com/janisp123/idle_game/actions/runs/45561154499) (13 tests plus trajectories), [combat 45561154518](https://github.com/janisp123/idle_game/actions/runs/45561154518), [protocol 45561154550](https://github.com/janisp123/idle_game/actions/runs/45561154550). Same trajectory seed 20261125 and purchase/arena strategies as A2. Time-earned expertise is independent of item ownership; actual equipped family/weapon receives credit at completed bouts. Practice continues beyond 4,000h, but proficiency caps at 100%. The earlier A2 power and price tables remain unchanged.
+
+| Profile | Strategy | First S MW weapon day | Full S MW day | End weapon grade/quality | Fighting | STR/DEX/END | Greatsword h | Plate h | Unarmoured h | Win % | Earned | Spent |
+| --- | --- | ---: | ---: | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| normal | daily (180d) | 170 | 170 | 7/masterwork | 52 | 148/148/136 | 4167.26 | 4145.24 | 22.02 | 64.66 | 3987888 | 3001321 |
+| normal | weekly (180d) | — | — | 4/common | 26 | 141/141/130 | 4306.17 | 4151.87 | 154.31 | 96.81 | 2608896 | 300321 |
+| normal | mixed (180d) | — | — | 6/common | 42 | 176/126/140 | 3055.14 | 3033.12 | 22.02 | 80.19 | 2845908 | 1125321 |
+| normal | rapid-farm (30d) | — | — | 0/poor | 20 | 66/65/61 | 715.88 | 0.00 | 715.88 | 94.35 | 146724 | 0 |
+| alpha | daily (180d) | 112 | 129 | 7/masterwork | 181 | 193/193/175 | 4203.16 | 4181.08 | 22.07 | 72.97 | 6492710 | 3001321 |
+| alpha | weekly (180d) | — | — | 4/common | 26 | 141/141/130 | 4306.65 | 4151.87 | 154.78 | 96.92 | 2609928 | 300321 |
+| alpha | mixed (180d) | 148 | 170 | 7/masterwork | 131 | 228/157/175 | 3010.14 | 2988.07 | 22.07 | 65.23 | 3593700 | 3001321 |
+| alpha | rapid-farm (30d) | — | — | 0/poor | 252 | 147/147/130 | 719.01 | 0.00 | 719.01 | 98.7 | 153492 | 0 |
+
+Normal daily checkpoints:
+
+| Day | Fighting | STR/DEX/END | Productive h | Greatsword h | Plate h | Win % | Earned | Spent | Wallet | Weapon grade/quality | Opponent grade |
+| ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| 0 | 1 | 10/10/10 | 0 | 0.00 | 0.00 | — | 0 | 0 | 0 | 0/poor | Non-grade |
+| 30 | 17 | 65/64/60 | 701.94 | 701.92 | 679.90 | 74.96 | 252544 | 120321 | 132223 | 3/common | D |
+| 90 | 34 | 107/106/98 | 2094.96 | 2094.93 | 2072.92 | 69.9 | 1311104 | 600321 | 710783 | 5/common | B |
+| 150 | 46 | 135/135/124 | 3468.47 | 3468.44 | 3446.43 | 63.47 | 2775978 | 1125321 | 1650657 | 6/common | A |
+| 180 | 52 | 148/148/136 | 4167.28 | 4167.26 | 4145.24 | 64.66 | 3987888 | 3001321 | 986567 | 7/masterwork | S |
+
+All other weapon and unused armour tracks are zero across these fixed-build trajectories. The normal daily build satisfies the six-month target: both selected expertise tracks exceed 4,000h and S Masterwork is bought at day 170. Weekly gets mastery from offline effort but remains below S general Fighting purchase gate (level 26); mixed normal has A Common and ~3,055/3,033 practice hours at day 180. Normal first-month farmer still has no S; alpha acceleration is a distinct test profile, not the promised normal pace. Abandoned/partial bouts explain a small difference between productive elapsed hours and credited practice; slot budgets still conserve effort. A4 should reproduce a documented representative six-month build using real effort/skill calculations, not manufacture every expertise track or set all activity levels to the maximum. The data are fixed-seed, not optimized worst-case or multi-seed assurance. Final price/style/quality/readiness fairness remains to be reviewed.
