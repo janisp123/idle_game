@@ -1,8 +1,12 @@
 # Current working checkpoint
 
+## CLAN-PLAN-001 — Pre-server implementation roadmap
+
+PR #171 adds [CLAN_IMPLEMENTATION_PLAN.md](CLAN_IMPLEMENTATION_PLAN.md), mapping every intended screen to operations, data boundaries and proposed code locations, current material sources, staged offline development and server deployment gates. Design only; next agree on exact rank permissions, membership edge cases, donation and building economics, then implement/test pure rules in scoped batches. Renting a server is not a prerequisite for local development.
+
 ## CLAN-001 — navigation and design, real clans blocked
 
-[PR #170](https://github.com/janisp123/idle_game/pull/170): standalone Clan entry, explicit offline-alpha limitation, unavailable search/create rather than fake data. [Owner-approved design](CLAN_DESIGN.md) covers membership, founding/rejoin restrictions, ranks, contributions, warehouse, buildings and open decisions. No backend or save changes. Next verify navigation release; real clans require separate approved authoritative accounts/inventory/persistence architecture.
+[PR #170](https://github.com/janisp123/idle_game/pull/170): standalone Clan entry, explicit offline-alpha limitation, unavailable search/create rather than fake data. [Owner-approved design](CLAN_DESIGN.md) covers membership, founding/rejoin restrictions, ranks, contributions, warehouse, buildings and open decisions. No backend or save changes. Final head cb7d37f passed website 45631412298, systems 45631412444, protocol 45631412358; merged cd4e93d; Pages 45631544350 validation/publish passed. No independent public rendering check. Real clans require separate approved authoritative accounts/inventory/persistence architecture.
 
 ## UI-CATEGORY-001 — deployed PR #169
 
