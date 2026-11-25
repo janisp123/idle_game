@@ -8,14 +8,23 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## UI-COMPACT-001 — Compact skill and resources panels
+
+- **Goal:** Combine Skill Progress and Skill Master; fold Resources by default.
+- **Acceptance:** XP and Master controls in one panel; native collapsible Resources retains exact inventory and updates; browser/mobile checks; no mechanics/save changes.
+- **Status:** IN_REVIEW — PR #175.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## CLAN-TEST-001 — Developer-only fake clan members
 
 - **Goal:** Generate synthetic players and clans to test membership, roles, cooldown, contributions and warehouse accounting before hosting.
 - **Acceptance:** Repeatable scenarios with explicit test policy, actual item IDs, synthetic test IDs, 100-member/30-day test, negative-path tests; integrated into developer lab and CI; no live player data, public admin tool or production rule changes.
-- **Status:** IN_REVIEW — PR #174.
+- **Status:** DONE — PR #174 merged 152c54e; systems 45638587639 and protocol 45638587580 passed.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #174).
 
 ## CLAN-PLAN-001 — Pre-server clan development and implementation handoff
 
