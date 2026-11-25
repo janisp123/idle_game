@@ -78,6 +78,14 @@ Branch: `alpha/six-month-gear-benchmark`. Goal: source-backed six-month single-b
 
 **Remaining / recommended A6:** combined balance audit (material/style parity, equal-grade side advantage, novice-veteran severity and normal/alpha economy); preserve art transfer as an open blocker and verify real 390px/1440px browser layouts after activation. Both approved images exist in downloadable ZIP provided to Owner, not yet in Git. A5 is partial overall despite verified code. No merge or deployment.
 
+### Batch A6 — final balance evidence (2026-11-25, chat)
+
+**Why:** A2/A3 aggregate samples establish strong grade and expertise separation but obscure individual material/style imbalance, player-side bias, quality value and early economic strategies. Do not tune by intuition or equate a single greatsword/plate trajectory with every build.
+
+**What:** Developer-only paired audit at Non-grade/D/S uses every weapon × all four armour families, same-grade attributes, every arena, 24 seeds across three groups and both role orientations. Separate real NPC readiness rows sample three sessions, 64 bouts each; quality and intermediate expertise comparisons use same builds in both orientations. Economy harness retains original baseline defaults and supports alternate builds, 15-minute visits, first observed any-S affordability/purchase and independent once-daily income-based tier choice, using actual production settlement and smith prices. Normal/alpha early rushes and four additional normal six-month scenarios. Results stored in CI artifact, compact logs; no gameplay formulas, images or save schema modified.
+
+**Caveat:** Fixed arena weights and sample policies are not optimal play or a statistical confidence interval. An unarmoured build has no armour grade protection by design; evaluate separately. Alpha speeds intentionally differ. Source review also identified a potential stale stat snapshot after a return without a Master claim, and restart-before-resurrection time-based XP behavior; verify implications and distinguish intentional historical behavior from defects before adjusting. Art binary transfer still pending. Code-head CI and actual audit results pending. No release.
+
 ## GLAD-005 · DEPLOYED · 2026-11-24
 
 Goal: Verify and finalize bounded offline combat, balance, and the playable gladiator loop.

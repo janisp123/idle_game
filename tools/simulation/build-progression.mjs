@@ -31,8 +31,8 @@ async function withProfile(profile, run) {
       throw new Error('Timing profile declaration changed; inspect the source before benchmarking');
     await writeFile(enginePath,source.replace(pattern,'export const TIMING_PROFILE = "'+profile+'";'));
     const load = name => import(pathToFileURL(join(dir,name)).href);
-    const [engine,attrs,smith,combat,armour,difficulty] = await Promise.all(
-      ['engine.mjs','attributes.mjs','smith.mjs','combat.mjs','armour.mjs','difficulty.mjs'].map(load));
+    const [engine,attrs,smith,combat,armour,difficulty,wallet] = await Promise.all(
+      ['engine.mjs','attributes.mjs','smith.mjs','combat.mjs','armour.mjs','difficulty.mjs','arena-wallet.mjs'].map(load));
     if(engine.TIMING_PROFILE!==profile) throw new Error('Incorrect timing profile');
     // Test actual disabled normal-profile code, not a caller-supplied flag.
     const alphaTools=await load("alpha-tools.mjs");
@@ -41,7 +41,7 @@ async function withProfile(profile, run) {
       let refused=false;try{action(engine.newGame(0));}catch(error){refused=error instanceof RangeError;}
       if(!refused)throw new Error("Normal profile accepted an alpha shortcut");
     }
-    return await run({engine,attrs,smith,combat,armour,difficulty});
+    return await run({engine,attrs,smith,combat,armour,difficulty,wallet});
   } finally {
     await rm(dir,{recursive:true,force:true});
   }
@@ -55,16 +55,17 @@ export const BASELINE_SCENARIOS = Object.freeze([
 ]);
 
 function trajectory(modules, scenario, seed) {
-  const {engine,attrs,smith,combat,armour,difficulty}=modules;
-  const {days,claimHours,mixed,farm,id}=scenario;
+  const {engine,attrs,smith,combat,armour,difficulty,wallet}=modules;
+  const {days,claimHours,mixed,farm,id,loadout='greatsword',family='plate',income=false}=scenario;
   if(!Number.isInteger(days)||days<1||days>180||
-     !Number.isInteger(claimHours)||claimHours<1||claimHours>168)
+     !Number.isInteger(claimHours*60)||claimHours<0.25||claimHours>168)
     throw new RangeError('Unsupported bounded benchmark horizon/cadence');
   const rng=combat.seededCombatRandom(seed);
   let state=engine.newGame(0), time=0, spent=0, earned=0, productiveFightMs=0;
   let firstSWeapon=null,firstSSet=null,firstSWeaponAffordable=null,firstSSetAffordable=null;
   const outcomes={bouts:0,victories:0,defeats:0,doubleDeaths:0};
-  const loadout='greatsword', family='plate';
+  let firstAnyS=null,firstAnySAffordable=null;
+  if(!armour.ARMOUR_TIERS.includes(family)||family==='none')throw new RangeError('Audit requires an actual armour family');
   const ids=[loadout,...armour.ARMOUR_SLOTS.map(slot=>slot.id+':'+family)];
   const targetSame=(item,target)=>item?.grade===target.grade&&item?.quality===target.quality;
   const snapshot=()=>({
@@ -79,11 +80,14 @@ function trajectory(modules, scenario, seed) {
     gear:Object.fromEntries(ids.map(key=>[key,state.equipment[key]??null])),
     expertise:Object.fromEntries(Object.entries(state.expertise).map(([id,units])=>[id,units/14400000]))
   });
-  const checkpoints=[snapshot()];
   state=engine.setCombatLoadout(state,loadout,time,rng).state;
+  const checkpoints=[snapshot()];
   state=engine.queueStartActivity(state,'fighting',null,time,rng).state;
   const checkAffordability=()=>{
     const quotes=ids.map(key=>smith.smithQuote(state,key,FINAL_ITEM));
+    const anyS=ids.map(key=>smith.smithQuote(state,key,{grade:7,quality:state.equipment[key]?.quality??'poor'}));
+    if(firstAnySAffordable===null&&anyS.some(q=>q.improves&&q.affordable))firstAnySAffordable=time/DAY;
+    if(firstAnyS===null&&ids.some(key=>state.equipment[key]?.grade===7))firstAnyS=time/DAY;
     if(firstSWeaponAffordable===null&&(targetSame(state.equipment[loadout],FINAL_ITEM)||(quotes[0].improves&&quotes[0].affordable)))
       firstSWeaponAffordable=time/DAY;
     if(firstSSetAffordable===null&&ids.every((key,i)=>targetSame(state.equipment[key],FINAL_ITEM)||quotes[i].improves)
@@ -140,9 +144,29 @@ function trajectory(modules, scenario, seed) {
       // and the whole equipped build, not the former survival unlock rule.
       const stats=attrs.effectiveAttributeProgress(state.attributeEffort,state.skills);
       const avg=(stats.STR.value+stats.DEX.value+stats.END.value)/3;
-      const grade=farm?0:Math.min(...ids.map(key=>state.equipment[key]?.grade??0),
+      let grade=farm?0:Math.min(...ids.map(key=>state.equipment[key]?.grade??0),
         difficulty.GRADES.reduce((max,_,i)=>avg>=difficulty.arenaBenchmark(i).stat*0.90&&
           state.skills.fighting.level>=difficulty.arenaBenchmark(i).skill?i:max,0));
+      if(income){
+        // Once daily, choose highest estimated coin/hour, not best actual future seed.
+        // The samples are a public fixed independent fixture using current stats/gear.
+        grade=state.difficulties.fighting??0;
+        if(time%DAY===0){
+          let best=-1;
+          const kit=smith.trainingKit(state.armour,loadout,state.equipment);
+          const effects=smith.trainingEffects(kit,loadout,state.expertiseActive);
+          const player={name:'Audit',loadout,str:stats.STR.value,dex:stats.DEX.value,end:stats.END.value,
+            skill:state.skills.fighting.level,gearAttack:effects.gearAttack,condition:effects.condition,
+            gear:{...armour.armourStats(state.armour,loadout),gearDefense:effects.gearDefense}};
+          for(let tier=0;tier<8;tier++){
+            const session=combat.startCombatSession({...player,difficulty:tier},(seed^0x49cc4b77)>>>0);
+            let wins=0;
+            for(let bout=0;bout<24;bout++)wins+=Number(combat.combatAtTime({...session,elapsedMs:(bout+1)*combat.BOUT_MS-1}).outcome==='victory');
+            const score=wins*wallet.arenaReward(tier);
+            if(score>best){best=score;grade=tier;}
+          }
+        }
+      }
       if((state.difficulties.fighting??0)!==grade)
         state=engine.setDifficulty(state,'fighting',grade,time,rng).state;
     }
@@ -156,7 +180,7 @@ function trajectory(modules, scenario, seed) {
     if(outcomes.bouts!==outcomes.victories+outcomes.defeats+outcomes.doubleDeaths)
       throw new Error('Arena outcome conservation failed');
   }
-  return {id,days,claimHours,mixed,farm,seed,firstSWeaponAffordable,firstSSetAffordable,
+  return {id,days,claimHours,mixed,farm,seed,loadout,family,income,firstAnyS,firstAnySAffordable,firstSWeaponAffordable,firstSSetAffordable,
     firstSWeapon,firstSSet,checkpoints};
 }
 

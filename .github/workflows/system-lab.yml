@@ -83,6 +83,25 @@ jobs:
             for(const p of report.reports)for(const s of p.scenarios)
               console.log(JSON.stringify({profile:p.profile, ...s}));
           '
+      - name: Run A6 paired-build and economy audit
+        if: github.head_ref == 'alpha/six-month-gear-benchmark'
+        run: |
+          node tools/simulation/balance-audit.mjs > balance-audit.json
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            const r=JSON.parse(readFileSync("balance-audit.json","utf8"));
+            console.log(JSON.stringify({audit:"bounds",...r.bounds}));
+            for(const row of r.rows)console.log(JSON.stringify({audit:"combat",...row}));
+            for(const {checkpoints,...row} of r.economy)console.log(JSON.stringify({audit:"economy",...row}));
+          '
+      - name: Attach A6 audit
+        if: github.head_ref == 'alpha/six-month-gear-benchmark'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: balance-audit-${{ github.run_id }}-${{ github.run_attempt }}
+          path: balance-audit.json
+          if-no-files-found: error
+          retention-days: 7
       - name: Attach build progression baseline
         if: github.head_ref == 'alpha/six-month-gear-benchmark'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
