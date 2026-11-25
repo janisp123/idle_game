@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## APPRENTICE-A1 · STARTED (2026-11-25, chat)
+
+Owner says to start the Apprentice plan. First isolated foundation: pure derived earned-level and slot/unlock policy, boundary regressions; then connect actual queue guards and UI after baseline PR #175 passes. No automated spending, tribute or clan action. Proposed later thresholds stay design-only. Branch `docs/apprentice-plan`; overlapping pending #175 must be reconciled before merge.
+
 ## APPRENTICE-PLAN-001 · STARTED (2026-11-25, chat)
 
 Owner requests a design and implementation plan for earned automation, Personal Assistant/Apprentice. Branch `docs/apprentice-plan`, base `152c54e`. Plan only: retain five weapons, distinguish Owner direction from provisional thresholds and unresolved economy decisions. Do not implement gameplay. Separate from pending compact UI/first-entry PR #175. Saved [Apprentice implementation plan](APPRENTICE_IMPLEMENTATION_PLAN.md): UI/function map, earned-level unlocks, bounded queue settlement, login transaction order, grade gating/price conflicts, preferences/consent, staged tests and server dependency. Draft pending reconciliation of overlapping changelog with #175; no runtime or balance change.
