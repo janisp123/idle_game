@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## APPRENTICE-PLAN-001 · STARTED (2026-11-25, chat)
+
+Owner requests a design and implementation plan for earned automation, Personal Assistant/Apprentice. Branch `docs/apprentice-plan`, base `152c54e`. Plan only: retain five weapons, distinguish Owner direction from provisional thresholds and unresolved economy decisions. Do not implement gameplay. Separate from pending compact UI/first-entry PR #175.
+
 ## CLAN-TEST-001 · STARTED (2026-11-25, chat)
 
 Owner requests fake players able to join clans for pre-server testing. Branch `test/clan-fixture-lab`, base `7d5bcb0`. Developer-only synthetic scenario module, roster actions and donation tests using real item IDs, explicitly provisional configurable fixture policies. No public game changes, test identities in live data, server accounts or balance decisions. Added synthetic scenario module, JSON example, system-lab adapter, tests and CI. Explicit fixture capacity/cap and synthetic stock; no real player data or runtime changes. Next final CI.
