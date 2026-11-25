@@ -676,6 +676,12 @@ test("unmodified character save keeps its alpha profile and rejects invalid prof
   assert.equal(readSave({ ...start, timingProfile: undefined }), null);
 });
 
+// Queue regression fixtures have earned three slots through an unused skill.
+const queueFixture = (now=0) => {
+  const state = newGame(now);
+  state.skills.fishing.level=21;
+  return state;
+};
 const queueStart = (state, id, duration, now = state.settledAtMs) =>
   queueStartActivity(state, id, duration, now, midpoint);
 const queueDuration = (state, index, duration, now = state.settledAtMs) =>
@@ -722,7 +728,7 @@ test("new selected task owns four-hour duration; original work remains Forever f
 });
 
 test("selected second task is finite, while existing current duration and Forever are preserved", () => {
-  let state = queueStart(newGame(0), "mining", null).state;
+  let state = queueStart(queueFixture(0), "mining", null).state;
   state = queueStart(state, "construction", 2 * HOUR_MS).state;
   state = finish(state, INITIAL_PREPARATION_MS + 5_000).state;
   const prior = { ...state, wagons: state.wagons.map(w => ({ ...w })) };
@@ -743,7 +749,7 @@ test("selected second task is finite, while existing current duration and Foreve
 });
 
 test("Start now explicitly replaces only unfinished plans, preserving completed rewards", () => {
-  let state = queueStart(newGame(0), "mining", null).state;
+  let state = queueStart(queueFixture(0), "mining", null).state;
   state = queueTimed(state, "hunting", MINUTE_MS).state;
   state = finish(state, INITIAL_PREPARATION_MS + 30_000).state;
   const earnedXP = state.skills.hunting.xp;
@@ -757,7 +763,7 @@ test("Start now explicitly replaces only unfinished plans, preserving completed 
 });
 
 test("three wagon invariants: one Forever last, explicit previous slot duration, no fourth", () => {
-  assert.equal(MAX_WAGONS, 3);
+  assert.equal(MAX_WAGONS, 5);
   for (let i = 1; i <= 8; i++) {
     assert.equal(validPlannedDuration(i * MINUTE_MS), true);
     assert.equal(validPlannedDuration(i * HOUR_MS), true);
@@ -766,7 +772,7 @@ test("three wagon invariants: one Forever last, explicit previous slot duration,
   for (const n of [0, 500, 9 * MINUTE_MS, 9 * HOUR_MS, 9 * DAY_MS, 10_000]) {
     assert.equal(validPlannedDuration(n), false);
   }
-  const first = queueStart(newGame(0), "mining", null).state;
+  const first = queueStart(queueFixture(0), "mining", null).state;
   assert.deepEqual(first.wagons, [{ activity: "mining", plannedMs: null }]);
   assert.equal(first.transition.phase, "preparing");
   assert.equal(first.activity, null);
@@ -789,7 +795,7 @@ test("three wagon invariants: one Forever last, explicit previous slot duration,
 });
 
 test("alpha minute slots complete in real productive minutes without losing old saves", () => {
-  let first = queueStart(newGame(0), "mining", null).state;
+  let first = queueStart(queueFixture(0), "mining", null).state;
   first = queueStart(first, "hunting", MINUTE_MS).state;
   assert.deepEqual(readSave(JSON.stringify(first)), first);
   const ready = finish(first, INITIAL_PREPARATION_MS).state;
@@ -809,7 +815,7 @@ test("alpha minute slots complete in real productive minutes without losing old 
 });
 
 test("one and two wagon queue correctly settle a 20-year absence without daily checks", () => {
-  const initial = queueStart(newGame(0), "mining", null).state;
+  const initial = queueStart(queueFixture(0), "mining", null).state;
   const queued = queueStart(initial, "hunting", HOUR_MS).state;
   let rolls = 0;
   const result = settle(queued, YEAR * 20, () => { rolls++; return 0.5; });
@@ -830,7 +836,7 @@ test("one and two wagon queue correctly settle a 20-year absence without daily c
 });
 
 test("three wagons consume prior foraging in chronological order and then work forever", () => {
-  let state = queueStart(newGame(0), "mining", null).state;
+  let state = queueStart(queueFixture(0), "mining", null).state;
   state = queueStart(state, "construction", HOUR_MS).state;
   state = queueStart(state, "hunting", HOUR_MS).state;
   const result = finish(state, 20 * YEAR);
@@ -873,7 +879,7 @@ test("queue works with a partially finished last cycle, with no extra reward at 
 });
 
 test("future swap is free, current swap restarts travel without losing old cycle rewards", () => {
-  let state = queueStart(newGame(0), "mining", null).state;
+  let state = queueStart(queueFixture(0), "mining", null).state;
   state = queueStart(state, "hunting", HOUR_MS).state;
   state = queueStart(state, "construction", HOUR_MS).state;
   const ready = finish(state, INITIAL_PREPARATION_MS + 4_000).state;
@@ -900,7 +906,7 @@ test("future swap is free, current swap restarts travel without losing old cycle
 });
 
 test("future wagon can be removed without losing current progress; final becomes Forever", () => {
-  let state = queueStart(newGame(0), "mining", null).state;
+  let state = queueStart(queueFixture(0), "mining", null).state;
   state = queueStart(state, "hunting", HOUR_MS).state;
   state = queueStart(state, "construction", HOUR_MS).state;
   state = finish(state, INITIAL_PREPARATION_MS + 5_000).state;
@@ -948,7 +954,7 @@ test("Skill Master and queue share full-XP readiness", () => {
 });
 
 test("Until LvL Up scheduled XP-only activity stops at mastery readiness without auto-leveling", () => {
-  let state = queueStart(newGame(0), "hunting", null).state;
+  let state = queueStart(queueFixture(0), "hunting", null).state;
   state = queueTimed(state, "training", UNTIL_LEVEL_UP).state;
   assert.deepEqual(state.wagons, [
     {activity:"training", plannedMs:UNTIL_LEVEL_UP},
@@ -971,7 +977,7 @@ test("Until LvL Up scheduled XP-only activity stops at mastery readiness without
 });
 
 test("Until LvL Up skips a full XP bar even when all outputs were consumed", () => {
-  let state=queueStart(newGame(0),"hunting",null).state;
+  let state=queueStart(queueFixture(0),"hunting",null).state;
   state.skills.mining.xp=xpToNextLevel(1);
   state=queueTimed(state,"mining",UNTIL_LEVEL_UP).state;
   const out=finish(state,INITIAL_PREPARATION_MS+ZONE_TRAVEL_MS+PREPARATION_MS+ACTIVITIES.hunting.durationMs).state;
@@ -983,13 +989,13 @@ test("Until LvL Up skips a full XP bar even when all outputs were consumed", () 
 
 
 test("capped crafting skips without consuming inputs and uncapped empty crafting cannot fabricate XP",()=>{
-  let state=queueStart(newGame(0),"hunting",null).state;
+  let state=queueStart(queueFixture(0),"hunting",null).state;
   state.skills.smithing.xp=xpToNextLevel(1);state.items.iron_ore=2;
   state=queueTimed(state,"smithing",UNTIL_LEVEL_UP).state;
   const out=finish(state,20*YEAR).state;
   assert.equal(out.activity,"hunting");assert.equal(out.items.iron_ore,2);assert.equal(out.items.iron_ingot,0);
   assert.equal(skillMasterReadiness(out,"smithing").ready,true);
-  let waiting=queueStart(newGame(0),"hunting",null).state;
+  let waiting=queueStart(queueFixture(0),"hunting",null).state;
   waiting=queueTimed(waiting,"smithing",UNTIL_LEVEL_UP).state;
   const blocked=finish(waiting,20*YEAR).state;
   assert.equal(blocked.activity,"smithing");assert.equal(blocked.items.iron_ingot,0);assert.equal(blocked.skills.smithing.xp,0);
@@ -997,7 +1003,7 @@ test("capped crafting skips without consuming inputs and uncapped empty crafting
 
 
 test("editing and reordering Until LvL Up schedule preserve other jobs and saved progress", () => {
-  let state = queueStart(newGame(0), "mining", null).state;
+  let state = queueStart(queueFixture(0), "mining", null).state;
   state = queueTimed(state, "hunting", MINUTE_MS).state;
   state = queueTimed(state, "training", UNTIL_LEVEL_UP).state;
   assert.deepEqual(state.wagons.map(w=>w.plannedMs), [MINUTE_MS, UNTIL_LEVEL_UP, null]);
@@ -1183,7 +1189,7 @@ test("GLAD-001 mortar requires and consumes both limestone and fuel", () => {
 });
 
 test("GLAD-001 a 20-year farm and cooking route consumes grain and preserves straw", () => {
-  const fresh=newGame(0);fresh.skills.farming.level=10;
+  const fresh=newGame(0);fresh.skills.farming.level=10;fresh.skills.fishing.level=2;
   let state = queueStart(fresh, "farming", null).state;
   state = queueStart(state, "cooking", HOUR_MS).state;
   const result = finish(readSave(JSON.stringify(state)), 20 * YEAR);
