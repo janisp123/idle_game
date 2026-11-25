@@ -158,7 +158,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=apprentice-a1/,
+  assert.match(html, /app\.mjs\?v=apprentice-a2/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -939,6 +939,11 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(reset.coins,0);
     assert.equal(elements.get("alphaSpeed").checked,false);
     assert.match(elements.get("alphaStatus").textContent,/Progress reset/);
+    // A stale tab cannot overwrite an observed newer persisted character.
+    const external=JSON.stringify({...reset,coins:77});
+    store.set(SAVE_KEY,external);
+    handlers.get("window:pagehide")();
+    assert.equal(store.get(SAVE_KEY),external);
   } finally {
     Date.now = originalNow;
     Math.random = originalRandom;

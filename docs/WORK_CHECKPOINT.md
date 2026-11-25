@@ -1,8 +1,12 @@
 # Current working checkpoint
 
+## APPRENTICE-A2 — PR #178
+
+Automatic Master on page entry after offline settlement, derived 50-level gate, versioned explicit consent, shared claim mutation and exact committed report. Visibility catch-up/ordinary ticks and alpha idle-day tool remain non-claiming. Web Locks serialize login chores; stale snapshot checks reject observed conflicting saves; no claim where coordination unavailable. True transactional concurrency requires future server. No tribute, weapons, equipment or donation changes. Next final CI and Pages.
+
 ## APPRENTICE-A1 — PR #177
 
-[Implementation plan](APPRENTICE_IMPLEMENTATION_PLAN.md) carried forward from superseded draft #176. Added actual earned-level policy, engine and UI queue gates 1..5, preserved existing routes, bounded settlement through five slots, Personal Assistant menu and locked future chores. Regressions exercise boundaries, long absence, old saves and browser. Auto-Master, gear grade/quality, donations and later unlocks not implemented; next verify final checks and Pages.
+[Implementation plan](APPRENTICE_IMPLEMENTATION_PLAN.md) carried forward from superseded draft #176. Added actual earned-level policy, engine and UI queue gates 1..5, preserved existing routes, bounded settlement through five slots, Personal Assistant menu and locked future chores. Regressions exercise boundaries, long absence, old saves and browser. Auto-Master, gear grade/quality, donations and later unlocks not implemented; PR #177 merged 5b996be after website 45662042280, systems 45662042373, combat 45662042289 and protocol 45662042247 passed.
 
 ## START-FIGHT-001 — PR #175
 

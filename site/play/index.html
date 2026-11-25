@@ -9,7 +9,7 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css?v=apprentice-a1">
-  <script type="module" src="./app.mjs?v=apprentice-a1"></script>
+  <script type="module" src="./app.mjs?v=apprentice-a2"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -151,7 +151,8 @@
               <p id="apprenticeSlots" class="hint">1 / 5 activity slots unlocked</p>
               <p id="apprenticeNext" class="hint">Next activity slot unlocks at LvL 10.</p>
               <p id="apprenticeLegacy" class="hint" hidden>Your existing route is preserved. No new slots may be added above your unlocked capacity.</p>
-              <label class="apprentice-option"><input type="checkbox" disabled aria-describedby="apprenticeMaster"> Automatic Skill Master on login <span id="apprenticeMaster">Unlocks at LvL 50</span></label>
+              <label class="apprentice-option"><input id="apprenticeAutoMaster" type="checkbox" disabled aria-describedby="apprenticeMaster"> Automatic Skill Master on login <span id="apprenticeMaster">Unlocks at LvL 50</span></label>
+              <p id="apprenticeMasterReport" class="hint" role="status" hidden></p>
               <label class="apprentice-option"><input type="checkbox" disabled> Automatic equipment quality upgrades <span>Planned</span></label>
               <label class="apprentice-option"><input type="checkbox" disabled> Automatic clan donations <span>Planned · Online clans required</span></label>
             </div>

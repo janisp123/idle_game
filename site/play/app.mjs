@@ -1,4 +1,5 @@
-import { characterStats } from "./character-stats.mjs?v=apprentice-a1";
+import { characterStats } from "./character-stats.mjs?v=apprentice-a2";
+import { MASTER_CONSENT_VERSION } from "./apprentice.mjs?v=apprentice-a2";
 import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
 import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
 import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a2";
@@ -7,12 +8,12 @@ import {
   setDifficulty, buyEquipment, activateExpertise, arenaBoutProgress, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
   lootChances, recipeOptions, newGame, chooseActivity, readSave, settle,
-  enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
+  enterGame, enterGameWithApprentice, setAutoMasterConsent, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
   getApprenticeProgress, queueCapacity, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, activityRewardCapped, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=apprentice-a1";
+} from "./engine.mjs?v=apprentice-a2";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=bal-002";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-art-001";
@@ -22,7 +23,7 @@ import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats, dodgeChance }
   from "./armour.mjs?v=bal-002";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=apprentice-a1";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=apprentice-a2";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -228,6 +229,8 @@ let latestWorkResult = null;
 const visibleTokenSignatures = new Map();
 let lastSavedAt = 0;
 let storageWorks = true;
+let lastStoredText = null;
+let autoLoginSupported = false;
 let planningActivity = null;
 let planningHint = "";
 let lastWagonSignature = null;
@@ -377,18 +380,40 @@ emptyInventory.className = "hint";
 emptyInventory.textContent = "No resources collected yet.";
 ui.resourceList.append(emptyInventory);
 
-function writeSave() {
-  if (!storageWorks) return;
+// Reject writes based on a snapshot we already know has been superseded.
+// Browser storage is still not an authoritative multi-client database.
+function persistState(next) {
+  if (!storageWorks) return false;
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    const actual = localStorage.getItem(SAVE_KEY);
+    if (actual !== lastStoredText) {
+      const newer = readSave(actual);
+      if (newer) {
+        state = newer;
+        lastStoredText = actual;
+        latestWorkResult = null;
+        $("apprenticeMasterReport").hidden = true;
+        message("Save updated in another tab. Please retry your action.");
+      } else {
+        storageWorks = false;
+        ui.saveStatus.textContent = "Save changed elsewhere";
+      }
+      return false;
+    }
+    const serialized = JSON.stringify(next);
+    localStorage.setItem(SAVE_KEY, serialized);
+    lastStoredText = serialized;
     ui.saveStatus.textContent = "Saved on this device";
     lastSavedAt = Date.now();
+    return true;
   } catch {
     storageWorks = false;
     ui.saveStatus.textContent = "Save unavailable";
     ui.saveStatus.title = "Your browser is blocking local storage; progress may be lost when you close this tab.";
+    return false;
   }
 }
+function writeSave() { return persistState(state); }
 
 function message(text) {
   // A single compact notification for actions/errors, not a scrollable history.
@@ -832,9 +857,16 @@ function renderApprentice() {
   $("apprenticeNext").textContent = progress.nextSlotAt === null
     ? "All activity slots unlocked."
     : "Next activity slot unlocks at LvL " + number(progress.nextSlotAt) + ".";
-  $("apprenticeMaster").textContent = progress.autoMasterUnlocked
-    ? "Level requirement met · Automation not implemented yet"
-    : "Unlocks at LvL " + number(progress.autoMasterAt);
+  const autoMaster = $("apprenticeAutoMaster");
+  autoMaster.checked = state.apprenticeMasterConsent === MASTER_CONSENT_VERSION;
+  autoMaster.disabled = !progress.autoMasterUnlocked || !storageWorks || !autoLoginSupported;
+  $("apprenticeMaster").textContent = !progress.autoMasterUnlocked
+    ? "Unlocks at LvL " + number(progress.autoMasterAt)
+    : !autoLoginSupported || !storageWorks
+      ? "Unavailable · This browser requires safe local save and login coordination."
+      : autoMaster.checked
+        ? "Enabled · On next login, advance ready skills and pay their full tribute."
+        : "Optional · On login, advance ready skills and surrender ALL their produced resources.";
   $("apprenticeLegacy").hidden = used <= progress.slots;
   $("queueUnlockHint").textContent = progress.nextSlotAt === null
     ? "All activity slots unlocked."
@@ -1128,11 +1160,23 @@ function planActivity(kind, untilLevelUp = false) {
   ui.queuePlanner.hidden = false;
 }
 
-function start() {
+function showApprenticeMasterReport(result) {
+  const target = $("apprenticeMasterReport");
+  const levels = result.mastery.ready.map(id => ACTIVITIES[id].title + " LvL " + number(result.state.skills[id].level));
+  const tribute = Object.entries(result.mastery.tribute).map(([id, qty]) => number(qty) + " " + ITEM_LABELS[id]);
+  target.textContent = "Apprentice advanced: " + levels.join(", ") + ". Tribute: " +
+    (tribute.length ? tribute.join(", ") : "no materials") + ".";
+  target.hidden = false;
+  message(target.textContent);
+}
+
+function start(coordinatedLogin = false) {
+  autoLoginSupported = coordinatedLogin;
   let saved = null;
   let clockText = null;
   try {
     saved = localStorage.getItem(SAVE_KEY);
+    lastStoredText = saved;
     clockText = localStorage.getItem(ALPHA_CLOCK_KEY);
   } catch { storageWorks = false; }
   state = saved ? readSave(saved) : null;
@@ -1152,11 +1196,46 @@ function start() {
     else message("Your first arena fight has begun. Fighting continues automatically.");
     writeSave();
   } else {
-    const result = enterGame(state, gameNow());
-    state = result.state;
-    reportProgress(result);
-    writeSave();
+    const now = gameNow();
+    const result = autoLoginSupported && storageWorks
+      ? enterGameWithApprentice(state, now)
+      : enterGame(state, now);
+    if (result.mastery) {
+      // No success notification or applied sacrifice until the new save is committed.
+      if (persistState(result.state)) {
+        state = result.state;
+        reportProgress(result);
+        showApprenticeMasterReport(result);
+      } else {
+        const ordinary = enterGame(state, now);
+        state = ordinary.state;
+        reportProgress(ordinary);
+        writeSave();
+        message("Apprentice skipped: automatic advancement could not be safely saved.");
+      }
+    } else {
+      state = result.state;
+      reportProgress(result);
+      writeSave();
+    }
   }
+
+  $("apprenticeAutoMaster").addEventListener("change", () => {
+    const control = $("apprenticeAutoMaster");
+    if (control.disabled) { render(); return; }
+    const enabled = control.checked;
+    if (enabled && !window.confirm("AUTOMATIC SKILL MASTER\n\nOn future game entries, advance every ready skill once and surrender ALL owned resources produced by those skills. Coins and unrelated materials remain. No additional confirmation each login. Enable?")) {
+      render(); return;
+    }
+    try {
+      const next = setAutoMasterConsent(state, enabled);
+      if (persistState(next)) {
+        state = next;
+        message(enabled ? "Apprentice enabled for future logins." : "Automatic Skill Master disabled.");
+      }
+    } catch { message("Automatic Skill Master is unavailable."); }
+    render();
+  });
 
   $("dismissSaveReset").addEventListener("click",()=>{$("saveResetNotice").hidden=true;});
   // All alpha controls are visibly local test actions, absent in normal mode.
@@ -1167,7 +1246,7 @@ function start() {
     try{
       const result=action();
       // Persist before replacing live state, so a failed write cannot report success.
-      localStorage.setItem(SAVE_KEY,JSON.stringify(result.state));
+      if (!persistState(result.state)) { ui.alphaStatus.textContent="Alpha test could not be saved.";render();return; }
       state=result.state;
       lastSavedAt=Date.now();
       ui.saveStatus.textContent="Saved on this device";
@@ -1200,6 +1279,7 @@ function start() {
       localStorage.removeItem(ALPHA_CLOCK_KEY);
       alphaClock=null;
       state=newStartingCharacter(Date.now());
+      $("apprenticeMasterReport").hidden=true;
       latestWorkResult=null;
       lastCombatEventKey=null;
       lastWagonSignature=null;
@@ -1303,9 +1383,13 @@ function start() {
       ui.alphaSpeed.checked=alphaClock?.speed===10;
     }
     if (event.key === SAVE_KEY) {
-      const newer = readSave(event.newValue);
+      let current;
+      try { current = localStorage.getItem(SAVE_KEY); } catch { storageWorks=false;return; }
+      const newer = readSave(current);
       if (newer) {
         state = newer;
+        lastStoredText = current;
+        $("apprenticeMasterReport").hidden=true;
         latestWorkResult = null; // another tab's loot cannot be asserted locally
         render();
         message("Save updated from another tab.");
@@ -1314,6 +1398,13 @@ function start() {
   });
   render();
   window.setInterval(tick, 250);
+  ui.saveStatus.setAttribute("data-game-ready","true");
 }
 
-start();
+// Serialize page-entry chores between cooperating tabs. Without Web Locks,
+// normal manual play is still available; destructive automatic claims stay off.
+if (globalThis.navigator?.locks?.request) {
+  let began = false;
+  navigator.locks.request("long-vigil-login", () => { began = true; start(true); })
+    .catch(error => { if (!began) start(false); else throw error; });
+} else start(false);

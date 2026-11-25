@@ -28,3 +28,8 @@ export function apprenticeProgress(state,skillIds){
     autoMasterUnlocked:earnedLevels>=APPRENTICE_BALANCE.autoMaster,
     autoMasterAt:APPRENTICE_BALANCE.autoMaster};
 }
+
+/** Consent is specific to the current Master tribute policy. A future policy change
+ * must increment this version and require consent again. */
+export const MASTER_CONSENT_VERSION = 1;
+export const normalizeMasterConsent = value => value === MASTER_CONSENT_VERSION ? MASTER_CONSENT_VERSION : 0;
