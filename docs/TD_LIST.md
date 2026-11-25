@@ -8,11 +8,20 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## SIM-003 — Production parity and automatic simulation triggers
+
+- **Goal:** Keep simulation tools synchronized with actual gameplay source and run relevant simulation checks automatically.
+- **Acceptance:** Actual game snapshot and settled payout/event parity, novice/trained distinction, source path coverage, optional full balance, no site or save changes.
+- **Status:** PENDING PR #159; checks pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## CHAR-STATS-002 — Compact character power and activity overview
 
 - **Goal:** Simplify the existing stat sheet into compact expandable actual equipment/attribute/activity modifiers; retain source breakdowns and open state on equipment changes.
 - **Acceptance:** Real same-move grade/quality attack power, accuracy/dodge modifiers, material, mobility and conditional defense, all eleven activities with actual direct gear effect, level and difficulty factors. Distinguish crafting, recovery and conditional results; no save or balance change. Actual mobile/desktop browser tests.
-- **Status:** PENDING PR #158; tests pending.
+- **Status:** DONE — PR #158 merged 3002fb1, Pages 45589039287 succeeded.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

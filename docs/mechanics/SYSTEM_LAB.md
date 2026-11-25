@@ -127,3 +127,8 @@ Run `node tools/simulation/build-progression.mjs` on the desired revision. Uses 
 
 
 A9: run the complete six-month and paired-balance reports through the Developer Game Systems Lab workflow's optional `full_balance` input on manual dispatch. Ordinary PR checks still run bounded production-parity and detached normal/alpha smoke tests. The full audit remains reproducible via `node tools/simulation/build-progression.mjs` and `node tools/simulation/balance-audit.mjs`; historical branch runs are linked in ALPHA_GEAR_FINAL_AUDIT.md. No need to rerun the expensive matrix on every documentation-only commit.
+
+
+## SIM-003 — automatic source coverage
+
+Both simulator workflows trigger for changes to `site/play/**/*.mjs`, excluding app, character-stat, combat-art and readout presentation modules. New mechanics modules are covered by default. Ordinary PRs run production parity and the combat benchmark; full six-month/paired audit remains opt-in `full_balance` manual dispatch. The income-policy simulator now constructs its estimated fighter through the production `desiredArenaPlayer` builder; it may select a different strategy because it uses active rather than merely earned stats, not a balance change. No user save or game code modified. See COMBAT_SIMULATOR.md.

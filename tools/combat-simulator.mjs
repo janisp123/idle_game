@@ -1,6 +1,6 @@
-import { fullExpertise,expertiseThreshold,EXPERTISE_BALANCE } from "../site/play/expertise.mjs";
+import { fullExpertise,blankExpertise,EXPERTISE_BALANCE } from "../site/play/expertise.mjs";
 import { arenaReward } from '../site/play/arena-wallet.mjs';
-import { equippedCondition, equipmentBonuses, STARTER_ITEM } from '../site/play/smith.mjs';
+import { trainingKit, trainingEffects, STARTER_ITEM } from '../site/play/smith.mjs';
 /**
  * SIM-001: developer-only, zero-delay, deterministic combat harness.
  * This file lives in tools/, outside the GitHub Pages ./site deployment.
@@ -69,16 +69,19 @@ export function createPlayerSnapshot(options = {}) {
   ]);
   // Default to fully trained synthetic gear to preserve prior comparison
   // matrices; explicit practice hours select a novice/partially trained build.
-  const expertise=fullExpertise();
+  const mode=options.expertiseMode??"trained";
+  if(!["trained","novice"].includes(mode))throw new RangeError("Invalid expertise mode");
+  const expertise=mode==="novice"?blankExpertise():fullExpertise();
   for(const [key,hours] of Object.entries(options.expertiseHours??{})){
     if(!Object.hasOwn(expertise,key)||!Number.isFinite(hours)||hours<0||
       !Number.isSafeInteger(hours*EXPERTISE_BALANCE.unitsPerHour))throw new RangeError("Invalid expertise hours");
     expertise[key]=hours*EXPERTISE_BALANCE.unitsPerHour;
   }
-  const bonus = equipmentBonuses({ combatLoadout: loadout, armour, equipment,expertiseActive:expertise });
-  return { name:'Wanderer', difficulty, loadout, skill, str, dex, end,
-    gear: { ...armourStats(armour, loadout), gearDefense: bonus.defense },
-    gearAttack: bonus.attack, condition: equippedCondition(armour, loadout, equipment,expertise) };
+  const kit=trainingKit(armour,loadout,equipment);
+  const effects=trainingEffects(kit,loadout,expertise);
+  return { name:'Wanderer', difficulty, loadout, trainingKit:kit, skill, str, dex, end,
+    gear: { ...armourStats(armour, loadout), gearDefense: effects.gearDefense },
+    gearAttack: effects.gearAttack, condition: effects.condition };
 
 }
 const increment = (obj, key, n = 1) => { obj[key] = (obj[key] ?? 0) + n; };
@@ -99,6 +102,7 @@ export function simulateBatch(options = {}) {
   const battles = intIn(options.battles ?? DEFAULT_BATTLES, 1, MAX_BATTLES, 'battles');
   const traces = intIn(options.trace ?? 0, 0, Math.min(MAX_TRACES, battles), 'trace');
   const saved = options.snapshot;
+  if(saved&&["grade","loadout","armour","armourSlots","itemGrade","quality","expertiseMode","expertiseHours","skill","str","dex","end"].some(k=>Object.hasOwn(options,k)))throw new RangeError("Snapshot supplies frozen build; do not mix build options");
   const combatSession = saved?.combatSession ?? saved?.state?.combatSession ??
     (saved?.player && saved.seed !== undefined ? saved : null);
   const player = saved ? (combatSession?.player ?? saved.player ?? saved) : createPlayerSnapshot(options);
@@ -109,7 +113,7 @@ export function simulateBatch(options = {}) {
   const session = startCombatSession(player, seed); // production validation
   const generatedBuild = saved ? null : {
     armourSlots:uniform(options.armour ?? 'none', options.armourSlots ?? {}),
-    itemGrade: options.itemGrade ?? 0, quality: options.quality ?? "poor",expertiseHours:options.expertiseHours??"fully trained synthetic build"
+    itemGrade: options.itemGrade ?? 0, quality: options.quality ?? "poor",expertiseMode:options.expertiseMode??"trained",expertiseHours:options.expertiseHours??{}
   };
   const summary = {
     source:'site/play/combat.mjs:combatAtTime',
@@ -223,6 +227,7 @@ export function parseCliArgs(args) {
     '--battles':'battles','--seed':'seed','--start-bout':'startBout',
     '--grade':'grade','--loadout':'loadout','--armour':'armour',
     '--armour-slots':'armourSlots','--item-grade':'itemGrade','--quality':'quality',
+    '--expertise-mode':'expertiseMode','--expertise-hours':'expertiseHours',
     '--skill':'skill','--str':'str',
     '--dex':'dex','--end':'end',
     '--trace':'trace',
@@ -240,9 +245,10 @@ export function parseCliArgs(args) {
     const value = args[++i];
     out[key] = numeric.has(key) ? Number(value) :
       key === 'armourSlots' ? pairList(value, 'armour', false) :
+      key === 'expertiseHours' ? pairList(value, 'expertise', true) :
       key === 'snapshot' ? JSON.parse(readFileSync(resolve(value), 'utf8')) : value;
   }
-  if (out.snapshot && ['grade','loadout','armour','armourSlots','itemGrade','quality','expertiseHours','skill',
+  if (out.snapshot && ['grade','loadout','armour','armourSlots','itemGrade','quality','expertiseMode','expertiseHours','skill',
       'str','dex','end'].some(k => Object.hasOwn(out,k)))
     throw new RangeError('--snapshot supplies the frozen fighter; do not mix build options');
   return out;
@@ -254,8 +260,10 @@ export const HELP = [
   ' --battles N              number of duels (default 10000; max 1000000)',
   ' --grade Non-grade|F|E|D|C|B|A|S  opponent difficulty (default Non-grade)',
   ' --loadout greatsword|sword_shield|hammer|bow|spear',
-  ' --armour none|padded|leather|plate   all 11 body slots (default none)',
+  ' --armour none|padded|leather|plate   all four body slots (default none)',
   ' --armour-slots head:plate,torso:leather   overrides individual body slots',
+  ' --expertise-mode trained|novice  synthetic default trained; novice starts all tracks at zero',
+  ' --expertise-hours greatsword:1000,plate:2000  override individual tracks in hours',
   ' --skill N --str N --dex N --end N  default: grade benchmarks',
   ' --seed N                  live combat session RNG seed (default 20261124)',
   ' --start-bout N            zero-based live bout index (default 0)',
