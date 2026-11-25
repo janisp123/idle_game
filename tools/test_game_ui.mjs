@@ -95,6 +95,10 @@ test("compact results use only real event/report values and correct combat side"
 test("real browser-app entrypoint renders skill UI and reloads a current saved character", async () => {
   const html = readFileSync(new URL("../site/play/index.html", import.meta.url), "utf8");
   const queueCss = readFileSync(new URL("../site/play/iron-ui.css", import.meta.url), "utf8");
+  assert.match(html, /<details id="clanMenu">/);
+  assert.match(html, /not available in this browser-only alpha/);
+  assert.match(html, /<button[^>]*disabled[^>]*>Search clans<\/button>/);
+  assert.match(html, /<button[^>]*disabled[^>]*>Create a clan<\/button>/);
   assert.match(html, /id="characterAttributes"/, "three visible stats belong to the character panel");
   assert.match(html, /id="combatPanel"/, "only combat receives a dedicated event panel");
   for (const oldCopy of ["Early prototype.", "Use ▶ to start now", "Attribute growth is uncapped",
