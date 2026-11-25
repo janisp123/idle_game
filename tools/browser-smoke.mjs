@@ -154,6 +154,15 @@ try{
     await shot("stats-"+width);
     await navigate("persist-"+width);
     assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})).coins`),200000);
+    const capped=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=cap-001");const start=Date.now()-86400000;
+      const s=e.chooseActivity(e.newGame(start),"mining",start,()=>.5).state;return JSON.stringify(e.settle(s,Date.now(),()=>.5).state);})()`);
+    await navigate("capped-"+width,{[saveKey]:capped,[clockKey]:null});
+    const pause=await evaluate(`(()=>{const key=${JSON.stringify(saveKey)},before=JSON.parse(localStorage.getItem(key));
+      document.getElementById("alphaDay").click();const after=JSON.parse(localStorage.getItem(key));
+      return {before,after,notice:document.getElementById("skillXp").textContent,reset:document.getElementById("saveResetNotice").hidden};})()`);
+    assert.match(pause.notice,/All rewards paused/);assert.equal(pause.reset,true);
+    for(const key of ["items","attributeEffort","expertise","coins","skills"])assert.deepEqual(pause.before[key],pause.after[key]);
+    await shot("capped-"+width);
     for(const mode of ["impressive_victory","humiliation"]){
       // Only synthetic saves created by production functions in this temporary
       // browser. Pick an actual resolved qualifying final event, never fake it.
@@ -168,7 +177,7 @@ try{
           s=a.alphaMaxStats(s,"plate",start,()=>.5).state;s={...s,coins:4000000};
           s=e.buyEquipment(s,"greatsword",{grade:7,quality:"masterwork"},start,()=>.5).state;
           for(const slot of ["head","torso","arms","legs"])s=e.buyEquipment(s,slot+":plate",{grade:7,quality:"masterwork"},start,()=>.5).state;
-        }else{s=e.setDifficulty(s,"fighting",7,start,()=>.5).state;}
+        }else{s.skills.fighting.level=2;s=e.setDifficulty(s,"fighting",7,start,()=>.5).state;}
         s=e.chooseActivity(s,"fighting",start,()=>.5).state;
         s=e.settle(s,now,()=>.5).state;
         const expected=v.combatVerdict(c.combatAtTime(s.combatSession).event);
