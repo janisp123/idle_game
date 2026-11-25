@@ -148,7 +148,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=alpha-gear-a4/,
+  assert.match(html, /app\.mjs\?v=alpha-gear-a5/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -956,4 +956,14 @@ test("mobile recovery keeps both vital labels and bars aligned at equal widths",
       "--user-data-dir="+join(dir,"profile"),"--dump-dom","file://"+page],{encoding:"utf8",stdio:["ignore","pipe","pipe"],timeout:30000});
     assert.match(dom,/<html data-passed="yes">/);
   } finally {fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test("A5 readout distinguishes actual dominant outcomes without changing events",()=>{
+  const event={type:"victory",reason:"knockout",vitals:{player:{hp:85,maxHP:100},enemy:{hp:0,maxHP:100}}};
+  const before=structuredClone(event);
+  assert.deepEqual(combatReadoutForEvent(event),{player:[{value:"IMPRESSIVE VICTORY",tone:"gain",label:""}],enemy:[]});
+  assert.deepEqual(event,before);
+  const defeat={...event,type:"defeat",vitals:{player:event.vitals.enemy,enemy:event.vitals.player}};
+  assert.deepEqual(combatReadoutForEvent(defeat),{player:[{value:"HUMILIATION",tone:"damage",label:""}],enemy:[]});
+  assert.equal(combatReadoutForEvent({...event,reason:"timeout"}).player[0].value,"VICTORY");
 });

@@ -1,3 +1,4 @@
+import { combatVerdict } from "../site/play/combat-verdict.mjs";
 // Representative alpha benchmark. Every bout calls the live physical resolver.
 import { BOUT_MS, RESURRECTION_MS, seededCombatRandom,makeOpponent } from "../site/play/combat.mjs";
 import { ARENAS,chooseArena } from "../site/play/arenas.mjs";
@@ -11,7 +12,8 @@ const armourLoads = ["padded", "leather", "plate"];
 const random = seededCombatRandom(20261124);
 const seeds = Array.from({ length: 128 }, () => Math.floor(random() * 2 ** 32));
 const outcomes = () => ({ bouts: 0, victory: 0, defeat: 0, double_death: 0,
-  breaks: 0, arrowExhaustions: 0, bleedTicks: 0, staggers: 0, coins: 0, productiveMs: 0 });
+  breaks: 0, arrowExhaustions: 0, bleedTicks: 0, staggers: 0, coins: 0, productiveMs: 0,
+  impressive_victory:0,humiliation:0 });
 
 function sample(player, enemy, arena, grade, seeds, totals) {
   for (const seed of seeds) {
@@ -21,6 +23,8 @@ function sample(player, enemy, arena, grade, seeds, totals) {
     totals.coins += result.outcome === "victory" ? arenaReward(grade) : 0;
     totals.productiveMs += BOUT_MS - (result.outcome === "victory" ? 0 : RESURRECTION_MS);
     const final = result.events.at(-1);
+    const verdict=combatVerdict(final);
+    if(verdict?.dominant)totals[verdict.category]++;
     for (const [side, fighter] of [["player", player], ["enemy", enemy]]) {
       if (fighter.loadout === "bow" && final.vitals[side].arrows === 0) totals.arrowExhaustions++;
     }
@@ -122,5 +126,17 @@ for(const [grade,stat] of [[0,10],[3,62],[7,150]])for(const novice of ["weapon",
   }
   expertiseRows.push({grade,stat,novice,...totals,winRatePct:100*totals.victory/totals.bouts});
 }
+// Reverse the most extreme comparison too, using the same production rules.
+const dominanceRows=[];
+for(const [higher,lower] of [[0,0],[7,0],[0,7],[7,7]]){
+  const totals=outcomes();
+  for(const style of styles)for(const opponent of styles){
+    const shared={str:150,dex:150,end:150,skill:50,armour:"leather",quality:"common"};
+    const p=createPlayerSnapshot({...shared,loadout:style,itemGrade:higher});
+    const q=createPlayerSnapshot({...shared,loadout:opponent,itemGrade:lower});
+    for(const arena of ARENAS)sample(p,q,arena,lower,seeds.slice(0,16),totals);
+  }
+  dominanceRows.push({playerGrade:higher,enemyGrade:lower,...totals});
+}
 console.log(JSON.stringify({...baselineReport,
-  gradeSeparation:{seed:20261124,gearRows,readinessRows},expertiseRows},null,2));
+  gradeSeparation:{seed:20261124,gearRows,readinessRows},expertiseRows,dominanceRows},null,2));

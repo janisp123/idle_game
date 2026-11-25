@@ -66,6 +66,16 @@ Branch: `alpha/six-month-gear-benchmark`. Goal: source-backed six-month single-b
 
 **Limitations and next:** Real mobile/desktop browser smoke remains pending (automated fake-DOM UI tests passed). The source timing profile disables testing handlers and new fixtures in normal mode; local saves are not tamper-proof and eventual production needs code removal plus reset. The armour choice defaults to Plate and is explicit; it trains but does not equip gear. Max Stats intentionally uses minimum floors, so it can preserve higher existing values and repeated deliberate build choices can train additional tracks. No merge, deployment or live save reset. **Recommended A5:** visual-only result categories; exact owner-approved artwork if accessible, otherwise document blocker and do not substitute. Final style/armour fairness, economy calibration and real browser verification remain before release.
 
+### Batch A5 — motivational combat verdicts (2026-11-25, chat)
+
+**Why:** Owner wants visible motivation when gear/stat progression creates decisive victories or when a challenge is far too difficult. The outcome must not change mechanical rewards or penalties. Existing timeout verdicts force the loser to zero HP; looking only at final HP would falsely count a timeout as a crushing win.
+
+**What:** Pure presentation helper combat-verdict.mjs maps a real final knockout with winner HP >=80% of maximum into Impressive Victory/Humiliation symmetrically. Regular wins, losses, timeouts and double deaths stay normal. UI title, caption and result readout share the helper; no resolver, wallet, progression, timer, RNG or save changes. Existing correct outcome art (or neutral scene) is fallback until approved images are committed; optional explicit art registry prevents broken URLs. Seeded benchmark counts dominance on the same resolved fights, plus equal-grade and both orientations of S vs Non-grade. Boundary, symmetry, timeout, label, fallback and non-mutation tests added.
+
+**Asset blocker:** Both original approved illustrations were found in chat's mounted files, visually identified, and converted to WebP at 960x640 (preserved full 3:2 composition). Container cannot resolve github.com and GitHub connector accepts text or inline base64, not an uploaded file path/reference. The full-quality binary files cannot be transferred directly with the available connector. No unrelated generated substitutes, dead URLs or claim of integration. Exact expected paths, SHA-256 hashes and activation instructions in [OUTCOME_ART_HANDOFF.md](mechanics/OUTCOME_ART_HANDOFF.md). Owner can extract the supplied ZIP at repository root and commit it on this draft branch, or pass it to Codex. Existing outcome art still works. No deployment before completing this blocker and final calibration/browser smoke.
+
+**Verification:** pending A5 code-head CI; then archive measured dominance counts and compare unchanged ordinary economy.
+
 ## GLAD-005 · DEPLOYED · 2026-11-24
 
 Goal: Verify and finalize bounded offline combat, balance, and the playable gladiator loop.

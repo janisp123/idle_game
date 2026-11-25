@@ -118,3 +118,7 @@ Source: `node tools/gladiator-benchmark.mjs`, seed 20261124, [combat CI 45561154
 | 7 | 150 | neither | 691 | 57.58 |
 
 At S, 1,198/1,200 wins against a weapon novice, 1,155/1,200 against armour novice and 1,200/1,200 against both; equipment expertise clearly matters even when actual gear/stats are identical. Non-grade has no expertise penalty. Sampled 100% does not prove guaranteed outcome. Trained-versus-trained S win 57.58%, which still indicates side bias. At D/S matched NPC readiness, the earlier Leather-vs-material-mix imbalance remains to be calibrated. No claim that every style or family is equally effective. Reassess severity and fairness in final combined calibration, not by adding scripted outcomes.
+
+## A5 — motivational verdict presentation (draft)
+
+The original resolver outcome remains victory/defeat/double death. A pure UI helper derives Impressive Victory or Humiliation only for an actual knockout with the winner retaining at least 80% maximum HP (at most 20% HP lost). Same threshold for either side, no timeout or double-death qualification. The loser HP in a timeout is forced to zero at verdict, so it must not count as a knockout. No extra payout, XP, expertise, penalties, timing, RNG or save changes. The final event alone is classified; no early reveal. The current UI title, picture caption and compact result token use the label. The existing correct style-specific art is used until the two exact approved outcome images can be committed. See [art handoff](OUTCOME_ART_HANDOFF.md).

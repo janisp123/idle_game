@@ -1,3 +1,4 @@
+import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
 import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
 import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a2";
 import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel } from "./smith.mjs?v=alpha-gear-a3";
@@ -13,9 +14,9 @@ import {
 } from "./engine.mjs?v=alpha-gear-a3";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=alpha-gear-a3";
-import { combatArtworkForEvent } from "./combat-art.mjs?v=glad-003";
+import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-gear-a5";
 import { combatFlowState } from "./combat-flow.mjs?v=glad-003";
-import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=glad-003";
+import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=alpha-gear-a5";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats }
   from "./armour.mjs?v=glad-003";
@@ -921,8 +922,8 @@ function render() {
       ? (combat.playerHP === 0 ? "Resurrection and return" : "Arena recovery")
       : event.distance;
     const action = event.move ?? event.type;
-    const status = event.type === "double_death" ? "Both fighters executed" :
-      event.type === "finisher" ? "Decisive hit" : action.replaceAll("_", " ");
+    const verdict=combatVerdict(event);
+    const status = verdict?.label ?? (event.type === "finisher" ? "Decisive hit" : action.replaceAll("_", " "));
     ui.combatEventTitle.textContent = "DUEL " + number(combat.bout) + " · " +
       (event.actor === "player" ? "You · " : event.actor === "enemy" ? "Opponent · " : "") + status;
     const { positioning, terrain } = combat;
