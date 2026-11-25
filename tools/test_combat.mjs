@@ -13,12 +13,12 @@ test("changing armour mid-Fighting preserves earned progression and refreshes fr
   assert.equal(before.combatSession.player.gear.physicalReductionPct,0);
   const oldXP=before.skills.fighting.xp,oldEffort={...before.attributeEffort};
   const changed=buyEquipment(before,"torso:leather",{grade:0,quality:"fine"},STEP_MS,()=>.5).state;
-  assert.equal(changed.combatSession,null,"equipping a different piece begins a new fight");
+  assert.deepEqual(changed.combatSession,before.combatSession,"purchase does not discard current fight");
   assert.equal(changed.items.stone,77);
   assert.equal(changed.skills.fighting.xp,oldXP);
   assert.deepEqual(changed.attributeEffort,oldEffort);
   assert.equal(changed.armour.torso,"leather");
-  const later=settle(changed,2*STEP_MS,()=>.5).state;
+  const later=settle(changed,BOUT_MS,()=>.5).state;
   assert.equal(later.combatSession.player.gear.physicalReductionPct,7);
   assert.equal(later.combatSession.player.gear.totalKg>before.combatSession.player.gear.totalKg,true);
   assert.deepEqual(readSave(JSON.stringify(later)),later);
@@ -59,12 +59,11 @@ test("Skill Master raises stat immediately but restarts a Fighting duel only aft
   const skillsBefore=prior.skills.fighting.xp;
   const taught=learnFromMaster(prior,STEP_MS,()=>.5);
   assert.equal(taught.state.skills.mining.level,2);
-  assert.equal(taught.state.combatSession,null,
-    "new permanent stats should not inherit a stale active Fighting snapshot");
+  assert.deepEqual(taught.state.combatSession,prior.combatSession,"current fight keeps old snapshot");
   assert.equal(taught.state.items.stone,0);
   assert.equal(taught.state.skills.fighting.xp,skillsBefore);
   assert.equal(effectiveAttributeProgress(taught.state.attributeEffort,taught.state.skills).STR.value,11);
-  const next=settle(taught.state,2*STEP_MS,()=>.5).state;
+  const next=settle(taught.state,BOUT_MS,()=>.5).state;
   assert.equal(next.combatSession.player.str,11);
   assert.equal(next.skills.mining.level,2);
   assert.deepEqual(readSave(JSON.stringify(next)),next);
@@ -77,12 +76,12 @@ test("style switching settles saved XP/materials and starts a fresh duel",()=>{
   const oldXP=first.skills.fighting.xp,oldEffort={...first.attributeEffort};
   const swapped=setCombatLoadout(first,"sword_shield",STEP_MS,()=>.5);
   assert.equal(swapped.state.combatLoadout,"sword_shield");
-  assert.equal(swapped.state.combatSession,null);
+  assert.deepEqual(swapped.state.combatSession,first.combatSession);
   assert.equal(swapped.state.items.stone,38);
   assert.equal(swapped.state.skills.fighting.xp,oldXP);
   assert.deepEqual(swapped.state.attributeEffort,oldEffort);
   assert.deepEqual(readSave(JSON.stringify(swapped.state)),swapped.state);
-  const running=settle(swapped.state,STEP_MS+10_000,()=>.5).state;
+  const running=settle(swapped.state,BOUT_MS,()=>.5).state;
   assert.equal(running.combatSession.player.loadout,"sword_shield");
   assert.deepEqual(setCombatLoadout(running,"sword_shield",running.settledAtMs,()=>.5).state,running);
   assert.throws(()=>setCombatLoadout(running,"unknown",running.settledAtMs),RangeError);
@@ -121,7 +120,7 @@ test("GLAD-005 offline arena summary conserves results, coins and productive tim
   const end = 42 + 20 * YEAR;
   const whole = enterGame(start, end, () => .5);
   const splitAt = 42 + 43 * BOUT_MS - 7_000;
-  const first = enterGame(start, splitAt, () => .5);
+  const first = settle(start, splitAt, () => .5);
   const second = enterGame(readSave(JSON.stringify(first.state)), end, () => .5);
   const { bouts, victories, defeats, doubleDeaths, coins, downtimeMs } = whole.offlineArena;
   assert.ok(whole.offlineArena.sampledBouts <= ARENA_SCHEDULE_BOUTS);
@@ -130,7 +129,7 @@ test("GLAD-005 offline arena summary conserves results, coins and productive tim
   assert.equal(coins, victories * 12);
   assert.equal(whole.state.coins, coins);
   assert.equal(second.state.coins, whole.state.coins);
-  assert.equal(first.offlineArena.downtimeMs + second.offlineArena.downtimeMs, downtimeMs);
+  assert.equal(first.report.arena.downtimeMs + second.offlineArena.downtimeMs, downtimeMs);
   assert.deepEqual(second.state.attributeEffort, whole.state.attributeEffort);
   assert.equal(enterGame(whole.state, end, () => .5).offlineArena, undefined);
 });
@@ -153,7 +152,7 @@ test("GLAD-005 a twenty-year three-wagon claim preserves crafting inputs and fro
 
 
 import {blankExpertise,awardExpertise,expertiseThreshold,proficiency,EXPERTISE_BALANCE} from "../site/play/expertise.mjs";
-import {activateExpertise,setArmourChoice,setDifficulty} from "../site/play/engine.mjs";
+import {activateExpertise,setArmourChoice,setDifficulty,requestActivityChange} from "../site/play/engine.mjs";
 test("A3 independent weapon and four-slot armour practice conserves both budgets",()=>{
   const armour={head:"none",torso:"plate",arms:"plate",legs:"leather"};
   const e=awardExpertise(blankExpertise(),"bow",armour,HOUR_MS);
@@ -186,27 +185,73 @@ test("A3 offline practice uses frozen kit, no retroactive effectiveness, no dupl
   const boundary=end+(BOUT_MS-end%BOUT_MS)%BOUT_MS;
   const next=settle(returned,boundary+1,()=>.5).state;
   assert.equal(next.combatSession.player.condition.weapon.proficiency,1);
-  assert.equal(next.combatSession.player.str,started.combatSession.player.str);
+  assert.ok(next.combatSession.player.str>started.combatSession.player.str);
   assert.deepEqual(readSave(JSON.stringify(next)),next);
   assert.equal(readSave({...next,expertiseActive:{...next.expertiseActive,bow:1}}),null);
 });
-test("A3 abandoned partial bouts cannot be farmed and switches retain practice",()=>{
-  let s=chooseActivity(newGame(0),"fighting",0,()=>.5).state;
-  for(let n=1;n<=8;n++){
-    const at=n*(BOUT_MS-1);
-    s=setCombatLoadout(s,n%2?"bow":"greatsword",at,()=>.5).state;
-  }
-  assert.deepEqual(s.expertise,blankExpertise());
-  const at=8*(BOUT_MS-1)+BOUT_MS;
-  s=settle(s,at,()=>.5).state;
-  assert.ok(s.expertise.greatsword>0);
-  const learned=s.expertise.greatsword;
-  s=setCombatLoadout(s,"bow",at,()=>.5).state;
-  s=settle(s,at+BOUT_MS,()=>.5).state;
-  assert.equal(s.expertise.greatsword,learned);assert.ok(s.expertise.bow>0);
-  assert.equal(s.expertise.none,s.expertise.greatsword+s.expertise.bow);
-  const mine=chooseActivity(s,"mining",at+BOUT_MS,()=>.5).state;
-  assert.deepEqual(settle(mine,at+BOUT_MS+HOUR_MS,()=>.5).state.expertise,s.expertise);
+test("A7 repeated edits cannot skip loss recovery or steal practice",()=>{
+  const start=chooseActivity(newGame(42),"fighting",42,()=>.5).state;
+  const first=settle(start,43,()=>.5).state;
+  const lost=Array.from({length:32},(_,i)=>i).find(i=>combatAtTime({...first.combatSession,elapsedMs:i*BOUT_MS}).outcome!=="victory");
+  assert.notEqual(lost,undefined);
+  const end=42+(lost+1)*BOUT_MS;
+  const before=settle(first,end-20000,()=>.5).state;
+  const switched=setCombatLoadout(before,"bow",end-20000,()=>.5).state;
+  const changed=setDifficulty(switched,"fighting",7,end-15000,()=>.5).state;
+  const again=setCombatLoadout(changed,"spear",end-10000,()=>.5).state;
+  assert.equal(again.combatSession.player.loadout,"greatsword");
+  assert.equal(again.combatSession.player.difficulty,0);
+  assert.equal(again.combatSession.seed,before.combatSession.seed);
+  const after=settle(readSave(JSON.stringify(again)),end,()=>.5).state;
+  const control=settle(before,end,()=>.5).state;
+  assert.deepEqual(after.attributeEffort,control.attributeEffort);
+  assert.deepEqual(after.expertise,control.expertise);
+  assert.equal(after.coins,control.coins);
+  assert.equal(after.combatSession.player.loadout,"spear");
+  assert.equal(after.combatSession.player.difficulty,7);
+  const following=settle(after,end+BOUT_MS,()=>.5).state;
+  assert.ok(following.expertise.spear>0);
+  assert.equal(following.expertise.greatsword,after.expertise.greatsword);
+});
+test("A7 return without Master claim activates stats only at next boundary",()=>{
+  const init=chooseActivity(newGame(0),"fighting",0,()=>.5).state;
+  const elapsed=7*24*HOUR_MS+12345;
+  const offline=settle(init,elapsed,()=>.5);
+  const returned=enterGame(offline.state,elapsed,()=>.5).state;
+  assert.equal(returned.combatSession.player.str,10);
+  assert.equal(returned.skills.fighting.level,1);
+  const boundary=elapsed+(BOUT_MS-elapsed%BOUT_MS)%BOUT_MS;
+  const before=settle(returned,boundary-1,()=>.5).state;
+  assert.equal(before.combatSession.player.str,10);
+  const after=settle(readSave(JSON.stringify(before)),boundary,()=>.5).state;
+  const control=settle(offline.state,boundary,()=>.5).state;
+  assert.equal(after.coins,control.coins);
+  assert.deepEqual(after.expertise,control.expertise);
+  assert.equal(after.combatSession.player.str,effectiveAttributeProgress(returned.attributeEffort,returned.skills).STR.value);
+  assert.ok(after.combatSession.player.str>10);
+  assert.equal(after.combatSession.prizeCursor,control.combatSession.prizeCursor);
+  assert.equal(readSave({...after,attributeEffortActive:{...after.attributeEffortActive,STR:after.attributeEffort.STR+1}}),null);
+});
+test("A7 departure finishes recovery and banks fractional Fighting work",()=>{
+  const init=chooseActivity(newGame(42),"fighting",42,()=>.5).state;
+  const first=settle(init,43,()=>.5).state;
+  const lost=Array.from({length:32},(_,i)=>i).find(i=>combatAtTime({...first.combatSession,elapsedMs:i*BOUT_MS}).outcome!=="victory");
+  const end=42+(lost+1)*BOUT_MS;
+  const before=settle(first,end-19000,()=>.5).state;
+  const requested=requestActivityChange(before,"mining",end-19000,()=>.5).state;
+  const midway=settle(requested,end-1,()=>.5).state;
+  assert.equal(midway.transition.phase,"finishing");
+  const atEnd=settle(midway,end,()=>.5).state;
+  const control=settle(before,end,()=>.5).state;
+  assert.equal(atEnd.transition.phase,"moving");
+  assert.equal(atEnd.combatSession,null);
+  assert.equal(atEnd.fightingRemainderMs,control.progressMs);
+  assert.deepEqual(atEnd.attributeEffort,control.attributeEffort);
+  assert.deepEqual(atEnd.expertise,control.expertise);
+  const mined=settle(readSave(JSON.stringify(atEnd)),end+HOUR_MS,()=>.5).state;
+  const back=chooseActivity(mined,"fighting",end+HOUR_MS,()=>.5).state;
+  assert.equal(back.progressMs,control.progressMs);
+  assert.equal(back.fightingRemainderMs,0);
 });
 test("A3 proficiency updates at a boundary without rewriting the unfinished fight",()=>{
   let s=newGame(0);s.skills.fighting.level=50;s.coins=10000000;

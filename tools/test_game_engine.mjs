@@ -1397,7 +1397,7 @@ test("A4 grants exactly 100000 coins separately, preserves old settlement and re
   assert.deepEqual(grant,{...normal,coins:normal.coins+100000});
   const max=alphaMaxStats(fighting,"leather",HOUR_MS,midpoint).state;
   assert.equal(max.coins,normal.coins);
-  assert.equal(max.combatSession,null);
+  assert.deepEqual(max.combatSession,normal.combatSession);
   assert.equal(max.settledAtMs,normal.settledAtMs);
   assert.equal(max.skills.fighting.level,52);
   assert.equal(max.expertise.leather,4145*14400000);

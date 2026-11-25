@@ -26,7 +26,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=glad-001";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 13; // alpha expertise snapshot schema
+export const GAME_VERSION = 14; // active attributes and immutable arena bouts
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -98,9 +98,8 @@ export function setDifficulty(state,id,tier,now=Date.now(),random=Math.random) {
     throw new RangeError("Difficulty locked");
   const result=settle(state,now,random);
   if((state.difficulties[id]??0)===tier) return result;
-  return {...result,state:{...result.state,difficulties:{...state.difficulties,[id]:tier},
-    combatSession:id==="fighting"?null:result.state.combatSession,
-    progressMs:result.state.activity===id?0:result.state.progressMs}};
+  return {...result,state:{...activateExpertise(result.state),difficulties:{...state.difficulties,[id]:tier},
+    progressMs:id!=="fighting"&&result.state.activity===id?0:result.state.progressMs}};
 }
 export const ITEM_KEYS = Object.freeze(Object.keys(ITEM_LABELS));
 export const SKILL_IDS = Object.freeze(Object.keys(ACTIVITIES));
@@ -163,6 +162,8 @@ export function newGame(now = Date.now()) {
     name: "Wanderer",
     skills: blankSkills(),
     attributeEffort: blankAttributeEffort(),
+    attributeEffortActive:blankAttributeEffort(),
+    fightingRemainderMs:0,
     expertise:blankExpertise(), expertiseActive:blankExpertise(),
     combatSession: null,
     coins: 0,
@@ -198,7 +199,9 @@ export function readSave(value) {
     if (!s || s.version !== GAME_VERSION ||
         typeof s.name !== "string" || s.name.length > 40 ||
         !s.items || typeof s.items !== "object" || Array.isArray(s.items) ||
-        !validAttributeEffort(s.attributeEffort) || !isCount(s.coins) ||
+        !validAttributeEffort(s.attributeEffort) || !validAttributeEffort(s.attributeEffortActive) ||
+        Object.keys(s.attributeEffort).some(id=>s.attributeEffortActive[id]>s.attributeEffort[id])||
+        !isCount(s.fightingRemainderMs)||!isCount(s.coins) ||
         !validExpertise(s.expertise)||!validExpertise(s.expertiseActive)||
         Object.keys(s.expertise).some(id=>s.expertiseActive[id]>s.expertise[id])||
         (s.combatSession!==null&&!s.combatSession?.player?.trainingKit)||
@@ -211,6 +214,9 @@ export function readSave(value) {
     const savedProfile = s.timingProfile;
     if (!Object.hasOwn(TIMING_PROFILES, savedProfile)) return null;
     const sourceTiming = TIMING_PROFILES[savedProfile];
+    const sourceFightingMs=workDurationForProfile(ACTIVITIES.fighting,savedProfile);
+    if(s.fightingRemainderMs>=sourceFightingMs||
+      (s.activity==='fighting'&&(!s.transition||s.transition.phase==='finishing')&&s.fightingRemainderMs!==0))return null;
     const sourceWorkMs = s.activity ? workDurationForProfile(ACTIVITIES[s.activity], savedProfile) : 0;
     if (s.activity && s.progressMs >= sourceWorkMs) return null;
     if (!s.activity && s.progressMs !== 0) return null;
@@ -276,6 +282,8 @@ export function readSave(value) {
     return {
       version: GAME_VERSION, timingProfile: TIMING_PROFILE, name: s.name, skills,
       attributeEffort: { ...s.attributeEffort },
+      attributeEffortActive:{...s.attributeEffortActive},
+      fightingRemainderMs:scalePartialProgress(s.fightingRemainderMs,sourceFightingMs,ACTIVITIES.fighting.durationMs),
       expertise:{...s.expertise},expertiseActive:{...s.expertiseActive},
       combatLoadout: s.combatLoadout,
       coins: s.coins,
@@ -340,29 +348,47 @@ function variedTotal(base, random) {
   return whole + (fraction > 0 && roll() < fraction ? 1 : 0);
 }
 
-/** Publish earned practice at a real return/live tick; never in offline settle.
- * The current bout is not replayed. At most one additional snapshot boundary
- * is processed in any settlement, regardless of the absence length.
- */
+/** Publish earned attributes/practice on real return or visible tick only. */
 export function activateExpertise(state){
-  return Object.keys(state.expertise).every(id=>state.expertise[id]===state.expertiseActive[id])?
-    state:{...state,expertiseActive:{...state.expertise}};
+  const changed=Object.keys(state.expertise).some(id=>state.expertise[id]!==state.expertiseActive[id])||
+    Object.keys(state.attributeEffort).some(id=>state.attributeEffort[id]!==state.attributeEffortActive[id]);
+  return changed?{...state,expertiseActive:{...state.expertise},attributeEffortActive:{...state.attributeEffort}}:state;
 }
-function settleExpertiseArena(session,elapsedMs,active){
-  const from=session.elapsedMs;
-  const to=from+elapsedMs;
-  const boundary=from+(BOUT_MS-from%BOUT_MS)%BOUT_MS;
-  const run=(current,end)=>settleArenaPrizes(advanceCombatSession(current,end-current.elapsedMs),current.elapsedMs);
-  if(to<boundary)return run(session,to);
-  const p=session.player;
-  const effects=trainingEffects(p.trainingKit,p.loadout,active);
-  if(JSON.stringify(effects.condition)===JSON.stringify(p.condition))return run(session,to);
-  const first=run(session,boundary);
-  const next={...first.session,player:{...p,condition:effects.condition,gearAttack:effects.gearAttack,
-    gear:{...p.gear,gearDefense:effects.gearDefense}}};
-  const second=run(next,to);
-  const fields=["downtimeMs","sampledBouts","bouts","victories","defeats","doubleDeaths","coins"];
-  return {session:second.session,...Object.fromEntries(fields.map(k=>[k,first[k]+second[k]]))};
+function desiredArenaPlayer(state){
+  const attrs=combatAttributeProgress(state.attributeEffortActive,state.skills);
+  const kit=trainingKit(state.armour,state.combatLoadout,state.equipment);
+  const effects=trainingEffects(kit,state.combatLoadout,state.expertiseActive);
+  return {difficulty:state.difficulties.fighting??0,name:state.name,
+    loadout:state.combatLoadout,trainingKit:kit,
+    gear:{...armourStats(state.armour,state.combatLoadout),gearDefense:effects.gearDefense},
+    gearAttack:effects.gearAttack,condition:effects.condition,
+    str:attrs.STR.value,dex:attrs.DEX.value,end:attrs.END.value,skill:state.skills.fighting.level};
+}
+const arenaFields=["downtimeMs","sampledBouts","bouts","victories","defeats","doubleDeaths","coins"];
+function settleArenaBuild(state,elapsedMs){
+  const desired=desiredArenaPlayer(state);
+  let session=state.combatSession??startCombatSession(desired,state.settledAtMs>>>0);
+  let expertise=state.expertise;
+  const totals=Object.fromEntries(arenaFields.map(k=>[k,0]));
+  const run=duration=>{
+    const player=session.player;
+    const prize=settleArenaPrizes(advanceCombatSession(session,duration),session.elapsedMs);
+    const practice=prize.bouts*BOUT_MS-(prize.defeats+prize.doubleDeaths)*RESURRECTION_MS;
+    if(practice)expertise=awardExpertise(expertise,player.loadout,player.trainingKit.armour,practice);
+    session=prize.session;
+    for(const key of arenaFields)totals[key]+=prize[key];
+  };
+  // Keep the original fight, including recovery, until its boundary.
+  // Apply at most one pending build change per settlement segment.
+  if(JSON.stringify(session.player)!==JSON.stringify(desired)){
+    const remaining=(BOUT_MS-session.elapsedMs%BOUT_MS)%BOUT_MS;
+    if(elapsedMs<remaining){run(elapsedMs);return {...totals,session,expertise};}
+    if(remaining)run(remaining);
+    session={...session,player:desired};
+    elapsedMs-=remaining;
+  }
+  if(elapsedMs)run(elapsedMs);
+  return {...totals,session,expertise};
 }
 
 function settleWork(state, now, random, frozenEffort, xpRandom = random) {
@@ -383,36 +409,14 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
   const multiplier=tier&&state.activity!=="fighting"?workMultiplier(tier,ACTIVITY_STAT_WEIGHTS[state.activity],
     combatAttributeProgress(frozenEffort,state.skills)):1;
   if (state.activity === "fighting") {
-    let session = state.combatSession;
-    if (!session) {
-      const attrs = combatAttributeProgress(frozenEffort, state.skills);
-      const kit=trainingKit(state.armour,state.combatLoadout,state.equipment);
-      const effects=trainingEffects(kit,state.combatLoadout,state.expertiseActive);
-      session = startCombatSession({
-        difficulty:tier, name: state.name,
-        loadout: state.combatLoadout,trainingKit:kit,
-        gear: {...armourStats(state.armour,state.combatLoadout),
-          gearDefense:effects.gearDefense},
-        gearAttack:effects.gearAttack,
-        condition:effects.condition,
-        str: attrs.STR.value, dex: attrs.DEX.value, end: attrs.END.value,
-        skill: state.skills.fighting.level
-      }, state.settledAtMs >>> 0);
-    }
-    const prize = settleExpertiseArena(session,elapsedMs,state.expertiseActive);
-    productiveMs -= prize.downtimeMs;
-    // Credit completed bouts exactly once. Partial practice remains pending
-    // until the bout completes; abandoning/restarting a fight forfeits it.
-    // This prevents repetitive restarts from farming expertise without defeats.
-    const completedPractice=prize.bouts*BOUT_MS-
-      (prize.defeats+prize.doubleDeaths)*RESURRECTION_MS;
-    next.expertise=awardExpertise(state.expertise,session.player.loadout,
-      session.player.trainingKit.armour,completedPractice);
+    const prize=settleArenaBuild(state,elapsedMs);
+    productiveMs-=prize.downtimeMs;
+    next.expertise=prize.expertise;
     next.combatSession = prize.session;
     next.coins = safeAdd(state.coins, prize.coins);
     report.gainedCoins = prize.coins;
     if (prize.bouts || prize.downtimeMs) {
-      const { session: _session, ...arena } = prize;
+      const { session: _session, expertise: _expertise, ...arena } = prize;
       report.arena = arena;
     }
   }
@@ -486,14 +490,15 @@ function settleTransition(state, now, random, frozenEffort) {
   for (let i = 0; i < 3 && next.transition; i++) {
     const transition = next.transition;
     if (transition.phase === "finishing") {
-      const needed = ACTIVITIES[next.activity].durationMs - next.progressMs;
+      const needed=finishingDuration(next);
       const take = Math.min(remaining, needed);
       const work = settleWork(next, next.settledAtMs + take, random, frozenEffort);
       next = work.state;
       pushReport(work.report);
       remaining -= take;
       if (take < needed) break;
-      next = { ...next, transition: { ...transition, phase: "moving", phaseProgressMs: 0 } };
+      next = { ...next, ...(next.activity==="fighting"?{fightingRemainderMs:next.progressMs,progressMs:0,combatSession:null}:{}),
+        transition: { ...transition, phase: "moving", phaseProgressMs: 0 } };
     } else {
       const phaseDuration = transition.phase === "moving"
         ? (ACTIVITIES[next.activity].zone === ACTIVITIES[transition.targetActivity].zone
@@ -508,9 +513,10 @@ function settleTransition(state, now, random, frozenEffort) {
       if (transition.phase === "moving") {
         next = { ...next, transition: { ...transition, phase: "preparing", phaseProgressMs: 0 } };
       } else {
-        next = { ...next, activity: transition.targetActivity, progressMs: 0,
-          transition: null, combatSession: transition.targetActivity === "fighting"
-            ? null : next.combatSession };
+        const fighting=transition.targetActivity==="fighting";
+        next = { ...next, activity: transition.targetActivity, progressMs:fighting?next.fightingRemainderMs:0,
+          fightingRemainderMs:fighting?0:next.fightingRemainderMs,
+          transition: null, combatSession:null };
       }
     }
   }
@@ -529,14 +535,18 @@ function settleTransition(state, now, random, frozenEffort) {
 
 
 /** Remaining transition time, bounded regardless of absent years. */
+function finishingDuration(state){
+  if(state.activity==="fighting")return state.combatSession?
+    (BOUT_MS-state.combatSession.elapsedMs%BOUT_MS)%BOUT_MS:0;
+  return ACTIVITIES[state.activity].durationMs-state.progressMs;
+}
 function remainingTransitionMs(state) {
   const t = state.transition;
   if (!t) return 0;
   const movement = state.activity && ACTIVITIES[state.activity].zone ===
     ACTIVITIES[t.targetActivity].zone ? SAME_ZONE_TRAVEL_MS : ZONE_TRAVEL_MS;
   const preparation = state.activity ? PREPARATION_MS : INITIAL_PREPARATION_MS;
-  if (t.phase === "finishing") return ACTIVITIES[state.activity].durationMs -
-    state.progressMs + movement + preparation;
+  if (t.phase === "finishing") return finishingDuration(state)+movement+preparation;
   if (t.phase === "moving") return movement - t.phaseProgressMs + preparation;
   return preparation - t.phaseProgressMs;
 }
@@ -675,7 +685,7 @@ export function settle(state, now = Date.now(), random = Math.random) {
     const targetActivity = future[0].activity;
     next = { ...next, wagons: future, productiveElapsedMs: 0,
       transition: targetActivity === next.activity ? null : {
-        targetActivity, phase: next.progressMs > 0 ? "finishing" : "moving",
+        targetActivity, phase: next.activity==="fighting"||next.progressMs>0 ? "finishing" : "moving",
         phaseProgressMs: 0
       } };
     if (!next.transition && next.settledAtMs === end) break;
@@ -795,7 +805,7 @@ export function requestActivityChange(state, targetActivity, now = Date.now(), r
   const current = outcome.state;
   const wagons = [{ activity: targetActivity, plannedMs: null }];
   return { ...outcome, state: retargetSettled(
-    { ...current, wagons, productiveElapsedMs: 0 }, targetActivity) };
+    { ...activateExpertise(current), wagons, productiveElapsedMs: 0 }, targetActivity) };
 }
 
 /** Returning is only a catch-up. No level or skill improvement applies automatically. */
@@ -856,11 +866,9 @@ export function learnFromMaster(state, now = Date.now(), random = Math.random) {
   for (const key of Object.keys(offer.tribute)) items[key] = 0;
   return { ...outcome, state: {
     ...outcome.state, skills, items,
-    // A confirmed level-up grants its stat immediately. Restart only the
-    // current Fighting duel, after settling old frozen power first. Offline
-    // bouts and previously collected progress are never recalculated.
-    combatSession: outcome.state.activity === "fighting" && !outcome.state.transition
-      ? null : outcome.state.combatSession
+    // Claimed levels are visible immediately; combat applies at the boundary.
+    attributeEffortActive:{...outcome.state.attributeEffort},
+    expertiseActive:{...outcome.state.expertise}
   }, mastery: offer };
 }
 
@@ -874,8 +882,8 @@ export function setCombatLoadout(state, loadout, now = Date.now(), random = Math
   const result = settle(state, now, random);
   if (result.state.combatLoadout === loadout) return result;
   return { ...result, state: { ...result.state, combatLoadout: loadout,
-    combatSession: result.state.activity === "fighting" && !result.state.transition
-      ? null : result.state.combatSession } };
+    attributeEffortActive:{...result.state.attributeEffort},
+    expertiseActive:{...result.state.expertise} } };
 }
 
 export function setArmourChoice(state, slot, family, now = Date.now(), random = Math.random) {
@@ -885,7 +893,8 @@ export function setArmourChoice(state, slot, family, now = Date.now(), random = 
   const result = settle(state, now, random);
   if (result.state.armour[slot] === family) return result;
   return { ...result, state: { ...result.state,
-    armour: { ...result.state.armour, [slot]: family }, combatSession: null } };
+    armour: { ...result.state.armour, [slot]: family },
+    attributeEffortActive:{...result.state.attributeEffort},expertiseActive:{...result.state.expertise} } };
 }
 
 export function buyEquipment(state, id, target, now = Date.now(), random = Math.random) {
@@ -900,7 +909,7 @@ export function buyEquipment(state, id, target, now = Date.now(), random = Math.
   return { ...result, purchased: true, state: { ...current, armour,
     coins: current.coins - quote.cost, equipment: { ...current.equipment,
       [id]: { grade: target.grade, quality: target.quality } },
-    combatSession: null } };
+    attributeEffortActive:{...current.attributeEffort},expertiseActive:{...current.expertise} } };
 }
 
 /** Legacy instant selection helper retained for historical engine fixtures only; the UI uses requestActivityChange. */
@@ -908,8 +917,12 @@ export function chooseActivity(state, activity, now = Date.now(), random = Math.
   if (!Object.hasOwn(ACTIVITIES, activity)) throw new RangeError("Unknown activity");
   const settled = settle(state, now, random);
   if (settled.state.activity === activity && !settled.state.transition) return settled;
-  return { state: { ...settled.state, activity, progressMs: 0, transition: null,
-    combatSession: activity === "fighting" ? null : settled.state.combatSession,
+  const current=activateExpertise(settled.state);
+  if(current.activity==="fighting"&&finishingDuration(current)>0)
+    return {...settled,state:retargetSettled({...current,wagons:[{activity,plannedMs:null}],productiveElapsedMs:0},activity)};
+  return { state: { ...current, activity, progressMs:activity==="fighting"?current.fightingRemainderMs:0,
+    fightingRemainderMs:activity==="fighting"?0:current.activity==="fighting"?current.progressMs:current.fightingRemainderMs,
+    transition: null,combatSession:null,
     wagons: [{ activity, plannedMs: null }], productiveElapsedMs: 0 }, report: settled.report };
 }
 

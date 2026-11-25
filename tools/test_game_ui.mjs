@@ -148,7 +148,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=alpha-gear-a5/,
+  assert.match(html, /app\.mjs\?v=alpha-gear-a7/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -804,7 +804,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     shieldWeapon.fire("click");
     const swapped = JSON.parse(store.get(SAVE_KEY));
     assert.equal(swapped.combatLoadout,"sword_shield");
-    assert.equal(swapped.combatSession,null,"new style starts a new duel");
+    assert.equal(swapped.combatSession.player.loadout,"greatsword","current bout keeps its style");
     assert.equal(shieldWeapon.getAttribute("aria-pressed"),"true");
     assert.equal(weaponChoices[0].getAttribute("aria-pressed"),"false");
     assert.equal(armourButtons[0].getAttribute("aria-pressed"),"false",

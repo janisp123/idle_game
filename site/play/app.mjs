@@ -11,9 +11,9 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=alpha-gear-a3";
+} from "./engine.mjs?v=alpha-gear-a7";
 
-import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=alpha-gear-a3";
+import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=alpha-gear-a3";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-gear-a5";
 import { combatFlowState } from "./combat-flow.mjs?v=glad-003";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=alpha-gear-a5";
@@ -21,7 +21,7 @@ import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats }
   from "./armour.mjs?v=glad-003";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=alpha-gear-a4";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=alpha-gear-a7";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -895,12 +895,13 @@ function render() {
     };
     const phaseName = stageNames[transition.phase];
     if (ui.transitionPhase.textContent !== phaseName) ui.transitionPhase.textContent = phaseName;
-    const phaseLength = transition.phase === "finishing" ? ACTIVITIES[state.activity].durationMs :
+    const arenaFinishing=transition.phase==="finishing"&&state.activity==="fighting";
+    const phaseLength = transition.phase === "finishing" ? (arenaFinishing?BOUT_MS:ACTIVITIES[state.activity].durationMs) :
       transition.phase === "moving"
       ? (ACTIVITIES[state.activity].zone === ACTIVITIES[transition.targetActivity].zone
         ? SAME_ZONE_TRAVEL_MS : ZONE_TRAVEL_MS)
       : (state.activity ? PREPARATION_MS : INITIAL_PREPARATION_MS);
-    const phaseElapsed = transition.phase === "finishing" ? state.progressMs : transition.phaseProgressMs;
+    const phaseElapsed = transition.phase === "finishing" ? (arenaFinishing?(state.combatSession?.elapsedMs??0)%BOUT_MS:state.progressMs) : transition.phaseProgressMs;
     const percent = Math.min(100, 100 * phaseElapsed / phaseLength);
     ui.transitionFill.style.width = percent.toFixed(2) + "%";
     ui.transitionProgress.setAttribute("aria-valuenow", String(Math.round(percent)));

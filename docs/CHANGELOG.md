@@ -88,6 +88,14 @@ Branch: `alpha/six-month-gear-benchmark`. Goal: source-backed six-month single-b
 
 **Decision/next:** Not ready to deploy. Source review confirms earned stat snapshot stays stale on return without session reset, and restart can skip unresolved recovery while retaining time XP (expertise and prizes already completed-bout gated). These need targeted reproduction and regression tests, not hidden balance tweaks. Recommended A7 snapshot/restart correctness, then A8 paired physical balance and economy retest. Keep current prices/expertise provisional until remeasurement; do not invent unarmoured protection. Fixed sample policies are not global optima, alpha intentionally differs, original A5 art binary transfer and real-browser checks remain blocked/pending. No merge or deployment.
 
+### Batch A7 — immutable arena bout and active attributes (2026-11-25, chat)
+
+**Why:** A6 found stale stats on return and recovery avoidance through mid-bout edits. Preserve original bout and rewards; avoid new cooldowns or forfeiting legitimate work.
+
+**What:** V14 earned/active attribute effort, publish on return/visible tick like expertise. Desired kit, attributes, grade and claimed skill apply at next completed 200-second bout boundary, with immutable original seed/cursor, old/new prize and practice attribution per segment. Purchase/style/armour/difficulty/Master/Max Stats no longer discard an unfinished fight. Fighting departure finishes the actual bout and banks fractional work before travel; restores fraction on re-entry. Noncombat transitions unchanged; finishing UI shows arena progress. No gameplay balance formula changes. Current alpha save reset allowed and not deployed.
+
+**Verification:** regression tests for no-Master return, old rewards and recovery under repeated edits, departure, save validation, offline split and current UI updated. CI and revised economy pending. First source-text patch attempt aborted before write; no partial remote mutation.
+
 ## GLAD-005 · DEPLOYED · 2026-11-24
 
 Goal: Verify and finalize bounded offline combat, balance, and the playable gladiator loop.

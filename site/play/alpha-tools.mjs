@@ -1,4 +1,4 @@
-import { TIMING_PROFILE, enterGame } from "./engine.mjs?v=alpha-gear-a3";
+import { TIMING_PROFILE, enterGame } from "./engine.mjs?v=alpha-gear-a7";
 import { awardAttributeTime,blankAttributeEffort } from "./attributes.mjs?v=glad-001";
 import { EXPERTISE_BALANCE } from "./expertise.mjs?v=alpha-gear-a3";
 import { ARMOUR_TIERS } from "./armour.mjs?v=glad-003";
@@ -38,7 +38,7 @@ export function alphaMaxStats(state,family,now,random=Math.random){
     Object.keys(expertise).some(id=>expertise[id]!==old.expertise[id]);
   if(!changed)return result;
   return {...result,state:{...old,attributeEffort,skills:{...old.skills,fighting},
-    expertise,expertiseActive:{...expertise},combatSession:null}};
+    expertise,expertiseActive:{...expertise},attributeEffortActive:{...attributeEffort}}};
 }
 /** Explicit local test credit, not an arena prize. Existing fights are untouched. */
 export function alphaGrantCoins(state,now,random=Math.random){
