@@ -84,6 +84,24 @@ export function characterStats(state){
     row("Missing swing clearance (each)",pp(-v.aimClearance)),row("Accuracy bounds",pct(v.aimMinimum)+"–"+pct(v.aimMaximum))
   ],"DEX and skill contributions are relative to the enemy; line of sight and cover can also reduce ranged accuracy."));
   sections.push(section("Armour penetration",pct(v.penetration),[row(weaponName+" · trained penetration",pct(trained.weapon.penetration)),row("Expertise penalty",pp(v.penetration-trained.weapon.penetration))]));
+  sections.push(section("Recovery skip chance",pct(v.speed),[
+    row(weaponName+" · trained bonus",pct(trained.weapon.speed)),
+    row("Expertise penalty",pp(v.speed-trained.weapon.speed))
+  ],"Chance per intact attack to remove one recovery turn; not a direct attack-speed percentage."));
+  sections.push(section("Critical chance modifier",pp(v.crit),[
+    row("Base critical chance", "4%"),row(weaponName+" · trained bonus",pp(trained.weapon.crit)),
+    row("Expertise penalty",pp(v.crit-trained.weapon.crit))
+  ],"Conditional on an accurate, undodged strike without block or parry. Enemy critical avoidance reduces the chance."));
+  sections.push(section("Critical damage modifier",signed(v.critDamage),[
+    row("Base critical multiplier","×1.65"),row(weaponName+" · trained bonus",signed(trained.weapon.critDamage)),
+    row("Expertise penalty",signed(v.critDamage-trained.weapon.critDamage))
+  ],"Added to the critical multiplier; enemy armour can reduce the bonus."));
+  sections.push(section("Critical avoidance",pct(v.critResist),
+    pieces.flatMap(x=>[row(x.name+" · trained bonus",pp(x.full.critResist)),row("Expertise penalty",pp(x.part.critResist-x.full.critResist))]),
+    "Subtracts from an opponent's conditional critical chance while armour is intact."));
+  sections.push(section("Critical damage reduction",fmt(v.critReduction),
+    pieces.flatMap(x=>[row(x.name+" · trained reduction",signed(x.full.critReduction)),row("Expertise penalty",signed(x.part.critReduction-x.full.critReduction))]),
+    "Subtracts from the critical bonus multiplier, not ordinary attack damage."));
   sections.push(section("Initiative score",fmt(v.initiativeScore),[row("Dexterity",fmt(v.initiativeDex)),row("Mobility ÷ 10",signed(v.initiativeMobility))],"Compared against the opponent; not a fixed first-strike chance."));
   sections.push(section("Block / parry","Conditional",[
     row("Shield block",pct(v.block)),row("Shield block vs blunt",pct(v.bluntBlock)),row("Greatsword ready parry",pct(v.parry)),row("Greatsword recovering parry",pct(v.recoveryParry)),row("Relevant equipment proficiency",pct(v.weapon.proficiency)),row("Guard after heavy impact","Temporarily reduced"),row("Shield block impact · standard",pct(v.guardRules.blockImpact)),row("Shield block impact · ranged",pct(v.guardRules.rangedBlockImpact)),row("Shield block impact · reach thrust",pct(v.guardRules.reachBlockImpact)),row("Shield block impact · blunt",pct(v.guardRules.bluntBlockImpact))
