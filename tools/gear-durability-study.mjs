@@ -1,5 +1,5 @@
 // Developer-only GEAR-RESEARCH-001. No runtime files modified.
-// Run from repository root: node tools/gear-progression-matrix.mjs
+// Run from repository root: node tools/gear-durability-study.mjs
 // Reads only the pinned committed baseline via git show; candidate changes are in memory.
 import {execFileSync} from "node:child_process";
 const ref="01362378d8aefcec3aa1fa4bb73116d9457237c3";
