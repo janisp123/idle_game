@@ -16,7 +16,9 @@ test("a seeded archer uses a finite quiver and switches to its dagger", () => {
   const first = resolvePhysicalDuel(bow, spear, 72);
   assert.deepEqual(resolvePhysicalDuel(bow, spear, 72), first);
   assert.ok(first.events.length <= PHYSICAL_RULES.turnLimit * 3 + 1);
-  const moves = first.events.filter(event => event.actor === "player").map(event => event.move);
+  const moves = first.events.filter(event => event.type==="dodge"?event.target==="player":event.actor==="player").map(event => event.move);
+  assert.equal(first.events[0].vitals.player.arrows, PHYSICAL_RULES.arrows);
+  assert.equal(first.events.at(-1).vitals.player.arrows,0);
   assert.equal(moves.filter(move => move === "shot").length, PHYSICAL_RULES.arrows);
   assert.ok(moves.includes("dagger"));
 });
@@ -113,13 +115,13 @@ import {newGame,desiredArenaPlayer,setCombatLoadout,buyEquipment} from "../site/
 test("CHAR-STATS-001 exact shared damage, HP and armour breakdown",()=>{
   let state=newGame(0);
   const starter=physicalBuildStats(desiredArenaPlayer(state));
-  assert.equal(starter.attacks[0].base,16);
+  assert.equal(starter.attacks[0].base,19);
   assert.equal(starter.health.total,44);
   assert.equal(starter.mobility,97);
   const before=JSON.stringify(state);
   const sheet=characterStats(state);
   assert.equal(JSON.stringify(state),before);
-  assert.equal(sheet.sections.find(x=>x.title==="Damage · swing").total,"16");
+  assert.equal(sheet.sections.find(x=>x.title==="Damage · swing").total,"19");
   state={...state,coins:1000000,skills:{...state.skills,fighting:{level:5,xp:0}}};
   state=buyEquipment(state,"greatsword",{grade:1,quality:"common"},0,()=>.5).state;
   const upgraded=physicalBuildStats(desiredArenaPlayer(state));
@@ -156,4 +158,18 @@ test("CHAR-STATS-002 equipment modifiers isolate grade bonus and preserve noncom
   const miner={...state,skills:{...state.skills,mining:{level:10,xp:0}}};
   assert.equal(get(miner,"activity-mining").summary,"×1.18");
   assert.equal(get(miner,"activity-mining").rows.find(x=>x.label==="Direct equipment XP/yield bonus").value,"+0%");
+});
+
+
+test("BAL-002 backup dagger scaling and material-specific protections come from the resolver",()=>{
+  const options={str:150,dex:150,end:150,skill:50,loadout:"bow",itemGrade:7,quality:"masterwork"};
+  const bow=physicalBuildStats(createPlayerSnapshot({...options,armour:"leather"}));
+  assert.equal(bow.attacks[1].multiplier,1+(bow.attacks[0].multiplier-1)*bow.attacks[1].gradeScale);
+  assert.ok(bow.attacks[1].base<bow.attacks[0].base*.65);
+  const padded=physicalBuildStats(createPlayerSnapshot({...options,armour:"padded"}));
+  const plate=physicalBuildStats(createPlayerSnapshot({...options,armour:"plate"}));
+  assert.ok(padded.materialProtection.blunt>plate.materialProtection.blunt);
+  assert.ok(plate.materialProtection.slashing>padded.materialProtection.slashing);
+  assert.ok(plate.materialProtection.piercing>padded.materialProtection.piercing);
+  assert.ok(padded.mobility>plate.mobility&&padded.dodge>plate.dodge);
 });
