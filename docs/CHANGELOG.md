@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## CLAN-001 · STARTED (2026-11-25, chat)
+
+Owner approved a separate Clan category, membership/search/creation views, minimum seven days of play for founding, seven-day rejoin/founding cooldown, permanent leadership until voluntary transfer, one vice, five generals and fifteen officers. Earlier approved clan donation/warehouse direction: once-daily online per-member limited contributions, warehouse permanently clan-owned, building-only expenditure, leader priorities, many upgradeable buildings. Branch `feature/clan-entry-and-design`, base `5dab306`. Current local-only alpha cannot support real shared clans. Scope this PR to honest Clan entry/availability screen and persistent design contract; no fake membership, browser-local donations, backend selection, or unapproved economy/permissions. Next implement entry and documentation.
+
 ## UI-CATEGORY-001 · STARTED (2026-11-25, chat)
 
 Owner requests Fighting and Training together. Branch `ui/combat-training-category`, verified base `5cdc925`. UI grouping only: Combat contains Fighting and Training, Survival Work remains unchanged. Preserve distinct mechanics, activity IDs and saves. Navigation now has Combat (Fighting, Training) and Survival Work (nine existing activities). Cache revision updated and UI regression checks adjusted. Next final CI and Pages verification.
