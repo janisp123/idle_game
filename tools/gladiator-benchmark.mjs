@@ -1,6 +1,6 @@
 // Representative alpha benchmark. Every bout calls the live physical resolver.
-import { BOUT_MS, RESURRECTION_MS, seededCombatRandom } from "../site/play/combat.mjs";
-import { ARENAS } from "../site/play/arenas.mjs";
+import { BOUT_MS, RESURRECTION_MS, seededCombatRandom,makeOpponent } from "../site/play/combat.mjs";
+import { ARENAS,chooseArena } from "../site/play/arenas.mjs";
 import { arenaReward } from "../site/play/arena-wallet.mjs";
 import { resolvePhysicalDuel } from "../site/play/physical-duel.mjs";
 import { ITEM_QUALITIES } from "../site/play/smith.mjs";
@@ -69,6 +69,44 @@ for (const opponentGrade of [0, 1, 2]) {
   }
 }
 
-console.log(JSON.stringify({ seed: 20261124,
-  bouts: 5 * styles.length ** 2 * 64 + (upgradeRows.length + gradeRows.length) * seeds.length,
-  byArena, upgradeRows, gradeRows }, null, 2));
+const baselineReport={seed:20261124,
+  bouts:5*styles.length**2*64+(upgradeRows.length+gradeRows.length)*seeds.length,
+  byArena,upgradeRows,gradeRows};
+
+
+// ALPHA-GEAR-001 A2 — equal-stat grade separation and real arena readiness.
+// The report is deliberately aggregated across every ordered style pair and
+// all five arenas; sample seeds are independent of a particular matchup.
+const gearRows=[];
+const gearScenarios=[
+  ...[10,80,150].flatMap(stat=>[0,1,2,3,7].map(delta=>({stat,lower:0,higher:delta,kind:"equal-stats"}))),
+  ...[1,2,3].map(delta=>({stat:150,lower:7-delta,higher:7,kind:"late-adjacent"}))
+];
+for(const row of gearScenarios){
+  const totals=outcomes();
+  for(const [i,style] of styles.entries())for(const [j,opponent] of styles.entries()){
+    const family=armourLoads[(i+j)%3],enemyFamily=armourLoads[(i+2*j)%3];
+    const shared={str:row.stat,dex:row.stat,end:row.stat,skill:40,quality:"common"};
+    const p=createPlayerSnapshot({...shared,loadout:style,armour:family,itemGrade:row.higher});
+    const q=createPlayerSnapshot({...shared,loadout:opponent,armour:enemyFamily,itemGrade:row.lower});
+    for(const arena of ARENAS)sample(p,q,arena,row.lower,seeds.slice(0,16),totals);
+  }
+  gearRows.push({...row,...totals,winRatePct:100*totals.victory/totals.bouts});
+}
+const readinessRows=[];
+for(const grade of [0,3,7])for(const state of ["matched","low-stats","low-gear"]){
+  const totals=outcomes();
+  for(const style of styles){
+    const player=createPlayerSnapshot({grade,loadout:style,armour:"leather",quality:"common",
+      ...(state==="low-stats"?{str:10,dex:10,end:10,skill:1}:{}),
+      itemGrade:state==="low-gear"?0:grade});
+    for(const seed of seeds.slice(0,64)){
+      const enemy=makeOpponent(0,grade,seededCombatRandom(seed));
+      const arena=chooseArena(player,enemy,seededCombatRandom(seed^0x193765)).arena;
+      sample(player,enemy,arena,grade,[seed],totals);
+    }
+  }
+  readinessRows.push({grade,state,...totals,winRatePct:100*totals.victory/totals.bouts});
+}
+console.log(JSON.stringify({...baselineReport,
+  gradeSeparation:{seed:20261124,gearRows,readinessRows}},null,2));

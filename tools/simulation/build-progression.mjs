@@ -130,10 +130,13 @@ function trajectory(modules, scenario, seed) {
       if(engine.skillMasterOffer(state).ready.length)
         state=engine.learnFromMaster(state,time,rng).state;
       shop();
-      // Fixed policy (not an engine gate): non-farm players voluntarily stay
-      // near the old recommended skill band and their equipped weapon grade.
-      const grade=farm?0:Math.min(state.equipment[loadout].grade,
-        7,difficulty.GRADES.reduce((max,_,i)=>state.skills.fighting.level>=difficulty.unlockLevel(i)?i:max,0));
+      // Fixed candidate policy: aim for a grade supported by both attributes
+      // and the whole equipped build, not the former survival unlock rule.
+      const stats=attrs.effectiveAttributeProgress(state.attributeEffort,state.skills);
+      const avg=(stats.STR.value+stats.DEX.value+stats.END.value)/3;
+      const grade=farm?0:Math.min(...ids.map(key=>state.equipment[key]?.grade??0),
+        difficulty.GRADES.reduce((max,_,i)=>avg>=difficulty.arenaBenchmark(i).stat*0.90&&
+          state.skills.fighting.level>=difficulty.arenaBenchmark(i).skill?i:max,0));
       if((state.difficulties.fighting??0)!==grade)
         state=engine.setDifficulty(state,'fighting',grade,time,rng).state;
     }
@@ -158,9 +161,9 @@ export async function runBuildBaseline({profiles=['normal','alpha'],scenarios=BA
     boutMs:modules.combat.BOUT_MS,
     scenarios:scenarios.map(s=>trajectory(modules,s,seed))
   })));
-  return {version:'ALPHA-GEAR-001-A1',kind:'production-engine progression and economy trajectory',
+  return {version:'ALPHA-GEAR-001-A2',kind:'production-engine progression and economy trajectory',
     limitations:['One deterministic seed per scenario; not a confidence interval.',
-      'Fixed greatsword/plate purchase policies; not an optimal progression search.',
+      'Fixed greatsword/plate purchase policy and target-stat/whole-build arena selection; not an optimal progression search. Selection policy changed from A1, so before/after includes that policy change.',
       'Rapid hourly visits test aggressive play, not a proven earliest possible claim.',
       'Weekly checkpoint settlements may split absence without claiming; outcomes reflect current engine.',
       'Affordability ignores skill gates; purchases enforce both.',

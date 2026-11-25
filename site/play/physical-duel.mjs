@@ -22,7 +22,11 @@ function seededRandom(seed) {
 
 function piece(profile, fallback) {
   return { hp: profile?.maxHP ?? fallback, maxHP: profile?.maxHP ?? fallback,
-    breakable: profile?.breakable ?? true };
+    breakable: profile?.breakable ?? true,
+    flatAttack:profile?.flatAttack,damageMultiplier:profile?.damageMultiplier,
+    accuracy:profile?.accuracy??0,penetration:profile?.penetration??0,
+    guard:profile?.guard,resistance:profile?.resistance??0,
+    mobility:profile?.mobility??0,dodge:profile?.dodge??0 };
 }
 
 function fighter(snapshot, side) {
@@ -60,6 +64,17 @@ function protection(target) {
     sum + (item.hp > 0 ? item.protection : 0), 0);
 }
 
+const intactArmourSum=(target,key)=>target.armour.reduce((sum,piece)=>
+  sum+(piece.hp>0?(piece[key]??0):0),0);
+function flatGuard(target) {
+  // Legacy synthetic fixtures can omit detailed profiles. Real new snapshots
+  // carry per-piece guard, which disappears as each piece breaks.
+  if(target.armour.some(p=>p.guard!==undefined))return intactArmourSum(target,"guard");
+  if(target.armour.length)return (target.gear?.gearDefense??0)*
+    target.armour.filter(p=>p.hp>0).length/target.armour.length;
+  return target.gear?.gearDefense??0;
+}
+
 function vitals(target) {
   return { hp: target.hp, maxHP: target.maxHP, arrows: target.arrows, shield: target.shield.hp,
     shieldMax: target.shield.maxHP, weapon: target.weapon.hp, weaponMax: target.weapon.maxHP,
@@ -75,7 +90,7 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
   let approachProgress = 0;
   let retreatsLeft = terrain.retreatSpace ?? (terrain.retreat === false ? 0 : 3);
   let distance = Math.min(2, Math.max(0, terrain.startDistance ?? 2));
-  const mobility = actor => actor.gear?.mobilityPct ?? 95;
+  const mobility = actor => Math.min(100,(actor.gear?.mobilityPct ?? 95)+intactArmourSum(actor,"mobility"));
   const record = (actor, target, type, extra = {}) => {
     events.push({ type, actor: actor?.side ?? null, target: target?.side ?? null, distance: BANDS[distance],
       damage: 0, ...extra, vitals: { player: vitals(you), enemy: vitals(foe) } });
@@ -130,7 +145,9 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       const obscuredShot = attack.ranged && distance > 0
         ? (2 - (terrain.lineOfSight ?? 2)) * 0.15 +
           (terrain.cover ?? 0) * (target.shield.hp > 0 ? 0.10 : 0.04) : 0;
-      const aim = 0.72 + (actor.dex - target.dex) * 0.012 + (actor.skill - target.skill) * 0.004 +
+      const activePiece=attack===BASH?actor.shield:actor.weapon;
+      const equipped=activePiece.hp>0;
+      const aim = 0.72 + (equipped?activePiece.accuracy:0) - intactArmourSum(target,"dodge") + (actor.dex - target.dex) * 0.012 + (actor.skill - target.skill) * 0.004 +
         (distance === 0 && bow ? -0.16 : 0) + (shortSpear ? -0.14 : 0) - obscuredShot - constriction * 0.12;
       if (roll() >= Math.max(0.19, Math.min(0.96, aim))) {
         record(actor, target, "miss", { move: attack.move });
@@ -141,13 +158,23 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       const parry = !block && target.loadout === "greatsword" && target.weapon.hp > 0 &&
         target.recovery === 0 && guardRoll < 0.32;
       const intact = actor.weapon.hp > 0 || attack.move === "dagger" || attack === BASH;
-      const base = (attack.power + actor.str * 0.3 + (actor.gearAttack ?? 0) * 0.65) *
+      // Broken weapons retain only improvised base damage, never their grade
+      // or flat bonus. The bow's backup dagger retains the kit's bonus only
+      // while the kit is intact; the shield bash uses the actual shield.
+      const flat=equipped?(activePiece.flatAttack??actor.gearAttack??0):0;
+      const multiplier=equipped?(activePiece.damageMultiplier??1):1;
+      const base = (attack.power + actor.str * 0.3 + flat * 0.65) * multiplier *
         (intact ? 1 : 0.55) * (shortSpear ? 0.82 : 1) * (counter && attack !== BASH ? 1.18 : 1);
       const vital = !block && !parry && guardRoll > 0.96;
+      const penetration=equipped?activePiece.penetration:0;
+      const armourFactor=ARMOUR_FACTOR[attack.type]*(1-penetration);
+      // Separate material protection from grade resistance: equal-grade
+      // equipment approximately cancels scaling, lower-grade armour does not.
+      const resistance=intactArmourSum(target,"resistance");
       const impact = Math.max(1, Math.round(base * (vital ? 1.65 : 1) *
         (block ? attack.type === "blunt" ? 0.94 : 0.27 : parry ? 0.35 : 1) *
-        (1 - Math.min(80, protection(target) * ARMOUR_FACTOR[attack.type]) / 100) -
-        (target.gear?.gearDefense ?? 0) * 0.35));
+        (1 - Math.min(80, protection(target) * armourFactor) / 100) /
+        (1+resistance*(1-penetration)) - flatGuard(target) * 0.35));
       const damage = wound(actor, target, impact);
       const broken = [];
       if (block && wear(target.shield, attack.type === "blunt" ? 24 : 5)) broken.push("shield");

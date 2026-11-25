@@ -1,4 +1,4 @@
-import { settleArenaPrizes } from "./arena-wallet.mjs?v=glad-005";
+import { settleArenaPrizes } from "./arena-wallet.mjs?v=alpha-gear-a2";
 import {
   ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
 } from "./attributes.mjs?v=glad-001";
@@ -10,7 +10,7 @@ export {
 } from "./attributes.mjs?v=glad-001";
 import {
   validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS
-} from "./combat.mjs?v=glad-004";
+} from "./combat.mjs?v=alpha-gear-a2";
 import { COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
 import { ARMOUR_SLOTS, ARMOUR_TIERS, initialArmour, armourOption, armourStats } from "./armour.mjs?v=glad-003";
@@ -25,7 +25,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=glad-001";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 11;
+export const GAME_VERSION = 12; // alpha combat snapshot/economy rebase
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -74,7 +74,7 @@ export const ITEM_LABELS = Object.freeze({
   ...EXTRA_LOOT_LABELS,
   ...PRODUCTION_LABELS
 });
-import { STARTER_ITEM, equippedCondition, equipmentBonuses, isEquipmentItem, smithQuote } from "./smith.mjs?v=alpha-gear-a1";
+import { STARTER_ITEM, equippedCondition, equipmentBonuses, isEquipmentItem, smithQuote } from "./smith.mjs?v=alpha-gear-a2";
 
 const equipmentIds = new Set([
   ...Object.keys(COMBAT_LOADOUTS),
@@ -91,7 +91,7 @@ function validEquipment(state) {
       (armour[id] === "none" || Object.hasOwn(equipment, id + ":" + armour[id]))));
 }
 
-import { canSelectDifficulty, workMultiplier } from "./difficulty.mjs?v=alpha-gear-a1";
+import { canSelectDifficulty, workMultiplier } from "./difficulty.mjs?v=alpha-gear-a2";
 export function setDifficulty(state,id,tier,now=Date.now(),random=Math.random) {
   if(!Object.hasOwn(ACTIVITIES,id)||!canSelectDifficulty(id,state.skills[id].level,tier))
     throw new RangeError("Difficulty locked");

@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { BOUT_MS, startCombatSession, combatAtTime } from '../site/play/combat.mjs';
 import { COMBAT_LOADOUTS } from '../site/play/combat-skills.mjs';
 import { ARMOUR_SLOTS, ARMOUR_TIERS, armourStats } from '../site/play/armour.mjs';
-import { GRADES, benchmark } from '../site/play/difficulty.mjs';
+import { GRADES, arenaBenchmark } from '../site/play/difficulty.mjs';
 
 const DEFAULT_SEED = 20261124;
 const DEFAULT_BATTLES = 10000;
@@ -52,7 +52,7 @@ const uniform = (armour, slots = {}) => {
 /** Build the SAME frozen fighter fields as engine.mjs's startCombatSession. */
 export function createPlayerSnapshot(options = {}) {
   const difficulty = parseGrade(options.grade ?? 'Non-grade');
-  const target = benchmark(difficulty);
+  const target = arenaBenchmark(difficulty);
   const skill = intIn(options.skill ?? target.skill, 1, 100000, 'Fighting skill');
   const str = intIn(options.str ?? target.stat, 0, 100000, 'STR');
   const dex = intIn(options.dex ?? target.stat, 0, 100000, 'DEX');

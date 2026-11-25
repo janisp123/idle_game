@@ -14,3 +14,12 @@ export function workMultiplier(tier,weights,attributes) {
   const stat=Object.entries(weights).reduce((total,[key,pct])=>total+attributes[key].value*pct/100,0);
   return (1+0.18*tier)*Math.min(1,(stat/benchmark(tier).stat)**2);
 }
+
+// Separate arena readiness from survival difficulty (which is unchanged).
+export const ARENA_BENCHMARKS=Object.freeze([10,24,42,62,82,104,124,144]);
+const ARENA_SKILLS=Object.freeze([1,5,10,17,25,33,40,50]);
+export function arenaBenchmark(tier){
+  if(!validTier(tier))throw new RangeError("Invalid arena grade");
+  return {stat:ARENA_BENCHMARKS[tier],skill:ARENA_SKILLS[tier],
+    quality:tier===0?"poor":"common"};
+}

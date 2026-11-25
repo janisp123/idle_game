@@ -1,5 +1,5 @@
-import { GRADES as difficultyGrades, benchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a1";
-import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel } from "./smith.mjs?v=alpha-gear-a1";
+import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a2";
+import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel } from "./smith.mjs?v=alpha-gear-a2";
 import {
   setDifficulty, buyEquipment, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
@@ -9,9 +9,9 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=alpha-gear-a1";
+} from "./engine.mjs?v=alpha-gear-a2";
 
-import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=glad-004";
+import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=alpha-gear-a2";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=glad-003";
 import { combatFlowState } from "./combat-flow.mjs?v=glad-003";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=glad-003";
@@ -163,9 +163,11 @@ function renderArmour() {
 
   const gear = armourStats(state.armour, state.combatLoadout);
   const bonus = equipmentBonuses(state);
-  ui.gearStats.textContent = gear.totalKg + " kg · Move " + gear.mobilityPct +
-    "% · Armour " + gear.physicalReductionPct + "% · Attack +" + bonus.attack +
-    " · Guard +" + bonus.defense;
+  ui.gearStats.textContent = gear.totalKg + " kg · Move " + Math.min(100,Math.round(gear.mobilityPct+bonus.mobility)) +
+    "% · Base armour " + gear.physicalReductionPct + "% · Attack +" + bonus.attack +
+    " ×" + bonus.damageMultiplier.toFixed(2) + " · Guard +" + bonus.defense +
+    " · Resistance +" + Math.round(bonus.resistance*100) + "% · Aim +" + Math.round(bonus.accuracy*100) +
+    "% · Pierce +" + Math.round(bonus.penetration*100) + "% · Dodge +" + Math.round(bonus.dodge*100) + "%";
   for (const [style, button] of weaponButtons) {
     button.setAttribute("data-equipped", String(style === state.combatLoadout));
     button.setAttribute("aria-pressed", String(!slot && style === state.combatLoadout));
@@ -328,7 +330,8 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   difficultyGrades.forEach((grade,tier) => {
     const option = document.createElement("option");
     option.value = String(tier);
-    option.textContent = tier ? grade + (id === "fighting" ? " · Target skill " : " · Requires level ") + benchmark(tier).skill + " · Target stat " + benchmark(tier).stat : "0 · Non-grade";
+    const target=id==="fighting"?arenaBenchmark(tier):benchmark(tier);
+    option.textContent = tier ? grade + (id === "fighting" ? " · Target skill " : " · Requires level ") + target.skill + " · Target stat " + target.stat : "0 · Non-grade";
     difficulty.append(option);
   });
   difficulty.addEventListener("change", () => {
@@ -1063,7 +1066,7 @@ function start() {
       try { localStorage.removeItem(ALPHA_CLOCK_KEY); } catch { storageWorks = false; }
     }
     state = newGame(Date.now());
-    if (saved) message("Alpha progression was reset for the arena update or because the previous save could not be read. A new character was created.");
+    if (saved) message("Alpha progression was reset for the equipment balance update or because the previous save could not be read. A new character was created.");
     else message("Choose an activity. Your character will work without further clicks.");
     writeSave();
   } else {

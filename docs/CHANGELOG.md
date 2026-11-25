@@ -30,6 +30,14 @@ Branch: `alpha/six-month-gear-benchmark`. Goal: source-backed six-month single-b
 
 **Boundaries and next:** A1 still has excessive win rates (normal daily 99.5% cumulative); physical scaling, opponent rebalance, expertise and art remain pending. A2: make grade/quality affect flat + proportional physical power, implement comparable grade/quality opponent builds, meaningful secondary bonuses, and broken-piece effect removal; run seeded comparable-grade and mismatched-grade duels across late stats, then re-run price progression. Do not assume A1 prices will survive A2/A3. Review cumulative charges, frozen state and first-month bound. No local full suite or live deployment claimed; draft remains open.
 
+### Batch A2 — physical grade scaling and opponents (2026-11-25, chat)
+
+**Why:** A1 measured 99.5% cumulative wins; NPC S attributes were only 38 while a six-month fighter reaches ~150. Flat gear bonuses also lost relative value with rising STR. Both issues undermine tier progression.
+
+**What:** Smith now produces per-piece frozen physical effects, flat and grade-scaled weapon damage, armour grade resistance, and smaller type-specific accuracy/penetration/mobility/dodge. Resolver uses surviving pieces only. Broken equipment loses its grade/flat/secondary effects, Masterwork keeps its unbreakable condition. Opponents get real matching-grade weapon and four armour pieces through the same builder, separate arena stat/skill targets, and Common quality except starter Poor. Survival gates and work coefficients unchanged. UI shows actual gear contribution and arena guidance. V12 reset policy prevents repricing/settling old frozen V11 builds under a different resolver; clear existing alpha notice. No expertise changes yet.
+
+**Choice and risk:** 1.35 exponential grade factor, small quality multiplier, graded armour resistance divisor rather than unlimited additive percentage reduction; preserve armour material/weapon/terrain counters. Grade dominates at equal stats without a scripted verdict or multiplying HP. Candidate numeric factors need evidence across all five styles and late stats. New progression strategy voluntarily selects a tier supported by whole build and stats rather than old survival gates; report this policy difference when comparing A1. Tests cover grade dominance, NPC gear parity, malformed effects, condition, existing offline/UI tests. Developer matrix extends historical benchmark; normal/alpha trajectories rerun. Prices not yet retuned. Next read CI and matrices, correct failures, tune before proceeding to expertise. No deployment claimed.
+
 ## GLAD-005 · DEPLOYED · 2026-11-24
 
 Goal: Verify and finalize bounded offline combat, balance, and the playable gladiator loop.

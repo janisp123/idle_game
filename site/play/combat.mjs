@@ -1,7 +1,7 @@
 import { chooseArena } from "./arenas.mjs?v=glad-004";
 /** Seeded, bounded arena timeline shared by play, prizes and the simulator. */
-import { resolvePhysicalDuel } from "./physical-duel.mjs?v=glad-004";
-import { equippedCondition } from "./smith.mjs?v=glad-003";
+import { resolvePhysicalDuel } from "./physical-duel.mjs?v=alpha-gear-a2";
+import { equippedCondition,equipmentBonuses } from "./smith.mjs?v=alpha-gear-a2";
 import { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
 import { armourStats, initialArmour } from "./armour.mjs?v=glad-003";
@@ -11,7 +11,7 @@ export { COMBAT_ART } from "./combat-art.mjs?v=glad-003";
 
 export const BOUT_MS = 200_000;
 export const RESURRECTION_MS = 20_000;
-import { benchmark, validTier } from "./difficulty.mjs?v=glad-004";
+import { arenaBenchmark, validTier } from "./difficulty.mjs?v=alpha-gear-a2";
 const ENCOUNTERS=[
   {role:"Tank",weapon:"sword_shield",sets:["plate"]},
   {role:"Vanguard",weapon:"greatsword",sets:["leather","plate"]},
@@ -45,8 +45,13 @@ const validGear = gear => gear && typeof gear === "object" && !Array.isArray(gea
   gear.totalKg >= 0 && gear.totalKg <= 60 &&
   gear.armourKg >= 0 && gear.armourKg <= 40 &&
   gear.weaponKg >= 0 && gear.weaponKg <= 12;
+const effectBounds=Object.freeze({flatAttack:[0,100],damageMultiplier:[1,20],
+  accuracy:[0,0.2],penetration:[0,0.2],guard:[0,100],resistance:[0,20],
+  mobility:[0,20],dodge:[0,0.2]});
 const validPiece = piece => Boolean(piece && Number.isSafeInteger(piece.maxHP) &&
-  piece.maxHP > 0 && piece.maxHP <= 1000 && typeof piece.breakable === "boolean");
+  piece.maxHP > 0 && piece.maxHP <= 1000 && typeof piece.breakable === "boolean" &&
+  Object.entries(effectBounds).every(([key,[min,max]])=>piece[key]===undefined||
+    Number.isFinite(piece[key])&&piece[key]>=min&&piece[key]<=max));
 
 function validCondition(condition) {
   return Boolean(condition && validPiece(condition.weapon) &&
@@ -73,14 +78,19 @@ function validateFighter(f) {
 export function makeOpponent(bout,tier=0,random=seededCombatRandom(bout)) {
   if (!validUnsigned(bout)) throw new RangeError("Invalid bout number");
   const pick=list=>list[Math.floor(random()*list.length)];
-  const model=benchmark(tier),profile=pick(ENCOUNTERS),armour=pick(profile.sets);
+  const model=arenaBenchmark(tier),profile=pick(ENCOUNTERS),armour=pick(profile.sets);
   const loadout=profile.weapon;
   const pieces=Object.fromEntries(Object.keys(initialArmour()).map(id=>[id,armour]));
-  const stat=()=>model.stat+Math.floor(random()*5)-2;
+  const spec={grade:tier,quality:model.quality};
+  const equipment=Object.fromEntries([[loadout,spec],
+    ...Object.keys(pieces).map(slot=>[slot+":"+armour,spec])]);
+  const bonus=equipmentBonuses({combatLoadout:loadout,armour:pieces,equipment});
+  const spread=Math.max(2,Math.round(model.stat*0.035));
+  const stat=()=>model.stat+Math.floor(random()*(2*spread+1))-spread;
   return {name:OPPONENTS[bout%OPPONENTS.length],role:profile.role,armour,loadout,
-    str:stat(),dex:stat(),end:stat(),skill:model.skill,gearAttack:model.gearPower,
-    condition: equippedCondition(pieces, loadout, { [loadout]: { grade: tier, quality: "poor" } }),
-    gear:{...armourStats(pieces,loadout),gearDefense:model.gearPower}};
+    str:stat(),dex:stat(),end:stat(),skill:model.skill,gearAttack:bonus.attack,
+    condition:equippedCondition(pieces,loadout,equipment),
+    gear:{...armourStats(pieces,loadout),gearDefense:bonus.defense}};
 
 }
 export function validCombatSession(session) {
