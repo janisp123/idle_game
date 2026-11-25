@@ -56,7 +56,7 @@ export function characterStats(state){
   sections.push(section("Mobility",fmt(v.mobility)+"%",[
     row("Unburdened mobility","100%"),...WEAPON_PIECES[p.loadout].map(x=>row(x.name+" weight",fmt(x.kg)+" kg")),
     row("Weapon weight penalty",signed(bare.mobilityPct-100," pp")),...weightRows,
-    ...pieces.map(x=>row(x.name+" · grade mobility",signed(x.part.mobility," pp"))),
+    ...pieces.flatMap(x=>[row(x.name+" · trained grade mobility",signed(x.full.mobility," pp")),row("Expertise penalty",signed(x.part.mobility-x.full.mobility," pp"))]),
     row("100% mobility cap",signed(v.mobility-v.baseMobility-v.gradeMobility," pp"))
   ],"Armour weight penalties are applied in slot order to show the exact rounded total. Mobility affects initiative, bow retreat and natural dodge; it is not an attack-speed multiplier."));
   sections.push(section("Total equipment weight",fmt(p.gear.totalKg)+" kg",[
@@ -65,10 +65,10 @@ export function characterStats(state){
   ]));
   sections.push(section("Dodge chance",pct(v.dodge),[
     row("Natural mobility dodge",pct(v.naturalDodge)),
-    ...pieces.map(x=>row(x.name+" · grade dodge",pp(x.part.dodge))),
+    ...pieces.flatMap(x=>[row(x.name+" · trained grade dodge",pp(x.full.dodge)),row("Expertise penalty",pp(x.part.dodge-x.full.dodge))]),
     row("40% dodge cap",pp(v.dodge-v.naturalDodge-v.gradedDodge))
   ],"Chance to evade an otherwise accurate strike; broken armour loses graded dodge."));
-  sections.push(section("Material protection",fmt(v.protection)+"%",pieces.map(x=>row(x.name,signed(x.part.protection," pp"))),"Not universal damage reduction. Attack type and penetration modify protection; the resolver caps material reduction at 80%."));
+  sections.push(section("Material protection",fmt(v.protection)+"%",[...pieces.map(x=>row(x.name,signed(x.part.protection," pp"))),...Object.entries(v.materialFactors).map(([type,factor])=>row(type+" damage protection factor","×"+fmt(factor)))],"Not universal damage reduction. Attack type and penetration modify protection; the resolver caps material reduction at 80%."));
   sections.push(section("Grade resistance","×"+fmt(1+v.resistance),[row("Base damage divisor","×1"),...pieces.flatMap(x=>[row(x.name+" · trained bonus",signed(x.full.resistance)),row("Expertise penalty",signed(x.part.resistance-x.full.resistance))])],"Damage is divided by 1 + resistance × (1 − enemy penetration)."));
   sections.push(section("Flat armour guard",fmt(v.guard),pieces.flatMap(x=>[row(x.name+" · trained guard",signed(x.full.guard)),row("Expertise penalty",signed(x.part.guard-x.full.guard))]),"Reduces final impact by "+fmt(v.guardDamageReduction)+" before rounding and minimum 1 damage."));
   sections.push(section("Accuracy vs equal DEX / Fighting",pct(Math.min(v.aimMaximum,Math.max(v.aimMinimum,v.aimBase+v.accuracy))),[
@@ -81,7 +81,7 @@ export function characterStats(state){
   sections.push(section("Armour penetration",pct(v.penetration),[row(weaponName+" · trained penetration",pct(trained.weapon.penetration)),row("Expertise penalty",pp(v.penetration-trained.weapon.penetration))]));
   sections.push(section("Initiative score",fmt(v.initiativeScore),[row("Dexterity",fmt(v.initiativeDex)),row("Mobility ÷ 10",signed(v.initiativeMobility))],"Compared against the opponent; not a fixed first-strike chance."));
   sections.push(section("Block / parry","Conditional",[
-    row("Shield block",pct(v.block)),row("Shield block vs blunt",pct(v.bluntBlock)),row("Greatsword ready parry",pct(v.parry)),row("Greatsword recovering parry",pct(v.recoveryParry))
+    row("Shield block",pct(v.block)),row("Shield block vs blunt",pct(v.bluntBlock)),row("Greatsword ready parry",pct(v.parry)),row("Greatsword recovering parry",pct(v.recoveryParry)),row("Relevant equipment proficiency",pct(v.weapon.proficiency))
   ],"Checked after accuracy and dodge; requires intact relevant gear. Rates include expertise."));
   sections.push(section("Equipment condition","At start of bout",[
     row(weaponName,fmt(v.weapon.maxHP)+" HP"+(v.weapon.breakable?"":" · Unbreakable")),
