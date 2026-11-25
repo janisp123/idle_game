@@ -122,3 +122,16 @@ At S, 1,198/1,200 wins against a weapon novice, 1,155/1,200 against armour novic
 ## A5 — motivational verdict presentation (draft)
 
 The original resolver outcome remains victory/defeat/double death. A pure UI helper derives Impressive Victory or Humiliation only for an actual knockout with the winner retaining at least 80% maximum HP (at most 20% HP lost). Same threshold for either side, no timeout or double-death qualification. The loser HP in a timeout is forced to zero at verdict, so it must not count as a knockout. No extra payout, XP, expertise, penalties, timing, RNG or save changes. The final event alone is classified; no early reveal. The current UI title, picture caption and compact result token use the label. The existing correct style-specific art is used until the two exact approved outcome images can be committed. See [art handoff](OUTCOME_ART_HANDOFF.md).
+
+### A5 verified dominance matrix
+
+[Code head 7f12888](https://github.com/janisp123/idle_game/commit/7f1288860adda839cd65eebc1b466cb51d40b11f), [combat CI 45562341402](https://github.com/janisp123/idle_game/actions/runs/45562341402). 2,000 duels per row, equal STR/DEX/END 150, skill 50, fully trained Common Leather, all 25 ordered style pairings × five arenas × 16 seeds.
+
+| Player / opponent grade | Wins | Losses | Double deaths | Impressive victories | Humiliations |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Non / Non | 1151 | 847 | 2 | 64 | 25 |
+| S / Non | 2000 | 0 | 0 | 2000 | 0 |
+| Non / S | 0 | 2000 | 0 | 0 | 2000 |
+| S / S | 1135 | 864 | 1 | 50 | 20 |
+
+Special results are subsets of the actual win/loss counts; no mechanical reward or HP changes. The 80% knockout threshold distinguishes gear mismatch from ordinary comparable fights in these samples. All four checks passed; the full A3/A4 normal daily trajectory is unchanged (including day 170 acquisition and 64.66% cumulative win rate). New binary art still pending; existing images remain fallback. Equal-grade player-side advantage remains for A6 review.
