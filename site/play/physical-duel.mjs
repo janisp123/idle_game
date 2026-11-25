@@ -261,7 +261,7 @@ export function physicalBuildStats(snapshot){
     aimDexPerPoint:AIM.dex,aimSkillPerLevel:AIM.skill,aimCloseBow:AIM.closeBow,aimCloseSpear:AIM.closeSpear,aimClearance:AIM.clearance,
     penetration:a.weapon.penetration,materialFactors:Object.fromEntries(Object.keys(ARMOUR_FACTOR).map(type=>[type,protection(a)>0?protection(a,type)/protection(a):0])),
     materialProtection:Object.fromEntries(Object.keys(ARMOUR_FACTOR).map(type=>[type,protection(a,type)])),
-    tactics:TACTICS,aimFarBow:AIM.farBow,aimReachSpear:AIM.reachSpear,
+    tactics:TACTICS,guardRules:GUARD,aimFarBow:AIM.farBow,aimReachSpear:AIM.reachSpear,
     attacks:attacks.map(attack=>({...attack,...attackComponents(a,attack,attack===BASH?a.shield:a.weapon),
       condition:attack===BASH?a.shield:a.weapon})),
     block:a.shield.hp>0?GUARD.block*a.shield.proficiency:0,
