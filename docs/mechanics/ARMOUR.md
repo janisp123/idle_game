@@ -42,3 +42,17 @@ A7: selecting a weapon, armour, difficulty or claiming Master levels changes the
 ## A8 — measured physical tradeoffs
 
 Current material resistance coefficients Padded .95, Leather 1.00, Plate 1.05 supersede A2 .70/.85/1.15; base protection unchanged (12/22/50 for full set). Actual dodge chance = min(.40, max(0, mobility−65) × .0045 + intact graded dodge). Per-grade graded dodge factors Padded .035, Leather .025, Plate .001, weighted by coverage and expertise. The resolver rolls dodge after initial accuracy, emitting a zero-damage defense event; broken pieces lose graded dodge, guard and resistance, worn weight remains. UI reports total chance conditional on an accurate attack, not guaranteed damage avoidance. Unarmoured has natural mobility evasion only, not imaginary graded armour. Masterwork stays unbreakable; gear prices and expertise thresholds unchanged. See A8 audit for measured results.
+
+## BAL-002 — material-specific protection and mobility (candidate)
+
+For intact pieces, keep original coverage-weighted raw material score (full Padded 12, Leather 22, Plate 50). Multiply by the material/damage-type factor before penetration and 80% material cap. With all four intact pieces, pre-penetration protection values:
+
+| Material | Piercing | Slashing | Blunt |
+| --- | ---: | ---: | ---: |
+| Padded | 10.8% | 13.8% | 36% |
+| Leather | 26.4% | 29.7% | 22% |
+| Plate | 40% | 50% | 9% |
+
+Mixed armour sums actual intact piece contributions. Legacy synthetic profiles without material ID use prior generic damage-type factors; actual snapshots carry itemId from the smith. Broken pieces contribute zero typed protection and zero graded resistance/dodge; worn weight remains. Material protection is separate from grade resistance and flat guard. Grade resistance coefficients, quality multipliers, costs and proficiency unchanged. Natural dodge slope .0045→.0075 per mobility percentage point above 65, combined cap remains .40. Per-grade mobility factors Padded/Leather/Plate 1.0/.7/.2, graded dodge .028/.018/.001, weighted by coverage and proficiency. Mobility now affects closing speed and retreat as well as initiative/dodge. Unarmoured gets natural mobility dodge only, no imaginary grade equipment; owner has not approved guaranteed endgame viability without armour. Masterwork remains unbreakable.
+
+The character sheet retains raw material coverage for comparison and shows real pre-penetration typed totals underneath; it must not describe raw coverage as universal damage reduction. BAL-002 is game-specific provisional abstraction, not a historical armour simulation.
