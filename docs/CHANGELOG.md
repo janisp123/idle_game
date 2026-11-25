@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## BAL-AUDIT-001 · STARTED (2026-11-25, chat)
+
+Owner explicitly requested a playability, weapon counter, armour and arena balance audit on main `2eaa0886`. Branch `audit/balance-counters-20261125`. Use current production resolver and synchronized tooling, no gameplay/save changes. Existing A8 results show Plate dominance and Bow Gatehouse anomaly; rerun full audit and extract pairwise counters. GitHub connector cannot dispatch manually; use an isolated branch-only CI trigger, remove it before merging evidence. Next: run and review actual reports, document recommendations without changing tuning.
+
 ## SITE-004 · DEPLOYED (2026-11-25, chat)
 
 Owner approved the exact new gladiator hero, gameplay-first public copy and status reconciliation; no gameplay/save changes. Base `4f752fc`, branch `site/gladiator-hero`. Original image transferred through Drive; Git blob `e4aa812be3fb64fe77fc3e27a5b0d3c7eff88d12` matches local original. FREE-001 deployed in Pages 45595434419. Final head `ab1481e98d60779b5272ada40e61ea9d404d2a85` passed [website 45608205457](https://github.com/janisp123/idle_game/actions/runs/45608205457), [systems 45608205312](https://github.com/janisp123/idle_game/actions/runs/45608205312) and [protocol 45608205508](https://github.com/janisp123/idle_game/actions/runs/45608205508). [PR #162](https://github.com/janisp123/idle_game/pull/162) merged `c7f2b8ca98f20033709004bf1d2137c35f15d273`. [Pages 45608310757](https://github.com/janisp123/idle_game/actions/runs/45608310757) validation and publish jobs succeeded, including real Chromium mobile/desktop; exact PNG 2,665,574 bytes verified against original by PR receipt. No `site/play/` or save changes. Independent live rendering not rechecked during recovery. Next: full balance audit using synchronized production simulation tools; no tuning inferred.
