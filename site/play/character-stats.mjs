@@ -1,7 +1,7 @@
 import {GRADES,workMultiplier,benchmark} from "./difficulty.mjs?v=alpha-gear-a2";
 // Read-only character sheet. All numeric totals come from the selected build
 // constructed by the engine and the shared physical resolver helpers.
-import {desiredArenaPlayer,ACTIVITIES,SKILL_BALANCE,PRODUCTION_RECIPES,activityRewardCapped} from "./engine.mjs?v=bal-002";
+import {desiredArenaPlayer,ACTIVITIES,SKILL_BALANCE,PRODUCTION_RECIPES,activityRewardCapped} from "./engine.mjs?v=cap-001";
 import {ATTRIBUTE_BALANCE,ATTRIBUTES,ACTIVITY_STAT_WEIGHTS,effectiveAttributeProgress,masteryBonusesForSkill} from "./attributes.mjs?v=glad-001";
 import {physicalBuildStats} from "./physical-duel.mjs?v=bal-002";
 import {ARMOUR_SLOTS,ARMOUR_TIER_LABELS,armourStats,initialArmour,armourOption,WEAPON_PIECES} from "./armour.mjs?v=bal-002";
