@@ -84,6 +84,9 @@ jobs:
             console.log("Modules:",(r.results??r.scenarios??[]).map(x=>x.module||"combat").join(", "));
             console.log("Valid JSON; full report attached below.");
           '
+      - name: BAL-002 candidate tactical validation
+        if: github.event_name == 'pull_request' && github.head_ref == 'balance/physical-counters-20261125'
+        run: node tools/simulation/counter-validation.mjs --progression
       - name: Produce full normal/alpha build progression report
         if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
         run: |
