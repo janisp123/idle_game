@@ -2,7 +2,7 @@
 
 ## RESEARCH-SAVE-001 · STARTED (2026-11-25, chat)
 
-Owner requires every research or simulation session to be saved to GitHub before handoff, including inconclusive/failed findings and reproducibility evidence. Branch `docs/research-persistence-rule`; documentation-only. Next: add durable decision and mandatory agent rule, verify changed files and checks. Existing gear study/matrix and harness are pending in PR #179; no gameplay change.
+Owner requires every research or simulation session to be saved to GitHub before handoff, including inconclusive/failed findings and reproducibility evidence. Branch `docs/research-persistence-rule`; documentation-only. Mandatory agent rule, durable decision and checkpoint added in PR #180; next verify changed files, final checks and reconcile overlap with #179. Existing gear study/matrix and harness are pending in PR #179; no gameplay change.
 
 ## APPRENTICE-A2 · STARTED (2026-11-25, chat)
 
