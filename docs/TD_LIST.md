@@ -8,14 +8,24 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## CLAN-001 — Clan entry, membership and shared development
+
+- **Goal:** Separate Clan category with current clan, search and creation; enforce durable membership, leadership, donation and warehouse rules in [CLAN_DESIGN.md](CLAN_DESIGN.md).
+- **Acceptance:** Current alpha shows truthful availability; online implementation must authenticate identity, validate seven-day founding and rejoin eligibility, enforce one leader/one vice/five generals/fifteen officers, transactional daily contributions and building-only warehouse spending, no player withdrawals, real search and multi-account tests.
+- **Status:** PARTIAL/BLOCKED — [PR #170](https://github.com/janisp123/idle_game/pull/170) adds alpha navigation and design contract; real shared functionality requires owner-approved account/server architecture, permission and economy decisions.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet (shared multiplayer).
+- **Dependencies:** CHAR-001, server authority, authentication, persistence and tested economy; no browser-local simulated clan presented as real.
+
 ## UI-CATEGORY-001 — Shared Combat menu
 
 - **Goal:** Put Fighting and Training in the same activity category.
 - **Acceptance:** Combat lists both distinct activities; Survival Work retains nine activities; no engine, progression or save changes. UI regression and browser checks pass.
-- **Status:** IN_REVIEW — [PR #169](https://github.com/janisp123/idle_game/pull/169).
+- **Status:** DONE — PR #169 merged `5dab306`; final website 45627081574, systems 45627081668, protocol 45627081603 and Pages 45627186530 passed.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #169).
 
 ## CAP-001 — Reward stop at skill XP cap and evergreen public overview
 
