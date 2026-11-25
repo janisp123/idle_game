@@ -51,7 +51,7 @@ const DAY=86400000,HOUR=3600000,DEFAULT_DAYS=[0,30,90,150,180],FINAL_ITEM={grade
 const styles=["greatsword","sword_shield","hammer","bow","spear"],families=["padded","leather","plate"];
 
 const m=install("credit");
-const {combat,smith,armour,difficulty,wallet}=m;
+const {combat,smith:gearSmith,armour,difficulty,wallet}=m;
 const {fullExpertise,blankExpertise,expertiseThreshold}=modules.expertise;
 const builds=styles.flatMap(style=>families.map(family=>[style,family]));
 const profiles=[
@@ -67,7 +67,7 @@ function player(style,family,g,tier,p){
  const equipment=Object.fromEntries([[style,spec],...armour.ARMOUR_SLOTS.filter(s=>!p.unarmoured).map(s=>[s.id+":"+family,spec])]);
  const hours=p.practice==="full"?expertiseThreshold(7):p.practice==="prior"?expertiseThreshold(Math.max(0,g-1)):0;
  const expertise=Object.fromEntries(Object.keys(blankExpertise()).map(k=>[k,hours]));
- const condition=smith.equippedCondition(pieces,style,equipment,expertise);
+ const condition=gearSmith.equippedCondition(pieces,style,equipment,expertise);
  return {name:"Research fighter",loadout:style,str:stats.stat,dex:stats.stat,end:stats.stat,skill:stats.skill,difficulty:tier,gear:armour.armourStats(pieces,style),condition,gearAttack:condition.weapon.flatAttack};
 }
 function audit(p){
