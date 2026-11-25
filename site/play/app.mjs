@@ -6,7 +6,7 @@ import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote
 import {
   setDifficulty, buyEquipment, activateExpertise, arenaBoutProgress, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
-  lootChances, recipeOptions, newGame, readSave, settle,
+  lootChances, recipeOptions, newGame, chooseActivity, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
@@ -1068,6 +1068,11 @@ function returnToGame() {
   render();
 }
 
+// Only genuinely new or explicitly reset characters start in the arena.
+function newStartingCharacter(now) {
+  return chooseActivity(newGame(now), "fighting", now).state;
+}
+
 function startActivityNow(kind) {
   const alreadyCurrent = state.wagons[0]?.activity === kind;
   if (alreadyCurrent) return;
@@ -1123,9 +1128,9 @@ function start() {
     if (storageWorks) {
       try { localStorage.removeItem(ALPHA_CLOCK_KEY); } catch { storageWorks = false; }
     }
-    state = newGame(Date.now());
+    state = newStartingCharacter(Date.now());
     if (saved) $("saveResetNotice").hidden=false;
-    else message("Choose an activity. Your character will work without further clicks.");
+    else message("Your first arena fight has begun. Fighting continues automatically.");
     writeSave();
   } else {
     const result = enterGame(state, gameNow());
@@ -1175,7 +1180,7 @@ function start() {
       }
       localStorage.removeItem(ALPHA_CLOCK_KEY);
       alphaClock=null;
-      state=newGame(Date.now());
+      state=newStartingCharacter(Date.now());
       latestWorkResult=null;
       lastCombatEventKey=null;
       lastWagonSignature=null;

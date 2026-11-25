@@ -109,6 +109,11 @@ try{
     assert.equal(hobby.items,5);assert.ok(hobby.heading,"hobby heading in viewport: "+JSON.stringify(hobby));assert.ok(hobby.overflow<=2,"hobby horizontal overflow: "+hobby.overflow);
     await shot("hobby-"+width);
     await navigate("clean-"+width,{[saveKey]:null,[clockKey]:null});
+    const fresh=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));return {activity:s.activity,route:s.wagons,transition:s.transition,difficulty:s.difficulties.fighting??0,coins:s.coins,level:s.skills.fighting.level,combat:!document.getElementById("combatFlow").hidden};})()`);
+    assert.equal(fresh.activity,"fighting");assert.deepEqual(fresh.route,[{activity:"fighting",plannedMs:null}]);assert.equal(fresh.transition,null);assert.equal(fresh.difficulty,0);assert.equal(fresh.level,1);assert.equal(fresh.coins,0);// Fixed clock does not create a combat session until positive time elapses.
+    await evaluate(`(()=>{Date.now=()=>${fixedNow+1000};document.dispatchEvent(new Event("visibilitychange"));})()`);
+    await until(()=>evaluate('!document.getElementById("combatFlow").hidden'),"first automatic bout "+width);
+    await evaluate(`Date.now=()=>${fixedNow}`);
     const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=15;s.name="Old alpha";return JSON.stringify(s);})()`);
     await navigate("reset-"+width,{[saveKey]:old,[clockKey]:JSON.stringify({version:1,realAnchorMs:0,gameAnchorMs:0,speed:10})});
     const notice=await evaluate('({hidden:document.getElementById("saveResetNotice").hidden,text:document.getElementById("saveResetNotice").textContent})');
@@ -118,6 +123,8 @@ try{
     assert.equal(await evaluate('document.getElementById("character-heading").textContent'),"Wanderer");
     await evaluate('document.getElementById("dismissSaveReset").click()');
     assert.equal(await evaluate('document.getElementById("saveResetNotice").hidden'),true);
+    const compact=await evaluate(`(()=>{const panel=document.getElementById("resourcesPanel"),list=document.getElementById("resourceList"),summary=panel.querySelector("summary");const closed=!panel.open;summary.click();const opened=panel.open&&list.getBoundingClientRect().height>0;summary.click();const folded=!panel.open;const skill=document.querySelector(".skill-focus");return {closed,opened,folded,combined:skill.contains(document.getElementById("visitMaster"))&&skill.contains(document.getElementById("skillXp"))&&skill.contains(document.getElementById("masterAudience")),overflow:document.documentElement.scrollWidth-innerWidth};})()`);
+    assert.ok(compact.closed&&compact.opened&&compact.folded&&compact.combined&&compact.overflow<=2,"compact skill and resources layout");
     const clan=await evaluate(`(()=>{const menu=document.getElementById("clanMenu"),summary=menu.querySelector("summary");const closed=!menu.open;summary.click();menu.scrollIntoView({block:"start"});return {closed,open:menu.open,text:menu.innerText,disabled:[...menu.querySelectorAll("button")].every(b=>b.disabled),count:menu.querySelectorAll("button").length,overflow:document.documentElement.scrollWidth-innerWidth};})()`);
     assert.ok(clan.closed&&clan.open&&clan.disabled&&clan.count===2&&clan.overflow<=2);
     assert.match(clan.text,/not available in this browser-only alpha/);

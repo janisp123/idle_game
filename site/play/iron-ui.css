@@ -1024,3 +1024,12 @@ footer p{color:#aa9680}
 .stat-overview-summary .stat-negative {color:#e79c87}
 .stat-overview-summary:focus-visible {outline:2px solid #e0b580;outline-offset:2px}
 .stat-overview-sources {padding:0 0 10px 15px;min-width:0}
+
+/* UI-COMPACT-001: one skill panel, folded material inventory. */
+.inventory#resourcesPanel{padding:0 12px;align-self:start}
+.resources-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;list-style:none;cursor:pointer;min-height:44px;color:#dfb47c;font:700 12px/1.4 Georgia,serif;letter-spacing:.13em}
+.resources-summary::-webkit-details-marker{display:none}
+.resources-summary span{color:#b68455;font-size:17px}
+.resources-summary:focus-visible{outline:2px solid #ecc286;outline-offset:2px}
+#resourcesPanel[open] .resources-summary{border-bottom:1px solid #674831}
+#resourcesPanel[open] #resourceList{padding:4px 0 10px}

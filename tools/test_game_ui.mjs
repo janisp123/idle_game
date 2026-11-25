@@ -5,7 +5,7 @@ import { combatAtTime, BOUT_MS } from "../site/play/combat.mjs";
 import { combatArtworkForEvent } from "../site/play/combat-art.mjs";
 import { combatFlowState } from "../site/play/combat-flow.mjs";
 import { combatReadoutForEvent, workReadoutForReport } from "../site/play/result-readout.mjs";
-import { newGame, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP, xpToNextLevel } from "../site/play/engine.mjs";
+import { newGame, chooseActivity, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP, xpToNextLevel } from "../site/play/engine.mjs";
 
 test("the final recovery tick leads into a fresh arena bout", () => {
   const session = { seed: 42, elapsedMs: BOUT_MS - 1,
@@ -95,6 +95,11 @@ test("compact results use only real event/report values and correct combat side"
 test("real browser-app entrypoint renders skill UI and reloads a current saved character", async () => {
   const html = readFileSync(new URL("../site/play/index.html", import.meta.url), "utf8");
   const queueCss = readFileSync(new URL("../site/play/iron-ui.css", import.meta.url), "utf8");
+  const skillPanel = html.match(/<section class="panel skill-focus"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(skillPanel?.includes('id="skillXp"') && skillPanel.includes('id="visitMaster"') && skillPanel.includes('id="masterAudience"'), "Master and skill XP share one panel");
+  assert.doesNotMatch(html, /class="panel skill-master"/);
+  assert.match(html, /<details id="resourcesPanel" class="panel inventory" aria-labelledby="inventory-heading">/);
+  assert.match(html, /<summary id="inventory-heading" class="resources-summary">RESOURCES/);
   assert.match(html, /<details id="clanMenu">/);
   assert.match(html, /not available in this browser-only alpha/);
   assert.match(html, /<button[^>]*disabled[^>]*>Search clans<\/button>/);
@@ -153,7 +158,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=ui-category-001/,
+  assert.match(html, /app\.mjs\?v=start-fight-001/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -178,7 +183,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=char-stats-002/,
+  assert.match(html, /iron-ui\.css\?v=ui-compact-001/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -915,8 +920,8 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(store.has("idle-game-alpha-clock-v1"),false,
       "full reset removes acceleration and virtual-time offset");
     const reset=JSON.parse(store.get(SAVE_KEY));
-    assert.deepEqual(reset,newGame(now),
-      "reset restores every starting default including levels, stats, coins and route");
+    assert.deepEqual(reset,chooseActivity(newGame(now), "fighting", now, ()=>.5).state,
+      "reset restores every starting default including levels, stats, coins and starting arena route");
     assert.equal(reset.skills.mining.level,1);
     assert.equal(reset.items.stone,0);
     assert.equal(reset.coins,0);
