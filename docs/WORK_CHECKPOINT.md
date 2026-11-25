@@ -1,5 +1,11 @@
 # Current working checkpoint
 
+## APPRENTICE-A3 — PR #181 (implementation in progress)
+
+Core shared modules, next-stage shop UI, character stat breakdown and actual progression simulator updated. Source-imported smoke checks: 17,952 eligibility checks (544 legal), 4,992 condition checks, 960 valid combat sessions/duels, 63 real purchases, 21 stat sections. Evidence: [test output](mechanics/GEAR_A3_IMPLEMENTATION_TEST_RESULTS.json), `tools/test_gear_progression_a3.mjs`. Initial head 9852f86: protocol PASS 45706684540; website FAIL 45706684509, combat FAIL 45706684478, systems FAIL 45706684611; legacy direct-purchase fixtures, old NPC-stat expectation and cache version assertion updated without bypassing purchase restrictions. Head aeaf29d checks pending at observation. Next inspect final-head CI, fix any failures, review cache dependencies and real browser shop interaction, reconcile PRs #179/#180 before merge. No deployment or save reset.
+
+Research evidence remains on PR #179, [combined report](https://github.com/janisp123/idle_game/blob/docs/gear-progression-balance-study/docs/mechanics/GEAR_COMBINED_VALIDATION.md). PR #180 policy overlaps shared documentation. Keep current 4000h S mastery, open arena access, 32 strictly sequential equipment stages, full-credit pricing, unbreakable Masterwork. A4 auto-quality purchases remain separate.
+
 ## APPRENTICE-A2 — PR #178
 
 Automatic Master on page entry after offline settlement, derived 50-level gate, versioned explicit consent, shared claim mutation and exact committed report. Visibility catch-up/ordinary ticks and alpha idle-day tool remain non-claiming. Web Locks serialize login chores; stale snapshot checks reject observed conflicting saves; no claim where coordination unavailable. True transactional concurrency requires future server. No tribute, weapons, equipment or donation changes. Next final CI and Pages.
