@@ -6,12 +6,34 @@ The Long Vigil is the playable game in the Idle Game hobby project. Fight automa
 
 **This project is actively evolving.** Mechanics, content, visuals and long-term plans may change as ideas are tested. The current build is an experiment, not a promise of a fixed final feature set.
 
+![Gladiator striking a shield with a two-handed sword](site/assets/gladiator-shield-clash.png)
+
 ## Play the current alpha
 
 - **[Play in your browser](https://janisp123.github.io/idle_game/play/)**
 - **[Visit the project website](https://janisp123.github.io/idle_game/)**
 
 The playable alpha is an experimental, accelerated test build. Expect changes, rough edges and ongoing balancing. Progress is stored **locally in your browser** and alpha saves may be reset; there are no online accounts, multiplayer or cross-device save synchronization. This is not a production-ready game.
+
+## What you can play now
+
+- Automatic physical combat in five arenas, with bow, spear, sword & shield, greatsword or war hammer.
+- Arena coins and equipment from Non-grade through S, with Poor, Common, Fine and unbreakable Masterwork quality, four armour slots and material/handling trade-offs.
+- Separate retained weapon and armour expertise; equipment purchase gates use activated Fighting level and coins, not character class. All arena difficulties can be attempted.
+- Strength, dexterity and endurance; eleven activities: Fighting, Hunting, Fishing, Foraging, Woodcutting, Mining, Smithing, Construction, Cooking, Farming and Training.
+- Unlimited offline elapsed time, queued work and explicit Skill Master claims. Effective stats and gear are frozen during absence; skill XP is capped at one unclaimed level bar.
+- Expandable live character statistics with actual source breakdowns, and developer-only production-linked combat and systems simulations.
+
+The long-term balance target is one specialized endgame build after approximately six months of sustained normal-profile progression, not a calendar lock or guaranteed outcome. Current alpha timing is deliberately accelerated.
+
+## Guiding ideas
+
+- **Progress at your own pace.** The game is designed for players who may step away for long periods rather than check in every day.
+- **A world worth returning to.** Different activities, character development and encounters should create lasting choices without demanding constant attention.
+- **Atmosphere over noise.** Original dark-fantasy artwork and a readable, mobile-friendly interface matter as much as the underlying rules.
+- **Build carefully, change when needed.** Gameplay decisions are tested and revised; ideas are not guaranteed features.
+
+These are design goals, not a final roadmap. For current implementation details, use the mechanics documentation and repository history rather than this overview.
 
 ## A Hobby, Not a Business
 
@@ -34,26 +56,6 @@ By choosing to play, you acknowledge and accept these risks. I cannot guarantee 
 Constructive feedback is always welcome, but please respect that this project is developed in my free time.
 
 Enjoy the game for what it is — something made for the joy of creating.
-
-## What you can play now
-
-- Automatic physical combat in five arenas, with bow, spear, sword & shield, greatsword or war hammer.
-- Arena coins and equipment from Non-grade through S, with Poor, Common, Fine and unbreakable Masterwork quality, four armour slots and material/handling trade-offs.
-- Separate retained weapon and armour expertise; equipment purchase gates use activated Fighting level and coins, not character class. All arena difficulties can be attempted.
-- Strength, dexterity and endurance; eleven activities: Fighting, Hunting, Fishing, Foraging, Woodcutting, Mining, Smithing, Construction, Cooking, Farming and Training.
-- Unlimited offline elapsed time, queued work and explicit Skill Master claims. Effective stats and gear are frozen during absence; skill XP is capped at one unclaimed level bar.
-- Expandable live character statistics with actual source breakdowns, and developer-only production-linked combat and systems simulations.
-
-The long-term balance target is one specialized endgame build after approximately six months of sustained normal-profile progression, not a calendar lock or guaranteed outcome. Current alpha timing is deliberately accelerated.
-
-## Guiding ideas
-
-- **Progress at your own pace.** The game is designed for players who may step away for long periods rather than check in every day.
-- **A world worth returning to.** Different activities, character development and encounters should create lasting choices without demanding constant attention.
-- **Atmosphere over noise.** Original dark-fantasy artwork and a readable, mobile-friendly interface matter as much as the underlying rules.
-- **Build carefully, change when needed.** Gameplay decisions are tested and revised; ideas are not guaranteed features.
-
-These are design goals, not a final roadmap. For current implementation details, use the mechanics documentation and repository history rather than this overview.
 
 ## Open engineering library
 

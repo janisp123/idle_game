@@ -4,9 +4,9 @@
 
 Owner approved the exact new gladiator hero, gameplay-first public copy and status reconciliation; no gameplay/save changes. Base `4f752fc`, branch `site/gladiator-hero`. Original image transferred through Drive; Git blob `e4aa812be3fb64fe77fc3e27a5b0d3c7eff88d12` matches local original. FREE-001 deployed in Pages 45595434419. Next integrate, test, and verify public Pages.
 
-## FREE-001 · STARTED (2026-11-25, chat)
+## FREE-001 · DEPLOYED (2026-11-25, chat)
 
-Owner approved permanent zero monetization for The Long Vigil and the exact A Hobby, Not a Business public statement. Base `ce46729`; SITE-003 Pages 45593799089 verified successful. Branch `site/permanently-free`. Add identical policy copy to landing and README, durable decision and agent guard; no game or save edits and no license change. Next verify final checks and Pages.
+Owner approved permanent zero monetization for The Long Vigil and the exact A Hobby, Not a Business public statement. Base `ce46729`; SITE-003 Pages 45593799089 verified successful. Branch `site/permanently-free`. Add identical policy copy to landing and README, durable decision and agent guard; no game or save edits and no license change. Final head `d43e714` passed website 45595342544 (after deterministic scroll test correction), protocol 45595342617 and systems 45595342796. Merged `4f752fc`; Pages 45595434419 succeeded and live statement verified.
 
 ## SITE-003 · DEPLOYED (2026-11-25, chat)
 
