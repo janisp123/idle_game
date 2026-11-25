@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## APPRENTICE-A2 · STARTED (2026-11-25, chat)
+
+Owner requests continuing with automatic Skill Master at 50 earned activity levels. Branch `feat/apprentice-auto-master`, base `5b996be`. Explicit opt-in to current 100% tribute, login-only claim after settlement using shared Master mutation, one level per ready skill, accurate report after persistence. Web Locks serialize automatic login attempts; stale-write guards protect against observed other-tab saves; browser-local alpha is not an authoritative concurrent database. No automatic offline levels, equipment or donation changes. Next implement/test.
+
 ## APPRENTICE-A1 · STARTED (2026-11-25, chat)
 
 Owner approved starting Apprentice implementation. Fresh branch `feat/apprentice-foundation` base `29d7bee` replaces overlapping draft #176; carry forward plan and pure unlock policy/tests. Scope: earned activated levels minus starting levels, 1..5 queue slots, real queue guards, foldable Assistant menu, locked/unimplemented chores clearly marked, preserve preexisting valid routes. No automation spending, tribute, new weapons or live clan changes. Added pure policy and real queue gating, five-slot bounded settlement, menu and source-linked tests; updated synthetic queue regression fixtures and lab sample. Next final CI.
