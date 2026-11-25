@@ -1,0 +1,83 @@
+{
+  "module": "clan",
+  "policy": {
+    "capacity": 25,
+    "dailyCap": 10
+  },
+  "actions": [
+    {
+      "op": "createPlayer",
+      "id": "test-leader",
+      "playedDays": 7
+    },
+    {
+      "op": "createClan",
+      "actor": "test-leader",
+      "id": "test-vigil"
+    },
+    {
+      "op": "createPlayer",
+      "id": "test-miner",
+      "activity": "mining",
+      "stock": {
+        "stone": 1000000
+      }
+    },
+    {
+      "op": "createPlayer",
+      "id": "test-woodcutter",
+      "activity": "woodcutting",
+      "stock": {
+        "log": 100
+      }
+    },
+    {
+      "op": "join",
+      "actor": "test-miner",
+      "clanId": "test-vigil"
+    },
+    {
+      "op": "join",
+      "actor": "test-woodcutter",
+      "clanId": "test-vigil"
+    },
+    {
+      "op": "assignRank",
+      "actor": "test-leader",
+      "target": "test-miner",
+      "rank": "general"
+    },
+    {
+      "op": "donate",
+      "actor": "test-miner",
+      "items": {
+        "stone": 10
+      }
+    },
+    {
+      "op": "donate",
+      "actor": "test-miner",
+      "items": {
+        "stone": 1
+      }
+    },
+    {
+      "op": "donate",
+      "actor": "test-woodcutter",
+      "items": {
+        "log": 10
+      }
+    },
+    {
+      "op": "advanceDays",
+      "days": 1
+    },
+    {
+      "op": "donate",
+      "actor": "test-miner",
+      "items": {
+        "stone": 10
+      }
+    }
+  ]
+}

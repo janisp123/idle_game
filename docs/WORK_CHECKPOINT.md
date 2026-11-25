@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## CLAN-TEST-001 — fake player scenario lab
+
+PR #174 adds developer-only synthetic players, clan admission, role/transfer, seven-day cooldown and once-daily contribution scenarios, real item IDs and explicit fixture policy. Run `node tools/system-lab.mjs --config tools/simulation/clan-example.json`. CI includes 100 members x 30 days; production clan service, building balance and actual engine-generated test-player income remain unimplemented. Next verify final checks and merge.
+
 ## CLAN-PLAN-001 — Pre-server implementation roadmap
 
 PR #171 merged dcc76b6 after systems 45632295464 and protocol 45632295716 passed. [CLAN_IMPLEMENTATION_PLAN.md](CLAN_IMPLEMENTATION_PLAN.md), mapping every intended screen to operations, data boundaries and proposed code locations, current material sources, staged offline development and server deployment gates. Design only; next agree on exact rank permissions, membership edge cases, donation and building economics, then implement/test pure rules in scoped batches. Renting a server is not a prerequisite for local development. PR #172 records new [castle and academy brainstorming](brainstorm/GROUPS_AND_CLANS.md) as proposals, not authorized implementation; CLAN-WARFARE-001 now records the approved permanent earned levels/zero-floor XP loss rule; remaining PvE XP curve, difficulty, daily balance, activity-specific research and building effects need review.

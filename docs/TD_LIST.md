@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## CLAN-TEST-001 — Developer-only fake clan members
+
+- **Goal:** Generate synthetic players and clans to test membership, roles, cooldown, contributions and warehouse accounting before hosting.
+- **Acceptance:** Repeatable scenarios with explicit test policy, actual item IDs, synthetic test IDs, 100-member/30-day test, negative-path tests; integrated into developer lab and CI; no live player data, public admin tool or production rule changes.
+- **Status:** IN_REVIEW — PR #174.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## CLAN-PLAN-001 — Pre-server clan development and implementation handoff
 
 - **Goal:** Prepare useful design and implementation specifications before the Owner rents a server; clearly map features to screens, functions and data ownership.

@@ -101,6 +101,8 @@ Candidate catalogue from CLAN_DESIGN: Clan Hall, Warehouse, Barracks, Training G
 
 **New owner brainstorming (2026-11-25):** [Castle and activity research proposals](brainstorm/GROUPS_AND_CLANS.md#2026-11-25--owners-castle-and-building-proposals-not-implementation-approval) define Hospital recovery, Barracks capacity, independent Academy research, Walls defence, Archer Turrets attack, and optional daily leader-triggered NPC castle defence with signed Warfare XP and a zero floor. CLAN-WARFARE-001 additionally requires earned levels to remain permanent: defeat subtracts only from current-level XP and discards excess at zero. Tests must verify repeated defeats never lower the level. The linked screen/function map and test scenarios extend P1/P2 design work only. Exact effects and PvE mechanics require approval before adding to P3 or server integration; no PvP authorization.
 
+**CLAN-TEST-001:** the developer-only scenario lab in `tools/simulation/clan-fixtures.mjs` supports synthetic player creation, admission, departure/cooldown, ranks/transfer, online status and donation/warehouse tests. Run the example via `node tools/system-lab.mjs --config tools/simulation/clan-example.json`. This is explicitly a fixture, not production clan logic; capacity, donation cap and unresolved policies are test inputs/choices. No server, player saves or live UI needed. Extend with real engine settlement and approved building rules later.
+
 ## 6. Order of work before renting a server
 
 | Stage | Deliverable and acceptance | Status |
