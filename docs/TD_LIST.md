@@ -12,10 +12,10 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Implement owner-approved physical counter system with distinct weapon/armour strengths and arena specialization.
 - **Acceptance:** Every weapon has meaningful favourable/unfavourable matchups; intended home/away effects; no universal build; strong gear grade separation; test all 15 armoured combinations and normal progression against six-month target. Typical counters 60–70% proposed, not guaranteed. Preserve prices/XP/expertise; no scripted wins, class locks, or artificial unarmoured bonuses. Verify frozen-outcome save compatibility and communicate any necessary alpha reset before deployment.
-- **Status:** IN_REVIEW — [PR #165](https://github.com/janisp123/idle_game/pull/165); iterative simulation and release gates pending.
+- **Status:** DONE — PR #165 merged `634b56c`, final four workflows passed, Pages 45619113871 succeeded. [Verification report](mechanics/BAL_002_VERIFICATION.md); V16 alpha reset, remaining tuning provisional.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #165).
 
 ## BAL-AUDIT-001 — Playability, weapon counters, armour and terrain
 

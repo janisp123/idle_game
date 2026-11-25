@@ -1,8 +1,8 @@
 # Current working checkpoint
 
-## BAL-002 — candidate verified, PR #165 pending release
+## BAL-002 — deployed PR #165
 
-Owner-approved weapon/armour/terrain counter implementation. Full audit head `0db45d7` [systems 45618540299](https://github.com/janisp123/idle_game/actions/runs/45618540299): 366,960 audit duel executions, all 15 daily normal builds reach S Masterwork days 169–171. [Report](mechanics/BAL_002_VERIFICATION.md), exact formulas in COMBAT/ARMOUR. Candidate website/browser V15 assertion corrected and all four workflows passed at 17161f2. V16 alpha save reset deliberately communicated; current-version saves and offline parity retained. Final-head checks, merge and Pages verification pending. No tuning changes to prices, expertise or XP. Next: verify release, then owner playtest residual counters.
+Owner-approved weapon/armour/terrain counter implementation. Full audit head `0db45d7` [systems 45618540299](https://github.com/janisp123/idle_game/actions/runs/45618540299): 366,960 audit duel executions, all 15 daily normal builds reach S Masterwork days 169–171. [Report](mechanics/BAL_002_VERIFICATION.md), exact formulas in COMBAT/ARMOUR. Candidate website/browser V15 assertion corrected and all four workflows passed at 17161f2. V16 alpha save reset deliberately communicated; current-version saves and offline parity retained. Final head `0a0097a4` passed website 45619016625, combat 45619016530, systems 45619016718 and protocol 45619016604. Merge `634b56c`; [Pages 45619113871](https://github.com/janisp123/idle_game/actions/runs/45619113871) validation and publish succeeded. No independent public rendering check. No tuning changes to prices, expertise or XP. Next: owner playtest residual counters.
 
 ## BAL-AUDIT-001 — verified current-build diagnostic
 
