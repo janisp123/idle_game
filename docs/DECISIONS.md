@@ -4,6 +4,7 @@
 
 | ID | Date | Approved by | Decision | Status |
 | --- | --- | --- | --- | --- |
+| FREE-001 | 2026-11-25 | Owner | **The Long Vigil will always be 100% free.** No advertising (including optional or rewarded ads), microtransactions, paid content or access, subscriptions, pay-to-win, donations, tips, Buy Me a Coffee or other financial contributions or monetization. This is the Owner's first game and a noncommercial hobby project; no development schedule, bug-free operation, uninterrupted availability, balance or progress preservation is promised. Constructive feedback is welcome. This commitment applies to The Long Vigil, not all future projects or third-party MIT-licensed reuse; no license change. | Active — permanent product policy |
 | PRO-001 | 2026-11-18 | Owner | Common path `docs/TD_LIST.md` and shared project files across repositories. | Active |
 | PRO-002 | 2026-11-18 | Owner | `chat`, `cw`, `codex` name distinct agent workflows. | Active |
 | PRO-003 | 2026-11-18 | Owner | Read current remote TD before action; verify PRs, checks and handoffs. | Active |
