@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## ALPHA-GEAR-001 · STARTED
+
+Branch: `alpha/six-month-gear-benchmark`. Goal: simulate gear progression and add six-month Max Stats and +100,000 arena coins controls. Last verified: GLAD-005 deployed. Pending: model, simulations, controls and release. Next: inspect progression and run the benchmark.
+
 ## GLAD-005 · DEPLOYED · 2026-11-24
 
 Goal: Verify and finalize bounded offline combat, balance, and the playable gladiator loop.
