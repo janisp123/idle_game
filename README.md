@@ -13,6 +13,28 @@ The Long Vigil is the playable game in the Idle Game hobby project. Fight automa
 
 The playable alpha is an experimental, accelerated test build. Expect changes, rough edges and ongoing balancing. Progress is stored **locally in your browser** and alpha saves may be reset; there are no online accounts, multiplayer or cross-device save synchronization. This is not a production-ready game.
 
+## A Hobby, Not a Business
+
+The Long Vigil is my first gaming project, built out of curiosity, passion and a desire to create something enjoyable.
+
+**It will always be 100% free.**
+
+- No advertisements.
+- No microtransactions.
+- No subscriptions.
+- No pay-to-win mechanics.
+- No donations or financial contributions.
+
+Not even a button to buy me a coffee.
+
+There is, however, a catch. This is an independent hobby project, not a commercial product. Development may be slow or irregular. Bugs, balance issues, unfinished features and loss of progress are possible.
+
+By choosing to play, you acknowledge and accept these risks. I cannot guarantee uninterrupted availability, preservation of progress or regular updates.
+
+Constructive feedback is always welcome, but please respect that this project is developed in my free time.
+
+Enjoy the game for what it is — something made for the joy of creating.
+
 ## What you can play now
 
 - Automatic physical combat in five arenas, with bow, spear, sword & shield, greatsword or war hammer.
