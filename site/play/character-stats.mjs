@@ -1,7 +1,7 @@
 import {GRADES,workMultiplier,benchmark} from "./difficulty.mjs?v=alpha-gear-a2";
 // Read-only character sheet. All numeric totals come from the selected build
 // constructed by the engine and the shared physical resolver helpers.
-import {desiredArenaPlayer,ACTIVITIES,SKILL_BALANCE,PRODUCTION_RECIPES} from "./engine.mjs?v=bal-002";
+import {desiredArenaPlayer,ACTIVITIES,SKILL_BALANCE,PRODUCTION_RECIPES,activityRewardCapped} from "./engine.mjs?v=bal-002";
 import {ATTRIBUTE_BALANCE,ATTRIBUTES,ACTIVITY_STAT_WEIGHTS,effectiveAttributeProgress,masteryBonusesForSkill} from "./attributes.mjs?v=glad-001";
 import {physicalBuildStats} from "./physical-duel.mjs?v=bal-002";
 import {ARMOUR_SLOTS,ARMOUR_TIER_LABELS,armourStats,initialArmour,armourOption,WEAPON_PIECES} from "./armour.mjs?v=bal-002";
@@ -134,7 +134,8 @@ export function characterStats(state){
     // difficulty for XP. Display at currently earned stats for the next
     // settlement, not as a promise of the frozen offline outcome.
     const difficulty=id==="fighting"?1:workMultiplier(tier,ACTIVITY_STAT_WEIGHTS[id],earned);
-    const efficiency=mastery*difficulty;
+    const capped=activityRewardCapped(state,id);
+    const efficiency=capped?0:mastery*difficulty;
     const crafted=Object.hasOwn(PRODUCTION_RECIPES,id);
     const weights=ACTIVITY_STAT_WEIGHTS[id];
     const weightedStat=Object.entries(weights).reduce((n,[stat,w])=>n+earned[stat].value*w/100,0);
@@ -146,10 +147,10 @@ export function characterStats(state){
       ...Object.entries(weights).map(([stat,w])=>row(stat+" · "+w+"% weight",fmt(earned[stat].value*w/100))),
       row("Difficulty / readiness factor","×"+fmt(difficulty)));
     else rows.push(row("Difficulty XP/yield factor","×1"));
-    rows.push(row("Combined XP factor","×"+fmt(efficiency)));
-    if(activity.item!==null)rows.push(row(crafted?"Recipe output per successful cycle":"Primary resource yield factor",crafted?"1":"×"+fmt(efficiency)));
+    rows.push(row("Combined XP factor","×"+fmt(efficiency)),row("Reward status",capped?"Paused · Skill Master":"Available"));
+    if(activity.item!==null)rows.push(row(crafted?"Recipe output per successful cycle":"Primary resource yield factor",crafted?(capped?"0":"1"):"×"+fmt(efficiency)));
     rows.push(row("Attribute training split",Object.entries(weights).map(([stat,w])=>stat+" "+w+"%").join(" · ")));
-    const note=id==="fighting"?"Gear affects combat performance and productive time through victory or resurrection, not the direct skill XP multiplier. Arena coins depend on actual wins and difficulty.":crafted?"Recipes require available inputs. Efficiency affects skill XP, not the number of items per successful recipe.":"Efficiency affects skill XP"+(activity.item!==null?" and primary resource yield":"")+", not action duration. Random batch variation and the skill XP cap still apply.";
+    const note=capped?"Full XP bar: all rewards and productive time are paused until the Skill Master advances this skill.":id==="fighting"?"Gear affects combat performance and productive time through victory or resurrection, not the direct skill XP multiplier. Arena coins depend on actual wins and difficulty.":crafted?"Recipes require available inputs. Efficiency affects skill XP, not the number of items per successful recipe.":"Efficiency affects skill XP"+(activity.item!==null?" and primary resource yield":"")+", not action duration. Random batch variation and the skill XP cap still apply.";
     overview.push({key:"activity-"+id,group:"Activity modifiers",title:activity.title,summary:"×"+fmt(efficiency),
       subtitle:id==="fighting"?"XP factor · combat gear effects above":crafted?"XP factor · no direct gear bonus":activity.item!==null?"XP / yield factor · no direct gear bonus":"XP factor · no direct gear bonus",
       rows,note});
