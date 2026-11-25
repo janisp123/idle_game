@@ -59,6 +59,8 @@ def check():
     assert parser.stylesheet and parser.favicon, "Stylesheet and icon are required"
     assert {"header", "nav", "main", "footer", "h1", "h2"}.issubset(parser.tags)
     assert {"main", "vision", "library"}.issubset(parser.ids)
+    for phrase in ("The Long Vigil", "Eleven activities", "Masterwork equipment cannot break", "may be reset", "No offline time cutoff"):
+        assert phrase in html, f"Missing current alpha landing information: {phrase}"
     # Keep a single stable Play Now entry on the landing page.
     assert len(parser.play_controls) == 1, "Landing page needs exactly one Play Now control"
     play_tag, play_attrs = parser.play_controls[0]

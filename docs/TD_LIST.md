@@ -8,14 +8,23 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## SITE-003 — Current alpha website and repository overview
+
+- **Goal:** Refresh the public landing page, README and stale current-status documentation without changing game mechanics or saves.
+- **Acceptance:** Current feature descriptions, clear alpha warning, original artwork and Play Now preserved; static checks and actual 390/1440px browser checks; verify Pages separately after merge.
+- **Status:** IN_REVIEW — [PR #160](https://github.com/janisp123/idle_game/pull/160); final checks and deployment not yet verified.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## SIM-003 — Production parity and automatic simulation triggers
 
 - **Goal:** Keep simulation tools synchronized with actual gameplay source and run relevant simulation checks automatically.
 - **Acceptance:** Actual game snapshot and settled payout/event parity, novice/trained distinction, source path coverage, optional full balance, no site or save changes.
-- **Status:** PENDING PR #159; checks pending.
+- **Status:** DONE — PR #159 merged 67f62e0; no site changes. Independent final-head CI run listing unavailable during SITE-003; full audit remains separate.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #159).
 
 ## CHAR-STATS-002 — Compact character power and activity overview
 
@@ -24,7 +33,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Status:** DONE — PR #158 merged 3002fb1, Pages 45589039287 succeeded.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #158).
 
 ## CHAR-STATS-001 — Transparent live character statistics
 
@@ -33,11 +42,11 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Status:** DONE — PR #157 merged ca689467, Pages 45585083404 succeeded.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #157).
 
 ## ALPHA-GEAR-001 — Six-month build progression, gear economy and expertise
 
-**Owner-approved direction (2026-11-25).** Extend the active [draft PR #154](https://github.com/janisp123/idle_game/pull/154). This newer scope supersedes conflicting gear/fight difficulty requirements in the historical GLAD roadmap. Six months of sustained play should develop **one** endgame build (one weapon style and one armour family), not universal mastery. Do not hard-lock arena opponents; do gate purchases by Fighting level and coins. Exact tuning is provisional until measured.
+**Owner-approved direction (2026-11-25).** Implemented in [PR #154](https://github.com/janisp123/idle_game/pull/154); retain the following approved scope as historical acceptance evidence. This newer scope supersedes conflicting gear/fight difficulty requirements in the historical GLAD roadmap. Six months of sustained play should develop **one** endgame build (one weapon style and one armour family), not universal mastery. Do not hard-lock arena opponents; do gate purchases by Fighting level and coins. Exact tuning is provisional until measured.
 
 ### A — Source-backed benchmark and economy design
 - Inspect the production progression, difficulty, shop, combat and offline modules. Use the existing developer-only combat simulator and systems lab; never copy their mechanics into an independent gameplay implementation.
@@ -76,7 +85,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Dependencies:** ALPHA-GEAR-001.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #156).
 
 ## GLADIATOR REWORK — owner-directed Codex implementation sequence (2026-11-24)
 

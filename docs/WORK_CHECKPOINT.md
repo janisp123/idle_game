@@ -1,8 +1,12 @@
 # Current working checkpoint
 
-## SIM-003 — draft PR #159
+## SITE-003 — draft PR #160
 
-Production parity safeguards and workflow coverage implemented; final CI pending. No game source changed. Next verify checks and merge.
+Owner-approved landing page, README and current-status reconciliation. No game or save changes. Base 67f62e0; final checks and Pages verification pending. Next inspect PR final-head checks and changed files, then merge only after readiness gates and verify deployment. Full balance audit remains a separate task.
+
+## SIM-003 — merged PR #159
+
+Production parity safeguards and workflow coverage merged at 67f62e0. GitHub confirms merged; independent final-head CI run listing returned no runs during SITE-003, so no additional pass claim. No game source changed. Full balance remains opt-in; the previous balance results predate this synchronization.
 
 ## CHAR-STATS-002 — deployed PR #158
 
@@ -21,8 +25,8 @@ Exact approved assets transferred via Drive, SHA-256 and browser checks passed. 
 - **Live release:** [Play](https://janisp123.github.io/idle_game/play/). Merge `d13f8b2107ebc8061115bf06ccd25c3a91cae193` verified on main; [Pages 45570157207](https://github.com/janisp123/idle_game/actions/runs/45570157207) completed successfully on that revision. Independent fresh public HTTP fetch was unavailable; no claim of separate HTTP or physical-device verification.
 - **Final checks:** final PR head `76b720355321c07983224ed74606e85b7f97ab6a` passed [website 45570023066](https://github.com/janisp123/idle_game/actions/runs/45570023066), [systems 45570023131](https://github.com/janisp123/idle_game/actions/runs/45570023131), [combat 45570023102](https://github.com/janisp123/idle_game/actions/runs/45570023102), [protocol 45570023017](https://github.com/janisp123/idle_game/actions/runs/45570023017). 111 game/UI tests, 13 systems tests and real Chromium at 390/1440px; main website validation/publish passed too.
 - **Scope:** A0–A9 gameplay deployed. Gear access, prices, grade/quality, nine retained expertise tracks, immutable bouts, physical balance, visual verdicts, updated Max Stats 149/149/137 and Lv52 with selected expertise, +100,000 coins. A8 audit 214,320 additional fights; six distinct tested normal builds reached S Masterwork days 168–172. V15 resets old disposable alpha saves with visible notice. Full balance is provisional; see CHANGELOG.md and mechanics/ALPHA_GEAR_FINAL_AUDIT.md.
-- **Outstanding:** Owner explicitly deferred exact verdict illustrations. ALPHA-ART-001 remains blocked pending binary transfer; existing artwork used. No custom art claim.
-- **Next:** Owner plays the new alpha on their device and reports usability/balance problems; Codex reviews A0–A9 evidence and can integrate the original ZIP in a fresh PR when available. No new gameplay scope inferred. Older historical NEXT entries below do not supersede this checkpoint.
+- **At this historical release:** Owner deferred exact verdict illustrations. Subsequently completed and deployed in PR #156 (see current ALPHA-ART-001 above).
+- **Next:** Owner plays the new alpha on their device and reports usability/balance problems; Codex reviews A0–A9 evidence if needed; the exact art follow-up has since deployed. No new gameplay scope inferred. Older historical NEXT entries below do not supersede this checkpoint.
 
 ## GLAD-PLAN-001 — owner-approved gladiator rework roadmap (2026-11-24)
 
