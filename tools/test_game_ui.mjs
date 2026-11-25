@@ -719,7 +719,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.wagons[0].plannedMs, UNTIL_LEVEL_UP);
     const masteryMeter = elements.get("wagonList").children[0].children[2];
-    assert.match(masteryMeter.getAttribute("aria-label"), /Skill Master readiness/);
+    assert.match(masteryMeter.getAttribute("aria-label"), /full XP/);
     assert.equal(state.productiveElapsedMs, 0);
     // Restore a finite window: changing the stop type takes effect immediately.
     const afterMastery = elements.get("wagonList").children[0].children[3];
