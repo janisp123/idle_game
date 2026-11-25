@@ -90,6 +90,18 @@ try{
   await send("Page.addScriptToEvaluateOnNewDocument",{source:"Date.now=()=>"+fixedNow+";"});
   for(const width of [390,1440]){
     await send("Emulation.setDeviceMetricsOverride",{width,height:width===390?844:1000,deviceScaleFactor:1,mobile:width===390});
+    const landingUrl=origin+"/?smoke=landing-"+width;
+    const landingNav=await send("Page.navigate",{url:landingUrl});
+    assert.equal(landingNav.errorText,undefined);
+    await until(()=>evaluate(`location.href===${JSON.stringify(landingUrl)}&&document.readyState==="complete"&&document.querySelector(".hero-art img")?.naturalWidth>0`),"landing page loaded "+width);
+    const landing=await evaluate(`(()=>{const play=document.querySelector(".button-play"),art=document.querySelector(".hero-art img"),box=play.getBoundingClientRect();
+      return {title:document.title,heading:document.querySelector("h1").textContent,copy:document.body.innerText,href:play.getAttribute("href"),width:box.width,height:box.height,visible:box.top>=0&&box.bottom<=innerHeight,
+        artWidth:art.naturalWidth,overflow:document.documentElement.scrollWidth-innerWidth};})()`);
+    assert.match(landing.title,/The Long Vigil/);assert.match(landing.heading,/The world is cruel/);
+    assert.match(landing.copy,/Eleven activities/);assert.match(landing.copy,/may be reset/);
+    assert.equal(landing.href,"./play/");assert.ok(landing.width>0&&landing.height>=40&&landing.visible,"Play Now must be visible above the fold");
+    assert.ok(landing.artWidth>0&&landing.overflow<=2,"landing overflow or missing art");
+    await shot("landing-"+width);
     await navigate("clean-"+width,{[saveKey]:null,[clockKey]:null});
     const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=11;s.name="Old alpha";return JSON.stringify(s);})()`);
     await navigate("reset-"+width,{[saveKey]:old,[clockKey]:JSON.stringify({version:1,realAnchorMs:0,gameAnchorMs:0,speed:10})});
