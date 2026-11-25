@@ -17,9 +17,9 @@ import { awardAttributeTime,effectiveAttributeProgress } from '../site/play/attr
 import { armourStats,ARMOUR_SLOTS } from '../site/play/armour.mjs';
 import { seededCombatRandom } from '../site/play/combat.mjs';
 
-test('the lab registry covers all production-backed modules and is deterministic',()=>{
+test('the lab registry covers production-backed modules plus the synthetic clan fixture and is deterministic',()=>{
   assert.deepEqual(Object.keys(LAB_MODULES).sort(),
-    ['combat','activity','loot','crafting','attributes','master','equipment','queue','save'].sort());
+    ['combat','activity','loot','crafting','attributes','master','equipment','queue','save','clan'].sort());
   const config=JSON.parse(readFileSync('tools/simulation/example-scenarios.json','utf8'));
   const before=JSON.stringify(config);
   const a=runLab(config),b=runLab(config);
