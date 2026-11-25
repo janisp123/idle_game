@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## START-FIGHT-001 — Automatic first-entry arena
+
+- **Goal:** Fresh character immediately begins Fighting with starter equipment and lowest difficulty.
+- **Acceptance:** One Fighting Forever route, no initial menu/preparation gate; offline continuation under current XP cap; existing saves untouched, explicit alpha reset same start; real mobile/desktop fresh-entry regression.
+- **Status:** IN_REVIEW — PR #175 (combined with approved UI-COMPACT-001).
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## UI-COMPACT-001 — Compact skill and resources panels
 
 - **Goal:** Combine Skill Progress and Skill Master; fold Resources by default.
