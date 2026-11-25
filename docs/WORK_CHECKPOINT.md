@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## RESEARCH-SAVE-001 — durable research and simulation handoff (PR #180)
+
+Owner requires all research and simulation evidence to be pushed and linked before handoff; see AGENTS.md and DECISIONS.md. Gear research and reproducible grade-matrix harness are on pending [PR #179](https://github.com/janisp123/idle_game/pull/179): [original study](https://github.com/janisp123/idle_game/blob/docs/gear-progression-balance-study/docs/mechanics/GEAR_PROGRESSION_STUDY.md), [matrix results](https://github.com/janisp123/idle_game/blob/docs/gear-progression-balance-study/docs/mechanics/GEAR_GRADE_MATRIX.md), [harness](https://github.com/janisp123/idle_game/blob/docs/gear-progression-balance-study/tools/gear-progression-matrix.mjs). No live gameplay changes; candidate durability and economy remain pending. Policy PR #180 awaits checks and overlap review.
+
 ## APPRENTICE-A2 — PR #178
 
 Automatic Master on page entry after offline settlement, derived 50-level gate, versioned explicit consent, shared claim mutation and exact committed report. Visibility catch-up/ordinary ticks and alpha idle-day tool remain non-claiming. Web Locks serialize login chores; stale snapshot checks reject observed conflicting saves; no claim where coordination unavailable. True transactional concurrency requires future server. No tribute, weapons, equipment or donation changes. Next final CI and Pages.
