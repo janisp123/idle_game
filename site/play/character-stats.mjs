@@ -76,13 +76,13 @@ export function characterStats(state){
     row("Base accuracy",pct(v.aimBase)),row(weaponName+" · trained accuracy",pp(trained.weapon.accuracy)),row("Expertise penalty",pp(v.accuracy-trained.weapon.accuracy)),
     row("DEX advantage per point",pp(v.aimDexPerPoint)),row("Fighting advantage per level",pp(v.aimSkillPerLevel)),
     ...(p.loadout==="bow"?[row("Close-range shot penalty",pp(v.aimCloseBow)),row("Far-range shot advantage",pp(v.aimFarBow))]:[]),
-    ...(p.loadout==="spear"?[row("Close spear penalty",pp(v.aimCloseSpear))]:[]),
+    ...(p.loadout==="spear"?[row("Close spear penalty",pp(v.aimCloseSpear)),row("Reach thrust advantage",pp(v.aimReachSpear))]:[]),
     row("Missing swing clearance (each)",pp(-v.aimClearance)),row("Accuracy bounds",pct(v.aimMinimum)+"–"+pct(v.aimMaximum))
   ],"DEX and skill contributions are relative to the enemy; line of sight and cover can also reduce ranged accuracy."));
   sections.push(section("Armour penetration",pct(v.penetration),[row(weaponName+" · trained penetration",pct(trained.weapon.penetration)),row("Expertise penalty",pp(v.penetration-trained.weapon.penetration))]));
   sections.push(section("Initiative score",fmt(v.initiativeScore),[row("Dexterity",fmt(v.initiativeDex)),row("Mobility ÷ 10",signed(v.initiativeMobility))],"Compared against the opponent; not a fixed first-strike chance."));
   sections.push(section("Block / parry","Conditional",[
-    row("Shield block",pct(v.block)),row("Shield block vs blunt",pct(v.bluntBlock)),row("Greatsword ready parry",pct(v.parry)),row("Greatsword recovering parry",pct(v.recoveryParry)),row("Relevant equipment proficiency",pct(v.weapon.proficiency)),row("Guard after heavy impact","Temporarily reduced")
+    row("Shield block",pct(v.block)),row("Shield block vs blunt",pct(v.bluntBlock)),row("Greatsword ready parry",pct(v.parry)),row("Greatsword recovering parry",pct(v.recoveryParry)),row("Relevant equipment proficiency",pct(v.weapon.proficiency)),row("Guard after heavy impact","Temporarily reduced"),row("Shield block impact · standard",pct(v.guardRules.blockImpact)),row("Shield block impact · reach thrust",pct(v.guardRules.reachBlockImpact)),row("Shield block impact · blunt",pct(v.guardRules.bluntBlockImpact))
   ],"Checked after accuracy and dodge; requires intact relevant gear. Rates include expertise."));
   sections.push(section("Equipment condition","At start of bout",[
     row(weaponName,fmt(v.weapon.maxHP)+" HP"+(v.weapon.breakable?"":" · Unbreakable")),
