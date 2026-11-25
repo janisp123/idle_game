@@ -1,8 +1,12 @@
 # Current working checkpoint
 
+## UI-COMPACT-001 — PR #175
+
+Skill progress and Master share one panel; Resources uses native collapsed details. No XP, tribute, resource or save changes. Next verify final checks and Pages.
+
 ## CLAN-TEST-001 — fake player scenario lab
 
-PR #174 adds developer-only synthetic players, clan admission, role/transfer, seven-day cooldown and once-daily contribution scenarios, real item IDs and explicit fixture policy. Run `node tools/system-lab.mjs --config tools/simulation/clan-example.json`. CI includes 100 members x 30 days; production clan service, building balance and actual engine-generated test-player income remain unimplemented. Next verify final checks and merge.
+PR #174 adds developer-only synthetic players, clan admission, role/transfer, seven-day cooldown and once-daily contribution scenarios, real item IDs and explicit fixture policy. Run `node tools/system-lab.mjs --config tools/simulation/clan-example.json`. CI includes 100 members x 30 days; production clan service, building balance and actual engine-generated test-player income remain unimplemented. Final head 226d1fe passed systems 45638587639 and protocol 45638587580; PR #174 merged 152c54e.
 
 ## CLAN-PLAN-001 — Pre-server implementation roadmap
 
