@@ -535,6 +535,7 @@ function settleTransition(state, now, random, frozenEffort) {
 
 
 /** Remaining transition time, bounded regardless of absent years. */
+export function arenaBoutProgress(state){return (state.combatSession?.elapsedMs??0)%BOUT_MS/BOUT_MS;}
 function finishingDuration(state){
   if(state.activity==="fighting")return state.combatSession?
     (BOUT_MS-state.combatSession.elapsedMs%BOUT_MS)%BOUT_MS:0;

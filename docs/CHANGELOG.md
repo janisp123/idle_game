@@ -94,7 +94,7 @@ Branch: `alpha/six-month-gear-benchmark`. Goal: source-backed six-month single-b
 
 **What:** V14 earned/active attribute effort, publish on return/visible tick like expertise. Desired kit, attributes, grade and claimed skill apply at next completed 200-second bout boundary, with immutable original seed/cursor, old/new prize and practice attribution per segment. Purchase/style/armour/difficulty/Master/Max Stats no longer discard an unfinished fight. Fighting departure finishes the actual bout and banks fractional work before travel; restores fraction on re-entry. Noncombat transitions unchanged; finishing UI shows arena progress. No gameplay balance formula changes. Current alpha save reset allowed and not deployed.
 
-**Verification:** regression tests for no-Master return, old rewards and recovery under repeated edits, departure, save validation, offline split and current UI updated. CI and revised economy pending. First source-text patch attempt aborted before write; no partial remote mutation.
+**Verification:** regression tests for no-Master return, old rewards and recovery under repeated edits, departure, save validation, offline split and current UI updated. Initial 5129243 site preflight rejected a direct elapsedMs reference in the app under UI-TIME-001. Move the arena progress fraction into an engine helper, keeping the UI progress-only; update fake-DOM style-switch test to cross a real bout boundary. CI and revised economy pending. First source-text patch attempt aborted before write; no partial remote mutation.
 
 ## GLAD-005 · DEPLOYED · 2026-11-24
 

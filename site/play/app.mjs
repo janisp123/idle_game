@@ -3,7 +3,7 @@ import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
 import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a2";
 import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel } from "./smith.mjs?v=alpha-gear-a3";
 import {
-  setDifficulty, buyEquipment, activateExpertise, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
+  setDifficulty, buyEquipment, activateExpertise, arenaBoutProgress, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
   lootChances, recipeOptions, newGame, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
@@ -901,7 +901,7 @@ function render() {
       ? (ACTIVITIES[state.activity].zone === ACTIVITIES[transition.targetActivity].zone
         ? SAME_ZONE_TRAVEL_MS : ZONE_TRAVEL_MS)
       : (state.activity ? PREPARATION_MS : INITIAL_PREPARATION_MS);
-    const phaseElapsed = transition.phase === "finishing" ? (arenaFinishing?(state.combatSession?.elapsedMs??0)%BOUT_MS:state.progressMs) : transition.phaseProgressMs;
+    const phaseElapsed = transition.phase === "finishing" ? (arenaFinishing?arenaBoutProgress(state)*BOUT_MS:state.progressMs) : transition.phaseProgressMs;
     const percent = Math.min(100, 100 * phaseElapsed / phaseLength);
     ui.transitionFill.style.width = percent.toFixed(2) + "%";
     ui.transitionProgress.setAttribute("aria-valuenow", String(Math.round(percent)));

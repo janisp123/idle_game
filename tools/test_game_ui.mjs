@@ -814,7 +814,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
       "armour item selector is unavailable while editing weapon");
     assert.match(elements.get("equipmentEditHeading").textContent,/Sword & Shield/);
     assert.match(elements.get("combatSkillsText").textContent,/Thrust.*Shield Block/);
-    now += 5_000;
+    now += BOUT_MS;
     tick();
     const shieldDuel = JSON.parse(store.get(SAVE_KEY));
     assert.equal(shieldDuel.combatSession.player.loadout,"sword_shield");
