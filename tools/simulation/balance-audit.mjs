@@ -26,7 +26,7 @@ function paired(a,b,arena,seed,ca,cb,orientation){
     tally(first,out);tally(second,out,"enemy");tally(orientation,out);
   }
 }
-const rows=[],matchups=[];
+const rows=[],matchups=[],terrainRows=[];
 for(const [grade,stat,skill] of [[0,10,1],[3,62,17],[7,150,50]]){
   const builds=styles.flatMap(style=>families.map(family=>({
     style,family,build:createPlayerSnapshot({loadout:style,armour:family,itemGrade:grade,quality:"common",str:stat,dex:stat,end:stat,skill}),
@@ -35,7 +35,12 @@ for(const [grade,stat,skill] of [[0,10,1],[3,62,17],[7,150,50]]){
   const orientation=counts(),mirror=counts();
   for(let i=0;i<builds.length;i++)for(let j=i;j<builds.length;j++){
     const a=builds[i],b=builds[j],ca=counts(),cb=counts();
-    for(const arena of ARENAS)for(const seed of seeds)paired(a.build,b.build,arena,seed,ca,cb,i===j?mirror:orientation);
+    for(const arena of ARENAS){
+      const ta=counts(),tb=counts(),orientationCount=counts();
+      for(const seed of seeds)paired(a.build,b.build,arena,seed,ta,tb,orientationCount);
+      for(const k of Object.keys(ca)){ca[k]+=ta[k];cb[k]+=tb[k];(i===j?mirror:orientation)[k]+=orientationCount[k];}
+      terrainRows.push({grade,arena:arena.id,a:a.style+"/"+a.family,b:b.style+"/"+b.family,...ta,winPct:pct(ta)});
+    }
     // Count every build equally, including exactly one self matchup.
     for(const [target,source] of i===j?[[a.total,ca]]:[[a.total,ca],[b.total,cb]])for(const key of Object.keys(target))target[key]+=source[key];
     matchups.push({grade,a:a.style+"/"+a.family,b:b.style+"/"+b.family,...ca,winPct:pct(ca)});
@@ -49,6 +54,18 @@ for(const [grade,stat,skill] of [[0,10,1],[3,62,17],[7,150,50]]){
       }
     }
     rows.push({kind:"build",grade,style:b.style,family:b.family,pairedWinPct:pct(b.total),npcWinPct:pct(b.npc),npcBouts:b.npc.bouts,npcCoinsPerHour:Math.round(b.coins/b.npc.bouts*3600000/BOUT_MS)});
+  }
+  for(const style of styles){
+    const subset=terrainRows.filter(r=>r.grade===grade&&r.a.split("/")[1]!=="none"&&r.b.split("/")[1]!=="none");
+    for(const arena of ARENAS){
+      const total=counts();
+      for(const r of subset.filter(r=>r.arena===arena.id)){
+        const a=r.a.split("/")[0],b=r.b.split("/")[0];
+        if(a===style){total.bouts+=r.bouts;total.wins+=r.wins;total.losses+=r.losses;total.draws+=r.draws;}
+        if(b===style&&r.b!==r.a){total.bouts+=r.bouts;total.wins+=r.losses;total.losses+=r.wins;total.draws+=r.draws;}
+      }
+      rows.push({kind:"terrain",grade,style,arena:arena.id,winPct:pct(total),bouts:total.bouts});
+    }
   }
   rows.push({kind:"orientation",grade,mirrorPlayerWinPct:pct(mirror),mirrorBouts:mirror.bouts,mirrorDrawPct:100*mirror.draws/mirror.bouts,crossPlayerWinPct:pct(orientation),crossBouts:orientation.bouts});
   for(const [dimension,keys] of [["style",styles],["family",families]]){
@@ -98,7 +115,7 @@ for(const [profiles,scenarios,seed] of [[["normal","alpha"],short,20261125],[["n
       earned:e.coinsEarned,spent:e.coinsSpent,wallet:e.wallet,weapon:e.gear[scenario.loadout],expertise:e.expertise}});
   }
 }
-const report={version:"A6",seedGroups:[20261125,20261126,20261127],rows,matchups,economy,
+const report={version:"A8",seedGroups:[20261125,20261126,20261127],rows,matchups,terrainRows,economy,
  bounds:{sPoorPrice:equipmentPrice({grade:7,quality:"poor"}),sUnlock:equipmentUnlockLevel(7),
   nonGradePerfect30d:Math.floor(30*86400000/BOUT_MS)*arenaReward(0),
   allSPerfect30d:Math.floor(30*86400000/BOUT_MS)*arenaReward(7)},

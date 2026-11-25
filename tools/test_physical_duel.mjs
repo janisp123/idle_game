@@ -78,3 +78,31 @@ test("A2 broken equipment loses physical effects and Masterwork remains intact",
   assert.ok(broken.events.some(e=>e.broken?.length));
   assert.notDeepEqual(broken.events.map(e=>e.damage),intact.events.map(e=>e.damage));
 });
+import {dodgeChance} from "../site/play/armour.mjs";
+test("A8 mobility and intact graded armour affect real dodge events",()=>{
+  assert.ok(dodgeChance(98,.2)>dodgeChance(75,.007));
+  assert.equal(dodgeChance(100,1),.4);
+  const opts={str:150,dex:150,end:150,skill:50,loadout:"greatsword",itemGrade:7,quality:"common"};
+  const a=createPlayerSnapshot({...opts,armour:"padded"});
+  const b=createPlayerSnapshot({...opts,armour:"plate"});
+  let padded=0,plate=0;
+  const random=seededCombatRandom(20261125);
+  for(let i=0;i<128;i++){
+    const result=resolvePhysicalDuel(a,b,Math.floor(random()*2**32),ARENAS[2]);
+    for(const e of result.events.filter(e=>e.type==="dodge")){
+      assert.equal(e.damage,0);
+      if(e.actor==="player")padded++;else plate++;
+    }
+  }
+  assert.ok(padded>plate,"lighter armour must produce actual evasion");
+});
+test("A8 equal mirrors have no large initiative-side advantage in independent-seed sample",()=>{
+  const build=createPlayerSnapshot({loadout:"greatsword",armour:"leather",itemGrade:7,quality:"common",str:150,dex:150,end:150,skill:50});
+  const random=seededCombatRandom(19482076);
+  let wins=0,losses=0;
+  for(let i=0;i<512;i++){
+    const result=resolvePhysicalDuel(build,build,Math.floor(random()*2**32),ARENAS[i%5]);
+    wins+=Number(result.outcome==="victory");losses+=Number(result.outcome==="defeat");
+  }
+  assert.ok(Math.abs(wins-losses)<512*.15,"mirror win/loss imbalance");
+});

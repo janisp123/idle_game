@@ -1,7 +1,7 @@
 import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
 import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
 import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a2";
-import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel } from "./smith.mjs?v=alpha-gear-a3";
+import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel } from "./smith.mjs?v=alpha-gear-a8";
 import {
   setDifficulty, buyEquipment, activateExpertise, arenaBoutProgress, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
@@ -11,17 +11,17 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=alpha-gear-a7";
+} from "./engine.mjs?v=alpha-gear-a8";
 
-import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=alpha-gear-a3";
+import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=alpha-gear-a8";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-gear-a5";
 import { combatFlowState } from "./combat-flow.mjs?v=glad-003";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=alpha-gear-a5";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
-  armourOption, armourStats }
-  from "./armour.mjs?v=glad-003";
+  armourOption, armourStats, dodgeChance }
+  from "./armour.mjs?v=alpha-gear-a8";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=alpha-gear-a7";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=alpha-gear-a8";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -178,7 +178,7 @@ function renderArmour() {
     "% · Base armour " + gear.physicalReductionPct + "% · Attack +" + bonus.attack +
     " ×" + bonus.damageMultiplier.toFixed(2) + " · Guard +" + bonus.defense +
     " · Resistance +" + Math.round(bonus.resistance*100) + "% · Aim +" + Math.round(bonus.accuracy*100) +
-    "% · Pierce +" + Math.round(bonus.penetration*100) + "% · Dodge +" + Math.round(bonus.dodge*100) + "%";
+    "% · Pierce +" + Math.round(bonus.penetration*100) + "% · Dodge " + Math.round(dodgeChance(Math.min(100,gear.mobilityPct+bonus.mobility),bonus.dodge)*100) + "%";
   for (const [style, button] of weaponButtons) {
     button.setAttribute("data-equipped", String(style === state.combatLoadout));
     button.setAttribute("aria-pressed", String(!slot && style === state.combatLoadout));

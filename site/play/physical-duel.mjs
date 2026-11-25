@@ -1,3 +1,4 @@
+import { dodgeChance } from "./armour.mjs?v=alpha-gear-a8";
 // Pure provisional arena rules. Distances, injuries and wear are game abstractions.
 export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 4 });
 const WEAPONS = Object.freeze({
@@ -5,7 +6,7 @@ const WEAPONS = Object.freeze({
   dagger: { move: "dagger", type: "piercing", range: 0, power: 4, recovery: 2 },
   spear: { move: "thrust", clearance: 1, type: "piercing", range: 1, power: 9, recovery: 2 },
   sword_shield: { move: "cut", type: "slashing", range: 0, power: 8, recovery: 2 },
-  greatsword: { move: "swing", clearance: 2, type: "slashing", range: 1, power: 12, recovery: 3 },
+  greatsword: { move: "swing", clearance: 2, type: "slashing", range: 1, power: 13, recovery: 2 },
   hammer: { move: "hammer", type: "blunt", range: 0, power: 17, recovery: 4 }
 });
 const BASH = Object.freeze({ move: "shield_bash", type: "blunt", range: 0, power: 4, recovery: 3 });
@@ -86,6 +87,8 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
   const actors = [fighter(player, "player"), fighter(enemy, "enemy")];
   const [you, foe] = actors;
   const roll = seededRandom(seed);
+  // Independent initiative stream, not affected by conditional attack rolls.
+  const initiativeRoll=seededRandom((seed^0x9e3779b9)>>>0);
   const events = [];
   let approachProgress = 0;
   let retreatsLeft = terrain.retreatSpace ?? (terrain.retreat === false ? 0 : 3);
@@ -99,7 +102,8 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
   record(null, null, "engage");
 
   for (let turn = 0; turn < PHYSICAL_RULES.turnLimit && you.hp && foe.hp; turn++) {
-    const lead = (you.dex + mobility(you) / 10 + roll() * 5 >= foe.dex + mobility(foe) / 10 + roll() * 5) ? 0 : 1;
+    const advantage=you.dex-foe.dex+(mobility(you)-mobility(foe))/10;
+    const lead=initiativeRoll()<Math.max(.05,Math.min(.95,.5+advantage*.1))?0:1;
     for (const index of [lead, 1 - lead]) {
       const actor = actors[index], target = actors[1 - index];
       if (!actor.hp || !target.hp) break;
@@ -147,16 +151,21 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
           (terrain.cover ?? 0) * (target.shield.hp > 0 ? 0.10 : 0.04) : 0;
       const activePiece=attack===BASH?actor.shield:actor.weapon;
       const equipped=activePiece.hp>0;
-      const aim = 0.72 + (equipped?activePiece.accuracy:0) - intactArmourSum(target,"dodge") + (actor.dex - target.dex) * 0.012 + (actor.skill - target.skill) * 0.004 +
+      const aim = 0.72 + (equipped?activePiece.accuracy:0) + (actor.dex - target.dex) * 0.012 + (actor.skill - target.skill) * 0.004 +
         (distance === 0 && bow ? -0.16 : 0) + (shortSpear ? -0.14 : 0) - obscuredShot - constriction * 0.12;
       if (roll() >= Math.max(0.19, Math.min(0.96, aim))) {
         record(actor, target, "miss", { move: attack.move });
         continue;
       }
+      // Actual defense event after accuracy. Broken pieces lose graded dodge.
+      if(roll()<dodgeChance(mobility(target),intactArmourSum(target,"dodge"))){
+        record(target,actor,"dodge",{move:attack.move});
+        continue;
+      }
       const guardRoll = roll();
       const block = target.shield.hp > 0 && guardRoll < (attack.type === "blunt" ? 0.50 : 0.40)*target.shield.proficiency;
       const parry = !block && target.loadout === "greatsword" && target.weapon.hp > 0 &&
-        target.recovery === 0 && guardRoll < 0.32*target.weapon.proficiency;
+        target.recovery <= 1 && guardRoll < (target.recovery===0?.32:.18)*target.weapon.proficiency;
       const intact = actor.weapon.hp > 0 || attack.move === "dagger" || attack === BASH;
       // Broken weapons retain only improvised base damage, never their grade
       // or flat bonus. The bow's backup dagger retains the kit's bonus only
