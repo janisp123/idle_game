@@ -2,7 +2,7 @@
 
 ## START-FIGHT-001 · STARTED (2026-11-25, chat)
 
-Owner explicitly approved new characters automatically starting lowest-difficulty Fighting, with starter equipment and offline continuation; valid returning saves untouched. Build on existing approved UI-COMPACT-001 PR #175 because both change HTML/UI tests; repair its stale CSS revision assertion. Use existing chooseActivity on fresh character only, including explicit alpha reset; start in arena without initial preparation delay, no balance/engine/save-format changes. No other brainstorm implemented. Next update app and tests.
+Owner explicitly approved new characters automatically starting lowest-difficulty Fighting, with starter equipment and offline continuation; valid returning saves untouched. Build on existing approved UI-COMPACT-001 PR #175 because both change HTML/UI tests; repair its stale CSS revision assertion. Use existing chooseActivity on fresh character only, including explicit alpha reset; start in arena without initial preparation delay, no balance/engine/save-format changes. No other brainstorm implemented. New-start helper uses chooseActivity, fresh/reset only; cache revision and real browser starter assertions updated; compact UI stale CSS regression fixed. Next final CI.
 
 ## UI-COMPACT-001 · STARTED (2026-11-25, chat)
 
