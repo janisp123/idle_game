@@ -1,7 +1,7 @@
 // Geometry is expressed in the same three abstract distance bands as combat.
 export const ARENAS = Object.freeze([
   { id: "open_field", name: "Open Field", startDistance: 2, lineOfSight: 2, cover: 0,
-    retreatSpace: 3, approachSteps: 1, clearance: 2, detail: "Long sightlines and room to retreat" },
+    retreatSpace: 4, approachSteps: 2, clearance: 2, detail: "Long sightlines and room to retreat" },
   { id: "narrow_bridge", name: "Narrow Bridge", startDistance: 2, lineOfSight: 2, cover: 0,
     retreatSpace: 0, approachSteps: 2, clearance: 1, detail: "Single approach and restricted swings" },
   { id: "ruined_streets", name: "Ruined Streets", startDistance: 1, lineOfSight: 0, cover: 2,
