@@ -2,9 +2,9 @@
 
 ## UI-COMPACT-001 · STARTED (2026-11-25, chat)
 
-Owner requests combined Skill Progress and Skill Master section and collapsible Resources. Branch `ui/compact-skill-resources`, base `152c54e`. Preserve existing XP display, Master controls, tribute, resource rendering, saves and all gameplay. Resources closed by default. Next update markup, styling and UI/browser checks.
+Owner requests combined Skill Progress and Skill Master section and collapsible Resources. Branch `ui/compact-skill-resources`, base `152c54e`. Preserve existing XP display, Master controls, tribute, resource rendering, saves and all gameplay. Resources closed by default. Combined XP and Master controls in one section, native folded Resources retains resourceList, CSS revision updated, DOM and real browser checks added. Next final CI.
 
-## CLAN-TEST-001 · STARTED (2026-11-25, chat)
+## CLAN-TEST-001 · MERGED (2026-11-25, chat)
 
 Owner requests fake players able to join clans for pre-server testing. Branch `test/clan-fixture-lab`, base `7d5bcb0`. Developer-only synthetic scenario module, roster actions and donation tests using real item IDs, explicitly provisional configurable fixture policies. No public game changes, test identities in live data, server accounts or balance decisions. Added synthetic scenario module, JSON example, system-lab adapter, tests and CI. Explicit fixture capacity/cap and synthetic stock; no real player data or runtime changes. Next final CI.
 
