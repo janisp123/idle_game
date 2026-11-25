@@ -12,10 +12,10 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Pause all rewards at one full skill XP bar, auto-advance queued activities, keep explicit Master claims; generic public overview.
 - **Acceptance:** XP, loot, crafting, coins, attributes and expertise stop at the first cap; no phantom rewards during pauses/travel; timed and until-level-up wagons skip capped skills; no resource-proof deadlock; current V16 saves retained; bounded offline settlement and UI/browser checks. Rebenchmark economy, no silent numerical retuning. Preserve artwork and permanent FREE-001.
-- **Status:** IN_REVIEW — [PR #167](https://github.com/janisp123/idle_game/pull/167).
+- **Status:** DONE — PR #167 merged `427a8cc`; final four workflows and Pages 45625750762 passed. [Audit](mechanics/CAP_001_AUDIT.md).
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #167).
 
 ## BAL-002 — Physical weapon counters, armour tradeoffs and terrain
 
