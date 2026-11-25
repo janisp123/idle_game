@@ -10,7 +10,7 @@ export {
   totalMasteryAttributeBonuses, effectiveAttributeProgress
 } from "./attributes.mjs?v=glad-001";
 import {
-  validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS
+  validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS, RESURRECTION_MS
 } from "./combat.mjs?v=alpha-gear-a3";
 import { COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
