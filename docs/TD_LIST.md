@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## APPRENTICE-A1 — Apprentice foundation and queue unlocks
+
+- **Goal:** Introduce earned activity level unlocks, a Personal Assistant menu and progressively available queue slots.
+- **Acceptance:** Count activated skill levels minus starting levels; 0/10/20/30/40 unlock 1..5 slots; level 50 auto-Master requirement; enforce actual queue limits and explain locked features; old routes preserved; tests in normal/alpha; no automatic spending yet.
+- **Status:** PARTIAL — PR #176 adds tested pure policy foundation; queue enforcement and UI integration pending baseline PR #175.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet (full batch).
+
 ## CLAN-TEST-001 — Developer-only fake clan members
 
 - **Goal:** Generate synthetic players and clans to test membership, roles, cooldown, contributions and warehouse accounting before hosting.
