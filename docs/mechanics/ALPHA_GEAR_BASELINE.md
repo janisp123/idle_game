@@ -258,3 +258,8 @@ All other weapon and unused armour tracks are zero across these fixed-build traj
 ### A6 expanded economy audit
 
 [Full multi-build and rapid-visit results](ALPHA_GEAR_FINAL_AUDIT.md). Normal Bow/Leather full S MW day 171, Hammer/Plate day 166, Greatsword/Padded no full set at day 180; all selected tracks mastered. Both tested 15-minute normal strategies at two seeds fail any S purchase/affordability at day 30. Conservative normal level-50 bound remains. Keep candidate prices until A7 state fixes and A8 physical tuning are measured.
+
+
+### A7 — corrected arena state
+
+Verified head 81d0c5c, systems run 45563621103: normal daily reaches full S MW day 170, Fighting 52, STR/DEX/END 148/148/136, 4,170.74 weapon and 4,148.68 Plate practice hours, 65.46% wins, 4,006,408 earned, 3,001,321 spent, 1,005,087 wallet. Weekly Fighting 26, 96.83% wins, C Common (mastery claim cap remains); mixed Fighting 42, A Common, 82.70% wins; normal hourly starter farm has no S at day 30. Additional trajectories in ALPHA_GEAR_FINAL_AUDIT.md. A7 fixes state correctness, not physical balance; no price changes or deployment.

@@ -54,7 +54,7 @@ There is no **offline time cap** or mandatory daily login. Attribute effort and 
 
 ## Saves and migration
 
-- `SAVE_KEY = "idle-game-prototype-v1"` stays the same. `readSave` on the pending A3 branch accepts V13 (the live GLAD-005 release still uses V11). Earlier alpha saves start fresh with a reset notice on eventual release.
+- `SAVE_KEY = "idle-game-prototype-v1"` stays the same. `readSave` on the pending A7 branch accepts V14 (the live GLAD-005 release still uses V11). Earlier alpha saves start fresh with a reset notice on eventual release.
 - Saved values include individual skill XP/levels, `attributeEffort`, items, current activity, partial work, transition phase, wagon route, productive-period progress, timestamp, and `combatSession`.
 - Current-build progress across timing-profile changes is scaled **proportionally** to preserve the fraction of the unfinished work cycle or transition phase. Item totals, skill levels, XP and routes are not reset.
 - Inventory is available to eligible recipes. Skill Master action deliberately forfeits the selected skills' output resources only after confirmation.
@@ -70,9 +70,12 @@ There is no **offline time cap** or mandatory daily login. Attribute effort and 
 
 ## A3 expertise and offline settlement (draft)
 
-Saved expertise earned/active maps and the session's actual frozen training kit keep weapon and armour practice separate from general activity skill. Only completed productive bouts earn expertise, excluding resurrection; abandoning a partial bout forfeits its pending practice. Every completed bout credits its saved kit, not newly selected equipment. `settle` uses the saved active map for the whole absence. Return/visible tick publishes earned practice, which changes effective equipment at the next completed bout boundary while retaining the old bout outcome, prize cursor, seed and other frozen stats. A settlement may split at one extra boundary, with each bounded arena segment; no replay per level or hour. Twenty-year split/reload and duplicate-credit tests passed. V13 saved maps and kit validate shape and bounds. See [ARMOUR.md](ARMOUR.md).
+Saved expertise earned/active maps and the session's actual frozen training kit keep weapon and armour practice separate from general activity skill. Only completed productive bouts earn expertise, excluding resurrection; A7 makes the current bout immutable, so ordinary gear changes or departure cannot abandon it. Every completed bout credits its saved kit, not newly selected equipment. `settle` uses the saved active map for the whole absence. Return/visible tick publishes earned practice, which changes effective equipment at the next completed bout boundary while retaining the old bout outcome, prize cursor, seed and other frozen stats. A settlement may split at one extra boundary, with each bounded arena segment; no replay per level or hour. Twenty-year split/reload and duplicate-credit tests passed. V13 saved maps and kit validate shape and bounds. See [ARMOUR.md](ARMOUR.md).
 
 
-## A7 — immutable arena bouts (pending)
+## A7 — immutable arena bouts (verified in draft)
 
 V14 saves store earned and active attribute effort separately and bank fractional Fighting work on departure. Return/visible tick publishes attributes and expertise, never inside offline settlement. The current bout including recovery retains its kit, grade, stats, seed, prize cursor and practice attribution. At the next boundary the chosen kit/grade and published attributes/skills/expertise apply together. Settlement splits at most once per activity segment. Fighting departure finishes the actual bout, banks partial skill-cycle progress, then travels/prepares; returning restores the fraction. Noncombat transitions unchanged. No added cooldown or discarded earned prizes. V14 alpha reset on eventual release. Max Stats follows the same boundary rule.
+
+
+A7 code head 81d0c5c passed all four workflows, including 109 game/UI and 13 systems tests. The split-absence regression now uses settle for intermediate checkpoints rather than enterGame (an actual return legitimately activates earned attributes). No live deployment or real browser smoke yet.

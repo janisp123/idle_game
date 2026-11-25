@@ -174,3 +174,21 @@ At 4,000h paired control is 49.75% each with 0.5% double deaths. At zero weapon 
 ## Next acceptance sequence
 
 A7: reproduce and fix snapshot/restart issues in one coherent engine batch with focused and full checks; document exact policy and preserve offline bounds. A8: candidate balancing: meaningful mobility/dodge vs plate, Greatsword handling/guard, quality vs adjacent grade, mirror side RNG investigation. Use paired same-family/armoured-only and terrain-conditional results; aim for viable choices, not forced 50% in every pairing. Require no loss of existing grade separation, meaningful expertise, no S purchase month one and representative 180-day specialist progression across different weapons/families. Re-evaluate prices after A8. A5 original art transfer still open. Final code-head checks, real 390px/1440px browser verification, removal of branch-only CI reporting or explicit manual workflow, correct changelog/checkpoint and release checks before merge. No release/deployment approved by this audit.
+
+
+## A7 verified engine correction retest
+
+[Code head 81d0c5c](https://github.com/janisp123/idle_game/commit/81d0c5c941efeab7a37c3e2fa91344e8e28834b3), [systems audit 45563621103](https://github.com/janisp123/idle_game/actions/runs/45563621103), website 45563620845, combat 45563620958, protocol 45563621023 all passed. No combat balance constants changed, so paired physical/quality/expertise matrix unchanged. Arena progression changes because active attributes now apply at actual returns and kit/grade edits no longer discard a bout. First-month normal S purchase remains blocked in both tested strategies/two seeds. The original A6 source issues have dedicated passing regression tests. A8 must still tune physical tradeoffs.
+
+| Profile | Scenario | Seed | Days | Fighting | First any S | Full S MW | Win % | Earned | Wallet |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| normal | rapid-income | 20261125 | 30 | 20 | — | — | 90.9 | 291420 | 171099 |
+| normal | rapid-starter-rush | 20261125 | 30 | 20 | — | — | 95.13 | 147936 | 147936 |
+| alpha | rapid-income | 20261125 | 30 | 270 | — | — | 93.12 | 775650 | 70329 |
+| alpha | rapid-starter-rush | 20261125 | 30 | 271 | — | — | 99.13 | 154152 | 154152 |
+| normal | rapid-income | 20261126 | 30 | 20 | — | — | 90.92 | 291472 | 171151 |
+| normal | rapid-starter-rush | 20261126 | 30 | 20 | — | — | 95.14 | 147948 | 147948 |
+| normal | bow-leather | 20261126 | 180 | 51 | 171 | 171 | 74.24 | 4554500 | 1553179 |
+| normal | hammer-plate | 20261126 | 180 | 52 | 166 | 166 | 93.21 | 6022702 | 3021381 |
+| normal | greatsword-padded | 20261126 | 180 | 51 | 175 | — | 36.63 | 1981582 | 156261 |
+| normal | greatsword-plate-income | 20261126 | 180 | 52 | 167 | 167 | 93.4 | 4945860 | 1944539 |
