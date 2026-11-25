@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## APPRENTICE-A1 — policy foundation
+
+Owner approved starting [Apprentice plan](APPRENTICE_IMPLEMENTATION_PLAN.md). PR #176 implements pure earned-level/slot unlock calculations and boundary tests only. No actual queue gates or menu yet; pending baseline PR #175 must pass browser tests, then reconcile overlapping documents and integrate engine/UI with legacy route fixtures. No automated purchases, tribute, donations or new weapons.
+
 ## CLAN-TEST-001 — fake player scenario lab
 
 PR #174 adds developer-only synthetic players, clan admission, role/transfer, seven-day cooldown and once-daily contribution scenarios, real item IDs and explicit fixture policy. Run `node tools/system-lab.mjs --config tools/simulation/clan-example.json`. CI includes 100 members x 30 days; production clan service, building balance and actual engine-generated test-player income remain unimplemented. Next verify final checks and merge.
