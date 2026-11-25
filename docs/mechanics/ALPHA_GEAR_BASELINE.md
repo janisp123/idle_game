@@ -104,3 +104,98 @@
 ## Next batch
 
 Implement unrestricted Fighting difficulty independently from purchase access, then calibrate provisional gear prices, purchase thresholds, grade/quality scaling, opponent benchmarks and expertise in bounded coherent slices. Retain these old observations for before/after comparison. Re-run the source-backed report after each meaningful tuning slice, not after every minor edit.
+
+## A1 — verified access/economy candidate (before physical gear scaling)
+
+[Code revision fbc3b1d](https://github.com/janisp123/idle_game/commit/fbc3b1dddc7fc5b2176b21b6b40fc880e97bffbf). [Website CI 45558792515](https://github.com/janisp123/idle_game/actions/runs/45558792515) (95 tests passed, 0 failures, 18.74s); [systems lab 45558792554](https://github.com/janisp123/idle_game/actions/runs/45558792554) (13 passed, 0 failures, 0.70s and full trajectory); [combat simulator 45558792599](https://github.com/janisp123/idle_game/actions/runs/45558792599) and [protocol 45558792490](https://github.com/janisp123/idle_game/actions/runs/45558792490) passed.
+
+A1 removes the arena difficulty lock, introduces coin + Fighting-level purchase access, increases cumulative prices, and makes Fighting XP grade-independent. No changes to combat power, enemy strength, expertise, timing or prize values yet. Same seed and purchase/visit strategies as A0. "Affordable" now deliberately excludes the skill gate; "bought" includes it. Earliest observed acquisition is **S Masterwork** (not any S quality) and is conditional on the strategy.
+
+| Profile | Strategy | S Masterwork weapon affordable day | Set affordable day | Weapon bought day | Set bought day |
+| --- | --- | ---: | ---: | ---: | ---: |
+| normal | daily | 77 | 163 | 168 | 168 |
+| normal | weekly | 105 | not reached | not reached | not reached |
+| normal | mixed | 108 | not reached | not reached | not reached |
+| normal | rapid-farm | not reached | not reached | not reached | not reached |
+| alpha | daily | 69 | 89 | 77 | 89 |
+| alpha | weekly | 105 | not reached | not reached | not reached |
+| alpha | mixed | 95 | 123 | 107 | 123 |
+| alpha | rapid-farm | not reached | not reached | not reached | not reached |
+
+### A1 normal / daily
+
+| Day | Fighting | STR/DEX/END | Productive Fighting h | Win % | Earned | Spent | Wallet | Weapon grade/quality | Enemy grade |
+| ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| 0 | 1 | 10/10/10 | 0 | not reached | 0 | 0 | 0 | 0/poor | Non-grade |
+| 30 | 17 | 65/64/60 | 717.79 | 96.98 | 213024 | 120321 | 92703 | 3/common | F |
+| 90 | 34 | 108/107/99 | 2157.79 | 98.99 | 1111584 | 600321 | 511263 | 5/common | D |
+| 150 | 46 | 137/137/126 | 3597.79 | 99.40 | 2632224 | 1125321 | 1506903 | 6/common | C |
+| 180 | 52 | 150/150/138 | 4317.79 | 99.50 | 3637920 | 3001321 | 636599 | 7/masterwork | B |
+
+### A1 normal / weekly
+
+| Day | Fighting | STR/DEX/END | Productive Fighting h | Win % | Earned | Spent | Wallet | Weapon grade/quality | Enemy grade |
+| ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| 0 | 1 | 10/10/10 | 0 | not reached | 0 | 0 | 0 | 0/poor | Non-grade |
+| 30 | 5 | 61/60/56 | 706.19 | 80.87 | 125760 | 12821 | 112939 | 1/common | Non-grade |
+| 90 | 13 | 100/100/93 | 2146.19 | 93.62 | 530112 | 45321 | 484791 | 2/common | F |
+| 150 | 22 | 129/128/119 | 3586.19 | 96.17 | 1136640 | 120321 | 1016319 | 3/common | E |
+| 180 | 26 | 141/141/130 | 4306.19 | 96.81 | 1551360 | 300321 | 1251039 | 4/common | E |
+
+### A1 normal / mixed
+
+| Day | Fighting | STR/DEX/END | Productive Fighting h | Win % | Earned | Spent | Wallet | Weapon grade/quality | Enemy grade |
+| ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| 0 | 1 | 10/10/10 | 0 | not reached | 0 | 0 | 0 | 0/poor | Non-grade |
+| 30 | 14 | 74/56/61 | 525.86 | 95.88 | 143860 | 45321 | 98539 | 2/common | F |
+| 90 | 27 | 125/92/101 | 1558.24 | 98.61 | 650156 | 300321 | 349835 | 4/common | E |
+| 150 | 38 | 162/117/130 | 2590.14 | 99.16 | 1479244 | 600321 | 878923 | 5/common | D |
+| 180 | 42 | 178/127/141 | 3118.21 | 99.30 | 2056232 | 1125321 | 930911 | 6/common | C |
+
+### A1 normal / rapid-farm
+
+| Day | Fighting | STR/DEX/END | Productive Fighting h | Win % | Earned | Spent | Wallet | Weapon grade/quality | Enemy grade |
+| ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| 0 | 1 | 10/10/10 | 0 | not reached | 0 | 0 | 0 | 0/poor | Non-grade |
+| 30 | 20 | 66/65/61 | 715.90 | 94.35 | 146724 | 0 | 146724 | 0/poor | Non-grade |
+
+### A1 alpha / daily
+
+| Day | Fighting | STR/DEX/END | Productive Fighting h | Win % | Earned | Spent | Wallet | Weapon grade/quality | Enemy grade |
+| ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| 0 | 1 | 10/10/10 | 0 | not reached | 0 | 0 | 0 | 0/poor | Non-grade |
+| 30 | 31 | 70/69/64 | 717.88 | 97.06 | 287448 | 264321 | 23127 | 4/common | D |
+| 90 | 91 | 128/127/116 | 2157.88 | 99.02 | 3125688 | 3001321 | 124367 | 7/masterwork | S |
+| 150 | 151 | 174/173/158 | 3597.88 | 99.41 | 7221048 | 3001321 | 4219727 | 7/masterwork | S |
+| 180 | 181 | 195/195/177 | 4317.88 | 99.51 | 9268728 | 3001321 | 6267407 | 7/masterwork | S |
+
+### A1 alpha / weekly
+
+| Day | Fighting | STR/DEX/END | Productive Fighting h | Win % | Earned | Spent | Wallet | Weapon grade/quality | Enemy grade |
+| ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| 0 | 1 | 10/10/10 | 0 | not reached | 0 | 0 | 0 | 0/poor | Non-grade |
+| 30 | 5 | 61/60/56 | 706.70 | 81.53 | 126792 | 12821 | 113971 | 1/common | Non-grade |
+| 90 | 13 | 100/100/93 | 2146.70 | 93.85 | 531144 | 45321 | 485823 | 2/common | F |
+| 150 | 22 | 129/128/119 | 3586.70 | 96.31 | 1137672 | 120321 | 1017351 | 3/common | E |
+| 180 | 26 | 141/141/130 | 4306.70 | 96.92 | 1552392 | 300321 | 1252071 | 4/common | E |
+
+### A1 alpha / mixed
+
+| Day | Fighting | STR/DEX/END | Productive Fighting h | Win % | Earned | Spent | Wallet | Weapon grade/quality | Enemy grade |
+| ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| 0 | 1 | 10/10/10 | 0 | not reached | 0 | 0 | 0 | 0/poor | Non-grade |
+| 30 | 23 | 79/60/63 | 525.87 | 95.99 | 169860 | 120321 | 49539 | 3/common | E |
+| 90 | 66 | 148/106/115 | 1557.85 | 98.64 | 1480842 | 1475321 | 5521 | 7/common | A |
+| 150 | 109 | 203/142/158 | 2589.82 | 99.18 | 4352256 | 3001321 | 1350935 | 7/masterwork | S |
+| 180 | 131 | 229/158/177 | 3117.81 | 99.32 | 5853256 | 3001321 | 2851935 | 7/masterwork | S |
+
+### A1 alpha / rapid-farm
+
+| Day | Fighting | STR/DEX/END | Productive Fighting h | Win % | Earned | Spent | Wallet | Weapon grade/quality | Enemy grade |
+| ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
+| 0 | 1 | 10/10/10 | 0 | not reached | 0 | 0 | 0 | 0/poor | Non-grade |
+| 30 | 252 | 147/147/130 | 719.06 | 98.70 | 153492 | 0 | 153492 | 0/poor | Non-grade |
+
+**Interpretation:** Normal daily S Masterwork set moves from day 2 to day 168 (about 5.6 months). Six-month Fighting 52 and 150/150/138, 3,637,920 earned, 3,001,321 spent. Normal daily ends with D Common at day 30, B Common at day 90, A Common at day 150, S Masterwork by day 180. Normal hourly low-tier rush earns 146,724 in month one, cannot afford even one S Masterwork and reaches only Fighting 20. The mathematical test separately excludes any S purchase in 30 normal days by bounding total possible Fighting XP below level 50, even if all cycles are maximally efficient. Weekly and mixed normal schedules reach C/A Common respectively at six months; neither reached S. Alpha daily still buys S Masterwork by day 89 due to intentionally accelerated leveling. Alpha high-tier-farming optimal strategy has not been tested. No claim of universal six-month acquisition.
+
+**Remaining serious flaw:** Normal daily win rate remains 99.5% because enemy benchmarks and flat gear are unchanged. The current pricing success is only a starting point. A2 must fix power scaling, grade-specific opponent builds and meaningful matchups; then recompute the economy and adjust price/level candidates. A3 expertise must further change the trajectory. Do not deploy this incomplete rebalance or claim S gear is balanced yet.

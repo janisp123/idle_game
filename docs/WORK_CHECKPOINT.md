@@ -2,7 +2,7 @@
 
 ## ALPHA-GEAR-001 — A1 access/economy candidate (pending PR #154, 2026-11-25)
 
-Owner asked chat to implement in small, reviewable batches while Codex is unavailable. [Draft PR #154](https://github.com/janisp123/idle_game/pull/154), branch `alpha/six-month-gear-benchmark`, contains the approved economy/expertise scope, verified A0 baseline and A1 provisional access/price/XP implementation. Rationale, evidence and caveats are in the branch changelog. **No gameplay release yet; last deployed build remains GLAD-005.** Next: verify A1 CI and compare trajectories, then A2 gear scaling/opponent balance. Do not interpret older historical NEXT entries below as overriding this active pending branch.
+Owner asked chat to implement in small, reviewable batches while Codex is unavailable. [Draft PR #154](https://github.com/janisp123/idle_game/pull/154), branch `alpha/six-month-gear-benchmark`, contains the approved economy/expertise scope, verified A0 baseline and A1 provisional access/price/XP implementation. Rationale, evidence and caveats are in the branch changelog. **No gameplay release yet; last deployed build remains GLAD-005.** A1 code head fbc3b1d passed website, systems lab, combat simulator and protocol. Normal daily full S Masterwork bought at day 168; actual combat still too easy. Next: A2 gear scaling/opponent balance, followed by revised trajectory and expertise. See ALPHA_GEAR_BASELINE.md. Do not interpret older historical NEXT entries below as overriding this active pending branch.
 
 ## GLAD-PLAN-001 — owner-approved gladiator rework roadmap (2026-11-24)
 

@@ -68,3 +68,7 @@ No player-controlled global XP pool, no manual attribute assignment, no account-
 Each activity starts at Non-grade (0). F, E, D, C, B, A and S unlock at that activity’s levels 10 through 70 in ten-level steps. A selection persists independently for each activity. Changing the active grade settles elapsed work and starts a new cycle at the selected grade.
 
 For grade index t above zero the provisional target stat is 10 + 4t. The activity-weighted average of effective attributes determines readiness. XP and raw gathering yield multiply by (1 + 0.18t) × min(1, (weighted stat / target)²). Recipe quantities and ingredient costs stay paired. Combat opponents use a fixed same-grade reference build. Older saves default to Non-grade.
+
+## ALPHA-GEAR-001 A1 — Fighting XP and purchase access
+
+All arena difficulties may be attempted at any level. Selected grade no longer multiplies Fighting XP; productive time, base cycle XP, capped mastery efficiency, batch variation and defeat downtime remain. This prevents selecting a high tier merely to accelerate shop access through repeated losses. Noncombat difficulty XP multipliers and gates are unchanged. Purchase access depends on activated Fighting skill and arena coins, not attributes alone. See [measured progression](ALPHA_GEAR_BASELINE.md) and [smith](ARMOUR.md).
