@@ -2,7 +2,7 @@
 
 ## UI-CATEGORY-001 · STARTED (2026-11-25, chat)
 
-Owner requests Fighting and Training together. Branch `ui/combat-training-category`, verified base `5cdc925`. UI grouping only: Combat contains Fighting and Training, Survival Work remains unchanged. Preserve distinct mechanics, activity IDs and saves. Next update navigation and tests.
+Owner requests Fighting and Training together. Branch `ui/combat-training-category`, verified base `5cdc925`. UI grouping only: Combat contains Fighting and Training, Survival Work remains unchanged. Preserve distinct mechanics, activity IDs and saves. Navigation now has Combat (Fighting, Training) and Survival Work (nine existing activities). Cache revision updated and UI regression checks adjusted. Next final CI and Pages verification.
 
 ## CAP-001 · DEPLOYED (2026-11-25, chat)
 
