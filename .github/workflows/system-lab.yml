@@ -84,6 +84,9 @@ jobs:
             console.log("Modules:",(r.results??r.scenarios??[]).map(x=>x.module||"combat").join(", "));
             console.log("Valid JSON; full report attached below.");
           '
+      - name: CAP-001 normal six-month progression audit
+        if: github.event_name == 'pull_request' && github.head_ref == 'feature/reward-cap-20261125'
+        run: node tools/simulation/counter-validation.mjs --progression
       - name: Independent tactical counter matrix and 15-build progression
         if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
         run: node tools/simulation/counter-validation.mjs --progression
