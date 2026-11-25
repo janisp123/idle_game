@@ -35,12 +35,12 @@ The engine resolves skill XP, material outputs, attribute effort and (for Fighti
 
 ## Three-wagon schedule
 
-A route has **1–3 distinct activities**, currently `MAX_WAGONS=3`. The final wagon always has `plannedMs:null` and runs **Forever**, including after arbitrarily long absences. Earlier wagons can have:
+A route has **1–3 distinct activities**, currently `MAX_WAGONS=3`. The final wagon always has `plannedMs:null` and remains selected **Forever**; it pauses when its current XP bar fills. Earlier wagons can have:
 
 - A finite duration `n × unit`, where `n` is an integer in `SCHEDULE_BALANCE.minDurationUnits…maxDurationUnits` (currently **1..8**) and `unit` is **minutes, hours or days** (minutes offered in alpha UI). These are **productive** intervals, not wall time including switching.
-- `plannedMs:"untilLevelUp"`: stop at the **first completed work cycle** where the *same* Skill Master readiness predicate is true: one full XP bar **and** required eligible output resource(s). Does **not** level automatically or pay Master tribute.
+- `plannedMs:"untilLevelUp"`: stop at the **first completed work cycle** where the skill XP bar is full. Does **not** level automatically or pay Master tribute.
 
-For a finite wagon, accrue `productiveElapsedMs` only while it actually works; when the configured period ends, preserve the already earned resources, finish the current incomplete full work cycle, then transition to the next route item. An edit to a running wagon's duration restarts its planned productive window from the edit, without deleting already earned XP/items. The final Forever wagon continues indefinitely.
+For a finite wagon, accrue `productiveElapsedMs` only while it actually works; when the configured period ends, preserve the already earned resources, finish the current incomplete full work cycle, then transition to the next route item. An edit to a running wagon's duration restarts its planned productive window from the edit, without deleting already earned XP/items. CAP-001: every finite wagon ends early at full XP; the final Forever wagon remains selected but rewards pause at cap.
 
 `validPlannedDuration(ms)` accepts exactly integer values `n × 60,000`, `n × 3,600,000`, or `n × 86,400,000`, constrained by `SCHEDULE_BALANCE`. The planner and existing queued-wagon editors **both generate amount choices** from the same `SCHEDULE_BALANCE` values. Do not duplicate a `1..8` list in HTML.
 
@@ -50,7 +50,7 @@ When only one Forever wagon exists, scheduling a new finite activity inserts it 
 
 The engine processes route boundaries chronologically with a small, **fixed upper bound** on segments, independent of offline years. Each finite/Forever chunk is settled in bulk. To find readiness, it tests whether XP+resources are possible by the end of the available full cycles, then binary-searches for the **first eligible full cycle**, using **repeatable seeded randomness across probes** so the condition is monotone. Ingredient depletion blocks progress until resources really exist; no phantom items.
 
-There is no **offline time cap** or mandatory daily login. Attribute effort and item stocks continue without an XP-level cap; skill XP stops at one current-level bar. Effective **skill levels, attributes and the entire combat character/equipment snapshot stay frozen** during an absent batch (OFF-001). Equipment changes settle prior earned time under the old gear before starting a new duel. The Skill Master still requires player confirmation.
+There is no calendar-based offline time cutoff. CAP-001 stops all rewards, including attribute effort, material stocks, crafting and arena coins/expertise, at one full current-level XP bar. Timed and readiness wagons automatically advance at cap; the final wagon pauses. Effective **skill levels, attributes and the entire combat character/equipment snapshot stay frozen** during an absent batch (OFF-001). Equipment changes settle prior earned time under the old gear before starting a new duel. The Skill Master still requires player confirmation.
 
 ## Saves and migration
 
@@ -66,7 +66,7 @@ There is no **offline time cap** or mandatory daily login. Attribute effort and 
 - Work-cycle rewards/XP: a particular `ACTIVITIES` record; for universal XP variation/efficiency: `SKILL_BALANCE`.
 - Offered duration amounts: `SCHEDULE_BALANCE` (shared with UI); changes to previously valid plans can invalidate old saves, so **extend/backward-compatibly migrate** rather than shrink carelessly.
 - Number of queue slots: `MAX_WAGONS` is centralized **but not an isolated balance change**—the current UI layout, three-wagon tests and settlement iteration bounds assume three. Increasing this requires a separate tested structural/UI change. Do **not** casually set 5 and assume it works.
-- Phase ordering, offline freeze, Skill Master gate and never-ending final wagon are **core invariants**, not balance numbers.
+- Phase ordering, offline freeze, explicit Skill Master gate and selected final wagon are **core invariants**, not balance numbers.
 
 ## A3 expertise and offline settlement (draft)
 
@@ -82,3 +82,8 @@ A7 code head 81d0c5c passed all four workflows, including 109 game/UI and 13 sys
 
 
 A8 advances V14 to V15 solely to prevent old frozen bouts being replayed under changed physical combat formulas. No offline architecture changes in A8; A7 immutable-bout rules remain. No live reset until eventual alpha release.
+
+
+## CAP-001 bounded cap settlement
+
+The engine first determines whether a full XP bar is even reachable within a segment. Ordinary ticks below that bound use the normal batch calculation. For possible cap crossings, freeze two XP RNG draws and replay resource RNG draws in pure probes; bound the first probe by worst ordinary XP efficiency and maximum arena downtime, and binary-search the first rewarding cycle (or first actual productive millisecond for arena resurrection). Cache immutable arena outcomes per frozen snapshot/seed during the probes only; do not persist cache or duplicate formulas. Commit only the winning probe. A capped final activity advances its wall clock but not productive time; an unfinished combat clock remains paused until the Master advances Fighting. Capped departure skips finishing and discards only an unfinished bout; completed prizes and practice remain exact-once. A timed wagon ending before its cap still finishes an incomplete action as before, unless the cap is reached first. V16 save schema/earned inventory and rewards retained. Batch variation was already not exact per-cycle random replay; cap probes are deterministic within their own batch, not a promise of identical random samples for arbitrary split boundaries.
