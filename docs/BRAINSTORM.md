@@ -14,7 +14,7 @@ This page is intentionally short. **Write and update each idea in its topical no
 | Automatic attributes, two-skill progression, no loot sorting | [Progression and equipment](brainstorm/PROGRESSION_AND_EQUIPMENT.md) |
 | **Battlefield range, terrain, cover and natural combat counters** | **[Environmental combat](brainstorm/ENVIRONMENTAL_COMBAT.md)** |
 | Automated activities, battle clocks, no offline limit | [Automation and offline](brainstorm/AUTOMATION_AND_OFFLINE.md) |
-| NPCs, parties, shared activities, clans (future) | [Groups and clans](brainstorm/GROUPS_AND_CLANS.md) |
+| NPCs, parties, shared activities, clans (future) | [Groups and clans](brainstorm/GROUPS_AND_CLANS.md); [approved direction](CLAN_DESIGN.md); [implementation roadmap](CLAN_IMPLEMENTATION_PLAN.md) |
 | Modularity, the headless combat simulator and testing | [Architecture and balancing](brainstorm/ARCHITECTURE_AND_BALANCING.md) |
 | Unresolved decisions, deferred systems and old questions | [Open questions](brainstorm/OPEN_QUESTIONS.md) |
 
