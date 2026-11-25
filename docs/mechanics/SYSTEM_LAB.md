@@ -132,3 +132,7 @@ A9: run the complete six-month and paired-balance reports through the Developer 
 ## SIM-003 — automatic source coverage
 
 Both simulator workflows trigger for changes to `site/play/**/*.mjs`, excluding app, character-stat and readout presentation modules (combat-art remains covered because combat re-exports it). New mechanics modules are covered by default. Ordinary PRs run production parity and the combat benchmark; full six-month/paired audit remains opt-in `full_balance` manual dispatch. The income-policy simulator now constructs its estimated fighter through the production `desiredArenaPlayer` builder; it may select a different strategy because it uses active rather than merely earned stats, not a balance change. No user save or game code modified. See COMBAT_SIMULATOR.md.
+
+## BAL-002 — independent tactical and specialization audit
+
+Run `node tools/simulation/counter-validation.mjs` for the independent fixed-seed matched-material weapon/arena and same-weapon armour matrices at Non/D/S; output includes actual NPC readiness and separate armour results per weapon. Add `--progression` to test all 15 armoured combinations over 180 normal-profile days with daily visits and real production settlement/coins/purchases. Manual full_balance workflow runs this in addition to the original paired cross-build/economy audit. Ordinary PRs retain bounded production parity and the dedicated combat benchmark. Equal synthetic build fixture statistics are not claims about actual new-player starting gear. No hidden game controls or formula copies.

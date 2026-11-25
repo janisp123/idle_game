@@ -109,7 +109,7 @@ try{
     assert.equal(hobby.items,5);assert.ok(hobby.heading,"hobby heading in viewport: "+JSON.stringify(hobby));assert.ok(hobby.overflow<=2,"hobby horizontal overflow: "+hobby.overflow);
     await shot("hobby-"+width);
     await navigate("clean-"+width,{[saveKey]:null,[clockKey]:null});
-    const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=11;s.name="Old alpha";return JSON.stringify(s);})()`);
+    const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=15;s.name="Old alpha";return JSON.stringify(s);})()`);
     await navigate("reset-"+width,{[saveKey]:old,[clockKey]:JSON.stringify({version:1,realAnchorMs:0,gameAnchorMs:0,speed:10})});
     const notice=await evaluate('({hidden:document.getElementById("saveResetNotice").hidden,text:document.getElementById("saveResetNotice").textContent})');
     assert.equal(notice.hidden,false);
@@ -124,7 +124,7 @@ try{
       const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));
       $("alphaTools").scrollIntoView({block:"start"});return {s,hidden:$("alphaTools").hidden,
         status:$("alphaStatus").textContent,overflow:document.documentElement.scrollWidth-innerWidth};})()`);
-    assert.equal(result.hidden,false);assert.equal(result.s.version,15);assert.equal(result.s.skills.fighting.level,52);
+    assert.equal(result.hidden,false);assert.equal(result.s.version,16);assert.equal(result.s.skills.fighting.level,52);
     assert.equal(result.s.coins,200000);assert.equal(result.s.expertise.greatsword,4235*14400000);
     assert.equal(result.s.expertise.leather,4213*14400000);assert.equal(result.s.expertise.plate,0);
     assert.match(result.status,/100,000/);assert.ok(result.overflow<=2,"horizontal page overflow: "+result.overflow);
@@ -158,9 +158,9 @@ try{
       // Only synthetic saves created by production functions in this temporary
       // browser. Pick an actual resolved qualifying final event, never fake it.
       const setup=await evaluate(`(async()=>{
-        const e=await import("./engine.mjs?v=char-stats-001");
-        const a=await import("./alpha-tools.mjs?v=char-stats-001");
-        const c=await import("./combat.mjs?v=char-stats-001");
+        const e=await import("./engine.mjs?v=bal-002");
+        const a=await import("./alpha-tools.mjs?v=bal-002");
+        const c=await import("./combat.mjs?v=bal-002");
         const v=await import("./combat-verdict.mjs?v=alpha-gear-a5");
         const mode=${JSON.stringify(mode)},now=Date.now(),start=now-c.BOUT_MS+1;
         let s=e.newGame(start);

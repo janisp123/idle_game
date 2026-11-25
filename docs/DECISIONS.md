@@ -4,6 +4,7 @@
 
 | ID | Date | Approved by | Decision | Status |
 | --- | --- | --- | --- | --- |
+| BAL-002 | 2026-11-25 | Owner | Implement natural physical weapon counters and distinct armour material strengths, with real terrain geometry; no class locks, scripted wins or class-vs-class damage table. Preserve grade superiority, six-month daily normal specialization, existing price/XP/expertise rules unless separately justified. Provisional typical counter target 60–70%, meaningful strengths and weaknesses, not guaranteed outcomes. Unarmoured endgame viability and weekly claim policy remain undecided. | Approved; numerical calibration provisional |
 | FREE-001 | 2026-11-25 | Owner | **The Long Vigil will always be 100% free.** No advertising (including optional or rewarded ads), microtransactions, paid content or access, subscriptions, pay-to-win, donations, tips, Buy Me a Coffee or other financial contributions or monetization. This is the Owner's first game and a noncommercial hobby project; no development schedule, bug-free operation, uninterrupted availability, balance or progress preservation is promised. Constructive feedback is welcome. This commitment applies to The Long Vigil, not all future projects or third-party MIT-licensed reuse; no license change. | Active — permanent product policy |
 | PRO-001 | 2026-11-18 | Owner | Common path `docs/TD_LIST.md` and shared project files across repositories. | Active |
 | PRO-002 | 2026-11-18 | Owner | `chat`, `cw`, `codex` name distinct agent workflows. | Active |

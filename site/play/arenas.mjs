@@ -1,7 +1,7 @@
 // Geometry is expressed in the same three abstract distance bands as combat.
 export const ARENAS = Object.freeze([
   { id: "open_field", name: "Open Field", startDistance: 2, lineOfSight: 2, cover: 0,
-    retreatSpace: 3, approachSteps: 1, clearance: 2, detail: "Long sightlines and room to retreat" },
+    retreatSpace: 4, approachSteps: 2, clearance: 2, detail: "Long sightlines and room to retreat" },
   { id: "narrow_bridge", name: "Narrow Bridge", startDistance: 2, lineOfSight: 2, cover: 0,
     retreatSpace: 0, approachSteps: 2, clearance: 1, detail: "Single approach and restricted swings" },
   { id: "ruined_streets", name: "Ruined Streets", startDistance: 1, lineOfSight: 0, cover: 2,
@@ -15,7 +15,7 @@ export const ARENAS = Object.freeze([
 const AVAILABILITY_BIAS = 0.64;
 const preferences = {
   bow: arena => 2 * arena.lineOfSight + 2 * arena.retreatSpace,
-  spear: arena => 2 * arena.startDistance + 3 * arena.approachSteps + arena.clearance,
+  spear: arena => 2 * arena.startDistance + 3 * arena.approachSteps + arena.clearance - 2 * arena.retreatSpace,
   sword_shield: arena => 3 * arena.cover - arena.startDistance,
   greatsword: arena => 3 * arena.clearance - arena.retreatSpace,
   hammer: arena => 3 * (2 - arena.clearance) - arena.startDistance

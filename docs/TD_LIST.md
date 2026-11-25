@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## BAL-002 — Physical weapon counters, armour tradeoffs and terrain
+
+- **Goal:** Implement owner-approved physical counter system with distinct weapon/armour strengths and arena specialization.
+- **Acceptance:** Every weapon has meaningful favourable/unfavourable matchups; intended home/away effects; no universal build; strong gear grade separation; test all 15 armoured combinations and normal progression against six-month target. Typical counters 60–70% proposed, not guaranteed. Preserve prices/XP/expertise; no scripted wins, class locks, or artificial unarmoured bonuses. Verify frozen-outcome save compatibility and communicate any necessary alpha reset before deployment.
+- **Status:** IN_REVIEW — [PR #165](https://github.com/janisp123/idle_game/pull/165); iterative simulation and release gates pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## BAL-AUDIT-001 — Playability, weapon counters, armour and terrain
 
 - **Goal:** Audit the current production-linked combat and progression; identify tactical strengths and weaknesses.

@@ -1,4 +1,4 @@
-import { ARMOUR_SLOTS, pieceProtection } from "./armour.mjs?v=alpha-gear-a8";
+import { ARMOUR_SLOTS, pieceProtection } from "./armour.mjs?v=bal-002";
 import { GRADES, validTier } from "./difficulty.mjs?v=alpha-gear-a2";
 import { proficiency,validExpertise,fullExpertise } from "./expertise.mjs?v=alpha-gear-a3";
 
@@ -37,8 +37,8 @@ export const GEAR_BALANCE=Object.freeze({
   gradeFactor:1.35,
   qualityFactors:Object.freeze({poor:1,common:1.04,fine:1.09,masterwork:1.15}),
   armourResistance:Object.freeze({padded:0.95,leather:1.00,plate:1.05}),
-  armourMobility:Object.freeze({padded:0.4,leather:0.7,plate:1.0}),
-  armourDodge:Object.freeze({padded:0.035,leather:0.025,plate:0.001}),
+  armourMobility:Object.freeze({padded:1.0,leather:0.7,plate:0.2}),
+  armourDodge:Object.freeze({padded:0.028,leather:0.018,plate:0.001}),
   weaponAccuracy:Object.freeze({bow:0.012,spear:0.010,sword_shield:0.006,greatsword:0.006,hammer:0.004}),
   weaponPenetration:Object.freeze({bow:0.012,spear:0.014,sword_shield:0.006,greatsword:0.008,hammer:0.016})
 });

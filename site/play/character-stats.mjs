@@ -1,11 +1,11 @@
 import {GRADES,workMultiplier,benchmark} from "./difficulty.mjs?v=alpha-gear-a2";
 // Read-only character sheet. All numeric totals come from the selected build
 // constructed by the engine and the shared physical resolver helpers.
-import {desiredArenaPlayer,ACTIVITIES,SKILL_BALANCE,PRODUCTION_RECIPES} from "./engine.mjs?v=char-stats-001";
+import {desiredArenaPlayer,ACTIVITIES,SKILL_BALANCE,PRODUCTION_RECIPES} from "./engine.mjs?v=bal-002";
 import {ATTRIBUTE_BALANCE,ATTRIBUTES,ACTIVITY_STAT_WEIGHTS,effectiveAttributeProgress,masteryBonusesForSkill} from "./attributes.mjs?v=glad-001";
-import {physicalBuildStats} from "./physical-duel.mjs?v=char-stats-001";
-import {ARMOUR_SLOTS,ARMOUR_TIER_LABELS,armourStats,initialArmour,armourOption,WEAPON_PIECES} from "./armour.mjs?v=alpha-gear-a8";
-import {ITEM_GRADES,equippedCondition} from "./smith.mjs?v=alpha-gear-a8";
+import {physicalBuildStats} from "./physical-duel.mjs?v=bal-002";
+import {ARMOUR_SLOTS,ARMOUR_TIER_LABELS,armourStats,initialArmour,armourOption,WEAPON_PIECES} from "./armour.mjs?v=bal-002";
+import {ITEM_GRADES,equippedCondition} from "./smith.mjs?v=bal-002";
 import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=glad-002";
 const fmt=n=>Number(n.toFixed(3)).toLocaleString("en-US",{maximumFractionDigits:3});
 const pct=n=>fmt(n*100)+"%";
@@ -35,18 +35,22 @@ export function characterStats(state){
   ],"Training history is stored as total effort, not per-activity history."));
   sections.push(section("Maximum HP",fmt(v.health.total),[row("Base HP",fmt(v.health.base)),row("Endurance × 1.6",signed(v.health.endurance)),row("Rounding",signed(v.health.total-v.health.base-v.health.endurance))]));
   for(const a of v.attacks){
-    const fullFlat=trained.weapon.flatAttack*.65;
-    const fullMultiplier=trained.weapon.damageMultiplier;
+    const fullFlat=trained.weapon.flatAttack*.65*a.flatScale;
+    const fullMultiplier=1+(trained.weapon.damageMultiplier-1)*a.gradeScale;
     sections.push(section("Damage · "+a.move.replaceAll("_"," "),fmt(a.base),[
-      row(weaponName+" · base move",fmt(a.weapon)),row("Strength × 0.3",signed(a.strength)),
-      row(weaponName+" · full flat bonus × 0.65",signed(fullFlat)),
+      row(weaponName+" · base move",fmt(a.weapon)),row("Strength × "+fmt(.3*a.strengthScale),signed(a.strength)),
+      row(weaponName+" · full flat bonus × "+fmt(.65*a.flatScale),signed(fullFlat)),
       row("Unfamiliar equipment · flat penalty",signed(a.gear-fullFlat)),
       row("Full grade/quality multiplier","×"+fmt(fullMultiplier)),
       row("Expertise penalty on multiplier",signed(a.multiplier-fullMultiplier)),
       row("Effective multiplier","×"+fmt(a.multiplier)),
       row("Equipment proficiency",pct(a.condition.proficiency)),row("Damage type",a.type),
+      ...(a.move==="shot"?[row("Far-range impact","×"+fmt(v.tactics.farShotImpact)),row("Reach-range impact","×"+fmt(v.tactics.reachShotImpact)),row("Close-range impact","×"+fmt(v.tactics.closeShotImpact))]:[]),
+      ...(a.move==="thrust"?[row("Reach impact","×"+fmt(v.tactics.reachSpearImpact)),row("Close impact","×"+fmt(v.tactics.shortSpearImpact))]:[]),
+      ...(a.move==="swing"?[row("Unconstrained swing impact","×"+fmt(v.tactics.openSwing)),row("Constrained swing impact","×"+fmt(v.tactics.constrainedSwing))]:[]),
+      ...(a.move==="dagger"?[row("Backup handling factor",pct(v.tactics.daggerHandling))]:[]),
       row("Recovery turns after attack",a.recovery-1)
-    ],"Intact, unconstrained hit before enemy protection, resistance, guard, dodge, block, parry or vital hit. Terrain, range, weapon breakage and counters modify actual damage."));
+    ],"Intact, unconstrained hit before enemy protection, resistance, guard, dodge, block, parry or vital hit. Terrain, range, weapon breakage and counters modify actual damage. Backup dagger and shield bash use reduced equipment scaling."));
   }
   const none=initialArmour(),bare=armourStats(none,p.loadout);
   let prev=bare.mobilityPct;const weightRows=[];
@@ -59,7 +63,7 @@ export function characterStats(state){
     row("Weapon weight penalty",signed(bare.mobilityPct-100," pp")),...weightRows,
     ...pieces.flatMap(x=>[row(x.name+" · trained grade mobility",signed(x.full.mobility," pp")),row("Expertise penalty",signed(x.part.mobility-x.full.mobility," pp"))]),
     row("100% mobility cap",signed(v.mobility-v.baseMobility-v.gradeMobility," pp"))
-  ],"Armour weight penalties are applied in slot order to show the exact rounded total. Mobility affects initiative, bow retreat and natural dodge; it is not an attack-speed multiplier."));
+  ],"Armour weight penalties are applied in slot order to show the exact rounded total. Mobility affects initiative, approach, bow retreat and natural dodge; it is not an attack-speed multiplier."));
   sections.push(section("Total equipment weight",fmt(p.gear.totalKg)+" kg",[
     ...WEAPON_PIECES[p.loadout].map(x=>row(x.name,fmt(x.kg)+" kg")),
     ...ARMOUR_SLOTS.map(x=>row(x.name+" "+ARMOUR_TIER_LABELS[kit.armour[x.id]],fmt(armourOption(x.id,kit.armour[x.id]).weightKg)+" kg"))
@@ -69,20 +73,20 @@ export function characterStats(state){
     ...pieces.flatMap(x=>[row(x.name+" · trained grade dodge",pp(x.full.dodge)),row("Expertise penalty",pp(x.part.dodge-x.full.dodge))]),
     row("40% dodge cap",pp(v.dodge-v.naturalDodge-v.gradedDodge))
   ],"Chance to evade an otherwise accurate strike; broken armour loses graded dodge."));
-  sections.push(section("Material protection",fmt(v.protection)+"%",[...pieces.map(x=>row(x.name,signed(x.part.protection," pp"))),...Object.entries(v.materialFactors).map(([type,factor])=>row(type+" damage protection factor","×"+fmt(factor)))],"Not universal damage reduction. Attack type and penetration modify protection; the resolver caps material reduction at 80%."));
+  sections.push(section("Material protection",fmt(v.protection)+"%",[...pieces.map(x=>row(x.name,signed(x.part.protection," pp"))),...Object.entries(v.materialProtection).map(([type,protection])=>row(type+" protection before penetration",fmt(protection)+"%"))],"Not universal damage reduction. Attack type and penetration modify protection; the resolver caps material reduction at 80%."));
   sections.push(section("Grade resistance","×"+fmt(1+v.resistance),[row("Base damage divisor","×1"),...pieces.flatMap(x=>[row(x.name+" · trained bonus",signed(x.full.resistance)),row("Expertise penalty",signed(x.part.resistance-x.full.resistance))])],"Damage is divided by 1 + resistance × (1 − enemy penetration)."));
   sections.push(section("Flat armour guard",fmt(v.guard),pieces.flatMap(x=>[row(x.name+" · trained guard",signed(x.full.guard)),row("Expertise penalty",signed(x.part.guard-x.full.guard))]),"Reduces final impact by "+fmt(v.guardDamageReduction)+" before rounding and minimum 1 damage."));
   sections.push(section("Accuracy vs equal DEX / Fighting",pct(Math.min(v.aimMaximum,Math.max(v.aimMinimum,v.aimBase+v.accuracy))),[
     row("Base accuracy",pct(v.aimBase)),row(weaponName+" · trained accuracy",pp(trained.weapon.accuracy)),row("Expertise penalty",pp(v.accuracy-trained.weapon.accuracy)),
     row("DEX advantage per point",pp(v.aimDexPerPoint)),row("Fighting advantage per level",pp(v.aimSkillPerLevel)),
-    ...(p.loadout==="bow"?[row("Close-range shot penalty",pp(v.aimCloseBow))]:[]),
-    ...(p.loadout==="spear"?[row("Close spear penalty",pp(v.aimCloseSpear))]:[]),
+    ...(p.loadout==="bow"?[row("Close-range shot penalty",pp(v.aimCloseBow)),row("Far-range shot advantage",pp(v.aimFarBow))]:[]),
+    ...(p.loadout==="spear"?[row("Close spear penalty",pp(v.aimCloseSpear)),row("Reach thrust advantage",pp(v.aimReachSpear))]:[]),
     row("Missing swing clearance (each)",pp(-v.aimClearance)),row("Accuracy bounds",pct(v.aimMinimum)+"–"+pct(v.aimMaximum))
   ],"DEX and skill contributions are relative to the enemy; line of sight and cover can also reduce ranged accuracy."));
   sections.push(section("Armour penetration",pct(v.penetration),[row(weaponName+" · trained penetration",pct(trained.weapon.penetration)),row("Expertise penalty",pp(v.penetration-trained.weapon.penetration))]));
   sections.push(section("Initiative score",fmt(v.initiativeScore),[row("Dexterity",fmt(v.initiativeDex)),row("Mobility ÷ 10",signed(v.initiativeMobility))],"Compared against the opponent; not a fixed first-strike chance."));
   sections.push(section("Block / parry","Conditional",[
-    row("Shield block",pct(v.block)),row("Shield block vs blunt",pct(v.bluntBlock)),row("Greatsword ready parry",pct(v.parry)),row("Greatsword recovering parry",pct(v.recoveryParry)),row("Relevant equipment proficiency",pct(v.weapon.proficiency))
+    row("Shield block",pct(v.block)),row("Shield block vs blunt",pct(v.bluntBlock)),row("Greatsword ready parry",pct(v.parry)),row("Greatsword recovering parry",pct(v.recoveryParry)),row("Relevant equipment proficiency",pct(v.weapon.proficiency)),row("Guard after heavy impact","Temporarily reduced"),row("Shield block impact · standard",pct(v.guardRules.blockImpact)),row("Shield block impact · ranged",pct(v.guardRules.rangedBlockImpact)),row("Shield block impact · reach thrust",pct(v.guardRules.reachBlockImpact)),row("Shield block impact · blunt",pct(v.guardRules.bluntBlockImpact))
   ],"Checked after accuracy and dodge; requires intact relevant gear. Rates include expertise."));
   sections.push(section("Equipment condition","At start of bout",[
     row(weaponName,fmt(v.weapon.maxHP)+" HP"+(v.weapon.breakable?"":" · Unbreakable")),
