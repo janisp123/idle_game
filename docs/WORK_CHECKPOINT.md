@@ -1,8 +1,12 @@
 # Current working checkpoint
 
-## UI-CATEGORY-001 — PR #169
+## CLAN-001 — navigation and design, real clans blocked
 
-Owner requested Fighting and Training in one activity menu. Combat now groups both; Survival Work unchanged. Separate engine categories and skills retained. No gameplay or save changes. Next verify final CI and deployment.
+[PR #170](https://github.com/janisp123/idle_game/pull/170): standalone Clan entry, explicit offline-alpha limitation, unavailable search/create rather than fake data. [Owner-approved design](CLAN_DESIGN.md) covers membership, founding/rejoin restrictions, ranks, contributions, warehouse, buildings and open decisions. No backend or save changes. Next verify navigation release; real clans require separate approved authoritative accounts/inventory/persistence architecture.
+
+## UI-CATEGORY-001 — deployed PR #169
+
+Owner requested Fighting and Training in one activity menu. Combat now groups both; Survival Work unchanged. Separate engine categories and skills retained. No gameplay or save changes. Final head 9f502ef passed website 45627081574, systems 45627081668, protocol 45627081603. Merge 5dab306; Pages 45627186530 validation/publish succeeded. No independent public rendering check.
 
 ## CAP-001 — deployed PR #167
 

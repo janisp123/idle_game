@@ -1,8 +1,12 @@
 # Changelog and task handoffs
 
-## UI-CATEGORY-001 · STARTED (2026-11-25, chat)
+## CLAN-001 · STARTED (2026-11-25, chat)
 
-Owner requests Fighting and Training together. Branch `ui/combat-training-category`, verified base `5cdc925`. UI grouping only: Combat contains Fighting and Training, Survival Work remains unchanged. Preserve distinct mechanics, activity IDs and saves. Navigation now has Combat (Fighting, Training) and Survival Work (nine existing activities). Cache revision updated and UI regression checks adjusted. Next final CI and Pages verification.
+Owner approved a separate Clan category, membership/search/creation views, minimum seven days of play for founding, seven-day rejoin/founding cooldown, permanent leadership until voluntary transfer, one vice, five generals and fifteen officers. Earlier approved clan donation/warehouse direction: once-daily online per-member limited contributions, warehouse permanently clan-owned, building-only expenditure, leader priorities, many upgradeable buildings. Branch `feature/clan-entry-and-design`, base `5dab306`. Current local-only alpha cannot support real shared clans. Scope this PR to honest Clan entry/availability screen and persistent design contract; no fake membership, browser-local donations, backend selection, or unapproved economy/permissions. Added standalone Clan entry and [design contract](CLAN_DESIGN.md), including explicit availability limits. Search/create are disabled until shared backend exists. Next verify browser and Pages; no implementation claim for real clans.
+
+## UI-CATEGORY-001 · DEPLOYED (2026-11-25, chat)
+
+Owner requests Fighting and Training together. Branch `ui/combat-training-category`, verified base `5cdc925`. UI grouping only: Combat contains Fighting and Training, Survival Work remains unchanged. Preserve distinct mechanics, activity IDs and saves. Navigation now has Combat (Fighting, Training) and Survival Work (nine existing activities). Cache revision updated and UI regression checks adjusted. Final head 9f502ef passed website 45627081574, systems 45627081668 and protocol 45627081603. PR #169 merged 5dab306; Pages 45627186530 validation/publish succeeded. No independent public rendering check.
 
 ## CAP-001 · DEPLOYED (2026-11-25, chat)
 
