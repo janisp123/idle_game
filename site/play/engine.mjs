@@ -1,4 +1,4 @@
-import { APPRENTICE_BALANCE, apprenticeProgress } from "./apprentice.mjs?v=apprentice-a1";
+import { APPRENTICE_BALANCE, apprenticeProgress, MASTER_CONSENT_VERSION, normalizeMasterConsent } from "./apprentice.mjs?v=apprentice-a2";
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=cap-001";
 import {
@@ -166,6 +166,7 @@ export function newGame(now = Date.now()) {
     timingProfile: TIMING_PROFILE,
     name: "Wanderer",
     skills: blankSkills(),
+    apprenticeMasterConsent: 0,
     attributeEffort: blankAttributeEffort(),
     attributeEffortActive:blankAttributeEffort(),
     fightingRemainderMs:0,
@@ -286,6 +287,7 @@ export function readSave(value) {
     }
     return {
       version: GAME_VERSION, timingProfile: TIMING_PROFILE, name: s.name, skills,
+      apprenticeMasterConsent: normalizeMasterConsent(s.apprenticeMasterConsent),
       attributeEffort: { ...s.attributeEffort },
       attributeEffortActive:{...s.attributeEffortActive},
       fightingRemainderMs:scalePartialProgress(s.fightingRemainderMs,sourceFightingMs,ACTIVITIES.fighting.durationMs),
@@ -888,7 +890,11 @@ export function skillMasterOffer(state) {
  * This is always an explicitly confirmed inventory sacrifice.
  */
 export function learnFromMaster(state, now = Date.now(), random = Math.random) {
-  const outcome = settle(state, now, random);
+  return claimSettledMaster(settle(state, now, random));
+}
+
+// Both manual confirmation and explicitly consented login use this exact mutation.
+function claimSettledMaster(outcome) {
   const offer = skillMasterOffer(outcome.state);
   if (!offer.ready.length) throw new RangeError("No mastery available to claim");
   const skills = { ...outcome.state.skills };
@@ -904,6 +910,26 @@ export function learnFromMaster(state, now = Date.now(), random = Math.random) {
     attributeEffortActive:{...outcome.state.attributeEffort},
     expertiseActive:{...outcome.state.expertise}
   }, mastery: offer };
+}
+
+/** Persist only explicit consent to the current tribute policy, never a saved unlock flag. */
+export function setAutoMasterConsent(state, enabled) {
+  if (typeof enabled !== "boolean") throw new RangeError("Invalid automation setting");
+  if (enabled && !getApprenticeProgress(state).autoMasterUnlocked)
+    throw new RangeError("Automatic Skill Master unlocks at LvL 50");
+  return {...state, apprenticeMasterConsent: enabled ? MASTER_CONSENT_VERSION : 0};
+}
+
+/** Login-only orchestration; ordinary ticks and visibility catch-up remain enterGame.
+ * No repeated offline Master claims or retroactive rewards from newly claimed levels.
+ */
+export function enterGameWithApprentice(state, now = Date.now(), random = Math.random) {
+  const allowed = state.apprenticeMasterConsent === MASTER_CONSENT_VERSION &&
+    getApprenticeProgress(state).autoMasterUnlocked;
+  const outcome = enterGame(state, now, random);
+  if (!allowed || !skillMasterOffer(outcome.state).ready.length) return outcome;
+  const result = claimSettledMaster(outcome);
+  return {...result, levelsGained:Object.fromEntries(result.mastery.ready.map(id=>[id,1]))};
 }
 
 /**
