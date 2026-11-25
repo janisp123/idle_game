@@ -11,7 +11,7 @@ import {
 import { ARMOUR_SLOTS, ARMOUR_TIERS, armourStats } from "../site/play/armour.mjs";
 import { xpForAttributeValue } from "../site/play/attributes.mjs";
 import { ALPHA_CLOCK_KEY, ALPHA_SPEED, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock } from "../site/play/alpha-tools.mjs";
+  setAlphaSpeed, advanceAlphaClock, alphaMaxStats, alphaGrantCoins, ALPHA_TOOLS_ENABLED } from "../site/play/alpha-tools.mjs";
 
 const midpoint = () => 0.5;
 const stockTotal = (state, skill) => skillSpoils(skill).reduce((sum, id) => sum + state.items[id], 0);
@@ -1357,4 +1357,49 @@ test("ALPHA-GEAR-001 attempting S cannot artificially accelerate productive Figh
   const lowResult=e.settle(s,5*e.MINUTE_MS,()=>.5);
   const highResult=e.settle(high,5*e.MINUTE_MS,()=>.5);
   assert.ok(highResult.state.skills.fighting.xp<=lowResult.state.skills.fighting.xp);
+});
+
+test("A4 Max Stats uses the six-month normal specialist floor, not all mastery tracks",()=>{
+  assert.equal(ALPHA_TOOLS_ENABLED,true);
+  const fresh=newGame(0);
+  const boosted=alphaMaxStats(fresh,"plate",0,midpoint).state;
+  assert.equal(boosted.skills.fighting.level,52);
+  const attrs=effectiveAttributeProgress(boosted.attributeEffort,boosted.skills);
+  assert.deepEqual(Object.fromEntries(Object.entries(attrs).map(([id,v])=>[id,v.value])),{STR:148,DEX:148,END:136});
+  assert.equal(boosted.expertise.greatsword,4167*14400000);
+  assert.equal(boosted.expertise.plate,4145*14400000);
+  for(const id of Object.keys(boosted.expertise).filter(id=>!["greatsword","plate"].includes(id)))assert.equal(boosted.expertise[id],0);
+  assert.deepEqual(boosted.expertise,boosted.expertiseActive);
+  assert.deepEqual(boosted.equipment,fresh.equipment);
+  assert.deepEqual(boosted.items,fresh.items);
+  assert.equal(boosted.coins,0);
+  assert.equal(boosted.settledAtMs,0);
+  assert.deepEqual(readSave(JSON.stringify(boosted)),boosted);
+  assert.deepEqual(alphaMaxStats(boosted,"plate",0,midpoint).state,boosted);
+  const better={...boosted,skills:{...boosted.skills,fighting:{level:60,xp:5}},
+    attributeEffort:{...boosted.attributeEffort,STR:boosted.attributeEffort.STR+1},
+    expertise:{...boosted.expertise,bow:14400000}};
+  const next=alphaMaxStats(better,"plate",0,midpoint).state;
+  assert.deepEqual(next.skills,better.skills);
+  assert.deepEqual(next.attributeEffort,better.attributeEffort);
+  assert.equal(next.expertise.bow,14400000);
+  assert.throws(()=>alphaMaxStats(fresh,"unknown",0,midpoint),RangeError);
+});
+test("A4 grants exactly 100000 coins separately, preserves old settlement and rejects overflow",()=>{
+  const fresh=newGame(0);
+  const one=alphaGrantCoins(fresh,0,midpoint).state;
+  const two=alphaGrantCoins(one,0,midpoint).state;
+  assert.deepEqual(two,{...fresh,coins:200000});
+  assert.throws(()=>alphaGrantCoins({...fresh,coins:Number.MAX_SAFE_INTEGER},0,midpoint),RangeError);
+  const fighting=chooseActivity(fresh,"fighting",0,midpoint).state;
+  const normal=enterGame(fighting,HOUR_MS,midpoint).state;
+  const grant=alphaGrantCoins(fighting,HOUR_MS,midpoint).state;
+  assert.deepEqual(grant,{...normal,coins:normal.coins+100000});
+  const max=alphaMaxStats(fighting,"leather",HOUR_MS,midpoint).state;
+  assert.equal(max.coins,normal.coins);
+  assert.equal(max.combatSession,null);
+  assert.equal(max.settledAtMs,normal.settledAtMs);
+  assert.equal(max.skills.fighting.level,52);
+  assert.equal(max.expertise.leather,4145*14400000);
+  assert.equal(max.expertise.plate,0);
 });

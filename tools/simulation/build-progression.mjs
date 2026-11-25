@@ -34,6 +34,13 @@ async function withProfile(profile, run) {
     const [engine,attrs,smith,combat,armour,difficulty] = await Promise.all(
       ['engine.mjs','attributes.mjs','smith.mjs','combat.mjs','armour.mjs','difficulty.mjs'].map(load));
     if(engine.TIMING_PROFILE!==profile) throw new Error('Incorrect timing profile');
+    // Test actual disabled normal-profile code, not a caller-supplied flag.
+    const alphaTools=await load("alpha-tools.mjs");
+    if(alphaTools.ALPHA_TOOLS_ENABLED!==(profile==="alpha"))throw new Error("Incorrect alpha tools gate");
+    if(profile==="normal")for(const action of [s=>alphaTools.alphaMaxStats(s,"plate",0),s=>alphaTools.alphaGrantCoins(s,0)]){
+      let refused=false;try{action(engine.newGame(0));}catch(error){refused=error instanceof RangeError;}
+      if(!refused)throw new Error("Normal profile accepted an alpha shortcut");
+    }
     return await run({engine,attrs,smith,combat,armour,difficulty});
   } finally {
     await rm(dir,{recursive:true,force:true});

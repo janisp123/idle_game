@@ -20,7 +20,7 @@ import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats }
   from "./armour.mjs?v=glad-003";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock } from "./alpha-tools.mjs?v=20261122-alpha-tools1";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=alpha-gear-a4";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -61,7 +61,8 @@ const ui = {
   resultNotice: $("resultNotice"),
   banner: $("sceneBanner"), saveStatus: $("saveStatus"),
   alphaReset: $("alphaReset"), alphaDay: $("alphaDay"), alphaSpeed: $("alphaSpeed"),
-  alphaStatus: $("alphaStatus")
+  alphaTools:$("alphaTools"), alphaMax:$("alphaMaxStats"), alphaCoins:$("alphaCoins"),
+  alphaFamily:$("alphaFamily"), alphaStatus: $("alphaStatus")
 };
 const number = value => new Intl.NumberFormat("en-GB").format(value);
 // The planner and editable hourglass draw from the same validated duration
@@ -1069,6 +1070,11 @@ function start() {
   } catch { storageWorks = false; }
   state = saved ? readSave(saved) : null;
   alphaClock = state ? parseAlphaClock(clockText) : null;
+  // A normal-timing build cannot run the testing clock at accelerated speed.
+  // Preserve the existing logical offset at 1x for a current-build save.
+  if(!ALPHA_TOOLS_ENABLED&&alphaClock)alphaClock=setAlphaSpeed(alphaClock,Date.now(),1);
+  ui.alphaTools.hidden=!ALPHA_TOOLS_ENABLED;
+  ui.alphaFamily.value="plate";
   if (!state) {
     // Invalid/new character saves must not inherit an old acceleration clock.
     if (storageWorks) {
@@ -1085,9 +1091,34 @@ function start() {
     writeSave();
   }
 
-  // Alpha actions are presented as three switches. Destructive reset and
-  // one-day simulation act ONCE then automatically switch themselves off.
+  // All alpha controls are visibly local test actions, absent in normal mode.
   // Only ×10 speed is a persistent on/off mode.
+  if(ALPHA_TOOLS_ENABLED){
+  const applyTest=(action,description)=>{
+    if(!storageWorks){ui.alphaStatus.textContent="Alpha test unavailable: device storage is blocked.";return;}
+    try{
+      const result=action();
+      // Persist before replacing live state, so a failed write cannot report success.
+      localStorage.setItem(SAVE_KEY,JSON.stringify(result.state));
+      state=result.state;
+      lastSavedAt=Date.now();
+      ui.saveStatus.textContent="Saved on this device";
+      latestWorkResult=null;
+      lastCombatEventKey=null;
+      ui.masterAudience.hidden=true;
+      reportProgress(result);
+      render();
+      ui.alphaStatus.textContent=description;
+    }catch{ui.alphaStatus.textContent="Alpha test could not complete or be saved.";}
+  };
+  ui.alphaMax.addEventListener("click",()=>{
+    const weapon=COMBAT_LOADOUTS[state.combatLoadout].name;
+    const family=ui.alphaFamily.value;
+    applyTest(()=>alphaMaxStats(state,family,gameNow()),
+      "TEST ONLY · Six-month benchmark applied: "+weapon+" + "+family+". Fighting Lv 52 minimum; no free gear or coins.");
+  });
+  ui.alphaCoins.addEventListener("click",()=>applyTest(()=>alphaGrantCoins(state,gameNow()),
+    "TEST ONLY · Added 100,000 arena coins."));
   ui.alphaReset.addEventListener("change", () => {
     if (!ui.alphaReset.checked) return;
     try {
@@ -1156,6 +1187,7 @@ function start() {
       ui.alphaStatus.textContent="Could not change testing speed.";
     }
   });
+  }
   resetSmithSelection();
   ui.armourChoice.addEventListener("change", () => {
     if (!armourOption(selectedEquipmentSlot, ui.armourChoice.value)) return;
@@ -1198,7 +1230,7 @@ function start() {
   });
   window.addEventListener("pagehide", writeSave);
   window.addEventListener("storage", event => {
-    if (event.key === ALPHA_CLOCK_KEY) {
+    if (event.key === ALPHA_CLOCK_KEY && ALPHA_TOOLS_ENABLED) {
       alphaClock=parseAlphaClock(event.newValue);
       ui.alphaSpeed.checked=alphaClock?.speed===10;
     }

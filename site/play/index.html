@@ -9,7 +9,7 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css?v=glad-005-equipment">
-  <script type="module" src="./app.mjs?v=alpha-gear-a3"></script>
+  <script type="module" src="./app.mjs?v=alpha-gear-a4"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -218,7 +218,7 @@
           <h2 id="inventory-heading" class="engraved-title">RESOURCES</h2>
           <div id="resourceList"></div>
         </section>
-        <details id="alphaTools" class="panel alpha-tools" aria-label="Alpha test tools">
+        <details id="alphaTools" class="panel alpha-tools" aria-label="Alpha test tools" hidden>
           <summary class="alpha-tools-title">ALPHA TOOLS <span aria-hidden="true">⚙</span></summary>
           <div class="alpha-tools-controls">
             <label class="alpha-toggle">
@@ -230,6 +230,10 @@
               <span>Activity speed ×10</span>
               <input type="checkbox" id="alphaSpeed" role="switch" aria-label="Increase all activity speed ten times">
             </label>
+            <label>Max Stats armour expertise <select id="alphaFamily"><option value="none">Unarmoured</option><option value="padded">Padded</option><option value="leather">Leather</option><option value="plate" selected>Plate</option></select></label>
+            <button type="button" id="alphaMaxStats" class="alpha-day-button">Max Stats · six-month build</button>
+            <button type="button" id="alphaCoins" class="alpha-day-button">+100,000 arena coins</button>
+            <p class="hint">Test only. Max Stats trains the currently selected weapon and chosen armour family; does not buy equipment.</p>
             <p id="alphaStatus" class="alpha-tools-status" role="status" aria-live="polite"></p>
           </div>
         </details>

@@ -113,7 +113,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "remove the old separate weapon dropdown that did not display enchant ranks");
   assert.match(html, /<details id="alphaTools"/,
     "alpha tools must fold away rather than occupy normal phone space");
-  for(const id of ["alphaReset","alphaDay","alphaSpeed","alphaStatus"])
+  for(const id of ["alphaReset","alphaDay","alphaSpeed","alphaStatus","alphaMaxStats","alphaCoins","alphaFamily"])
     assert.ok(html.includes('id="' + id + '"'),"alpha control target: "+id);
   assert.match(html, /<button type="button" id="alphaDay" class="alpha-day-button">Test 24 hours idle<\/button>/,
     "24h action is a real button, not a switch");
@@ -148,7 +148,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=alpha-gear-a3/,
+  assert.match(html, /app\.mjs\?v=alpha-gear-a4/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -880,6 +880,21 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
       "each button click simulates exactly one additional day");
     assert.equal(afterSecondDay.skills.mining.level,1,
       "repeated 24h clicks still cannot level up automatically");
+    assert.equal(elements.get("alphaTools").hidden,false);
+    elements.get("alphaFamily").value="leather";
+    elements.get("alphaMaxStats").fire("click");
+    const benchmark=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(benchmark.skills.fighting.level,52);
+    assert.equal(benchmark.skills.mining.level,1);
+    assert.ok(benchmark.expertise.greatsword>0&&benchmark.expertise.leather>0);
+    assert.equal(benchmark.expertise.plate,0);
+    assert.equal(benchmark.coins,afterSecondDay.coins);
+    assert.deepEqual(benchmark.equipment,afterSecondDay.equipment);
+    assert.match(elements.get("alphaStatus").textContent,/TEST ONLY.*six-month/i);
+    elements.get("alphaCoins").fire("click");
+    elements.get("alphaCoins").fire("click");
+    assert.equal(JSON.parse(store.get(SAVE_KEY)).coins,benchmark.coins+200000);
+    assert.match(elements.get("alphaStatus").textContent,/TEST ONLY.*100,000/);
     const savedBeforeCancelledReset=store.get(SAVE_KEY);
     elements.get("alphaReset").checked=true;
     elements.get("alphaReset").fire("change");

@@ -18,3 +18,13 @@ The Owner requested a compact **Alpha Tools** block with two switches and one **
 - Automated tests in `tools/test_game_engine.mjs` and `tools/test_game_ui.mjs` cover virtual-clock persistence, 1×↔10× continuity, exact simulated day, save reload, offline XP cap, reset cancellation, full reset and closed-panel UI.
 
 **Known behavior:** This is a forward-only simulation, **not an undoable 24h preview**. A confirmed reset is not reversible. The reset remains a one-shot confirmation switch that returns OFF; the 24h test is a real clickable button with no checked state; only ×10 is a persistent switch. This button replaces the earlier 24h toggle at the Owner's request.
+
+
+## A4 — six-month benchmark and arena coin controls (pending PR #154)
+
+Two additional clearly marked local testing buttons in the folded panel:
+
+- **Max Stats · six-month build:** choose one armour family (default Plate) and use the currently selected weapon. Set floors based on the A3 verified normal daily build, seed 20261125 at day 180: Fighting Lv 52, 4,167 productive hours of real Fighting attribute effort, 4,167 weapon practice hours, 4,145 chosen armour hours (rounded down from measured values). On a fresh character this produces STR/DEX/END 148/148/136. Both selected tracks exceed the 4,000h S mastery requirement. Existing higher values and other legitimate activity/expertise progress stay intact. Does not equip armour, buy gear, grant coins, increase other skills, or advance the logical clock. Repeating for the same build is idempotent at the same time; deliberately selecting another build and clicking can train it for testing. Settle previous earned progress first, restart only the unfinished snapshot if the fixture changes, and never rewrite old rewards.
+- **+100,000 arena coins:** adds exactly 100,000 to the settled wallet per click; no mastery, gear, stats or special prize outcome. Reject integer overflow.
+
+These are intentionally artificial local QA fixtures, **not earned progression**. All five controls are hidden and their event handlers not registered under the normal timing profile. New fixture functions additionally enforce the same source-defined profile internally. The existing clock offset may be preserved at 1× for a normal-profile current-build save; no accelerated rate. No new save fields, credentials, server endpoint or secret activation route. Before production, explicitly remove test code/assets and reset disposable alpha saves; this static browser prototype is not an authoritative anti-cheat boundary. Tests include exact benchmark stats, idempotence, higher-value preservation, independent credit, overflow, old combat settlement, normal-profile refusal and UI click persistence. See [ALPHA_GEAR_BASELINE.md](ALPHA_GEAR_BASELINE.md).
