@@ -114,15 +114,23 @@ try{
     const statView=await evaluate(`(()=>{
       const panel=document.getElementById("characterStatsPanel"),equipment=document.getElementById("armourCabinet");
       panel.open=true;equipment.open=true;panel.dispatchEvent(new Event("toggle"));
-      const sheet=document.getElementById("characterStatsBreakdown"),before=sheet.textContent;
+      const sheet=document.getElementById("characterStatsBreakdown");
+      const count=sheet.querySelectorAll("details").length,initiallyClosed=sheet.querySelectorAll("details[open]").length===0;
+      sheet.querySelector('details[data-stat-key="primary-attack"]').open=true;
+      const before=sheet.textContent;
       document.querySelector('[data-loadout="bow"]').click();
       const after=sheet.textContent;
-      return {open:panel.open,equipment:equipment.open,before,after,overflow:document.documentElement.scrollWidth-innerWidth};
+      return {open:panel.open,equipment:equipment.open,before,after,count,initiallyClosed,
+        keptOpen:sheet.querySelector('details[data-stat-key="primary-attack"]').open,
+        othersClosed:sheet.querySelectorAll("details[open]").length===1,overflow:document.documentElement.scrollWidth-innerWidth};
     })()`);
     assert.ok(statView.open&&statView.equipment);
-    assert.match(statView.before,/Damage · swing/);
-    assert.match(statView.after,/Damage · shot/);
-    assert.match(statView.after,/Damage · dagger/);
+    assert.ok(statView.initiallyClosed&&statView.count>=20&&statView.keptOpen&&statView.othersClosed);
+    assert.match(statView.before,/Attack power · swing/);
+    assert.match(statView.after,/Attack power · shot/);
+    assert.match(statView.after,/Attack power · dagger/);
+    assert.match(statView.after,/Activity modifiers/);
+    assert.match(statView.after,/No direct gear bonus/i);
     assert.notEqual(statView.before,statView.after);
     assert.ok(statView.overflow<=2,"stat sheet horizontal overflow");
     await shot("stats-"+width);

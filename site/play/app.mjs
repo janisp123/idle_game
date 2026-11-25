@@ -1,4 +1,4 @@
-import { characterStats } from "./character-stats.mjs?v=char-stats-001";
+import { characterStats } from "./character-stats.mjs?v=char-stats-002";
 import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
 import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
 import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a2";
@@ -791,20 +791,35 @@ function renderCharacterStats(){
   if(signature===previousStatsMarkup)return;
   previousStatsMarkup=signature;
   $("characterStatsNotice").textContent=model.notice;
-  const groups=model.sections.map(section=>{
-    const group=document.createElement("section");group.className="stat-breakdown-group";
-    const title=document.createElement("h3"),value=document.createElement("strong");
-    title.textContent=section.title;value.textContent=section.total;title.append(value);group.append(title);
+  const host=$("characterStatsBreakdown");
+  const expanded=new Set(Array.from(host.querySelectorAll("details[data-stat-key][open]"),el=>el.dataset.statKey));
+  const groups=[];
+  let currentGroup;
+  for(const section of model.overview){
+    if(section.group!==currentGroup){
+      currentGroup=section.group;
+      const heading=document.createElement("h3");heading.className="stat-overview-heading";heading.textContent=currentGroup;groups.push(heading);
+    }
+    const group=document.createElement("details");group.className="stat-breakdown-group";group.dataset.statKey=section.key;
+    group.open=expanded.has(section.key);
+    const title=document.createElement("summary");title.className="stat-overview-summary";
+    const labels=document.createElement("span"),name=document.createElement("span"),value=document.createElement("strong");
+    name.textContent=section.title;labels.append(name);
+    if(section.subtitle){const sub=document.createElement("small");sub.textContent=section.subtitle;labels.append(sub);}
+    value.textContent=section.summary;
+    if(section.summary.startsWith("−"))value.className="stat-negative";
+    title.append(labels,value);group.append(title);
+    const body=document.createElement("div");body.className="stat-overview-sources";
     for(const {label,value} of section.rows){
       const line=document.createElement("div");line.className="stat-breakdown-line";
       const name=document.createElement("span"),amount=document.createElement("strong");
       name.textContent=label;amount.textContent=value;
       if(value.startsWith("−"))amount.className="stat-negative";
-      line.append(name,amount);group.append(line);
+      line.append(name,amount);body.append(line);
     }
-    if(section.note){const note=document.createElement("p");note.className="stat-breakdown-note";note.textContent=section.note;group.append(note);}
-    return group;
-  });
+    if(section.note){const note=document.createElement("p");note.className="stat-breakdown-note";note.textContent=section.note;body.append(note);}
+    group.append(body);groups.push(group);
+  }
   $("characterStatsBreakdown").replaceChildren(...groups);
 }
 $("characterStatsPanel").addEventListener("toggle",()=>{if(state)renderCharacterStats();});

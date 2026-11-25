@@ -1,10 +1,11 @@
+import {GRADES,workMultiplier,benchmark} from "./difficulty.mjs?v=alpha-gear-a2";
 // Read-only character sheet. All numeric totals come from the selected build
 // constructed by the engine and the shared physical resolver helpers.
-import {desiredArenaPlayer,ACTIVITIES} from "./engine.mjs?v=char-stats-001";
-import {ATTRIBUTE_BALANCE,ATTRIBUTES,effectiveAttributeProgress,masteryBonusesForSkill} from "./attributes.mjs?v=glad-001";
+import {desiredArenaPlayer,ACTIVITIES,SKILL_BALANCE,PRODUCTION_RECIPES} from "./engine.mjs?v=char-stats-001";
+import {ATTRIBUTE_BALANCE,ATTRIBUTES,ACTIVITY_STAT_WEIGHTS,effectiveAttributeProgress,masteryBonusesForSkill} from "./attributes.mjs?v=glad-001";
 import {physicalBuildStats} from "./physical-duel.mjs?v=char-stats-001";
 import {ARMOUR_SLOTS,ARMOUR_TIER_LABELS,armourStats,initialArmour,armourOption,WEAPON_PIECES} from "./armour.mjs?v=alpha-gear-a8";
-import {ITEM_GRADES,STARTER_ITEM,equippedCondition} from "./smith.mjs?v=alpha-gear-a8";
+import {ITEM_GRADES,equippedCondition} from "./smith.mjs?v=alpha-gear-a8";
 import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=glad-002";
 const fmt=n=>Number(n.toFixed(3)).toLocaleString("en-US",{maximumFractionDigits:3});
 const pct=n=>fmt(n*100)+"%";
@@ -89,7 +90,67 @@ export function characterStats(state){
     ...pieces.map(x=>row(x.name,fmt(x.part.maxHP)+" HP"+(x.part.breakable?"":" · Unbreakable")+", "+pct(x.part.proficiency)+" proficiency")),
     ...(v.arrows?[row("Bow arrows",v.arrows)]:[])
   ],"Condition and ammunition can change during a fight. The live arena displays remaining condition."));
+  // Keep the detailed values for inspection, but the overview is about
+  // modifiers, not predicting a particular combat result.
+  const overview=sections.map((detail,i)=>{
+    const entry={...detail,key:detail.title,group:i<3?"Attributes":"Combat modifiers",summary:detail.total};
+    if(i<3)return {...entry,summary:detail.total,subtitle:"+0 from equipment",
+      rows:[...detail.rows,row("Equipment attribute bonus","+0")]};
+    if(detail.title.startsWith("Damage · ")){
+      const a=v.attacks.find(a=>"Damage · "+a.move.replaceAll("_"," ")===detail.title);
+      // Isolate grade/quality effects on this same move at the same STR.
+      const baseline=a.weapon+a.strength;
+      const bonus=(a.base/baseline-1)*100;
+      return {...entry,key:a===v.attacks[0]?"primary-attack":"secondary-attack",
+        title:"Attack power · "+a.move.replaceAll("_"," "),summary:signed(bonus,"%"),
+        subtitle:"vs same move without grade/quality bonuses",
+        rows:[row("Same move without grade/quality bonuses",fmt(baseline)),
+          row("Grade/quality attack power bonus",signed(bonus,"%")),...detail.rows,
+          row("Unmitigated intact hit input",detail.total)]};
+    }
+    if(detail.title==="Maximum HP")return {...entry,subtitle:"No equipment HP bonus",rows:[...detail.rows,row("Equipment bonus","+0 HP")]};
+    if(detail.title==="Mobility")return {...entry,subtitle:signed(v.mobility-100," pp")+" vs unburdened"};
+    if(detail.title==="Dodge chance")return {...entry,title:"Dodge modifier",summary:pp(v.gradedDodge),
+      subtitle:"Intact armour grade bonus, before cap",rows:[...detail.rows,row("Conditional dodge rate after cap",detail.total)]};
+    if(detail.title==="Material protection")return {...entry,summary:signed(v.protection," pp"),subtitle:"Material coverage, not damage avoided"};
+    if(detail.title==="Accuracy vs equal DEX / Fighting")return {...entry,title:"Weapon accuracy modifier",
+      summary:pp(v.accuracy),subtitle:"Before situational effects and caps",
+      rows:[...detail.rows,row("Unobstructed equal-stat accuracy",detail.total)]};
+    if(detail.title==="Armour penetration")return {...entry,summary:pp(v.penetration),subtitle:"Reduces enemy protection and resistance"};
+    if(detail.title==="Initiative score")return {...entry,title:"Initiative modifier",summary:signed(v.initiativeMobility),
+      subtitle:"Mobility contribution; not a first-strike probability",rows:[...detail.rows,row("Total comparison score",detail.total)]};
+    if(detail.title==="Grade resistance")return {...entry,summary:signed(v.resistance),subtitle:"Added to damage divisor"};
+    if(detail.title==="Block / parry")return {...entry,summary:p.loadout==="sword_shield"?"Shield":p.loadout==="greatsword"?"Parry":"None",subtitle:"Conditional defense"};
+    return entry;
+  });
+  for(const [id,activity] of Object.entries(ACTIVITIES)){
+    const level=state.skills[id].level,tier=state.difficulties[id]??0;
+    const mastery=Math.min(SKILL_BALANCE.maxEfficiency,1+Math.max(0,level-1)*SKILL_BALANCE.efficiencyPerLevel);
+    // Exactly the production work multiplier; Fighting deliberately ignores
+    // difficulty for XP. Display at currently earned stats for the next
+    // settlement, not as a promise of the frozen offline outcome.
+    const difficulty=id==="fighting"?1:workMultiplier(tier,ACTIVITY_STAT_WEIGHTS[id],earned);
+    const efficiency=mastery*difficulty;
+    const crafted=Object.hasOwn(PRODUCTION_RECIPES,id);
+    const weights=ACTIVITY_STAT_WEIGHTS[id];
+    const weightedStat=Object.entries(weights).reduce((n,[stat,w])=>n+earned[stat].value*w/100,0);
+    const rows=[row("Direct equipment XP/yield bonus","+0%"),
+      row("Claimed skill Lv "+level,signed((mastery-1)*100,"%")),
+      row("Skill efficiency cap","×"+fmt(SKILL_BALANCE.maxEfficiency)),
+      row("Selected difficulty",GRADES[tier])];
+    if(id!=="fighting"&&tier>0)rows.push(row("Weighted attribute readiness",fmt(weightedStat)+" / "+benchmark(tier).stat),
+      ...Object.entries(weights).map(([stat,w])=>row(stat+" · "+w+"% weight",fmt(earned[stat].value*w/100))),
+      row("Difficulty / readiness factor","×"+fmt(difficulty)));
+    else rows.push(row("Difficulty XP/yield factor","×1"));
+    rows.push(row("Combined XP factor","×"+fmt(efficiency)));
+    if(activity.item!==null)rows.push(row(crafted?"Recipe output per successful cycle":"Primary resource yield factor",crafted?"1":"×"+fmt(efficiency)));
+    rows.push(row("Attribute training split",Object.entries(weights).map(([stat,w])=>stat+" "+w+"%").join(" · ")));
+    const note=id==="fighting"?"Gear affects combat performance and productive time through victory or resurrection, not the direct skill XP multiplier. Arena coins depend on actual wins and difficulty.":crafted?"Recipes require available inputs. Efficiency affects skill XP, not the number of items per successful recipe.":"Efficiency affects skill XP"+(activity.item!==null?" and primary resource yield":"")+", not action duration. Random batch variation and the skill XP cap still apply.";
+    overview.push({key:"activity-"+id,group:"Activity modifiers",title:activity.title,summary:"×"+fmt(efficiency),
+      subtitle:id==="fighting"?"XP factor · combat gear effects above":crafted?"XP factor · no direct gear bonus":activity.item!==null?"XP / yield factor · no direct gear bonus":"XP factor · no direct gear bonus",
+      rows,note});
+  }
   const old=state.combatSession?.player;
   const pending=Boolean(old&&JSON.stringify(old)!==JSON.stringify(p));
-  return {sections,notice:pending?"Selected build for the next bout. The current fight retains its original equipment and stats.":"Selected build · intact equipment at the start of a fight.",weaponName};
+  return {sections,overview,notice:pending?"Selected build for the next bout. The current fight retains its original equipment and stats.":"Selected build · intact equipment at the start of a fight.",weaponName};
 }

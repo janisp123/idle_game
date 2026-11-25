@@ -32,3 +32,6 @@ The owner resumed this work. Branch `alpha/approved-verdict-art` has the activat
 ## Binary transfer resolved
 
 Owner suggested using Google Drive as an intermediary. The two original attachments were uploaded to the owner's Drive without sharing changes; raw content was read back and stored as GitHub blobs. Both blob hashes matched the locally calculated Git blob hashes. The two files are committed to PR #156 under the required paths. Exact SHA-256 checks and Chromium verdict rendering tests are required on the final revision before merging. No Drive runtime dependency, gameplay change or save reset.
+
+
+Release receipt: PR #156 merged ff063078, exact SHA-256 and real Chromium checks passed, Pages 45575028297 succeeded. Both approved images integrated; no save reset.

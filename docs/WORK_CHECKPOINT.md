@@ -1,12 +1,16 @@
 # Current working checkpoint
 
-## CHAR-STATS-001 — draft PR #157
+## CHAR-STATS-002 — draft PR #158
 
-Owner-requested collapsible read-only detailed stat sheet implemented. Actual resolver formulas preserved, selected intact next-bout build and conditional effects labelled. CI pending; no deployment or save reset. Next verify full checks and browser smoke, then merge/deploy if gates pass.
+Owner-approved compact stat overview and activity factors implemented; CI pending. No gameplay/save change. Next verify and release.
 
-## ALPHA-ART-001 — pending draft PR #156
+## CHAR-STATS-001 — deployed PR #157
 
-Owner requested exact art integration. Branch `alpha/approved-verdict-art` contains registry activation and strict tests; original WebP blobs transferred via owner-suggested private Google Drive bridge and matched local Git blob hashes. Both committed to this branch with strict SHA-256/browser tests. Current live V15 gameplay unaffected. Next verify final-head checks and deploy. See OUTCOME_ART_HANDOFF.md.
+Verified head 0afbd10 passed 113 game/UI tests and real Chromium; merge ca689467, Pages 45585083404 success. No save reset. Superseded UI detail layout by CHAR-STATS-002.
+
+## ALPHA-ART-001 — deployed PR #156
+
+Exact approved assets transferred via Drive, SHA-256 and browser checks passed. Merge ff063078, Pages 45575028297 succeeded. No gameplay/save change. See OUTCOME_ART_HANDOFF.md.
 
 ## ALPHA-GEAR-001 — DEPLOYED (PR #154, 2026-11-25)
 
