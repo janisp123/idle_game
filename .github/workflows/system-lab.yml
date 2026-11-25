@@ -73,6 +73,24 @@ jobs:
             console.log("Modules:",(r.results??r.scenarios??[]).map(x=>x.module||"combat").join(", "));
             console.log("Valid JSON; full report attached below.");
           '
+      - name: Produce the ALPHA-GEAR-001 baseline report on its active branch
+        if: github.head_ref == 'alpha/six-month-gear-benchmark'
+        run: |
+          node tools/simulation/build-progression.mjs > build-progression-report.json
+          node --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            const report=JSON.parse(readFileSync("build-progression-report.json","utf8"));
+            for(const p of report.reports)for(const s of p.scenarios)
+              console.log(JSON.stringify({profile:p.profile, ...s}));
+          '
+      - name: Attach build progression baseline
+        if: github.head_ref == 'alpha/six-month-gear-benchmark'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: build-progression-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build-progression-report.json
+          if-no-files-found: error
+          retention-days: 7
       - name: Attach report, without modifying playable site
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
