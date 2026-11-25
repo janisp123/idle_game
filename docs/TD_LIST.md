@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## UI-CATEGORY-001 — Shared Combat menu
+
+- **Goal:** Put Fighting and Training in the same activity category.
+- **Acceptance:** Combat lists both distinct activities; Survival Work retains nine activities; no engine, progression or save changes. UI regression and browser checks pass.
+- **Status:** IN_REVIEW — [PR #169](https://github.com/janisp123/idle_game/pull/169).
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## CAP-001 — Reward stop at skill XP cap and evergreen public overview
 
 - **Goal:** Pause all rewards at one full skill XP bar, auto-advance queued activities, keep explicit Master claims; generic public overview.
