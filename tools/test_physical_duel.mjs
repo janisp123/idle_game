@@ -11,8 +11,9 @@ test("timeout compares raw HP and requires damage from the leading fighter", () 
 });
 
 test("a seeded archer uses a finite quiver and switches to its dagger", () => {
-  const bow = actor("bow", { end: 60 });
-  const spear = actor("spear", { end: 60 });
+  // High HP ensures this test reaches arrow exhaustion instead of a legitimate early knockout.
+  const bow = actor("bow", { end: 200 });
+  const spear = actor("spear", { end: 200 });
   const first = resolvePhysicalDuel(bow, spear, 72);
   assert.deepEqual(resolvePhysicalDuel(bow, spear, 72), first);
   assert.ok(first.events.length <= PHYSICAL_RULES.turnLimit * 3 + 1);
