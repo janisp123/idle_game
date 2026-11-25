@@ -1,10 +1,14 @@
 # Changelog and task handoffs
 
-## START-FIGHT-001 · STARTED (2026-11-25, chat)
+## APPRENTICE-A1 · STARTED (2026-11-25, chat)
 
-Owner explicitly approved new characters automatically starting lowest-difficulty Fighting, with starter equipment and offline continuation; valid returning saves untouched. Build on existing approved UI-COMPACT-001 PR #175 because both change HTML/UI tests; repair its stale CSS revision assertion. Use existing chooseActivity on fresh character only, including explicit alpha reset; start in arena without initial preparation delay, no balance/engine/save-format changes. No other brainstorm implemented. New-start helper uses chooseActivity, fresh/reset only; cache revision and real browser starter assertions updated; compact UI stale CSS regression fixed. Next final CI.
+Owner approved starting Apprentice implementation. Fresh branch `feat/apprentice-foundation` base `29d7bee` replaces overlapping draft #176; carry forward plan and pure unlock policy/tests. Scope: earned activated levels minus starting levels, 1..5 queue slots, real queue guards, foldable Assistant menu, locked/unimplemented chores clearly marked, preserve preexisting valid routes. No automation spending, tribute, new weapons or live clan changes. Added pure policy and real queue gating, five-slot bounded settlement, menu and source-linked tests; updated synthetic queue regression fixtures and lab sample. Next final CI.
 
-## UI-COMPACT-001 · STARTED (2026-11-25, chat)
+## START-FIGHT-001 · MERGED (2026-11-25, chat)
+
+Owner explicitly approved new characters automatically starting lowest-difficulty Fighting, with starter equipment and offline continuation; valid returning saves untouched. Build on existing approved UI-COMPACT-001 PR #175 because both change HTML/UI tests; repair its stale CSS revision assertion. Use existing chooseActivity on fresh character only, including explicit alpha reset; start in arena without initial preparation delay, no balance/engine/save-format changes. No other brainstorm implemented. New-start helper uses chooseActivity, fresh/reset only; cache revision and real browser starter assertions updated; compact UI stale CSS regression fixed; fixed-clock browser first bout tested after positive elapsed time. PR #175 merged 29d7bee after website 45660928790, systems 45660928724 and protocol 45660928741 passed.
+
+## UI-COMPACT-001 · MERGED (2026-11-25, chat)
 
 Owner requests combined Skill Progress and Skill Master section and collapsible Resources. Branch `ui/compact-skill-resources`, base `152c54e`. Preserve existing XP display, Master controls, tribute, resource rendering, saves and all gameplay. Resources closed by default. Combined XP and Master controls in one section, native folded Resources retains resourceList, CSS revision updated, DOM and real browser checks added. Next final CI.
 

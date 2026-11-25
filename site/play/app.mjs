@@ -1,4 +1,4 @@
-import { characterStats } from "./character-stats.mjs?v=cap-001";
+import { characterStats } from "./character-stats.mjs?v=apprentice-a1";
 import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
 import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
 import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a2";
@@ -9,10 +9,10 @@ import {
   lootChances, recipeOptions, newGame, chooseActivity, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
-  MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
+  getApprenticeProgress, queueCapacity, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, activityRewardCapped, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=cap-001";
+} from "./engine.mjs?v=apprentice-a1";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=bal-002";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-art-001";
@@ -22,7 +22,7 @@ import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats, dodgeChance }
   from "./armour.mjs?v=bal-002";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=cap-001";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=apprentice-a1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -520,7 +520,7 @@ function renderWagons() {
   currentScheduledMeter = null;
   currentScheduledFill = null;
   // Unlike the previous scrolling wagon strip, every hourglass fits in view.
-  ui.wagonList.style.gridTemplateColumns = "repeat(" + Math.max(1, wagons.length) +
+  ui.wagonList.style.gridTemplateColumns = "repeat(" + Math.max(1, Math.min(3, wagons.length)) +
     ", minmax(0, 1fr))";
   const cards = wagons.map((wagon, i) => {
     const card = document.createElement("article");
@@ -679,6 +679,7 @@ ui.queueUnit.addEventListener("change", updatePlanningMode);
 ui.queueCancel.addEventListener("click", () => hideQueuePlanner());
 ui.queueConfirm.addEventListener("click", () => {
   if (!planningActivity) return;
+  if (state.wagons.length >= queueCapacity(state)) { hideQueuePlanner(); return; }
   const plan = ui.queueUnit.value === UNTIL_LEVEL_UP ? UNTIL_LEVEL_UP :
     Number(ui.queueAmount.value) * durationUnitMs(ui.queueUnit.value);
   const task = planningActivity;
@@ -823,7 +824,25 @@ function renderCharacterStats(){
   $("characterStatsBreakdown").replaceChildren(...groups);
 }
 $("characterStatsPanel").addEventListener("toggle",()=>{if(state)renderCharacterStats();});
+function renderApprentice() {
+  const progress = getApprenticeProgress(state);
+  const used = state.wagons.length;
+  $("apprenticeLevel").textContent = number(progress.earnedLevels) + " earned levels";
+  $("apprenticeSlots").textContent = number(progress.slots) + " / 5 activity slots unlocked";
+  $("apprenticeNext").textContent = progress.nextSlotAt === null
+    ? "All activity slots unlocked."
+    : "Next activity slot unlocks at LvL " + number(progress.nextSlotAt) + ".";
+  $("apprenticeMaster").textContent = progress.autoMasterUnlocked
+    ? "Level requirement met · Automation not implemented yet"
+    : "Unlocks at LvL " + number(progress.autoMasterAt);
+  $("apprenticeLegacy").hidden = used <= progress.slots;
+  $("queueUnlockHint").textContent = progress.nextSlotAt === null
+    ? "All activity slots unlocked."
+    : "Activity slots: " + progress.slots + " · Next unlock at LvL " + progress.nextSlotAt;
+}
+
 function render() {
+  renderApprentice();
   const current = state.activity ? ACTIVITIES[state.activity] : null;
   ui.alphaSpeed.checked = alphaClock?.speed === 10;
   const chosen = COMBAT_LOADOUTS[state.combatLoadout];
@@ -882,7 +901,7 @@ function render() {
     row.classList.toggle("active", workingHere);
     row.classList.toggle("pending", destination);
     const queuedIndex = state.wagons.findIndex(w => w.activity === id);
-    const queueFull = state.wagons.length >= MAX_WAGONS;
+    const queueFull = state.wagons.length >= queueCapacity(state);
     startButton.disabled = queuedIndex === 0;
     startButton.textContent = "▶";
     const startLabel = queuedIndex === 0
@@ -1091,7 +1110,7 @@ function startActivityNow(kind) {
 
 function planActivity(kind, untilLevelUp = false) {
   if (!state.wagons.length || state.wagons.some(w => w.activity === kind) ||
-      state.wagons.length >= MAX_WAGONS) return;
+      state.wagons.length >= queueCapacity(state)) return;
   showActivityScreen("root", null);
   planningActivity = kind;
   ui.queueAmount.value = String(SCHEDULE_BALANCE.minDurationUnits);

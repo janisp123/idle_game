@@ -109,8 +109,8 @@ test('Skill Master report mirrors exact readiness and confirmed resource payment
 
 test('queue simulated work and travel reproduce the same source settlement exactly',()=>{
   const args={route:[{activity:'mining',plannedMs:60000},
-    {activity:'woodcutting',plannedMs:null}],elapsedMs:1234567,seed:6789,trials:1};
-  let s=newGame(0),rng=seededCombatRandom(args.seed);
+    {activity:'woodcutting',plannedMs:null}],elapsedMs:1234567,seed:6789,trials:1,levels:{fishing:11}};
+  let s=newGame(0),rng=seededCombatRandom(args.seed);s.skills.fishing.level=11;
   s=queueStartActivity(s,'mining',null,0,rng).state;
   s=queueStartActivity(s,'woodcutting',60000,0,rng).state;
   assert.equal(s.wagons.length,2);
@@ -119,7 +119,7 @@ test('queue simulated work and travel reproduce the same source settlement exact
   assert.equal(actual.firstTrial.finalActivity,expected.state.activity);
   assert.deepEqual(actual.firstTrial.finalQueue,expected.state.wagons);
   assert.deepEqual(actual.firstTrial.transition,expected.state.transition);
-  assert.equal(MAX_WAGONS,3);
+  assert.equal(MAX_WAGONS,5);
   const twentyYears=simulateQueue({route:[{activity:'mining',plannedMs:null}],
     elapsedMs:20*365*86400000,trials:1,seed:42});
   assert.ok(twentyYears.firstTrial.itemChanges.stone>0);

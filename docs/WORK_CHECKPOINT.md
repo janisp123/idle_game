@@ -1,12 +1,16 @@
 # Current working checkpoint
 
+## APPRENTICE-A1 — PR #177
+
+[Implementation plan](APPRENTICE_IMPLEMENTATION_PLAN.md) carried forward from superseded draft #176. Added actual earned-level policy, engine and UI queue gates 1..5, preserved existing routes, bounded settlement through five slots, Personal Assistant menu and locked future chores. Regressions exercise boundaries, long absence, old saves and browser. Auto-Master, gear grade/quality, donations and later unlocks not implemented; next verify final checks and Pages.
+
 ## START-FIGHT-001 — PR #175
 
-New character initialization now enters existing lowest-tier arena via chooseActivity; valid saves resume normally. Explicit alpha reset uses same starter route. No engine or balance change. Combined with approved compact UI PR #175 and stale CSS test assertion fix. Next CI and Pages verification.
+New character initialization now enters existing lowest-tier arena via chooseActivity; valid saves resume normally. Explicit alpha reset uses same starter route. No engine or balance change. Combined with approved compact UI PR #175 and stale CSS test assertion fix. PR #175 merged 29d7bee; final head e3265cc passed website 45660928790, systems 45660928724 and protocol 45660928741.
 
 ## UI-COMPACT-001 — PR #175
 
-Skill progress and Master share one panel; Resources uses native collapsed details. No XP, tribute, resource or save changes. Next verify final checks and Pages.
+Skill progress and Master share one panel; Resources uses native collapsed details. No XP, tribute, resource or save changes. PR #175 merged 29d7bee; website 45660928790, systems 45660928724 and protocol 45660928741 passed.
 
 ## CLAN-TEST-001 — fake player scenario lab
 

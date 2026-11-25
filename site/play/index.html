@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=ui-compact-001">
-  <script type="module" src="./app.mjs?v=start-fight-001"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=apprentice-a1">
+  <script type="module" src="./app.mjs?v=apprentice-a1"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -109,6 +109,7 @@
         <section class="panel actions" aria-labelledby="actions-heading">
           <p class="section-index">II · ACTIVITIES</p>
           <h2 id="actions-heading" class="engraved-title">ACTIVITIES</h2>
+          <p id="queueUnlockHint" class="hint"></p>
           <div id="activityNav" class="activity-navigation">
             <button id="openActivities" class="activity-nav-button" type="button" aria-controls="activityCategories" aria-expanded="false">Choose activity <span aria-hidden="true">›</span></button>
             <div id="activityCategories" class="activity-nav-screen" hidden aria-label="Activity categories">
@@ -138,6 +139,23 @@
               <button type="button" id="queueCancel" class="activity-start">Cancel</button>
             </div>
           </div>
+        </section>
+
+        <section class="panel actions apprentice-panel" aria-labelledby="apprentice-heading">
+          <h2 id="apprentice-heading" class="engraved-title">PERSONAL ASSISTANT</h2>
+          <details id="apprenticeMenu">
+            <summary class="activity-nav-button">Your Apprentice <span aria-hidden="true">›</span></summary>
+            <div class="apprentice-content">
+              <p class="master-voice">“I have watched your battles. Take me as your apprentice. Teach me your ways, and I will take care of more of your chores.”</p>
+              <p id="apprenticeLevel" class="activity-nav-label">0 earned levels</p>
+              <p id="apprenticeSlots" class="hint">1 / 5 activity slots unlocked</p>
+              <p id="apprenticeNext" class="hint">Next activity slot unlocks at LvL 10.</p>
+              <p id="apprenticeLegacy" class="hint" hidden>Your existing route is preserved. No new slots may be added above your unlocked capacity.</p>
+              <label class="apprentice-option"><input type="checkbox" disabled aria-describedby="apprenticeMaster"> Automatic Skill Master on login <span id="apprenticeMaster">Unlocks at LvL 50</span></label>
+              <label class="apprentice-option"><input type="checkbox" disabled> Automatic equipment quality upgrades <span>Planned</span></label>
+              <label class="apprentice-option"><input type="checkbox" disabled> Automatic clan donations <span>Planned · Online clans required</span></label>
+            </div>
+          </details>
         </section>
 
         <section class="panel actions" aria-labelledby="clan-heading">

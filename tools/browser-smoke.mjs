@@ -114,6 +114,8 @@ try{
     await evaluate(`(()=>{Date.now=()=>${fixedNow+1000};document.dispatchEvent(new Event("visibilitychange"));})()`);
     await until(()=>evaluate('!document.getElementById("combatFlow").hidden'),"first automatic bout "+width);
     await evaluate(`Date.now=()=>${fixedNow}`);
+    const apprentice=await evaluate(`(()=>{const menu=document.getElementById("apprenticeMenu");menu.querySelector("summary").click();const result={open:menu.open,text:menu.innerText,locked:[...menu.querySelectorAll("input")].every(i=>i.disabled),overflow:document.documentElement.scrollWidth-innerWidth};menu.querySelector("summary").click();return result;})()`);
+    assert.ok(apprentice.open&&apprentice.locked&&apprentice.overflow<=2);assert.match(apprentice.text,/0 earned levels/i);assert.match(apprentice.text,/Unlocks at LvL 50/);assert.match(apprentice.text,/1 \/ 5 activity slots unlocked/);
     const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=15;s.name="Old alpha";return JSON.stringify(s);})()`);
     await navigate("reset-"+width,{[saveKey]:old,[clockKey]:JSON.stringify({version:1,realAnchorMs:0,gameAnchorMs:0,speed:10})});
     const notice=await evaluate('({hidden:document.getElementById("saveResetNotice").hidden,text:document.getElementById("saveResetNotice").textContent})');

@@ -53,6 +53,7 @@ jobs:
           node --check tools/system-lab.mjs
           node --test tools/test_system_lab.mjs
           node --test tools/simulation/clan-fixtures.test.mjs
+          node --test tools/simulation/apprentice.test.mjs
           node tools/system-lab.mjs --config tools/simulation/clan-example.json > clan-fixture-report.json
       - name: Validate scenario input without accepting private saves
         env:

@@ -8,11 +8,20 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## APPRENTICE-A1 — Earned scheduling and Personal Assistant
+
+- **Goal:** One starting slot; unlock a new slot each ten earned activity levels up to five. Personal Assistant menu shows progress and future chores.
+- **Acceptance:** Activated levels only, both queue add operations enforce derived capacity; preserve valid existing routes; five-slot bounded settlement, browser menu and locked future automation, regression tests. No auto-spending.
+- **Status:** IN_REVIEW — PR #177.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## START-FIGHT-001 — Automatic first-entry arena
 
 - **Goal:** Fresh character immediately begins Fighting with starter equipment and lowest difficulty.
 - **Acceptance:** One Fighting Forever route, no initial menu/preparation gate; offline continuation under current XP cap; existing saves untouched, explicit alpha reset same start; real mobile/desktop fresh-entry regression.
-- **Status:** IN_REVIEW — PR #175 (combined with approved UI-COMPACT-001).
+- **Status:** DONE — PR #175 merged 29d7bee; website 45660928790, systems 45660928724 and protocol 45660928741 passed.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -21,7 +30,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Combine Skill Progress and Skill Master; fold Resources by default.
 - **Acceptance:** XP and Master controls in one panel; native collapsible Resources retains exact inventory and updates; browser/mobile checks; no mechanics/save changes.
-- **Status:** IN_REVIEW — PR #175.
+- **Status:** DONE — PR #175 merged 29d7bee; website 45660928790, systems 45660928724 and protocol 45660928741 passed.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
