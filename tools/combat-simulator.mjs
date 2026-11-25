@@ -1,3 +1,4 @@
+import { fullExpertise,expertiseThreshold,EXPERTISE_BALANCE } from "../site/play/expertise.mjs";
 import { arenaReward } from '../site/play/arena-wallet.mjs';
 import { equippedCondition, equipmentBonuses, STARTER_ITEM } from '../site/play/smith.mjs';
 /**
@@ -11,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { BOUT_MS, startCombatSession, combatAtTime } from '../site/play/combat.mjs';
 import { COMBAT_LOADOUTS } from '../site/play/combat-skills.mjs';
 import { ARMOUR_SLOTS, ARMOUR_TIERS, armourStats } from '../site/play/armour.mjs';
-import { GRADES, benchmark, unlockLevel } from '../site/play/difficulty.mjs';
+import { GRADES, arenaBenchmark } from '../site/play/difficulty.mjs';
 
 const DEFAULT_SEED = 20261124;
 const DEFAULT_BATTLES = 10000;
@@ -52,8 +53,8 @@ const uniform = (armour, slots = {}) => {
 /** Build the SAME frozen fighter fields as engine.mjs's startCombatSession. */
 export function createPlayerSnapshot(options = {}) {
   const difficulty = parseGrade(options.grade ?? 'Non-grade');
-  const target = benchmark(difficulty);
-  const skill = intIn(options.skill ?? target.skill, unlockLevel(difficulty), 100000, 'Fighting skill');
+  const target = arenaBenchmark(difficulty);
+  const skill = intIn(options.skill ?? target.skill, 1, 100000, 'Fighting skill');
   const str = intIn(options.str ?? target.stat, 0, 100000, 'STR');
   const dex = intIn(options.dex ?? target.stat, 0, 100000, 'DEX');
   const end = intIn(options.end ?? target.stat, 0, 100000, 'END');
@@ -66,10 +67,18 @@ export function createPlayerSnapshot(options = {}) {
     ...Object.entries(armour).filter(([, family]) => family !== 'none')
       .map(([slot, family]) => [slot + ':' + family, spec])
   ]);
-  const bonus = equipmentBonuses({ combatLoadout: loadout, armour, equipment });
+  // Default to fully trained synthetic gear to preserve prior comparison
+  // matrices; explicit practice hours select a novice/partially trained build.
+  const expertise=fullExpertise();
+  for(const [key,hours] of Object.entries(options.expertiseHours??{})){
+    if(!Object.hasOwn(expertise,key)||!Number.isFinite(hours)||hours<0||
+      !Number.isSafeInteger(hours*EXPERTISE_BALANCE.unitsPerHour))throw new RangeError("Invalid expertise hours");
+    expertise[key]=hours*EXPERTISE_BALANCE.unitsPerHour;
+  }
+  const bonus = equipmentBonuses({ combatLoadout: loadout, armour, equipment,expertiseActive:expertise });
   return { name:'Wanderer', difficulty, loadout, skill, str, dex, end,
     gear: { ...armourStats(armour, loadout), gearDefense: bonus.defense },
-    gearAttack: bonus.attack, condition: equippedCondition(armour, loadout, equipment) };
+    gearAttack: bonus.attack, condition: equippedCondition(armour, loadout, equipment,expertise) };
 
 }
 const increment = (obj, key, n = 1) => { obj[key] = (obj[key] ?? 0) + n; };
@@ -100,7 +109,7 @@ export function simulateBatch(options = {}) {
   const session = startCombatSession(player, seed); // production validation
   const generatedBuild = saved ? null : {
     armourSlots:uniform(options.armour ?? 'none', options.armourSlots ?? {}),
-    itemGrade: options.itemGrade ?? 0, quality: options.quality ?? "poor"
+    itemGrade: options.itemGrade ?? 0, quality: options.quality ?? "poor",expertiseHours:options.expertiseHours??"fully trained synthetic build"
   };
   const summary = {
     source:'site/play/combat.mjs:combatAtTime',
@@ -233,7 +242,7 @@ export function parseCliArgs(args) {
       key === 'armourSlots' ? pairList(value, 'armour', false) :
       key === 'snapshot' ? JSON.parse(readFileSync(resolve(value), 'utf8')) : value;
   }
-  if (out.snapshot && ['grade','loadout','armour','armourSlots','itemGrade','quality','skill',
+  if (out.snapshot && ['grade','loadout','armour','armourSlots','itemGrade','quality','expertiseHours','skill',
       'str','dex','end'].some(k => Object.hasOwn(out,k)))
     throw new RangeError('--snapshot supplies the frozen fighter; do not mix build options');
   return out;
@@ -256,7 +265,7 @@ export const HELP = [
   ' --help                   this guide',
   'Write JSON to a file with shell redirection: ... > combat-report.json',
   'IMPORTANT: Grade/stat build benchmarks are synthetic, not player progression.',
-  'Saved snapshots use real frozen player stats; gear locks apply to generated builds.'
+  'Saved snapshots use real frozen player stats; synthetic builds may attempt any arena grade.'
 ].join('\n');
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {

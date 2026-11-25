@@ -1,7 +1,9 @@
-import { GRADES as difficultyGrades, benchmark } from "./difficulty.mjs?v=glad-004";
-import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote } from "./smith.mjs?v=glad-003";
+import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
+import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
+import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a2";
+import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel } from "./smith.mjs?v=alpha-gear-a8";
 import {
-  setDifficulty, buyEquipment, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
+  setDifficulty, buyEquipment, activateExpertise, arenaBoutProgress, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
   lootChances, recipeOptions, newGame, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
@@ -9,17 +11,17 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=glad-005";
+} from "./engine.mjs?v=alpha-gear-a8";
 
-import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=glad-004";
-import { combatArtworkForEvent } from "./combat-art.mjs?v=glad-003";
+import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=alpha-gear-a8";
+import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-gear-a5";
 import { combatFlowState } from "./combat-flow.mjs?v=glad-003";
-import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=glad-003";
+import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=alpha-gear-a5";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
-  armourOption, armourStats }
-  from "./armour.mjs?v=glad-003";
+  armourOption, armourStats, dodgeChance }
+  from "./armour.mjs?v=alpha-gear-a8";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock } from "./alpha-tools.mjs?v=20261122-alpha-tools1";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=alpha-gear-a9";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -27,7 +29,7 @@ const ui = {
   weaponSlots: $("weaponSlots"), combatSkillsText: $("combatSkillsText"),
   armourSlots: $("armourSlots"), armourChoice: $("armourChoice"),
   armourEditor: $("armourEditor"),
-  equipmentEditHeading: $("equipmentEditHeading"), gearStats: $("gearStats"),
+  equipmentEditHeading: $("equipmentEditHeading"), gearStats: $("gearStats"), expertiseStats:$("expertiseStats"),
   coinWallet: $("coinWallet"), itemGrade: $("itemGrade"), itemQuality: $("itemQuality"),
   smithBuy: $("smithBuy"), smithEquip: $("smithEquip"), smithStatus: $("smithStatus"),
   resourceList: $("resourceList"), choices: $("activityChoices"),
@@ -60,7 +62,8 @@ const ui = {
   resultNotice: $("resultNotice"),
   banner: $("sceneBanner"), saveStatus: $("saveStatus"),
   alphaReset: $("alphaReset"), alphaDay: $("alphaDay"), alphaSpeed: $("alphaSpeed"),
-  alphaStatus: $("alphaStatus")
+  alphaTools:$("alphaTools"), alphaMax:$("alphaMaxStats"), alphaCoins:$("alphaCoins"),
+  alphaFamily:$("alphaFamily"), alphaStatus: $("alphaStatus")
 };
 const number = value => new Intl.NumberFormat("en-GB").format(value);
 // The planner and editable hourglass draw from the same validated duration
@@ -132,7 +135,8 @@ for (const slot of ARMOUR_SLOTS) {
   armourButtons.set(slot.id, button);
 }
 for (const { id, name } of ARMOUR_CHOICES.head) addOption(ui.armourChoice, id, name);
-ITEM_GRADES.forEach((grade, index) => addOption(ui.itemGrade, index, grade));
+ITEM_GRADES.forEach((grade, index) => addOption(ui.itemGrade, index,
+  index ? grade + " · Fighting " + equipmentUnlockLevel(index) : grade));
 ITEM_QUALITIES.forEach(quality => addOption(ui.itemQuality, quality, titleCase(quality)));
 const selectedSpec = () => ({ grade: Number(ui.itemGrade.value), quality: ui.itemQuality.value });
 
@@ -149,18 +153,32 @@ function renderArmour() {
   ui.itemGrade.disabled = !id;
   ui.itemQuality.disabled = !id;
   ui.smithBuy.disabled = !quote?.available;
-  ui.smithBuy.textContent = quote?.cost ?
-    (item ? "Improve" : "Buy and equip") + " · " + number(quote.cost) + " coins" : "Choose an improvement";
+  const quotedCost=quote?.cost ? number(quote.cost) + " coins" : "";
+  ui.smithBuy.textContent = quote?.reason==="fighting_level" ?
+    "Fighting " + quote.requiredFightingLevel + " required · " + quotedCost :
+    quote?.reason==="coins" ? "Need " + quotedCost :
+    quote?.available ? (item ? "Improve" : "Buy and equip") + " · " + quotedCost :
+    "Choose an improvement";
   ui.smithEquip.hidden = !slot || (id && !item);
   ui.smithEquip.disabled = !slot || state.armour[slot.id] === selectedFamily;
   ui.smithEquip.textContent = selectedFamily === "none" ? "Unequip" : "Equip owned armour";
   ui.coinWallet.textContent = number(state.coins) + " coins";
 
+  const track=slot?selectedFamily:state.combatLoadout;
+  const practice=expertiseProgress(state.expertise[track]);
+  const effectiveness=proficiency(state.expertiseActive[track],id?selectedSpec().grade:0);
+  ui.expertiseStats.textContent=(slot?(track==="none"?"Unarmoured":titleCase(track)):COMBAT_LOADOUTS[track].name)+
+    " expertise · "+practice.hours.toFixed(1)+" h · "+ITEM_GRADES[practice.rank]+
+    (practice.nextHours===null?" mastered":" · Next "+ITEM_GRADES[practice.rank+1]+": "+number(practice.nextHours)+" h")+
+    (id?" · Selected gear bonus "+Math.round(effectiveness*100)+"% (−"+Math.round((1-effectiveness)*100)+"% penalty)":"")+
+    " · Applies next bout";
   const gear = armourStats(state.armour, state.combatLoadout);
   const bonus = equipmentBonuses(state);
-  ui.gearStats.textContent = gear.totalKg + " kg · Move " + gear.mobilityPct +
-    "% · Armour " + gear.physicalReductionPct + "% · Attack +" + bonus.attack +
-    " · Guard +" + bonus.defense;
+  ui.gearStats.textContent = gear.totalKg + " kg · Move " + Math.min(100,Math.round(gear.mobilityPct+bonus.mobility)) +
+    "% · Base armour " + gear.physicalReductionPct + "% · Attack +" + bonus.attack +
+    " ×" + bonus.damageMultiplier.toFixed(2) + " · Guard +" + bonus.defense +
+    " · Resistance +" + Math.round(bonus.resistance*100) + "% · Aim +" + Math.round(bonus.accuracy*100) +
+    "% · Pierce +" + Math.round(bonus.penetration*100) + "% · Dodge " + Math.round(dodgeChance(Math.min(100,gear.mobilityPct+bonus.mobility),bonus.dodge)*100) + "%";
   for (const [style, button] of weaponButtons) {
     button.setAttribute("data-equipped", String(style === state.combatLoadout));
     button.setAttribute("aria-pressed", String(!slot && style === state.combatLoadout));
@@ -323,7 +341,8 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   difficultyGrades.forEach((grade,tier) => {
     const option = document.createElement("option");
     option.value = String(tier);
-    option.textContent = tier ? grade + " · Level " + benchmark(tier).skill + " · Target stat " + benchmark(tier).stat : "0 · Non-grade";
+    const target=id==="fighting"?arenaBenchmark(tier):benchmark(tier);
+    option.textContent = tier ? grade + (id === "fighting" ? " · Target skill " : " · Requires level ") + target.skill + " · Target stat " + target.stat : "0 · Non-grade";
     difficulty.append(option);
   });
   difficulty.addEventListener("change", () => {
@@ -808,7 +827,7 @@ function render() {
   }
   for (const [id, { row, startButton, queueButton, levelButton, difficulty }] of activityButtons) {
     const skill = state.skills[id];
-    Array.from(difficulty.children).forEach((option,tier) => { option.disabled = skill.level < benchmark(tier).skill; });
+    Array.from(difficulty.children).forEach((option,tier) => { option.disabled = !canSelectDifficulty(id,skill.level,tier); });
     difficulty.value = String(state.difficulties[id] ?? 0);
     activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level) +
       (skill.xp >= xpToNextLevel(skill.level) ? " · Master ready" : "");
@@ -876,12 +895,13 @@ function render() {
     };
     const phaseName = stageNames[transition.phase];
     if (ui.transitionPhase.textContent !== phaseName) ui.transitionPhase.textContent = phaseName;
-    const phaseLength = transition.phase === "finishing" ? ACTIVITIES[state.activity].durationMs :
+    const arenaFinishing=transition.phase==="finishing"&&state.activity==="fighting";
+    const phaseLength = transition.phase === "finishing" ? (arenaFinishing?BOUT_MS:ACTIVITIES[state.activity].durationMs) :
       transition.phase === "moving"
       ? (ACTIVITIES[state.activity].zone === ACTIVITIES[transition.targetActivity].zone
         ? SAME_ZONE_TRAVEL_MS : ZONE_TRAVEL_MS)
       : (state.activity ? PREPARATION_MS : INITIAL_PREPARATION_MS);
-    const phaseElapsed = transition.phase === "finishing" ? state.progressMs : transition.phaseProgressMs;
+    const phaseElapsed = transition.phase === "finishing" ? (arenaFinishing?arenaBoutProgress(state)*BOUT_MS:state.progressMs) : transition.phaseProgressMs;
     const percent = Math.min(100, 100 * phaseElapsed / phaseLength);
     ui.transitionFill.style.width = percent.toFixed(2) + "%";
     ui.transitionProgress.setAttribute("aria-valuenow", String(Math.round(percent)));
@@ -903,8 +923,8 @@ function render() {
       ? (combat.playerHP === 0 ? "Resurrection and return" : "Arena recovery")
       : event.distance;
     const action = event.move ?? event.type;
-    const status = event.type === "double_death" ? "Both fighters executed" :
-      event.type === "finisher" ? "Decisive hit" : action.replaceAll("_", " ");
+    const verdict=combatVerdict(event);
+    const status = verdict?.label ?? (event.type === "finisher" ? "Decisive hit" : action.replaceAll("_", " "));
     ui.combatEventTitle.textContent = "DUEL " + number(combat.bout) + " · " +
       (event.actor === "player" ? "You · " : event.actor === "enemy" ? "Opponent · " : "") + status;
     const { positioning, terrain } = combat;
@@ -918,7 +938,7 @@ function render() {
       (positioning.higher === "player" ? "Your higher roll favoured your arena preference" :
         "The opponent's higher roll favoured their arena preference");
     ui.combatPanel.setAttribute("data-arena", terrain.id);
-    $("combatGround").textContent = difficultyGrades[state.difficulties.fighting ?? 0] + " · " +
+    $("combatGround").textContent = difficultyGrades[state.combatSession.player.difficulty ?? 0] + " · " +
       terrain.name + " · " + terrain.detail;
     ui.combatPanel.classList.toggle("finisher", event.type === "finisher");
     const broken = event.broken?.join(", ");
@@ -990,7 +1010,7 @@ function tick() {
   if (document.visibilityState === "hidden") return;
   const before = state.transition;
   const result = settle(state, gameNow());
-  state = result.state;
+  state = activateExpertise(result.state);
   const gained = reportProgress(result);
   announceArrival(before);
   if (gained || (before && !state.transition) || gameNow() - lastSavedAt > 3000) writeSave();
@@ -1052,13 +1072,18 @@ function start() {
   } catch { storageWorks = false; }
   state = saved ? readSave(saved) : null;
   alphaClock = state ? parseAlphaClock(clockText) : null;
+  // A normal-timing build cannot run the testing clock at accelerated speed.
+  // Preserve the existing logical offset at 1x for a current-build save.
+  if(!ALPHA_TOOLS_ENABLED&&alphaClock)alphaClock=setAlphaSpeed(alphaClock,Date.now(),1);
+  ui.alphaTools.hidden=!ALPHA_TOOLS_ENABLED;
+  ui.alphaFamily.value="plate";
   if (!state) {
     // Invalid/new character saves must not inherit an old acceleration clock.
     if (storageWorks) {
       try { localStorage.removeItem(ALPHA_CLOCK_KEY); } catch { storageWorks = false; }
     }
     state = newGame(Date.now());
-    if (saved) message("Alpha progression was reset for the arena update or because the previous save could not be read. A new character was created.");
+    if (saved) $("saveResetNotice").hidden=false;
     else message("Choose an activity. Your character will work without further clicks.");
     writeSave();
   } else {
@@ -1068,9 +1093,35 @@ function start() {
     writeSave();
   }
 
-  // Alpha actions are presented as three switches. Destructive reset and
-  // one-day simulation act ONCE then automatically switch themselves off.
+  $("dismissSaveReset").addEventListener("click",()=>{$("saveResetNotice").hidden=true;});
+  // All alpha controls are visibly local test actions, absent in normal mode.
   // Only ×10 speed is a persistent on/off mode.
+  if(ALPHA_TOOLS_ENABLED){
+  const applyTest=(action,description)=>{
+    if(!storageWorks){ui.alphaStatus.textContent="Alpha test unavailable: device storage is blocked.";return;}
+    try{
+      const result=action();
+      // Persist before replacing live state, so a failed write cannot report success.
+      localStorage.setItem(SAVE_KEY,JSON.stringify(result.state));
+      state=result.state;
+      lastSavedAt=Date.now();
+      ui.saveStatus.textContent="Saved on this device";
+      latestWorkResult=null;
+      lastCombatEventKey=null;
+      ui.masterAudience.hidden=true;
+      reportProgress(result);
+      render();
+      ui.alphaStatus.textContent=description;
+    }catch{ui.alphaStatus.textContent="Alpha test could not complete or be saved.";}
+  };
+  ui.alphaMax.addEventListener("click",()=>{
+    const weapon=COMBAT_LOADOUTS[state.combatLoadout].name;
+    const family=ui.alphaFamily.value;
+    applyTest(()=>alphaMaxStats(state,family,gameNow()),
+      "TEST ONLY · Six-month benchmark applied: "+weapon+" + "+family+". Fighting Lv 52 minimum; no free gear or coins.");
+  });
+  ui.alphaCoins.addEventListener("click",()=>applyTest(()=>alphaGrantCoins(state,gameNow()),
+    "TEST ONLY · Added 100,000 arena coins."));
   ui.alphaReset.addEventListener("change", () => {
     if (!ui.alphaReset.checked) return;
     try {
@@ -1139,6 +1190,7 @@ function start() {
       ui.alphaStatus.textContent="Could not change testing speed.";
     }
   });
+  }
   resetSmithSelection();
   ui.armourChoice.addEventListener("change", () => {
     if (!armourOption(selectedEquipmentSlot, ui.armourChoice.value)) return;
@@ -1181,7 +1233,7 @@ function start() {
   });
   window.addEventListener("pagehide", writeSave);
   window.addEventListener("storage", event => {
-    if (event.key === ALPHA_CLOCK_KEY) {
+    if (event.key === ALPHA_CLOCK_KEY && ALPHA_TOOLS_ENABLED) {
       alphaClock=parseAlphaClock(event.newValue);
       ui.alphaSpeed.checked=alphaClock?.speed===10;
     }

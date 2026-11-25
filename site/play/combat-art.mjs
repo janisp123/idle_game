@@ -1,3 +1,4 @@
+import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
 /**
  * GAME-011 — single source of truth for original, local combat illustrations.
  * No simulation code or random choice occurs here. Only use images whose
@@ -31,6 +32,10 @@ export const COMBAT_ART = Object.freeze({
   })
 });
 
+// Activate only after the exact owner-approved WebPs are committed and verified.
+// Until then use the truthful existing style-specific verdict art (or neutral).
+// See docs/mechanics/OUTCOME_ART_HANDOFF.md for the exact asset names and hashes.
+export const DOMINANCE_ART = Object.freeze({impressive_victory:null,humiliation:null});
 const STYLE_NAMES = Object.freeze({
   hammer:"Two-handed hammer",
   greatsword: "Two-handed greatsword",
@@ -57,6 +62,8 @@ const styleOf = (actor, playerLoadout, enemyLoadout) =>
 export function combatArtworkForEvent(event, playerLoadout, enemyLoadout) {
   if (!event || typeof event !== "object") throw new RangeError("Invalid combat event");
   const type = event.type;
+  const verdict=combatVerdict(event);
+  const specialAsset=verdict?.dominant?DOMINANCE_ART[verdict.category]:null;
   let asset;
   if (type === "engage" || type === "initiative" || type === "stalemate") asset = COMBAT_ART.engage;
   else if (type === "victory" || type === "defeat")
@@ -72,9 +79,10 @@ export function combatArtworkForEvent(event, playerLoadout, enemyLoadout) {
   else if (["hit", "strike", "wound", "collapse", "finisher"].includes(type))
     asset = COMBAT_ART.hit[styleOf(event.actor, playerLoadout, enemyLoadout)];
   // Do not fabricate an image for any new, unillustrated event.
+  if(specialAsset)asset=specialAsset;
   const exact = Boolean(asset);
   const chosen = asset ?? COMBAT_ART.engage;
-  const title = TYPE_TITLES[type] ?? "THE FIGHTING PIT";
+  const title = verdict?.label ?? TYPE_TITLES[type] ?? "THE FIGHTING PIT";
   const relevantStyle = ["victory", "defeat"].includes(type) ? playerLoadout :
     ["dodge", "block", "parry"].includes(type)
       ? styleOf(type === "dodge" ? event.target : event.actor, playerLoadout, enemyLoadout)
@@ -84,7 +92,7 @@ export function combatArtworkForEvent(event, playerLoadout, enemyLoadout) {
     asset: chosen,
     exact,
     label: title,
-    alt: exact ? `Dark fantasy illustration of ${label.toLowerCase()} — ${title.toLowerCase()}.` :
+    alt: specialAsset ? (verdict.category==="impressive_victory"?"Arena victor stands over a defeated opponent.":"Defeated fighter lies beneath the victorious opponent.") : exact ? `Dark fantasy illustration of ${label.toLowerCase()} — ${type === "victory" || type === "defeat" ? type : title.toLowerCase()}.` :
       "Two warriors face off in the fighting pit, neutral arena backdrop."
   });
 }

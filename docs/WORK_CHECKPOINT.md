@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## ALPHA-GEAR-001 — release candidate (PR #154, 2026-11-25)
+
+A0–A9 implemented and verified in [PR #154](https://github.com/janisp123/idle_game/pull/154). Final gameplay revision 2852c5f passed all four CI workflows (111 game/UI tests, 13 systems tests, actual Chromium at 390/1440px); A8 audit verified 214,320 duels, six distinct normal daily builds across all five weapon styles and three armour families reach full S Masterwork days 168–172, first-month normal S restriction held. Updated Max Stats 149/149/137, Fighting 52, selected expertise; +100,000 coins. V15 disposable alpha reset with visible notice. Owner explicitly approved release with existing verdict artwork, deferring original custom artwork to ALPHA-ART-001. No merge or deployment yet; final-head checks and Pages gate pending. See CHANGELOG.md and mechanics/ALPHA_GEAR_FINAL_AUDIT.md for full A0–A9 evidence, limitations and decisions. Next: verify final PR head and merge/deploy; then record actual revision/run and preserve separate art task. Historical NEXT entries below do not override this checkpoint.
+
 ## GLAD-PLAN-001 — owner-approved gladiator rework roadmap (2026-11-24)
 
 **Documentation roadmap prepared in [PR #143](https://github.com/janisp123/idle_game/pull/143), NOT gameplay implementation.** The main task list `docs/TD_LIST.md` owns the complete design contract and five ordered, non-micro Codex batches. This design supersedes later work on old five-stat/41-activity/11-slot/magic/enchanting/attack-dice mechanics; currently deployed source code still implements those until replaced. Target: 3 attributes, 11 survival activities, 5 weapons with counters, 4 armour slots, item grade + Poor/Common/Fine/Masterwork, coins from victories, equipment HP/breakage, injury, bow ammo + dagger fallback, five physical environments using probabilistic 3d6 selection, idle-safe outcomes and eventually clan-donatable resources (no clan code).

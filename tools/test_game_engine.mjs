@@ -11,7 +11,7 @@ import {
 import { ARMOUR_SLOTS, ARMOUR_TIERS, armourStats } from "../site/play/armour.mjs";
 import { xpForAttributeValue } from "../site/play/attributes.mjs";
 import { ALPHA_CLOCK_KEY, ALPHA_SPEED, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock } from "../site/play/alpha-tools.mjs";
+  setAlphaSpeed, advanceAlphaClock, alphaMaxStats, alphaGrantCoins, ALPHA_TOOLS_ENABLED } from "../site/play/alpha-tools.mjs";
 
 const midpoint = () => 0.5;
 const stockTotal = (state, skill) => skillSpoils(skill).reduce((sum, id) => sum + state.items[id], 0);
@@ -1154,7 +1154,7 @@ test("Fighting is a distinct first activity and does not manufacture simulated c
   assert.equal(readSave(oldV5), null, "required current-build skills cannot be missing");
 });
 
-test("activity grades unlock independently every ten levels and survive reloading",async()=>{
+test("noncombat grades remain gated; all Fighting grades are open and survive reloading",async()=>{
   const {setDifficulty}=await import("../site/play/engine.mjs");
   const {workMultiplier,benchmark}=await import("../site/play/difficulty.mjs");
   let state=newGame(0);
@@ -1167,12 +1167,15 @@ test("activity grades unlock independently every ten levels and survive reloadin
     state.skills.mining.level++;
     state=setDifficulty(state,"mining",tier,0).state;
     assert.equal(readSave(state).difficulties.mining,tier);
-    assert.throws(()=>setDifficulty(state,"fighting",tier,0));
+    state=setDifficulty(state,"fighting",tier,0).state;
+    assert.equal(readSave(state).difficulties.fighting,tier);
     const model=benchmark(tier), weight={STR:100};
     assert.ok(workMultiplier(tier,weight,{STR:{value:model.stat}})>1);
     assert.ok(workMultiplier(tier,weight,{STR:{value:model.stat/2}})<1);
   }
-  assert.equal(state.difficulties.fighting,undefined);
+  assert.equal(state.skills.fighting.level,1);
+  assert.equal(state.difficulties.fighting,7);
+  assert.throws(()=>setDifficulty(state,"fighting",8,0));
   assert.throws(()=>setDifficulty(state,"mining",8,0));
 });
 
@@ -1231,8 +1234,11 @@ test("GLAD-001 grade S training and mining keep capped offline skill XP and dist
 test("GLAD-002 arena rewards match resolved wins and are independent of settlement splits", async () => {
   const { arenaReward, settleArenaPrizes } = await import("../site/play/arena-wallet.mjs");
   const { BOUT_MS, combatAtTime, startCombatSession } = await import("../site/play/combat.mjs");
-  const player = { name: "Test fighter", loadout: "greatsword", difficulty: 1,
-    str: 24, dex: 24, end: 24, skill: 12 };
+  const {createPlayerSnapshot}=await import("./combat-simulator.mjs");
+  // Test real payout/split semantics with a properly equipped F fighter.
+  // The old bare fixture lost all 18 after A8 made armour meaningful.
+  const player=createPlayerSnapshot({loadout:"greatsword",armour:"plate",grade:1,itemGrade:1,
+    quality:"common",str:30,dex:30,end:30,skill:12});
   const initial = startCombatSession(player, 197);
   const result = settleArenaPrizes({ ...initial, elapsedMs: 18 * BOUT_MS });
   let wins = 0;
@@ -1281,7 +1287,8 @@ test("GLAD-002 arena wins reach the saved wallet once", async () => {
 
 test("GLAD-002 sells independent equipment grades and qualities that improve real power", async () => {
   const shop = await import("../site/play/smith.mjs");
-  const state = { ...newGame(0), coins: 1000 };
+  const state = { ...newGame(0), coins: 10000 };
+  state.skills.fighting.level=5;
   const item = { grade: 1, quality: "fine" };
   const quote = shop.smithQuote(state, "greatsword", item);
   assert.ok(quote.cost > 0 && quote.available);
@@ -1293,13 +1300,14 @@ test("GLAD-002 sells independent equipment grades and qualities that improve rea
 test("GLAD-002 four slots and five weapon styles support real purchases", () => {
   assert.deepEqual(ARMOUR_SLOTS.map(s => s.id), ["head", "torso", "arms", "legs"]);
   assert.deepEqual(ARMOUR_TIERS, ["none", "padded", "leather", "plate"]);
-  const start = { ...newGame(0), coins: 300 };
+  const start = { ...newGame(0), coins: 10000 };
+  start.skills.fighting.level=5;
   assert.deepEqual(Object.keys(start.equipment).sort(), ["bow", "greatsword", "hammer", "spear", "sword_shield"]);
   assert.throws(() => setArmourChoice(start, "arms", "leather", 0), RangeError);
   const purchased = buyEquipment(start, "arms:leather", { grade: 1, quality: "common" }, 0);
   assert.equal(purchased.purchased, true);
   assert.equal(purchased.state.armour.arms, "leather");
-  assert.equal(purchased.state.coins, 181);
+  assert.equal(purchased.state.coins, 7431);
   assert.ok(armourStats(purchased.state.armour, start.combatLoadout).physicalReductionPct > 0);
   const retry = buyEquipment(readSave(JSON.stringify(purchased.state)), "arms:leather",
     { grade: 1, quality: "common" }, 0);
@@ -1308,4 +1316,93 @@ test("GLAD-002 four slots and five weapon styles support real purchases", () => 
   assert.equal(buyEquipment(retry.state, "arms:leather", { grade: 7, quality: "common" }, 0).purchased, undefined);
   const forged = { ...retry.state, armour: { ...retry.state.armour, torso: "plate" } };
   assert.equal(readSave(forged), null);
+});
+
+test("ALPHA-GEAR-001 purchase requires actual Fighting level and wallet, not weapon history",async()=>{
+  const shop=await import("../site/play/smith.mjs");
+  const s={...newGame(0),coins:10000000};
+  const target={grade:7,quality:"masterwork"};
+  const locked=shop.smithQuote(s,"greatsword",target);
+  assert.equal(locked.requiredFightingLevel,50);
+  assert.equal(locked.affordable,true);
+  assert.equal(locked.reason,"fighting_level");
+  assert.equal(buyEquipment(s,"greatsword",target,0).purchased,undefined);
+  s.skills.fighting.level=50;
+  const poor={...s,coins:1};
+  assert.equal(shop.smithQuote(poor,"greatsword",target).reason,"coins");
+  assert.equal(buyEquipment(poor,"greatsword",target,0).purchased,undefined);
+  const direct=buyEquipment(s,"greatsword",target,0).state;
+  let staged=s;
+  for(let grade=1;grade<=7;grade++)staged=buyEquipment(staged,"greatsword",{grade,quality:"common"},0).state;
+  staged=buyEquipment(staged,"greatsword",target,0).state;
+  assert.equal(staged.coins,direct.coins,"cumulative upgrades must not charge twice");
+  assert.deepEqual(staged.equipment.greatsword,target);
+  assert.equal(buyEquipment(staged,"greatsword",target,0).purchased,undefined);
+  const {arenaReward}=await import("../site/play/arena-wallet.mjs");
+  const {BOUT_MS}=await import("../site/play/combat.mjs");
+  assert.ok(shop.equipmentPrice({grade:7,quality:"poor"})>Math.floor(30*86400000/BOUT_MS)*arenaReward(0));
+});
+test("ALPHA-GEAR-001 normal Fighting cannot reach the S purchase gate in 30 days",async()=>{
+  const e=await import("../site/play/engine.mjs");
+  const shop=await import("../site/play/smith.mjs");
+  const a=e.ACTIVITIES.fighting, normalCycle=a.baseMinutes*e.BASE_CYCLE_MS/a.speed;
+  const maximum=Math.floor(30*e.DAY_MS/normalCycle)*
+    Math.ceil(a.xp*e.SKILL_BALANCE.maxEfficiency*(1+e.SKILL_BALANCE.batchVariation));
+  assert.ok(maximum<e.xpForLevel(shop.equipmentUnlockLevel(7)));
+});
+test("ALPHA-GEAR-001 attempting S cannot artificially accelerate productive Fighting XP",async()=>{
+  const e=await import("../site/play/engine.mjs");
+  const {awardAttributeTime}=await import("../site/play/attributes.mjs");
+  let s=e.newGame(0);s.skills.fighting={level:30,xp:0};
+  s.attributeEffort=awardAttributeTime(s.attributeEffort,"fighting",180*e.DAY_MS);
+  s=e.chooseActivity(s,"fighting",0,()=>.5).state;
+  const high=e.setDifficulty(s,"fighting",7,0,()=>.5).state;
+  const lowResult=e.settle(s,5*e.MINUTE_MS,()=>.5);
+  const highResult=e.settle(high,5*e.MINUTE_MS,()=>.5);
+  assert.ok(highResult.state.skills.fighting.xp<=lowResult.state.skills.fighting.xp);
+});
+
+test("A4 Max Stats uses the six-month normal specialist floor, not all mastery tracks",()=>{
+  assert.equal(ALPHA_TOOLS_ENABLED,true);
+  const fresh=newGame(0);
+  const boosted=alphaMaxStats(fresh,"plate",0,midpoint).state;
+  assert.equal(boosted.skills.fighting.level,52);
+  const attrs=effectiveAttributeProgress(boosted.attributeEffort,boosted.skills);
+  assert.deepEqual(Object.fromEntries(Object.entries(attrs).map(([id,v])=>[id,v.value])),{STR:149,DEX:149,END:137});
+  assert.equal(boosted.expertise.greatsword,4235*14400000);
+  assert.equal(boosted.expertise.plate,4213*14400000);
+  for(const id of Object.keys(boosted.expertise).filter(id=>!["greatsword","plate"].includes(id)))assert.equal(boosted.expertise[id],0);
+  assert.deepEqual(boosted.expertise,boosted.expertiseActive);
+  assert.deepEqual(boosted.equipment,fresh.equipment);
+  assert.deepEqual(boosted.items,fresh.items);
+  assert.equal(boosted.coins,0);
+  assert.equal(boosted.settledAtMs,0);
+  assert.deepEqual(readSave(JSON.stringify(boosted)),boosted);
+  assert.deepEqual(alphaMaxStats(boosted,"plate",0,midpoint).state,boosted);
+  const better={...boosted,skills:{...boosted.skills,fighting:{level:60,xp:5}},
+    attributeEffort:{...boosted.attributeEffort,STR:boosted.attributeEffort.STR+1},
+    expertise:{...boosted.expertise,bow:14400000}};
+  const next=alphaMaxStats(better,"plate",0,midpoint).state;
+  assert.deepEqual(next.skills,better.skills);
+  assert.deepEqual(next.attributeEffort,better.attributeEffort);
+  assert.equal(next.expertise.bow,14400000);
+  assert.throws(()=>alphaMaxStats(fresh,"unknown",0,midpoint),RangeError);
+});
+test("A4 grants exactly 100000 coins separately, preserves old settlement and rejects overflow",()=>{
+  const fresh=newGame(0);
+  const one=alphaGrantCoins(fresh,0,midpoint).state;
+  const two=alphaGrantCoins(one,0,midpoint).state;
+  assert.deepEqual(two,{...fresh,coins:200000});
+  assert.throws(()=>alphaGrantCoins({...fresh,coins:Number.MAX_SAFE_INTEGER},0,midpoint),RangeError);
+  const fighting=chooseActivity(fresh,"fighting",0,midpoint).state;
+  const normal=enterGame(fighting,HOUR_MS,midpoint).state;
+  const grant=alphaGrantCoins(fighting,HOUR_MS,midpoint).state;
+  assert.deepEqual(grant,{...normal,coins:normal.coins+100000});
+  const max=alphaMaxStats(fighting,"leather",HOUR_MS,midpoint).state;
+  assert.equal(max.coins,normal.coins);
+  assert.deepEqual(max.combatSession,normal.combatSession);
+  assert.equal(max.settledAtMs,normal.settledAtMs);
+  assert.equal(max.skills.fighting.level,52);
+  assert.equal(max.expertise.leather,4213*14400000);
+  assert.equal(max.expertise.plate,0);
 });

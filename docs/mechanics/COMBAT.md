@@ -58,3 +58,90 @@ Run `node tools/gladiator-benchmark.mjs` to reproduce 13,760 resolved bouts with
 The baseline had 4,105 wins, 3,894 defeats and one double death. Across both sides it recorded 3,613 breaks, 2,971 bow outcomes with an empty quiver, 57,757 bleed ticks and 6,859 stagger events. The 106 break events in the Masterwork row came from the Common opponents. These are aggregate samples, with variation by opponent and arena.
 
 For a fixed Greatsword build in Walled Courtyard, Non-grade, F and E items won 33, 63 and 70 of 128 against an F Spear. Raising that opponent to E reduced those results to 0, 18 and 18. The current costs and power steps show a benefit in the sampled settings and remain provisional. Sword & Shield was strong overall, including 64 of 64 against Spear in Gatehouse Chamber, and won 23 of 64 against Bow in Open Field. The other four styles each had stronger and weaker pairings in the same matrix.
+
+## A2 — candidate opponent and gear scaling (draft)
+
+Arena readiness is separate from survival work. Opponent target stats by grade are 10/24/42/62/82/104/124/144, with corresponding skill 1/5/10/17/25/33/40/50 and small stat variation. NPCs use the same smith and condition profile as the player, with matching grade on weapon and all four armour pieces; Non-grade Poor, higher-grade Common. No hard difficulty lock. Grade/quality multipliers and resistance are in [ARMOUR.md](ARMOUR.md). A2 keeps the fixed bout timeline and bounded offline payout, and advances the alpha save version to V12 (old disposable test progress resets with notice). Earlier GLAD-005 tables above are historical baseline, not current A2 results. New matrix pending CI and calibration.
+
+### A2 verified grade-separation matrix
+
+Source: `node tools/gladiator-benchmark.mjs`, fixed seed 20261124, [combat CI 45560649423](https://github.com/janisp123/idle_game/actions/runs/45560649423). Each equal-stat row uses 2,000 actual duels (25 ordered style pairs × five arenas × 16 seeds), Common quality and rotating Padded/Leather/Plate combinations. Because material pairings are not strictly mirrored, equal-grade rates are a broad reference, not a perfect symmetric fairness measurement. No gear/expertise penalty for unfamiliar types yet.
+
+| Equal STR/DEX/END | Higher grade | Lower grade | Higher-grade-side win % |
+| ---: | ---: | ---: | ---: |
+| 10 | 0 | 0 | 57 |
+| 10 | 1 | 0 | 92.45 |
+| 10 | 2 | 0 | 99.2 |
+| 10 | 3 | 0 | 99.9 |
+| 10 | 7 | 0 | 100 |
+| 80 | 0 | 0 | 56.6 |
+| 80 | 1 | 0 | 85.1 |
+| 80 | 2 | 0 | 95.5 |
+| 80 | 3 | 0 | 99.6 |
+| 80 | 7 | 0 | 100 |
+| 150 | 0 | 0 | 57.25 |
+| 150 | 1 | 0 | 83.8 |
+| 150 | 2 | 0 | 94.65 |
+| 150 | 3 | 0 | 99.35 |
+| 150 | 7 | 0 | 100 |
+| 150 | 7 | 6 | 81.5 |
+| 150 | 7 | 5 | 94.3 |
+| 150 | 7 | 4 | 99.25 |
+
+Readiness against actual randomly selected arena NPCs: each row 320 fights (five styles × 64 seeds), player Common Leather. Matched = default benchmark stats and same item grade; low stats = 10/10/10 and skill 1 with matching gear; low gear = benchmark stats with Non-grade Common. NPC material distribution varies by role.
+
+| Opponent grade | Matched | Low stats | Low gear |
+| ---: | ---: | ---: | ---: |
+| 0 | 58.44% | 58.44% | 58.44% |
+| 3 | 31.88% | 0.00% | 0.00% |
+| 7 | 32.81% | 0.00% | 0.00% |
+
+S beat Non-grade in all 6,000 sampled equal-stat duels; at stat 150, S vs A/B/C won 81.5%/94.3%/99.25%. D/S readiness mismatches lost every sampled fight; no scripted result. Matched Leather wins ~32% against the NPC material mix, below a 50% broad target; Padded vs Plate, per-style bias, high-level quality and symmetric same-grade fairness need additional measurement after expertise. Early F vs Non-grade at stat 10 is stronger than the initial 75–85% one-grade target (92.45%); do not hide this. Grade factor provisional. Matrix comprises 36,000 gear and 2,880 readiness duels in addition to legacy 13,760 and the CI 10,000-bout scenario.
+
+## A3 — verified equipment expertise matrix
+
+Source: `node tools/gladiator-benchmark.mjs`, seed 20261124, [combat CI 45561154518](https://github.com/janisp123/idle_game/actions/runs/45561154518), verified head ff17713. Each row uses 1,200 production duels (five weapon styles × three armour families × five arenas × 16 seeds). Both builds use identical attributes, Fighting 50, same Masterwork item grade and same weapon/armour type. Player is fully trained; only opponent practice is varied. Trained control is an orientation-biased reference, not perfectly fair 50%.
+
+| Grade | Equal stats | Opponent unfamiliar with | Trained-side wins / 1200 | Win % |
+| --- | ---: | --- | ---: | ---: |
+| 0 | 10 | weapon | 733 | 61.08 |
+| 0 | 10 | armour | 733 | 61.08 |
+| 0 | 10 | both | 733 | 61.08 |
+| 0 | 10 | neither | 733 | 61.08 |
+| 3 | 62 | weapon | 1107 | 92.25 |
+| 3 | 62 | armour | 989 | 82.42 |
+| 3 | 62 | both | 1172 | 97.67 |
+| 3 | 62 | neither | 708 | 59.00 |
+| 7 | 150 | weapon | 1198 | 99.83 |
+| 7 | 150 | armour | 1155 | 96.25 |
+| 7 | 150 | both | 1200 | 100.00 |
+| 7 | 150 | neither | 691 | 57.58 |
+
+At S, 1,198/1,200 wins against a weapon novice, 1,155/1,200 against armour novice and 1,200/1,200 against both; equipment expertise clearly matters even when actual gear/stats are identical. Non-grade has no expertise penalty. Sampled 100% does not prove guaranteed outcome. Trained-versus-trained S win 57.58%, which still indicates side bias. At D/S matched NPC readiness, the earlier Leather-vs-material-mix imbalance remains to be calibrated. No claim that every style or family is equally effective. Reassess severity and fairness in final combined calibration, not by adding scripted outcomes.
+
+## A5 — motivational verdict presentation (draft)
+
+The original resolver outcome remains victory/defeat/double death. A pure UI helper derives Impressive Victory or Humiliation only for an actual knockout with the winner retaining at least 80% maximum HP (at most 20% HP lost). Same threshold for either side, no timeout or double-death qualification. The loser HP in a timeout is forced to zero at verdict, so it must not count as a knockout. No extra payout, XP, expertise, penalties, timing, RNG or save changes. The final event alone is classified; no early reveal. The current UI title, picture caption and compact result token use the label. The existing correct style-specific art is used until the two exact approved outcome images can be committed. See [art handoff](OUTCOME_ART_HANDOFF.md).
+
+### A5 verified dominance matrix
+
+[Code head 7f12888](https://github.com/janisp123/idle_game/commit/7f1288860adda839cd65eebc1b466cb51d40b11f), [combat CI 45562341402](https://github.com/janisp123/idle_game/actions/runs/45562341402). 2,000 duels per row, equal STR/DEX/END 150, skill 50, fully trained Common Leather, all 25 ordered style pairings × five arenas × 16 seeds.
+
+| Player / opponent grade | Wins | Losses | Double deaths | Impressive victories | Humiliations |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Non / Non | 1151 | 847 | 2 | 64 | 25 |
+| S / Non | 2000 | 0 | 0 | 2000 | 0 |
+| Non / S | 0 | 2000 | 0 | 0 | 2000 |
+| S / S | 1135 | 864 | 1 | 50 | 20 |
+
+Special results are subsets of the actual win/loss counts; no mechanical reward or HP changes. The 80% knockout threshold distinguishes gear mismatch from ordinary comparable fights in these samples. All four checks passed; the full A3/A4 normal daily trajectory is unchanged (including day 170 acquisition and 64.66% cumulative win rate). New binary art still pending; existing images remain fallback. Equal-grade player-side advantage remains for A6 review.
+
+
+### A6 combined audit
+
+[Full audited tables and findings](ALPHA_GEAR_FINAL_AUDIT.md). A6 measures paired role orientations, 20 builds, actual NPC readiness, quality, partial expertise and expanded trajectories. Greatsword and lighter armour require tuning, and mirror role bias requires review. No formula changed; A6 is not final balance approval.
+
+
+## A8 — verified physical balance candidate
+
+Greatsword base power 13, recovery 2; parry 32% ready/18% final recovery scaled by proficiency. Shortened constrained swings reduce clearance recovery by one turn (floor zero), retain .12 accuracy penalty per missing clearance and 10% impact reduction when constrained. Bow close-range aim penalty .30. Initiative probability symmetric, based on DEX/mobility difference with independent deterministic stream; no fixed tie preference. Dodge and material coefficients in ARMOUR.md. All four workflows passed at 265c7a8, full [A8 audit](ALPHA_GEAR_FINAL_AUDIT.md) records all before/after findings, remaining imperfect terrain/material matchups and cross-quality effects. Existing outcome art fallback unchanged. Save version V15 on eventual deployment because replaying old frozen duels with changed formulas would change outcomes.

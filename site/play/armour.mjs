@@ -67,3 +67,9 @@ export function armourStats(armour, loadout) {
     dodgeMargin: Math.max(1, Math.round(dodgeMargin)), initiativePenalty: Math.min(4, Math.floor(totalKg / 12))
   });
 }
+
+/** Chance to evade an otherwise accurate strike; weight and intact gear
+ * are separate. Bound the total to preserve physical counters. */
+export function dodgeChance(mobilityPct,gradedDodge=0){
+  return Math.min(.40,Math.max(0,mobilityPct-65)*.0045+Math.max(0,gradedDodge));
+}

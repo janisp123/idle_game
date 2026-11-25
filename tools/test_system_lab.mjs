@@ -153,7 +153,8 @@ test('module input validation catches impossible configurations and secrets do n
   assert.throws(()=>simulateLoot({activity:'mining',level:0}),RangeError);
   assert.throws(()=>simulateCrafting({inventory:{forged_item:1}}),RangeError);
   assert.throws(()=>simulateQueue({route:[{activity:'mining',plannedMs:null},{activity:'woodcutting'}]}),RangeError);
-  assert.throws(()=>simulateActivity({activity:'fighting',level:1,difficulty:2}),RangeError);
+  assert.throws(()=>simulateActivity({activity:'mining',level:1,difficulty:2}),RangeError);
+  assert.doesNotThrow(()=>simulateActivity({activity:'fighting',level:1,difficulty:7,elapsedMs:0,trials:1}));
   assert.equal(readFileSync('site/play/index.html','utf8').includes('system-lab.mjs'),false);
   assert.equal(readFileSync('.github/workflows/pages.yml','utf8').includes('tools/system-lab.mjs'),false);
 });
@@ -183,4 +184,28 @@ test("equipment lab reports an actual smith purchase", () => {
   assert.equal(result.coins, 31);
   assert.equal(result.equippedArmour.arms, "padded");
   assert.ok(result.bonuses.defense > 0);
+});
+
+
+// ALPHA-GEAR-001 A0: exercise both real timing profiles on detached module copies.
+import { runBuildBaseline } from './simulation/build-progression.mjs';
+test('build baseline uses real normal/alpha settlement and conserves arena currency',async()=>{
+  const scenario={id:'smoke',days:2,claimHours:24,mixed:false,farm:true};
+  const report=await runBuildBaseline({scenarios:[scenario],seed:20261125});
+  const [normal,alpha]=report.reports;
+  assert.equal(normal.profile,'normal');
+  assert.equal(alpha.profile,'alpha');
+  assert.ok(normal.cycleMs>alpha.cycleMs);
+  assert.equal(normal.boutMs,alpha.boutMs);
+  for(const r of report.reports){
+    const s=r.scenarios[0],last=s.checkpoints.at(-1);
+    assert.equal(last.day,2);
+    assert.ok(last.outcomes.bouts>0);
+    assert.equal(last.outcomes.bouts,last.outcomes.victories+last.outcomes.defeats+last.outcomes.doubleDeaths);
+    assert.equal(last.wallet,last.coinsEarned-last.coinsSpent);
+    assert.ok(last.expertise.greatsword>0);
+    assert.ok(Math.abs(Object.values(last.expertise).reduce((a,b)=>a+b,0)/2-last.productiveFightingHours)<0.06);
+    assert.ok(last.productiveFightingHours>0&&last.productiveFightingHours<=48);
+  }
+  assert.deepEqual(report,await runBuildBaseline({scenarios:[scenario],seed:20261125}));
 });

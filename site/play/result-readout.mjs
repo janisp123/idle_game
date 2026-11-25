@@ -1,3 +1,4 @@
+import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
 /**
  * Pure presentation-only result mapping.
  * Never turn an unimplemented event into damage, healing, or failed mining.
@@ -39,9 +40,9 @@ export function combatReadoutForEvent(event) {
       (event.actor === "player" || event.actor === "enemy")) {
     sides[event.actor].push(token("FIRST STRIKE", "neutral"));
   } else if (event.type === "victory") {
-    sides.player.push(token("VICTORY","gain"));
+    sides.player.push(token(combatVerdict(event).label,"gain"));
   } else if (event.type === "defeat") {
-    sides.player.push(token("DEFEAT","damage"));
+    sides.player.push(token(combatVerdict(event).label,"damage"));
   } else if (event.type === "double_death") {
     sides.player.push(token("EXECUTED", "damage"));
     sides.enemy.push(token("EXECUTED", "damage"));

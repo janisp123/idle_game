@@ -78,7 +78,7 @@ The separately installed `tools/combat-simulator.mjs` remains the canonical deta
 }
 ```
 
-The `activity` module accepts `activity`, `level`, `xp`, `inventory`, `difficulty` (numeric tier index 0..7), `elapsedMs`, `trials`, and `seed`. It constructs a **labelled synthetic state**, uses the same live batch settlement and enforces the game’s XP cap and level gate. Time must be interpreted using the currently active alpha/normal timing profile. `queue` instead uses the real switching/planning and travel process; each non-final route entry must have a valid `plannedMs` (or `untilLevelUp`) and the final entry runs Forever.
+The `activity` module accepts `activity`, `level`, `xp`, `inventory`, `difficulty` (numeric tier index 0..7), `elapsedMs`, `trials`, and `seed`. It constructs a **labelled synthetic state**, uses the same live batch settlement and enforces the game’s XP cap and noncombat level gates (all Fighting difficulties are selectable). Time must be interpreted using the currently active alpha/normal timing profile. `queue` instead uses the real switching/planning and travel process; each non-final route entry must have a valid `plannedMs` (or `untilLevelUp`) and the final entry runs Forever.
 
 For equipment, pass `slot`, `gear`, `loadout`, optionally `masterySlot`, `train:true`, `inventory` and `levels` to test whether a change is legal at the **actual** current character attributes. To investigate higher stat values without forging levels, run a realistic productive-time session first and use a detached local validated state as the next input. Enchantment trials accept `slot`, `attempts`, `startingRank` and `trials` and expose success/reset counts. The simulator does not fabricate scroll drops for a real save.
 
@@ -120,3 +120,10 @@ For a **local** inspection of an existing save, the `activity`, `master`, `equip
 At every new chat/agent session, check the remote `main:docs/TD_LIST.md` first, then use this lab rather than re-deriving all rules or assuming historical balance values.
 
 The equipment module accepts a synthetic coin wallet and calls the production smith purchase operation. Use `gear`, `slot`, `itemGrade`, and `quality` to specify the item.
+
+## Six-month build/economy trajectory
+
+Run `node tools/simulation/build-progression.mjs` on the desired revision. Uses detached copies of actual production modules with only the existing normal/alpha timing switch changed. No player saves or published source touched. Reports deterministic fixed-policy trajectories; current reports distinguish coins-only affordability from actual gated purchases. [Archived A0 and A1 results](ALPHA_GEAR_BASELINE.md) are historical verified measurements, not a forecast of future combat balance.
+
+
+A9: run the complete six-month and paired-balance reports through the Developer Game Systems Lab workflow's optional `full_balance` input on manual dispatch. Ordinary PR checks still run bounded production-parity and detached normal/alpha smoke tests. The full audit remains reproducible via `node tools/simulation/build-progression.mjs` and `node tools/simulation/balance-audit.mjs`; historical branch runs are linked in ALPHA_GEAR_FINAL_AUDIT.md. No need to rerun the expensive matrix on every documentation-only commit.

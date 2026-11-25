@@ -8,6 +8,7 @@ on:
       - "tools/check_pages_site.py"
       - "tools/test_game_engine.mjs"
       - "tools/test_game_ui.mjs"
+      - "tools/browser-smoke.mjs"
       - "tools/test_combat_art.mjs"
       - "tools/combat-simulator.mjs"
       - "tools/test_combat_simulator.mjs"
@@ -19,6 +20,7 @@ on:
       - "tools/check_pages_site.py"
       - "tools/test_game_engine.mjs"
       - "tools/test_game_ui.mjs"
+      - "tools/browser-smoke.mjs"
       - "tools/test_combat_art.mjs"
       - "tools/combat-simulator.mjs"
       - "tools/test_combat_simulator.mjs"
@@ -46,6 +48,16 @@ jobs:
         run: node --check site/play/app.mjs && node --check site/play/engine.mjs && node --check site/play/loot.mjs && node --check site/play/production.mjs && node --check site/play/attributes.mjs && node --check site/play/combat.mjs && node --check site/play/combat-skills.mjs && node --check site/play/combat-art.mjs && node --check tools/combat-simulator.mjs && node --check tools/test_combat_simulator.mjs
       - name: Test offline engine, skill migration and browser UI
         run: node --test tools/test_game_engine.mjs tools/test_physical_duel.mjs tools/test_arenas.mjs tools/test_game_ui.mjs tools/test_combat.mjs tools/test_combat_art.mjs tools/test_combat_simulator.mjs
+      - name: Real Chromium browser smoke (mobile and desktop)
+        run: node tools/browser-smoke.mjs
+      - name: Attach browser smoke screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+          path: browser-smoke-results/
+          if-no-files-found: ignore
+          retention-days: 7
 
   deploy:
     name: Publish to GitHub Pages

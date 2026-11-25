@@ -113,7 +113,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "remove the old separate weapon dropdown that did not display enchant ranks");
   assert.match(html, /<details id="alphaTools"/,
     "alpha tools must fold away rather than occupy normal phone space");
-  for(const id of ["alphaReset","alphaDay","alphaSpeed","alphaStatus"])
+  for(const id of ["alphaReset","alphaDay","alphaSpeed","alphaStatus","alphaMaxStats","alphaCoins","alphaFamily"])
     assert.ok(html.includes('id="' + id + '"'),"alpha control target: "+id);
   assert.match(html, /<button type="button" id="alphaDay" class="alpha-day-button">Test 24 hours idle<\/button>/,
     "24h action is a real button, not a switch");
@@ -148,7 +148,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=glad-005/,
+  assert.match(html, /app\.mjs\?v=alpha-gear-a9/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -249,6 +249,13 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(selectedCount(), 1);
     assert.equal(elements.get("smithBuy").disabled, true);
     assert.equal(elements.get("coinWallet").textContent, "0 coins");
+    elements.get("itemGrade").value="7";
+    elements.get("itemGrade").fire("change");
+    assert.equal(elements.get("smithBuy").disabled,true);
+    assert.match(elements.get("smithBuy").textContent,/Fighting 50 required/);
+    assert.match(elements.get("expertiseStats").textContent,/40%.*60% penalty/);
+    elements.get("itemGrade").value="0";
+    elements.get("itemGrade").fire("change");
 
     const openActivities = elements.get("openActivities");
     const categoryScreen = elements.get("activityCategories");
@@ -268,6 +275,8 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(elements.get("activityCategoryTitle").textContent, "Fighting");
     const fightingCards = elements.get("activityChoices").children;
     assert.equal(fightingCards.length, 1);
+    assert.equal(fightingCards[0].children[0].children[4].children[7].disabled,false,
+      "even a fresh player may challenge S opponents");
     assert.equal(elements.get("combatPanel").hidden, true,
       "ordinary activity selection has no simulated fight");
     assert.equal(fightingCards[0].children[0].children[0].children[0].textContent, "Fighting");
@@ -286,6 +295,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
       b.children[0].children[1].textContent
     )), true, "activity buttons must not reveal cycle rates");
     assert.ok(buttons.every(b => b.children[0].children[2].textContent === "Skill level 1"));
+    assert.ok(buttons.every(b => b.children[0].children[4].children[7].disabled),"work difficulty remains locked");
     const smithing = buttons.find(b => b.children[0].children[0].children[0].textContent === "Smithing");
     const cooking = buttons.find(b => b.children[0].children[0].children[0].textContent === "Cooking");
     assert.ok(smithing.children[0].children[1].textContent.includes("Iron ingots (uses Iron ore)"));
@@ -794,7 +804,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     shieldWeapon.fire("click");
     const swapped = JSON.parse(store.get(SAVE_KEY));
     assert.equal(swapped.combatLoadout,"sword_shield");
-    assert.equal(swapped.combatSession,null,"new style starts a new duel");
+    assert.equal(swapped.combatSession.player.loadout,"greatsword","current bout keeps its style");
     assert.equal(shieldWeapon.getAttribute("aria-pressed"),"true");
     assert.equal(weaponChoices[0].getAttribute("aria-pressed"),"false");
     assert.equal(armourButtons[0].getAttribute("aria-pressed"),"false",
@@ -804,7 +814,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
       "armour item selector is unavailable while editing weapon");
     assert.match(elements.get("equipmentEditHeading").textContent,/Sword & Shield/);
     assert.match(elements.get("combatSkillsText").textContent,/Thrust.*Shield Block/);
-    now += 5_000;
+    now += BOUT_MS;
     tick();
     const shieldDuel = JSON.parse(store.get(SAVE_KEY));
     assert.equal(shieldDuel.combatSession.player.loadout,"sword_shield");
@@ -870,6 +880,21 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
       "each button click simulates exactly one additional day");
     assert.equal(afterSecondDay.skills.mining.level,1,
       "repeated 24h clicks still cannot level up automatically");
+    assert.equal(elements.get("alphaTools").hidden,false);
+    elements.get("alphaFamily").value="leather";
+    elements.get("alphaMaxStats").fire("click");
+    const benchmark=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(benchmark.skills.fighting.level,52);
+    assert.equal(benchmark.skills.mining.level,1);
+    assert.ok(benchmark.expertise.greatsword>0&&benchmark.expertise.leather>0);
+    assert.equal(benchmark.expertise.plate,0);
+    assert.equal(benchmark.coins,afterSecondDay.coins);
+    assert.deepEqual(benchmark.equipment,afterSecondDay.equipment);
+    assert.match(elements.get("alphaStatus").textContent,/TEST ONLY.*six-month/i);
+    elements.get("alphaCoins").fire("click");
+    elements.get("alphaCoins").fire("click");
+    assert.equal(JSON.parse(store.get(SAVE_KEY)).coins,benchmark.coins+200000);
+    assert.match(elements.get("alphaStatus").textContent,/TEST ONLY.*100,000/);
     const savedBeforeCancelledReset=store.get(SAVE_KEY);
     elements.get("alphaReset").checked=true;
     elements.get("alphaReset").fire("change");
@@ -931,4 +956,14 @@ test("mobile recovery keeps both vital labels and bars aligned at equal widths",
       "--user-data-dir="+join(dir,"profile"),"--dump-dom","file://"+page],{encoding:"utf8",stdio:["ignore","pipe","pipe"],timeout:30000});
     assert.match(dom,/<html data-passed="yes">/);
   } finally {fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test("A5 readout distinguishes actual dominant outcomes without changing events",()=>{
+  const event={type:"victory",reason:"knockout",vitals:{player:{hp:85,maxHP:100},enemy:{hp:0,maxHP:100}}};
+  const before=structuredClone(event);
+  assert.deepEqual(combatReadoutForEvent(event),{player:[{value:"IMPRESSIVE VICTORY",tone:"gain",label:""}],enemy:[]});
+  assert.deepEqual(event,before);
+  const defeat={...event,type:"defeat",vitals:{player:event.vitals.enemy,enemy:event.vitals.player}};
+  assert.deepEqual(combatReadoutForEvent(defeat),{player:[{value:"HUMILIATION",tone:"damage",label:""}],enemy:[]});
+  assert.equal(combatReadoutForEvent({...event,reason:"timeout"}).player[0].value,"VICTORY");
 });

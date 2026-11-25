@@ -66,3 +66,38 @@ test("every registered image is an actual committed WebP file, not a dead URL",(
     assert.equal(bytes.toString("ascii",8,12),"WEBP",asset);
   }
 });
+
+import { combatVerdict, DOMINANCE_HP_FRACTION } from "../site/play/combat-verdict.mjs";
+import { DOMINANCE_ART } from "../site/play/combat-art.mjs";
+const terminal=(type,reason,hp,maxHP=100)=>{
+  const winner={hp,maxHP},loser={hp:0,maxHP:100};
+  return {type,reason,vitals:type==="victory"?{player:winner,enemy:loser}:{player:loser,enemy:winner}};
+};
+test("A5 dominance uses identical knockout and remaining-HP criteria for both sides",()=>{
+  assert.equal(DOMINANCE_HP_FRACTION,.8);
+  for(const [type,special] of [["victory","impressive_victory"],["defeat","humiliation"]]){
+    assert.equal(combatVerdict(terminal(type,"knockout",80)).category,special);
+    assert.equal(combatVerdict(terminal(type,"knockout",79)).category,type);
+    assert.equal(combatVerdict(terminal(type,"timeout",100)).category,type);
+    assert.equal(combatVerdict(terminal(type,"knockout",160,200)).category,special);
+    assert.equal(combatVerdict(terminal(type,"knockout",101)).category,type);
+    assert.equal(combatVerdict({type,reason:"knockout"}).category,type);
+  }
+  assert.equal(combatVerdict({type:"hit"}),null);
+  assert.equal(combatVerdict(terminal("double_death","timeout",100)).category,"double_death");
+});
+test("A5 verdict labels are visible while artwork only references available local assets",()=>{
+  for(const [type,category,label,fallback] of [["victory","impressive_victory","IMPRESSIVE VICTORY","greatsword-victory"],["defeat","humiliation","HUMILIATION","greatsword-defeat"]]){
+    const event=terminal(type,"knockout",90);
+    const before=structuredClone(event);
+    const art=combatArtworkForEvent(event,player,enemy);
+    assert.equal(art.label,label);
+    assert.equal(art.asset,DOMINANCE_ART[category]??fallback);
+    assert.deepEqual(event,before);
+    if(DOMINANCE_ART[category]){
+      const bytes=readFileSync(new URL("../site/play/assets/combat/"+art.asset+".webp",import.meta.url));
+      assert.equal(bytes.toString("ascii",8,12),"WEBP");
+    }
+    assert.equal(combatArtworkForEvent(terminal(type,"timeout",100),player,enemy).asset,fallback);
+  }
+});

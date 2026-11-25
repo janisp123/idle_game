@@ -1,6 +1,7 @@
+import { combatVerdict } from "../site/play/combat-verdict.mjs";
 // Representative alpha benchmark. Every bout calls the live physical resolver.
-import { BOUT_MS, RESURRECTION_MS, seededCombatRandom } from "../site/play/combat.mjs";
-import { ARENAS } from "../site/play/arenas.mjs";
+import { BOUT_MS, RESURRECTION_MS, seededCombatRandom,makeOpponent } from "../site/play/combat.mjs";
+import { ARENAS,chooseArena } from "../site/play/arenas.mjs";
 import { arenaReward } from "../site/play/arena-wallet.mjs";
 import { resolvePhysicalDuel } from "../site/play/physical-duel.mjs";
 import { ITEM_QUALITIES } from "../site/play/smith.mjs";
@@ -11,7 +12,8 @@ const armourLoads = ["padded", "leather", "plate"];
 const random = seededCombatRandom(20261124);
 const seeds = Array.from({ length: 128 }, () => Math.floor(random() * 2 ** 32));
 const outcomes = () => ({ bouts: 0, victory: 0, defeat: 0, double_death: 0,
-  breaks: 0, arrowExhaustions: 0, bleedTicks: 0, staggers: 0, coins: 0, productiveMs: 0 });
+  breaks: 0, arrowExhaustions: 0, bleedTicks: 0, staggers: 0, coins: 0, productiveMs: 0,
+  impressive_victory:0,humiliation:0 });
 
 function sample(player, enemy, arena, grade, seeds, totals) {
   for (const seed of seeds) {
@@ -21,6 +23,8 @@ function sample(player, enemy, arena, grade, seeds, totals) {
     totals.coins += result.outcome === "victory" ? arenaReward(grade) : 0;
     totals.productiveMs += BOUT_MS - (result.outcome === "victory" ? 0 : RESURRECTION_MS);
     const final = result.events.at(-1);
+    const verdict=combatVerdict(final);
+    if(verdict?.dominant)totals[verdict.category]++;
     for (const [side, fighter] of [["player", player], ["enemy", enemy]]) {
       if (fighter.loadout === "bow" && final.vitals[side].arrows === 0) totals.arrowExhaustions++;
     }
@@ -69,6 +73,70 @@ for (const opponentGrade of [0, 1, 2]) {
   }
 }
 
-console.log(JSON.stringify({ seed: 20261124,
-  bouts: 5 * styles.length ** 2 * 64 + (upgradeRows.length + gradeRows.length) * seeds.length,
-  byArena, upgradeRows, gradeRows }, null, 2));
+const baselineReport={seed:20261124,
+  bouts:5*styles.length**2*64+(upgradeRows.length+gradeRows.length)*seeds.length,
+  byArena,upgradeRows,gradeRows};
+
+
+// ALPHA-GEAR-001 A2 — equal-stat grade separation and real arena readiness.
+// The report is deliberately aggregated across every ordered style pair and
+// all five arenas; sample seeds are independent of a particular matchup.
+const gearRows=[];
+const gearScenarios=[
+  ...[10,80,150].flatMap(stat=>[0,1,2,3,7].map(delta=>({stat,lower:0,higher:delta,kind:"equal-stats"}))),
+  ...[1,2,3].map(delta=>({stat:150,lower:7-delta,higher:7,kind:"late-adjacent"}))
+];
+for(const row of gearScenarios){
+  const totals=outcomes();
+  for(const [i,style] of styles.entries())for(const [j,opponent] of styles.entries()){
+    const family=armourLoads[(i+j)%3],enemyFamily=armourLoads[(i+2*j)%3];
+    const shared={str:row.stat,dex:row.stat,end:row.stat,skill:40,quality:"common"};
+    const p=createPlayerSnapshot({...shared,loadout:style,armour:family,itemGrade:row.higher});
+    const q=createPlayerSnapshot({...shared,loadout:opponent,armour:enemyFamily,itemGrade:row.lower});
+    for(const arena of ARENAS)sample(p,q,arena,row.lower,seeds.slice(0,16),totals);
+  }
+  gearRows.push({...row,...totals,winRatePct:100*totals.victory/totals.bouts});
+}
+const readinessRows=[];
+for(const grade of [0,3,7])for(const state of ["matched","low-stats","low-gear"]){
+  const totals=outcomes();
+  for(const style of styles){
+    const player=createPlayerSnapshot({grade,loadout:style,armour:"leather",quality:"common",
+      ...(state==="low-stats"?{str:10,dex:10,end:10,skill:1}:{}),
+      itemGrade:state==="low-gear"?0:grade});
+    for(const seed of seeds.slice(0,64)){
+      const enemy=makeOpponent(0,grade,seededCombatRandom(seed));
+      const arena=chooseArena(player,enemy,seededCombatRandom((seed^0x193765)>>>0)).arena;
+      sample(player,enemy,arena,grade,[seed],totals);
+    }
+  }
+  readinessRows.push({grade,state,...totals,winRatePct:100*totals.victory/totals.bouts});
+}
+const expertiseRows=[];
+for(const [grade,stat] of [[0,10],[3,62],[7,150]])for(const novice of ["weapon","armour","both","neither"]){
+  const totals=outcomes();
+  for(const style of styles)for(const family of armourLoads){
+    const shared={str:stat,dex:stat,end:stat,skill:50,loadout:style,armour:family,itemGrade:grade,quality:"masterwork"};
+    const trained=createPlayerSnapshot(shared);
+    const hours={};
+    if(novice==="weapon"||novice==="both")hours[style]=0;
+    if(novice==="armour"||novice==="both")hours[family]=0;
+    const untrained=createPlayerSnapshot({...shared,expertiseHours:hours});
+    for(const arena of ARENAS)sample(trained,untrained,arena,grade,seeds.slice(0,16),totals);
+  }
+  expertiseRows.push({grade,stat,novice,...totals,winRatePct:100*totals.victory/totals.bouts});
+}
+// Reverse the most extreme comparison too, using the same production rules.
+const dominanceRows=[];
+for(const [higher,lower] of [[0,0],[7,0],[0,7],[7,7]]){
+  const totals=outcomes();
+  for(const style of styles)for(const opponent of styles){
+    const shared={str:150,dex:150,end:150,skill:50,armour:"leather",quality:"common"};
+    const p=createPlayerSnapshot({...shared,loadout:style,itemGrade:higher});
+    const q=createPlayerSnapshot({...shared,loadout:opponent,itemGrade:lower});
+    for(const arena of ARENAS)sample(p,q,arena,lower,seeds.slice(0,16),totals);
+  }
+  dominanceRows.push({playerGrade:higher,enemyGrade:lower,...totals});
+}
+console.log(JSON.stringify({...baselineReport,
+  gradeSeparation:{seed:20261124,gearRows,readinessRows},expertiseRows,dominanceRows},null,2));
