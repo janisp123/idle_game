@@ -1,0 +1,536 @@
+[
+  {
+    "profile": {
+      "id": "starterUnarmoured",
+      "quality": "poor",
+      "practice": "zero",
+      "stats": "grade",
+      "unarmoured": true
+    },
+    "total": 2560,
+    "rows": [
+      {
+        "gearGrade": 0,
+        "arena": 0,
+        "n": 320,
+        "wins": 146,
+        "defeats": 174,
+        "draws": 0,
+        "winRate": 45.625,
+        "knockoutWinRate": 45.625,
+        "coinsPerHour": 98.55,
+        "perBuild": [
+          {
+            "style": "greatsword",
+            "family": "none",
+            "wins": 27,
+            "defeats": 37,
+            "draws": 0,
+            "winRate": 42.1875,
+            "coinsPerHour": 91.125
+          },
+          {
+            "style": "sword_shield",
+            "family": "none",
+            "wins": 24,
+            "defeats": 40,
+            "draws": 0,
+            "winRate": 37.5,
+            "coinsPerHour": 81
+          },
+          {
+            "style": "hammer",
+            "family": "none",
+            "wins": 36,
+            "defeats": 28,
+            "draws": 0,
+            "winRate": 56.25,
+            "coinsPerHour": 121.5
+          },
+          {
+            "style": "bow",
+            "family": "none",
+            "wins": 35,
+            "defeats": 29,
+            "draws": 0,
+            "winRate": 54.6875,
+            "coinsPerHour": 118.125
+          },
+          {
+            "style": "spear",
+            "family": "none",
+            "wins": 24,
+            "defeats": 40,
+            "draws": 0,
+            "winRate": 37.5,
+            "coinsPerHour": 81
+          }
+        ]
+      },
+      {
+        "gearGrade": 0,
+        "arena": 1,
+        "n": 320,
+        "wins": 1,
+        "defeats": 319,
+        "draws": 0,
+        "winRate": 0.3125,
+        "knockoutWinRate": 0,
+        "coinsPerHour": 1.125,
+        "perBuild": [
+          {
+            "style": "greatsword",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "sword_shield",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "hammer",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "bow",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "spear",
+            "family": "none",
+            "wins": 1,
+            "defeats": 63,
+            "draws": 0,
+            "winRate": 1.5625,
+            "coinsPerHour": 5.625
+          }
+        ]
+      },
+      {
+        "gearGrade": 0,
+        "arena": 2,
+        "n": 320,
+        "wins": 0,
+        "defeats": 320,
+        "draws": 0,
+        "winRate": 0,
+        "knockoutWinRate": 0,
+        "coinsPerHour": 0,
+        "perBuild": [
+          {
+            "style": "greatsword",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "sword_shield",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "hammer",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "bow",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "spear",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          }
+        ]
+      },
+      {
+        "gearGrade": 0,
+        "arena": 3,
+        "n": 320,
+        "wins": 0,
+        "defeats": 320,
+        "draws": 0,
+        "winRate": 0,
+        "knockoutWinRate": 0,
+        "coinsPerHour": 0,
+        "perBuild": [
+          {
+            "style": "greatsword",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "sword_shield",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "hammer",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "bow",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "spear",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          }
+        ]
+      },
+      {
+        "gearGrade": 0,
+        "arena": 4,
+        "n": 320,
+        "wins": 0,
+        "defeats": 320,
+        "draws": 0,
+        "winRate": 0,
+        "knockoutWinRate": 0,
+        "coinsPerHour": 0,
+        "perBuild": [
+          {
+            "style": "greatsword",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "sword_shield",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "hammer",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "bow",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "spear",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          }
+        ]
+      },
+      {
+        "gearGrade": 0,
+        "arena": 5,
+        "n": 320,
+        "wins": 0,
+        "defeats": 320,
+        "draws": 0,
+        "winRate": 0,
+        "knockoutWinRate": 0,
+        "coinsPerHour": 0,
+        "perBuild": [
+          {
+            "style": "greatsword",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "sword_shield",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "hammer",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "bow",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "spear",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          }
+        ]
+      },
+      {
+        "gearGrade": 0,
+        "arena": 6,
+        "n": 320,
+        "wins": 0,
+        "defeats": 320,
+        "draws": 0,
+        "winRate": 0,
+        "knockoutWinRate": 0,
+        "coinsPerHour": 0,
+        "perBuild": [
+          {
+            "style": "greatsword",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "sword_shield",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "hammer",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "bow",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "spear",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          }
+        ]
+      },
+      {
+        "gearGrade": 0,
+        "arena": 7,
+        "n": 320,
+        "wins": 0,
+        "defeats": 320,
+        "draws": 0,
+        "winRate": 0,
+        "knockoutWinRate": 0,
+        "coinsPerHour": 0,
+        "perBuild": [
+          {
+            "style": "greatsword",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "sword_shield",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "hammer",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "bow",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          },
+          {
+            "style": "spear",
+            "family": "none",
+            "wins": 0,
+            "defeats": 64,
+            "draws": 0,
+            "winRate": 0,
+            "coinsPerHour": 0
+          }
+        ]
+      }
+    ],
+    "best": [
+      {
+        "gearGrade": 0,
+        "bestArena": 0,
+        "individual": [
+          {
+            "style": "greatsword",
+            "family": "none",
+            "bestArena": 0,
+            "bestCoins": 91.125,
+            "ownCoins": 91.125,
+            "bestWin": 42.1875,
+            "skip": false,
+            "skipTwo": false
+          },
+          {
+            "style": "sword_shield",
+            "family": "none",
+            "bestArena": 0,
+            "bestCoins": 81,
+            "ownCoins": 81,
+            "bestWin": 37.5,
+            "skip": false,
+            "skipTwo": false
+          },
+          {
+            "style": "hammer",
+            "family": "none",
+            "bestArena": 0,
+            "bestCoins": 121.5,
+            "ownCoins": 121.5,
+            "bestWin": 56.25,
+            "skip": false,
+            "skipTwo": false
+          },
+          {
+            "style": "bow",
+            "family": "none",
+            "bestArena": 0,
+            "bestCoins": 118.125,
+            "ownCoins": 118.125,
+            "bestWin": 54.6875,
+            "skip": false,
+            "skipTwo": false
+          },
+          {
+            "style": "spear",
+            "family": "none",
+            "bestArena": 0,
+            "bestCoins": 81,
+            "ownCoins": 81,
+            "bestWin": 37.5,
+            "skip": false,
+            "skipTwo": false
+          }
+        ]
+      }
+    ]
+  }
+]
