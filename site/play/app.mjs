@@ -14,7 +14,7 @@ import {
 } from "./engine.mjs?v=alpha-gear-a8";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=alpha-gear-a8";
-import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-gear-a5";
+import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-art-001";
 import { combatFlowState } from "./combat-flow.mjs?v=glad-003";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=alpha-gear-a5";
 import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,

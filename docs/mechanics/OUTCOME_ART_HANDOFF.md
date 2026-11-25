@@ -22,3 +22,13 @@ A9 verification: ZIP contents rechecked against both SHA-256 values above; exact
 ## Owner-approved deferral (2026-11-25)
 
 Owner explicitly approved the playable alpha release using existing verified fallback artwork after final checks. This supersedes the earlier artwork-as-release-blocker instruction for PR #154 only. The two exact images remain a separate open task ALPHA-ART-001 in TD_LIST. When working on it, start a fresh branch from current main; do not reopen or reuse the merged release branch. All original checksum, activation and browser acceptance requirements remain. No artwork integration claimed.
+
+
+## Integration candidate — PR #156
+
+The owner resumed this work. Branch `alpha/approved-verdict-art` has the activation code, cache updates, exact byte/hash verification and browser checks for the intended asset source and decoded dimensions. Upload both extracted WebP files directly to `site/play/assets/combat/` on this branch (not main). The draft intentionally cannot pass missing-file tests until both originals are uploaded. No save schema or combat formula changes. Existing live release remains unchanged until the PR is verified and merged.
+
+
+## Binary transfer resolved
+
+Owner suggested using Google Drive as an intermediary. The two original attachments were uploaded to the owner's Drive without sharing changes; raw content was read back and stored as GitHub blobs. Both blob hashes matched the locally calculated Git blob hashes. The two files are committed to PR #156 under the required paths. Exact SHA-256 checks and Chromium verdict rendering tests are required on the final revision before merging. No Drive runtime dependency, gameplay change or save reset.

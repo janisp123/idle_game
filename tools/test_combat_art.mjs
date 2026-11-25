@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, statSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { combatArtworkForEvent, COMBAT_ART } from "../site/play/combat-art.mjs";
 
 const player="greatsword", enemy="sword_shield";
@@ -100,4 +101,20 @@ test("A5 verdict labels are visible while artwork only references available loca
     }
     assert.equal(combatArtworkForEvent(terminal(type,"timeout",100),player,enemy).asset,fallback);
   }
+});
+
+test("ALPHA-ART-001 exact approved WebP bytes and symbolic verdict selection",()=>{
+  const approved={impressive_victory:["impressive-victory",162094,"495d303527e15207aa1252d934491544dbe7972a490c8ca5cff111d760e28f88"],humiliation:["humiliation",139910,"6e1df144defacb680963326a69c59f12c885dd995559312a0838c7f33af0a184"]};
+  for(const [category,[asset,length,sha]] of Object.entries(approved)){
+    assert.equal(DOMINANCE_ART[category],asset);
+    const bytes=readFileSync(new URL("../site/play/assets/combat/"+asset+".webp",import.meta.url));
+    assert.equal(bytes.length,length);assert.equal(createHash("sha256").update(bytes).digest("hex"),sha);
+    for(const style of ["bow","spear","sword_shield","greatsword","hammer"]){
+      const type=category==="impressive_victory"?"victory":"defeat";
+      assert.equal(combatArtworkForEvent(terminal(type,"knockout",90),style,enemy).asset,asset);
+      assert.notEqual(combatArtworkForEvent(terminal(type,"timeout",100),style,enemy).asset,asset);
+      assert.notEqual(combatArtworkForEvent(terminal(type,"knockout",79),style,enemy).asset,asset);
+    }
+  }
+  assert.equal(combatArtworkForEvent(terminal("double_death","knockout",100),player,enemy).asset,"fight-engage");
 });

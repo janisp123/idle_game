@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## ALPHA-ART-001 — pending draft PR #156
+
+Owner requested exact art integration. Branch `alpha/approved-verdict-art` contains registry activation and strict tests; original WebP blobs transferred via owner-suggested private Google Drive bridge and matched local Git blob hashes. Both committed to this branch with strict SHA-256/browser tests. Current live V15 gameplay unaffected. Next verify final-head checks and deploy. See OUTCOME_ART_HANDOFF.md.
+
 ## ALPHA-GEAR-001 — DEPLOYED (PR #154, 2026-11-25)
 
 - **Live release:** [Play](https://janisp123.github.io/idle_game/play/). Merge `d13f8b2107ebc8061115bf06ccd25c3a91cae193` verified on main; [Pages 45570157207](https://github.com/janisp123/idle_game/actions/runs/45570157207) completed successfully on that revision. Independent fresh public HTTP fetch was unavailable; no claim of separate HTTP or physical-device verification.

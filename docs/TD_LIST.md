@@ -45,7 +45,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Integrate the two exact owner-approved Impressive Victory and Humiliation WebPs, without changing combat, rewards, or saves.
 - **Acceptance:** Use the paths, SHA-256 values and activation steps in [OUTCOME_ART_HANDOFF.md](mechanics/OUTCOME_ART_HANDOFF.md). Upload exact WebP bytes; verify checksums, enable registry and update cache revisions. Run existing art tests, real Chrome at 390/1440px, full relevant final-head checks and Pages verification. Do not regenerate or substitute images. Keep existing fallback until integration is verified.
-- **Status:** BLOCKED — binary transfer unavailable to chat; Owner explicitly deferred for alpha release on 2026-11-25. Use original ZIP supplied in chat; branch from current main when available.
+- **Status:** PENDING PR — #156 contains both exact approved WebPs, activation and strict checksum/browser tests. Owner's Google Drive bridge resolved binary transfer. Await final-head CI, merge and deployment; no live change yet.
 - **Dependencies:** ALPHA-GEAR-001.
 - **Added by:** chat.
 - **Requested by:** Owner.
