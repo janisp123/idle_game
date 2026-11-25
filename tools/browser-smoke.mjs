@@ -98,7 +98,7 @@ try{
       return {title:document.title,heading:document.querySelector("h1").textContent,copy:document.body.innerText,href:play.getAttribute("href"),width:box.width,height:box.height,visible:box.top>=0&&box.bottom<=innerHeight,
         artWidth:art.naturalWidth,artHeight:art.naturalHeight,artSrc:art.getAttribute("src"),artFits:art.getBoundingClientRect().width<=innerWidth&&Math.abs(art.getBoundingClientRect().width/art.getBoundingClientRect().height-1672/941)<.02,featureFirst:!!(document.getElementById("vision").compareDocumentPosition(document.getElementById("hobby"))&Node.DOCUMENT_POSITION_FOLLOWING),overflow:document.documentElement.scrollWidth-innerWidth};})()`);
     assert.match(landing.title,/The Long Vigil/);assert.match(landing.heading,/The world is cruel/);
-    assert.match(landing.copy,/Eleven activities/);assert.match(landing.copy,/may be reset/);
+    assert.match(landing.copy,/Life beyond the arena/);assert.match(landing.copy,/may be reset/);
     assert.equal(landing.href,"./play/");assert.ok(landing.width>0&&landing.height>=40&&landing.visible,"Play Now must be visible above the fold");
     assert.equal(landing.artWidth,1672);assert.equal(landing.artHeight,941);assert.equal(landing.artSrc,"./assets/gladiator-shield-clash.png");assert.ok(landing.artFits&&landing.featureFirst&&landing.overflow<=2,"landing artwork sizing, order or overflow");
     await shot("landing-"+width);
