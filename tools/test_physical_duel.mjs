@@ -135,3 +135,25 @@ test("CHAR-STATS-001 exact shared damage, HP and armour breakdown",()=>{
   state=setCombatLoadout(state,"bow",0,()=>.5).state;
   assert.ok(characterStats(state).sections.some(x=>x.title==="Damage · dagger"));
 });
+
+test("CHAR-STATS-002 equipment modifiers isolate grade bonus and preserve noncombat efficiency",()=>{
+  let state=newGame(0);
+  const get=(s,key)=>characterStats(s).overview.find(x=>x.key===key);
+  const starter=get(state,"primary-attack");
+  assert.equal(starter.summary,"+0%");
+  assert.equal(get(state,"activity-mining").summary,"×1");
+  const base=characterStats(state).overview.filter(x=>x.group==="Activity modifiers").map(x=>x.summary);
+  state={...state,coins:1000000,skills:{...state.skills,fighting:{level:5,xp:0}}};
+  const before=characterStats(state).overview.filter(x=>x.group==="Activity modifiers").map(x=>x.summary);
+  state=buyEquipment(state,"greatsword",{grade:1,quality:"common"},0,()=>.5).state;
+  assert.notEqual(get(state,"primary-attack").summary,starter.summary);
+  for(const slot of ["head","torso","arms","legs"])state=buyEquipment(state,slot+":plate",{grade:0,quality:"common"},0,()=>.5).state;
+  assert.equal(get(state,"Mobility").summary,"72%");
+  assert.equal(get(state,"Material protection").summary,"+50 pp");
+  assert.deepEqual(characterStats(state).overview.filter(x=>x.group==="Activity modifiers").map(x=>x.summary),before);
+  assert.equal(base.length,11);
+  assert.equal(get(state,"activity-smithing").rows.find(x=>x.label==="Recipe output per successful cycle").value,"1");
+  const miner={...state,skills:{...state.skills,mining:{level:10,xp:0}}};
+  assert.equal(get(miner,"activity-mining").summary,"×1.18");
+  assert.equal(get(miner,"activity-mining").rows.find(x=>x.label==="Direct equipment XP/yield bonus").value,"+0%");
+});

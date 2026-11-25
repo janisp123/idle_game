@@ -8,11 +8,20 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## CHAR-STATS-002 — Compact character power and activity overview
+
+- **Goal:** Simplify the existing stat sheet into compact expandable actual equipment/attribute/activity modifiers; retain source breakdowns and open state on equipment changes.
+- **Acceptance:** Real same-move grade/quality attack power, accuracy/dodge modifiers, material, mobility and conditional defense, all eleven activities with actual direct gear effect, level and difficulty factors. Distinguish crafting, recovery and conditional results; no save or balance change. Actual mobile/desktop browser tests.
+- **Status:** PENDING PR #158; tests pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## CHAR-STATS-001 — Transparent live character statistics
 
 - **Goal:** Independent collapsible character statistics panel, selected gear changes update the open sheet immediately; show total and source bonuses/penalties from real resolver, no fictitious DPS.
 - **Acceptance:** Attributes, damage by actual move, HP, weight, mobility, dodge, material protection, resistance, guard, accuracy, penetration, initiative, block/parry, condition and ammo. Distinguish selected intact next-bout build from ongoing bout, opponent/terrain and breakage. Preserve V15 saves and combat balance; actual browser tests.
-- **Status:** PENDING PR #157; tests pending.
+- **Status:** DONE — PR #157 merged ca689467, Pages 45585083404 succeeded.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -54,7 +63,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Integrate the two exact owner-approved Impressive Victory and Humiliation WebPs, without changing combat, rewards, or saves.
 - **Acceptance:** Use the paths, SHA-256 values and activation steps in [OUTCOME_ART_HANDOFF.md](mechanics/OUTCOME_ART_HANDOFF.md). Upload exact WebP bytes; verify checksums, enable registry and update cache revisions. Run existing art tests, real Chrome at 390/1440px, full relevant final-head checks and Pages verification. Do not regenerate or substitute images. Keep existing fallback until integration is verified.
-- **Status:** PENDING PR — #156 contains both exact approved WebPs, activation and strict checksum/browser tests. Owner's Google Drive bridge resolved binary transfer. Await final-head CI, merge and deployment; no live change yet.
+- **Status:** DONE — PR #156 merged ff063078, exact image hashes and browser checks passed; Pages 45575028297 succeeded.
 - **Dependencies:** ALPHA-GEAR-001.
 - **Added by:** chat.
 - **Requested by:** Owner.

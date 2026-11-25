@@ -1010,3 +1010,17 @@ footer p{color:#aa9680}
 .stat-breakdown-line .stat-negative {color:#e79c87}
 .stat-breakdown-note {font-size:.78rem;line-height:1.4;color:#b9a78d;margin:6px 8px}
 .stat-breakdown-group .stat-breakdown-note {margin:6px 0 0}
+
+/* CHAR-STATS-002 — compact independently expandable modifier rows. */
+.stat-overview-heading {margin:16px 0 6px;font:600 .87rem/1.3 Georgia,serif;text-transform:uppercase;letter-spacing:.07em;color:#d4b185}
+.stat-breakdown-group {padding:0;border-top:1px solid #674831}
+.stat-overview-summary {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px 0;align-items:center;cursor:pointer;list-style:none;font-size:.9rem;color:#ead4b5}
+.stat-overview-summary::-webkit-details-marker {display:none}
+.stat-overview-summary>span {min-width:0;position:relative;padding-left:15px;overflow-wrap:anywhere}
+.stat-overview-summary>span::before {content:"+";position:absolute;left:0;color:#b89a70}
+.stat-breakdown-group[open] .stat-overview-summary>span::before {content:"−"}
+.stat-overview-summary small {display:block;color:#baa88e;font-size:.73rem;line-height:1.35;margin-top:3px}
+.stat-overview-summary strong {color:#f1cb92;text-align:right;font-variant-numeric:tabular-nums;font-size:.85rem}
+.stat-overview-summary .stat-negative {color:#e79c87}
+.stat-overview-summary:focus-visible {outline:2px solid #e0b580;outline-offset:2px}
+.stat-overview-sources {padding:0 0 10px 15px;min-width:0}
