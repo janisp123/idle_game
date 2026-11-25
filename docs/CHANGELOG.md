@@ -2,11 +2,11 @@
 
 ## APPRENTICE-A2 · STARTED (2026-11-25, chat)
 
-Owner requests continuing with automatic Skill Master at 50 earned activity levels. Branch `feat/apprentice-auto-master`, base `5b996be`. Explicit opt-in to current 100% tribute, login-only claim after settlement using shared Master mutation, one level per ready skill, accurate report after persistence. Web Locks serialize automatic login attempts; stale-write guards protect against observed other-tab saves; browser-local alpha is not an authoritative concurrent database. No automatic offline levels, equipment or donation changes. Next implement/test.
+Owner requests continuing with automatic Skill Master at 50 earned activity levels. Branch `feat/apprentice-auto-master`, base `5b996be`. Explicit opt-in to current 100% tribute, login-only claim after settlement using shared Master mutation, one level per ready skill, accurate report after persistence. Web Locks serialize automatic login attempts; stale-write guards protect against observed other-tab saves; browser-local alpha is not an authoritative concurrent database. No automatic offline levels, equipment or donation changes. Implemented versioned opt-in, shared claim, coordinated startup, stale-save check, exact transient report and regression tests. Next final CI.
 
-## APPRENTICE-A1 · STARTED (2026-11-25, chat)
+## APPRENTICE-A1 · MERGED (2026-11-25, chat)
 
-Owner approved starting Apprentice implementation. Fresh branch `feat/apprentice-foundation` base `29d7bee` replaces overlapping draft #176; carry forward plan and pure unlock policy/tests. Scope: earned activated levels minus starting levels, 1..5 queue slots, real queue guards, foldable Assistant menu, locked/unimplemented chores clearly marked, preserve preexisting valid routes. No automation spending, tribute, new weapons or live clan changes. Added pure policy and real queue gating, five-slot bounded settlement, menu and source-linked tests; updated synthetic queue regression fixtures and lab sample. Next final CI.
+Owner approved starting Apprentice implementation. Fresh branch `feat/apprentice-foundation` base `29d7bee` replaces overlapping draft #176; carry forward plan and pure unlock policy/tests. Scope: earned activated levels minus starting levels, 1..5 queue slots, real queue guards, foldable Assistant menu, locked/unimplemented chores clearly marked, preserve preexisting valid routes. No automation spending, tribute, new weapons or live clan changes. Added pure policy and real queue gating, five-slot bounded settlement, menu and source-linked tests; updated synthetic queue regression fixtures and lab sample. Final head c89d448 passed website 45662042280, systems 45662042373, combat 45662042289 and protocol 45662042247; PR #177 merged 5b996be. Draft #176 superseded and closed.
 
 ## START-FIGHT-001 · MERGED (2026-11-25, chat)
 
