@@ -85,7 +85,7 @@ jobs:
             console.log("Valid JSON; full report attached below.");
           '
       - name: Produce full normal/alpha build progression report
-        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true || (github.event_name == 'pull_request' && github.head_ref == 'audit/balance-counters-20261125')
         run: |
           node tools/simulation/build-progression.mjs > build-progression-report.json
           node --input-type=module -e '
@@ -95,7 +95,7 @@ jobs:
               console.log(JSON.stringify({profile:p.profile, ...s}));
           '
       - name: Run full paired-build and economy audit
-        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true || (github.event_name == 'pull_request' && github.head_ref == 'audit/balance-counters-20261125')
         run: |
           node tools/simulation/balance-audit.mjs > balance-audit.json
           node --input-type=module -e '
@@ -104,9 +104,28 @@ jobs:
             console.log(JSON.stringify({audit:"bounds",...r.bounds}));
             for(const row of r.rows)console.log(JSON.stringify({audit:"combat",...row}));
             for(const {checkpoints,...row} of r.economy)console.log(JSON.stringify({audit:"economy",...row}));
+            const styles=["bow","spear","sword_shield","greatsword","hammer"],families=["padded","leather","plate"], arenas=[...new Set(r.terrainRows.map(x=>x.arena))];
+            for(const grade of [0,3,7]){
+              const rows=r.terrainRows.filter(x=>x.grade===grade&&families.includes(x.a.split("/")[1])&&families.includes(x.b.split("/")[1]));
+              const cell=(a,b,arena,dimension=0,sameFamily=false)=>{
+                let wins=0,losses=0,draws=0,n=0;
+                for(const x of rows){
+                  if(arena&&x.arena!==arena)continue;
+                  const A=x.a.split("/"),B=x.b.split("/");
+                  if(sameFamily&&A[1]!==B[1])continue;
+                  if(A[dimension]===a&&B[dimension]===b){wins+=x.wins;losses+=x.losses;draws+=x.draws;n+=x.bouts;}
+                  if(B[dimension]===a&&A[dimension]===b&&x.a!==x.b){wins+=x.losses;losses+=x.wins;draws+=x.draws;n+=x.bouts;}
+                }
+                return {w:Math.round(wins/n*1000)/10,d:Math.round(draws/n*1000)/10,n};
+              };
+              for(const a of styles){
+                console.log("COUNTER "+JSON.stringify({grade,a,all:styles.map(b=>cell(a,b,null,0,true)),arenas:arenas.map(arena=>({arena,vs:styles.map(b=>cell(a,b,arena,0,true))}))}));
+              }
+              for(const a of families)console.log("ARMOUR "+JSON.stringify({grade,a,vs:families.map(b=>cell(a,b,null,1))}));
+            }
           '
       - name: Attach balance audit
-        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true || (github.event_name == 'pull_request' && github.head_ref == 'audit/balance-counters-20261125')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: balance-audit-${{ github.run_id }}-${{ github.run_attempt }}
@@ -114,7 +133,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Attach build progression baseline
-        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true || (github.event_name == 'pull_request' && github.head_ref == 'audit/balance-counters-20261125')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: build-progression-${{ github.run_id }}-${{ github.run_attempt }}
