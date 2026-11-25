@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## CLAN-PLAN-001 · STARTED (2026-11-25, chat)
+
+Owner requests maximum useful development/design before renting a server, with clear function placement and a durable server implementation handoff. Branch `docs/clan-server-handoff`, base `cd4e93d`. Documentation only: map screens, domain functions, data ownership, offline test work, server prerequisites, staged acceptance and open decisions. No hosting choice, provisioning, gameplay change or fictional online functionality. Next write and link the roadmap.
+
 ## CLAN-001 · STARTED (2026-11-25, chat)
 
 Owner approved a separate Clan category, membership/search/creation views, minimum seven days of play for founding, seven-day rejoin/founding cooldown, permanent leadership until voluntary transfer, one vice, five generals and fifteen officers. Earlier approved clan donation/warehouse direction: once-daily online per-member limited contributions, warehouse permanently clan-owned, building-only expenditure, leader priorities, many upgradeable buildings. Branch `feature/clan-entry-and-design`, base `5dab306`. Current local-only alpha cannot support real shared clans. Scope this PR to honest Clan entry/availability screen and persistent design contract; no fake membership, browser-local donations, backend selection, or unapproved economy/permissions. Added standalone Clan entry and [design contract](CLAN_DESIGN.md), including explicit availability limits. Search/create are disabled until shared backend exists. Next verify browser and Pages; no implementation claim for real clans.
