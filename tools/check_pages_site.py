@@ -61,6 +61,9 @@ def check():
     assert {"main", "vision", "library"}.issubset(parser.ids)
     for phrase in ("The Long Vigil", "Eleven activities", "Masterwork equipment cannot break", "may be reset", "No offline time cutoff"):
         assert phrase in html, f"Missing current alpha landing information: {phrase}"
+    assert "hobby" in parser.ids, "Permanent free-game statement must be on landing page"
+    for phrase in ("A Hobby,", "Not a Business", "It will always be 100% free.", "No advertisements.", "No microtransactions.", "No subscriptions.", "No pay-to-win mechanics.", "No donations or financial contributions.", "Not even a button to buy me a coffee.", "loss of progress are possible", "Constructive feedback is always welcome"):
+        assert phrase in html, f"Missing FREE-001 commitment: {phrase}"
     # Keep a single stable Play Now entry on the landing page.
     assert len(parser.play_controls) == 1, "Landing page needs exactly one Play Now control"
     play_tag, play_attrs = parser.play_controls[0]

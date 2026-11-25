@@ -1,8 +1,12 @@
 # Changelog and task handoffs
 
-## SITE-003 · STARTED (2026-11-25, chat)
+## FREE-001 · STARTED (2026-11-25, chat)
 
-Owner approved coordinated landing page, README and project-status refresh on `site/current-alpha-overview`, base `67f62e0`. Existing Pages 45589039287 succeeded; live landing and game returned HTTP 200 and the game has char-stats-002. Preserve artwork, Play Now, research library, all gameplay files and saves. Next update public copy and reconcile obsolete status, then verify changed files, mobile/desktop and deployment before closing.
+Owner approved permanent zero monetization for The Long Vigil and the exact A Hobby, Not a Business public statement. Base `ce46729`; SITE-003 Pages 45593799089 verified successful. Branch `site/permanently-free`. Add identical policy copy to landing and README, durable decision and agent guard; no game or save edits and no license change. Next verify final checks and Pages.
+
+## SITE-003 · DEPLOYED (2026-11-25, chat)
+
+Owner approved coordinated landing page, README and project-status refresh on `site/current-alpha-overview`, base `67f62e0`. Existing Pages 45589039287 succeeded; live landing and game returned HTTP 200 and the game has char-stats-002. Preserve artwork, Play Now, research library, all gameplay files and saves. Updated landing, README and current status. PR #160 final `9eabc15` passed website 45593679665, protocol 45593679702 and systems 45593679821; merged `ce46729`; Pages 45593799089 succeeded. No game/save changes.
 
 ## SIM-003 · MERGED (2026-11-25, chat)
 

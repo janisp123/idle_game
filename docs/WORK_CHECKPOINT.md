@@ -1,8 +1,12 @@
 # Current working checkpoint
 
-## SITE-003 — draft PR #160
+## FREE-001 — PR #161
 
-Owner-approved landing page, README and current-status reconciliation. No game or save changes. Base 67f62e0; final checks and Pages verification pending. Next inspect PR final-head checks and changed files, then merge only after readiness gates and verify deployment. Full balance audit remains a separate task.
+Owner-approved permanent free-game policy and public statement. No gameplay/save/license changes. Verify final-head checks, merge and Pages; then full balance audit remains separate.
+
+## SITE-003 — deployed PR #160
+
+Merged `ce46729`; final head `9eabc15` passed website 45593679665 (including Chromium 390/1440), protocol 45593679702 and systems 45593679821. Pages 45593799089 verified successful. No game or save changes. Stable public gameplay screenshots were not added.
 
 ## SIM-003 — merged PR #159
 

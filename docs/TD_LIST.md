@@ -8,14 +8,23 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## FREE-001 — Permanent free-game commitment
+
+- **Goal:** Publish the owner-approved A Hobby, Not a Business statement on landing page and README, and establish permanent zero monetization in the project decision and agent rules.
+- **Acceptance:** Identical approved wording, no ads or financial contribution options, clear hobby risks, no game/save/license changes, static and actual mobile/desktop checks, Pages verification.
+- **Status:** IN_REVIEW — [PR #161](https://github.com/janisp123/idle_game/pull/161); final checks and deployment pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## SITE-003 — Current alpha website and repository overview
 
 - **Goal:** Refresh the public landing page, README and stale current-status documentation without changing game mechanics or saves.
 - **Acceptance:** Current feature descriptions, clear alpha warning, original artwork and Play Now preserved; static checks and actual 390/1440px browser checks; verify Pages separately after merge.
-- **Status:** IN_REVIEW — [PR #160](https://github.com/janisp123/idle_game/pull/160); final checks and deployment not yet verified.
+- **Status:** DONE — PR #160 merged `ce46729`; final website, protocol and systems checks passed; Pages 45593799089 succeeded.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #160).
 
 ## SIM-003 — Production parity and automatic simulation triggers
 
