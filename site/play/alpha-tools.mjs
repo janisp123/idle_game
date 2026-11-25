@@ -4,10 +4,10 @@ import { EXPERTISE_BALANCE } from "./expertise.mjs?v=alpha-gear-a3";
 import { ARMOUR_TIERS } from "./armour.mjs?v=alpha-gear-a8";
 
 export const ALPHA_TOOLS_ENABLED=TIMING_PROFILE==="alpha";
-// Rounded-down productive hours of the verified A3 normal daily trajectory
-// (ff17713, seed 20261125); use the real attribute formula, not fake stat fields.
+// Rounded-down productive hours of the verified A8 normal daily trajectory
+// (265c7a8, seed 20261125); use the real attribute formula, not fake stat fields.
 export const SIX_MONTH_BUILD=Object.freeze({
-  fightingLevel:52,productiveHours:4167,weaponHours:4167,armourHours:4145
+  fightingLevel:52,productiveHours:4235,weaponHours:4235,armourHours:4213
 });
 export const ALPHA_COIN_GRANT=100000;
 function requireAlpha(){

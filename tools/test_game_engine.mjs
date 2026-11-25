@@ -1368,9 +1368,9 @@ test("A4 Max Stats uses the six-month normal specialist floor, not all mastery t
   const boosted=alphaMaxStats(fresh,"plate",0,midpoint).state;
   assert.equal(boosted.skills.fighting.level,52);
   const attrs=effectiveAttributeProgress(boosted.attributeEffort,boosted.skills);
-  assert.deepEqual(Object.fromEntries(Object.entries(attrs).map(([id,v])=>[id,v.value])),{STR:148,DEX:148,END:136});
-  assert.equal(boosted.expertise.greatsword,4167*14400000);
-  assert.equal(boosted.expertise.plate,4145*14400000);
+  assert.deepEqual(Object.fromEntries(Object.entries(attrs).map(([id,v])=>[id,v.value])),{STR:149,DEX:149,END:137});
+  assert.equal(boosted.expertise.greatsword,4235*14400000);
+  assert.equal(boosted.expertise.plate,4213*14400000);
   for(const id of Object.keys(boosted.expertise).filter(id=>!["greatsword","plate"].includes(id)))assert.equal(boosted.expertise[id],0);
   assert.deepEqual(boosted.expertise,boosted.expertiseActive);
   assert.deepEqual(boosted.equipment,fresh.equipment);
@@ -1403,6 +1403,6 @@ test("A4 grants exactly 100000 coins separately, preserves old settlement and re
   assert.deepEqual(max.combatSession,normal.combatSession);
   assert.equal(max.settledAtMs,normal.settledAtMs);
   assert.equal(max.skills.fighting.level,52);
-  assert.equal(max.expertise.leather,4145*14400000);
+  assert.equal(max.expertise.leather,4213*14400000);
   assert.equal(max.expertise.plate,0);
 });

@@ -124,3 +124,6 @@ The equipment module accepts a synthetic coin wallet and calls the production sm
 ## Six-month build/economy trajectory
 
 Run `node tools/simulation/build-progression.mjs` on the desired revision. Uses detached copies of actual production modules with only the existing normal/alpha timing switch changed. No player saves or published source touched. Reports deterministic fixed-policy trajectories; current reports distinguish coins-only affordability from actual gated purchases. [Archived A0 and A1 results](ALPHA_GEAR_BASELINE.md) are historical verified measurements, not a forecast of future combat balance.
+
+
+A9: run the complete six-month and paired-balance reports through the Developer Game Systems Lab workflow's optional `full_balance` input on manual dispatch. Ordinary PR checks still run bounded production-parity and detached normal/alpha smoke tests. The full audit remains reproducible via `node tools/simulation/build-progression.mjs` and `node tools/simulation/balance-audit.mjs`; historical branch runs are linked in ALPHA_GEAR_FINAL_AUDIT.md. No need to rerun the expensive matrix on every documentation-only commit.

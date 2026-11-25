@@ -21,7 +21,7 @@ import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats, dodgeChance }
   from "./armour.mjs?v=alpha-gear-a8";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=alpha-gear-a8";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=alpha-gear-a9";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -938,7 +938,7 @@ function render() {
       (positioning.higher === "player" ? "Your higher roll favoured your arena preference" :
         "The opponent's higher roll favoured their arena preference");
     ui.combatPanel.setAttribute("data-arena", terrain.id);
-    $("combatGround").textContent = difficultyGrades[state.difficulties.fighting ?? 0] + " · " +
+    $("combatGround").textContent = difficultyGrades[state.combatSession.player.difficulty ?? 0] + " · " +
       terrain.name + " · " + terrain.detail;
     ui.combatPanel.classList.toggle("finisher", event.type === "finisher");
     const broken = event.broken?.join(", ");

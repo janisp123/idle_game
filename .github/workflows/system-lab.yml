@@ -3,6 +3,11 @@ name: Developer Game Systems Lab
 on:
   workflow_dispatch:
     inputs:
+      full_balance:
+        description: 'Run the full six-month progression and paired combat balance reports'
+        type: boolean
+        required: false
+        default: false
       scenario:
         description: 'Public test scenario JSON; default runs all modules. Never paste a real save.'
         type: string
@@ -73,8 +78,8 @@ jobs:
             console.log("Modules:",(r.results??r.scenarios??[]).map(x=>x.module||"combat").join(", "));
             console.log("Valid JSON; full report attached below.");
           '
-      - name: Produce the ALPHA-GEAR-001 baseline report on its active branch
-        if: github.head_ref == 'alpha/six-month-gear-benchmark'
+      - name: Produce full normal/alpha build progression report
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
         run: |
           node tools/simulation/build-progression.mjs > build-progression-report.json
           node --input-type=module -e '
@@ -83,8 +88,8 @@ jobs:
             for(const p of report.reports)for(const s of p.scenarios)
               console.log(JSON.stringify({profile:p.profile, ...s}));
           '
-      - name: Run A6 paired-build and economy audit
-        if: github.head_ref == 'alpha/six-month-gear-benchmark'
+      - name: Run full paired-build and economy audit
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
         run: |
           node tools/simulation/balance-audit.mjs > balance-audit.json
           node --input-type=module -e '
@@ -94,8 +99,8 @@ jobs:
             for(const row of r.rows)console.log(JSON.stringify({audit:"combat",...row}));
             for(const {checkpoints,...row} of r.economy)console.log(JSON.stringify({audit:"economy",...row}));
           '
-      - name: Attach A6 audit
-        if: github.head_ref == 'alpha/six-month-gear-benchmark'
+      - name: Attach balance audit
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: balance-audit-${{ github.run_id }}-${{ github.run_attempt }}
@@ -103,7 +108,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Attach build progression baseline
-        if: github.head_ref == 'alpha/six-month-gear-benchmark'
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: build-progression-${{ github.run_id }}-${{ github.run_attempt }}

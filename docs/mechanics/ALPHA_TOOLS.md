@@ -36,3 +36,6 @@ A7 supersedes the A4 unfinished-snapshot restart: Max Stats publishes its test f
 
 
 A8 retest: the normal representative six-month daily build now reaches 149/149/137, Fighting 52, ~4,235.97h weapon and 4,213.28h Plate. A4 fixture remains its verified historical A3 minimum until A9 refresh; no claim that it is a universal maximum. Do not change other expertise tracks or coin-grant behaviour.
+
+
+A9 candidate refreshes the floor from the verified A8 normal trajectory (265c7a8, seed 20261125): 4,235 productive and selected-weapon hours, 4,213 selected-armour hours, Fighting Lv52; expected STR/DEX/END 149/149/137. The older A3 values above are historical. Same one-build and immutable-bout semantics, same 100,000 coin grant.
