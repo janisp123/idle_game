@@ -1,4 +1,4 @@
-import { dodgeChance } from "./armour.mjs?v=alpha-gear-a8";
+import { dodgeChance } from "./armour.mjs?v=bal-002";
 // Pure provisional arena rules. Distances, injuries and wear are game abstractions.
 export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 5 });
 const WEAPONS = Object.freeze({
