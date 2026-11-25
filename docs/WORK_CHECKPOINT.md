@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## ALPHA-GEAR-001 — A0 baseline tooling (pending PR #154, 2026-11-25)
+
+Owner asked chat to implement in small, reviewable batches while Codex is unavailable. [Draft PR #154](https://github.com/janisp123/idle_game/pull/154), branch `alpha/six-month-gear-benchmark`, contains the approved economy/expertise scope and first developer-only baseline harness. The detailed why, approach, caveats, verification status and next action are recorded in the branch changelog. **No gameplay release yet; last deployed build remains GLAD-005.** Next: check final-head system-lab CI and real baseline output; only then tune economy/combat. Do not interpret older historical NEXT entries below as overriding this active pending branch.
+
 ## GLAD-PLAN-001 — owner-approved gladiator rework roadmap (2026-11-24)
 
 **Documentation roadmap prepared in [PR #143](https://github.com/janisp123/idle_game/pull/143), NOT gameplay implementation.** The main task list `docs/TD_LIST.md` owns the complete design contract and five ordered, non-micro Codex batches. This design supersedes later work on old five-stat/41-activity/11-slot/magic/enchanting/attack-dice mechanics; currently deployed source code still implements those until replaced. Target: 3 attributes, 11 survival activities, 5 weapons with counters, 4 armour slots, item grade + Poor/Common/Fine/Masterwork, coins from victories, equipment HP/breakage, injury, bow ammo + dagger fallback, five physical environments using probabilistic 3d6 selection, idle-safe outcomes and eventually clan-donatable resources (no clan code).
