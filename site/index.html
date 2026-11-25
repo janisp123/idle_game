@@ -5,15 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0c0908">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="The Long Vigil is a grimdark idle gladiator RPG. Fight in five arenas, specialize in weapons and armour, and train through eleven activities in a free browser alpha.">
+  <meta name="description" content="The Long Vigil is a grimdark idle gladiator RPG. Fight in five arenas, specialize in weapons and armour, and train through eleven activities in an evolving browser alpha.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="The Long Vigil — The World Is Cruel. Time Is Not.">
   <meta property="og:description" content="An idle gladiator RPG with equipment, expertise and survival work. Play the evolving browser alpha.">
+  <meta property="og:image" content="https://janisp123.github.io/idle_game/assets/gladiator-shield-clash.png">
+  <meta property="og:image:alt" content="A greatsword gladiator striking an opponent’s shield in a grimdark arena.">
   <meta property="og:url" content="https://janisp123.github.io/idle_game/">
   <title>The Long Vigil — The World Is Cruel. Time Is Not.</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=20261121-gate-fix">
-  <link rel="stylesheet" href="./grimdark.css?v=20261121-gate-fix">
+  <link rel="stylesheet" href="./styles.css?v=20261125-gladiator-hero">
+  <link rel="stylesheet" href="./grimdark.css?v=20261125-gladiator-hero">
   <!-- Keep the approved artwork contained even if a visitor has old CSS cached.
        Other page styles remain in the external stylesheets. -->
   <style>
@@ -21,7 +23,7 @@
       width: 100%;
       height: auto;
       min-height: 0;
-      aspect-ratio: 1163 / 1352;
+      aspect-ratio: 1672 / 941;
       overflow: hidden;
       background: transparent;
     }
@@ -37,6 +39,7 @@
       height: auto;
       object-fit: contain;
     }
+    .progression-note { max-width: 780px; margin: 28px 0 0; color: #d8c2a7; line-height: 1.65; }
     .hobby-section { padding-block: clamp(48px, 7vw, 96px); border-block: 1px solid rgba(169,100,69,.33); background: #15100e; }
     .hobby-copy { max-width: 760px; }
     .hobby-copy h2 { font: 400 clamp(32px, 5vw, 54px)/1.15 Georgia, serif; color: #ead7be; margin: 0 0 24px; }
@@ -79,12 +82,12 @@
             <a class="button button-outline" href="#vision">Read the Oath <span aria-hidden="true">↗</span></a>
             <a class="button button-outline" href="https://github.com/janisp123/idle_game" target="_blank" rel="noopener noreferrer">Explore the project <span aria-hidden="true">↗</span></a>
           </div>
-          <div class="hero-note" id="play-status"><span class="note-spark" aria-hidden="true"></span> <strong>Playable alpha:</strong> Early testing build. Saves stay in this browser and may be reset as the game evolves. No online accounts or multiplayer yet. <a href="#hobby">Always free · hobby project terms</a>.</div>
+          <div class="hero-note" id="play-status"><span class="note-spark" aria-hidden="true"></span> <strong>Playable alpha:</strong> Early testing build. Saves stay in this browser and may be reset as the game evolves. No online accounts or multiplayer yet. <a href="#hobby">About this hobby project</a>.</div>
         </div>
 
         <div class="hero-art hero-art-painted">
-          <img src="./assets/long-absent-gate.webp" width="1163" height="1352"
-               alt="Grimdark stone gate crowned with skulls, torn crimson banners and three skull dice showing 6, 6 and 6."
+          <img src="./assets/gladiator-shield-clash.png" width="1672" height="941"
+               alt="A brutal gladiator swings a two-handed sword against the shield of an armoured opponent in a grimdark arena."
                fetchpriority="high" decoding="async">
         </div>
       </div>
@@ -100,39 +103,58 @@
         <div class="section-heading">
           <p class="section-kicker">I — THE OATH</p>
           <div class="heading-flex">
-            <h2 id="vision-heading">A harsh world.<br><span>One promise kept.</span></h2>
-            <p>Explore the current playable systems. Exact numbers and balance remain provisional during alpha.</p>
+            <h2 id="vision-heading">Forge your fighter.<br><span>Master your craft.</span></h2>
+            <p>Choose a fighting style, earn stronger equipment and develop expertise over time. Exact balance remains provisional during alpha.</p>
           </div>
         </div>
         <div class="principles-grid">
           <article class="principle-card">
             <span class="card-number">01 /</span>
-            <div class="card-glyph" aria-hidden="true">∞</div>
-            <h3>The long absence</h3>
-            <p>No offline time cutoff or daily streaks. Work continues while you are away; skill XP stops at one level bar until you visit the Skill Master.</p>
-          </article>
-          <article class="principle-card">
-            <span class="card-number">02 /</span>
             <div class="card-glyph" aria-hidden="true">⌘</div>
             <h3>Five paths into battle</h3>
             <p>Fight with bow, spear, sword and shield, greatsword or war hammer. Five arenas shape automatic physical duels, with real tactical trade-offs.</p>
           </article>
           <article class="principle-card">
-            <span class="card-number">03 /</span>
+            <span class="card-number">02 /</span>
             <div class="card-glyph" aria-hidden="true">✧</div>
             <h3>Earn your equipment</h3>
-            <p>Win arena coins, buy graded weapons and four armour pieces, and train weapon and armour expertise. Masterwork equipment cannot break.</p>
+            <p>Win arena coins and upgrade from Non-grade to S-grade equipment, with four quality levels and separate weapon and armour expertise. Masterwork equipment cannot break.</p>
           </article>
           <article class="principle-card">
-            <span class="card-number">04 /</span>
+            <span class="card-number">03 /</span>
             <div class="card-glyph" aria-hidden="true">◇</div>
             <h3>Eleven activities</h3>
             <p>Fight, train, hunt, fish, forage, cut wood, mine, smith, build, cook or farm. Grow strength, dexterity and endurance at your own pace.</p>
           </article>
+          <article class="principle-card">
+            <span class="card-number">04 /</span>
+            <div class="card-glyph" aria-hidden="true">∞</div>
+            <h3>The long absence</h3>
+            <p>No offline time cutoff or daily streaks. Work continues while you are away; skill XP stops at one level bar until you visit the Skill Master.</p>
+          </article>
         </div>
+        <p class="progression-note">Long-term progression is designed around mastering one weapon and armour build over roughly six months of sustained normal play. This is a balance target, not a guaranteed timeline; the current alpha runs at accelerated timing.</p>
         <div class="status-strip">
           <div class="status-indicator"><span aria-hidden="true"></span><strong>THE FORGE</strong> <span>Playable browser alpha · In active development</span></div>
           <a href="https://github.com/janisp123/idle_game/blob/main/docs/mechanics/README.md" target="_blank" rel="noopener noreferrer">Read the mechanics handbook <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="library-section" id="library" aria-labelledby="library-heading">
+      <div class="container library-grid">
+        <div class="library-intro">
+          <p class="section-kicker">II — THE IRON ARCHIVES</p>
+          <h2 id="library-heading">Behind every legend,<br><span>a working machine.</span></h2>
+          <p>We keep an open archive of the engineering behind idle worlds: combat, probability, long absences and reliable saves. The research is public; the world we build will be our own.</p>
+          <a class="button button-primary" href="https://github.com/janisp123/idle_game/blob/main/docs/RESEARCH_LIBRARY.md" target="_blank" rel="noopener noreferrer">Enter the Archives <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="library-list" aria-label="Engineering research areas">
+          <div class="library-row"><span class="library-index">01</span><div><strong>Simulation and offline progression</strong><small>Time calculations, long absences, reliable outcomes</small></div><span aria-hidden="true">↗</span></div>
+          <div class="library-row"><span class="library-index">02</span><div><strong>Combat, skills and rewards</strong><small>Game rules, probabilistic loot, repeatable testing</small></div><span aria-hidden="true">↗</span></div>
+          <div class="library-row"><span class="library-index">03</span><div><strong>Architecture and security</strong><small>Server authority, persistence, safe transactions</small></div><span aria-hidden="true">↗</span></div>
+          <div class="library-row"><span class="library-index">04</span><div><strong>Browser and mobile experience</strong><small>Responsive interfaces, performance, accessibility</small></div><span aria-hidden="true">↗</span></div>
+          <a class="library-all" href="https://github.com/janisp123/idle_game/blob/main/docs/USEFUL_EXAMPLES.md" target="_blank" rel="noopener noreferrer">Browse implementation patterns <span aria-hidden="true">↗</span></a>
         </div>
       </div>
     </section>
@@ -155,24 +177,6 @@
         <p>By choosing to play, you acknowledge and accept these risks. I cannot guarantee uninterrupted availability, preservation of progress or regular updates.</p>
         <p>Constructive feedback is always welcome, but please respect that this project is developed in my free time.</p>
         <p>Enjoy the game for what it is — something made for the joy of creating.</p>
-      </div>
-    </section>
-
-    <section class="library-section" id="library" aria-labelledby="library-heading">
-      <div class="container library-grid">
-        <div class="library-intro">
-          <p class="section-kicker">II — THE IRON ARCHIVES</p>
-          <h2 id="library-heading">Behind every legend,<br><span>a working machine.</span></h2>
-          <p>We keep an open archive of the engineering behind idle worlds: combat, probability, long absences and reliable saves. The research is public; the world we build will be our own.</p>
-          <a class="button button-primary" href="https://github.com/janisp123/idle_game/blob/main/docs/RESEARCH_LIBRARY.md" target="_blank" rel="noopener noreferrer">Enter the Archives <span aria-hidden="true">↗</span></a>
-        </div>
-        <div class="library-list" aria-label="Engineering research areas">
-          <div class="library-row"><span class="library-index">01</span><div><strong>Simulation and offline progression</strong><small>Time calculations, long absences, reliable outcomes</small></div><span aria-hidden="true">↗</span></div>
-          <div class="library-row"><span class="library-index">02</span><div><strong>Combat, skills and rewards</strong><small>Game rules, probabilistic loot, repeatable testing</small></div><span aria-hidden="true">↗</span></div>
-          <div class="library-row"><span class="library-index">03</span><div><strong>Architecture and security</strong><small>Server authority, persistence, safe transactions</small></div><span aria-hidden="true">↗</span></div>
-          <div class="library-row"><span class="library-index">04</span><div><strong>Browser and mobile experience</strong><small>Responsive interfaces, performance, accessibility</small></div><span aria-hidden="true">↗</span></div>
-          <a class="library-all" href="https://github.com/janisp123/idle_game/blob/main/docs/USEFUL_EXAMPLES.md" target="_blank" rel="noopener noreferrer">Browse implementation patterns <span aria-hidden="true">↗</span></a>
-        </div>
       </div>
     </section>
 

@@ -82,16 +82,20 @@ def check():
     assert "prefers-reduced-motion" in css, "Respect reduced-motion settings"
     assert "<svg " in icon and "</svg>" in icon, "Favicon must be valid-looking SVG"
 
-    # The owner-approved hero is a real, self-hosted painting, not the old flat
-    # CSS gateway. Its dice depict 6-6-6 and should not be cropped by the CSS.
-    gate_path = SITE / "assets" / "long-absent-gate.webp"
-    assert gate_path.is_file(), "Missing painted landing-page gate"
-    gate_data = gate_path.read_bytes()
-    assert len(gate_data) >= 60_000, "The gate painting appears incomplete"
-    assert gate_data[:4] == b"RIFF" and gate_data[8:12] == b"WEBP", "The hero asset must be a valid WebP container"
-    assert 'src="./assets/long-absent-gate.webp"' in html
+    # Exact owner-approved arena image, not the previous gate concept.
+    hero_path = SITE / "assets" / "gladiator-shield-clash.png"
+    assert hero_path.is_file(), "Missing gladiator hero artwork"
+    hero_data = hero_path.read_bytes()
+    assert hero_data[:8] == b"\x89PNG\r\n\x1a\n", "Hero must be a valid PNG"
+    import hashlib
+    header = f"blob {len(hero_data)}\0".encode()
+    assert hashlib.sha1(header + hero_data).hexdigest() == "e4aa812be3fb64fe77fc3e27a5b0d3c7eff88d12", "Original hero artwork changed"
+    assert 'src="./assets/gladiator-shield-clash.png"' in html
     assert "hero-art-painted" in html and "fate-emblem" not in html
-    assert "6, 6 and 6" in html, "Document the maximum face values in the hero alt text"
+    assert "two-handed sword" in html and "shield" in html
+    assert html.index('id="vision"') < html.index('id="hobby"')
+    readme = (SITE.parent / "README.md").read_text(encoding="utf-8")
+    assert readme.index("## What you can play now") < readme.index("## A Hobby, Not a Business")
     theme = (SITE / "grimdark.css").read_text(encoding="utf-8")
     assert ".hero-art.hero-art-painted img" in theme
     assert "object-fit: contain" in theme, "Keep the complete painting visible"
@@ -100,8 +104,8 @@ def check():
     # natural dimensions, cropped within a fixed-height decorative container.
     # Changing the CSS URLs refreshes the styles; the inline sizing fallback
     # protects the image if an older stylesheet is served.
-    assert 'href="./styles.css?v=20261121-gate-fix"' in html
-    assert 'href="./grimdark.css?v=20261121-gate-fix"' in html
+    assert 'href="./styles.css?v=20261125-gladiator-hero"' in html
+    assert 'href="./grimdark.css?v=20261125-gladiator-hero"' in html
     assert ".hero-art.hero-art-painted > img" in html
     assert "max-width: 100%" in html and "height: auto" in html
     assert ".hero-art.hero-art-painted::before" in html

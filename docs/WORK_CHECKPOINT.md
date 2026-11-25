@@ -1,8 +1,12 @@
 # Current working checkpoint
 
-## FREE-001 — PR #161
+## SITE-004 — PR #162
 
-Owner-approved permanent free-game policy and public statement. No gameplay/save/license changes. Verify final-head checks, merge and Pages; then full balance audit remains separate.
+Exact original gladiator artwork and gameplay-first public presentation; no gameplay/save changes. Verify final-head checks and Pages. Next after verification: full balance audit using the synchronized test engine.
+
+## FREE-001 — deployed PR #161
+
+Merged `4f752fc`; final head `d43e714` passed website 45595342544, protocol 45595342617 and systems 45595342796. Pages 45595434419 succeeded; live text verified. Permanent FREE-001 policy active; no gameplay/save/license changes.
 
 ## SITE-003 — deployed PR #160
 

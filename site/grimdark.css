@@ -260,13 +260,13 @@ a:focus-visible, button:focus-visible { outline-color: #e5b483; }
 }
 
 
-/* Painted gate (owner-approved 6·6·6 concept). Keep the entire artwork visible:
+/* Owner-approved gladiator arena artwork. Keep the entire artwork visible:
    the previous CSS monument is removed, not layered beneath the painting. */
 .hero-art.hero-art-painted {
   width: 100%;
   height: auto;
   min-height: 0;
-  aspect-ratio: 1163 / 1352;
+  aspect-ratio: 1672 / 941;
   overflow: hidden;
   isolation: auto;
   background: transparent;

@@ -8,14 +8,23 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## SITE-004 — Gladiator artwork and gameplay-first public presentation
+
+- **Goal:** Integrate the exact generated gladiator art and foreground actual gameplay/progression while retaining the permanent free-game policy.
+- **Acceptance:** Artwork byte parity, matching README and landing priorities, accurate previous status, static and real-browser checks at 390/1440px, verified Pages. No game or save changes.
+- **Status:** IN_REVIEW — [PR #162](https://github.com/janisp123/idle_game/pull/162); final checks and deployment pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## FREE-001 — Permanent free-game commitment
 
 - **Goal:** Publish the owner-approved A Hobby, Not a Business statement on landing page and README, and establish permanent zero monetization in the project decision and agent rules.
 - **Acceptance:** Identical approved wording, no ads or financial contribution options, clear hobby risks, no game/save/license changes, static and actual mobile/desktop checks, Pages verification.
-- **Status:** IN_REVIEW — [PR #161](https://github.com/janisp123/idle_game/pull/161); final checks and deployment pending.
+- **Status:** DONE — PR #161 merged `4f752fc`, final website/protocol/systems checks passed, Pages 45595434419 succeeded and public text verified.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #161).
 
 ## SITE-003 — Current alpha website and repository overview
 
