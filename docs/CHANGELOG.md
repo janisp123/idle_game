@@ -38,6 +38,8 @@ Branch: `alpha/six-month-gear-benchmark`. Goal: source-backed six-month single-b
 
 **Choice and risk:** 1.35 exponential grade factor, small quality multiplier, graded armour resistance divisor rather than unlimited additive percentage reduction; preserve armour material/weapon/terrain counters. Grade dominates at equal stats without a scripted verdict or multiplying HP. Candidate numeric factors need evidence across all five styles and late stats. New progression strategy voluntarily selects a tier supported by whole build and stats rather than old survival gates; report this policy difference when comparing A1. Tests cover grade dominance, NPC gear parity, malformed effects, condition, existing offline/UI tests. Developer matrix extends historical benchmark; normal/alpha trajectories rerun. Prices not yet retuned. Next read CI and matrices, correct failures, tune before proceeding to expertise. No deployment claimed.
 
+**First CI iteration:** aec83c1 website passed 98/98, protocol passed. Expanded developer benchmark failed on a signed 32-bit XOR seed in the new readiness harness, not the combat resolver. Cast derived seed to unsigned and expose compact matrix rows in existing workflow logs for review; rerun final checks. No balancing conclusions from the failed benchmark.
+
 ## GLAD-005 · DEPLOYED · 2026-11-24
 
 Goal: Verify and finalize bounded offline combat, balance, and the playable gladiator loop.

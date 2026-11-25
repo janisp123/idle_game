@@ -102,7 +102,7 @@ for(const grade of [0,3,7])for(const state of ["matched","low-stats","low-gear"]
       itemGrade:state==="low-gear"?0:grade});
     for(const seed of seeds.slice(0,64)){
       const enemy=makeOpponent(0,grade,seededCombatRandom(seed));
-      const arena=chooseArena(player,enemy,seededCombatRandom(seed^0x193765)).arena;
+      const arena=chooseArena(player,enemy,seededCombatRandom((seed^0x193765)>>>0)).arena;
       sample(player,enemy,arena,grade,[seed],totals);
     }
   }
