@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## BAL-AUDIT-001 — Playability, weapon counters, armour and terrain
+
+- **Goal:** Audit the current production-linked combat and progression; identify tactical strengths and weaknesses.
+- **Acceptance:** Full current-source audit, paired weapon and armour matrices, terrain contrasts, progression trajectories and evidence. No gameplay or save changes.
+- **Status:** DONE — audit evidence from PR #164 head `d3be32b`, systems run 45614599116 passed; [report](mechanics/BALANCE_COUNTERS_AUDIT_20261125.md). Playable alpha, tactical balance not yet satisfactory. Further tuning requires Owner approval.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** chat (audit only).
+
 ## SITE-004 — Gladiator artwork and gameplay-first public presentation
 
 - **Goal:** Integrate the exact generated gladiator art and foreground actual gameplay/progression while retaining the permanent free-game policy.

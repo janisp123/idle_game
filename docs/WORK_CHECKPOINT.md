@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## BAL-AUDIT-001 — verified current-build diagnostic
+
+[PR #164](https://github.com/janisp123/idle_game/pull/164) audit head `d3be32b` on main baseline `2eaa0886`: [systems 45614599116](https://github.com/janisp123/idle_game/actions/runs/45614599116) and protocol 45614599121 passed; 14/14 tests, 214,320 paired/NPC/quality/expertise/mirror duels plus progression. [Full report](mechanics/BALANCE_COUNTERS_AUDIT_20261125.md). All five weapons viable in tested daily armoured progression, but Shield/Plate too broad, Bow too effective in Gatehouse, Spear and Greatsword lack healthy counter balance. Weekly normal claim cadence stalls gear access (level 26 at day 180). Temporary audit-only CI trigger removed, no gameplay/save changes. Next: Owner review and approval before physical tuning.
+
 ## SITE-004 — deployed PR #162
 
 Exact original gladiator artwork and gameplay-first public presentation merged `c7f2b8c`. Final head `ab1481e` passed website 45608205457 (static, regression and Chromium 390/1440px), systems 45608205312 and protocol 45608205508. [Pages 45608310757](https://github.com/janisp123/idle_game/actions/runs/45608310757) validation and publish succeeded. No gameplay/save changes. Independent live rendering not rechecked during recovery. Next: full balance audit using the synchronized test engine; report findings before changing balance.
