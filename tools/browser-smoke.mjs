@@ -118,6 +118,8 @@ try{
     assert.equal(await evaluate('document.getElementById("character-heading").textContent'),"Wanderer");
     await evaluate('document.getElementById("dismissSaveReset").click()');
     assert.equal(await evaluate('document.getElementById("saveResetNotice").hidden'),true);
+    const compact=await evaluate(`(()=>{const panel=document.getElementById("resourcesPanel"),list=document.getElementById("resourceList"),summary=panel.querySelector("summary");const closed=!panel.open&&list.getBoundingClientRect().height===0;summary.click();const opened=panel.open&&list.getBoundingClientRect().height>0;summary.click();const folded=!panel.open&&list.getBoundingClientRect().height===0;const skill=document.querySelector(".skill-focus");return {closed,opened,folded,combined:skill.contains(document.getElementById("visitMaster"))&&skill.contains(document.getElementById("skillXp"))&&skill.contains(document.getElementById("masterAudience")),overflow:document.documentElement.scrollWidth-innerWidth};})()`);
+    assert.ok(compact.closed&&compact.opened&&compact.folded&&compact.combined&&compact.overflow<=2,"compact skill and resources layout");
     const clan=await evaluate(`(()=>{const menu=document.getElementById("clanMenu"),summary=menu.querySelector("summary");const closed=!menu.open;summary.click();menu.scrollIntoView({block:"start"});return {closed,open:menu.open,text:menu.innerText,disabled:[...menu.querySelectorAll("button")].every(b=>b.disabled),count:menu.querySelectorAll("button").length,overflow:document.documentElement.scrollWidth-innerWidth};})()`);
     assert.ok(clan.closed&&clan.open&&clan.disabled&&clan.count===2&&clan.overflow<=2);
     assert.match(clan.text,/not available in this browser-only alpha/);
