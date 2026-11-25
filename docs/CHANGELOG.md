@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## CLAN-TEST-001 · STARTED (2026-11-25, chat)
+
+Owner requests fake players able to join clans for pre-server testing. Branch `test/clan-fixture-lab`, base `7d5bcb0`. Developer-only synthetic scenario module, roster actions and donation tests using real item IDs, explicitly provisional configurable fixture policies. No public game changes, test identities in live data, server accounts or balance decisions. Next implement isolated test lab and regressions.
+
 ## CLAN-WARFARE-001 · STARTED (2026-11-25, chat)
 
 Owner explicitly confirms Castle Warfare levels are permanent; defeats may deduct only XP toward the next level, floored at zero. Branch `docs/warfare-level-protection`, base `f56f587`. Record decision and acceptance tests in design/roadmap; no implementation authorization for the broader warfare system. Recorded CLAN-WARFARE-001 in DECISIONS, clan design, brainstorming and implementation roadmap, with loss-over-current-XP and repeated-zero-loss acceptance cases. Documentation only; next CI.
