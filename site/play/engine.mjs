@@ -1,5 +1,5 @@
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
-import { settleArenaPrizes } from "./arena-wallet.mjs?v=bal-002";
+import { settleArenaPrizes } from "./arena-wallet.mjs?v=cap-001";
 import {
   ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
 } from "./attributes.mjs?v=glad-001";
