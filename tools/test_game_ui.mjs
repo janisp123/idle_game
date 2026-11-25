@@ -149,7 +149,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=cap-001/,
+  assert.match(html, /app\.mjs\?v=ui-category-001/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -266,16 +266,16 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(categoryScreen.hidden, true);
     assert.equal(listScreen.hidden, true);
     assert.deepEqual(categories.map(b => b.textContent),
-      ["Fighting", "Survival Work", "Training"]);
+      ["Combat", "Survival Work"]);
     assert.doesNotMatch(html, />Choose a path<|CHOOSE YOUR PATH/i,
       "the redundant choose-a-path heading is removed");
     openActivities.fire("click");
     assert.equal(openActivities.hidden, true);
     assert.equal(categoryScreen.hidden, false);
     categories[0].fire("click");
-    assert.equal(elements.get("activityCategoryTitle").textContent, "Fighting");
+    assert.equal(elements.get("activityCategoryTitle").textContent, "Combat");
     const fightingCards = elements.get("activityChoices").children;
-    assert.equal(fightingCards.length, 1);
+    assert.equal(fightingCards.length, 2);
     assert.equal(fightingCards[0].children[0].children[4].children[7].disabled,false,
       "even a fresh player may challenge S opponents");
     assert.equal(elements.get("combatPanel").hidden, true,
@@ -283,11 +283,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(fightingCards[0].children[0].children[0].children[0].textContent, "Fighting");
     assert.match(fightingCards[0].children[0].children[3].textContent, /STR.*DEX|DEX.*STR/,
       "Fighting shows its stat bonuses");
-    elements.get("backToCategories").fire("click");
-    categories[2].fire("click");
-    assert.equal(elements.get("activityCategoryTitle").textContent, "Training");
-    assert.equal(elements.get("activityChoices").children.length, 1);
-    assert.equal(elements.get("activityChoices").children[0].children[0].children[0].children[0].textContent, "Training");
+    assert.equal(fightingCards[1].children[0].children[0].children[0].textContent, "Training");
     elements.get("backToCategories").fire("click");
     categories[1].fire("click");
     const buttons = elements.get("activityChoices").children.filter(node => node.className === "activity");
@@ -486,7 +482,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
 
     // The chosen activity receives the requested duration, not Mining.
     openActivities.fire("click");
-    categories[2].fire("click");
+    categories[0].fire("click");
     const training = elements.get("activityChoices").children.find(
       b => b.children[0]?.children[0]?.children[0]?.textContent === "Training");
     const trainingActions = training.children[0].children[0].children[1];
@@ -516,7 +512,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(store.get(SAVE_KEY), routeBeforePlanning,
       "cancelling a proposed level-up schedule never changes the actual queue");
     openActivities.fire("click");
-    categories[2].fire("click");
+    categories[0].fire("click");
     trainingSchedule.fire("click");
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.activity, "mining");
