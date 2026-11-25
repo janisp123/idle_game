@@ -1,0 +1,1130 @@
+[
+  {
+    "id": "daily",
+    "days": 180,
+    "claimHours": 24,
+    "mixed": false,
+    "farm": false,
+    "seed": 20261201,
+    "loadout": "greatsword",
+    "family": "padded",
+    "income": false,
+    "firstAnyS": null,
+    "firstAnySAffordable": null,
+    "firstSWeaponAffordable": null,
+    "firstSSetAffordable": null,
+    "firstSWeapon": 169,
+    "firstSSet": 169,
+    "checkpoints": [
+      {
+        "day": 0,
+        "fightingLevel": 1,
+        "fightingXP": 0,
+        "stats": {
+          "STR": 10,
+          "DEX": 10,
+          "END": 10
+        },
+        "productiveFightingHours": 0,
+        "outcomes": {
+          "bouts": 0,
+          "victories": 0,
+          "defeats": 0,
+          "doubleDeaths": 0
+        },
+        "winRatePct": null,
+        "coinsEarned": 0,
+        "coinsSpent": 0,
+        "wallet": 0,
+        "opponentGrade": "Non-grade",
+        "gear": {
+          "greatsword": {
+            "grade": 0,
+            "quality": "poor"
+          },
+          "head:padded": null,
+          "torso:padded": null,
+          "arms:padded": null,
+          "legs:padded": null
+        },
+        "expertise": {
+          "greatsword": 0,
+          "sword_shield": 0,
+          "hammer": 0,
+          "bow": 0,
+          "spear": 0,
+          "none": 0,
+          "padded": 0,
+          "leather": 0,
+          "plate": 0
+        }
+      },
+      {
+        "day": 30,
+        "fightingLevel": 17,
+        "fightingXP": 0,
+        "stats": {
+          "STR": 57,
+          "DEX": 56,
+          "END": 53
+        },
+        "productiveFightingHours": 509.33,
+        "outcomes": {
+          "bouts": 9363,
+          "victories": 7410,
+          "defeats": 1951,
+          "doubleDeaths": 2
+        },
+        "winRatePct": 79.14,
+        "coinsEarned": 194872,
+        "coinsSpent": 181321,
+        "wallet": 13551,
+        "opponentGrade": "D",
+        "gear": {
+          "greatsword": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "head:padded": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "torso:padded": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "arms:padded": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "legs:padded": {
+            "grade": 3,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 509.31666666666666,
+          "sword_shield": 0,
+          "hammer": 0,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.694444444444445,
+          "padded": 504.6222222222222,
+          "leather": 0,
+          "plate": 0
+        }
+      },
+      {
+        "day": 90,
+        "fightingLevel": 33,
+        "fightingXP": 334,
+        "stats": {
+          "STR": 98,
+          "DEX": 98,
+          "END": 91
+        },
+        "productiveFightingHours": 1719.25,
+        "outcomes": {
+          "bouts": 31446,
+          "victories": 26450,
+          "defeats": 4986,
+          "doubleDeaths": 10
+        },
+        "winRatePct": 84.11,
+        "coinsEarned": 1331820,
+        "coinsSpent": 901321,
+        "wallet": 430499,
+        "opponentGrade": "B",
+        "gear": {
+          "greatsword": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "head:padded": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "torso:padded": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "arms:padded": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "legs:padded": {
+            "grade": 5,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 1719.2444444444445,
+          "sword_shield": 0,
+          "hammer": 0,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.694444444444445,
+          "padded": 1714.55,
+          "leather": 0,
+          "plate": 0
+        }
+      },
+      {
+        "day": 150,
+        "fightingLevel": 46,
+        "fightingXP": 371,
+        "stats": {
+          "STR": 128,
+          "DEX": 128,
+          "END": 117
+        },
+        "productiveFightingHours": 3004.59,
+        "outcomes": {
+          "bouts": 54844,
+          "victories": 47229,
+          "defeats": 7593,
+          "doubleDeaths": 22
+        },
+        "winRatePct": 86.12,
+        "coinsEarned": 3554948,
+        "coinsSpent": 1688821,
+        "wallet": 1866127,
+        "opponentGrade": "A",
+        "gear": {
+          "greatsword": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "head:padded": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "torso:padded": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "arms:padded": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "legs:padded": {
+            "grade": 6,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 3004.5833333333335,
+          "sword_shield": 0,
+          "hammer": 0,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.694444444444445,
+          "padded": 2999.8888888888887,
+          "leather": 0,
+          "plate": 0
+        }
+      },
+      {
+        "day": 180,
+        "fightingLevel": 52,
+        "fightingXP": 450,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "productiveFightingHours": 3658.72,
+        "outcomes": {
+          "bouts": 66713,
+          "victories": 58144,
+          "defeats": 8547,
+          "doubleDeaths": 22
+        },
+        "winRatePct": 87.16,
+        "coinsEarned": 5118040,
+        "coinsSpent": 3001321,
+        "wallet": 2116719,
+        "opponentGrade": "S",
+        "gear": {
+          "greatsword": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "head:padded": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "torso:padded": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "arms:padded": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "legs:padded": {
+            "grade": 7,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 3658.6722222222224,
+          "sword_shield": 0,
+          "hammer": 0,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.694444444444445,
+          "padded": 3653.9777777777776,
+          "leather": 0,
+          "plate": 0
+        }
+      }
+    ]
+  },
+  {
+    "id": "daily",
+    "days": 180,
+    "claimHours": 24,
+    "mixed": false,
+    "farm": false,
+    "seed": 20261201,
+    "loadout": "greatsword",
+    "family": "leather",
+    "income": false,
+    "firstAnyS": null,
+    "firstAnySAffordable": null,
+    "firstSWeaponAffordable": null,
+    "firstSSetAffordable": null,
+    "firstSWeapon": 169,
+    "firstSSet": 169,
+    "checkpoints": [
+      {
+        "day": 0,
+        "fightingLevel": 1,
+        "fightingXP": 0,
+        "stats": {
+          "STR": 10,
+          "DEX": 10,
+          "END": 10
+        },
+        "productiveFightingHours": 0,
+        "outcomes": {
+          "bouts": 0,
+          "victories": 0,
+          "defeats": 0,
+          "doubleDeaths": 0
+        },
+        "winRatePct": null,
+        "coinsEarned": 0,
+        "coinsSpent": 0,
+        "wallet": 0,
+        "opponentGrade": "Non-grade",
+        "gear": {
+          "greatsword": {
+            "grade": 0,
+            "quality": "poor"
+          },
+          "head:leather": null,
+          "torso:leather": null,
+          "arms:leather": null,
+          "legs:leather": null
+        },
+        "expertise": {
+          "greatsword": 0,
+          "sword_shield": 0,
+          "hammer": 0,
+          "bow": 0,
+          "spear": 0,
+          "none": 0,
+          "padded": 0,
+          "leather": 0,
+          "plate": 0
+        }
+      },
+      {
+        "day": 30,
+        "fightingLevel": 17,
+        "fightingXP": 0,
+        "stats": {
+          "STR": 57,
+          "DEX": 56,
+          "END": 53
+        },
+        "productiveFightingHours": 509.33,
+        "outcomes": {
+          "bouts": 9369,
+          "victories": 7358,
+          "defeats": 2010,
+          "doubleDeaths": 1
+        },
+        "winRatePct": 78.54,
+        "coinsEarned": 193512,
+        "coinsSpent": 181321,
+        "wallet": 12191,
+        "opponentGrade": "D",
+        "gear": {
+          "greatsword": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "head:leather": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "torso:leather": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "arms:leather": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "legs:leather": {
+            "grade": 3,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 509.3277777777778,
+          "sword_shield": 0,
+          "hammer": 0,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.694444444444445,
+          "padded": 0,
+          "leather": 504.6333333333333,
+          "plate": 0
+        }
+      },
+      {
+        "day": 90,
+        "fightingLevel": 33,
+        "fightingXP": 334,
+        "stats": {
+          "STR": 98,
+          "DEX": 98,
+          "END": 91
+        },
+        "productiveFightingHours": 1719.31,
+        "outcomes": {
+          "bouts": 31457,
+          "victories": 26357,
+          "defeats": 5097,
+          "doubleDeaths": 3
+        },
+        "winRatePct": 83.79,
+        "coinsEarned": 1327896,
+        "coinsSpent": 901321,
+        "wallet": 426575,
+        "opponentGrade": "B",
+        "gear": {
+          "greatsword": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "head:leather": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "torso:leather": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "arms:leather": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "legs:leather": {
+            "grade": 5,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 1719.2777777777778,
+          "sword_shield": 0,
+          "hammer": 0,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.694444444444445,
+          "padded": 0,
+          "leather": 1714.5833333333333,
+          "plate": 0
+        }
+      },
+      {
+        "day": 150,
+        "fightingLevel": 46,
+        "fightingXP": 371,
+        "stats": {
+          "STR": 128,
+          "DEX": 128,
+          "END": 117
+        },
+        "productiveFightingHours": 3004.58,
+        "outcomes": {
+          "bouts": 54858,
+          "victories": 47098,
+          "defeats": 7749,
+          "doubleDeaths": 11
+        },
+        "winRatePct": 85.85,
+        "coinsEarned": 3547738,
+        "coinsSpent": 1688821,
+        "wallet": 1858917,
+        "opponentGrade": "A",
+        "gear": {
+          "greatsword": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "head:leather": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "torso:leather": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "arms:leather": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "legs:leather": {
+            "grade": 6,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 3004.5555555555557,
+          "sword_shield": 0,
+          "hammer": 0,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.694444444444445,
+          "padded": 0,
+          "leather": 2999.8611111111113,
+          "plate": 0
+        }
+      },
+      {
+        "day": 180,
+        "fightingLevel": 52,
+        "fightingXP": 450,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "productiveFightingHours": 3658.79,
+        "outcomes": {
+          "bouts": 66699,
+          "victories": 58289,
+          "defeats": 8399,
+          "doubleDeaths": 11
+        },
+        "winRatePct": 87.39,
+        "coinsEarned": 5160315,
+        "coinsSpent": 3001321,
+        "wallet": 2158994,
+        "opponentGrade": "S",
+        "gear": {
+          "greatsword": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "head:leather": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "torso:leather": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "arms:leather": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "legs:leather": {
+            "grade": 7,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 3658.777777777778,
+          "sword_shield": 0,
+          "hammer": 0,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.694444444444445,
+          "padded": 0,
+          "leather": 3654.0833333333335,
+          "plate": 0
+        }
+      }
+    ]
+  },
+  {
+    "id": "daily",
+    "days": 180,
+    "claimHours": 24,
+    "mixed": false,
+    "farm": false,
+    "seed": 20261201,
+    "loadout": "hammer",
+    "family": "plate",
+    "income": false,
+    "firstAnyS": null,
+    "firstAnySAffordable": null,
+    "firstSWeaponAffordable": null,
+    "firstSSetAffordable": null,
+    "firstSWeapon": 170,
+    "firstSSet": 170,
+    "checkpoints": [
+      {
+        "day": 0,
+        "fightingLevel": 1,
+        "fightingXP": 0,
+        "stats": {
+          "STR": 10,
+          "DEX": 10,
+          "END": 10
+        },
+        "productiveFightingHours": 0,
+        "outcomes": {
+          "bouts": 0,
+          "victories": 0,
+          "defeats": 0,
+          "doubleDeaths": 0
+        },
+        "winRatePct": null,
+        "coinsEarned": 0,
+        "coinsSpent": 0,
+        "wallet": 0,
+        "opponentGrade": "Non-grade",
+        "gear": {
+          "hammer": {
+            "grade": 0,
+            "quality": "poor"
+          },
+          "head:plate": null,
+          "torso:plate": null,
+          "arms:plate": null,
+          "legs:plate": null
+        },
+        "expertise": {
+          "greatsword": 0,
+          "sword_shield": 0,
+          "hammer": 0,
+          "bow": 0,
+          "spear": 0,
+          "none": 0,
+          "padded": 0,
+          "leather": 0,
+          "plate": 0
+        }
+      },
+      {
+        "day": 30,
+        "fightingLevel": 17,
+        "fightingXP": 0,
+        "stats": {
+          "STR": 57,
+          "DEX": 56,
+          "END": 53
+        },
+        "productiveFightingHours": 509.67,
+        "outcomes": {
+          "bouts": 9369,
+          "victories": 7414,
+          "defeats": 1955,
+          "doubleDeaths": 0
+        },
+        "winRatePct": 79.13,
+        "coinsEarned": 195604,
+        "coinsSpent": 181321,
+        "wallet": 14283,
+        "opponentGrade": "D",
+        "gear": {
+          "hammer": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "head:plate": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "torso:plate": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "arms:plate": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "legs:plate": {
+            "grade": 3,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 0,
+          "sword_shield": 0,
+          "hammer": 509.6388888888889,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.683333333333334,
+          "padded": 0,
+          "leather": 0,
+          "plate": 504.9555555555556
+        }
+      },
+      {
+        "day": 90,
+        "fightingLevel": 33,
+        "fightingXP": 334,
+        "stats": {
+          "STR": 98,
+          "DEX": 98,
+          "END": 91
+        },
+        "productiveFightingHours": 1719.61,
+        "outcomes": {
+          "bouts": 31519,
+          "victories": 25854,
+          "defeats": 5661,
+          "doubleDeaths": 4
+        },
+        "winRatePct": 82.03,
+        "coinsEarned": 1294788,
+        "coinsSpent": 901321,
+        "wallet": 393467,
+        "opponentGrade": "B",
+        "gear": {
+          "hammer": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "head:plate": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "torso:plate": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "arms:plate": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "legs:plate": {
+            "grade": 5,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 0,
+          "sword_shield": 0,
+          "hammer": 1719.5833333333333,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.683333333333334,
+          "padded": 0,
+          "leather": 0,
+          "plate": 1714.9
+        }
+      },
+      {
+        "day": 150,
+        "fightingLevel": 46,
+        "fightingXP": 0,
+        "stats": {
+          "STR": 127,
+          "DEX": 127,
+          "END": 117
+        },
+        "productiveFightingHours": 2983,
+        "outcomes": {
+          "bouts": 54674,
+          "victories": 44865,
+          "defeats": 9801,
+          "doubleDeaths": 8
+        },
+        "winRatePct": 82.06,
+        "coinsEarned": 3322020,
+        "coinsSpent": 1688821,
+        "wallet": 1633199,
+        "opponentGrade": "A",
+        "gear": {
+          "hammer": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "head:plate": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "torso:plate": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "arms:plate": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "legs:plate": {
+            "grade": 6,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 0,
+          "sword_shield": 0,
+          "hammer": 2982.95,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.683333333333334,
+          "padded": 0,
+          "leather": 0,
+          "plate": 2978.266666666667
+        }
+      },
+      {
+        "day": 180,
+        "fightingLevel": 52,
+        "fightingXP": 0,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 128
+        },
+        "productiveFightingHours": 3635.67,
+        "outcomes": {
+          "bouts": 66579,
+          "victories": 55205,
+          "defeats": 11366,
+          "doubleDeaths": 8
+        },
+        "winRatePct": 82.92,
+        "coinsEarned": 4786234,
+        "coinsSpent": 3001321,
+        "wallet": 1784913,
+        "opponentGrade": "S",
+        "gear": {
+          "hammer": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "head:plate": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "torso:plate": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "arms:plate": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "legs:plate": {
+            "grade": 7,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 0,
+          "sword_shield": 0,
+          "hammer": 3635.6444444444446,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.683333333333334,
+          "padded": 0,
+          "leather": 0,
+          "plate": 3630.961111111111
+        }
+      }
+    ]
+  },
+  {
+    "id": "daily",
+    "days": 180,
+    "claimHours": 24,
+    "mixed": false,
+    "farm": false,
+    "seed": 20261201,
+    "loadout": "hammer",
+    "family": "leather",
+    "income": false,
+    "firstAnyS": null,
+    "firstAnySAffordable": null,
+    "firstSWeaponAffordable": null,
+    "firstSSetAffordable": null,
+    "firstSWeapon": 169,
+    "firstSSet": 169,
+    "checkpoints": [
+      {
+        "day": 0,
+        "fightingLevel": 1,
+        "fightingXP": 0,
+        "stats": {
+          "STR": 10,
+          "DEX": 10,
+          "END": 10
+        },
+        "productiveFightingHours": 0,
+        "outcomes": {
+          "bouts": 0,
+          "victories": 0,
+          "defeats": 0,
+          "doubleDeaths": 0
+        },
+        "winRatePct": null,
+        "coinsEarned": 0,
+        "coinsSpent": 0,
+        "wallet": 0,
+        "opponentGrade": "Non-grade",
+        "gear": {
+          "hammer": {
+            "grade": 0,
+            "quality": "poor"
+          },
+          "head:leather": null,
+          "torso:leather": null,
+          "arms:leather": null,
+          "legs:leather": null
+        },
+        "expertise": {
+          "greatsword": 0,
+          "sword_shield": 0,
+          "hammer": 0,
+          "bow": 0,
+          "spear": 0,
+          "none": 0,
+          "padded": 0,
+          "leather": 0,
+          "plate": 0
+        }
+      },
+      {
+        "day": 30,
+        "fightingLevel": 17,
+        "fightingXP": 0,
+        "stats": {
+          "STR": 57,
+          "DEX": 56,
+          "END": 53
+        },
+        "productiveFightingHours": 510,
+        "outcomes": {
+          "bouts": 9326,
+          "victories": 7858,
+          "defeats": 1468,
+          "doubleDeaths": 0
+        },
+        "winRatePct": 84.26,
+        "coinsEarned": 207832,
+        "coinsSpent": 181321,
+        "wallet": 26511,
+        "opponentGrade": "D",
+        "gear": {
+          "hammer": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "head:leather": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "torso:leather": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "arms:leather": {
+            "grade": 3,
+            "quality": "masterwork"
+          },
+          "legs:leather": {
+            "grade": 3,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 0,
+          "sword_shield": 0,
+          "hammer": 509.9555555555556,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.683333333333334,
+          "padded": 0,
+          "leather": 505.27222222222224,
+          "plate": 0
+        }
+      },
+      {
+        "day": 90,
+        "fightingLevel": 33,
+        "fightingXP": 338,
+        "stats": {
+          "STR": 98,
+          "DEX": 98,
+          "END": 91
+        },
+        "productiveFightingHours": 1720.2,
+        "outcomes": {
+          "bouts": 31342,
+          "victories": 27549,
+          "defeats": 3792,
+          "doubleDeaths": 1
+        },
+        "winRatePct": 87.9,
+        "coinsEarned": 1381892,
+        "coinsSpent": 901321,
+        "wallet": 480571,
+        "opponentGrade": "B",
+        "gear": {
+          "hammer": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "head:leather": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "torso:leather": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "arms:leather": {
+            "grade": 5,
+            "quality": "masterwork"
+          },
+          "legs:leather": {
+            "grade": 5,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 0,
+          "sword_shield": 0,
+          "hammer": 1720.15,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.683333333333334,
+          "padded": 0,
+          "leather": 1715.4666666666667,
+          "plate": 0
+        }
+      },
+      {
+        "day": 150,
+        "fightingLevel": 46,
+        "fightingXP": 371,
+        "stats": {
+          "STR": 128,
+          "DEX": 128,
+          "END": 117
+        },
+        "productiveFightingHours": 3005.84,
+        "outcomes": {
+          "bouts": 54707,
+          "victories": 48687,
+          "defeats": 6013,
+          "doubleDeaths": 7
+        },
+        "winRatePct": 89,
+        "coinsEarned": 3646268,
+        "coinsSpent": 1688821,
+        "wallet": 1957447,
+        "opponentGrade": "A",
+        "gear": {
+          "hammer": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "head:leather": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "torso:leather": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "arms:leather": {
+            "grade": 6,
+            "quality": "masterwork"
+          },
+          "legs:leather": {
+            "grade": 6,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 0,
+          "sword_shield": 0,
+          "hammer": 3005.8333333333335,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.683333333333334,
+          "padded": 0,
+          "leather": 3001.15,
+          "plate": 0
+        }
+      },
+      {
+        "day": 180,
+        "fightingLevel": 52,
+        "fightingXP": 450,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "productiveFightingHours": 3660.11,
+        "outcomes": {
+          "bouts": 66567,
+          "victories": 59710,
+          "defeats": 6847,
+          "doubleDeaths": 10
+        },
+        "winRatePct": 89.7,
+        "coinsEarned": 5240617,
+        "coinsSpent": 3001321,
+        "wallet": 2239296,
+        "opponentGrade": "S",
+        "gear": {
+          "hammer": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "head:leather": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "torso:leather": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "arms:leather": {
+            "grade": 7,
+            "quality": "masterwork"
+          },
+          "legs:leather": {
+            "grade": 7,
+            "quality": "masterwork"
+          }
+        },
+        "expertise": {
+          "greatsword": 0,
+          "sword_shield": 0,
+          "hammer": 3660.072222222222,
+          "bow": 0,
+          "spear": 0,
+          "none": 4.683333333333334,
+          "padded": 0,
+          "leather": 3655.3888888888887,
+          "plate": 0
+        }
+      }
+    ]
+  }
+]
