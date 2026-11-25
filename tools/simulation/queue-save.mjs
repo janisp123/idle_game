@@ -1,4 +1,4 @@
-/** Actual three-wagon planner, timed transitions, settlement and save roundtrips. */
+/** Actual progressive-capacity planner, timed transitions, settlement and save roundtrips. */
 import { ACTIVITIES,SKILL_IDS,MAX_WAGONS,UNTIL_LEVEL_UP,validQueuePlan,
   queueStartActivity,settle,readSave,GAME_VERSION } from '../../site/play/engine.mjs';
 import { effectiveAttributeProgress } from '../../site/play/attributes.mjs';
@@ -35,7 +35,7 @@ export function simulateQueue(options={}) {
   const route=options.state?null:normalizeRoute(options.route??[
     {activity:'mining',plannedMs:60000},{activity:'woodcutting',plannedMs:null}]);
   const elapsedMs=count(options.elapsedMs??3600000,'elapsedMs',1000000000000);
-  const runs=trials(options),baseline=seededState(options);
+  const runs=trials(options),baseline=seededState(options.route===undefined&&!options.state&&options.levels===undefined?{...options,levels:{fishing:11}}:options);
   const result={module:'queue',source:'site/play/engine.mjs:queueStartActivity+settle',
     configuredRoute:route,elapsedMs,trials:runs,
     endedAt:{},transitionPhases:{},totalItems:{},totalConsumed:{},
