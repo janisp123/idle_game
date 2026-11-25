@@ -12,10 +12,10 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** At 50 earned activity levels, permit optional automatic Master claims on game entry.
 - **Acceptance:** Explicit versioned consent; shared exact manual tribute and one claim per ready skill, settle first with no retroactive gains, locked UI below threshold, report after saved commit, reload/visibility/stale-save tests, no other automation.
-- **Status:** IN_REVIEW — PR #178.
+- **Status:** DONE — PR #178 merged 0136237; website 45663329577, systems 45663329342, combat 45663329312, protocol 45663329349 and Pages 45663460990 passed.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #178).
 
 ## APPRENTICE-A1 — Earned scheduling and Personal Assistant
 
