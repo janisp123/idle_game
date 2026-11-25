@@ -14,6 +14,7 @@ import { simulateLoot,simulateCrafting } from './simulation/resources.mjs';
 import { simulateActivity,simulateAttributes,simulateMaster } from './simulation/progression.mjs';
 import { simulateEquipment } from './simulation/equipment.mjs';
 import { simulateQueue,simulateSave } from './simulation/queue-save.mjs';
+import { simulateClan } from './simulation/clan-fixtures.mjs';
 
 export const LAB_MODULES=Object.freeze({
   combat:simulateBatch,
@@ -24,7 +25,8 @@ export const LAB_MODULES=Object.freeze({
   master:simulateMaster,
   equipment:simulateEquipment,
   queue:simulateQueue,
-  save:simulateSave
+  save:simulateSave,
+  clan:simulateClan
 });
 const plain=(x)=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const resultMeasure=(value,path)=> {
