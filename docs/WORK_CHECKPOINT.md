@@ -2,7 +2,7 @@
 
 ## GEAR-RESEARCH-001 — proposed A3 grade balance
 
-[Study](mechanics/GEAR_PROGRESSION_STUDY.md) records 376,800 isolated source-linked duels, proposed cumulative grade expertise, speed/accuracy/crit and coverage-weighted armour perks. No gameplay change. Candidate requires owner approval and further durability/counter/economy tests before mandatory Masterwork progression is implemented. Next: review numbers and price model.
+[Study](mechanics/GEAR_PROGRESSION_STUDY.md) records 376,800 isolated source-linked duels, proposed cumulative grade expertise, speed/accuracy/crit and coverage-weighted armour perks. No gameplay change. Candidate requires owner approval and further durability/counter/economy tests before mandatory Masterwork progression is implemented. [Grade matrix](mechanics/GEAR_GRADE_MATRIX.md) records 244,800 distinct bouts; [durability study](mechanics/GEAR_DURABILITY_STUDY.md) records 794,160 additional executions and recommends 24+3g+12q capacity, Masterwork unbreakable, condition restored each bout. Both reproducible harnesses and structured durability results are on PR #179. Candidate not approved for runtime. Next: six-month upgrade economy and purchase path, then difficulty/counter validation. Standalone Node/CI not verified.
 
 ## APPRENTICE-A2 — PR #178
 
