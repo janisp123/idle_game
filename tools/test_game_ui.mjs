@@ -407,7 +407,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.skills.mining.xp, 40, "the XP bar stops at one level");
     assert.equal(state.skills.mining.level, 1);
-    assert.equal(elements.get("skillXp").textContent, "XP full · Seek the Skill Master to advance");
+    assert.equal(elements.get("skillXp").textContent, "XP full · All rewards paused · Seek the Skill Master");
     assert.equal(miningQueueLabel.textContent, "Mining LvL 1,100",
       "at the Master gate show 100% rather than hiding or exceeding the cap");
     assert.match(miningQueueLabel.getAttribute("aria-label"), /visit the Skill Master to advance/);
@@ -531,7 +531,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     elements.get("queueUnit").fire("change");
     assert.equal(elements.get("queueAmount").hidden, true);
     assert.equal(elements.get("queueAmountLabel").hidden, true);
-    assert.match(elements.get("queuePlannerHint").textContent, /both XP and Skill Master resources/);
+    assert.match(elements.get("queuePlannerHint").textContent, /full XP bar/);
     assert.match(elements.get("queueConfirm").textContent, /LvL Up/);
     elements.get("queueUnit").value = "minutes";
     elements.get("queueUnit").fire("change");
