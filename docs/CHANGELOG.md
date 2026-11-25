@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## GEAR-RESEARCH-001 · STARTED (2026-11-25, chat)
+
+Owner requests testing progressive grade bonuses for weapons and armour before Apprentice A3, particularly previous Masterwork versus next Poor. Branch `docs/gear-progression-balance-study`, base `0136237`. Research only: evaluate in-memory source-linked variants and save numerical results; no playable rules, save, economy or deployment changes. Proposed numbers require owner approval.
+
 ## APPRENTICE-A2 · STARTED (2026-11-25, chat)
 
 Owner requests continuing with automatic Skill Master at 50 earned activity levels. Branch `feat/apprentice-auto-master`, base `5b996be`. Explicit opt-in to current 100% tribute, login-only claim after settlement using shared Master mutation, one level per ready skill, accurate report after persistence. Web Locks serialize automatic login attempts; stale-write guards protect against observed other-tab saves; browser-local alpha is not an authoritative concurrent database. No automatic offline levels, equipment or donation changes. Implemented versioned opt-in, shared claim, coordinated startup, stale-save check, exact transient report and regression tests. Next final CI.
