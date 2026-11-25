@@ -46,11 +46,37 @@ export function gearFactor(item) {
   if(!isEquipmentItem(item))throw new RangeError("Invalid equipment item");
   return GEAR_BALANCE.gradeFactor**item.grade*GEAR_BALANCE.qualityFactors[item.quality];
 }
-function cumulative(g,effort,value){let result=0;for(let t=1;t<=g;t++)result+=(value(t)-value(t-1))*proficiency(effort,t);return result;}
-function effectiveFlat(item,effort){return cumulative(item.grade,effort,t=>4*t)+QUALITY_POWER[item.quality]*proficiency(effort,item.grade);}
-function effectiveMultiplier(item,effort){return 1+cumulative(item.grade,effort,t=>1.35**t)+1.35**item.grade*(GEAR_BALANCE.qualityFactors[item.quality]-1)*proficiency(effort,item.grade);}
-function weaponEffects(style,item,effort){const g=item.grade,C=v=>cumulative(g,effort,v);return {proficiency:proficiency(effort,g),flatAttack:Math.round(effectiveFlat(item,effort)),damageMultiplier:effectiveMultiplier(item,effort),accuracy:C(t=>t*(GEAR_BALANCE.weaponAccuracy[style]??0)+Math.max(0,t-1)*.01),penetration:C(t=>t*(GEAR_BALANCE.weaponPenetration[style]??0)),speed:C(t=>t*.02),crit:C(t=>Math.max(0,t-2)*.005),critDamage:C(t=>Math.max(0,t-3)*.03)};}
-function armourEffects(slot,family,item,effort){const g=item.grade,coverage=slot.coverage/100,C=v=>cumulative(g,effort,v);return {proficiency:proficiency(effort,g),protection:pieceProtection(slot,family),guard:Math.ceil(effectiveFlat(item,effort)/4),resistance:coverage*(effectiveMultiplier(item,effort)-1)*GEAR_BALANCE.armourResistance[family],mobility:coverage*C(t=>t*GEAR_BALANCE.armourMobility[family]),dodge:coverage*C(t=>t*GEAR_BALANCE.armourDodge[family]+Math.max(0,t-1)*.005*({padded:1,leather:.65,plate:.15}[family])),critResist:coverage*C(t=>Math.max(0,t-2)*.005),critReduction:coverage*C(t=>Math.max(0,t-3)*.03)};}
+// Practice discounts only the newly unlocked increment, preserving mastered grades.
+function cumulative(grade, effort, value) {
+  let result=0;
+  for(let t=1;t<=grade;t++) result+=(value(t)-value(t-1))*proficiency(effort,t);
+  return result;
+}
+function effectiveFlat(item,effort) {
+  return cumulative(item.grade,effort,t=>4*t)+QUALITY_POWER[item.quality]*proficiency(effort,item.grade);
+}
+function effectiveMultiplier(item,effort) {
+  const factor=GEAR_BALANCE.gradeFactor;
+  return 1+cumulative(item.grade,effort,t=>factor**t)+factor**item.grade*
+    (GEAR_BALANCE.qualityFactors[item.quality]-1)*proficiency(effort,item.grade);
+}
+function weaponEffects(style,item,effort) {
+  const g=item.grade,C=v=>cumulative(g,effort,v);
+  return {proficiency:proficiency(effort,g),flatAttack:Math.round(effectiveFlat(item,effort)),
+    damageMultiplier:effectiveMultiplier(item,effort),
+    accuracy:C(t=>t*(GEAR_BALANCE.weaponAccuracy[style]??0)+Math.max(0,t-1)*.01),
+    penetration:C(t=>t*(GEAR_BALANCE.weaponPenetration[style]??0)),
+    speed:C(t=>t*.02),crit:C(t=>Math.max(0,t-2)*.005),critDamage:C(t=>Math.max(0,t-3)*.03)};
+}
+function armourEffects(slot,family,item,effort) {
+  const g=item.grade,coverage=slot.coverage/100,C=v=>cumulative(g,effort,v);
+  return {proficiency:proficiency(effort,g),protection:pieceProtection(slot,family),
+    guard:Math.ceil(effectiveFlat(item,effort)/4),
+    resistance:coverage*(effectiveMultiplier(item,effort)-1)*GEAR_BALANCE.armourResistance[family],
+    mobility:coverage*C(t=>t*GEAR_BALANCE.armourMobility[family]),
+    dodge:coverage*C(t=>t*GEAR_BALANCE.armourDodge[family]+Math.max(0,t-1)*.005*({padded:1,leather:.65,plate:.15}[family])),
+    critResist:coverage*C(t=>Math.max(0,t-2)*.005),critReduction:coverage*C(t=>Math.max(0,t-3)*.03)};
+}
 export function conditionProfile(itemId, item) {
   if (!isEquipmentItem(item)) throw new RangeError("Invalid equipment item");
   return Object.freeze({ itemId, maxHP: 24 + 3*item.grade + 12*ITEM_QUALITIES.indexOf(item.quality),
@@ -59,18 +85,25 @@ export function conditionProfile(itemId, item) {
 
 // Prices are cumulative so the price of incremental improvements is the same
 // as buying the same final item directly.
-export function smithQuote(state,itemId,target){
- if(!isEquipmentItem(target))throw new RangeError("Invalid equipment specification");
- const current=Object.hasOwn(state.equipment??{},itemId)?state.equipment[itemId]:null;
- const q=ITEM_QUALITIES.indexOf(target.quality),cq=current?ITEM_QUALITIES.indexOf(current.quality):-1;
- const nextGrade=!!current&&target.grade===current.grade+1&&cq===3&&q===0;
- const improves=!current?target.grade===0&&q===0:target.grade===current.grade&&q===cq+1||nextGrade;
- const credit=current?equipmentPrice(current):0;
- const cost=!improves?0:!current?SMITH_BALANCE.firstArmourCost:equipmentPrice(target)-credit;
- const requiredFightingLevel=equipmentUnlockLevel(target.grade),levelReady=(state.skills?.fighting?.level??1)>=requiredFightingLevel,affordable=cost<=state.coins;
- const reason=!improves||!Number.isSafeInteger(cost)||cost<=0?"no_improvement":!levelReady?"fighting_level":!affordable?"coins":null;
- return {current,cost,improves,requiredFightingLevel,levelReady,affordable,reason,available:reason===null};
+// Every owned item advances exactly one of the 32 stages. Never refund or downgrade.
+export function nextEquipmentUpgrade(current) {
+  if(current==null)return {...STARTER_ITEM};
+  if(!isEquipmentItem(current))throw new RangeError("Invalid current equipment");
+  const q=ITEM_QUALITIES.indexOf(current.quality);
+  if(q<ITEM_QUALITIES.length-1)return {grade:current.grade,quality:ITEM_QUALITIES[q+1]};
+  return current.grade<ITEM_GRADES.length-1?{grade:current.grade+1,quality:"poor"}:null;
 }
+export function smithQuote(state,itemId,target) {
+  if(!isEquipmentItem(target))throw new RangeError("Invalid equipment specification");
+  const current=Object.hasOwn(state.equipment??{},itemId)?state.equipment[itemId]:null;
+  const next=nextEquipmentUpgrade(current);
+  const improves=Boolean(next&&target.grade===next.grade&&target.quality===next.quality);
+  const cost=improves?(current?equipmentPrice(target)-equipmentPrice(current):SMITH_BALANCE.firstArmourCost):0;
+  const requiredFightingLevel=equipmentUnlockLevel(target.grade),levelReady=(state.skills?.fighting?.level??1)>=requiredFightingLevel,affordable=cost<=state.coins;
+  const reason=!improves||!Number.isSafeInteger(cost)||cost<=0?"no_improvement":!levelReady?"fighting_level":!affordable?"coins":null;
+  return {current,cost,improves,requiredFightingLevel,levelReady,affordable,reason,available:reason===null};
+}
+
 export function equipmentBonuses(state) {
   const condition=equippedCondition(state.armour,state.combatLoadout,state.equipment,state.expertiseActive);
   const pieces=Object.values(condition.armour);
