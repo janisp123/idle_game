@@ -14,7 +14,6 @@ on:
       - 'site/play/**/*.mjs'
       - '!site/play/app.mjs'
       - '!site/play/character-stats.mjs'
-      - '!site/play/combat-art.mjs'
       - '!site/play/result-readout.mjs'
       - "tools/combat-simulator.mjs"
       - "tools/test_combat_simulator.mjs"

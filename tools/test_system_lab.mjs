@@ -220,7 +220,7 @@ test("SIM-003 both simulation workflows automatically cover production modules",
     assert.ok(paths.includes("'site/play/**/*.mjs'"));
     for(const excluded of paths.matchAll(/'!site\/play\/([^']+)'/g)){
       const name=excluded[1];
-      assert.ok(["app.mjs","character-stats.mjs","combat-art.mjs","result-readout.mjs"].includes(name));
+      assert.ok(["app.mjs","character-stats.mjs","result-readout.mjs"].includes(name));
       // An excluded UI module must not be imported by a production module
       // covered by the actual mechanics/simulation graph.
       for(const source of ["engine","combat","physical-duel","smith","armour","arena-wallet","expertise","attributes","difficulty","production","loot"]){

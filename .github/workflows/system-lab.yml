@@ -19,7 +19,6 @@ on:
       - 'site/play/**/*.mjs'
       - '!site/play/app.mjs'
       - '!site/play/character-stats.mjs'
-      - '!site/play/combat-art.mjs'
       - '!site/play/result-readout.mjs'
       - 'tools/system-lab.mjs'
       - 'tools/combat-simulator.mjs'
