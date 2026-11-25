@@ -203,7 +203,8 @@ test('build baseline uses real normal/alpha settlement and conserves arena curre
     assert.ok(last.outcomes.bouts>0);
     assert.equal(last.outcomes.bouts,last.outcomes.victories+last.outcomes.defeats+last.outcomes.doubleDeaths);
     assert.equal(last.wallet,last.coinsEarned-last.coinsSpent);
-    assert.equal(last.expertise,null); // baseline: before implementation
+    assert.ok(last.expertise.greatsword>0);
+    assert.ok(Math.abs(Object.values(last.expertise).reduce((a,b)=>a+b,0)/2-last.productiveFightingHours)<0.06);
     assert.ok(last.productiveFightingHours>0&&last.productiveFightingHours<=48);
   }
   assert.deepEqual(report,await runBuildBaseline({scenarios:[scenario],seed:20261125}));

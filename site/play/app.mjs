@@ -1,7 +1,8 @@
+import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
 import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a2";
-import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel } from "./smith.mjs?v=alpha-gear-a2";
+import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel } from "./smith.mjs?v=alpha-gear-a3";
 import {
-  setDifficulty, buyEquipment, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
+  setDifficulty, buyEquipment, activateExpertise, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
   lootChances, recipeOptions, newGame, readSave, settle,
   enterGame, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
@@ -9,9 +10,9 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=alpha-gear-a2";
+} from "./engine.mjs?v=alpha-gear-a3";
 
-import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=alpha-gear-a2";
+import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=alpha-gear-a3";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=glad-003";
 import { combatFlowState } from "./combat-flow.mjs?v=glad-003";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=glad-003";
@@ -27,7 +28,7 @@ const ui = {
   weaponSlots: $("weaponSlots"), combatSkillsText: $("combatSkillsText"),
   armourSlots: $("armourSlots"), armourChoice: $("armourChoice"),
   armourEditor: $("armourEditor"),
-  equipmentEditHeading: $("equipmentEditHeading"), gearStats: $("gearStats"),
+  equipmentEditHeading: $("equipmentEditHeading"), gearStats: $("gearStats"), expertiseStats:$("expertiseStats"),
   coinWallet: $("coinWallet"), itemGrade: $("itemGrade"), itemQuality: $("itemQuality"),
   smithBuy: $("smithBuy"), smithEquip: $("smithEquip"), smithStatus: $("smithStatus"),
   resourceList: $("resourceList"), choices: $("activityChoices"),
@@ -161,6 +162,14 @@ function renderArmour() {
   ui.smithEquip.textContent = selectedFamily === "none" ? "Unequip" : "Equip owned armour";
   ui.coinWallet.textContent = number(state.coins) + " coins";
 
+  const track=slot?selectedFamily:state.combatLoadout;
+  const practice=expertiseProgress(state.expertise[track]);
+  const effectiveness=proficiency(state.expertiseActive[track],id?selectedSpec().grade:0);
+  ui.expertiseStats.textContent=(slot?(track==="none"?"Unarmoured":titleCase(track)):COMBAT_LOADOUTS[track].name)+
+    " expertise · "+practice.hours.toFixed(1)+" h · "+ITEM_GRADES[practice.rank]+
+    (practice.nextHours===null?" mastered":" · Next "+ITEM_GRADES[practice.rank+1]+": "+number(practice.nextHours)+" h")+
+    (id?" · Selected gear bonus "+Math.round(effectiveness*100)+"% (−"+Math.round((1-effectiveness)*100)+"% penalty)":"")+
+    " · Applies next bout";
   const gear = armourStats(state.armour, state.combatLoadout);
   const bonus = equipmentBonuses(state);
   ui.gearStats.textContent = gear.totalKg + " kg · Move " + Math.min(100,Math.round(gear.mobilityPct+bonus.mobility)) +
@@ -998,7 +1007,7 @@ function tick() {
   if (document.visibilityState === "hidden") return;
   const before = state.transition;
   const result = settle(state, gameNow());
-  state = result.state;
+  state = activateExpertise(result.state);
   const gained = reportProgress(result);
   announceArrival(before);
   if (gained || (before && !state.transition) || gameNow() - lastSavedAt > 3000) writeSave();

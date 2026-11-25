@@ -65,6 +65,7 @@ jobs:
             if(r.gradeSeparation) {
               for(const row of r.gradeSeparation.gearRows) console.log(JSON.stringify({matrix:"gear",...row}));
               for(const row of r.gradeSeparation.readinessRows) console.log(JSON.stringify({matrix:"readiness",...row}));
+              for(const row of r.expertiseRows??[]) console.log(JSON.stringify({matrix:"expertise",...row}));
             }
           '
       - name: Attach detailed reproducible battle reports

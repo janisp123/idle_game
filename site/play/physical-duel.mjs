@@ -24,7 +24,7 @@ function piece(profile, fallback) {
   return { hp: profile?.maxHP ?? fallback, maxHP: profile?.maxHP ?? fallback,
     breakable: profile?.breakable ?? true,
     flatAttack:profile?.flatAttack,damageMultiplier:profile?.damageMultiplier,
-    accuracy:profile?.accuracy??0,penetration:profile?.penetration??0,
+    accuracy:profile?.accuracy??0,penetration:profile?.penetration??0,proficiency:profile?.proficiency??1,
     guard:profile?.guard,resistance:profile?.resistance??0,
     mobility:profile?.mobility??0,dodge:profile?.dodge??0 };
 }
@@ -154,9 +154,9 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
         continue;
       }
       const guardRoll = roll();
-      const block = target.shield.hp > 0 && guardRoll < (attack.type === "blunt" ? 0.50 : 0.40);
+      const block = target.shield.hp > 0 && guardRoll < (attack.type === "blunt" ? 0.50 : 0.40)*target.shield.proficiency;
       const parry = !block && target.loadout === "greatsword" && target.weapon.hp > 0 &&
-        target.recovery === 0 && guardRoll < 0.32;
+        target.recovery === 0 && guardRoll < 0.32*target.weapon.proficiency;
       const intact = actor.weapon.hp > 0 || attack.move === "dagger" || attack === BASH;
       // Broken weapons retain only improvised base damage, never their grade
       // or flat bonus. The bow's backup dagger retains the kit's bonus only

@@ -108,5 +108,19 @@ for(const grade of [0,3,7])for(const state of ["matched","low-stats","low-gear"]
   }
   readinessRows.push({grade,state,...totals,winRatePct:100*totals.victory/totals.bouts});
 }
+const expertiseRows=[];
+for(const [grade,stat] of [[0,10],[3,62],[7,150]])for(const novice of ["weapon","armour","both","neither"]){
+  const totals=outcomes();
+  for(const style of styles)for(const family of armourLoads){
+    const shared={str:stat,dex:stat,end:stat,skill:50,loadout:style,armour:family,itemGrade:grade,quality:"masterwork"};
+    const trained=createPlayerSnapshot(shared);
+    const hours={};
+    if(novice==="weapon"||novice==="both")hours[style]=0;
+    if(novice==="armour"||novice==="both")hours[family]=0;
+    const untrained=createPlayerSnapshot({...shared,expertiseHours:hours});
+    for(const arena of ARENAS)sample(trained,untrained,arena,grade,seeds.slice(0,16),totals);
+  }
+  expertiseRows.push({grade,stat,novice,...totals,winRatePct:100*totals.victory/totals.bouts});
+}
 console.log(JSON.stringify({...baselineReport,
-  gradeSeparation:{seed:20261124,gearRows,readinessRows}},null,2));
+  gradeSeparation:{seed:20261124,gearRows,readinessRows},expertiseRows},null,2));

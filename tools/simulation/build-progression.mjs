@@ -70,8 +70,7 @@ function trajectory(modules, scenario, seed) {
     coinsEarned:earned,coinsSpent:spent,wallet:state.coins,
     opponentGrade:difficulty.GRADES[state.difficulties.fighting??0],
     gear:Object.fromEntries(ids.map(key=>[key,state.equipment[key]??null])),
-    // This baseline predates expertise. Never invent a mastered value.
-    expertise:null
+    expertise:Object.fromEntries(Object.entries(state.expertise).map(([id,units])=>[id,units/14400000]))
   });
   const checkpoints=[snapshot()];
   state=engine.setCombatLoadout(state,loadout,time,rng).state;
@@ -161,13 +160,13 @@ export async function runBuildBaseline({profiles=['normal','alpha'],scenarios=BA
     boutMs:modules.combat.BOUT_MS,
     scenarios:scenarios.map(s=>trajectory(modules,s,seed))
   })));
-  return {version:'ALPHA-GEAR-001-A2',kind:'production-engine progression and economy trajectory',
+  return {version:'ALPHA-GEAR-001-A3',kind:'production-engine progression and economy trajectory',
     limitations:['One deterministic seed per scenario; not a confidence interval.',
       'Fixed greatsword/plate purchase policy and target-stat/whole-build arena selection; not an optimal progression search. Selection policy changed from A1, so before/after includes that policy change.',
       'Rapid hourly visits test aggressive play, not a proven earliest possible claim.',
       'Weekly checkpoint settlements may split absence without claiming; outcomes reflect current engine.',
       'Affordability ignores skill gates; purchases enforce both.',
-      'No expertise exists yet. No future values inferred.'],reports};
+      'Expertise hours are earned from completed productive bouts; armour practice is split by slots. Unarmoured time before buying plate is not plate training.'],reports};
 }
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){

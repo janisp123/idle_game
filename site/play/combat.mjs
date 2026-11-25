@@ -1,7 +1,7 @@
 import { chooseArena } from "./arenas.mjs?v=glad-004";
 /** Seeded, bounded arena timeline shared by play, prizes and the simulator. */
-import { resolvePhysicalDuel } from "./physical-duel.mjs?v=alpha-gear-a2";
-import { equippedCondition,equipmentBonuses } from "./smith.mjs?v=alpha-gear-a2";
+import { resolvePhysicalDuel } from "./physical-duel.mjs?v=alpha-gear-a3";
+import { equippedCondition,equipmentBonuses,validTrainingKit } from "./smith.mjs?v=alpha-gear-a3";
 import { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
 import { armourStats, initialArmour } from "./armour.mjs?v=glad-003";
@@ -45,7 +45,7 @@ const validGear = gear => gear && typeof gear === "object" && !Array.isArray(gea
   gear.totalKg >= 0 && gear.totalKg <= 60 &&
   gear.armourKg >= 0 && gear.armourKg <= 40 &&
   gear.weaponKg >= 0 && gear.weaponKg <= 12;
-const effectBounds=Object.freeze({flatAttack:[0,100],damageMultiplier:[1,20],
+const effectBounds=Object.freeze({proficiency:[0.4,1],flatAttack:[0,100],damageMultiplier:[1,20],
   accuracy:[0,0.2],penetration:[0,0.2],guard:[0,100],resistance:[0,20],
   mobility:[0,20],dodge:[0,0.2]});
 const validPiece = piece => Boolean(piece && Number.isSafeInteger(piece.maxHP) &&
@@ -71,6 +71,7 @@ function validateFighter(f) {
       COMBAT_SKILLS[f.defenseSkill]?.role !== "defense") ||
     (f.gear !== undefined && !validGear(f.gear)) ||
     (f.condition !== undefined && !validCondition(f.condition)) ||
+    (f.trainingKit!==undefined&&!validTrainingKit(f.trainingKit,f.loadout)) ||
     (f.gearAttack !== undefined && (!Number.isSafeInteger(f.gearAttack) ||
       f.gearAttack < 0 || f.gearAttack > 10000)))
     throw new RangeError("Invalid fighter");

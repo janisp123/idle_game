@@ -150,3 +150,75 @@ test("GLAD-005 a twenty-year three-wagon claim preserves crafting inputs and fro
   assert.equal(result.state.coins, result.offlineArena.victories * 12);
   assert.ok(Object.values(result.state.skills).every(skill => skill.level === 1));
 });
+
+
+import {blankExpertise,awardExpertise,expertiseThreshold,proficiency,EXPERTISE_BALANCE} from "../site/play/expertise.mjs";
+import {activateExpertise,setArmourChoice,setDifficulty} from "../site/play/engine.mjs";
+test("A3 independent weapon and four-slot armour practice conserves both budgets",()=>{
+  const armour={head:"none",torso:"plate",arms:"plate",legs:"leather"};
+  const e=awardExpertise(blankExpertise(),"bow",armour,HOUR_MS);
+  assert.equal(e.bow,4*HOUR_MS);assert.equal(e.plate,2*HOUR_MS);
+  assert.equal(e.none,HOUR_MS);assert.equal(e.leather,HOUR_MS);
+  assert.equal(e.greatsword,0);
+  const f=awardExpertise(e,"greatsword",armour,HOUR_MS);
+  assert.equal(f.bow,e.bow);assert.equal(f.greatsword,4*HOUR_MS);
+  assert.equal(proficiency(0,0),1);assert.equal(proficiency(0,7),0.4);
+  assert.equal(proficiency(expertiseThreshold(7),7),1);
+  assert.ok(proficiency(expertiseThreshold(3),7)<1);
+});
+test("A3 offline practice uses frozen kit, no retroactive effectiveness, no duplicate credit",()=>{
+  let s=newGame(0);s.skills.fighting.level=50;s.coins=10000000;
+  s=buyEquipment(s,"greatsword",{grade:7,quality:"masterwork"},0).state;
+  for(const slot of ["head","torso","arms","legs"])s=buyEquipment(s,slot+":plate",{grade:7,quality:"masterwork"},0).state;
+  s=chooseActivity(s,"fighting",0,()=>.5).state;
+  const started=settle(s,1,()=>.5).state;
+  const end=20*YEAR;
+  const whole=settle(started,end,()=>.5);
+  const split=settle(started,43*BOUT_MS-7000,()=>.5);
+  const rest=settle(readSave(JSON.stringify(split.state)),end,()=>.5);
+  assert.deepEqual(rest.state.expertise,whole.state.expertise);
+  assert.equal(rest.state.coins,whole.state.coins);
+  assert.equal(whole.state.expertise.greatsword,whole.state.expertise.plate);
+  assert.deepEqual(whole.state.expertiseActive,blankExpertise());
+  assert.deepEqual(whole.state.combatSession.player.condition,started.combatSession.player.condition);
+  assert.equal(enterGame(whole.state,end,()=>.5).state.expertise.greatsword,whole.state.expertise.greatsword);
+  const returned=activateExpertise(whole.state);
+  const boundary=end+(BOUT_MS-end%BOUT_MS)%BOUT_MS;
+  const next=settle(returned,boundary+1,()=>.5).state;
+  assert.equal(next.combatSession.player.condition.weapon.proficiency,1);
+  assert.equal(next.combatSession.player.str,started.combatSession.player.str);
+  assert.deepEqual(readSave(JSON.stringify(next)),next);
+  assert.equal(readSave({...next,expertiseActive:{...next.expertiseActive,bow:1}}),null);
+});
+test("A3 abandoned partial bouts cannot be farmed and switches retain practice",()=>{
+  let s=chooseActivity(newGame(0),"fighting",0,()=>.5).state;
+  for(let n=1;n<=8;n++){
+    const at=n*(BOUT_MS-1);
+    s=setCombatLoadout(s,n%2?"bow":"greatsword",at,()=>.5).state;
+  }
+  assert.deepEqual(s.expertise,blankExpertise());
+  const at=8*(BOUT_MS-1)+BOUT_MS;
+  s=settle(s,at,()=>.5).state;
+  assert.ok(s.expertise.greatsword>0);
+  const learned=s.expertise.greatsword;
+  s=setCombatLoadout(s,"bow",at,()=>.5).state;
+  s=settle(s,at+BOUT_MS,()=>.5).state;
+  assert.equal(s.expertise.greatsword,learned);assert.ok(s.expertise.bow>0);
+  assert.equal(s.expertise.none,s.expertise.greatsword+s.expertise.bow);
+  const mine=chooseActivity(s,"mining",at+BOUT_MS,()=>.5).state;
+  assert.deepEqual(settle(mine,at+BOUT_MS+HOUR_MS,()=>.5).state.expertise,s.expertise);
+});
+test("A3 proficiency updates at a boundary without rewriting the unfinished fight",()=>{
+  let s=newGame(0);s.skills.fighting.level=50;s.coins=10000000;
+  s=buyEquipment(s,"greatsword",{grade:7,quality:"masterwork"},0).state;
+  s=chooseActivity(s,"fighting",0,()=>.5).state;
+  const first=settle(s,100000,()=>.5).state;
+  const trained=activateExpertise({...first,expertise:{...first.expertise,greatsword:expertiseThreshold(7)}});
+  const before=settle(trained,BOUT_MS-1,()=>.5).state;
+  assert.equal(before.combatSession.player.condition.weapon.proficiency,0.4);
+  const after=settle(before,BOUT_MS,()=>.5).state;
+  assert.equal(after.combatSession.player.condition.weapon.proficiency,1);
+  const original=settle(first,BOUT_MS,()=>.5).state;
+  assert.equal(after.coins,original.coins);
+  assert.equal(after.combatSession.prizeCursor,1);
+});

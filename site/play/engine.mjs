@@ -1,4 +1,5 @@
-import { settleArenaPrizes } from "./arena-wallet.mjs?v=alpha-gear-a2";
+import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
+import { settleArenaPrizes } from "./arena-wallet.mjs?v=alpha-gear-a3";
 import {
   ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
 } from "./attributes.mjs?v=glad-001";
@@ -10,7 +11,7 @@ export {
 } from "./attributes.mjs?v=glad-001";
 import {
   validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS
-} from "./combat.mjs?v=alpha-gear-a2";
+} from "./combat.mjs?v=alpha-gear-a3";
 import { COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
 import { ARMOUR_SLOTS, ARMOUR_TIERS, initialArmour, armourOption, armourStats } from "./armour.mjs?v=glad-003";
@@ -25,7 +26,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=glad-001";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 12; // alpha combat snapshot/economy rebase
+export const GAME_VERSION = 13; // alpha expertise snapshot schema
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -74,7 +75,7 @@ export const ITEM_LABELS = Object.freeze({
   ...EXTRA_LOOT_LABELS,
   ...PRODUCTION_LABELS
 });
-import { STARTER_ITEM, equippedCondition, equipmentBonuses, isEquipmentItem, smithQuote } from "./smith.mjs?v=alpha-gear-a2";
+import { STARTER_ITEM, isEquipmentItem, smithQuote, trainingKit, trainingEffects } from "./smith.mjs?v=alpha-gear-a3";
 
 const equipmentIds = new Set([
   ...Object.keys(COMBAT_LOADOUTS),
@@ -162,6 +163,7 @@ export function newGame(now = Date.now()) {
     name: "Wanderer",
     skills: blankSkills(),
     attributeEffort: blankAttributeEffort(),
+    expertise:blankExpertise(), expertiseActive:blankExpertise(),
     combatSession: null,
     coins: 0,
     combatLoadout: DEFAULT_COMBAT_LOADOUT,
@@ -197,6 +199,9 @@ export function readSave(value) {
         typeof s.name !== "string" || s.name.length > 40 ||
         !s.items || typeof s.items !== "object" || Array.isArray(s.items) ||
         !validAttributeEffort(s.attributeEffort) || !isCount(s.coins) ||
+        !validExpertise(s.expertise)||!validExpertise(s.expertiseActive)||
+        Object.keys(s.expertise).some(id=>s.expertiseActive[id]>s.expertise[id])||
+        (s.combatSession!==null&&!s.combatSession?.player?.trainingKit)||
         !validCombatLoadout(s.combatLoadout) || !validCombatSession(s.combatSession) ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
         !validEquipment(s) ||
@@ -271,6 +276,7 @@ export function readSave(value) {
     return {
       version: GAME_VERSION, timingProfile: TIMING_PROFILE, name: s.name, skills,
       attributeEffort: { ...s.attributeEffort },
+      expertise:{...s.expertise},expertiseActive:{...s.expertiseActive},
       combatLoadout: s.combatLoadout,
       coins: s.coins,
       armour: { ...s.armour },
@@ -334,6 +340,31 @@ function variedTotal(base, random) {
   return whole + (fraction > 0 && roll() < fraction ? 1 : 0);
 }
 
+/** Publish earned practice at a real return/live tick; never in offline settle.
+ * The current bout is not replayed. At most one additional snapshot boundary
+ * is processed in any settlement, regardless of the absence length.
+ */
+export function activateExpertise(state){
+  return Object.keys(state.expertise).every(id=>state.expertise[id]===state.expertiseActive[id])?
+    state:{...state,expertiseActive:{...state.expertise}};
+}
+function settleExpertiseArena(session,elapsedMs,active){
+  const from=session.elapsedMs;
+  const to=from+elapsedMs;
+  const boundary=from+(BOUT_MS-from%BOUT_MS)%BOUT_MS;
+  const run=(current,end)=>settleArenaPrizes(advanceCombatSession(current,end-current.elapsedMs),current.elapsedMs);
+  if(to<boundary)return run(session,to);
+  const p=session.player;
+  const effects=trainingEffects(p.trainingKit,p.loadout,active);
+  if(JSON.stringify(effects.condition)===JSON.stringify(p.condition))return run(session,to);
+  const first=run(session,boundary);
+  const next={...first.session,player:{...p,condition:effects.condition,gearAttack:effects.gearAttack,
+    gear:{...p.gear,gearDefense:effects.gearDefense}}};
+  const second=run(next,to);
+  const fields=["downtimeMs","sampledBouts","bouts","victories","defeats","doubleDeaths","coins"];
+  return {session:second.session,...Object.fromEntries(fields.map(k=>[k,first[k]+second[k]]))};
+}
+
 function settleWork(state, now, random, frozenEffort, xpRandom = random) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
   const end = Math.max(state.settledAtMs, now);
@@ -355,22 +386,28 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
     let session = state.combatSession;
     if (!session) {
       const attrs = combatAttributeProgress(frozenEffort, state.skills);
-      const bonus = equipmentBonuses(state);
+      const kit=trainingKit(state.armour,state.combatLoadout,state.equipment);
+      const effects=trainingEffects(kit,state.combatLoadout,state.expertiseActive);
       session = startCombatSession({
         difficulty:tier, name: state.name,
-        loadout: state.combatLoadout,
+        loadout: state.combatLoadout,trainingKit:kit,
         gear: {...armourStats(state.armour,state.combatLoadout),
-          gearDefense:bonus.defense},
-        gearAttack:bonus.attack,
-        condition: equippedCondition(state.armour, state.combatLoadout, state.equipment),
+          gearDefense:effects.gearDefense},
+        gearAttack:effects.gearAttack,
+        condition:effects.condition,
         str: attrs.STR.value, dex: attrs.DEX.value, end: attrs.END.value,
         skill: state.skills.fighting.level
       }, state.settledAtMs >>> 0);
     }
-    const fromElapsed = session.elapsedMs;
-    session = advanceCombatSession(session, elapsedMs);
-    const prize = settleArenaPrizes(session, fromElapsed);
+    const prize = settleExpertiseArena(session,elapsedMs,state.expertiseActive);
     productiveMs -= prize.downtimeMs;
+    // Credit completed bouts exactly once. Partial practice remains pending
+    // until the bout completes; abandoning/restarting a fight forfeits it.
+    // This prevents repetitive restarts from farming expertise without defeats.
+    const completedPractice=prize.bouts*BOUT_MS-
+      (prize.defeats+prize.doubleDeaths)*RESURRECTION_MS;
+    next.expertise=awardExpertise(state.expertise,session.player.loadout,
+      session.player.trainingKit.armour,completedPractice);
     next.combatSession = prize.session;
     next.coins = safeAdd(state.coins, prize.coins);
     report.gainedCoins = prize.coins;
@@ -771,7 +808,7 @@ export function enterGame(state, now = Date.now(), random = Math.random) {
     offlineArena = Object.fromEntries(fields.map(key =>
       [key, reports.reduce((sum, report) => sum + report[key], 0)]));
   }
-  return { ...outcome, levelsGained: {}, ...(offlineArena ? { offlineArena } : {}) };
+  return { ...outcome, state:activateExpertise(outcome.state), levelsGained: {}, ...(offlineArena ? { offlineArena } : {}) };
 }
 
 /** All items that a particular skill can produce, including locked rare tiers. */

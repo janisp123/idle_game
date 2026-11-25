@@ -1,5 +1,6 @@
 import { ARMOUR_SLOTS, pieceProtection } from "./armour.mjs?v=glad-003";
 import { GRADES, validTier } from "./difficulty.mjs?v=alpha-gear-a2";
+import { proficiency,validExpertise,fullExpertise } from "./expertise.mjs?v=alpha-gear-a3";
 
 export const ITEM_GRADES = Object.freeze([...GRADES]);
 export const ITEM_QUALITIES = Object.freeze(["poor", "common", "fine", "masterwork"]);
@@ -45,18 +46,20 @@ export function gearFactor(item) {
   if(!isEquipmentItem(item))throw new RangeError("Invalid equipment item");
   return GEAR_BALANCE.gradeFactor**item.grade*GEAR_BALANCE.qualityFactors[item.quality];
 }
-function weaponEffects(style,item) {
-  return {flatAttack:itemPower(item),damageMultiplier:gearFactor(item),
-    accuracy:item.grade*(GEAR_BALANCE.weaponAccuracy[style]??0),
-    penetration:item.grade*(GEAR_BALANCE.weaponPenetration[style]??0)};
+function weaponEffects(style,item,effort) {
+  const p=proficiency(effort,item.grade);
+  return {proficiency:p,flatAttack:Math.round(itemPower(item)*p),
+    damageMultiplier:1+(gearFactor(item)-1)*p,
+    accuracy:item.grade*(GEAR_BALANCE.weaponAccuracy[style]??0)*p,
+    penetration:item.grade*(GEAR_BALANCE.weaponPenetration[style]??0)*p};
 }
-function armourEffects(slot,family,item) {
-  const coverage=slot.coverage/100;
-  return {protection:pieceProtection(slot,family),
-    guard:Math.ceil(itemPower(item)/4),
-    resistance:coverage*(gearFactor(item)-1)*GEAR_BALANCE.armourResistance[family],
-    mobility:coverage*item.grade*GEAR_BALANCE.armourMobility[family],
-    dodge:coverage*item.grade*GEAR_BALANCE.armourDodge[family]};
+function armourEffects(slot,family,item,effort) {
+  const coverage=slot.coverage/100,p=proficiency(effort,item.grade);
+  return {proficiency:p,protection:pieceProtection(slot,family),
+    guard:Math.round(Math.ceil(itemPower(item)/4)*p),
+    resistance:coverage*(gearFactor(item)-1)*GEAR_BALANCE.armourResistance[family]*p,
+    mobility:coverage*item.grade*GEAR_BALANCE.armourMobility[family]*p,
+    dodge:coverage*item.grade*GEAR_BALANCE.armourDodge[family]*p};
 }
 
 export function conditionProfile(itemId, item) {
@@ -84,11 +87,9 @@ export function smithQuote(state, itemId, target) {
 }
 
 export function equipmentBonuses(state) {
-  const attack = itemPower(state.equipment[state.combatLoadout]);
-  const defense = Object.entries(state.armour).reduce((sum, [slot, family]) =>
-    family === "none" ? sum : sum + Math.ceil(itemPower(state.equipment[slot + ":" + family]) / 4), 0);
-  const condition=equippedCondition(state.armour,state.combatLoadout,state.equipment);
+  const condition=equippedCondition(state.armour,state.combatLoadout,state.equipment,state.expertiseActive);
   const pieces=Object.values(condition.armour);
+  const attack=condition.weapon.flatAttack, defense=pieces.reduce((n,p)=>n+p.guard,0);
   return { attack, defense, damageMultiplier:condition.weapon.damageMultiplier,
     accuracy:condition.weapon.accuracy,penetration:condition.weapon.penetration,
     resistance:pieces.reduce((n,p)=>n+p.resistance,0),
@@ -96,17 +97,41 @@ export function equipmentBonuses(state) {
     dodge:pieces.reduce((n,p)=>n+p.dodge,0) };
 }
 
-export function equippedCondition(armour, loadout, equipment) {
+// Omitted expertise means a fully trained synthetic/NPC build, not a player default.
+export function equippedCondition(armour, loadout, equipment, expertise=fullExpertise()) {
+  if(!validExpertise(expertise))throw new RangeError("Invalid equipment expertise");
   const weapon = equipment[loadout] ?? STARTER_ITEM;
   const pieces = Object.fromEntries(ARMOUR_SLOTS.filter(slot => armour[slot.id] !== "none").map(slot => {
     const family = armour[slot.id];
     const id = slot.id + ":" + family;
     const item=equipment[id]??STARTER_ITEM;
-    return [slot.id, { ...conditionProfile(id,item),...armourEffects(slot,family,item) }];
+    return [slot.id, { ...conditionProfile(id,item),...armourEffects(slot,family,item,expertise[family]) }];
   }));
   return {
-    weapon: {...conditionProfile(loadout, weapon),...weaponEffects(loadout,weapon)},
-    shield: loadout === "sword_shield" ? {...conditionProfile("shield",weapon),...weaponEffects(loadout,weapon)} : null,
+    weapon: {...conditionProfile(loadout, weapon),...weaponEffects(loadout,weapon,expertise[loadout])},
+    shield: loadout === "sword_shield" ? {...conditionProfile("shield",weapon),...weaponEffects(loadout,weapon,expertise[loadout])} : null,
     armour: pieces
   };
+}
+
+
+// Persist the actual loadout's gear, not later choices made in a finishing wagon.
+export function trainingKit(armour,loadout,equipment){
+  const ids=[loadout,...Object.entries(armour).filter(([,family])=>family!=="none")
+    .map(([slot,family])=>slot+":"+family)];
+  return {armour:{...armour},equipment:Object.fromEntries(ids.map(id=>[id,{...equipment[id]}]))};
+}
+export function validTrainingKit(kit,loadout){
+  if(!kit||!kit.armour||!kit.equipment||Array.isArray(kit.armour)||Array.isArray(kit.equipment)||
+    Object.keys(kit.armour).length!==ARMOUR_SLOTS.length||
+    !ARMOUR_SLOTS.every(({id})=>["none","padded","leather","plate"].includes(kit.armour[id])))return false;
+  const ids=[loadout,...Object.entries(kit.armour).filter(([,family])=>family!=="none")
+    .map(([slot,family])=>slot+":"+family)];
+  return Object.keys(kit.equipment).length===ids.length&&
+    ids.every(id=>Object.hasOwn(kit.equipment,id)&&isEquipmentItem(kit.equipment[id]));
+}
+export function trainingEffects(kit,loadout,expertise){
+  const condition=equippedCondition(kit.armour,loadout,kit.equipment,expertise);
+  return {condition,gearAttack:condition.weapon.flatAttack,
+    gearDefense:Object.values(condition.armour).reduce((sum,p)=>sum+p.guard,0)};
 }

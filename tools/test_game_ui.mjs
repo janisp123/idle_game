@@ -148,7 +148,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=alpha-gear-a2/,
+  assert.match(html, /app\.mjs\?v=alpha-gear-a3/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -253,6 +253,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     elements.get("itemGrade").fire("change");
     assert.equal(elements.get("smithBuy").disabled,true);
     assert.match(elements.get("smithBuy").textContent,/Fighting 50 required/);
+    assert.match(elements.get("expertiseStats").textContent,/40%.*60% penalty/);
     elements.get("itemGrade").value="0";
     elements.get("itemGrade").fire("change");
 
