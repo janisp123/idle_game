@@ -1,5 +1,5 @@
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
-import { settleArenaPrizes } from "./arena-wallet.mjs?v=char-stats-001";
+import { settleArenaPrizes } from "./arena-wallet.mjs?v=bal-002";
 import {
   ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
 } from "./attributes.mjs?v=glad-001";
@@ -11,10 +11,10 @@ export {
 } from "./attributes.mjs?v=glad-001";
 import {
   validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS, RESURRECTION_MS
-} from "./combat.mjs?v=char-stats-001";
+} from "./combat.mjs?v=bal-002";
 import { COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
-import { ARMOUR_SLOTS, ARMOUR_TIERS, initialArmour, armourOption, armourStats } from "./armour.mjs?v=alpha-gear-a8";
+import { ARMOUR_SLOTS, ARMOUR_TIERS, initialArmour, armourOption, armourStats } from "./armour.mjs?v=bal-002";
 import { effectiveAttributeProgress as combatAttributeProgress } from "./attributes.mjs?v=glad-001";
 import { LOOT_TABLES, EXTRA_LOOT_LABELS, allocateLoot } from "./loot.mjs?v=glad-001";
 import { PRODUCTION_RECIPES, PRODUCTION_INPUTS, PRODUCTION_LABELS, produce } from "./production.mjs?v=glad-001";
@@ -26,7 +26,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=glad-001";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 15; // alpha physical balance changes frozen duel outcomes
+export const GAME_VERSION = 16; // BAL-002 changes replayed frozen duel outcomes; disposable V15 alpha saves reset
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -75,7 +75,7 @@ export const ITEM_LABELS = Object.freeze({
   ...EXTRA_LOOT_LABELS,
   ...PRODUCTION_LABELS
 });
-import { STARTER_ITEM, isEquipmentItem, smithQuote, trainingKit, trainingEffects } from "./smith.mjs?v=alpha-gear-a8";
+import { STARTER_ITEM, isEquipmentItem, smithQuote, trainingKit, trainingEffects } from "./smith.mjs?v=bal-002";
 
 const equipmentIds = new Set([
   ...Object.keys(COMBAT_LOADOUTS),
