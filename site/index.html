@@ -37,6 +37,14 @@
       height: auto;
       object-fit: contain;
     }
+    .hobby-section { padding-block: clamp(48px, 7vw, 96px); border-block: 1px solid rgba(169,100,69,.33); background: #15100e; }
+    .hobby-copy { max-width: 760px; }
+    .hobby-copy h2 { font: 400 clamp(32px, 5vw, 54px)/1.15 Georgia, serif; color: #ead7be; margin: 0 0 24px; }
+    .hobby-copy h2 span { color: #cba477; }
+    .hobby-copy > p:not(.section-kicker) { font-size: 16px; line-height: 1.75; color: #d8c2a7; margin: 0 0 18px; }
+    .hobby-copy .hobby-promise strong { font-size: clamp(22px, 4vw, 30px); color: #e6bf8f; }
+    .hobby-list { padding-inline-start: 1.3em; margin: 0 0 18px; color: #e6d9c5; line-height: 1.75; }
+    .hobby-copy > p:last-child { margin-bottom: 0; }
   </style>
 </head>
 <body>
@@ -71,7 +79,7 @@
             <a class="button button-outline" href="#vision">Read the Oath <span aria-hidden="true">↗</span></a>
             <a class="button button-outline" href="https://github.com/janisp123/idle_game" target="_blank" rel="noopener noreferrer">Explore the project <span aria-hidden="true">↗</span></a>
           </div>
-          <div class="hero-note" id="play-status"><span class="note-spark" aria-hidden="true"></span> <strong>Playable alpha:</strong> Early testing build. Saves stay in this browser and may be reset as the game evolves. No online accounts or multiplayer yet.</div>
+          <div class="hero-note" id="play-status"><span class="note-spark" aria-hidden="true"></span> <strong>Playable alpha:</strong> Early testing build. Saves stay in this browser and may be reset as the game evolves. No online accounts or multiplayer yet. <a href="#hobby">Always free · hobby project terms</a>.</div>
         </div>
 
         <div class="hero-art hero-art-painted">
@@ -126,6 +134,27 @@
           <div class="status-indicator"><span aria-hidden="true"></span><strong>THE FORGE</strong> <span>Playable browser alpha · In active development</span></div>
           <a href="https://github.com/janisp123/idle_game/blob/main/docs/mechanics/README.md" target="_blank" rel="noopener noreferrer">Read the mechanics handbook <span aria-hidden="true">↗</span></a>
         </div>
+      </div>
+    </section>
+
+    <section class="hobby-section" id="hobby" aria-labelledby="hobby-heading">
+      <div class="container hobby-copy">
+        <p class="section-kicker">THE CREATOR'S PROMISE</p>
+        <h2 id="hobby-heading">A Hobby, <span>Not a Business</span></h2>
+        <p>The Long Vigil is my first gaming project, built out of curiosity, passion and a desire to create something enjoyable.</p>
+        <p class="hobby-promise"><strong>It will always be 100% free.</strong></p>
+        <ul class="hobby-list">
+          <li>No advertisements.</li>
+          <li>No microtransactions.</li>
+          <li>No subscriptions.</li>
+          <li>No pay-to-win mechanics.</li>
+          <li>No donations or financial contributions.</li>
+        </ul>
+        <p>Not even a button to buy me a coffee.</p>
+        <p>There is, however, a catch. This is an independent hobby project, not a commercial product. Development may be slow or irregular. Bugs, balance issues, unfinished features and loss of progress are possible.</p>
+        <p>By choosing to play, you acknowledge and accept these risks. I cannot guarantee uninterrupted availability, preservation of progress or regular updates.</p>
+        <p>Constructive feedback is always welcome, but please respect that this project is developed in my free time.</p>
+        <p>Enjoy the game for what it is — something made for the joy of creating.</p>
       </div>
     </section>
 
