@@ -1,11 +1,11 @@
 import {GRADES,workMultiplier,benchmark} from "./difficulty.mjs?v=alpha-gear-a2";
 // Read-only character sheet. All numeric totals come from the selected build
 // constructed by the engine and the shared physical resolver helpers.
-import {desiredArenaPlayer,ACTIVITIES,SKILL_BALANCE,PRODUCTION_RECIPES} from "./engine.mjs?v=char-stats-001";
+import {desiredArenaPlayer,ACTIVITIES,SKILL_BALANCE,PRODUCTION_RECIPES} from "./engine.mjs?v=bal-002";
 import {ATTRIBUTE_BALANCE,ATTRIBUTES,ACTIVITY_STAT_WEIGHTS,effectiveAttributeProgress,masteryBonusesForSkill} from "./attributes.mjs?v=glad-001";
-import {physicalBuildStats} from "./physical-duel.mjs?v=char-stats-001";
-import {ARMOUR_SLOTS,ARMOUR_TIER_LABELS,armourStats,initialArmour,armourOption,WEAPON_PIECES} from "./armour.mjs?v=alpha-gear-a8";
-import {ITEM_GRADES,equippedCondition} from "./smith.mjs?v=alpha-gear-a8";
+import {physicalBuildStats} from "./physical-duel.mjs?v=bal-002";
+import {ARMOUR_SLOTS,ARMOUR_TIER_LABELS,armourStats,initialArmour,armourOption,WEAPON_PIECES} from "./armour.mjs?v=bal-002";
+import {ITEM_GRADES,equippedCondition} from "./smith.mjs?v=bal-002";
 import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=glad-002";
 const fmt=n=>Number(n.toFixed(3)).toLocaleString("en-US",{maximumFractionDigits:3});
 const pct=n=>fmt(n*100)+"%";
@@ -45,6 +45,10 @@ export function characterStats(state){
       row("Expertise penalty on multiplier",signed(a.multiplier-fullMultiplier)),
       row("Effective multiplier","×"+fmt(a.multiplier)),
       row("Equipment proficiency",pct(a.condition.proficiency)),row("Damage type",a.type),
+      ...(a.move==="shot"?[row("Far-range impact","×"+fmt(v.tactics.farShotImpact)),row("Reach-range impact","×"+fmt(v.tactics.reachShotImpact)),row("Close-range impact","×"+fmt(v.tactics.closeShotImpact))]:[]),
+      ...(a.move==="thrust"?[row("Reach impact","×"+fmt(v.tactics.reachSpearImpact)),row("Close impact","×"+fmt(v.tactics.shortSpearImpact))]:[]),
+      ...(a.move==="swing"?[row("Unconstrained swing impact","×"+fmt(v.tactics.openSwing)),row("Constrained swing impact","×"+fmt(v.tactics.constrainedSwing))]:[]),
+      ...(a.move==="dagger"?[row("Backup handling factor",pct(v.tactics.daggerHandling))]:[]),
       row("Recovery turns after attack",a.recovery-1)
     ],"Intact, unconstrained hit before enemy protection, resistance, guard, dodge, block, parry or vital hit. Terrain, range, weapon breakage and counters modify actual damage. Backup dagger and shield bash use reduced equipment scaling."));
   }
@@ -82,7 +86,7 @@ export function characterStats(state){
   sections.push(section("Armour penetration",pct(v.penetration),[row(weaponName+" · trained penetration",pct(trained.weapon.penetration)),row("Expertise penalty",pp(v.penetration-trained.weapon.penetration))]));
   sections.push(section("Initiative score",fmt(v.initiativeScore),[row("Dexterity",fmt(v.initiativeDex)),row("Mobility ÷ 10",signed(v.initiativeMobility))],"Compared against the opponent; not a fixed first-strike chance."));
   sections.push(section("Block / parry","Conditional",[
-    row("Shield block",pct(v.block)),row("Shield block vs blunt",pct(v.bluntBlock)),row("Greatsword ready parry",pct(v.parry)),row("Greatsword recovering parry",pct(v.recoveryParry)),row("Relevant equipment proficiency",pct(v.weapon.proficiency)),row("Guard after heavy impact","Temporarily reduced"),row("Shield block impact · standard",pct(v.guardRules.blockImpact)),row("Shield block impact · reach thrust",pct(v.guardRules.reachBlockImpact)),row("Shield block impact · blunt",pct(v.guardRules.bluntBlockImpact))
+    row("Shield block",pct(v.block)),row("Shield block vs blunt",pct(v.bluntBlock)),row("Greatsword ready parry",pct(v.parry)),row("Greatsword recovering parry",pct(v.recoveryParry)),row("Relevant equipment proficiency",pct(v.weapon.proficiency)),row("Guard after heavy impact","Temporarily reduced"),row("Shield block impact · standard",pct(v.guardRules.blockImpact)),row("Shield block impact · ranged",pct(v.guardRules.rangedBlockImpact)),row("Shield block impact · reach thrust",pct(v.guardRules.reachBlockImpact)),row("Shield block impact · blunt",pct(v.guardRules.bluntBlockImpact))
   ],"Checked after accuracy and dodge; requires intact relevant gear. Rates include expertise."));
   sections.push(section("Equipment condition","At start of bout",[
     row(weaponName,fmt(v.weapon.maxHP)+" HP"+(v.weapon.breakable?"":" · Unbreakable")),
