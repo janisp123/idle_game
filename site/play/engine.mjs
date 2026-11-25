@@ -959,6 +959,7 @@ export function chooseActivity(state, activity, now = Date.now(), random = Math.
 export function testOfflineDay(state, now = Date.now(), random = Math.random) {
   if (!state.activity) return { state, report: null, levelsGained: 0 };
   // A transparent, local-only testing shortcut. No hidden duration cap.
-  const simulated = { ...state, settledAtMs: state.settledAtMs - 86400000 };
-  return enterGame(simulated, now, random);
+  const end=Math.max(state.settledAtMs,now);
+  const result=enterGame(state,end+DAY_MS,random);
+  return {...result,state:{...result.state,settledAtMs:end}};
 }
