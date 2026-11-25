@@ -96,6 +96,7 @@ def check():
     assert html.index('id="vision"') < html.index('id="hobby"')
     readme = (SITE.parent / "README.md").read_text(encoding="utf-8")
     assert readme.index("## What you can play now") < readme.index("## A Hobby, Not a Business")
+    theme = (SITE / "grimdark.css").read_text(encoding="utf-8")
     assert ".hero-art.hero-art-painted img" in theme
     assert "object-fit: contain" in theme, "Keep the complete painting visible"
 
