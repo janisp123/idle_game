@@ -1,8 +1,8 @@
 # Changelog and task handoffs
 
-## BAL-AUDIT-001 · STARTED (2026-11-25, chat)
+## BAL-AUDIT-001 · VERIFIED (2026-11-25, chat)
 
-Owner explicitly requested a playability, weapon counter, armour and arena balance audit on main `2eaa0886`. Branch `audit/balance-counters-20261125`. Use current production resolver and synchronized tooling, no gameplay/save changes. Existing A8 results show Plate dominance and Bow Gatehouse anomaly; rerun full audit and extract pairwise counters. GitHub connector cannot dispatch manually; use an isolated branch-only CI trigger, remove it before merging evidence. Next: run and review actual reports, document recommendations without changing tuning.
+Owner explicitly requested a playability, weapon counter, armour and arena balance audit on main `2eaa0886`. Branch `audit/balance-counters-20261125`. Use current production resolver and synchronized tooling, no gameplay/save changes. Existing A8 results show Plate dominance and Bow Gatehouse anomaly; rerun full audit and extract pairwise counters. GitHub connector cannot dispatch manually; use an isolated branch-only CI trigger, remove it before merging evidence. Verified full [systems audit 45614599116](https://github.com/janisp123/idle_game/actions/runs/45614599116) and protocol 45614599121 on `d3be32b`: 14/14 tests, 214,320 duels, progression and economy reports. All five tested armoured weapon styles reach S Masterwork days 168–172 under normal daily strategy. Tactical counter system needs work: shield dominance, weak Greatsword/Spear matchups, Bow strong in Gatehouse, Plate broadly dominant. [Full findings](mechanics/BALANCE_COUNTERS_AUDIT_20261125.md). Temporary CI trigger restored; no gameplay/save changes. Next: Owner review and approval of targeted tuning.
 
 ## SITE-004 · DEPLOYED (2026-11-25, chat)
 
