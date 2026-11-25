@@ -253,3 +253,8 @@ Normal daily checkpoints:
 | 180 | 52 | 148/148/136 | 4167.28 | 4167.26 | 4145.24 | 64.66 | 3987888 | 3001321 | 986567 | 7/masterwork | S |
 
 All other weapon and unused armour tracks are zero across these fixed-build trajectories. The normal daily build satisfies the six-month target: both selected expertise tracks exceed 4,000h and S Masterwork is bought at day 170. Weekly gets mastery from offline effort but remains below S general Fighting purchase gate (level 26); mixed normal has A Common and ~3,055/3,033 practice hours at day 180. Normal first-month farmer still has no S; alpha acceleration is a distinct test profile, not the promised normal pace. Abandoned/partial bouts explain a small difference between productive elapsed hours and credited practice; slot budgets still conserve effort. A4 should reproduce a documented representative six-month build using real effort/skill calculations, not manufacture every expertise track or set all activity levels to the maximum. The data are fixed-seed, not optimized worst-case or multi-seed assurance. Final price/style/quality/readiness fairness remains to be reviewed.
+
+
+### A6 expanded economy audit
+
+[Full multi-build and rapid-visit results](ALPHA_GEAR_FINAL_AUDIT.md). Normal Bow/Leather full S MW day 171, Hammer/Plate day 166, Greatsword/Padded no full set at day 180; all selected tracks mastered. Both tested 15-minute normal strategies at two seeds fail any S purchase/affordability at day 30. Conservative normal level-50 bound remains. Keep candidate prices until A7 state fixes and A8 physical tuning are measured.

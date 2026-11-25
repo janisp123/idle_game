@@ -135,3 +135,8 @@ The original resolver outcome remains victory/defeat/double death. A pure UI hel
 | S / S | 1135 | 864 | 1 | 50 | 20 |
 
 Special results are subsets of the actual win/loss counts; no mechanical reward or HP changes. The 80% knockout threshold distinguishes gear mismatch from ordinary comparable fights in these samples. All four checks passed; the full A3/A4 normal daily trajectory is unchanged (including day 170 acquisition and 64.66% cumulative win rate). New binary art still pending; existing images remain fallback. Equal-grade player-side advantage remains for A6 review.
+
+
+### A6 combined audit
+
+[Full audited tables and findings](ALPHA_GEAR_FINAL_AUDIT.md). A6 measures paired role orientations, 20 builds, actual NPC readiness, quality, partial expertise and expanded trajectories. Greatsword and lighter armour require tuning, and mirror role bias requires review. No formula changed; A6 is not final balance approval.
