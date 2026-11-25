@@ -16,7 +16,7 @@ export function workMultiplier(tier,weights,attributes) {
 }
 
 // Separate arena readiness from survival difficulty (which is unchanged).
-export const ARENA_BENCHMARKS=Object.freeze([10,24,42,62,82,104,124,144]);
+export const ARENA_BENCHMARKS=Object.freeze([10,24,40,58,74,92,108,124]);
 const ARENA_SKILLS=Object.freeze([1,5,10,17,25,33,40,50]);
 export function arenaBenchmark(tier){
   if(!validTier(tier))throw new RangeError("Invalid arena grade");
