@@ -84,11 +84,11 @@ jobs:
             console.log("Modules:",(r.results??r.scenarios??[]).map(x=>x.module||"combat").join(", "));
             console.log("Valid JSON; full report attached below.");
           '
-      - name: BAL-002 candidate tactical validation
-        if: github.event_name == 'pull_request' && github.head_ref == 'balance/physical-counters-20261125'
+      - name: Independent tactical counter matrix and 15-build progression
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
         run: node tools/simulation/counter-validation.mjs --progression
       - name: Produce full normal/alpha build progression report
-        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true || (github.event_name == 'pull_request' && github.head_ref == 'balance/physical-counters-20261125')
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
         run: |
           node tools/simulation/build-progression.mjs > build-progression-report.json
           node --input-type=module -e '
@@ -98,7 +98,7 @@ jobs:
               console.log(JSON.stringify({profile:p.profile, ...s}));
           '
       - name: Run full paired-build and economy audit
-        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true || (github.event_name == 'pull_request' && github.head_ref == 'balance/physical-counters-20261125')
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
         run: |
           node tools/simulation/balance-audit.mjs > balance-audit.json
           node --input-type=module -e '
@@ -107,21 +107,9 @@ jobs:
             console.log(JSON.stringify({audit:"bounds",...r.bounds}));
             for(const row of r.rows)console.log(JSON.stringify({audit:"combat",...row}));
             for(const {checkpoints,...row} of r.economy)console.log(JSON.stringify({audit:"economy",...row}));
-            const families=["padded","leather","plate"],styles=["bow","spear","sword_shield","greatsword","hammer"];
-            for(const grade of [0,3,7]){
-              const rows=r.terrainRows.filter(x=>x.grade===grade&&families.includes(x.a.split("/")[1])&&families.includes(x.b.split("/")[1]));
-              const tally=(matchA,matchB)=>{
-                let wins=0,n=0;
-                for(const x of rows){const a=x.a.split("/"),b=x.b.split("/");
-                  if(matchA(a)&&matchB(b)){wins+=x.wins;n+=x.bouts;}
-                  if(x.a!==x.b&&matchA(b)&&matchB(a)){wins+=x.losses;n+=x.bouts;}
-                }return Math.round(wins/n*1000)/10;
-              };
-              console.log("CROSSBUILD "+JSON.stringify({grade,builds:styles.flatMap(style=>families.map(family=>({style,family,vs:styles.map(other=>tally(a=>a[0]===style&&a[1]===family,b=>b[0]===other))}))),materialVsWeapon:families.map(family=>({family,vs:styles.map(style=>tally(a=>a[1]===family,b=>b[0]===style))}))}));
-            }
           '
       - name: Attach balance audit
-        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true || (github.event_name == 'pull_request' && github.head_ref == 'balance/physical-counters-20261125')
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: balance-audit-${{ github.run_id }}-${{ github.run_attempt }}
@@ -129,7 +117,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Attach build progression baseline
-        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true || (github.event_name == 'pull_request' && github.head_ref == 'balance/physical-counters-20261125')
+        if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: build-progression-${{ github.run_id }}-${{ github.run_attempt }}
