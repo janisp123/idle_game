@@ -2,6 +2,10 @@
 
 **Runtime:** [engine.mjs](../../site/play/engine.mjs), [attributes.mjs](../../site/play/attributes.mjs). **Tune:** `SKILL_BALANCE`, the per-activity `ACTIVITIES` rows, `MASTER_DEFAULT_ITEM_MINIMUM` / `MASTER_ITEM_MINIMUM_OVERRIDES` in engine, and `ATTRIBUTE_BALANCE` / `ACTIVITY_STAT_WEIGHTS` in attributes. No global character level.
 
+## CAP-001 — reward cap (supersedes earlier uncapped reward descriptions)
+
+The first complete productive XP cycle that fills the current-level bar is the final rewarding work for that skill. All later skill XP, loot, craft inputs/outputs, arena coins, productive attribute effort and expertise stop until the player explicitly advances that skill with the Master. Full XP is sufficient eligibility even if all outputs were spent; the Master still takes all remaining eligible owned outputs, never unrelated goods or coins. Time spent capped is not productive and cannot be reclaimed retroactively. No global calendar cutoff or automatic level-up. A mid-bout Fighting cap pauses the saved combat clock; resuming that activity after claiming preserves the fight. Leaving a capped arena abandons only the unfinished bout, never already settled rewards.
+
 ## Independent skill XP
 
 Let `L` be the **currently activated** skill level (starts at 1). Current code uses `SKILL_BALANCE.xpPerNextLevel = 40`:
@@ -20,12 +24,12 @@ For each XP or raw material **batch**: `scaled = base × (1 − v + 2v × U)`, w
 ## Skill Master gate and sacrifice
 
 - `xpReady = savedCurrentXP >= requiredXP(L)`.
-- `resourcesReady = sum(eligible owned outputs) >= requiredItemMinimum`. Default is **1 across all outputs** for producing activities, **0** for XP-only activities; per-skill overrides exist.
-- `ready = xpReady && resourcesReady`. Scheduler `untilLevelUp` uses **exactly the same** predicate.
+- `resourcesReady = sum(eligible owned outputs) >= requiredItemMinimum`. CAP-001 sets the default to **0 for every skill**; full XP proves work, and remaining outputs are still surrendered.
+- `ready = xpReady && resourcesReady`. Scheduler `untilLevelUp` stops at the full XP bar, as do timed wagons if capped earlier.
 - On explicit player confirmation, **each eligible skill gains exactly one level** and its current XP resets to 0. **ALL currently owned output resources** for every advanced skill (including rare variants) are surrendered. Unrelated inventory is untouched. No auto-visit, permanent save penalty, trading or currency.
 - Changing XP cost or Master minimum is a **game-design and existing-save migration decision**, not a harmless visual change. See [checklist](CHANGING_BALANCE.md).
 
-## Five uncapped time-based attributes
+## Time-based attributes within rewarding activity windows
 
 `ATTRIBUTE_IDS = STR, DEX, END`; each starts at `ATTRIBUTE_BALANCE.startingStat=10`.
 
