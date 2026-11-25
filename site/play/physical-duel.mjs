@@ -4,7 +4,7 @@ export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 5 });
 const WEAPONS = Object.freeze({
   bow: { move: "shot", ranged: true, type: "piercing", range: 2, power: 11, recovery: 2 },
   dagger: { move: "dagger", type: "piercing", range: 0, power: 4, recovery: 2, flatScale: .75, gradeScale: .72, strengthScale: .90 },
-  spear: { move: "thrust", clearance: 1, type: "piercing", range: 1, power: 10, recovery: 2 },
+  spear: { move: "thrust", clearance: 1, type: "piercing", range: 1, power: 12, recovery: 2 },
   sword_shield: { move: "cut", type: "slashing", range: 0, power: 8, recovery: 2 },
   greatsword: { move: "swing", clearance: 2, type: "slashing", range: 1, power: 14, recovery: 2 },
   hammer: { move: "hammer", type: "blunt", range: 0, power: 17, recovery: 3 }
@@ -12,8 +12,8 @@ const WEAPONS = Object.freeze({
 const BASH = Object.freeze({ move: "shield_bash", type: "blunt", range: 0, power: 4, recovery: 3, flatScale: .70, gradeScale: .75 });
 const BANDS = Object.freeze(["Close", "Reach", "Far"]);
 const ARMOUR_FACTOR = Object.freeze({ piercing: 0.8, slashing: 1.15, blunt: 0.45 });
-const AIM = Object.freeze({base:.72,dex:.012,skill:.004,closeBow:-.40,closeSpear:-.18,farBow:.12,clearance:.12,minimum:.15,maximum:.96});
-const GUARD = Object.freeze({block:.29,bluntBlock:.40,parry:.36,recoveringParry:.22,flatReduction:.35,openFactor:.15,counterChance:.15,reachBlockImpact:.65,blockImpact:.43,bluntBlockImpact:1.0});
+const AIM = Object.freeze({base:.72,dex:.012,skill:.004,closeBow:-.40,closeSpear:-.18,farBow:.12,reachSpear:.10,clearance:.12,minimum:.15,maximum:.96});
+const GUARD = Object.freeze({block:.29,bluntBlock:.40,parry:.36,recoveringParry:.22,flatReduction:.35,openFactor:.15,counterChance:.15,reachBlockImpact:.85,blockImpact:.43,bluntBlockImpact:1.0});
 // BAL-002: material absorbs each impact type differently. Multipliers act on
 // coverage-weighted intact piece protection, not on armour grade resistance.
 const MATERIAL_FACTORS=Object.freeze({
@@ -21,7 +21,7 @@ const MATERIAL_FACTORS=Object.freeze({
   leather:Object.freeze({piercing:1.20,slashing:1.35,blunt:1.0}),
   plate:Object.freeze({piercing:.80,slashing:1.0,blunt:.18})
 });
-const TACTICS=Object.freeze({slowApproach:.75,quickMobility:85,retreatLead:-3,shortSpearImpact:.80,constrainedSwing:.85,openSwing:1.08,guardOpenTurns:3,reachInterruptTurns:1,daggerHandling:.75,farShotImpact:1.60,reachShotImpact:1.15,closeShotImpact:.60});
+const TACTICS=Object.freeze({slowApproach:.75,quickMobility:85,retreatLead:-3,shortSpearImpact:.80,constrainedSwing:.85,openSwing:1.08,guardOpenTurns:3,reachInterruptTurns:2,reachSpearImpact:1.18,daggerHandling:.75,farShotImpact:1.60,reachShotImpact:1.15,closeShotImpact:.60});
 function attackComponents(actor,attack,activePiece){
   const equipped=activePiece.hp>0;
   const flatScale=attack.flatScale??1,gradeScale=attack.gradeScale??1,strengthScale=attack.strengthScale??1;
@@ -180,7 +180,7 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       const equipped=activePiece.hp>0;
       const handling=attack.move==="dagger"?TACTICS.daggerHandling:1;
       const aim = AIM.base + (equipped?activePiece.accuracy*handling:0) + (actor.dex - target.dex) * AIM.dex + (actor.skill - target.skill) * AIM.skill +
-        (distance === 0 && bow ? AIM.closeBow : 0) + (distance===2&&bow?AIM.farBow:0) + (shortSpear ? AIM.closeSpear : 0) - obscuredShot - constriction * AIM.clearance;
+        (distance === 0 && bow ? AIM.closeBow : 0) + (distance===2&&bow?AIM.farBow:0) + (shortSpear ? AIM.closeSpear : attack.move==="thrust"&&distance===1?AIM.reachSpear:0) - obscuredShot - constriction * AIM.clearance;
       if (roll() >= Math.max(AIM.minimum, Math.min(AIM.maximum, aim))) {
         record(actor, target, "miss", { move: attack.move });
         continue;
@@ -199,7 +199,7 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       // or flat bonus. The bow's backup dagger retains the kit's bonus only
       // while the kit is intact; the shield bash uses the actual shield.
       const base = attackComponents(actor,attack,activePiece).base *
-        (intact ? 1 : 0.55) * (shortSpear ? TACTICS.shortSpearImpact : 1) * (attack.move==="swing"?(constriction>0?TACTICS.constrainedSwing:TACTICS.openSwing):1) * (counter && attack !== BASH ? 1.18 : 1);
+        (intact ? 1 : 0.55) * (shortSpear ? TACTICS.shortSpearImpact : attack.move==="thrust"&&distance===1?TACTICS.reachSpearImpact:1) * (attack.move==="swing"?(constriction>0?TACTICS.constrainedSwing:TACTICS.openSwing):1) * (counter && attack !== BASH ? 1.18 : 1);
       const vital = !block && !parry && guardRoll > 0.96;
       const penetration=equipped?activePiece.penetration*handling:0;
       const materialProtection=protection(target,attack.type)*(1-penetration);
@@ -261,7 +261,7 @@ export function physicalBuildStats(snapshot){
     aimDexPerPoint:AIM.dex,aimSkillPerLevel:AIM.skill,aimCloseBow:AIM.closeBow,aimCloseSpear:AIM.closeSpear,aimClearance:AIM.clearance,
     penetration:a.weapon.penetration,materialFactors:Object.fromEntries(Object.keys(ARMOUR_FACTOR).map(type=>[type,protection(a)>0?protection(a,type)/protection(a):0])),
     materialProtection:Object.fromEntries(Object.keys(ARMOUR_FACTOR).map(type=>[type,protection(a,type)])),
-    tactics:TACTICS,aimFarBow:AIM.farBow,
+    tactics:TACTICS,aimFarBow:AIM.farBow,aimReachSpear:AIM.reachSpear,
     attacks:attacks.map(attack=>({...attack,...attackComponents(a,attack,attack===BASH?a.shield:a.weapon),
       condition:attack===BASH?a.shield:a.weapon})),
     block:a.shield.hp>0?GUARD.block*a.shield.proficiency:0,
