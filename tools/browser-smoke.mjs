@@ -118,6 +118,12 @@ try{
     assert.equal(await evaluate('document.getElementById("character-heading").textContent'),"Wanderer");
     await evaluate('document.getElementById("dismissSaveReset").click()');
     assert.equal(await evaluate('document.getElementById("saveResetNotice").hidden'),true);
+    const clan=await evaluate(`(()=>{const menu=document.getElementById("clanMenu"),summary=menu.querySelector("summary");const closed=!menu.open;summary.click();menu.scrollIntoView({block:"start"});return {closed,open:menu.open,text:menu.innerText,disabled:[...menu.querySelectorAll("button")].every(b=>b.disabled),count:menu.querySelectorAll("button").length,overflow:document.documentElement.scrollWidth-innerWidth};})()`);
+    assert.ok(clan.closed&&clan.open&&clan.disabled&&clan.count===2&&clan.overflow<=2);
+    assert.match(clan.text,/not available in this browser-only alpha/);
+    assert.match(clan.text,/Search clans/);assert.match(clan.text,/Create a clan/);
+    await shot("clan-"+width);
+    await evaluate('document.getElementById("clanMenu").querySelector("summary").click()');
     const result=await evaluate(`(()=>{const $=id=>document.getElementById(id);
       $("alphaTools").open=true;$("alphaFamily").value="leather";
       $("alphaMaxStats").click();$("alphaCoins").click();$("alphaCoins").click();
