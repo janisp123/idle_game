@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## CLAN-IDEAS-001 · STARTED (2026-11-25, chat)
+
+Record Owner's clan building and optional daily PvE castle defence ideas in topical brainstorming notes; preserve their proposed status, separate open balance choices, and link the pre-server roadmap. Branch `docs/clan-castle-brainstorm`, base `dcc76b6`. Documentation only; no gameplay, permissions or server changes. Next save the design.
+
 ## CLAN-PLAN-001 · STARTED (2026-11-25, chat)
 
 Owner requests maximum useful development/design before renting a server, with clear function placement and a durable server implementation handoff. Branch `docs/clan-server-handoff`, base `cd4e93d`. Documentation only: map screens, domain functions, data ownership, offline test work, server prerequisites, staged acceptance and open decisions. No hosting choice, provisioning, gameplay change or fictional online functionality. Added and linked [CLAN_IMPLEMENTATION_PLAN.md](CLAN_IMPLEMENTATION_PLAN.md): explicit screen/operation matrix, data and transaction invariants, source-backed current material outputs, pre-server P0–P6 and server S1–S6 milestones, open owner decisions. Next documentation checks and merge.
