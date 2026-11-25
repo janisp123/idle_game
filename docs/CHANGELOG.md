@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## ALPHA-ART-001 · STARTED (2026-11-25, chat)
+
+Owner asked to add the exact original Impressive Victory/Humiliation art. Branch `alpha/approved-verdict-art`, based on verified deployed gameplay and documentation closeout #155. Both prepared WebP bytes match original SHA-256 in mechanics/OUTCOME_ART_HANDOFF.md. Container GitHub DNS remains unavailable; connector cannot upload local files without inline binary data. Goal: prepare registry/cache activation and exact asset/browser tests in a draft PR. Do not merge until both original WebPs are committed and all checks pass. No save or gameplay changes. Next: prepare the activation patch and upload the two exact binary assets.
+
 ## ALPHA-GEAR-001 · DEPLOYED
 
 Branch: `alpha/six-month-gear-benchmark`. Goal: source-backed six-month single-build progression, grade/coin purchase gates, open arena difficulty, meaningful stat-scaling gear, independent weapon and armour expertise, motivational outcome art, Max Stats and +100,000 arena coins testing controls. Owner approved extended design on 2026-11-25; chat recorded detailed scope and criteria in TD_LIST and DECISIONS. Last verified: GLAD-005 deployed; current progression/shop source inspected. No gameplay code, asset integration or new simulation completed by this handoff. A0–A9 gameplay/code milestones verified on their code heads, including actual Chrome smoke. Owner explicitly approved deferring original artwork (ALPHA-ART-001) and releasing the playable alpha using verified existing art after final checks. Custom art is separately tracked, not completed. Final-head checks passed; merge and Pages deployment verified as recorded below.
