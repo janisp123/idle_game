@@ -12,10 +12,10 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Integrate the exact generated gladiator art and foreground actual gameplay/progression while retaining the permanent free-game policy.
 - **Acceptance:** Artwork byte parity, matching README and landing priorities, accurate previous status, static and real-browser checks at 390/1440px, verified Pages. No game or save changes.
-- **Status:** IN_REVIEW — [PR #162](https://github.com/janisp123/idle_game/pull/162); final checks and deployment pending.
+- **Status:** DONE — [PR #162](https://github.com/janisp123/idle_game/pull/162) merged `c7f2b8c`; final website, systems and protocol checks passed; [Pages 45608310757](https://github.com/janisp123/idle_game/actions/runs/45608310757) succeeded.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #162).
 
 ## FREE-001 — Permanent free-game commitment
 

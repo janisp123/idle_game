@@ -1,8 +1,8 @@
 # Current working checkpoint
 
-## SITE-004 — PR #162
+## SITE-004 — deployed PR #162
 
-Exact original gladiator artwork and gameplay-first public presentation; no gameplay/save changes. Verify final-head checks and Pages. Next after verification: full balance audit using the synchronized test engine.
+Exact original gladiator artwork and gameplay-first public presentation merged `c7f2b8c`. Final head `ab1481e` passed website 45608205457 (static, regression and Chromium 390/1440px), systems 45608205312 and protocol 45608205508. [Pages 45608310757](https://github.com/janisp123/idle_game/actions/runs/45608310757) validation and publish succeeded. No gameplay/save changes. Independent live rendering not rechecked during recovery. Next: full balance audit using the synchronized test engine; report findings before changing balance.
 
 ## FREE-001 — deployed PR #161
 
