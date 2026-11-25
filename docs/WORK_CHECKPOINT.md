@@ -1,8 +1,12 @@
 # Current working checkpoint
 
-## CHAR-STATS-002 — draft PR #158
+## SIM-003 — draft PR #159
 
-Owner-approved compact stat overview and activity factors implemented; CI pending. No gameplay/save change. Next verify and release.
+Production parity safeguards and workflow coverage implemented; final CI pending. No game source changed. Next verify checks and merge.
+
+## CHAR-STATS-002 — deployed PR #158
+
+Final head 4c4d0bc passed all three workflows, 114 game/UI tests and real Chromium. Merge 3002fb1, Pages 45589039287 succeeded. No gameplay/save change.
 
 ## CHAR-STATS-001 — deployed PR #157
 

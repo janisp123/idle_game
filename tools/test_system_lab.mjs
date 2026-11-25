@@ -209,3 +209,25 @@ test('build baseline uses real normal/alpha settlement and conserves arena curre
   }
   assert.deepEqual(report,await runBuildBaseline({scenarios:[scenario],seed:20261125}));
 });
+
+// Guard the CI source coverage contract as well as runtime parity. New game
+// modules are automatically covered by the recursive glob, unless explicitly
+// presentation-only. The broad filter is intentional; full balance stays manual.
+test("SIM-003 both simulation workflows automatically cover production modules",()=>{
+  for(const path of [".github/workflows/combat-simulator.yml",".github/workflows/system-lab.yml"]){
+    const yaml=readFileSync(path,"utf8");
+    const paths=yaml.slice(yaml.indexOf("  pull_request:"),yaml.indexOf("\npermissions:"));
+    assert.ok(paths.includes("'site/play/**/*.mjs'"));
+    for(const excluded of paths.matchAll(/'!site\/play\/([^']+)'/g)){
+      const name=excluded[1];
+      assert.ok(["app.mjs","character-stats.mjs","result-readout.mjs"].includes(name));
+      // An excluded UI module must not be imported by a production module
+      // covered by the actual mechanics/simulation graph.
+      for(const source of ["engine","combat","physical-duel","smith","armour","arena-wallet","expertise","attributes","difficulty","production","loot"]){
+        assert.ok(!readFileSync("site/play/"+source+".mjs","utf8").includes("./"+name),source+" imports excluded "+name);
+      }
+    }
+  }
+  const yaml=readFileSync(".github/workflows/system-lab.yml","utf8");
+  assert.match(yaml,/github.event_name == 'workflow_dispatch' && inputs.full_balance == true/);
+});

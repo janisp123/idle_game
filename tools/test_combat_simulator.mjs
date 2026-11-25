@@ -97,3 +97,49 @@ test('CLI outputs JSON and remains outside the static website package',()=>{
   assert.match(workflow,/test_combat_simulator\.mjs/);
   assert.ok(!readFileSync('site/play/index.html','utf8').includes('combat-simulator.mjs'));
 });
+
+import {newGame,desiredArenaPlayer,chooseActivity,settle,readSave} from "../site/play/engine.mjs";
+import {blankExpertise,fullExpertise,EXPERTISE_BALANCE} from "../site/play/expertise.mjs";
+import {COMBAT_LOADOUTS} from "../site/play/combat-skills.mjs";
+import {arenaReward} from "../site/play/arena-wallet.mjs";
+test("SIM-003 synthetic kits exactly match real engine snapshots, including novice and mixed armour",()=>{
+  for(const loadout of Object.keys(COMBAT_LOADOUTS))for(const grade of [0,3,7])for(const mode of ["trained","novice"]){
+    const state=newGame(42),spec={grade,quality:grade===7?"masterwork":"common"};
+    state.combatLoadout=loadout;state.armour={head:"padded",torso:"plate",arms:"leather",legs:"none"};
+    state.equipment[loadout]=spec;
+    for(const [slot,family] of Object.entries(state.armour))if(family!=="none")state.equipment[slot+":"+family]=spec;
+    state.skills.fighting={level:52,xp:0};state.difficulties.fighting=grade;
+    const practice=mode==="novice"?blankExpertise():fullExpertise();
+    practice[loadout]=1000*EXPERTISE_BALANCE.unitsPerHour;
+    state.expertise={...practice};state.expertiseActive={...practice};
+    const expected=desiredArenaPlayer(state);
+    const synthetic=createPlayerSnapshot({grade,itemGrade:grade,quality:spec.quality,loadout,armourSlots:state.armour,
+      expertiseMode:mode,expertiseHours:{[loadout]:1000},str:expected.str,dex:expected.dex,end:expected.end,skill:expected.skill});
+    assert.deepEqual(synthetic,expected);
+    const live=settle(chooseActivity(state,"fighting",42,()=>.5).state,43,()=>.5).state;
+    assert.deepEqual(live.combatSession.player,synthetic);
+    const saved=readSave(JSON.stringify(live));assert.ok(saved);
+    const before=JSON.stringify(saved);
+    const report=simulateBatch({snapshot:saved,battles:8,trace:2});
+    const end=settle(saved,42+8*BOUT_MS,()=>.5);
+    assert.equal(report.coins,end.state.coins-saved.coins);
+    assert.equal(report.coins,report.outcomes.victory*arenaReward(grade));
+    assert.equal(report.outcomes.victory,end.report.arena.victories);
+    assert.equal(report.outcomes.defeat,end.report.arena.defeats);
+    assert.equal(report.outcomes.double_death,end.report.arena.doubleDeaths);
+    for(const [i,sample] of report.samples.entries())assert.deepEqual(sample.events,
+      combatAtTime({...saved.combatSession,elapsedMs:i*BOUT_MS}).events);
+    assert.equal(JSON.stringify(saved),before);
+  }
+});
+test("SIM-003 explicitly novice or trained reports, no silently ignored frozen-build overrides",()=>{
+  const args={grade:"S",itemGrade:7,quality:"common",armour:"plate",battles:2};
+  const novice=simulateBatch({...args,expertiseMode:"novice"}),trained=simulateBatch(args);
+  assert.equal(novice.playerBuild.expertiseMode,"novice");
+  assert.equal(trained.playerBuild.expertiseMode,"trained");
+  assert.ok(novice.player.condition.weapon.proficiency<trained.player.condition.weapon.proficiency);
+  assert.throws(()=>createPlayerSnapshot({...args,expertiseMode:"unknown"}),RangeError);
+  assert.throws(()=>simulateBatch({snapshot:startCombatSession(createPlayerSnapshot(args),42),grade:"S",battles:1}),RangeError);
+  assert.deepEqual(parseCliArgs(["--expertise-mode","novice","--expertise-hours","greatsword:1000,plate:2000"]),
+    {expertiseMode:"novice",expertiseHours:{greatsword:1000,plate:2000}});
+});

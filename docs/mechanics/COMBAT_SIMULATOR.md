@@ -72,3 +72,8 @@ Use `--item-grade 2 --quality fine` to set the generated fighter’s item grade 
 ## A3 expertise fixtures
 
 Synthetic generated snapshots default to fully trained gear so prior gear-only comparisons remain comparable; this is not a real new character's default. An explicit `expertiseHours` JSON object overrides individual tracks, e.g. `{"bow":4000,"greatsword":0,"plate":4000}` for a veteran archer trying an unfamiliar greatsword while retaining Plate experience. Unspecified tracks stay fully trained in synthetic fixtures. Use valid weapon/family IDs and nonnegative hours representable as safe integer quarter-ms units. `node tools/gladiator-benchmark.mjs` adds a 14,400-duel matched expertise matrix; real progression uses the separate `tools/simulation/build-progression.mjs` engine harness with earned counters starting at zero. See [COMBAT.md](COMBAT.md).
+
+
+## SIM-003 — production synchronization
+
+Synthetic builds now use the same trainingKit/trainingEffects helpers as the engine and include the exact training kit. Default `expertiseMode: "trained"` retains previous benchmark assumptions; `"novice"` starts every track at zero. `expertiseHours` overrides individual tracks on either baseline (CLI `--expertise-mode novice --expertise-hours greatsword:1000,plate:2000`). Saved frozen snapshots take precedence; mixing build overrides is rejected. Four armour slots, not eleven. Parity tests compare every style, Non/D/S, mixed armour and both expertise modes with actual engine-created sessions, save/reload and real settled rewards. Automatic PR workflow covers production modules except explicitly presentation-only modules; report and benchmark run on gameplay changes. No game changes.

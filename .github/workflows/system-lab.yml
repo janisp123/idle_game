@@ -16,7 +16,13 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'site/play/**/*.mjs'
+      - '!site/play/app.mjs'
+      - '!site/play/character-stats.mjs'
+      - '!site/play/result-readout.mjs'
       - 'tools/system-lab.mjs'
+      - 'tools/combat-simulator.mjs'
+      - 'tools/test_combat_simulator.mjs'
       - 'tools/simulation/**'
       - 'tools/test_system_lab.mjs'
       - 'docs/mechanics/SYSTEM_LAB.md'

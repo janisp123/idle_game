@@ -153,11 +153,7 @@ function trajectory(modules, scenario, seed) {
         grade=state.difficulties.fighting??0;
         if(time%DAY===0){
           let best=-1;
-          const kit=smith.trainingKit(state.armour,loadout,state.equipment);
-          const effects=smith.trainingEffects(kit,loadout,state.expertiseActive);
-          const player={name:'Audit',loadout,str:stats.STR.value,dex:stats.DEX.value,end:stats.END.value,
-            skill:state.skills.fighting.level,gearAttack:effects.gearAttack,condition:effects.condition,
-            gear:{...armour.armourStats(state.armour,loadout),gearDefense:effects.gearDefense}};
+          const player=engine.desiredArenaPlayer(state);
           for(let tier=0;tier<8;tier++){
             const session=combat.startCombatSession({...player,difficulty:tier},(seed^0x49cc4b77)>>>0);
             let wins=0;
