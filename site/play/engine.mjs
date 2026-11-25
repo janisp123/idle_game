@@ -1,3 +1,4 @@
+import { APPRENTICE_BALANCE, apprenticeProgress } from "./apprentice.mjs?v=apprentice-a1";
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=cap-001";
 import {
@@ -115,7 +116,10 @@ export const activityDuration = (id, speedMultiplier = 1) => {
 const MAX = Number.MAX_SAFE_INTEGER;
 const isCount = value => Number.isSafeInteger(value) && value >= 0;
 const validTime = value => Number.isSafeInteger(value) && value >= 0;
-export const MAX_WAGONS = 3;
+export const MAX_WAGONS = APPRENTICE_BALANCE.maxSlots;
+// Derived, not saved. Preexisting routes are read/settled without truncation.
+export const getApprenticeProgress = state => apprenticeProgress(state, SKILL_IDS);
+export const queueCapacity = state => getApprenticeProgress(state).slots;
 /**
  * Independent skill progression and batch reward tuning.
  * Existing alpha numbers are unchanged. See docs/mechanics/.
@@ -657,7 +661,7 @@ export function skillMasterReadiness(state, skillId) {
 }
 
 /**
- * Settle at most three finite wagons chronologically, then the Forever wagon.
+ * Settle at most MAX_WAGONS - 1 finite wagons chronologically, then the Forever wagon.
  * No per-cycle replay; material from mining can feed subsequent masonry even
  * after a hundred years offline. Effective levels change only at the Master.
  */
@@ -672,9 +676,9 @@ export function settle(state, now = Date.now(), random = Math.random) {
       if (report?.completed || report?.arena) reports.push(report);
     }
   };
-  // Three productive segments + at most three transitions; the loop is
+  // At most MAX_WAGONS productive segments and MAX_WAGONS transitions; the loop is
   // bounded by queue length and independent of how long the player was away.
-  for (let step = 0; step < 10; step++) {
+  for (let step = 0; step < 2 * MAX_WAGONS + 2; step++) {
     if (next.transition) {
       const untilReady = remainingTransitionMs(next);
       const result = settleTransition(next, Math.min(end, next.settledAtMs + untilReady), random, state.attributeEffort,true);
@@ -738,7 +742,7 @@ export function queueStartActivity(state, activity, previousLastDurationMs = nul
   if (!Object.hasOwn(ACTIVITIES, activity)) throw new RangeError("Unknown activity");
   const result = settle(state, now, random);
   const current = result.state;
-  if (current.wagons.some(w => w.activity === activity) || current.wagons.length >= MAX_WAGONS)
+  if (current.wagons.some(w => w.activity === activity) || current.wagons.length >= queueCapacity(current))
     throw new RangeError("Activity already queued or all wagons occupied");
   if (!current.wagons.length) {
     const queued = { ...current, wagons: [{ activity, plannedMs: null }], productiveElapsedMs: 0 };
@@ -772,8 +776,8 @@ export function queueInsertTimedActivity(state, activity, plannedMs,
   const result = settle(state, now, random);
   const current = result.state;
   if (!current.wagons.length) throw new RangeError("Choose Start now for the first activity");
-  if (current.wagons.length >= MAX_WAGONS)
-    throw new RangeError("All three hourglasses are occupied");
+  if (current.wagons.length >= queueCapacity(current))
+    throw new RangeError("All unlocked activity slots are occupied");
   if (current.wagons.some(w => w.activity === activity))
     throw new RangeError("Activity already in the route");
   const wagons = [
