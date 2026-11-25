@@ -1,4 +1,4 @@
-import { characterStats } from "./character-stats.mjs?v=cap-001";
+import { characterStats } from "./character-stats.mjs?v=apprentice-a1";
 import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
 import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
 import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a2";
@@ -22,7 +22,7 @@ import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats, dodgeChance }
   from "./armour.mjs?v=bal-002";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=cap-001";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=apprentice-a1";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
