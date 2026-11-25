@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## CAP-001 — Reward stop at skill XP cap and evergreen public overview
+
+- **Goal:** Pause all rewards at one full skill XP bar, auto-advance queued activities, keep explicit Master claims; generic public overview.
+- **Acceptance:** XP, loot, crafting, coins, attributes and expertise stop at the first cap; no phantom rewards during pauses/travel; timed and until-level-up wagons skip capped skills; no resource-proof deadlock; current V16 saves retained; bounded offline settlement and UI/browser checks. Rebenchmark economy, no silent numerical retuning. Preserve artwork and permanent FREE-001.
+- **Status:** IN_REVIEW — [PR #167](https://github.com/janisp123/idle_game/pull/167).
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## BAL-002 — Physical weapon counters, armour tradeoffs and terrain
 
 - **Goal:** Implement owner-approved physical counter system with distinct weapon/armour strengths and arena specialization.
