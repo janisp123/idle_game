@@ -13,27 +13,16 @@ The Long Vigil is the playable game in the Idle Game hobby project. Fight automa
 - **[Play in your browser](https://janisp123.github.io/idle_game/play/)**
 - **[Visit the project website](https://janisp123.github.io/idle_game/)**
 
-The playable alpha is an experimental, accelerated test build. Expect changes, rough edges and ongoing balancing. Progress is stored **locally in your browser** and alpha saves may be reset; there are no online accounts, multiplayer or cross-device save synchronization. This is not a production-ready game.
+The playable alpha is an experimental test build. Expect changes, rough edges and ongoing balancing. Progress is stored **locally in your browser** and alpha saves may be reset; there are no online accounts, multiplayer or cross-device save synchronization. This is not a production-ready game.
 
-## What you can play now
+## The game
 
-- Automatic physical combat in five arenas, with bow, spear, sword & shield, greatsword or war hammer.
-- Arena coins and equipment from Non-grade through S, with Poor, Common, Fine and unbreakable Masterwork quality, four armour slots and material/handling trade-offs.
-- Separate retained weapon and armour expertise; equipment purchase gates use activated Fighting level and coins, not character class. All arena difficulties can be attempted.
-- Strength, dexterity and endurance; eleven activities: Fighting, Hunting, Fishing, Foraging, Woodcutting, Mining, Smithing, Construction, Cooking, Farming and Training.
-- Unlimited offline elapsed time, queued work and explicit Skill Master claims. Effective stats and gear are frozen during absence; skill XP is capped at one unclaimed level bar.
-- Expandable live character statistics with actual source breakdowns, and developer-only production-linked combat and systems simulations.
+- **Fight and specialize.** Choose your equipment and develop a fighting style. Weapons, armour and terrain shape the outcome of automatic arena battles.
+- **Build your character.** Train skills, grow attributes, earn rewards and improve your equipment. Specialization brings strengths as well as weaknesses.
+- **Survive beyond the arena.** Gather resources, practise crafts and plan a route of activities to support your progression.
+- **Play at your own pace.** Your character can work while you are away. Rewards depend on your character's current progression and activity; when a skill reaches its limit, return to advance it or let the planned route continue to another activity.
 
-The long-term balance target is one specialized endgame build after approximately six months of sustained normal-profile progression, not a calendar lock or guaranteed outcome. Current alpha timing is deliberately accelerated.
-
-## Guiding ideas
-
-- **Progress at your own pace.** The game is designed for players who may step away for long periods rather than check in every day.
-- **A world worth returning to.** Different activities, character development and encounters should create lasting choices without demanding constant attention.
-- **Atmosphere over noise.** Original dark-fantasy artwork and a readable, mobile-friendly interface matter as much as the underlying rules.
-- **Build carefully, change when needed.** Gameplay decisions are tested and revised; ideas are not guaranteed features.
-
-These are design goals, not a final roadmap. For current implementation details, use the mechanics documentation and repository history rather than this overview.
+The Long Vigil is an evolving idle RPG, not a fixed feature list. The game is designed around meaningful choices, gradual progression and a grimdark atmosphere rather than constant attention. Mechanics, balance and content will change during development; the [mechanics handbook](docs/mechanics/README.md) and [changelog](docs/CHANGELOG.md) describe the current implementation.
 
 ## A Hobby, Not a Business
 
