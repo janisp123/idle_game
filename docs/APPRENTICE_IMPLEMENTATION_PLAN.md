@@ -1,6 +1,6 @@
 # The Apprentice — progressive automation implementation plan
 
-**APPRENTICE-PLAN-001 — design and staged implementation, 2026-11-25.** Owner requested the plan, then approved starting implementation. A1 foundation merged 5b996be (PR #177); A2 auto-Master is in PR #178. Other automation remains proposed. Scope: make experienced players need less attention, retain all five existing weapon classes, no separate apprentice grind, no paid automation or upkeep. Subsequent batches are scoped separately; do not assume provisional economy or feature thresholds approved.
+**APPRENTICE-PLAN-001 — design and staged implementation, 2026-11-25.** Owner requested the plan, then approved starting implementation. A1 foundation merged 5b996be (PR #177); A2 auto-Master merged 0136237 (PR #178), Pages 45663460990 passed. Other automation remains proposed. Scope: make experienced players need less attention, retain all five existing weapon classes, no separate apprentice grind, no paid automation or upkeep. Subsequent batches are scoped separately; do not assume provisional economy or feature thresholds approved.
 
 ## 1. Direction and unresolved policy
 
@@ -46,6 +46,8 @@ Baseline before A1 `site/play/engine.mjs` had MAX_WAGONS=3, save validation, que
 Login chores must not automatically fill multiple levels retroactively. First settle exactly once at old state and effective bonuses; cap stops rewards as today. Run configured unlocked chores at that settlement boundary, preserve time already lost to cap, then resume existing Forever/queue under new levels. Ordinary ticks do NOT run login-only automation. A2 defines login as page entry, not visibility return, ordinary tick, storage event or browser focus. Repeated page entry cannot claim already-consumed XP. Web Locks serialize cooperating login attempts; observed stale save writes are rejected, but localStorage cannot provide authoritative cross-client transactions. Without Web Locks and working local storage, automated claims stay disabled. Alpha virtual day tests should invoke the same orchestration only when explicitly simulating a login.
 
 ## 4. Gear prerequisite and automation
+
+Owner requires higher-grade Poor to be a genuine improvement over previous-grade Masterwork. See [GEAR-RESEARCH-001 numerical study](mechanics/GEAR_PROGRESSION_STUDY.md) for 376,800 source-linked duels and proposed cumulative grade perks. Candidate is not approved for production; audit durability, expertise, counters and economy before A3 implementation.
 
 Current smithQuote in `site/play/smith.mjs` accepts higher grades with nondecreasing quality and itemPower, uses cumulative price differences and Fighting-level gates. Engine buyEquipment settles first and auto-equips armour family on purchase. This conflicts with new sequential grade progression.
 
