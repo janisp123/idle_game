@@ -70,15 +70,15 @@
         },
         "productiveFightingHours": 510,
         "outcomes": {
-          "bouts": 9348,
-          "victories": 7661,
-          "defeats": 1684,
+          "bouts": 9349,
+          "victories": 7654,
+          "defeats": 1692,
           "doubleDeaths": 3
         },
-        "winRatePct": 81.95,
-        "coinsEarned": 211090,
+        "winRatePct": 81.87,
+        "coinsEarned": 201336,
         "coinsSpent": 181321,
-        "wallet": 29769,
+        "wallet": 20015,
         "opponentGrade": "D",
         "gear": {
           "greatsword": {
@@ -103,7 +103,7 @@
           }
         },
         "expertise": {
-          "greatsword": 509.9611111111111,
+          "greatsword": 509.97222222222223,
           "sword_shield": 0,
           "hammer": 0,
           "bow": 0,
@@ -111,7 +111,7 @@
           "none": 4.694444444444445,
           "padded": 0,
           "leather": 0,
-          "plate": 505.26666666666665
+          "plate": 505.27777777777777
         }
       },
       {
@@ -123,17 +123,17 @@
           "DEX": 98,
           "END": 91
         },
-        "productiveFightingHours": 1720.23,
+        "productiveFightingHours": 1720.24,
         "outcomes": {
           "bouts": 31455,
-          "victories": 26547,
-          "defeats": 4896,
+          "victories": 26539,
+          "defeats": 4904,
           "doubleDeaths": 12
         },
-        "winRatePct": 84.4,
-        "coinsEarned": 1456064,
+        "winRatePct": 84.37,
+        "coinsEarned": 1325096,
         "coinsSpent": 901321,
-        "wallet": 554743,
+        "wallet": 423775,
         "opponentGrade": "B",
         "gear": {
           "greatsword": {
@@ -158,7 +158,7 @@
           }
         },
         "expertise": {
-          "greatsword": 1720.2333333333333,
+          "greatsword": 1720.1888888888889,
           "sword_shield": 0,
           "hammer": 0,
           "bow": 0,
@@ -166,7 +166,7 @@
           "none": 4.694444444444445,
           "padded": 0,
           "leather": 0,
-          "plate": 1715.5388888888888
+          "plate": 1715.4944444444445
         }
       },
       {
@@ -180,15 +180,15 @@
         },
         "productiveFightingHours": 3005.52,
         "outcomes": {
-          "bouts": 54967,
-          "victories": 46286,
-          "defeats": 8662,
+          "bouts": 54968,
+          "victories": 46278,
+          "defeats": 8671,
           "doubleDeaths": 19
         },
-        "winRatePct": 84.21,
-        "coinsEarned": 4185596,
+        "winRatePct": 84.19,
+        "coinsEarned": 3434724,
         "coinsSpent": 1688821,
-        "wallet": 2496775,
+        "wallet": 1745903,
         "opponentGrade": "A",
         "gear": {
           "greatsword": {
@@ -213,7 +213,7 @@
           }
         },
         "expertise": {
-          "greatsword": 3005.4944444444445,
+          "greatsword": 3005.5,
           "sword_shield": 0,
           "hammer": 0,
           "bow": 0,
@@ -221,7 +221,7 @@
           "none": 4.694444444444445,
           "padded": 0,
           "leather": 0,
-          "plate": 3000.8
+          "plate": 3000.8055555555557
         }
       },
       {
@@ -235,15 +235,15 @@
         },
         "productiveFightingHours": 3659.67,
         "outcomes": {
-          "bouts": 66863,
-          "victories": 56964,
-          "defeats": 9880,
+          "bouts": 66864,
+          "victories": 56956,
+          "defeats": 9889,
           "doubleDeaths": 19
         },
-        "winRatePct": 85.2,
-        "coinsEarned": 6237466,
+        "winRatePct": 85.18,
+        "coinsEarned": 4965815,
         "coinsSpent": 3001321,
-        "wallet": 3236145,
+        "wallet": 1964494,
         "opponentGrade": "S",
         "gear": {
           "greatsword": {
@@ -268,7 +268,7 @@
           }
         },
         "expertise": {
-          "greatsword": 3659.616666666667,
+          "greatsword": 3659.6222222222223,
           "sword_shield": 0,
           "hammer": 0,
           "bow": 0,
@@ -276,7 +276,7 @@
           "none": 4.694444444444445,
           "padded": 0,
           "leather": 0,
-          "plate": 3654.9222222222224
+          "plate": 3654.927777777778
         }
       }
     ]
@@ -352,15 +352,15 @@
         },
         "productiveFightingHours": 510,
         "outcomes": {
-          "bouts": 9304,
-          "victories": 8059,
-          "defeats": 1245,
+          "bouts": 9305,
+          "victories": 8050,
+          "defeats": 1255,
           "doubleDeaths": 0
         },
-        "winRatePct": 86.62,
-        "coinsEarned": 223130,
+        "winRatePct": 86.51,
+        "coinsEarned": 212696,
         "coinsSpent": 181321,
-        "wallet": 41809,
+        "wallet": 31375,
         "opponentGrade": "D",
         "gear": {
           "hammer": {
@@ -407,15 +407,15 @@
         },
         "productiveFightingHours": 1720.26,
         "outcomes": {
-          "bouts": 31282,
-          "victories": 28101,
-          "defeats": 3178,
+          "bouts": 31283,
+          "victories": 28090,
+          "defeats": 3190,
           "doubleDeaths": 3
         },
-        "winRatePct": 89.83,
-        "coinsEarned": 1547188,
+        "winRatePct": 89.79,
+        "coinsEarned": 1407368,
         "coinsSpent": 901321,
-        "wallet": 645867,
+        "wallet": 506047,
         "opponentGrade": "B",
         "gear": {
           "hammer": {
@@ -442,11 +442,11 @@
         "expertise": {
           "greatsword": 0,
           "sword_shield": 0,
-          "hammer": 1720.2166666666667,
+          "hammer": 1720.2055555555555,
           "bow": 0,
           "spear": 0,
           "none": 4.683333333333334,
-          "padded": 1715.5333333333333,
+          "padded": 1715.5222222222221,
           "leather": 0,
           "plate": 0
         }
@@ -462,15 +462,15 @@
         },
         "productiveFightingHours": 3005.61,
         "outcomes": {
-          "bouts": 54582,
-          "victories": 49764,
-          "defeats": 4809,
+          "bouts": 54583,
+          "victories": 49754,
+          "defeats": 4820,
           "doubleDeaths": 9
         },
-        "winRatePct": 91.17,
-        "coinsEarned": 4553264,
+        "winRatePct": 91.15,
+        "coinsEarned": 3728686,
         "coinsSpent": 1688821,
-        "wallet": 2864443,
+        "wallet": 2039865,
         "opponentGrade": "A",
         "gear": {
           "hammer": {
@@ -497,11 +497,11 @@
         "expertise": {
           "greatsword": 0,
           "sword_shield": 0,
-          "hammer": 3005.5666666666666,
+          "hammer": 3005.561111111111,
           "bow": 0,
           "spear": 0,
           "none": 4.683333333333334,
-          "padded": 3000.883333333333,
+          "padded": 3000.8777777777777,
           "leather": 0,
           "plate": 0
         }
@@ -517,15 +517,15 @@
         },
         "productiveFightingHours": 3659.79,
         "outcomes": {
-          "bouts": 66414,
-          "victories": 61031,
-          "defeats": 5371,
+          "bouts": 66415,
+          "victories": 61021,
+          "defeats": 5382,
           "doubleDeaths": 12
         },
-        "winRatePct": 91.89,
-        "coinsEarned": 6733599,
+        "winRatePct": 91.88,
+        "coinsEarned": 5356268,
         "coinsSpent": 3001321,
-        "wallet": 3732278,
+        "wallet": 2354947,
         "opponentGrade": "S",
         "gear": {
           "hammer": {
@@ -552,11 +552,11 @@
         "expertise": {
           "greatsword": 0,
           "sword_shield": 0,
-          "hammer": 3659.761111111111,
+          "hammer": 3659.7555555555555,
           "bow": 0,
           "spear": 0,
           "none": 4.683333333333334,
-          "padded": 3655.0777777777776,
+          "padded": 3655.072222222222,
           "leather": 0,
           "plate": 0
         }
@@ -634,15 +634,15 @@
         },
         "productiveFightingHours": 504.96,
         "outcomes": {
-          "bouts": 9342,
-          "victories": 6812,
-          "defeats": 2530,
+          "bouts": 9343,
+          "victories": 6803,
+          "defeats": 2540,
           "doubleDeaths": 0
         },
-        "winRatePct": 72.92,
-        "coinsEarned": 186650,
+        "winRatePct": 72.81,
+        "coinsEarned": 177964,
         "coinsSpent": 68821,
-        "wallet": 117829,
+        "wallet": 109143,
         "opponentGrade": "E",
         "gear": {
           "sword_shield": {
@@ -687,17 +687,17 @@
           "DEX": 97,
           "END": 90
         },
-        "productiveFightingHours": 1695,
+        "productiveFightingHours": 1695.33,
         "outcomes": {
-          "bouts": 31176,
-          "victories": 24508,
-          "defeats": 6665,
+          "bouts": 31183,
+          "victories": 24510,
+          "defeats": 6670,
           "doubleDeaths": 3
         },
-        "winRatePct": 78.61,
-        "coinsEarned": 1342300,
+        "winRatePct": 78.6,
+        "coinsEarned": 1224168,
         "coinsSpent": 901321,
-        "wallet": 440979,
+        "wallet": 322847,
         "opponentGrade": "B",
         "gear": {
           "sword_shield": {
@@ -723,14 +723,14 @@
         },
         "expertise": {
           "greatsword": 0,
-          "sword_shield": 1694.9555555555555,
+          "sword_shield": 1695.3166666666666,
           "hammer": 0,
           "bow": 0,
           "spear": 0,
           "none": 4.677777777777778,
           "padded": 0,
           "leather": 0,
-          "plate": 1690.2777777777778
+          "plate": 1690.638888888889
         }
       },
       {
@@ -742,17 +742,17 @@
           "DEX": 126,
           "END": 116
         },
-        "productiveFightingHours": 2966.09,
+        "productiveFightingHours": 2966.41,
         "outcomes": {
-          "bouts": 54542,
-          "victories": 43014,
-          "defeats": 11520,
+          "bouts": 54549,
+          "victories": 43013,
+          "defeats": 11528,
           "doubleDeaths": 8
         },
-        "winRatePct": 78.86,
-        "coinsEarned": 3872220,
+        "winRatePct": 78.85,
+        "coinsEarned": 3185140,
         "coinsSpent": 1688821,
-        "wallet": 2183399,
+        "wallet": 1496319,
         "opponentGrade": "A",
         "gear": {
           "sword_shield": {
@@ -778,14 +778,14 @@
         },
         "expertise": {
           "greatsword": 0,
-          "sword_shield": 2966.0666666666666,
+          "sword_shield": 2966.411111111111,
           "hammer": 0,
           "bow": 0,
           "spear": 0,
           "none": 4.677777777777778,
           "padded": 0,
           "leather": 0,
-          "plate": 2961.3888888888887
+          "plate": 2961.733333333333
         }
       },
       {
@@ -797,17 +797,17 @@
           "DEX": 139,
           "END": 128
         },
-        "productiveFightingHours": 3616.5,
+        "productiveFightingHours": 3616.83,
         "outcomes": {
-          "bouts": 66407,
-          "victories": 53300,
-          "defeats": 13099,
+          "bouts": 66414,
+          "victories": 53298,
+          "defeats": 13108,
           "doubleDeaths": 8
         },
-        "winRatePct": 80.26,
-        "coinsEarned": 5797490,
+        "winRatePct": 80.25,
+        "coinsEarned": 4619460,
         "coinsSpent": 3001321,
-        "wallet": 2796169,
+        "wallet": 1618139,
         "opponentGrade": "S",
         "gear": {
           "sword_shield": {
@@ -833,14 +833,14 @@
         },
         "expertise": {
           "greatsword": 0,
-          "sword_shield": 3616.461111111111,
+          "sword_shield": 3616.8,
           "hammer": 0,
           "bow": 0,
           "spear": 0,
           "none": 4.677777777777778,
           "padded": 0,
           "leather": 0,
-          "plate": 3611.7833333333333
+          "plate": 3612.1222222222223
         }
       }
     ]
@@ -922,9 +922,9 @@
           "doubleDeaths": 4
         },
         "winRatePct": 79.47,
-        "coinsEarned": 204736,
+        "coinsEarned": 195464,
         "coinsSpent": 181321,
-        "wallet": 23415,
+        "wallet": 14143,
         "opponentGrade": "D",
         "gear": {
           "bow": {
@@ -977,9 +977,9 @@
           "doubleDeaths": 4
         },
         "winRatePct": 84.03,
-        "coinsEarned": 1460086,
+        "coinsEarned": 1328384,
         "coinsSpent": 901321,
-        "wallet": 558765,
+        "wallet": 427063,
         "opponentGrade": "B",
         "gear": {
           "bow": {
@@ -1032,9 +1032,9 @@
           "doubleDeaths": 6
         },
         "winRatePct": 85.64,
-        "coinsEarned": 4307093,
+        "coinsEarned": 3528134,
         "coinsSpent": 1688821,
-        "wallet": 2618272,
+        "wallet": 1839313,
         "opponentGrade": "A",
         "gear": {
           "bow": {
@@ -1087,9 +1087,9 @@
           "doubleDeaths": 9
         },
         "winRatePct": 87.04,
-        "coinsEarned": 6440843,
+        "coinsEarned": 5120467,
         "coinsSpent": 3001321,
-        "wallet": 3439522,
+        "wallet": 2119146,
         "opponentGrade": "S",
         "gear": {
           "bow": {
