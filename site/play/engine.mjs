@@ -1,5 +1,5 @@
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
-import { settleArenaPrizes } from "./arena-wallet.mjs?v=bal-002";
+import { settleArenaPrizes } from "./arena-wallet.mjs?v=cap-001";
 import {
   ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
 } from "./attributes.mjs?v=glad-001";
@@ -136,7 +136,8 @@ export const UNTIL_LEVEL_UP = "untilLevelUp";
 // Balancing lives here, not in queue settlement or the Skill Master UI.
 // Changing DEFAULT adjusts all producing skills; custom skill values can be
 // placed in OVERRIDES without changing the readiness logic or save format.
-export const MASTER_DEFAULT_ITEM_MINIMUM = 1;
+// CAP-001: a full XP bar is proof of work. No missing-output deadlock.
+export const MASTER_DEFAULT_ITEM_MINIMUM = 0;
 export const MASTER_ITEM_MINIMUM_OVERRIDES = Object.freeze({});
 export const MASTER_RESOURCE_MINIMUM = Object.freeze(Object.fromEntries(
   SKILL_IDS.map(id => [id, MASTER_ITEM_MINIMUM_OVERRIDES[id] ??
@@ -365,14 +366,16 @@ export function desiredArenaPlayer(state){
     str:attrs.STR.value,dex:attrs.DEX.value,end:attrs.END.value,skill:state.skills.fighting.level};
 }
 const arenaFields=["downtimeMs","sampledBouts","bouts","victories","defeats","doubleDeaths","coins"];
-function settleArenaBuild(state,elapsedMs){
+function settleArenaBuild(state,elapsedMs,outcomeCaches){
   const desired=desiredArenaPlayer(state);
   let session=state.combatSession??startCombatSession(desired,state.settledAtMs>>>0);
   let expertise=state.expertise;
   const totals=Object.fromEntries(arenaFields.map(k=>[k,0]));
   const run=duration=>{
     const player=session.player;
-    const prize=settleArenaPrizes(advanceCombatSession(session,duration),session.elapsedMs);
+    const cacheKey=JSON.stringify([session.seed,player]);
+    if(outcomeCaches&&!outcomeCaches.has(cacheKey))outcomeCaches.set(cacheKey,new Map());
+    const prize=settleArenaPrizes(advanceCombatSession(session,duration),session.elapsedMs,outcomeCaches?.get(cacheKey));
     const practice=prize.bouts*BOUT_MS-(prize.defeats+prize.doubleDeaths)*RESURRECTION_MS;
     if(practice)expertise=awardExpertise(expertise,player.loadout,player.trainingKit.armour,practice);
     session=prize.session;
@@ -391,7 +394,7 @@ function settleArenaBuild(state,elapsedMs){
   return {...totals,session,expertise};
 }
 
-function settleWork(state, now, random, frozenEffort, xpRandom = random) {
+function settleUncappedWork(state, now, random, frozenEffort, xpRandom = random, outcomeCaches) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
   const end = Math.max(state.settledAtMs, now);
   const elapsedMs = end - state.settledAtMs;
@@ -401,7 +404,7 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
   if (!state.activity || elapsedMs === 0) return { state: next, report };
 
   // Attribute progress is based on productive time, not work cycles or
-  // alpha timing. Master-capped skill XP does not stop attribute growth.
+  // alpha timing. The caller bounds this window at the first full XP bar.
   let productiveMs = elapsedMs;
   const tier=state.difficulties[state.activity]??0;
   // Opening all arena grades must not reward deliberate high-tier losses
@@ -409,7 +412,7 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
   const multiplier=tier&&state.activity!=="fighting"?workMultiplier(tier,ACTIVITY_STAT_WEIGHTS[state.activity],
     combatAttributeProgress(frozenEffort,state.skills)):1;
   if (state.activity === "fighting") {
-    const prize=settleArenaBuild(state,elapsedMs);
+    const prize=settleArenaBuild(state,elapsedMs,outcomeCaches);
     productiveMs-=prize.downtimeMs;
     next.expertise=prize.expertise;
     next.combatSession = prize.session;
@@ -442,8 +445,8 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
         1 + Math.max(0, prior.level - 1) * SKILL_BALANCE.efficiencyPerLevel)*multiplier;
       report.gainedItems = rules.item === null ? 0 :
         crafted ? productive : variedTotal(count * rules.yield * efficiency, random);
-      // The Master owns the next level. Extra XP never banks, even if a
-      // character gathers resources unattended for decades.
+      // The Master owns the next level. Extra XP never banks. The
+      // caller also bounds all other rewards at this same threshold.
       const missingXP = Math.max(0, xpToNextLevel(prior.level) - prior.xp);
       report.gainedXP = missingXP
         ? Math.min(missingXP, variedTotal(productive * rules.xp * efficiency, xpRandom)) : 0;
@@ -469,13 +472,86 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
   return { state: next, report };
 }
 
+/** CAP-001: rewards stop at one current-level XP bar, not a calendar cutoff. */
+export function activityRewardCapped(state,id=state.activity){
+  return Boolean(id&&state.skills[id].xp>=xpToNextLevel(state.skills[id].level));
+}
+
+/** Bound every kind of reward by the same first full XP cycle.
+ * Fixed independent XP rolls and replayed resource rolls make threshold
+ * probes monotone; arena outcomes are cached only within this settlement.
+ * No state from a discarded probe can escape. A partially played duel
+ * pauses at the cap; it can resume after a Master claim on the same task.
+ */
+function settleWork(state,now,random,frozenEffort,stopAtCap=false){
+  if(!validTime(now))throw new RangeError("Invalid clock");
+  const end=Math.max(state.settledAtMs,now);
+  if(!state.activity)return settleUncappedWork(state,end,random,frozenEffort);
+  const pause=(result)=>{
+    const capped={...result.state,progressMs:0};
+    if(!stopAtCap)capped.settledAtMs=end;
+    return {...result,state:capped};
+  };
+  if(activityRewardCapped(state))return pause({state,report:emptyReport(state,0)});
+  const duration=end-state.settledAtMs;
+  if(!duration)return settleUncappedWork(state,end,random,frozenEffort);
+  const rules=ACTIVITIES[state.activity],prior=state.skills[state.activity];
+  const missing=xpToNextLevel(prior.level)-prior.xp;
+  const tier=state.difficulties[state.activity]??0;
+  const multiplier=tier&&state.activity!=="fighting"?workMultiplier(tier,ACTIVITY_STAT_WEIGHTS[state.activity],
+    combatAttributeProgress(frozenEffort,state.skills)):1;
+  const efficiency=Math.min(SKILL_BALANCE.maxEfficiency,1+Math.max(0,prior.level-1)*SKILL_BALANCE.efficiencyPerLevel)*multiplier;
+  const cycleXP=rules.xp*efficiency;
+  const maxCycles=Math.floor((state.progressMs+duration)/rules.durationMs);
+  // No probe or extra RNG work on ordinary live ticks that cannot reach cap.
+  if(Math.ceil(maxCycles*cycleXP*(1+SKILL_BALANCE.batchVariation))<missing)
+    return settleUncappedWork(state,end,random,frozenEffort);
+  const checkedRoll=()=>{
+    const value=random();
+    if(!Number.isFinite(value)||value<0||value>=1)throw new RangeError("Invalid random roll");
+    return value;
+  };
+  const xpRolls=[checkedRoll(),checkedRoll()],rolls=[],outcomeCaches=new Map();
+  const probe=elapsed=>{
+    let i=0,j=0;
+    return settleUncappedWork(state,state.settledAtMs+elapsed,()=>{
+      if(i===rolls.length)rolls.push(checkedRoll());
+      return rolls[i++];
+    },frozenEffort,()=>xpRolls[j++],outcomeCaches);
+  };
+  // Limit the first probe to enough work for a full XP bar even at the
+  // minimum batch roll and maximum arena resurrection fraction.
+  const productiveBound=cycleXP>0?Math.ceil((missing+1)/(cycleXP*(1-SKILL_BALANCE.batchVariation)))*rules.durationMs:duration;
+  const wallBound=state.activity==="fighting"?Math.ceil(productiveBound/(1-RESURRECTION_MS/BOUT_MS))+BOUT_MS:productiveBound;
+  let high=Math.min(duration,wallBound);
+  let result=probe(high);
+  if(!activityRewardCapped(result.state)&&high<duration){high=duration;result=probe(high);}
+  if(!activityRewardCapped(result.state))return result;
+  if(state.activity!=="fighting"){
+    let lo=1,hi=Math.floor((state.progressMs+high)/rules.durationMs);
+    while(lo<hi){
+      const mid=lo+Math.floor((hi-lo)/2);
+      if(activityRewardCapped(probe(mid*rules.durationMs-state.progressMs).state))hi=mid;
+      else lo=mid+1;
+    }
+    return pause(probe(lo*rules.durationMs-state.progressMs));
+  }
+  let low=1;
+  while(low<high){
+    const mid=low+Math.floor((high-low)/2);
+    if(activityRewardCapped(probe(mid).state))high=mid;else low=mid+1;
+  }
+  return pause(probe(low));
+}
+
+
 
 /**
  * Travel and preparation are real elapsed time, even with the page closed.
  * At most three transition phases and one old/full new-work batch are resolved,
  * regardless of whether the absence was minutes or decades.
  */
-function settleTransition(state, now, random, frozenEffort) {
+function settleTransition(state, now, random, frozenEffort, stopAtArrival=false) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
   if (!state.transition) return settleWork(state, now, random, frozenEffort);
   const end = Math.max(now, state.settledAtMs);
@@ -492,11 +568,12 @@ function settleTransition(state, now, random, frozenEffort) {
     if (transition.phase === "finishing") {
       const needed=finishingDuration(next);
       const take = Math.min(remaining, needed);
-      const work = settleWork(next, next.settledAtMs + take, random, frozenEffort);
+      const before=next.settledAtMs;
+      const work = settleWork(next, before + take, random, frozenEffort,true);
       next = work.state;
       pushReport(work.report);
-      remaining -= take;
-      if (take < needed) break;
+      remaining -= next.settledAtMs-before;
+      if (take < needed&&!activityRewardCapped(next)) break;
       next = { ...next, ...(next.activity==="fighting"?{fightingRemainderMs:next.progressMs,progressMs:0,combatSession:null}:{}),
         transition: { ...transition, phase: "moving", phaseProgressMs: 0 } };
     } else {
@@ -521,7 +598,7 @@ function settleTransition(state, now, random, frozenEffort) {
     }
   }
 
-  if (!next.transition) {
+  if (!next.transition&&!stopAtArrival) {
     const work = settleWork(next, end, random, frozenEffort);
     next = work.state;
     pushReport(work.report);
@@ -537,6 +614,7 @@ function settleTransition(state, now, random, frozenEffort) {
 /** Remaining transition time, bounded regardless of absent years. */
 export function arenaBoutProgress(state){return (state.combatSession?.elapsedMs??0)%BOUT_MS/BOUT_MS;}
 function finishingDuration(state){
+  if(activityRewardCapped(state))return 0;
   if(state.activity==="fighting")return state.combatSession?
     (BOUT_MS-state.combatSession.elapsedMs%BOUT_MS)%BOUT_MS:0;
   return ACTIVITIES[state.activity].durationMs-state.progressMs;
@@ -558,21 +636,9 @@ const emptyReport = (state, elapsedMs) => ({
 });
 
 
-/** Consistent random stream for bounded probes of the same offline interval.
- * Replaying the same seed makes a binary search for the first ready work
- * cycle independent of how many probes are needed (no per-cycle replay).
- */
-function seededRoll(seed) {
-  let value = seed >>> 0;
-  return () => {
-    value = (Math.imul(value, 1664525) + 1013904223) >>> 0;
-    return value / 0x100000000;
-  };
-}
-
 /** Pure readiness shared by Skill Master and the queue's level-up stop.
  * The resource minimum currently defaults to one eligible spoil per
- * resource-producing skill; XP-only skills require zero materials.
+ * resource-producing skill; CAP-001 sets the default to zero to avoid lockout.
  */
 export function skillMasterReadiness(state, skillId) {
   if (!Object.hasOwn(ACTIVITIES, skillId)) throw new RangeError("Unknown skill");
@@ -611,7 +677,7 @@ export function settle(state, now = Date.now(), random = Math.random) {
   for (let step = 0; step < 10; step++) {
     if (next.transition) {
       const untilReady = remainingTransitionMs(next);
-      const result = settleTransition(next, Math.min(end, next.settledAtMs + untilReady), random, state.attributeEffort);
+      const result = settleTransition(next, Math.min(end, next.settledAtMs + untilReady), random, state.attributeEffort,true);
       next = result.state;
       addReports(result);
       if (next.transition) break;
@@ -624,59 +690,19 @@ export function settle(state, now = Date.now(), random = Math.random) {
       addReports(result);
       break;
     }
-    if (first.plannedMs === UNTIL_LEVEL_UP) {
-      // No surprise extra work when the character is already ready. We still
-      // finish a previously begun work cycle through the usual transition.
-      if (!skillMasterReadiness(next, first.activity).ready) {
-        const task = ACTIVITIES[first.activity];
-        const possibleCycles = Math.floor((next.progressMs + end - next.settledAtMs) / task.durationMs);
-        if (possibleCycles === 0) {
-          next = settleWork(next, end, random, state.attributeEffort).state;
-          break;
-        }
-        const originalRoll = random();
-        if (!Number.isFinite(originalRoll) || originalRoll < 0 || originalRoll >= 1)
-          throw new RangeError("Invalid random roll");
-        const seed = Math.floor(originalRoll * 0x100000000);
-        // The XP roll must not shift when a variable-size crafting batch
-        // consumes a different number of loot RNG draws during probing.
-        // Holding its multiplier/rounding roll fixed makes XP (and readiness)
-        // monotone across candidate cycle counts.
-        const xpRoll = ((Math.imul(seed, 2246822519) + 3266489917) >>> 0) /
-          0x100000000;
-        const atCycle = count => next.settledAtMs + count * task.durationMs - next.progressMs;
-        const probe = count => settleWork(next, atCycle(count), seededRoll(seed), state.attributeEffort,
-          () => xpRoll);
-        const finalResult = probe(possibleCycles);
-        if (!skillMasterReadiness(finalResult.state, first.activity).ready) {
-          // No crafting inputs or not enough loot/XP: stay on this task until
-          // the condition really becomes true. Do not skip to Forever.
-          const tail = settleWork(finalResult.state, end, random, state.attributeEffort);
-          next = tail.state;
-          addReports(finalResult);
-          addReports(tail);
-          break;
-        }
-        // Binary-search the first FULL work cycle satisfying both the XP and
-        // resource requirements. Probe randomness is identical every time;
-        // complexity is O(log completed cycles), even after decades away.
-        let low = 1, high = possibleCycles;
-        while (low < high) {
-          const middle = low + Math.floor((high - low) / 2);
-          if (skillMasterReadiness(probe(middle).state, first.activity).ready)
-            high = middle;
-          else low = middle + 1;
-        }
-        const ready = probe(low);
-        next = ready.state;
-        addReports(ready);
-      }
-    } else if (next.productiveElapsedMs < first.plannedMs) {
-      const available = Math.min(end - next.settledAtMs, first.plannedMs - next.productiveElapsedMs);
-      const result = settleWork(next, next.settledAtMs + available, random, state.attributeEffort);
-      next = { ...result.state, productiveElapsedMs: next.productiveElapsedMs + available };
+    // Every finite wagon ends at its time limit OR the first full XP bar.
+    // Until-level-up uses the same cap and never visits the Master itself.
+    if(!activityRewardCapped(next)){
+      const available=first.plannedMs===UNTIL_LEVEL_UP?end-next.settledAtMs:
+        Math.min(end-next.settledAtMs,Math.max(0,first.plannedMs-next.productiveElapsedMs));
+      const before=next.settledAtMs;
+      const result=settleWork(next,before+available,random,state.attributeEffort,true);
+      next={...result.state,productiveElapsedMs:first.plannedMs===UNTIL_LEVEL_UP?0:
+        next.productiveElapsedMs+result.state.settledAtMs-before};
       addReports(result);
-      if (next.productiveElapsedMs < first.plannedMs) break;
+      if(!activityRewardCapped(next)&&(first.plannedMs===UNTIL_LEVEL_UP||next.productiveElapsedMs<first.plannedMs))break;
+    }else{
+      next={...next,progressMs:0};
     }
     // The finite interval ended or the Skill Master condition is fulfilled;
     // do not create an extra old-work cycle at an exact cycle boundary.
@@ -684,9 +710,10 @@ export function settle(state, now = Date.now(), random = Math.random) {
     const future = next.wagons.slice(1);
     if (!future.length) throw new RangeError("Finite final wagon");
     const targetActivity = future[0].activity;
-    next = { ...next, wagons: future, productiveElapsedMs: 0,
+    const capped=activityRewardCapped(next);
+    next = { ...next, ...(capped&&next.activity==="fighting"?{combatSession:null,fightingRemainderMs:0}:{}), wagons: future, productiveElapsedMs: 0,
       transition: targetActivity === next.activity ? null : {
-        targetActivity, phase: next.activity==="fighting"||next.progressMs>0 ? "finishing" : "moving",
+        targetActivity, phase: !capped&&(next.activity==="fighting"||next.progressMs>0) ? "finishing" : "moving",
         phaseProgressMs: 0
       } };
     if (!next.transition && next.settledAtMs === end) break;
@@ -697,10 +724,12 @@ export function settle(state, now = Date.now(), random = Math.random) {
 function retargetSettled(current, targetActivity) {
   if (current.transition?.targetActivity === targetActivity ||
       (!current.transition && current.activity === targetActivity)) return current;
-  const phase = !current.activity ? "preparing" :
+  const capped=activityRewardCapped(current);
+  const phase = !current.activity ? "preparing" : capped ? "moving" :
     current.transition?.phase === "finishing" ? "finishing" :
     current.transition ? "moving" : "finishing";
-  return { ...current, transition: { targetActivity, phase, phaseProgressMs: 0 } };
+  return { ...current, ...(capped?{progressMs:0,...(current.activity==="fighting"?{combatSession:null,fightingRemainderMs:0}:{})}:{}),
+    transition: { targetActivity, phase, phaseProgressMs: 0 } };
 }
 
 /** Start first job or append a future one. Previous Forever job becomes timed. */
@@ -930,6 +959,7 @@ export function chooseActivity(state, activity, now = Date.now(), random = Math.
 export function testOfflineDay(state, now = Date.now(), random = Math.random) {
   if (!state.activity) return { state, report: null, levelsGained: 0 };
   // A transparent, local-only testing shortcut. No hidden duration cap.
-  const simulated = { ...state, settledAtMs: state.settledAtMs - 86400000 };
-  return enterGame(simulated, now, random);
+  const end=Math.max(state.settledAtMs,now);
+  const result=enterGame(state,end+DAY_MS,random);
+  return {...result,state:{...result.state,settledAtMs:end}};
 }

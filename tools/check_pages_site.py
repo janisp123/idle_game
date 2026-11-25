@@ -59,7 +59,7 @@ def check():
     assert parser.stylesheet and parser.favicon, "Stylesheet and icon are required"
     assert {"header", "nav", "main", "footer", "h1", "h2"}.issubset(parser.tags)
     assert {"main", "vision", "library"}.issubset(parser.ids)
-    for phrase in ("The Long Vigil", "Eleven activities", "Masterwork equipment cannot break", "may be reset", "No offline time cutoff"):
+    for phrase in ("The Long Vigil", "Life beyond the arena", "Earn your equipment", "may be reset", "Progression limits prevent endless rewards"):
         assert phrase in html, f"Missing current alpha landing information: {phrase}"
     assert "hobby" in parser.ids, "Permanent free-game statement must be on landing page"
     for phrase in ("A Hobby,", "Not a Business", "It will always be 100% free.", "No advertisements.", "No microtransactions.", "No subscriptions.", "No pay-to-win mechanics.", "No donations or financial contributions.", "Not even a button to buy me a coffee.", "loss of progress are possible", "Constructive feedback is always welcome"):
@@ -95,7 +95,7 @@ def check():
     assert "two-handed sword" in html and "shield" in html
     assert html.index('id="vision"') < html.index('id="hobby"')
     readme = (SITE.parent / "README.md").read_text(encoding="utf-8")
-    assert readme.index("## What you can play now") < readme.index("## A Hobby, Not a Business")
+    assert readme.index("## The game") < readme.index("## A Hobby, Not a Business")
     theme = (SITE / "grimdark.css").read_text(encoding="utf-8")
     assert ".hero-art.hero-art-painted img" in theme
     assert "object-fit: contain" in theme, "Keep the complete painting visible"

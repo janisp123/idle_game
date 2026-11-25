@@ -98,7 +98,7 @@ try{
       return {title:document.title,heading:document.querySelector("h1").textContent,copy:document.body.innerText,href:play.getAttribute("href"),width:box.width,height:box.height,visible:box.top>=0&&box.bottom<=innerHeight,
         artWidth:art.naturalWidth,artHeight:art.naturalHeight,artSrc:art.getAttribute("src"),artFits:art.getBoundingClientRect().width<=innerWidth&&Math.abs(art.getBoundingClientRect().width/art.getBoundingClientRect().height-1672/941)<.02,featureFirst:!!(document.getElementById("vision").compareDocumentPosition(document.getElementById("hobby"))&Node.DOCUMENT_POSITION_FOLLOWING),overflow:document.documentElement.scrollWidth-innerWidth};})()`);
     assert.match(landing.title,/The Long Vigil/);assert.match(landing.heading,/The world is cruel/);
-    assert.match(landing.copy,/Eleven activities/);assert.match(landing.copy,/may be reset/);
+    assert.match(landing.copy,/Life beyond the arena/);assert.match(landing.copy,/may be reset/);
     assert.equal(landing.href,"./play/");assert.ok(landing.width>0&&landing.height>=40&&landing.visible,"Play Now must be visible above the fold");
     assert.equal(landing.artWidth,1672);assert.equal(landing.artHeight,941);assert.equal(landing.artSrc,"./assets/gladiator-shield-clash.png");assert.ok(landing.artFits&&landing.featureFirst&&landing.overflow<=2,"landing artwork sizing, order or overflow");
     await shot("landing-"+width);
@@ -154,12 +154,21 @@ try{
     await shot("stats-"+width);
     await navigate("persist-"+width);
     assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})).coins`),200000);
+    const capped=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=cap-001");const start=Date.now()-86400000;
+      const s=e.chooseActivity(e.newGame(start),"mining",start,()=>.5).state;return JSON.stringify(e.settle(s,Date.now(),()=>.5).state);})()`);
+    await navigate("capped-"+width,{[saveKey]:capped,[clockKey]:null});
+    const pause=await evaluate(`(()=>{const key=${JSON.stringify(saveKey)},before=JSON.parse(localStorage.getItem(key));
+      document.getElementById("alphaDay").click();const after=JSON.parse(localStorage.getItem(key));
+      return {before,after,notice:document.getElementById("skillXp").textContent,reset:document.getElementById("saveResetNotice").hidden};})()`);
+    assert.match(pause.notice,/All rewards paused/);assert.equal(pause.reset,true);
+    for(const key of ["items","attributeEffort","expertise","coins","skills"])assert.deepEqual(pause.before[key],pause.after[key]);
+    await shot("capped-"+width);
     for(const mode of ["impressive_victory","humiliation"]){
       // Only synthetic saves created by production functions in this temporary
       // browser. Pick an actual resolved qualifying final event, never fake it.
       const setup=await evaluate(`(async()=>{
-        const e=await import("./engine.mjs?v=bal-002");
-        const a=await import("./alpha-tools.mjs?v=bal-002");
+        const e=await import("./engine.mjs?v=cap-001");
+        const a=await import("./alpha-tools.mjs?v=cap-001");
         const c=await import("./combat.mjs?v=bal-002");
         const v=await import("./combat-verdict.mjs?v=alpha-gear-a5");
         const mode=${JSON.stringify(mode)},now=Date.now(),start=now-c.BOUT_MS+1;
@@ -168,7 +177,7 @@ try{
           s=a.alphaMaxStats(s,"plate",start,()=>.5).state;s={...s,coins:4000000};
           s=e.buyEquipment(s,"greatsword",{grade:7,quality:"masterwork"},start,()=>.5).state;
           for(const slot of ["head","torso","arms","legs"])s=e.buyEquipment(s,slot+":plate",{grade:7,quality:"masterwork"},start,()=>.5).state;
-        }else{s=e.setDifficulty(s,"fighting",7,start,()=>.5).state;}
+        }else{s.skills.fighting.level=2;s=e.setDifficulty(s,"fighting",7,start,()=>.5).state;}
         s=e.chooseActivity(s,"fighting",start,()=>.5).state;
         s=e.settle(s,now,()=>.5).state;
         const expected=v.combatVerdict(c.combatAtTime(s.combatSession).event);

@@ -149,7 +149,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=bal-002/,
+  assert.match(html, /app\.mjs\?v=cap-001/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -407,7 +407,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.skills.mining.xp, 40, "the XP bar stops at one level");
     assert.equal(state.skills.mining.level, 1);
-    assert.equal(elements.get("skillXp").textContent, "XP full · Seek the Skill Master to advance");
+    assert.equal(elements.get("skillXp").textContent, "XP full · All rewards paused · Seek the Skill Master");
     assert.equal(miningQueueLabel.textContent, "Mining LvL 1,100",
       "at the Master gate show 100% rather than hiding or exceeding the cap");
     assert.match(miningQueueLabel.getAttribute("aria-label"), /visit the Skill Master to advance/);
@@ -531,7 +531,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     elements.get("queueUnit").fire("change");
     assert.equal(elements.get("queueAmount").hidden, true);
     assert.equal(elements.get("queueAmountLabel").hidden, true);
-    assert.match(elements.get("queuePlannerHint").textContent, /both XP and Skill Master resources/);
+    assert.match(elements.get("queuePlannerHint").textContent, /full XP bar/);
     assert.match(elements.get("queueConfirm").textContent, /LvL Up/);
     elements.get("queueUnit").value = "minutes";
     elements.get("queueUnit").fire("change");
@@ -719,7 +719,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     state = JSON.parse(store.get(SAVE_KEY));
     assert.equal(state.wagons[0].plannedMs, UNTIL_LEVEL_UP);
     const masteryMeter = elements.get("wagonList").children[0].children[2];
-    assert.match(masteryMeter.getAttribute("aria-label"), /Skill Master readiness/);
+    assert.match(masteryMeter.getAttribute("aria-label"), /full XP/);
     assert.equal(state.productiveElapsedMs, 0);
     // Restore a finite window: changing the stop type takes effect immediately.
     const afterMastery = elements.get("wagonList").children[0].children[3];
@@ -767,6 +767,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     // A real running Fighting session (rather than a selected activity card)
     // displays the simulated result after productive time has passed.
     const fighting = newGame(now);
+    fighting.skills.fighting.level=2; // sufficient XP headroom to cross the bout boundary
     fighting.name = "The Black Rider";
     fighting.activity = "fighting";
     fighting.wagons = [{ activity: "fighting", plannedMs: null }];
@@ -799,7 +800,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
         label:node.children[1]?.textContent ?? ""
       })), displayed[side]);
     }
-    assert.equal(arena.skills.fighting.level, 1);
+    assert.equal(arena.skills.fighting.level, 2);
     assert.equal(arena.combatSession.player.loadout,"greatsword");
     const shieldWeapon=weaponChoices.find(x=>x.getAttribute("data-loadout")==="sword_shield");
     shieldWeapon.fire("click");
@@ -879,6 +880,9 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     const afterSecondDay=JSON.parse(store.get(SAVE_KEY));
     assert.equal(afterSecondDay.settledAtMs-afterDay.settledAtMs,86_400_000,
       "each button click simulates exactly one additional day");
+    assert.deepEqual(afterSecondDay.items,afterDay.items,"no capped loot on repeated 24h");
+    assert.deepEqual(afterSecondDay.attributeEffort,afterDay.attributeEffort,"no capped attribute XP");
+    assert.match(elements.get("skillXp").textContent,/All rewards paused/);
     assert.equal(afterSecondDay.skills.mining.level,1,
       "repeated 24h clicks still cannot level up automatically");
     assert.equal(elements.get("alphaTools").hidden,false);

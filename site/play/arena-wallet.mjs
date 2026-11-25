@@ -8,7 +8,7 @@ export function arenaReward(grade) {
   return WIN_PRIZES[grade];
 }
 
-export function settleArenaPrizes(session, fromElapsed = (session?.prizeCursor ?? 0) * BOUT_MS) {
+export function settleArenaPrizes(session, fromElapsed = (session?.prizeCursor ?? 0) * BOUT_MS, outcomes = new Map()) {
   if (!session || !validCombatSession(session)) throw new RangeError("Invalid arena session");
   const complete = Math.floor(session.elapsedMs / BOUT_MS);
   const cursor = session.prizeCursor ?? 0;
@@ -19,9 +19,10 @@ export function settleArenaPrizes(session, fromElapsed = (session?.prizeCursor ?
   const extra = count % ARENA_SCHEDULE_BOUTS;
   const outcomesCount = { victory: 0, defeat: 0, double_death: 0 };
   let downtimeMs = 0;
-  const outcomes = new Map();
+  const sampled = new Set();
   function outcomeAt(index) {
     const bout = index % ARENA_SCHEDULE_BOUTS;
+    sampled.add(bout);
     if (!outcomes.has(bout)) outcomes.set(bout,
       combatAtTime({ ...session, prizeCursor: 0, elapsedMs: (bout + 1) * BOUT_MS - 1 }).outcome);
     return outcomes.get(bout);
@@ -41,7 +42,7 @@ export function settleArenaPrizes(session, fromElapsed = (session?.prizeCursor ?
   downtimeMs += partialDowntime(session.elapsedMs) - partialDowntime(fromElapsed);
   return {
     session: { ...session, prizeCursor: complete },
-    downtimeMs, sampledBouts: outcomes.size, bouts: count, victories: outcomesCount.victory,
+    downtimeMs, sampledBouts: sampled.size, bouts: count, victories: outcomesCount.victory,
     defeats: outcomesCount.defeat, doubleDeaths: outcomesCount.double_death,
     coins: outcomesCount.victory * arenaReward(session.player.difficulty ?? 0)
   };

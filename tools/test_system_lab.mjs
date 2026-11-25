@@ -103,8 +103,8 @@ test('Skill Master report mirrors exact readiness and confirmed resource payment
   assert.equal(report.remainingInventory.stone,out.state.items.stone);
   assert.equal(report.itemsDelta.stone,-5);
   const blocked=simulateMaster({activity:'mining',xp:40,claim:true});
-  assert.equal(blocked.claimPerformed,false);
-  assert.equal(blocked.readiness.resourcesReady,false);
+  assert.equal(blocked.claimPerformed,true);
+  assert.equal(blocked.readiness.resourcesReady,true);
 });
 
 test('queue simulated work and travel reproduce the same source settlement exactly',()=>{

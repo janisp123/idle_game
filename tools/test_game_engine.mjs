@@ -202,9 +202,9 @@ test("mastery offers collect every possible skill spoil, including rare stock", 
   assert.deepEqual(skillSpoils("training"), []);
   assert.deepEqual(skillSpoils("cooking"), ["ration"]);
   const offer = skillMasterOffer(start);
-  assert.deepEqual(offer.ready, ["mining","training"],
-    "no hunting spoils means that skill cannot be trained yet");
-  assert.deepEqual(offer.blocked, ["hunting"]);
+  assert.deepEqual(offer.ready, ["hunting","mining","training"],
+    "full XP remains eligible even when all outputs were consumed");
+  assert.deepEqual(offer.blocked, []);
   assert.deepEqual(offer.tribute, {
     stone:1,iron_ore:19,limestone:5
   });
@@ -214,18 +214,18 @@ test("mastery offers collect every possible skill spoil, including rare stock", 
   assert.equal(Object.hasOwn(out.state, "protectedItems"), false);
   assert.deepEqual(out.state.skills.mining, {level:2,xp:0});
   assert.deepEqual(out.state.skills.training, {level:2,xp:0});
-  assert.deepEqual(out.state.skills.hunting, {level:1,xp:40});
+  assert.deepEqual(out.state.skills.hunting, {level:2,xp:0});
   assert.deepEqual(readSave(JSON.stringify(out.state)), out.state);
   assert.throws(() => learnFromMaster(out.state, 0), RangeError,
     "one visit can never grant two levels for a single XP bar");
 });
 
-test("spending spoils before the Master is strategic, but at least one remains necessary", () => {
+test("spending spoils before the Master is strategic, and full XP prevents missing-output deadlock", () => {
   const start = newGame(0);
   start.skills.mining.xp = xpToNextLevel(1);
-  assert.deepEqual(skillMasterOffer(start).ready, []);
-  assert.deepEqual(skillMasterOffer(start).blocked, ["mining"]);
-  assert.throws(() => learnFromMaster(start, 0), RangeError);
+  assert.deepEqual(skillMasterOffer(start).ready, ["mining"]);
+  assert.deepEqual(skillMasterOffer(start).blocked, []);
+  assert.equal(learnFromMaster(start,0).state.skills.mining.level,2);
   start.items.stone = 1;
   start.items.iron_ore = 0;
   assert.deepEqual(skillMasterOffer(start).ready, ["mining"]);
@@ -293,13 +293,13 @@ test("one full skill XP bar never grants levels until the Master sacrifices all 
   const result = finish(chosen, amount * ACTIVITIES.mining.durationMs);
   assert.equal(result.state.skills.mining.xp, xpToNextLevel(1), "XP stops at one threshold");
   assert.equal(result.state.skills.mining.level, 1);
-  assert.equal(stockTotal(result.state, "mining"), amount, "loot continues after the XP cap");
+  assert.equal(stockTotal(result.state, "mining"), 20, "loot stops at the XP cap");
   const returned = enter(chosen, amount * ACTIVITIES.mining.durationMs);
   assert.equal(returned.state.skills.mining.level, 1, "return never auto-levels");
   assert.deepEqual(returned.levelsGained, {});
   const offer = skillMasterOffer(returned.state);
   assert.deepEqual(offer.ready, ["mining"]);
-  assert.equal(Object.values(offer.tribute).reduce((sum, n) => sum + n, 0), amount);
+  assert.equal(Object.values(offer.tribute).reduce((sum, n) => sum + n, 0), 20);
   const trained = learnFromMaster(returned.state, returned.state.settledAtMs);
   assert.deepEqual(trained.state.skills.mining, { level: 2, xp: 0 });
   assert.equal(trained.state.items.stone, 0);
@@ -313,7 +313,7 @@ test("switching activities caps each level's XP separately and returns without l
   const switched = choose(state, "hunting", miningCount * ACTIVITIES.mining.durationMs + 1000);
   state = switched.state;
   assert.equal(state.progressMs, 0);
-  assert.equal(state.items.stone, miningCount);
+  assert.equal(state.items.stone, 20);
   assert.equal(state.skills.mining.xp, xpToNextLevel(1));
   assert.equal(state.skills.mining.level, 1);
   const huntingCount = 30;
@@ -331,12 +331,12 @@ test("switching activities caps each level's XP separately and returns without l
   assert.equal(trained.state.items.stone, 0);
   assert.equal(trained.state.items.hide, 0);
 });
-test("50 offline years still gather every resource but XP caps at one skill level", () => {
+test("50 offline years award only the first skill XP bar and its loot", () => {
   const start = 1_600_000_000_000;
   const elapsed = YEAR * 50;
   const away = choose(newGame(start), "hunting", start).state;
   const out = finish(away, start + elapsed);
-  const actions = Math.floor(elapsed / ACTIVITIES.hunting.durationMs);
+  const actions = Math.ceil(xpToNextLevel(1)/ACTIVITIES.hunting.xp);
   assert.equal(out.report.completed, actions);
   assert.equal(out.state.skills.hunting.xp, xpToNextLevel(1));
   assert.equal(out.state.skills.hunting.level, 1);
@@ -375,14 +375,14 @@ test("corrupted, incompatible or forged skill levels are rejected", () => {
 
 test("reward total variance stays independent and within +/-10%", () => {
   const chosen = choose(newGame(0), "mining", 0).state;
-  const time = 100 * ACTIVITIES.mining.durationMs;
+  const time = 10 * ACTIVITIES.mining.durationMs;
   const low = settle(chosen, time, () => 0);
   const rolls = [0.999999, 0, 0.999999, 0];
   const high = settle(chosen, time, () => rolls.shift() ?? 0.5);
-  assert.equal(low.report.gainedItems, 90);
-  assert.equal(high.report.gainedItems, 110);
-  assert.equal(low.state.skills.mining.xp, 40);
-  assert.equal(high.state.skills.mining.xp, 40);
+  assert.equal(low.report.gainedItems, 9);
+  assert.equal(high.report.gainedItems, 11);
+  assert.equal(low.state.skills.mining.xp, 18);
+  assert.equal(high.state.skills.mining.xp, 22);
   assert.equal(low.state.skills.mining.level, 1);
   assert.equal(high.state.skills.mining.level, 1);
 });
@@ -392,17 +392,17 @@ test("20 years settle with constant number of random rolls", () => {
   const chosen = choose(newGame(start), "foraging", start).state;
   let rolls = 0;
   const out = enterGame(chosen, start + YEAR * 20, () => { rolls++; return 0.5; });
-  assert.equal(rolls, 2);
+  assert.ok(rolls <= 20,"bounded probe RNG, not individual actions");
   assert.equal(out.state.skills.foraging.level, 1);
   assert.equal(out.state.skills.foraging.xp, 40);
   assert.equal(out.state.skills.mining.level, 1);
 });
 
 test("one-day testing shortcut internally respects frozen skill levels", () => {
-  const start = 1_000_000;
+  const start = 86400000;
   const chosen = choose(newGame(start), "foraging", start).state;
   const out = testOfflineDay(chosen, start, midpoint);
-  assert.equal(out.report.completed, Math.floor(86400000 / ACTIVITIES.foraging.durationMs));
+  assert.equal(out.report.completed, Math.ceil(xpToNextLevel(1)/ACTIVITIES.foraging.xp));
   assert.equal(out.state.skills.foraging.level, 1);
   assert.equal(out.state.skills.foraging.xp, xpToNextLevel(1));
   assert.deepEqual(readSave(JSON.stringify(out.state)), out.state);
@@ -442,9 +442,9 @@ test("long offline cooking consumes available fish, but Master takes meals to le
   start.items.fish = 1000;
   const selected = choose(start, "cooking", 0).state;
   const out = finish(selected, 20 * YEAR);
-  assert.equal(out.report.completed, 1000);
-  assert.equal(out.state.items.fish, 0);
-  assert.equal(out.state.items.ration, 1000);
+  assert.equal(out.report.completed, 20);
+  assert.equal(out.state.items.fish, 980);
+  assert.equal(out.state.items.ration, 20);
   assert.equal(out.state.skills.cooking.level, 1);
   assert.equal(out.state.skills.cooking.xp, xpToNextLevel(1));
   const returned = enter(selected, 20 * YEAR);
@@ -582,7 +582,7 @@ test("offline twenty years spans both activities exactly once without advancing 
   const after = settle(request, 20 * YEAR, () => { rolls++; return 0.5; });
   assert.ok(rolls < 30, "do not replay individual offline activities");
   assert.equal(after.state.items.stone, 1);
-  assert.ok(after.state.items.hide > 1000);
+  assert.equal(stockTotal(after.state,"hunting"),1);
   assert.equal(after.state.skills.hunting.level, 1);
   assert.equal(after.state.transition, null);
   assert.equal(after.state.activity, "hunting");
@@ -687,7 +687,8 @@ const queueTimed = (state, id, duration, now = state.settledAtMs) =>
   queueInsertTimedActivity(state, id, duration, now, midpoint);
 
 test("new selected task owns four-hour duration; original work remains Forever fallback", () => {
-  let state = queueStart(newGame(0), "mining", null).state;
+  const fresh=newGame(0); fresh.skills.hunting.level=1000;
+  let state = queueStart(fresh, "mining", null).state;
   state = finish(state, INITIAL_PREPARATION_MS + 4_000).state;
   const priorXP = state.skills.mining.xp;
   const previousItems = { ...state.items };
@@ -812,12 +813,12 @@ test("one and two wagon queue correctly settle a 20-year absence without daily c
   const queued = queueStart(initial, "hunting", HOUR_MS).state;
   let rolls = 0;
   const result = settle(queued, YEAR * 20, () => { rolls++; return 0.5; });
-  assert.ok(rolls < 25, "no per-cycle or per-day loop");
+  assert.ok(rolls < 100, "no per-cycle or per-day loop");
   assert.deepEqual(result.state.wagons, [{ activity: "hunting", plannedMs: null }]);
   assert.equal(result.state.transition, null);
   assert.equal(result.state.productiveElapsedMs, 0);
-  assert.equal(stockTotal(result.state, "mining"), HOUR_MS / ACTIVITIES.mining.durationMs);
-  assert.ok(result.state.items.hide > 100_000);
+  assert.equal(stockTotal(result.state, "mining"), 20);
+  assert.equal(stockTotal(result.state,"hunting"),14);
   assert.equal(result.state.skills.hunting.level, 1);
   assert.equal(result.state.skills.mining.level, 1);
   assert.equal(result.reports.length, 2);
@@ -833,9 +834,9 @@ test("three wagons consume prior foraging in chronological order and then work f
   state = queueStart(state, "construction", HOUR_MS).state;
   state = queueStart(state, "hunting", HOUR_MS).state;
   const result = finish(state, 20 * YEAR);
-  assert.equal(result.state.items.stone, 0, "construction uses previously mined stone");
-  assert.equal(result.state.items.block, result.reports[0].items.stone);
-  assert.ok(result.state.items.hide > 1_000);
+  assert.equal(result.state.items.stone+(result.state.items.block??0),result.reports[0].items.stone,"construction conserves mined stone");
+  assert.equal(result.state.items.block,result.reports[1].consumed.stone??0);
+  assert.equal(stockTotal(result.state,"hunting"),14);
   assert.equal(result.state.skills.mining.xp, xpToNextLevel(1));
   assert.equal(result.state.skills.construction.xp, xpToNextLevel(1));
   assert.deepEqual(result.state.wagons, [{ activity: "hunting", plannedMs: null }]);
@@ -844,20 +845,20 @@ test("three wagons consume prior foraging in chronological order and then work f
 });
 
 test("queue works with a partially finished last cycle, with no extra reward at a boundary", () => {
-  let state = queueStart(newGame(0), "mining", null).state;
+  let state = queueStart({...newGame(0),skills:{...newGame(0).skills,mining:{level:100,xp:0}}}, "mining", null).state;
   state = queueStart(state, "hunting", HOUR_MS).state;
   const exact = finish(state, INITIAL_PREPARATION_MS + HOUR_MS).state;
-  assert.equal(stockTotal(exact, "mining"), HOUR_MS / 10_000);
+  assert.equal(stockTotal(exact, "mining"), HOUR_MS / 10_000 * 2);
   assert.equal(exact.transition.phase, "moving");
   assert.equal(exact.progressMs, 0);
   const ready = finish(exact, exact.settledAtMs + ZONE_TRAVEL_MS + PREPARATION_MS).state;
-  assert.equal(stockTotal(ready, "mining"), HOUR_MS / 10_000, "no phantom extra finishing cycle");
+  assert.equal(stockTotal(ready, "mining"), HOUR_MS / 10_000 * 2, "no phantom extra finishing cycle");
   assert.equal(ready.activity, "hunting");
   assert.equal(ready.items.hide, 0);
 
   // An explicit running-duration edit starts its new window now, not back
   // at the first productive instant. The last cycle still finishes once.
-  const started = queueStart(newGame(0), "mining", null).state;
+  const started = queueStart({...newGame(0),skills:{...newGame(0).skills,mining:{level:100,xp:0}}}, "mining", null).state;
   let second = queueStart(started, "hunting", HOUR_MS).state;
   second = finish(second, INITIAL_PREPARATION_MS + 3_000).state;
   const edited = queueDuration(second, 0, HOUR_MS, second.settledAtMs).state;
@@ -865,9 +866,9 @@ test("queue works with a partially finished last cycle, with no extra reward at 
   assert.equal(edited.progressMs, 3_000);
   const expiry = finish(edited, edited.settledAtMs + HOUR_MS).state;
   assert.equal(expiry.transition.phase, "finishing");
-  assert.equal(stockTotal(expiry, "mining"), HOUR_MS / 10_000);
+  assert.equal(stockTotal(expiry, "mining"), HOUR_MS / 10_000 * 2);
   const boundary = finish(expiry, expiry.settledAtMs + 7_000).state;
-  assert.equal(stockTotal(boundary, "mining"), HOUR_MS / 10_000 + 1);
+  assert.equal(stockTotal(boundary, "mining"), HOUR_MS / 10_000 * 2 + 2);
   assert.equal(boundary.transition.phase, "moving");
 });
 
@@ -917,22 +918,22 @@ test("future wagon can be removed without losing current progress; final becomes
   assert.throws(() => queueRemoveLast(solo, solo.settledAtMs, midpoint), RangeError);
 });
 
-test("Skill Master and queue share centrally configured material thresholds", () => {
+test("Skill Master and queue share full-XP readiness", () => {
   assert.equal(UNTIL_LEVEL_UP, "untilLevelUp");
   assert.equal(validQueuePlan(UNTIL_LEVEL_UP), true);
   assert.equal(validQueuePlan(MINUTE_MS), true);
   assert.equal(validQueuePlan("other"), false);
-  assert.equal(MASTER_RESOURCE_MINIMUM.mining, 1);
-  assert.equal(MASTER_RESOURCE_MINIMUM.smithing, 1);
+  assert.equal(MASTER_RESOURCE_MINIMUM.mining, 0);
+  assert.equal(MASTER_RESOURCE_MINIMUM.smithing, 0);
   assert.equal(MASTER_RESOURCE_MINIMUM.training, 0);
   const s = newGame(0);
   s.skills.mining.xp = xpToNextLevel(1);
   let ready = skillMasterReadiness(s, "mining");
   assert.equal(ready.xpReady, true);
-  assert.equal(ready.resourcesReady, false);
-  assert.equal(ready.requiredItems, 1);
-  assert.equal(ready.ready, false);
-  assert.deepEqual(skillMasterOffer(s).blocked, ["mining"]);
+  assert.equal(ready.resourcesReady, true);
+  assert.equal(ready.requiredItems, 0);
+  assert.equal(ready.ready, true);
+  assert.deepEqual(skillMasterOffer(s).blocked, []);
   s.items.stone = 1;
   ready = skillMasterReadiness(s, "mining");
   assert.equal(ready.ready, true);
@@ -969,50 +970,31 @@ test("Until LvL Up scheduled XP-only activity stops at mastery readiness without
   assert.deepEqual(readSave(JSON.stringify(result.state)), result.state);
 });
 
-test("Until LvL Up requires actual owned resources, not only a full XP bar", () => {
-  let state = queueStart(newGame(0), "hunting", null).state;
-  state.skills.mining.xp = xpToNextLevel(1);
-  state = queueTimed(state, "mining", UNTIL_LEVEL_UP).state;
-  // The initial character has never worked: switching its pending Start goes
-  // straight to preparation, with no invented hunting cycle or travel.
-  const arrivedAt = INITIAL_PREPARATION_MS;
-  const arriving = finish(state, arrivedAt).state;
-  assert.equal(arriving.activity, "mining");
-  assert.equal(arriving.skills.mining.xp, xpToNextLevel(1));
-  assert.equal(skillMasterReadiness(arriving, "mining").ready, false,
-    "full XP but no material does not switch activities");
-  const oneCycle = finish(arriving, arrivedAt + ACTIVITIES.mining.durationMs).state;
-  if (oneCycle.wagons[0].activity === "mining") {
-    assert.equal(skillMasterReadiness(oneCycle, "mining").ready, false);
-  }
-  const enoughCycles = finish(oneCycle, arrivedAt + 2 * ACTIVITIES.mining.durationMs).state;
-  assert.deepEqual(enoughCycles.wagons, [{activity:"hunting", plannedMs:null}]);
-  assert.equal(enoughCycles.skills.mining.level, 1, "the queue does not visit the Master");
-  assert.equal(skillMasterReadiness(enoughCycles, "mining").ready, true);
-  assert.ok(stockTotal(enoughCycles, "mining") > 0);
+test("Until LvL Up skips a full XP bar even when all outputs were consumed", () => {
+  let state=queueStart(newGame(0),"hunting",null).state;
+  state.skills.mining.xp=xpToNextLevel(1);
+  state=queueTimed(state,"mining",UNTIL_LEVEL_UP).state;
+  const out=finish(state,INITIAL_PREPARATION_MS+ZONE_TRAVEL_MS+PREPARATION_MS+ACTIVITIES.hunting.durationMs).state;
+  assert.deepEqual(out.wagons,[{activity:"hunting",plannedMs:null}]);
+  assert.equal(stockTotal(out,"mining"),0);
+  assert.equal(out.skills.mining.level,1);
+  assert.equal(skillMasterReadiness(out,"mining").ready,true);
 });
 
-test("blocked crafting with XP full cannot escape mastery schedule until actual inputs arrive", () => {
-  let state = queueStart(newGame(0), "hunting", null).state;
-  state.skills.smithing.xp = xpToNextLevel(1);
-  state = queueTimed(state, "smithing", UNTIL_LEVEL_UP).state;
-  const blocked = finish(state, 20 * YEAR).state;
-  assert.equal(blocked.activity, "smithing");
-  assert.deepEqual(blocked.wagons, [
-    {activity:"smithing", plannedMs:UNTIL_LEVEL_UP},
-    {activity:"hunting", plannedMs:null}
-  ]);
-  assert.equal(blocked.items.iron_ingot, 0);
-  assert.equal(blocked.skills.smithing.level, 1);
-  assert.equal(skillMasterReadiness(blocked, "smithing").ready, false);
-  const supplied = {...blocked, items:{...blocked.items, iron_ore:2}};
-  const progressed = finish(supplied, blocked.settledAtMs + 2 * ACTIVITIES.smithing.durationMs).state;
-  assert.deepEqual(progressed.wagons, [{activity:"hunting",plannedMs:null}]);
-  assert.ok(progressed.items.iron_ingot > 0);
-  assert.equal(progressed.skills.smithing.level, 1);
-  assert.equal(skillMasterReadiness(progressed, "smithing").ready, true);
-  assert.equal(finish(progressed, progressed.settledAtMs).report.completed, 0);
+
+test("capped crafting skips without consuming inputs and uncapped empty crafting cannot fabricate XP",()=>{
+  let state=queueStart(newGame(0),"hunting",null).state;
+  state.skills.smithing.xp=xpToNextLevel(1);state.items.iron_ore=2;
+  state=queueTimed(state,"smithing",UNTIL_LEVEL_UP).state;
+  const out=finish(state,20*YEAR).state;
+  assert.equal(out.activity,"hunting");assert.equal(out.items.iron_ore,2);assert.equal(out.items.iron_ingot,0);
+  assert.equal(skillMasterReadiness(out,"smithing").ready,true);
+  let waiting=queueStart(newGame(0),"hunting",null).state;
+  waiting=queueTimed(waiting,"smithing",UNTIL_LEVEL_UP).state;
+  const blocked=finish(waiting,20*YEAR).state;
+  assert.equal(blocked.activity,"smithing");assert.equal(blocked.items.iron_ingot,0);assert.equal(blocked.skills.smithing.xp,0);
 });
+
 
 test("editing and reordering Until LvL Up schedule preserve other jobs and saved progress", () => {
   let state = queueStart(newGame(0), "mining", null).state;
@@ -1052,7 +1034,8 @@ test("every survival activity splits the same hourly stat budget", () => {
 });
 
 test("stat growth is based on productive time, even mid-cycle, never actions completed", () => {
-  const start = choose(newGame(0), "mining", 0).state;
+  const fresh=newGame(0);fresh.skills.mining.level=100;
+  const start = choose(fresh, "mining", 0).state;
   const first = finish(start, HOUR_MS - 1);
   const second = finish(first.state, HOUR_MS);
   const continuous = finish(start, HOUR_MS);
@@ -1070,8 +1053,9 @@ test("stat growth is based on productive time, even mid-cycle, never actions com
 });
 
 test("changing activities changes stat distribution but not total XP per hour", () => {
-  const mining = finish(choose(newGame(0), "mining", 0).state, HOUR_MS).state;
-  const study = finish(choose(newGame(0), "training", 0).state, HOUR_MS).state;
+  const fresh=newGame(0);fresh.skills.mining.level=100;fresh.skills.training.level=100;
+  const mining = finish(choose(fresh, "mining", 0).state, HOUR_MS).state;
+  const study = finish(choose(fresh, "training", 0).state, HOUR_MS).state;
   assert.equal(attributeXP(mining.attributeEffort.STR), 70);
   assert.equal(attributeXP(study.attributeEffort.DEX), 35);
   for (const state of [mining, study]) {
@@ -1098,21 +1082,19 @@ test("travel and preparation never grant attribute XP", () => {
     "travel and preparation are not productive work");
 });
 
-test("uncapped attribute progress continues after skill XP caps over twenty years offline", () => {
-  const start = choose(newGame(0), "training", 0).state;
-  const firstYear = finish(start, YEAR);
-  const twentyYears = finish(start, 20 * YEAR);
-  assert.equal(twentyYears.state.skills.training.level, 1);
-  assert.equal(twentyYears.state.skills.training.xp, xpToNextLevel(1),
-    "the Skill Master rule still caps skill XP");
-  assert.ok(attributeProgress(twentyYears.state.attributeEffort.END).value >
-    attributeProgress(firstYear.state.attributeEffort.END).value);
-  assert.ok(attributeProgress(twentyYears.state.attributeEffort.END).value > 10);
-  assert.equal(Object.values(twentyYears.state.attributeEffort).reduce(
-    (sum, effort) => sum + attributeXP(effort), 0),
-    20 * 365 * 24 * ATTRIBUTE_BALANCE.xpPerProductiveHour);
-  assert.deepEqual(readSave(JSON.stringify(twentyYears.state)), twentyYears.state);
+test("attribute effort stops at full skill XP and resumes after an explicit claim",()=>{
+  const start=choose(newGame(0),"training",0).state;
+  const first=finish(start,YEAR).state, long=finish(start,20*YEAR).state;
+  assert.equal(long.skills.training.level,1);assert.equal(long.skills.training.xp,xpToNextLevel(1));
+  assert.deepEqual(long.attributeEffort,first.attributeEffort);
+  assert.equal(Object.values(long.attributeEffort).reduce((a,b)=>a+b,0),14*ACTIVITIES.training.durationMs*100);
+  const paused=finish(readSave(JSON.stringify(long)),21*YEAR).state;
+  assert.deepEqual(paused.attributeEffort,long.attributeEffort);
+  const claimed=learnFromMaster(paused,21*YEAR,midpoint).state;
+  const resumed=finish(claimed,21*YEAR+ACTIVITIES.training.durationMs).state;
+  assert.ok(resumed.attributeEffort.STR>paused.attributeEffort.STR);
 });
+
 
 test("old alpha saves reset and current saves validate stats", () => {
   const legacy = newGame(123);
@@ -1123,7 +1105,7 @@ test("old alpha saves reset and current saves validate stats", () => {
   assert.equal(readSave(JSON.stringify(legacy)), null);
   const migrated = newGame(123);
   const progressed = finish(choose(migrated, "mining", 123).state, 123 + HOUR_MS).state;
-  assert.ok(allAttributeProgress(progressed.attributeEffort).STR.value > 10);
+  assert.ok(progressed.attributeEffort.STR > 0);
   assert.deepEqual(readSave(JSON.stringify(progressed)), progressed);
   for (const corrupt of [
     null, {}, { ...progressed.attributeEffort, STR: -1 },
@@ -1201,16 +1183,17 @@ test("GLAD-001 mortar requires and consumes both limestone and fuel", () => {
 });
 
 test("GLAD-001 a 20-year farm and cooking route consumes grain and preserves straw", () => {
-  let state = queueStart(newGame(0), "farming", null).state;
+  const fresh=newGame(0);fresh.skills.farming.level=10;
+  let state = queueStart(fresh, "farming", null).state;
   state = queueStart(state, "cooking", HOUR_MS).state;
   const result = finish(readSave(JSON.stringify(state)), 20 * YEAR);
   const harvest = result.reports.find(report => report.activity === "farming");
   const cooking = result.reports.find(report => report.activity === "cooking");
   assert.ok(harvest.items.grain > 0 && harvest.items.straw > 0);
-  assert.equal(cooking.consumed.grain, harvest.items.grain);
-  assert.equal(result.state.items.ration, harvest.items.grain);
+  assert.equal(cooking.consumed.grain??0,result.state.items.ration);
+  assert.equal(result.state.items.ration+result.state.items.grain,harvest.items.grain);
   assert.equal(result.state.items.straw, harvest.items.straw);
-  assert.equal(result.state.items.grain, 0);
+  assert.equal(result.state.items.ration,20);
   assert.equal(result.state.skills.cooking.level, 1);
   assert.ok(skillMasterOffer(result.state).ready.includes("cooking"));
   assert.deepEqual(readSave(JSON.stringify(result.state)), result.state);
@@ -1275,7 +1258,8 @@ test("GLAD-002 decades of prizes agree with the frozen arena schedule", async ()
 
 test("GLAD-002 arena wins reach the saved wallet once", async () => {
   const { BOUT_MS } = await import("../site/play/combat.mjs");
-  const state = choose(newGame(42), "fighting", 42).state;
+  const fresh=newGame(42);fresh.skills.fighting.level=100;
+  const state = choose(fresh, "fighting", 42).state;
   const at = 42 + BOUT_MS * 20;
   const result = finish(state, at);
   assert.ok(result.state.coins > 0);
