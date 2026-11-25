@@ -8,14 +8,23 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## APPRENTICE-A2 — Automatic Skill Master on login
+
+- **Goal:** At 50 earned activity levels, permit optional automatic Master claims on game entry.
+- **Acceptance:** Explicit versioned consent; shared exact manual tribute and one claim per ready skill, settle first with no retroactive gains, locked UI below threshold, report after saved commit, reload/visibility/stale-save tests, no other automation.
+- **Status:** IN_REVIEW — PR #178.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## APPRENTICE-A1 — Earned scheduling and Personal Assistant
 
 - **Goal:** One starting slot; unlock a new slot each ten earned activity levels up to five. Personal Assistant menu shows progress and future chores.
 - **Acceptance:** Activated levels only, both queue add operations enforce derived capacity; preserve valid existing routes; five-slot bounded settlement, browser menu and locked future automation, regression tests. No auto-spending.
-- **Status:** IN_REVIEW — PR #177.
+- **Status:** DONE — PR #177 merged 5b996be; website 45662042280, systems 45662042373, combat 45662042289 and protocol 45662042247 passed.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #177).
 
 ## START-FIGHT-001 — Automatic first-entry arena
 
