@@ -2,18 +2,18 @@ import { dodgeChance } from "./armour.mjs?v=alpha-gear-a8";
 // Pure provisional arena rules. Distances, injuries and wear are game abstractions.
 export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 5 });
 const WEAPONS = Object.freeze({
-  bow: { move: "shot", ranged: true, type: "piercing", range: 2, power: 10, recovery: 2 },
-  dagger: { move: "dagger", type: "piercing", range: 0, power: 4, recovery: 2, flatScale: .55, gradeScale: .50, strengthScale: .75 },
+  bow: { move: "shot", ranged: true, type: "piercing", range: 2, power: 11, recovery: 2 },
+  dagger: { move: "dagger", type: "piercing", range: 0, power: 4, recovery: 2, flatScale: .75, gradeScale: .72, strengthScale: .90 },
   spear: { move: "thrust", clearance: 1, type: "piercing", range: 1, power: 10, recovery: 2 },
   sword_shield: { move: "cut", type: "slashing", range: 0, power: 8, recovery: 2 },
-  greatsword: { move: "swing", clearance: 2, type: "slashing", range: 1, power: 16, recovery: 2 },
-  hammer: { move: "hammer", type: "blunt", range: 0, power: 17, recovery: 4 }
+  greatsword: { move: "swing", clearance: 2, type: "slashing", range: 1, power: 14, recovery: 2 },
+  hammer: { move: "hammer", type: "blunt", range: 0, power: 17, recovery: 3 }
 });
 const BASH = Object.freeze({ move: "shield_bash", type: "blunt", range: 0, power: 4, recovery: 3, flatScale: .70, gradeScale: .75 });
 const BANDS = Object.freeze(["Close", "Reach", "Far"]);
 const ARMOUR_FACTOR = Object.freeze({ piercing: 0.8, slashing: 1.15, blunt: 0.45 });
-const AIM = Object.freeze({base:.72,dex:.012,skill:.004,closeBow:-.43,closeSpear:-.22,farBow:.10,clearance:.12,minimum:.15,maximum:.96});
-const GUARD = Object.freeze({block:.32,bluntBlock:.40,parry:.40,recoveringParry:.25,flatReduction:.35,openFactor:.25,counterChance:.20});
+const AIM = Object.freeze({base:.72,dex:.012,skill:.004,closeBow:-.40,closeSpear:-.18,farBow:.12,clearance:.12,minimum:.15,maximum:.96});
+const GUARD = Object.freeze({block:.29,bluntBlock:.40,parry:.36,recoveringParry:.22,flatReduction:.35,openFactor:.15,counterChance:.15,reachBlockImpact:.65,blockImpact:.43,bluntBlockImpact:1.0});
 // BAL-002: material absorbs each impact type differently. Multipliers act on
 // coverage-weighted intact piece protection, not on armour grade resistance.
 const MATERIAL_FACTORS=Object.freeze({
@@ -21,7 +21,7 @@ const MATERIAL_FACTORS=Object.freeze({
   leather:Object.freeze({piercing:1.20,slashing:1.35,blunt:1.0}),
   plate:Object.freeze({piercing:.80,slashing:1.0,blunt:.18})
 });
-const TACTICS=Object.freeze({slowApproach:.75,quickMobility:85,retreatLead:5,shortSpearImpact:.72,constrainedSwing:.85,openSwing:1.12,guardOpenTurns:2,reachInterruptTurns:1,daggerHandling:.55});
+const TACTICS=Object.freeze({slowApproach:.75,quickMobility:85,retreatLead:-3,shortSpearImpact:.80,constrainedSwing:.85,openSwing:1.08,guardOpenTurns:3,reachInterruptTurns:1,daggerHandling:.75,farShotImpact:1.60,reachShotImpact:1.15,closeShotImpact:.60});
 function attackComponents(actor,attack,activePiece){
   const equipped=activePiece.hp>0;
   const flatScale=attack.flatScale??1,gradeScale=attack.gradeScale??1,strengthScale=attack.strengthScale??1;
@@ -203,11 +203,13 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       const vital = !block && !parry && guardRoll > 0.96;
       const penetration=equipped?activePiece.penetration*handling:0;
       const materialProtection=protection(target,attack.type)*(1-penetration);
+      const shotImpact=attack.ranged?(distance===2?TACTICS.farShotImpact:distance===1?TACTICS.reachShotImpact:TACTICS.closeShotImpact):1;
+      const blockImpact=attack.type==="blunt"?GUARD.bluntBlockImpact:attack.move==="thrust"&&distance===1?GUARD.reachBlockImpact:GUARD.blockImpact;
       // Separate material protection from grade resistance: equal-grade
       // equipment approximately cancels scaling, lower-grade armour does not.
       const resistance=intactArmourSum(target,"resistance");
-      const impact = Math.max(1, Math.round(base * (vital ? 1.65 : 1) *
-        (block ? attack.type === "blunt" ? 0.94 : 0.27 : parry ? 0.35 : 1) *
+      const impact = Math.max(1, Math.round(base * shotImpact * (vital ? 1.65 : 1) *
+        (block ? blockImpact : parry ? 0.35 : 1) *
         (1 - Math.min(80, materialProtection) / 100) /
         (1+resistance*(1-penetration)) - flatGuard(target) * GUARD.flatReduction));
       const damage = wound(actor, target, impact);
@@ -228,7 +230,7 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       }
       // A clean reach thrust disrupts a closing opponent, but cannot push
       // them back forever and does not interrupt an already ranged attacker.
-      if(attack.move==="thrust"&&distance===1&&!block&&!parry&&WEAPONS[target.loadout].range===0){
+      if(attack.move==="thrust"&&distance===1&&!parry&&WEAPONS[target.loadout].range===0){
         approachProgress=0;
         target.recovery=Math.max(target.recovery,TACTICS.reachInterruptTurns);
       }
