@@ -148,7 +148,7 @@ test("GLAD-005 offline arena summary conserves results, coins and productive tim
 
 test("GLAD-005 a twenty-year three-wagon claim preserves crafting inputs and frozen arena gear", () => {
   const queue = (state, id, duration) => queueStartActivity(state, id, duration, 0, () => .5).state;
-  const fresh=fighterState(0,2);fresh.skills.farming.level=10;
+  const fresh=fighterState(0,2);fresh.skills.farming.level=10;fresh.skills.fishing.level=11; // three unlocked queue slots
   const start = queue(queue(queue(fresh, "farming", null), "cooking", HOUR_MS), "fighting", HOUR_MS);
   const result = enterGame(readSave(JSON.stringify(start)), 20 * YEAR, () => .5);
   assert.deepEqual(result.reports.map(report => report.activity), ["farming", "cooking", "fighting"]);
