@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## APPRENTICE-A1 · STARTED (2026-11-25, chat)
+
+Owner approved starting Apprentice implementation. Fresh branch `feat/apprentice-foundation` base `29d7bee` replaces overlapping draft #176; carry forward plan and pure unlock policy/tests. Scope: earned activated levels minus starting levels, 1..5 queue slots, real queue guards, foldable Assistant menu, locked/unimplemented chores clearly marked, preserve preexisting valid routes. No automation spending, tribute, new weapons or live clan changes. Next tests.
+
 ## START-FIGHT-001 · STARTED (2026-11-25, chat)
 
 Owner explicitly approved new characters automatically starting lowest-difficulty Fighting, with starter equipment and offline continuation; valid returning saves untouched. Build on existing approved UI-COMPACT-001 PR #175 because both change HTML/UI tests; repair its stale CSS revision assertion. Use existing chooseActivity on fresh character only, including explicit alpha reset; start in arena without initial preparation delay, no balance/engine/save-format changes. No other brainstorm implemented. New-start helper uses chooseActivity, fresh/reset only; cache revision and real browser starter assertions updated; compact UI stale CSS regression fixed. Next final CI.
