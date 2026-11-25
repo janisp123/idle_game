@@ -37,3 +37,8 @@ Earned expertise is published automatically on visible ticks and return, no Mast
 
 
 A7: selecting a weapon, armour, difficulty or claiming Master levels changes the character's chosen build immediately; the arena applies it only at the next complete bout boundary, after the original fight and recovery. Expertise and newly earned active attributes follow the same rule. The old kit earns the old bout's practice, and old-grade prize settlement is unchanged. Earlier immediate-restart descriptions are superseded. See SCHEDULING.md.
+
+
+## A8 — measured physical tradeoffs
+
+Current material resistance coefficients Padded .95, Leather 1.00, Plate 1.05 supersede A2 .70/.85/1.15; base protection unchanged (12/22/50 for full set). Actual dodge chance = min(.40, max(0, mobility−65) × .0045 + intact graded dodge). Per-grade graded dodge factors Padded .035, Leather .025, Plate .001, weighted by coverage and expertise. The resolver rolls dodge after initial accuracy, emitting a zero-damage defense event; broken pieces lose graded dodge, guard and resistance, worn weight remains. UI reports total chance conditional on an accurate attack, not guaranteed damage avoidance. Unarmoured has natural mobility evasion only, not imaginary graded armour. Masterwork stays unbreakable; gear prices and expertise thresholds unchanged. See A8 audit for measured results.

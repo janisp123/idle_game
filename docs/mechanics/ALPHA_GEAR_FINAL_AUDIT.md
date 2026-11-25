@@ -192,3 +192,242 @@ A7: reproduce and fix snapshot/restart issues in one coherent engine batch with 
 | normal | hammer-plate | 20261126 | 180 | 52 | 166 | 166 | 93.21 | 6022702 | 3021381 |
 | normal | greatsword-padded | 20261126 | 180 | 51 | 175 | — | 36.63 | 1981582 | 156261 |
 | normal | greatsword-plate-income | 20261126 | 180 | 52 | 167 | 167 | 93.4 | 4945860 | 1944539 |
+
+
+## A8 final measured candidate (two iterations)
+
+Verified [code head 265c7a8](https://github.com/janisp123/idle_game/commit/265c7a8cc46478386bbe3da4432f325eba57d0a6), [systems audit 45565388492](https://github.com/janisp123/idle_game/actions/runs/45565388492), website 45565388545 (111 tests), combat 45565388541 and protocol 45565388603 all passed; systems lab 13 tests passed. Final candidate reruns 191,520 previous duels plus 19,200 independent mirrors and 3,600 adjacent-grade/quality duels = 214,320 audit duels, in addition to the combat benchmark and trajectories. First candidate d8e0988 had 110/111 site tests, failed positive-win assertion in a legacy bare synthetic wallet fixture; final fixture uses matching F Common Plate, preserves all payout/split/no-duplicate assertions. Candidate two shortens tight Greatsword recovery with reduced impact, raises Bow close-shot aim penalty; full mechanism in COMBAT.md and ARMOUR.md. Economy, expertise and grade coefficients unchanged.
+
+| Grade | Dimension | Build dimension | Paired win % | NPC win % |
+| --- | --- | --- | ---: | ---: |
+| Non | style | bow | 35.36 | 49.74 |
+| Non | style | spear | 42.4 | 52.86 |
+| Non | style | sword_shield | 61 | 63.8 |
+| Non | style | greatsword | 53.26 | 67.32 |
+| Non | style | hammer | 57.84 | 70.05 |
+| Non | family | none | 31.26 | 41.88 |
+| Non | family | padded | 45.65 | 54.06 |
+| Non | family | leather | 47.25 | 62.19 |
+| Non | family | plate | 75.73 | 84.9 |
+| D | style | bow | 52.47 | 35.68 |
+| D | style | spear | 43.16 | 27.08 |
+| D | style | sword_shield | 59.61 | 42.97 |
+| D | style | greatsword | 45.54 | 32.68 |
+| D | style | hammer | 49.18 | 36.33 |
+| D | family | none | 16.28 | 3.54 |
+| D | family | padded | 55.33 | 38.54 |
+| D | family | leather | 55.58 | 39.27 |
+| D | family | plate | 72.78 | 58.44 |
+| S | style | bow | 54.48 | 56.38 |
+| S | style | spear | 45.91 | 43.1 |
+| S | style | sword_shield | 57.15 | 55.86 |
+| S | style | greatsword | 44.93 | 46.74 |
+| S | style | hammer | 47.43 | 49.48 |
+| S | family | none | 12.88 | 1.15 |
+| S | family | padded | 58.49 | 63.44 |
+| S | family | leather | 59.53 | 64.69 |
+| S | family | plate | 69.03 | 71.98 |
+
+### All build comparisons
+
+| Grade | Weapon | Armour | Paired win % | NPC win % | Coins/hour |
+| --- | --- | --- | ---: | ---: | ---: |
+| Non | bow | none | 19.85 | 29.69 | 64 |
+| Non | bow | padded | 29.75 | 42.19 | 91 |
+| Non | bow | leather | 31.06 | 52.6 | 114 |
+| Non | bow | plate | 60.79 | 74.48 | 161 |
+| Non | spear | none | 23 | 32.81 | 71 |
+| Non | spear | padded | 36.79 | 45.83 | 99 |
+| Non | spear | leather | 38.92 | 52.08 | 113 |
+| Non | spear | plate | 70.88 | 80.73 | 174 |
+| Non | sword_shield | none | 40.92 | 47.4 | 102 |
+| Non | sword_shield | padded | 58.58 | 57.81 | 125 |
+| Non | sword_shield | leather | 60.23 | 64.06 | 138 |
+| Non | sword_shield | plate | 84.27 | 85.94 | 186 |
+| Non | greatsword | none | 33.81 | 51.56 | 111 |
+| Non | greatsword | padded | 49.85 | 60.94 | 132 |
+| Non | greatsword | leather | 52.02 | 65.63 | 142 |
+| Non | greatsword | plate | 77.35 | 91.15 | 197 |
+| Non | hammer | none | 38.71 | 47.92 | 104 |
+| Non | hammer | padded | 53.27 | 63.54 | 137 |
+| Non | hammer | leather | 54.02 | 76.56 | 165 |
+| Non | hammer | plate | 85.38 | 92.19 | 199 |
+| D | bow | none | 17.73 | 2.6 | 23 |
+| D | bow | padded | 57.63 | 40.1 | 347 |
+| D | bow | leather | 57.73 | 38.54 | 333 |
+| D | bow | plate | 76.81 | 61.46 | 531 |
+| D | spear | none | 15.5 | 2.08 | 18 |
+| D | spear | padded | 47.02 | 29.17 | 252 |
+| D | spear | leather | 47.75 | 29.69 | 257 |
+| D | spear | plate | 62.38 | 47.4 | 410 |
+| D | sword_shield | none | 19.46 | 6.25 | 54 |
+| D | sword_shield | padded | 68.81 | 50 | 432 |
+| D | sword_shield | leather | 67.98 | 51.04 | 441 |
+| D | sword_shield | plate | 82.21 | 64.58 | 558 |
+| D | greatsword | none | 15.23 | 3.65 | 32 |
+| D | greatsword | padded | 49.6 | 33.85 | 293 |
+| D | greatsword | leather | 50.25 | 36.98 | 320 |
+| D | greatsword | plate | 67.08 | 56.25 | 486 |
+| D | hammer | none | 13.5 | 3.13 | 27 |
+| D | hammer | padded | 53.58 | 39.58 | 342 |
+| D | hammer | leather | 54.21 | 40.1 | 347 |
+| D | hammer | plate | 75.42 | 62.5 | 540 |
+| S | bow | none | 14.58 | 1.04 | 30 |
+| S | bow | padded | 64.6 | 69.79 | 1985 |
+| S | bow | leather | 63.23 | 72.4 | 2059 |
+| S | bow | plate | 75.52 | 82.29 | 2340 |
+| S | spear | none | 13.31 | 1.04 | 30 |
+| S | spear | padded | 54.25 | 56.25 | 1600 |
+| S | spear | leather | 56.08 | 55.21 | 1570 |
+| S | spear | plate | 60 | 59.9 | 1703 |
+| S | sword_shield | none | 12.63 | 0 | 0 |
+| S | sword_shield | padded | 67.33 | 71.88 | 2044 |
+| S | sword_shield | leather | 68.83 | 72.92 | 2074 |
+| S | sword_shield | plate | 79.79 | 78.65 | 2237 |
+| S | greatsword | none | 14.33 | 2.08 | 59 |
+| S | greatsword | padded | 52.67 | 57.81 | 1644 |
+| S | greatsword | leather | 53.77 | 56.77 | 1615 |
+| S | greatsword | plate | 58.94 | 70.31 | 2000 |
+| S | hammer | none | 9.52 | 1.56 | 44 |
+| S | hammer | padded | 53.58 | 61.46 | 1748 |
+| S | hammer | leather | 55.73 | 66.15 | 1881 |
+| S | hammer | plate | 70.9 | 68.75 | 1955 |
+
+### Armoured-only terrain results
+
+| Grade | Weapon | Arena | Paired win % | Bouts |
+| --- | --- | --- | ---: | ---: |
+| Non | bow | open_field | 36.9 | 2160 |
+| Non | bow | narrow_bridge | 38.33 | 2160 |
+| Non | bow | ruined_streets | 23.61 | 2160 |
+| Non | bow | walled_courtyard | 24.86 | 2160 |
+| Non | bow | gatehouse_chamber | 34.58 | 2160 |
+| Non | spear | open_field | 40.97 | 2160 |
+| Non | spear | narrow_bridge | 47.92 | 2160 |
+| Non | spear | ruined_streets | 50.65 | 2160 |
+| Non | spear | walled_courtyard | 43.33 | 2160 |
+| Non | spear | gatehouse_chamber | 30.74 | 2160 |
+| Non | sword_shield | open_field | 55.88 | 2160 |
+| Non | sword_shield | narrow_bridge | 59.44 | 2160 |
+| Non | sword_shield | ruined_streets | 64.58 | 2160 |
+| Non | sword_shield | walled_courtyard | 59.54 | 2160 |
+| Non | sword_shield | gatehouse_chamber | 70 | 2160 |
+| Non | greatsword | open_field | 63.47 | 2160 |
+| Non | greatsword | narrow_bridge | 46.2 | 2160 |
+| Non | greatsword | ruined_streets | 50.32 | 2160 |
+| Non | greatsword | walled_courtyard | 67.13 | 2160 |
+| Non | greatsword | gatehouse_chamber | 40.14 | 2160 |
+| Non | hammer | open_field | 52.59 | 2160 |
+| Non | hammer | narrow_bridge | 58.1 | 2160 |
+| Non | hammer | ruined_streets | 60.65 | 2160 |
+| Non | hammer | walled_courtyard | 54.95 | 2160 |
+| Non | hammer | gatehouse_chamber | 73.98 | 2160 |
+| D | bow | open_field | 61.71 | 2160 |
+| D | bow | narrow_bridge | 63.29 | 2160 |
+| D | bow | ruined_streets | 42.64 | 2160 |
+| D | bow | walled_courtyard | 38.24 | 2160 |
+| D | bow | gatehouse_chamber | 61.71 | 2160 |
+| D | spear | open_field | 36.9 | 2160 |
+| D | spear | narrow_bridge | 47.08 | 2160 |
+| D | spear | ruined_streets | 48.01 | 2160 |
+| D | spear | walled_courtyard | 39.77 | 2160 |
+| D | spear | gatehouse_chamber | 21.44 | 2160 |
+| D | sword_shield | open_field | 54.86 | 2160 |
+| D | sword_shield | narrow_bridge | 60.88 | 2160 |
+| D | sword_shield | ruined_streets | 70.56 | 2160 |
+| D | sword_shield | walled_courtyard | 62.59 | 2160 |
+| D | sword_shield | gatehouse_chamber | 73.52 | 2160 |
+| D | greatsword | open_field | 56.48 | 2160 |
+| D | greatsword | narrow_bridge | 32.64 | 2160 |
+| D | greatsword | ruined_streets | 35.74 | 2160 |
+| D | greatsword | walled_courtyard | 61.39 | 2160 |
+| D | greatsword | gatehouse_chamber | 27.18 | 2160 |
+| D | hammer | open_field | 40.05 | 2160 |
+| D | hammer | narrow_bridge | 46.11 | 2160 |
+| D | hammer | ruined_streets | 52.96 | 2160 |
+| D | hammer | walled_courtyard | 48.01 | 2160 |
+| D | hammer | gatehouse_chamber | 65.97 | 2160 |
+| S | bow | open_field | 61.99 | 2160 |
+| S | bow | narrow_bridge | 63.98 | 2160 |
+| S | bow | ruined_streets | 49.31 | 2160 |
+| S | bow | walled_courtyard | 46.67 | 2160 |
+| S | bow | gatehouse_chamber | 64.31 | 2160 |
+| S | spear | open_field | 40.56 | 2160 |
+| S | spear | narrow_bridge | 49.63 | 2160 |
+| S | spear | ruined_streets | 52.22 | 2160 |
+| S | spear | walled_courtyard | 45.79 | 2160 |
+| S | spear | gatehouse_chamber | 25 | 2160 |
+| S | sword_shield | open_field | 57.69 | 2160 |
+| S | sword_shield | narrow_bridge | 61.53 | 2160 |
+| S | sword_shield | ruined_streets | 63.52 | 2160 |
+| S | sword_shield | walled_courtyard | 57.13 | 2160 |
+| S | sword_shield | gatehouse_chamber | 73.38 | 2160 |
+| S | greatsword | open_field | 52.73 | 2160 |
+| S | greatsword | narrow_bridge | 30.51 | 2160 |
+| S | greatsword | ruined_streets | 37.18 | 2160 |
+| S | greatsword | walled_courtyard | 57.92 | 2160 |
+| S | greatsword | gatehouse_chamber | 23.56 | 2160 |
+| S | hammer | open_field | 37.04 | 2160 |
+| S | hammer | narrow_bridge | 44.21 | 2160 |
+| S | hammer | ruined_streets | 47.69 | 2160 |
+| S | hammer | walled_courtyard | 42.36 | 2160 |
+| S | hammer | gatehouse_chamber | 63.24 | 2160 |
+
+### Mirror fairness, larger independent sample
+
+| Grade | Independent player win % | Wins/losses/draws | Shared-seed mirror player win % |
+| --- | ---: | --- | ---: |
+| Non | 49.36 | 3159/3223/18 | 45.17 |
+| D | 49 | 3136/3203/61 | 47.04 |
+| S | 50.17 | 3211/3119/70 | 50.67 |
+
+64 generated seeds per build/arena, distinct deterministic seed stream per cell; 6,400 per grade. The small shared-seed matrix still deviates at early grades, so the larger sample supports near parity without proving perfect RNG independence.
+
+### Quality and expertise
+
+| Grade | Quality vs Common | Paired win % |
+| --- | --- | ---: |
+| Non | poor | 19.83 |
+| Non | fine | 84.42 |
+| Non | masterwork | 94.5 |
+| D | poor | 38.92 |
+| D | fine | 68.17 |
+| D | masterwork | 85.17 |
+| S | poor | 39.58 |
+| S | fine | 66 |
+| S | masterwork | 79.67 |
+
+| Higher Poor grade vs lower Masterwork | Higher-side win % |
+| --- | ---: |
+| F vs Non | 41.67 |
+| C vs D | 70.67 |
+| S vs A | 75.58 |
+
+| S opponent practice hours | Weapon novice | Armour novice | Both novice |
+| ---: | ---: | ---: | ---: |
+| 0 | 99.5% | 97.58% | 100% |
+| 1000 | 97.75% | 90% | 99.83% |
+| 2000 | 92% | 81% | 97.5% |
+| 3000 | 74.5% | 66.92% | 84.08% |
+| 4000 | 49.75% | 49.75% | 49.75% |
+
+### Economy
+
+| Profile | Strategy | Seed | Days | Fighting | First any S affordable | First any S bought | Full S MW day | Win % | Earned | Wallet |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| normal | rapid-income | 20261125 | 30 | 20 | — | — | — | 90.17 | 319096 | 198775 |
+| normal | rapid-starter-rush | 20261125 | 30 | 20 | — | — | — | 98.36 | 152964 | 152964 |
+| alpha | rapid-income | 20261125 | 30 | 270 | — | — | — | 94.91 | 828034 | 17713 |
+| alpha | rapid-starter-rush | 20261125 | 30 | 271 | — | — | — | 99.68 | 155004 | 155004 |
+| normal | rapid-income | 20261126 | 30 | 20 | — | — | — | 90.17 | 319060 | 198739 |
+| normal | rapid-starter-rush | 20261126 | 30 | 20 | — | — | — | 98.37 | 152976 | 152976 |
+| normal | bow-leather | 20261126 | 180 | 51 | 45 | 171 | 171 | 78.87 | 4905562 | 1904241 |
+| normal | hammer-plate | 20261126 | 180 | 52 | 41 | 168 | 168 | 85.34 | 5345996 | 2344675 |
+| normal | greatsword-padded | 20261126 | 180 | 51 | 47 | 172 | 172 | 68.85 | 4160394 | 1159073 |
+| normal | greatsword-plate-income | 20261126 | 180 | 52 | 42 | 170 | 170 | 85.9 | 5234574 | 2233253 |
+| normal | spear-padded | 20261126 | 180 | 51 | 49 | 172 | 172 | 67.15 | 4088328 | 1087007 |
+| normal | shield-leather | 20261126 | 180 | 52 | 43 | 170 | 170 | 81.18 | 5087524 | 2086203 |
+
+Representative original normal daily Greatsword/Plate (seed 20261125): full S MW day 170, Fighting 52, STR/DEX/END 149/149/137, 80.56% wins, 5013990 earned, 3001321 spent, 2012669 spare, 4235.97h weapon/4213.28h armour. Together the seven normal daily trajectories all complete S MW days 168–172, with both selected tracks above 4000h. Includes a duplicate Greatsword/Plate strategy with income selection; six distinct tested builds covering all five weapons and all three worn families, **not every possible build**. No normal month-one any-S affordability/purchase in either rapid policy/two seeds. Normal first-month skill bound unchanged.
+
+**Retain candidate for alpha review:** S Common vs Non-grade Common mixed style/material 6,000/6,000 wins at stats 10/80/150; S vs A/B/C 91.35/99.2/100% at 150. D/S matched Leather NPCs win 43.75/45.31%, low-stat/low-gear 0 wins in all 1,280 samples. Same S Leather grade dominance benchmark 988 wins/1008 losses/4 draws, special results 67/66; mismatched grade both directions all 2,000 dominant outcomes. No extra rewards. Plate still strongest, especially at low grade; Bow Gatehouse remains strong despite lower close aim, and terrain preference ordering is not ideal. Greatsword still tactically weaker in confined space. Early adjacent Poor vs Masterwork overlap may warrant later tune. Do not claim final competitive balance or perfect equality. All current tests passed, but exact approved artwork still missing and actual browser smoke not yet performed. A9 refresh representative Max Stats based on measured normal build (current A3 floor is slightly stale), review pending PR scope/save notices/CI cleanup and resolve remaining art/browser checks before merge. No deployment.

@@ -263,3 +263,8 @@ All other weapon and unused armour tracks are zero across these fixed-build traj
 ### A7 — corrected arena state
 
 Verified head 81d0c5c, systems run 45563621103: normal daily reaches full S MW day 170, Fighting 52, STR/DEX/END 148/148/136, 4,170.74 weapon and 4,148.68 Plate practice hours, 65.46% wins, 4,006,408 earned, 3,001,321 spent, 1,005,087 wallet. Weekly Fighting 26, 96.83% wins, C Common (mastery claim cap remains); mixed Fighting 42, A Common, 82.70% wins; normal hourly starter farm has no S at day 30. Additional trajectories in ALPHA_GEAR_FINAL_AUDIT.md. A7 fixes state correctness, not physical balance; no price changes or deployment.
+
+
+### A8 — measured physical balance
+
+Verified code head 265c7a8. Representative normal daily Greatsword/Plate: S Masterwork day 170, Fighting 52, stats 149/149/137, 80.56% cumulative win rate, 5,013,990 coins earned, 3,001,321 spent, 2,012,669 spare, 4,235.97 weapon and 4,213.28 armour hours. All seven tested normal daily strategies finish S MW days 168–172. Greatsword/Padded now completes at day 172. Normal rapid rush remains below S in month one. Full tables and caveats in ALPHA_GEAR_FINAL_AUDIT.md. Keep prices and expertise curve. Update A4 representative fixture from A8 in release preparation.

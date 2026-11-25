@@ -33,3 +33,6 @@ These are intentionally artificial local QA fixtures, **not earned progression**
 
 
 A7 supersedes the A4 unfinished-snapshot restart: Max Stats publishes its test fixture but the current fight and recovery are immutable. The new test build applies at the next bout boundary. A4's six-month fixture remains a representative floor, not a live-derived universal maximum.
+
+
+A8 retest: the normal representative six-month daily build now reaches 149/149/137, Fighting 52, ~4,235.97h weapon and 4,213.28h Plate. A4 fixture remains its verified historical A3 minimum until A9 refresh; no claim that it is a universal maximum. Do not change other expertise tracks or coin-grant behaviour.

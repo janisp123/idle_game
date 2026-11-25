@@ -54,7 +54,7 @@ There is no **offline time cap** or mandatory daily login. Attribute effort and 
 
 ## Saves and migration
 
-- `SAVE_KEY = "idle-game-prototype-v1"` stays the same. `readSave` on the pending A7 branch accepts V14 (the live GLAD-005 release still uses V11). Earlier alpha saves start fresh with a reset notice on eventual release.
+- `SAVE_KEY = "idle-game-prototype-v1"` stays the same. `readSave` on the pending A8 branch accepts V15 (the live GLAD-005 release still uses V11). Earlier alpha saves start fresh with a reset notice on eventual release.
 - Saved values include individual skill XP/levels, `attributeEffort`, items, current activity, partial work, transition phase, wagon route, productive-period progress, timestamp, and `combatSession`.
 - Current-build progress across timing-profile changes is scaled **proportionally** to preserve the fraction of the unfinished work cycle or transition phase. Item totals, skill levels, XP and routes are not reset.
 - Inventory is available to eligible recipes. Skill Master action deliberately forfeits the selected skills' output resources only after confirmation.
@@ -79,3 +79,6 @@ V14 saves store earned and active attribute effort separately and bank fractiona
 
 
 A7 code head 81d0c5c passed all four workflows, including 109 game/UI and 13 systems tests. The split-absence regression now uses settle for intermediate checkpoints rather than enterGame (an actual return legitimately activates earned attributes). No live deployment or real browser smoke yet.
+
+
+A8 advances V14 to V15 solely to prevent old frozen bouts being replayed under changed physical combat formulas. No offline architecture changes in A8; A7 immutable-bout rules remain. No live reset until eventual alpha release.

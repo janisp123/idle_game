@@ -140,3 +140,8 @@ Special results are subsets of the actual win/loss counts; no mechanical reward 
 ### A6 combined audit
 
 [Full audited tables and findings](ALPHA_GEAR_FINAL_AUDIT.md). A6 measures paired role orientations, 20 builds, actual NPC readiness, quality, partial expertise and expanded trajectories. Greatsword and lighter armour require tuning, and mirror role bias requires review. No formula changed; A6 is not final balance approval.
+
+
+## A8 — verified physical balance candidate
+
+Greatsword base power 13, recovery 2; parry 32% ready/18% final recovery scaled by proficiency. Shortened constrained swings reduce clearance recovery by one turn (floor zero), retain .12 accuracy penalty per missing clearance and 10% impact reduction when constrained. Bow close-range aim penalty .30. Initiative probability symmetric, based on DEX/mobility difference with independent deterministic stream; no fixed tie preference. Dodge and material coefficients in ARMOUR.md. All four workflows passed at 265c7a8, full [A8 audit](ALPHA_GEAR_FINAL_AUDIT.md) records all before/after findings, remaining imperfect terrain/material matchups and cross-quality effects. Existing outcome art fallback unchanged. Save version V15 on eventual deployment because replaying old frozen duels with changed formulas would change outcomes.
