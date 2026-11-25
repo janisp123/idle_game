@@ -2,7 +2,8 @@
 import {execFileSync} from "node:child_process";
 const ref="01362378d8aefcec3aa1fa4bb73116d9457237c3",names=["armour","difficulty","combat-skills","expertise","arenas","smith","physical-duel","combat-verdict","combat-art","combat","arena-wallet","attributes","loot","production","apprentice","engine"];
 const src=Object.fromEntries(names.map(n=>[n,execFileSync("git",["show",ref+":site/play/"+n+".mjs"],{encoding:"utf8"})]));
-function run(src,selected,mode='moderate'){
+function run(src,selected,rewardMode='moderate'){
+
 
 
 
@@ -43,7 +44,7 @@ function install(mode){
  modules.smith=load("smith",s);
  modules["physical-duel"]=load("physical-duel",duel);
  for(const n of ["combat-verdict","combat-art","combat","arena-wallet","attributes","loot","production","apprentice","engine"]){
- let source=src[n];if(n==="arena-wallet")source=patch(source,"[12, 20, 32, 48, 68, 92, 122, 158]",mode==="targeted"?"[12, 20, 32, 48, 68, 92, 122, 185]":"[12, 20, 34, 52, 76, 112, 165, 245]");if(n==="engine")source=patch(source,'export const TIMING_PROFILE = "alpha";','export const TIMING_PROFILE = "normal";');
+ let source=src[n];if(n==="arena-wallet")source=patch(source,"[12, 20, 32, 48, 68, 92, 122, 158]",rewardMode==="targeted"?"[12, 20, 32, 48, 68, 92, 122, 185]":"[12, 20, 34, 52, 76, 112, 165, 245]");if(n==="engine")source=patch(source,'export const TIMING_PROFILE = "alpha";','export const TIMING_PROFILE = "normal";');
  modules[n]=load(n,source);}
  return {engine:modules.engine,attrs:modules.attributes,smith:modules.smith,combat:modules.combat,armour:modules.armour,difficulty:modules.difficulty,wallet:modules["arena-wallet"]};
 }
@@ -188,7 +189,7 @@ function trajectory(modules, scenario, seed) {
 
 
 const scenarios=selected??styles.flatMap(loadout=>families.map(family=>[loadout,family]));
-const m=install("credit");
+const m=install("credit");if(m.wallet.arenaReward(7)!==(rewardMode==="targeted"?185:245))throw Error("reward curve mismatch");
 return scenarios.map(([loadout,family])=>trajectory(m,{id:"daily",days:180,claimHours:24,mixed:false,farm:false,loadout,family},20261201));
 
 }
