@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## START-FIGHT-001 — PR #175
+
+New character initialization now enters existing lowest-tier arena via chooseActivity; valid saves resume normally. Explicit alpha reset uses same starter route. No engine or balance change. Combined with approved compact UI PR #175 and stale CSS test assertion fix. Next CI and Pages verification.
+
 ## UI-COMPACT-001 — PR #175
 
 Skill progress and Master share one panel; Resources uses native collapsed details. No XP, tribute, resource or save changes. Next verify final checks and Pages.
