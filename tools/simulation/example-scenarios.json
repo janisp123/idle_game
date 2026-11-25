@@ -66,6 +66,7 @@
     },
     {
       "module": "queue",
+      "levels": {"fishing": 11},
       "route": [
         {
           "activity": "mining",
