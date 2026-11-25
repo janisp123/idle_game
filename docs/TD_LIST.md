@@ -12,10 +12,10 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Prepare useful design and implementation specifications before the Owner rents a server; clearly map features to screens, functions and data ownership.
 - **Acceptance:** [CLAN_IMPLEMENTATION_PLAN.md](CLAN_IMPLEMENTATION_PLAN.md) records the source-backed resource map, proposed domain/API contracts, ordered offline design/testing and later deployment gates, unresolved decisions and security boundaries. Documentation only, no hosting commitment or gameplay change.
-- **Status:** IN_REVIEW — PR #171.
+- **Status:** DONE — PR #171 merged dcc76b6; protocol 45632295716 and systems 45632295464 passed.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #171, documentation only).
 
 ## CLAN-001 — Clan entry, membership and shared development
 
