@@ -2,7 +2,7 @@
 
 ## ALPHA-GEAR-001 · STARTED
 
-Branch: `alpha/six-month-gear-benchmark`. Goal: simulate gear progression and add six-month Max Stats and +100,000 arena coins controls. Last verified: GLAD-005 deployed. Pending: model, simulations, controls and release. Next: inspect progression and run the benchmark.
+Branch: `alpha/six-month-gear-benchmark`. Goal: source-backed six-month single-build progression, grade/coin purchase gates, open arena difficulty, meaningful stat-scaling gear, independent weapon and armour expertise, motivational outcome art, Max Stats and +100,000 arena coins testing controls. Owner approved extended design on 2026-11-25; chat recorded detailed scope and criteria in TD_LIST and DECISIONS. Last verified: GLAD-005 deployed; current progression/shop source inspected. No gameplay code, asset integration or new simulation completed by this handoff. Pending: source-backed normal/alpha progression and affordability benchmark, combat simulations, implementation slices, checks and release. Next: inspect current production mechanics and run the first benchmark as specified in ALPHA-GEAR-001 (including earliest legitimate rapid claims and low-tier farming). Keep PR #154 draft until its actual scope is complete.
 
 ## GLAD-005 · DEPLOYED · 2026-11-24
 
