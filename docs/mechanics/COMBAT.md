@@ -62,3 +62,38 @@ For a fixed Greatsword build in Walled Courtyard, Non-grade, F and E items won 3
 ## A2 — candidate opponent and gear scaling (draft)
 
 Arena readiness is separate from survival work. Opponent target stats by grade are 10/24/42/62/82/104/124/144, with corresponding skill 1/5/10/17/25/33/40/50 and small stat variation. NPCs use the same smith and condition profile as the player, with matching grade on weapon and all four armour pieces; Non-grade Poor, higher-grade Common. No hard difficulty lock. Grade/quality multipliers and resistance are in [ARMOUR.md](ARMOUR.md). A2 keeps the fixed bout timeline and bounded offline payout, and advances the alpha save version to V12 (old disposable test progress resets with notice). Earlier GLAD-005 tables above are historical baseline, not current A2 results. New matrix pending CI and calibration.
+
+### A2 verified grade-separation matrix
+
+Source: `node tools/gladiator-benchmark.mjs`, fixed seed 20261124, [combat CI 45560649423](https://github.com/janisp123/idle_game/actions/runs/45560649423). Each equal-stat row uses 2,000 actual duels (25 ordered style pairs × five arenas × 16 seeds), Common quality and rotating Padded/Leather/Plate combinations. Because material pairings are not strictly mirrored, equal-grade rates are a broad reference, not a perfect symmetric fairness measurement. No gear/expertise penalty for unfamiliar types yet.
+
+| Equal STR/DEX/END | Higher grade | Lower grade | Higher-grade-side win % |
+| ---: | ---: | ---: | ---: |
+| 10 | 0 | 0 | 57 |
+| 10 | 1 | 0 | 92.45 |
+| 10 | 2 | 0 | 99.2 |
+| 10 | 3 | 0 | 99.9 |
+| 10 | 7 | 0 | 100 |
+| 80 | 0 | 0 | 56.6 |
+| 80 | 1 | 0 | 85.1 |
+| 80 | 2 | 0 | 95.5 |
+| 80 | 3 | 0 | 99.6 |
+| 80 | 7 | 0 | 100 |
+| 150 | 0 | 0 | 57.25 |
+| 150 | 1 | 0 | 83.8 |
+| 150 | 2 | 0 | 94.65 |
+| 150 | 3 | 0 | 99.35 |
+| 150 | 7 | 0 | 100 |
+| 150 | 7 | 6 | 81.5 |
+| 150 | 7 | 5 | 94.3 |
+| 150 | 7 | 4 | 99.25 |
+
+Readiness against actual randomly selected arena NPCs: each row 320 fights (five styles × 64 seeds), player Common Leather. Matched = default benchmark stats and same item grade; low stats = 10/10/10 and skill 1 with matching gear; low gear = benchmark stats with Non-grade Common. NPC material distribution varies by role.
+
+| Opponent grade | Matched | Low stats | Low gear |
+| ---: | ---: | ---: | ---: |
+| 0 | 58.44% | 58.44% | 58.44% |
+| 3 | 31.88% | 0.00% | 0.00% |
+| 7 | 32.81% | 0.00% | 0.00% |
+
+S beat Non-grade in all 6,000 sampled equal-stat duels; at stat 150, S vs A/B/C won 81.5%/94.3%/99.25%. D/S readiness mismatches lost every sampled fight; no scripted result. Matched Leather wins ~32% against the NPC material mix, below a 50% broad target; Padded vs Plate, per-style bias, high-level quality and symmetric same-grade fairness need additional measurement after expertise. Early F vs Non-grade at stat 10 is stronger than the initial 75–85% one-grade target (92.45%); do not hide this. Grade factor provisional. Matrix comprises 36,000 gear and 2,880 readiness duels in addition to legacy 13,760 and the CI 10,000-bout scenario.

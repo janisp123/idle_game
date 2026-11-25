@@ -199,3 +199,30 @@ A1 removes the arena difficulty lock, introduces coin + Fighting-level purchase 
 **Interpretation:** Normal daily S Masterwork set moves from day 2 to day 168 (about 5.6 months). Six-month Fighting 52 and 150/150/138, 3,637,920 earned, 3,001,321 spent. Normal daily ends with D Common at day 30, B Common at day 90, A Common at day 150, S Masterwork by day 180. Normal hourly low-tier rush earns 146,724 in month one, cannot afford even one S Masterwork and reaches only Fighting 20. The mathematical test separately excludes any S purchase in 30 normal days by bounding total possible Fighting XP below level 50, even if all cycles are maximally efficient. Weekly and mixed normal schedules reach C/A Common respectively at six months; neither reached S. Alpha daily still buys S Masterwork by day 89 due to intentionally accelerated leveling. Alpha high-tier-farming optimal strategy has not been tested. No claim of universal six-month acquisition.
 
 **Remaining serious flaw:** Normal daily win rate remains 99.5% because enemy benchmarks and flat gear are unchanged. The current pricing success is only a starting point. A2 must fix power scaling, grade-specific opponent builds and meaningful matchups; then recompute the economy and adjust price/level candidates. A3 expertise must further change the trajectory. Do not deploy this incomplete rebalance or claim S gear is balanced yet.
+
+## A2 — physical grade scaling and opponent calibration
+
+Verified code head [7774d93](https://github.com/janisp123/idle_game/commit/7774d93e2785805eb758272781a3f73a390727f9). All four checks passed: [website 45560649429](https://github.com/janisp123/idle_game/actions/runs/45560649429), [combat 45560649423](https://github.com/janisp123/idle_game/actions/runs/45560649423), [systems lab 45560649409](https://github.com/janisp123/idle_game/actions/runs/45560649409), [protocol 45560649393](https://github.com/janisp123/idle_game/actions/runs/45560649393). Fixed seed 20261125 for trajectories; opponent/gear formula and voluntary arena selection policy changed from A1. Price table and rewards unchanged. Normal daily now targets its full-build grade and stat readiness instead of using survival skill unlocks. Consequently this is not a pure one-variable comparison.
+
+| Profile | Strategy | First S Masterwork weapon day | Complete S Masterwork day | Ending grade/quality | End Fighting | End STR/DEX/END | Cumulative win % | Earned | Spent |
+| --- | --- | ---: | ---: | --- | ---: | --- | ---: | ---: | ---: |
+| normal | daily (180d) | 170 | 170 | 7/masterwork | 52 | 148/148/136 | 64.78 | 3994156 | 3001321 |
+| normal | weekly (180d) | — | — | 4/common | 26 | 141/141/130 | 96.81 | 2608896 | 300321 |
+| normal | mixed (180d) | — | — | 6/common | 42 | 177/126/140 | 78.43 | 2827126 | 1125321 |
+| normal | rapid-farm (30d) | — | — | 0/poor | 20 | 66/65/61 | 94.35 | 146724 | 0 |
+| alpha | daily (180d) | 90 | 106 | 7/masterwork | 181 | 194/194/176 | 88.77 | 7924548 | 3001321 |
+| alpha | weekly (180d) | — | — | 4/common | 26 | 141/141/130 | 96.92 | 2609928 | 300321 |
+| alpha | mixed (180d) | 131 | 152 | 7/masterwork | 131 | 228/157/176 | 74.3 | 4386224 | 3001321 |
+| alpha | rapid-farm (30d) | — | — | 0/poor | 252 | 147/147/130 | 98.7 | 153492 | 0 |
+
+Normal daily checkpoint detail:
+
+| Day | Fighting | STR/DEX/END | Productive Fighting h | Wins/losses/double deaths | Win % | Earned | Spent | Wallet | Weapon grade/quality | Enemy grade |
+| ---: | ---: | --- | ---: | --- | ---: | ---: | ---: | ---: | --- | --- |
+| 0 | 1 | 10/10/10 | 0 | 0/0/0 | — | 0 | 0 | 0 | 0/poor | Non-grade |
+| 30 | 17 | 65/64/60 | 702.21 | 9762/3167/30 | 75.33 | 253972 | 120321 | 133651 | 3/common | D |
+| 90 | 34 | 107/106/98 | 2095.31 | 27241/11581/57 | 70.07 | 1313668 | 600321 | 713347 | 5/common | B |
+| 150 | 46 | 135/135/124 | 3468.93 | 41212/23505/82 | 63.6 | 2780350 | 1125321 | 1655029 | 6/common | A |
+| 180 | 52 | 148/148/136 | 4167.81 | 50371/27289/99 | 64.78 | 3994156 | 3001321 | 992835 | 7/masterwork | S |
+
+**Interpretation:** Day 170 is near six months, cumulative wins fall from 99.5% to 64.78%, and the representative six-month stats now 148/148/136 (Fighting 52). Normal mixed/weekly do not reach S by day 180. Alpha daily reaches S Masterwork at day 106; first-month normal low-tier farming still cannot buy S. Keep A1 prices provisionally until expertise is introduced and measured. No optimal high-tier alpha farm search or multi-seed trajectory performed. See the combat matrix for grade separation and remaining style/material imbalances.
