@@ -142,17 +142,20 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       const attack = actor.counter && actor.shield.hp > 0 ? BASH : active;
       const counter = actor.counter;
       actor.counter = false;
-      actor.recovery = attack.recovery - 1 + Math.max(0, (attack.clearance ?? 0) - (terrain.clearance ?? 2));
+      const constriction = Math.max(0, (attack.clearance ?? 0) - (terrain.clearance ?? 2));
+      // Shortened greatsword swings still lose accuracy and impact in tight
+      // quarters, without paying the full recovery penalty for every swing.
+      const clearanceRecovery=actor.loadout==="greatsword"?Math.max(0,constriction-1):constriction;
+      actor.recovery=attack.recovery-1+clearanceRecovery;
       if (attack.move === "shot") actor.arrows--;
       const shortSpear = actor.loadout === "spear" && distance === 0;
-      const constriction = Math.max(0, (attack.clearance ?? 0) - (terrain.clearance ?? 2));
       const obscuredShot = attack.ranged && distance > 0
         ? (2 - (terrain.lineOfSight ?? 2)) * 0.15 +
           (terrain.cover ?? 0) * (target.shield.hp > 0 ? 0.10 : 0.04) : 0;
       const activePiece=attack===BASH?actor.shield:actor.weapon;
       const equipped=activePiece.hp>0;
       const aim = 0.72 + (equipped?activePiece.accuracy:0) + (actor.dex - target.dex) * 0.012 + (actor.skill - target.skill) * 0.004 +
-        (distance === 0 && bow ? -0.16 : 0) + (shortSpear ? -0.14 : 0) - obscuredShot - constriction * 0.12;
+        (distance === 0 && bow ? -0.30 : 0) + (shortSpear ? -0.14 : 0) - obscuredShot - constriction * 0.12;
       if (roll() >= Math.max(0.19, Math.min(0.96, aim))) {
         record(actor, target, "miss", { move: attack.move });
         continue;
@@ -173,7 +176,7 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       const flat=equipped?(activePiece.flatAttack??actor.gearAttack??0):0;
       const multiplier=equipped?(activePiece.damageMultiplier??1):1;
       const base = (attack.power + actor.str * 0.3 + flat * 0.65) * multiplier *
-        (intact ? 1 : 0.55) * (shortSpear ? 0.82 : 1) * (counter && attack !== BASH ? 1.18 : 1);
+        (intact ? 1 : 0.55) * (shortSpear ? 0.82 : 1) * (actor.loadout==="greatsword"&&constriction>0?0.90:1) * (counter && attack !== BASH ? 1.18 : 1);
       const vital = !block && !parry && guardRoll > 0.96;
       const penetration=equipped?activePiece.penetration:0;
       const armourFactor=ARMOUR_FACTOR[attack.type]*(1-penetration);

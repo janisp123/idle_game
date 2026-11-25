@@ -67,6 +67,12 @@ for(const [grade,stat,skill] of [[0,10,1],[3,62,17],[7,150,50]]){
       rows.push({kind:"terrain",grade,style,arena:arena.id,winPct:pct(total),bouts:total.bouts});
     }
   }
+  const independent=counts();
+  for(const [i,b] of builds.entries())for(const [j,arena] of ARENAS.entries()){
+    const rng=seededCombatRandom(20261129+grade*10000+i*100+j);
+    for(let n=0;n<64;n++)tally(independent,resolvePhysicalDuel(b.build,b.build,Math.floor(rng()*2**32),arena).outcome);
+  }
+  rows.push({kind:"independent-mirror",grade,...independent,winPct:pct(independent)});
   rows.push({kind:"orientation",grade,mirrorPlayerWinPct:pct(mirror),mirrorBouts:mirror.bouts,mirrorDrawPct:100*mirror.draws/mirror.bouts,crossPlayerWinPct:pct(orientation),crossBouts:orientation.bouts});
   for(const [dimension,keys] of [["style",styles],["family",families]]){
     for(const key of keys){
@@ -99,6 +105,18 @@ for(const hours of [0,1000,2000,3000,4000])for(const novice of ["weapon","armour
   }
   rows.push({kind:"expertise",hours,novice,...a,trainedWinPct:pct(a)});
 }
+// Adjacent grades with the strongest plausible quality contrast, same
+// attributes, same style/material, paired orientations.
+for(const higher of [1,4,7]){
+  const stat=[0,24,0,0,82,0,0,150][higher],a=counts(),b=counts(),orientation=counts();
+  for(const style of styles)for(const family of families.slice(1)){
+    const opt={loadout:style,armour:family,str:stat,dex:stat,end:stat,skill:50};
+    const p=createPlayerSnapshot({...opt,itemGrade:higher,quality:"poor"});
+    const q=createPlayerSnapshot({...opt,itemGrade:higher-1,quality:"masterwork"});
+    for(const arena of ARENAS)for(const seed of seeds.slice(0,8))paired(p,q,arena,seed,a,b,orientation);
+  }
+  rows.push({kind:"adjacent-quality",higher,lower:higher-1,...a,winPct:pct(a)});
+}
 // Normal and alpha are explicitly separate, with no testing-button use.
 const economy=[];
 const short=[{id:"rapid-income",days:30,claimHours:.25,mixed:false,farm:false,income:true},
@@ -106,7 +124,9 @@ const short=[{id:"rapid-income",days:30,claimHours:.25,mixed:false,farm:false,in
 const long=[{id:"bow-leather",days:180,claimHours:24,mixed:false,farm:false,loadout:"bow",family:"leather"},
  {id:"hammer-plate",days:180,claimHours:24,mixed:false,farm:false,loadout:"hammer",family:"plate"},
  {id:"greatsword-padded",days:180,claimHours:24,mixed:false,farm:false,loadout:"greatsword",family:"padded"},
- {id:"greatsword-plate-income",days:180,claimHours:24,mixed:false,farm:false,income:true}];
+ {id:"greatsword-plate-income",days:180,claimHours:24,mixed:false,farm:false,income:true},
+ {id:"spear-padded",days:180,claimHours:24,mixed:false,farm:false,loadout:"spear",family:"padded"},
+ {id:"shield-leather",days:180,claimHours:24,mixed:false,farm:false,loadout:"sword_shield",family:"leather"}];
 for(const [profiles,scenarios,seed] of [[["normal","alpha"],short,20261125],[["normal"],short,20261126],[["normal"],long,20261126]]){
   const report=await runBuildBaseline({profiles,scenarios,seed});
   for(const p of report.reports)for(const scenario of p.scenarios){

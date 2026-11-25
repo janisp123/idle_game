@@ -1234,8 +1234,11 @@ test("GLAD-001 grade S training and mining keep capped offline skill XP and dist
 test("GLAD-002 arena rewards match resolved wins and are independent of settlement splits", async () => {
   const { arenaReward, settleArenaPrizes } = await import("../site/play/arena-wallet.mjs");
   const { BOUT_MS, combatAtTime, startCombatSession } = await import("../site/play/combat.mjs");
-  const player = { name: "Test fighter", loadout: "greatsword", difficulty: 1,
-    str: 24, dex: 24, end: 24, skill: 12 };
+  const {createPlayerSnapshot}=await import("./combat-simulator.mjs");
+  // Test real payout/split semantics with a properly equipped F fighter.
+  // The old bare fixture lost all 18 after A8 made armour meaningful.
+  const player=createPlayerSnapshot({loadout:"greatsword",armour:"plate",grade:1,itemGrade:1,
+    quality:"common",str:30,dex:30,end:30,skill:12});
   const initial = startCombatSession(player, 197);
   const result = settleArenaPrizes({ ...initial, elapsedMs: 18 * BOUT_MS });
   let wins = 0;
