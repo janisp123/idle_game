@@ -158,9 +158,9 @@ try{
       // Only synthetic saves created by production functions in this temporary
       // browser. Pick an actual resolved qualifying final event, never fake it.
       const setup=await evaluate(`(async()=>{
-        const e=await import("./engine.mjs?v=char-stats-001");
-        const a=await import("./alpha-tools.mjs?v=char-stats-001");
-        const c=await import("./combat.mjs?v=char-stats-001");
+        const e=await import("./engine.mjs?v=bal-002");
+        const a=await import("./alpha-tools.mjs?v=bal-002");
+        const c=await import("./combat.mjs?v=bal-002");
         const v=await import("./combat-verdict.mjs?v=alpha-gear-a5");
         const mode=${JSON.stringify(mode)},now=Date.now(),start=now-c.BOUT_MS+1;
         let s=e.newGame(start);
