@@ -1,5 +1,5 @@
-import { GRADES as difficultyGrades, benchmark } from "./difficulty.mjs?v=glad-004";
-import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote } from "./smith.mjs?v=glad-003";
+import { GRADES as difficultyGrades, benchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a1";
+import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel } from "./smith.mjs?v=alpha-gear-a1";
 import {
   setDifficulty, buyEquipment, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
@@ -9,7 +9,7 @@ import {
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=glad-005";
+} from "./engine.mjs?v=alpha-gear-a1";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS } from "./combat.mjs?v=glad-004";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=glad-003";
@@ -132,7 +132,8 @@ for (const slot of ARMOUR_SLOTS) {
   armourButtons.set(slot.id, button);
 }
 for (const { id, name } of ARMOUR_CHOICES.head) addOption(ui.armourChoice, id, name);
-ITEM_GRADES.forEach((grade, index) => addOption(ui.itemGrade, index, grade));
+ITEM_GRADES.forEach((grade, index) => addOption(ui.itemGrade, index,
+  index ? grade + " · Fighting " + equipmentUnlockLevel(index) : grade));
 ITEM_QUALITIES.forEach(quality => addOption(ui.itemQuality, quality, titleCase(quality)));
 const selectedSpec = () => ({ grade: Number(ui.itemGrade.value), quality: ui.itemQuality.value });
 
@@ -149,8 +150,12 @@ function renderArmour() {
   ui.itemGrade.disabled = !id;
   ui.itemQuality.disabled = !id;
   ui.smithBuy.disabled = !quote?.available;
-  ui.smithBuy.textContent = quote?.cost ?
-    (item ? "Improve" : "Buy and equip") + " · " + number(quote.cost) + " coins" : "Choose an improvement";
+  const quotedCost=quote?.cost ? number(quote.cost) + " coins" : "";
+  ui.smithBuy.textContent = quote?.reason==="fighting_level" ?
+    "Fighting " + quote.requiredFightingLevel + " required · " + quotedCost :
+    quote?.reason==="coins" ? "Need " + quotedCost :
+    quote?.available ? (item ? "Improve" : "Buy and equip") + " · " + quotedCost :
+    "Choose an improvement";
   ui.smithEquip.hidden = !slot || (id && !item);
   ui.smithEquip.disabled = !slot || state.armour[slot.id] === selectedFamily;
   ui.smithEquip.textContent = selectedFamily === "none" ? "Unequip" : "Equip owned armour";
@@ -323,7 +328,7 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   difficultyGrades.forEach((grade,tier) => {
     const option = document.createElement("option");
     option.value = String(tier);
-    option.textContent = tier ? grade + " · Level " + benchmark(tier).skill + " · Target stat " + benchmark(tier).stat : "0 · Non-grade";
+    option.textContent = tier ? grade + (id === "fighting" ? " · Target skill " : " · Requires level ") + benchmark(tier).skill + " · Target stat " + benchmark(tier).stat : "0 · Non-grade";
     difficulty.append(option);
   });
   difficulty.addEventListener("change", () => {
@@ -808,7 +813,7 @@ function render() {
   }
   for (const [id, { row, startButton, queueButton, levelButton, difficulty }] of activityButtons) {
     const skill = state.skills[id];
-    Array.from(difficulty.children).forEach((option,tier) => { option.disabled = skill.level < benchmark(tier).skill; });
+    Array.from(difficulty.children).forEach((option,tier) => { option.disabled = !canSelectDifficulty(id,skill.level,tier); });
     difficulty.value = String(state.difficulties[id] ?? 0);
     activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level) +
       (skill.xp >= xpToNextLevel(skill.level) ? " · Master ready" : "");

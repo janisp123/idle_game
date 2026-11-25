@@ -59,7 +59,8 @@
       "loadout": "sword_shield",
       "slot": "head",
       "gear": "padded",
-      "coins": 200,
+      "coins": 10000,
+      "levels": {"fighting": 5},
       "itemGrade": 1,
       "quality": "common"
     },

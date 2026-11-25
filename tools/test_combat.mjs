@@ -12,7 +12,7 @@ test("changing armour mid-Fighting preserves earned progression and refreshes fr
   const before=settle(init,STEP_MS,()=>.5).state;
   assert.equal(before.combatSession.player.gear.physicalReductionPct,0);
   const oldXP=before.skills.fighting.xp,oldEffort={...before.attributeEffort};
-  const changed=buyEquipment(before,"torso:leather",{grade:2,quality:"fine"},STEP_MS,()=>.5).state;
+  const changed=buyEquipment(before,"torso:leather",{grade:0,quality:"fine"},STEP_MS,()=>.5).state;
   assert.equal(changed.combatSession,null,"equipping a different piece begins a new fight");
   assert.equal(changed.items.stone,77);
   assert.equal(changed.skills.fighting.xp,oldXP);

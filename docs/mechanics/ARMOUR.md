@@ -15,3 +15,11 @@ Purchases settle prior work at the old frozen build, deduct coins once and start
 Completed victories pay 12, 20, 32, 48, 68, 92, 122 or 158 coins from Non-grade through S. A saved cursor tracks the last paid bout, and double deaths and defeats pay zero. The interim resolver repeats 256 seeded bouts per frozen build. Settlement resolves at most a single period, counts repeats arithmetically, and uses the same outcomes in live and offline play. V11 saves record coins, owned gear, equipped armour, and the frozen combat snapshot. Earlier alpha saves reset once with a clear notice.
 
 Source: `site/play/armour.mjs`, `smith.mjs`, `arena-wallet.mjs` and `engine.mjs`.
+
+## ALPHA-GEAR-001 A1 — provisional access and prices
+
+All Fighting difficulties are selectable at any level. Displayed target skill is guidance, not a lock. Noncombat activities retain their existing level gate. Gear purchases require activated Fighting level and coins; owned gear can still be equipped freely.
+
+The candidate level array (Non-grade through S) is 1, 5, 10, 17, 25, 33, 40, 50. Common grade cost components are 0, 2,500, 9,000, 24,000, 60,000, 120,000, 225,000, 400,000. Quality factors are 0.85/1/1.2/1.5 plus 0/45/120/245 quality base; first-time armour adds 24. The smith charges cumulative differences, exposes the lock reason and never consumes coins for a refused purchase. S Masterwork weapon costs 600,245; full one-weapon/four-armour build costs 3,001,321. Candidate only: actual income and prices must be retested after gear scaling and expertise.
+
+Fighting XP is independent of selected difficulty; productive combat time and general skill efficiency drive it, so selecting an impossible opponent does not accelerate skill leveling. Higher-grade wins still pay the larger prize. Noncombat work multipliers are unchanged. Old alpha ownership is not revoked by this draft; final release should clearly announce a reset if needed. See [measured A0 baseline](ALPHA_GEAR_BASELINE.md).

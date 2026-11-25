@@ -74,7 +74,7 @@ export const ITEM_LABELS = Object.freeze({
   ...EXTRA_LOOT_LABELS,
   ...PRODUCTION_LABELS
 });
-import { STARTER_ITEM, equippedCondition, equipmentBonuses, isEquipmentItem, smithQuote } from "./smith.mjs?v=glad-003";
+import { STARTER_ITEM, equippedCondition, equipmentBonuses, isEquipmentItem, smithQuote } from "./smith.mjs?v=alpha-gear-a1";
 
 const equipmentIds = new Set([
   ...Object.keys(COMBAT_LOADOUTS),
@@ -91,9 +91,9 @@ function validEquipment(state) {
       (armour[id] === "none" || Object.hasOwn(equipment, id + ":" + armour[id]))));
 }
 
-import { validTier, unlockLevel, workMultiplier } from "./difficulty.mjs?v=glad-004";
+import { canSelectDifficulty, workMultiplier } from "./difficulty.mjs?v=alpha-gear-a1";
 export function setDifficulty(state,id,tier,now=Date.now(),random=Math.random) {
-  if(!Object.hasOwn(ACTIVITIES,id)||!validTier(tier)||state.skills[id].level<unlockLevel(tier))
+  if(!Object.hasOwn(ACTIVITIES,id)||!canSelectDifficulty(id,state.skills[id].level,tier))
     throw new RangeError("Difficulty locked");
   const result=settle(state,now,random);
   if((state.difficulties[id]??0)===tier) return result;
@@ -251,7 +251,7 @@ export function readSave(value) {
     const difficulties=s.difficulties===undefined?{}:s.difficulties;
     if(!difficulties || typeof difficulties!=="object" || Array.isArray(difficulties) ||
       Object.entries(difficulties).some(([id,t])=>!Object.hasOwn(ACTIVITIES,id)||
-        !validTier(t)||(s.skills?.[id]?.level??1)<unlockLevel(t))) return null;
+        !canSelectDifficulty(id,s.skills?.[id]?.level??1,t))) return null;
     const skills = Object.fromEntries(SKILL_IDS.map(id => [id, { ...s.skills[id] }]));
     let newProgressMs = s.activity
       ? scalePartialProgress(s.progressMs, sourceWorkMs, ACTIVITIES[s.activity].durationMs) : 0;
@@ -347,7 +347,9 @@ function settleWork(state, now, random, frozenEffort, xpRandom = random) {
   // alpha timing. Master-capped skill XP does not stop attribute growth.
   let productiveMs = elapsedMs;
   const tier=state.difficulties[state.activity]??0;
-  const multiplier=tier?workMultiplier(tier,ACTIVITY_STAT_WEIGHTS[state.activity],
+  // Opening all arena grades must not reward deliberate high-tier losses
+  // with faster Fighting levels. Harder wins still pay larger prizes.
+  const multiplier=tier&&state.activity!=="fighting"?workMultiplier(tier,ACTIVITY_STAT_WEIGHTS[state.activity],
     combatAttributeProgress(frozenEffort,state.skills)):1;
   if (state.activity === "fighting") {
     let session = state.combatSession;

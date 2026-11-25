@@ -148,7 +148,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=glad-005/,
+  assert.match(html, /app\.mjs\?v=alpha-gear-a1/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -249,6 +249,12 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(selectedCount(), 1);
     assert.equal(elements.get("smithBuy").disabled, true);
     assert.equal(elements.get("coinWallet").textContent, "0 coins");
+    elements.get("itemGrade").value="7";
+    elements.get("itemGrade").fire("change");
+    assert.equal(elements.get("smithBuy").disabled,true);
+    assert.match(elements.get("smithBuy").textContent,/Fighting 50 required/);
+    elements.get("itemGrade").value="0";
+    elements.get("itemGrade").fire("change");
 
     const openActivities = elements.get("openActivities");
     const categoryScreen = elements.get("activityCategories");
@@ -268,6 +274,8 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(elements.get("activityCategoryTitle").textContent, "Fighting");
     const fightingCards = elements.get("activityChoices").children;
     assert.equal(fightingCards.length, 1);
+    assert.equal(fightingCards[0].children[0].children[4].children[7].disabled,false,
+      "even a fresh player may challenge S opponents");
     assert.equal(elements.get("combatPanel").hidden, true,
       "ordinary activity selection has no simulated fight");
     assert.equal(fightingCards[0].children[0].children[0].children[0].textContent, "Fighting");
@@ -286,6 +294,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
       b.children[0].children[1].textContent
     )), true, "activity buttons must not reveal cycle rates");
     assert.ok(buttons.every(b => b.children[0].children[2].textContent === "Skill level 1"));
+    assert.ok(buttons.every(b => b.children[0].children[4].children[7].disabled),"work difficulty remains locked");
     const smithing = buttons.find(b => b.children[0].children[0].children[0].textContent === "Smithing");
     const cooking = buttons.find(b => b.children[0].children[0].children[0].textContent === "Cooking");
     assert.ok(smithing.children[0].children[1].textContent.includes("Iron ingots (uses Iron ore)"));

@@ -4,6 +4,7 @@
  */
 import { ACTIVITIES, SKILL_IDS, chooseActivity, setDifficulty, enterGame,
   skillMasterOffer, learnFromMaster, xpToNextLevel, skillMasterReadiness } from '../../site/play/engine.mjs';
+import { canSelectDifficulty } from '../../site/play/difficulty.mjs';
 import { awardAttributeTime, effectiveAttributeProgress, ACTIVITY_STAT_WEIGHTS } from '../../site/play/attributes.mjs';
 import { count,choose,trials,sourceSeed,seededState,addCounts,average,histogram,assertConserved,deltas } from './common.mjs';
 
@@ -16,7 +17,7 @@ export function simulateActivity(options={}) {
   const base=seededState(options);
   if (options.state===undefined) base.skills[activity]={level,xp:count(options.xp??0,'xp',xpToNextLevel(level))};
   const chosenLevel=base.skills[activity].level;
-  if (tier>0 && chosenLevel<tier*10) throw new RangeError('Difficulty locked for skill '+activity);
+  if (!canSelectDifficulty(activity,chosenLevel,tier)) throw new RangeError('Difficulty locked for skill '+activity);
   if (options.state!==undefined && options.xp!==undefined) throw new RangeError('Cannot change XP on a saved state; create a synthetic one');
   const result={module:'activity',source:'site/play/engine.mjs:chooseActivity+enterGame',
     mode:'real productive-time engine batch; starting an activity is immediate in this test (not an actual travel simulation)',

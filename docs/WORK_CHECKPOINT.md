@@ -1,8 +1,8 @@
 # Current working checkpoint
 
-## ALPHA-GEAR-001 — A0 baseline tooling (pending PR #154, 2026-11-25)
+## ALPHA-GEAR-001 — A1 access/economy candidate (pending PR #154, 2026-11-25)
 
-Owner asked chat to implement in small, reviewable batches while Codex is unavailable. [Draft PR #154](https://github.com/janisp123/idle_game/pull/154), branch `alpha/six-month-gear-benchmark`, contains the approved economy/expertise scope and first developer-only baseline harness. The detailed why, approach, caveats, verification status and next action are recorded in the branch changelog. **No gameplay release yet; last deployed build remains GLAD-005.** Next: check final-head system-lab CI and real baseline output; only then tune economy/combat. Do not interpret older historical NEXT entries below as overriding this active pending branch.
+Owner asked chat to implement in small, reviewable batches while Codex is unavailable. [Draft PR #154](https://github.com/janisp123/idle_game/pull/154), branch `alpha/six-month-gear-benchmark`, contains the approved economy/expertise scope, verified A0 baseline and A1 provisional access/price/XP implementation. Rationale, evidence and caveats are in the branch changelog. **No gameplay release yet; last deployed build remains GLAD-005.** Next: verify A1 CI and compare trajectories, then A2 gear scaling/opponent balance. Do not interpret older historical NEXT entries below as overriding this active pending branch.
 
 ## GLAD-PLAN-001 — owner-approved gladiator rework roadmap (2026-11-24)
 

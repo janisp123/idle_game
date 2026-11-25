@@ -1154,7 +1154,7 @@ test("Fighting is a distinct first activity and does not manufacture simulated c
   assert.equal(readSave(oldV5), null, "required current-build skills cannot be missing");
 });
 
-test("activity grades unlock independently every ten levels and survive reloading",async()=>{
+test("noncombat grades remain gated; all Fighting grades are open and survive reloading",async()=>{
   const {setDifficulty}=await import("../site/play/engine.mjs");
   const {workMultiplier,benchmark}=await import("../site/play/difficulty.mjs");
   let state=newGame(0);
@@ -1167,12 +1167,15 @@ test("activity grades unlock independently every ten levels and survive reloadin
     state.skills.mining.level++;
     state=setDifficulty(state,"mining",tier,0).state;
     assert.equal(readSave(state).difficulties.mining,tier);
-    assert.throws(()=>setDifficulty(state,"fighting",tier,0));
+    state=setDifficulty(state,"fighting",tier,0).state;
+    assert.equal(readSave(state).difficulties.fighting,tier);
     const model=benchmark(tier), weight={STR:100};
     assert.ok(workMultiplier(tier,weight,{STR:{value:model.stat}})>1);
     assert.ok(workMultiplier(tier,weight,{STR:{value:model.stat/2}})<1);
   }
-  assert.equal(state.difficulties.fighting,undefined);
+  assert.equal(state.skills.fighting.level,1);
+  assert.equal(state.difficulties.fighting,7);
+  assert.throws(()=>setDifficulty(state,"fighting",8,0));
   assert.throws(()=>setDifficulty(state,"mining",8,0));
 });
 
@@ -1281,7 +1284,8 @@ test("GLAD-002 arena wins reach the saved wallet once", async () => {
 
 test("GLAD-002 sells independent equipment grades and qualities that improve real power", async () => {
   const shop = await import("../site/play/smith.mjs");
-  const state = { ...newGame(0), coins: 1000 };
+  const state = { ...newGame(0), coins: 10000 };
+  state.skills.fighting.level=5;
   const item = { grade: 1, quality: "fine" };
   const quote = shop.smithQuote(state, "greatsword", item);
   assert.ok(quote.cost > 0 && quote.available);
@@ -1293,13 +1297,14 @@ test("GLAD-002 sells independent equipment grades and qualities that improve rea
 test("GLAD-002 four slots and five weapon styles support real purchases", () => {
   assert.deepEqual(ARMOUR_SLOTS.map(s => s.id), ["head", "torso", "arms", "legs"]);
   assert.deepEqual(ARMOUR_TIERS, ["none", "padded", "leather", "plate"]);
-  const start = { ...newGame(0), coins: 300 };
+  const start = { ...newGame(0), coins: 10000 };
+  start.skills.fighting.level=5;
   assert.deepEqual(Object.keys(start.equipment).sort(), ["bow", "greatsword", "hammer", "spear", "sword_shield"]);
   assert.throws(() => setArmourChoice(start, "arms", "leather", 0), RangeError);
   const purchased = buyEquipment(start, "arms:leather", { grade: 1, quality: "common" }, 0);
   assert.equal(purchased.purchased, true);
   assert.equal(purchased.state.armour.arms, "leather");
-  assert.equal(purchased.state.coins, 181);
+  assert.equal(purchased.state.coins, 7431);
   assert.ok(armourStats(purchased.state.armour, start.combatLoadout).physicalReductionPct > 0);
   const retry = buyEquipment(readSave(JSON.stringify(purchased.state)), "arms:leather",
     { grade: 1, quality: "common" }, 0);
@@ -1308,4 +1313,48 @@ test("GLAD-002 four slots and five weapon styles support real purchases", () => 
   assert.equal(buyEquipment(retry.state, "arms:leather", { grade: 7, quality: "common" }, 0).purchased, undefined);
   const forged = { ...retry.state, armour: { ...retry.state.armour, torso: "plate" } };
   assert.equal(readSave(forged), null);
+});
+
+test("ALPHA-GEAR-001 purchase requires actual Fighting level and wallet, not weapon history",async()=>{
+  const shop=await import("../site/play/smith.mjs");
+  const s={...newGame(0),coins:10000000};
+  const target={grade:7,quality:"masterwork"};
+  const locked=shop.smithQuote(s,"greatsword",target);
+  assert.equal(locked.requiredFightingLevel,50);
+  assert.equal(locked.affordable,true);
+  assert.equal(locked.reason,"fighting_level");
+  assert.equal(buyEquipment(s,"greatsword",target,0).purchased,undefined);
+  s.skills.fighting.level=50;
+  const poor={...s,coins:1};
+  assert.equal(shop.smithQuote(poor,"greatsword",target).reason,"coins");
+  assert.equal(buyEquipment(poor,"greatsword",target,0).purchased,undefined);
+  const direct=buyEquipment(s,"greatsword",target,0).state;
+  let staged=s;
+  for(let grade=1;grade<=7;grade++)staged=buyEquipment(staged,"greatsword",{grade,quality:"common"},0).state;
+  staged=buyEquipment(staged,"greatsword",target,0).state;
+  assert.equal(staged.coins,direct.coins,"cumulative upgrades must not charge twice");
+  assert.deepEqual(staged.equipment.greatsword,target);
+  assert.equal(buyEquipment(staged,"greatsword",target,0).purchased,undefined);
+  const {arenaReward}=await import("../site/play/arena-wallet.mjs");
+  const {BOUT_MS}=await import("../site/play/combat.mjs");
+  assert.ok(shop.equipmentPrice({grade:7,quality:"poor"})>Math.floor(30*86400000/BOUT_MS)*arenaReward(0));
+});
+test("ALPHA-GEAR-001 normal Fighting cannot reach the S purchase gate in 30 days",async()=>{
+  const e=await import("../site/play/engine.mjs");
+  const shop=await import("../site/play/smith.mjs");
+  const a=e.ACTIVITIES.fighting, normalCycle=a.baseMinutes*e.BASE_CYCLE_MS/a.speed;
+  const maximum=Math.floor(30*e.DAY_MS/normalCycle)*
+    Math.ceil(a.xp*e.SKILL_BALANCE.maxEfficiency*(1+e.SKILL_BALANCE.batchVariation));
+  assert.ok(maximum<e.xpForLevel(shop.equipmentUnlockLevel(7)));
+});
+test("ALPHA-GEAR-001 attempting S cannot artificially accelerate productive Fighting XP",async()=>{
+  const e=await import("../site/play/engine.mjs");
+  const {awardAttributeTime}=await import("../site/play/attributes.mjs");
+  let s=e.newGame(0);s.skills.fighting={level:30,xp:0};
+  s.attributeEffort=awardAttributeTime(s.attributeEffort,"fighting",180*e.DAY_MS);
+  s=e.chooseActivity(s,"fighting",0,()=>.5).state;
+  const high=e.setDifficulty(s,"fighting",7,0,()=>.5).state;
+  const lowResult=e.settle(s,5*e.MINUTE_MS,()=>.5);
+  const highResult=e.settle(high,5*e.MINUTE_MS,()=>.5);
+  assert.ok(highResult.state.skills.fighting.xp<=lowResult.state.skills.fighting.xp);
 });

@@ -78,9 +78,9 @@ function trajectory(modules, scenario, seed) {
   state=engine.queueStartActivity(state,'fighting',null,time,rng).state;
   const checkAffordability=()=>{
     const quotes=ids.map(key=>smith.smithQuote(state,key,FINAL_ITEM));
-    if(firstSWeaponAffordable===null&&(targetSame(state.equipment[loadout],FINAL_ITEM)||quotes[0].available))
+    if(firstSWeaponAffordable===null&&(targetSame(state.equipment[loadout],FINAL_ITEM)||(quotes[0].improves&&quotes[0].affordable)))
       firstSWeaponAffordable=time/DAY;
-    if(firstSSetAffordable===null&&ids.every((key,i)=>targetSame(state.equipment[key],FINAL_ITEM)||quotes[i].available)
+    if(firstSSetAffordable===null&&ids.every((key,i)=>targetSame(state.equipment[key],FINAL_ITEM)||quotes[i].improves)
        &&quotes.reduce((sum,q)=>sum+q.cost,0)<=state.coins) firstSSetAffordable=time/DAY;
   };
   const buy=(key,target)=>{
@@ -130,8 +130,8 @@ function trajectory(modules, scenario, seed) {
       if(engine.skillMasterOffer(state).ready.length)
         state=engine.learnFromMaster(state,time,rng).state;
       shop();
-      // Current baseline still locks opponent tiers. Non-farm players move
-      // toward the highest unlocked tier no higher than their equipped weapon.
+      // Fixed policy (not an engine gate): non-farm players voluntarily stay
+      // near the old recommended skill band and their equipped weapon grade.
       const grade=farm?0:Math.min(state.equipment[loadout].grade,
         7,difficulty.GRADES.reduce((max,_,i)=>state.skills.fighting.level>=difficulty.unlockLevel(i)?i:max,0));
       if((state.difficulties.fighting??0)!==grade)
@@ -158,11 +158,12 @@ export async function runBuildBaseline({profiles=['normal','alpha'],scenarios=BA
     boutMs:modules.combat.BOUT_MS,
     scenarios:scenarios.map(s=>trajectory(modules,s,seed))
   })));
-  return {version:'ALPHA-GEAR-001-A0',kind:'production-engine baseline, not proposed rebalance',
+  return {version:'ALPHA-GEAR-001-A1',kind:'production-engine progression and economy trajectory',
     limitations:['One deterministic seed per scenario; not a confidence interval.',
       'Fixed greatsword/plate purchase policies; not an optimal progression search.',
       'Rapid hourly visits test aggressive play, not a proven earliest possible claim.',
       'Weekly checkpoint settlements may split absence without claiming; outcomes reflect current engine.',
+      'Affordability ignores skill gates; purchases enforce both.',
       'No expertise exists yet. No future values inferred.'],reports};
 }
 

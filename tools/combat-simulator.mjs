@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { BOUT_MS, startCombatSession, combatAtTime } from '../site/play/combat.mjs';
 import { COMBAT_LOADOUTS } from '../site/play/combat-skills.mjs';
 import { ARMOUR_SLOTS, ARMOUR_TIERS, armourStats } from '../site/play/armour.mjs';
-import { GRADES, benchmark, unlockLevel } from '../site/play/difficulty.mjs';
+import { GRADES, benchmark } from '../site/play/difficulty.mjs';
 
 const DEFAULT_SEED = 20261124;
 const DEFAULT_BATTLES = 10000;
@@ -53,7 +53,7 @@ const uniform = (armour, slots = {}) => {
 export function createPlayerSnapshot(options = {}) {
   const difficulty = parseGrade(options.grade ?? 'Non-grade');
   const target = benchmark(difficulty);
-  const skill = intIn(options.skill ?? target.skill, unlockLevel(difficulty), 100000, 'Fighting skill');
+  const skill = intIn(options.skill ?? target.skill, 1, 100000, 'Fighting skill');
   const str = intIn(options.str ?? target.stat, 0, 100000, 'STR');
   const dex = intIn(options.dex ?? target.stat, 0, 100000, 'DEX');
   const end = intIn(options.end ?? target.stat, 0, 100000, 'END');
@@ -256,7 +256,7 @@ export const HELP = [
   ' --help                   this guide',
   'Write JSON to a file with shell redirection: ... > combat-report.json',
   'IMPORTANT: Grade/stat build benchmarks are synthetic, not player progression.',
-  'Saved snapshots use real frozen player stats; gear locks apply to generated builds.'
+  'Saved snapshots use real frozen player stats; synthetic builds may attempt any arena grade.'
 ].join('\n');
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
