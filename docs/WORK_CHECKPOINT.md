@@ -1,8 +1,12 @@
 # Current working checkpoint
 
+## GEAR-RESEARCH-001 — proposed A3 grade balance
+
+[Study](mechanics/GEAR_PROGRESSION_STUDY.md) records 376,800 isolated source-linked duels, proposed cumulative grade expertise, speed/accuracy/crit and coverage-weighted armour perks. No gameplay change. Candidate requires owner approval and further durability/counter/economy tests before mandatory Masterwork progression is implemented. Next: review numbers and price model.
+
 ## APPRENTICE-A2 — PR #178
 
-Automatic Master on page entry after offline settlement, derived 50-level gate, versioned explicit consent, shared claim mutation and exact committed report. Visibility catch-up/ordinary ticks and alpha idle-day tool remain non-claiming. Web Locks serialize login chores; stale snapshot checks reject observed conflicting saves; no claim where coordination unavailable. True transactional concurrency requires future server. No tribute, weapons, equipment or donation changes. Next final CI and Pages.
+Automatic Master on page entry after offline settlement, derived 50-level gate, versioned explicit consent, shared claim mutation and exact committed report. Visibility catch-up/ordinary ticks and alpha idle-day tool remain non-claiming. Web Locks serialize login chores; stale snapshot checks reject observed conflicting saves; no claim where coordination unavailable. True transactional concurrency requires future server. No tribute, weapons, equipment or donation changes. PR #178 merged 0136237; all four final workflows passed, Pages 45663460990 passed.
 
 ## APPRENTICE-A1 — PR #177
 
