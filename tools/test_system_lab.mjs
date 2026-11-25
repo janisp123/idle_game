@@ -184,3 +184,26 @@ test("equipment lab reports an actual smith purchase", () => {
   assert.equal(result.equippedArmour.arms, "padded");
   assert.ok(result.bonuses.defense > 0);
 });
+
+
+// ALPHA-GEAR-001 A0: exercise both real timing profiles on detached module copies.
+import { runBuildBaseline } from './simulation/build-progression.mjs';
+test('build baseline uses real normal/alpha settlement and conserves arena currency',async()=>{
+  const scenario={id:'smoke',days:2,claimHours:24,mixed:false,farm:true};
+  const report=await runBuildBaseline({scenarios:[scenario],seed:20261125});
+  const [normal,alpha]=report.reports;
+  assert.equal(normal.profile,'normal');
+  assert.equal(alpha.profile,'alpha');
+  assert.ok(normal.cycleMs>alpha.cycleMs);
+  assert.equal(normal.boutMs,alpha.boutMs);
+  for(const r of report.reports){
+    const s=r.scenarios[0],last=s.checkpoints.at(-1);
+    assert.equal(last.day,2);
+    assert.ok(last.outcomes.bouts>0);
+    assert.equal(last.outcomes.bouts,last.outcomes.victories+last.outcomes.defeats+last.outcomes.doubleDeaths);
+    assert.equal(last.wallet,last.coinsEarned-last.coinsSpent);
+    assert.equal(last.expertise,null); // baseline: before implementation
+    assert.ok(last.productiveFightingHours>0&&last.productiveFightingHours<=48);
+  }
+  assert.deepEqual(report,await runBuildBaseline({scenarios:[scenario],seed:20261125}));
+});
