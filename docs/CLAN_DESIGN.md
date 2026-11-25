@@ -24,6 +24,10 @@ A successful donation atomically deducts personal inventory and adds the identic
 
 Many independently upgradeable clan buildings are a core goal. Candidate catalogue for design and economy testing, not yet approved exact effects: Clan Hall, Warehouse, Barracks, Training Grounds, Forge, Armoury, Watchtower, Fortress Walls, Infirmary, Kitchen, Granary, Hunting Lodge, Workshop, Library. Consider additional buildings as useful resource sinks. Use existing real resource categories (stone, timber, processed iron, mortar, rations, hides/leather, straw, fuel and related inputs); each activity should have meaningful contribution paths. Do not add pointless activities or duplicate item IDs merely for a building. Costs, requirements, bonuses, levels, construction duration, concurrency and permission to start/cancel upgrades must be designed and simulated before deployment. No personal withdrawals disguised as building benefits or upgrade cancellation refunds. Clan wars, raids, taxes, marketplace, upkeep or hunger are not approved by this design.
 
+## Permanent Castle Warfare levels
+
+**CLAN-WARFARE-001 (Owner approved):** in the proposed optional daily NPC castle defence event, defeat may remove only current-level Warfare XP, floored at zero. Earned levels never decrease; excess XP loss is discarded. The broader event remains a design proposal pending mechanics and implementation approval; see [castle brainstorming](brainstorm/GROUPS_AND_CLANS.md).
+
 ## Economy relationship
 
 CAP-001 stops all rewards when the current XP bar fills. The prior 30% Skill Master tribute suggestion is a separate proposed change; it was discussed but not explicitly approved for implementation. No tribute change in CLAN-001. Simulate building progression with varied activity mixes, daily participation, high-stock veterans and lower-level members; test that consistent contribution matters, bottlenecks are meaningful, and no single player can trivially rush upgrades. No exact contribution caps, costs or building bonuses are settled yet.
