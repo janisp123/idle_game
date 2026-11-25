@@ -95,6 +95,11 @@ test("compact results use only real event/report values and correct combat side"
 test("real browser-app entrypoint renders skill UI and reloads a current saved character", async () => {
   const html = readFileSync(new URL("../site/play/index.html", import.meta.url), "utf8");
   const queueCss = readFileSync(new URL("../site/play/iron-ui.css", import.meta.url), "utf8");
+  const skillPanel = html.match(/<section class="panel skill-focus"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(skillPanel?.includes('id="skillXp"') && skillPanel.includes('id="visitMaster"') && skillPanel.includes('id="masterAudience"'), "Master and skill XP share one panel");
+  assert.doesNotMatch(html, /class="panel skill-master"/);
+  assert.match(html, /<details id="resourcesPanel" class="panel inventory" aria-labelledby="inventory-heading">/);
+  assert.match(html, /<summary id="inventory-heading" class="resources-summary">RESOURCES/);
   assert.match(html, /<details id="clanMenu">/);
   assert.match(html, /not available in this browser-only alpha/);
   assert.match(html, /<button[^>]*disabled[^>]*>Search clans<\/button>/);
