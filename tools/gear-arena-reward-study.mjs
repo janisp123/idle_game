@@ -4,7 +4,7 @@ import {readFileSync} from "node:fs";
 const ref="01362378d8aefcec3aa1fa4bb73116d9457237c3",names=["armour","difficulty","combat-skills","expertise","arenas","smith","physical-duel","combat-verdict","combat-art","combat","arena-wallet"];
 const src=Object.fromEntries(names.map(n=>[n,execFileSync("git",["show",ref+":site/play/"+n+".mjs"],{encoding:"utf8"})]));
 const snapshots=["docs/mechanics/GEAR_DIFFICULTY_TRAJECTORIES_1.json","docs/mechanics/GEAR_DIFFICULTY_TRAJECTORIES_2.json"].flatMap(p=>JSON.parse(readFileSync(p,"utf8")).rows);
-function run(src,snapshots,filter){
+function run(src,snapshots,filter,validation=false){
 
 
 
@@ -48,6 +48,7 @@ const npcCurves=[
 ];
 const rewardCurves=[
 {id:"original",prizes:[12,20,32,48,68,92,122,158]},
+{id:"targeted",prizes:[12,20,32,48,68,92,122,185]},
 {id:"moderate",prizes:[12,20,34,52,76,112,165,245]},
 {id:"steep",prizes:[12,21,37,60,95,145,220,340]}
 ];
@@ -76,7 +77,7 @@ function measure(combat,a,d,seeds){
  if(wins+defeats+draws!==seeds.length*32)throw Error("outcome");
  return {arena:d,wins,defeats,draws,n:seeds.length*32};
 }
-const seeds=[20261125,1298729031];
+const seeds=validation?[975318642,314159265,246813579,271828182]:[20261125,1298729031];
 function runCurve(curve){
  const combat=install(curve);
  const rows=snapshots.map(s=>{
@@ -93,7 +94,7 @@ function runCurve(curve){
  const a=fighter(style,family,gear,stats,b.skill,expertise);
  guards.push({style,family,grade:g,quality,opts:[g,...(g<7?[g+1]:[]),...(g<6?[g+2]:[])].map(d=>measure(combat,a,d,seeds))});
  }
- return {curve,rows,guards,total:(rows.reduce((a,r)=>a+r.opts.length,0)+guards.reduce((a,r)=>a+r.opts.length,0))*64};
+ return {curve,rows,guards,total:(rows.reduce((a,r)=>a+r.opts.length,0)+guards.reduce((a,r)=>a+r.opts.length,0))*seeds.length*32};
 }
 function evaluate(r,prize){
  const score=o=>o.wins/o.n*prize.prizes[o.arena]*18;
@@ -112,4 +113,4 @@ const result=npcCurves.filter(c=>!filter||filter===c.id).map(runCurve).map(r=>({
 return result;
 
 }
-console.log(JSON.stringify(run(src,snapshots,process.argv[2]),null,2));
+console.log(JSON.stringify(run(src,snapshots,process.argv[2],process.argv.includes('--validate')),null,2));
