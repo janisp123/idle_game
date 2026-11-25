@@ -1398,6 +1398,7 @@ function start(coordinatedLogin = false) {
   });
   render();
   window.setInterval(tick, 250);
+  ui.saveStatus.setAttribute("data-game-ready","true");
 }
 
 // Serialize page-entry chores between cooperating tabs. Without Web Locks,
