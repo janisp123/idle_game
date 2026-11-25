@@ -1,8 +1,8 @@
 # Current working checkpoint
 
-## CAP-001 — candidate verified, PR #167 pending release
+## CAP-001 — deployed PR #167
 
-All productive rewards pause at full XP; queued tasks advance, final pauses, explicit Master accepts full XP and still surrenders remaining output. V16 progress retained, no combat or price/XP/expertise numeric retune. [CAP-001 audit](mechanics/CAP_001_AUDIT.md), systems 45625295136 passed; 8/15 normal daily builds reach S MW by day 180, all Fighting 51. Website 45625503208 passed real Chromium. Generic public presentation replaces exact counts and pacing promises, preserves artwork/100% free policy. Prior alpha Max Stats remains old stress-test fixture; revisit economy/benchmark on separate approval. Final-head checks and Pages still required.
+All productive rewards pause at full XP; queued tasks advance, final pauses, explicit Master accepts full XP and still surrenders remaining output. V16 progress retained, no combat or price/XP/expertise numeric retune. [CAP-001 audit](mechanics/CAP_001_AUDIT.md), systems 45625295136 passed; 8/15 normal daily builds reach S MW by day 180, all Fighting 51. Website 45625503208 passed real Chromium. Generic public presentation replaces exact counts and pacing promises, preserves artwork/100% free policy. Prior alpha Max Stats remains old stress-test fixture; revisit economy/benchmark on separate approval. Final head `3aceda1` passed four workflows; merge `427a8cc`; Pages 45625750762 validation and publishing succeeded. No independent public rendering check.
 
 ## BAL-002 — deployed PR #165
 
