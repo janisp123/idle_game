@@ -2,7 +2,7 @@
 
 ## APPRENTICE-A1 · STARTED (2026-11-25, chat)
 
-Owner says to start the Apprentice plan. First isolated foundation: pure derived earned-level and slot/unlock policy, boundary regressions; then connect actual queue guards and UI after baseline PR #175 passes. No automated spending, tribute or clan action. Proposed later thresholds stay design-only. Branch `docs/apprentice-plan`; overlapping pending #175 must be reconciled before merge.
+Owner says to start the Apprentice plan. First isolated foundation: pure derived earned-level and slot/unlock policy, boundary regressions; then connect actual queue guards and UI after baseline PR #175 passes. Added `site/play/apprentice.mjs` and `tools/simulation/apprentice.test.mjs`; CI tests all thresholds and invalid/forged skill keys. No automated spending, tribute or clan action. Proposed later thresholds stay design-only. Branch `docs/apprentice-plan`; overlapping pending #175 must be reconciled before merge.
 
 ## APPRENTICE-PLAN-001 · STARTED (2026-11-25, chat)
 
