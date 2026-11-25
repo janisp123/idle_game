@@ -1083,7 +1083,7 @@ function start() {
       try { localStorage.removeItem(ALPHA_CLOCK_KEY); } catch { storageWorks = false; }
     }
     state = newGame(Date.now());
-    if (saved) message("Alpha progression was reset for the equipment balance update or because the previous save could not be read. A new character was created.");
+    if (saved) $("saveResetNotice").hidden=false;
     else message("Choose an activity. Your character will work without further clicks.");
     writeSave();
   } else {
@@ -1093,6 +1093,7 @@ function start() {
     writeSave();
   }
 
+  $("dismissSaveReset").addEventListener("click",()=>{$("saveResetNotice").hidden=true;});
   // All alpha controls are visibly local test actions, absent in normal mode.
   // Only ×10 speed is a persistent on/off mode.
   if(ALPHA_TOOLS_ENABLED){

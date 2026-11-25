@@ -58,11 +58,16 @@ async function evaluate(expression){
   if(result.exceptionDetails)throw Error(result.exceptionDetails.exception?.description??result.exceptionDetails.text);
   return result.result.value;
 }
-async function navigate(label){
+async function navigate(label,storage=null){
   const url=origin+"/play/?smoke="+label;
+  // pagehide saves the old running character. Install synthetic fixtures on
+  // the NEW document before modules start, not into the departing page.
+  const inject=storage?await send("Page.addScriptToEvaluateOnNewDocument",{source:
+    "if(location.href==="+JSON.stringify(url)+"){for(const [key,value] of Object.entries("+JSON.stringify(storage)+")){if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}}"}):null;
   const result=await send("Page.navigate",{url});
   assert.equal(result.errorText,undefined);
   await until(()=>evaluate(`location.href===${JSON.stringify(url)}&&document.readyState==="complete"&&document.getElementById("weaponSlots")?.children.length>0`),"app loaded "+label);
+  if(inject)await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:inject.identifier});
 }
 async function shot(name){
   const r=await send("Page.captureScreenshot",{format:"png",captureBeyondViewport:false});
@@ -85,14 +90,16 @@ try{
   await send("Page.addScriptToEvaluateOnNewDocument",{source:"Date.now=()=>"+fixedNow+";"});
   for(const width of [390,1440]){
     await send("Emulation.setDeviceMetricsOverride",{width,height:width===390?844:1000,deviceScaleFactor:1,mobile:width===390});
-    await navigate("fresh-"+width);
-    await evaluate(`localStorage.removeItem(${JSON.stringify(saveKey)});localStorage.removeItem(${JSON.stringify(clockKey)});true`);
-    await navigate("clean-"+width);
-    const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=11;s.name="Old alpha";localStorage.setItem(${JSON.stringify(saveKey)},JSON.stringify(s));localStorage.setItem(${JSON.stringify(clockKey)},JSON.stringify({version:1,realAnchorMs:0,gameAnchorMs:0,speed:10}));return true;})()`);
-    assert.ok(old);
-    await navigate("reset-"+width);
-    assert.match(await evaluate('document.getElementById("resultNotice").textContent'),/Alpha progression was reset/);
+    await navigate("clean-"+width,{[saveKey]:null,[clockKey]:null});
+    const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=11;s.name="Old alpha";return JSON.stringify(s);})()`);
+    await navigate("reset-"+width,{[saveKey]:old,[clockKey]:JSON.stringify({version:1,realAnchorMs:0,gameAnchorMs:0,speed:10})});
+    const notice=await evaluate('({hidden:document.getElementById("saveResetNotice").hidden,text:document.getElementById("saveResetNotice").textContent})');
+    assert.equal(notice.hidden,false);
+    assert.match(notice.text,/Alpha progression was reset/);
     assert.equal(await evaluate(`localStorage.getItem(${JSON.stringify(clockKey)})`),null);
+    assert.equal(await evaluate('document.getElementById("character-heading").textContent'),"Wanderer");
+    await evaluate('document.getElementById("dismissSaveReset").click()');
+    assert.equal(await evaluate('document.getElementById("saveResetNotice").hidden'),true);
     const result=await evaluate(`(()=>{const $=id=>document.getElementById(id);
       $("alphaTools").open=true;$("alphaFamily").value="leather";
       $("alphaMaxStats").click();$("alphaCoins").click();$("alphaCoins").click();
@@ -126,15 +133,15 @@ try{
         const expected=v.combatVerdict(c.combatAtTime(s.combatSession).event);
         if(expected?.category!==mode)throw Error("Fixture did not resolve desired verdict "+JSON.stringify(expected));
         if(!e.readSave(JSON.stringify(s)))throw Error("Fixture save invalid");
-        localStorage.setItem(e.SAVE_KEY,JSON.stringify(s));return expected.label;
+        return {save:JSON.stringify(s),label:expected.label};
       })()`);
-      await navigate(mode+"-"+width);
+      await navigate(mode+"-"+width,{[saveKey]:setup.save,[clockKey]:null});
       await until(()=>evaluate('document.getElementById("sceneImage").complete&&document.getElementById("sceneImage").naturalWidth>0'),"verdict image loaded");
       const view=await evaluate(`(()=>{const $=id=>document.getElementById(id);$("combatPanel").scrollIntoView({block:"center"});
         return {title:$("combatEventTitle").textContent,result:$("playerResult").textContent,src:$("sceneImage").getAttribute("src"),
         overflow:document.documentElement.scrollWidth-innerWidth};})()`);
-      assert.ok(view.title.includes(setup),JSON.stringify(view));
-      assert.ok(view.result.includes(setup),JSON.stringify(view));
+      assert.ok(view.title.includes(setup.label),JSON.stringify(view));
+      assert.ok(view.result.includes(setup.label),JSON.stringify(view));
       assert.ok(view.overflow<=2,"verdict horizontal overflow");
       await shot(mode+"-"+width);
       console.log(JSON.stringify({width,mode,...view}));
