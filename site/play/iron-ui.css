@@ -1033,3 +1033,10 @@ footer p{color:#aa9680}
 .resources-summary:focus-visible{outline:2px solid #ecc286;outline-offset:2px}
 #resourcesPanel[open] .resources-summary{border-bottom:1px solid #674831}
 #resourcesPanel[open] #resourceList{padding:4px 0 10px}
+
+/* Apprentice progression: native foldable menu, no extra art or chores. */
+.apprentice-content{padding:8px 2px 2px;min-width:0}
+.apprentice-option{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:5px 8px;padding:10px 2px;border-top:1px solid #674831;color:#a99a89;font:600 13px/1.4 Georgia,serif}
+.apprentice-option input{margin-top:3px}
+.apprentice-option span{grid-column:2;color:#bca383;font-size:11px;font-weight:400}
+#queueUnlockHint{margin:0 0 8px}
