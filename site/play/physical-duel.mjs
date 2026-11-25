@@ -13,7 +13,7 @@ const BASH = Object.freeze({ move: "shield_bash", type: "blunt", range: 0, power
 const BANDS = Object.freeze(["Close", "Reach", "Far"]);
 const ARMOUR_FACTOR = Object.freeze({ piercing: 0.8, slashing: 1.15, blunt: 0.45 });
 const AIM = Object.freeze({base:.72,dex:.012,skill:.004,closeBow:-.40,closeSpear:-.18,farBow:.12,reachSpear:.10,clearance:.12,minimum:.15,maximum:.96});
-const GUARD = Object.freeze({block:.29,bluntBlock:.40,parry:.36,recoveringParry:.22,flatReduction:.35,openFactor:.15,counterChance:.15,reachBlockImpact:.85,blockImpact:.43,bluntBlockImpact:1.0});
+const GUARD = Object.freeze({block:.29,bluntBlock:.40,parry:.36,recoveringParry:.22,flatReduction:.35,openFactor:.15,counterChance:.15,reachBlockImpact:.85,blockImpact:.43,rangedBlockImpact:.55,bluntBlockImpact:1.0});
 // BAL-002: material absorbs each impact type differently. Multipliers act on
 // coverage-weighted intact piece protection, not on armour grade resistance.
 const MATERIAL_FACTORS=Object.freeze({
@@ -21,7 +21,7 @@ const MATERIAL_FACTORS=Object.freeze({
   leather:Object.freeze({piercing:1.20,slashing:1.35,blunt:1.0}),
   plate:Object.freeze({piercing:.80,slashing:1.0,blunt:.18})
 });
-const TACTICS=Object.freeze({slowApproach:.75,quickMobility:85,retreatLead:-3,shortSpearImpact:.80,constrainedSwing:.85,openSwing:1.08,guardOpenTurns:3,reachInterruptTurns:2,reachSpearImpact:1.18,daggerHandling:.75,farShotImpact:1.60,reachShotImpact:1.15,closeShotImpact:.60});
+const TACTICS=Object.freeze({slowApproach:.75,quickMobility:85,retreatLead:-3,shortSpearImpact:.80,constrainedSwing:.85,openSwing:1.08,guardOpenTurns:3,reachInterruptTurns:2,reachSpearImpact:1.18,daggerHandling:.75,farShotImpact:1.68,reachShotImpact:1.48,closeShotImpact:.60});
 function attackComponents(actor,attack,activePiece){
   const equipped=activePiece.hp>0;
   const flatScale=attack.flatScale??1,gradeScale=attack.gradeScale??1,strengthScale=attack.strengthScale??1;
@@ -204,7 +204,7 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       const penetration=equipped?activePiece.penetration*handling:0;
       const materialProtection=protection(target,attack.type)*(1-penetration);
       const shotImpact=attack.ranged?(distance===2?TACTICS.farShotImpact:distance===1?TACTICS.reachShotImpact:TACTICS.closeShotImpact):1;
-      const blockImpact=attack.type==="blunt"?GUARD.bluntBlockImpact:attack.move==="thrust"&&distance===1?GUARD.reachBlockImpact:GUARD.blockImpact;
+      const blockImpact=attack.type==="blunt"?GUARD.bluntBlockImpact:attack.move==="thrust"&&distance===1?GUARD.reachBlockImpact:attack.ranged?GUARD.rangedBlockImpact:GUARD.blockImpact;
       // Separate material protection from grade resistance: equal-grade
       // equipment approximately cancels scaling, lower-grade armour does not.
       const resistance=intactArmourSum(target,"resistance");
