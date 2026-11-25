@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## CHAR-STATS-001 — draft PR #157
+
+Owner-requested collapsible read-only detailed stat sheet implemented. Actual resolver formulas preserved, selected intact next-bout build and conditional effects labelled. CI pending; no deployment or save reset. Next verify full checks and browser smoke, then merge/deploy if gates pass.
+
 ## ALPHA-ART-001 — pending draft PR #156
 
 Owner requested exact art integration. Branch `alpha/approved-verdict-art` contains registry activation and strict tests; original WebP blobs transferred via owner-suggested private Google Drive bridge and matched local Git blob hashes. Both committed to this branch with strict SHA-256/browser tests. Current live V15 gameplay unaffected. Next verify final-head checks and deploy. See OUTCOME_ART_HANDOFF.md.

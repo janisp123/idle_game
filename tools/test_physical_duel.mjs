@@ -106,3 +106,32 @@ test("A8 equal mirrors have no large initiative-side advantage in independent-se
   }
   assert.ok(Math.abs(wins-losses)<512*.15,"mirror win/loss imbalance");
 });
+
+import {physicalBuildStats} from "../site/play/physical-duel.mjs";
+import {characterStats} from "../site/play/character-stats.mjs";
+import {newGame,desiredArenaPlayer,setCombatLoadout,buyEquipment} from "../site/play/engine.mjs";
+test("CHAR-STATS-001 exact shared damage, HP and armour breakdown",()=>{
+  let state=newGame(0);
+  const starter=physicalBuildStats(desiredArenaPlayer(state));
+  assert.equal(starter.attacks[0].base,16);
+  assert.equal(starter.health.total,44);
+  assert.equal(starter.mobility,97);
+  const before=JSON.stringify(state);
+  const sheet=characterStats(state);
+  assert.equal(JSON.stringify(state),before);
+  assert.equal(sheet.sections.find(x=>x.title==="Damage · swing").total,"16");
+  state={...state,coins:1000000,skills:{...state.skills,fighting:{level:5,xp:0}}};
+  state=buyEquipment(state,"greatsword",{grade:1,quality:"common"},0,()=>.5).state;
+  const upgraded=physicalBuildStats(desiredArenaPlayer(state));
+  assert.ok(upgraded.attacks[0].base>starter.attacks[0].base);
+  assert.ok(characterStats(state).sections.find(x=>x.title==="Damage · swing").rows.some(x=>x.label.includes("F common")));
+  for(const slot of ["head","torso","arms","legs"])state=buyEquipment(state,slot+":plate",{grade:0,quality:"common"},0,()=>.5).state;
+  const plate=physicalBuildStats(desiredArenaPlayer(state));
+  assert.equal(plate.mobility,72);assert.equal(plate.protection,50);
+  assert.ok(plate.dodge<starter.dodge);
+  const model=characterStats(state);
+  assert.equal(model.sections.find(x=>x.title==="Mobility").total,"72%");
+  assert.equal(model.sections.find(x=>x.title==="Material protection").total,"50%");
+  state=setCombatLoadout(state,"bow",0,()=>.5).state;
+  assert.ok(characterStats(state).sections.some(x=>x.title==="Damage · dagger"));
+});

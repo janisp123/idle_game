@@ -12,6 +12,15 @@ const WEAPONS = Object.freeze({
 const BASH = Object.freeze({ move: "shield_bash", type: "blunt", range: 0, power: 4, recovery: 3 });
 const BANDS = Object.freeze(["Close", "Reach", "Far"]);
 const ARMOUR_FACTOR = Object.freeze({ piercing: 0.8, slashing: 1.15, blunt: 0.45 });
+const AIM = Object.freeze({base:.72,dex:.012,skill:.004,closeBow:-.30,closeSpear:-.14,clearance:.12,minimum:.19,maximum:.96});
+const GUARD = Object.freeze({block:.40,bluntBlock:.50,parry:.32,recoveringParry:.18,flatReduction:.35});
+function attackComponents(actor,attack,activePiece){
+  const equipped=activePiece.hp>0;
+  const flat=equipped?(activePiece.flatAttack??actor.gearAttack??0):0;
+  const multiplier=equipped?(activePiece.damageMultiplier??1):1;
+  const strength=actor.str*.3,gear=flat*.65;
+  return {weapon:attack.power,strength,gear,flat,multiplier,base:(attack.power+strength+gear)*multiplier};
+}
 
 function seededRandom(seed) {
   let state = seed >>> 0;
@@ -30,8 +39,9 @@ function piece(profile, fallback) {
     mobility:profile?.mobility??0,dodge:profile?.dodge??0 };
 }
 
+function healthParts(end){return {base:28,endurance:end*1.6,total:Math.max(1,Math.round(28+end*1.6))};}
 function fighter(snapshot, side) {
-  const maxHP = Math.max(1, Math.round(28 + snapshot.end * 1.6));
+  const maxHP = healthParts(snapshot.end).total;
   const equipment = snapshot.condition ?? {};
   return { ...snapshot, side, hp: maxHP, maxHP, inflicted: 0, recovery: 0, stagger: 0,
     bleed: 0, counter: false, arrows: snapshot.loadout === "bow" ? PHYSICAL_RULES.arrows : 0,
@@ -76,6 +86,7 @@ function flatGuard(target) {
   return target.gear?.gearDefense??0;
 }
 
+const mobility = actor => Math.min(100,(actor.gear?.mobilityPct ?? 95)+intactArmourSum(actor,"mobility"));
 function vitals(target) {
   return { hp: target.hp, maxHP: target.maxHP, arrows: target.arrows, shield: target.shield.hp,
     shieldMax: target.shield.maxHP, weapon: target.weapon.hp, weaponMax: target.weapon.maxHP,
@@ -93,7 +104,7 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
   let approachProgress = 0;
   let retreatsLeft = terrain.retreatSpace ?? (terrain.retreat === false ? 0 : 3);
   let distance = Math.min(2, Math.max(0, terrain.startDistance ?? 2));
-  const mobility = actor => Math.min(100,(actor.gear?.mobilityPct ?? 95)+intactArmourSum(actor,"mobility"));
+
   const record = (actor, target, type, extra = {}) => {
     events.push({ type, actor: actor?.side ?? null, target: target?.side ?? null, distance: BANDS[distance],
       damage: 0, ...extra, vitals: { player: vitals(you), enemy: vitals(foe) } });
@@ -154,9 +165,9 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
           (terrain.cover ?? 0) * (target.shield.hp > 0 ? 0.10 : 0.04) : 0;
       const activePiece=attack===BASH?actor.shield:actor.weapon;
       const equipped=activePiece.hp>0;
-      const aim = 0.72 + (equipped?activePiece.accuracy:0) + (actor.dex - target.dex) * 0.012 + (actor.skill - target.skill) * 0.004 +
-        (distance === 0 && bow ? -0.30 : 0) + (shortSpear ? -0.14 : 0) - obscuredShot - constriction * 0.12;
-      if (roll() >= Math.max(0.19, Math.min(0.96, aim))) {
+      const aim = AIM.base + (equipped?activePiece.accuracy:0) + (actor.dex - target.dex) * AIM.dex + (actor.skill - target.skill) * AIM.skill +
+        (distance === 0 && bow ? AIM.closeBow : 0) + (shortSpear ? AIM.closeSpear : 0) - obscuredShot - constriction * AIM.clearance;
+      if (roll() >= Math.max(AIM.minimum, Math.min(AIM.maximum, aim))) {
         record(actor, target, "miss", { move: attack.move });
         continue;
       }
@@ -166,16 +177,14 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
         continue;
       }
       const guardRoll = roll();
-      const block = target.shield.hp > 0 && guardRoll < (attack.type === "blunt" ? 0.50 : 0.40)*target.shield.proficiency;
+      const block = target.shield.hp > 0 && guardRoll < (attack.type === "blunt" ? GUARD.bluntBlock : GUARD.block)*target.shield.proficiency;
       const parry = !block && target.loadout === "greatsword" && target.weapon.hp > 0 &&
-        target.recovery <= 1 && guardRoll < (target.recovery===0?.32:.18)*target.weapon.proficiency;
+        target.recovery <= 1 && guardRoll < (target.recovery===0?GUARD.parry:GUARD.recoveringParry)*target.weapon.proficiency;
       const intact = actor.weapon.hp > 0 || attack.move === "dagger" || attack === BASH;
       // Broken weapons retain only improvised base damage, never their grade
       // or flat bonus. The bow's backup dagger retains the kit's bonus only
       // while the kit is intact; the shield bash uses the actual shield.
-      const flat=equipped?(activePiece.flatAttack??actor.gearAttack??0):0;
-      const multiplier=equipped?(activePiece.damageMultiplier??1):1;
-      const base = (attack.power + actor.str * 0.3 + flat * 0.65) * multiplier *
+      const base = attackComponents(actor,attack,activePiece).base *
         (intact ? 1 : 0.55) * (shortSpear ? 0.82 : 1) * (actor.loadout==="greatsword"&&constriction>0?0.90:1) * (counter && attack !== BASH ? 1.18 : 1);
       const vital = !block && !parry && guardRoll > 0.96;
       const penetration=equipped?activePiece.penetration:0;
@@ -186,7 +195,7 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       const impact = Math.max(1, Math.round(base * (vital ? 1.65 : 1) *
         (block ? attack.type === "blunt" ? 0.94 : 0.27 : parry ? 0.35 : 1) *
         (1 - Math.min(80, protection(target) * armourFactor) / 100) /
-        (1+resistance*(1-penetration)) - flatGuard(target) * 0.35));
+        (1+resistance*(1-penetration)) - flatGuard(target) * GUARD.flatReduction));
       const damage = wound(actor, target, impact);
       const broken = [];
       if (block && wear(target.shield, attack.type === "blunt" ? 24 : 5)) broken.push("shield");
@@ -210,4 +219,26 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
   if (outcome !== "defeat") foe.hp = 0;
   record(null, null, outcome, { reason });
   return { events, outcome, reason, playerHP: you.hp, enemyHP: foe.hp, enemy: enemy.name };
+}
+
+/** Exact intact build inputs, not a forecast of a particular opponent or DPS. */
+export function physicalBuildStats(snapshot){
+  const a=fighter(snapshot,"player");
+  const attacks=[WEAPONS[a.loadout],...(a.loadout==="bow"?[WEAPONS.dagger]:a.loadout==="sword_shield"?[BASH]:[])];
+  return {health:healthParts(a.end),mobility:mobility(a),baseMobility:a.gear.mobilityPct,
+    gradeMobility:intactArmourSum(a,"mobility"),protection:protection(a),
+    guard:flatGuard(a),guardDamageReduction:flatGuard(a)*GUARD.flatReduction,
+    resistance:intactArmourSum(a,"resistance"),gradedDodge:intactArmourSum(a,"dodge"),
+    naturalDodge:dodgeChance(mobility(a),0),dodge:dodgeChance(mobility(a),intactArmourSum(a,"dodge")),
+    initiativeScore:a.dex+mobility(a)/10,initiativeDex:a.dex,initiativeMobility:mobility(a)/10,
+    aimBase:AIM.base,accuracy:a.weapon.accuracy,aimMinimum:AIM.minimum,aimMaximum:AIM.maximum,
+    aimDexPerPoint:AIM.dex,aimSkillPerLevel:AIM.skill,aimCloseBow:AIM.closeBow,aimCloseSpear:AIM.closeSpear,aimClearance:AIM.clearance,
+    penetration:a.weapon.penetration,materialFactors:ARMOUR_FACTOR,
+    attacks:attacks.map(attack=>({...attack,...attackComponents(a,attack,attack===BASH?a.shield:a.weapon),
+      condition:attack===BASH?a.shield:a.weapon})),
+    block:a.shield.hp>0?GUARD.block*a.shield.proficiency:0,
+    bluntBlock:a.shield.hp>0?GUARD.bluntBlock*a.shield.proficiency:0,
+    parry:a.loadout==="greatsword"?GUARD.parry*a.weapon.proficiency:0,
+    recoveryParry:a.loadout==="greatsword"?GUARD.recoveringParry*a.weapon.proficiency:0,
+    arrows:a.arrows,weapon:a.weapon,shield:a.shield,armour:a.armour};
 }

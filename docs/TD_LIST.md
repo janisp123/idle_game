@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## CHAR-STATS-001 — Transparent live character statistics
+
+- **Goal:** Independent collapsible character statistics panel, selected gear changes update the open sheet immediately; show total and source bonuses/penalties from real resolver, no fictitious DPS.
+- **Acceptance:** Attributes, damage by actual move, HP, weight, mobility, dodge, material protection, resistance, guard, accuracy, penetration, initiative, block/parry, condition and ammo. Distinguish selected intact next-bout build from ongoing bout, opponent/terrain and breakage. Preserve V15 saves and combat balance; actual browser tests.
+- **Status:** PENDING PR #157; tests pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## ALPHA-GEAR-001 — Six-month build progression, gear economy and expertise
 
 **Owner-approved direction (2026-11-25).** Extend the active [draft PR #154](https://github.com/janisp123/idle_game/pull/154). This newer scope supersedes conflicting gear/fight difficulty requirements in the historical GLAD roadmap. Six months of sustained play should develop **one** endgame build (one weapon style and one armour family), not universal mastery. Do not hard-lock arena opponents; do gate purchases by Fighting level and coins. Exact tuning is provisional until measured.
