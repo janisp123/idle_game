@@ -1,3 +1,4 @@
+import {purchaseThrough} from "./gear-test-fixture.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { ARENA_SCHEDULE_BOUTS, BOUT_MS, combatAtTime } from "../site/play/combat.mjs";
@@ -13,7 +14,7 @@ test("changing armour mid-Fighting preserves earned progression and refreshes fr
   const before=settle(init,STEP_MS,()=>.5).state;
   assert.equal(before.combatSession.player.gear.physicalReductionPct,0);
   const oldXP=before.skills.fighting.xp,oldEffort={...before.attributeEffort};
-  const changed=buyEquipment(before,"torso:leather",{grade:0,quality:"fine"},STEP_MS,()=>.5).state;
+  const changed=purchaseThrough(before,"torso:leather",{grade:0,quality:"fine"},STEP_MS,()=>.5).state;
   assert.deepEqual(changed.combatSession,before.combatSession,"purchase does not discard current fight");
   assert.equal(changed.items.stone,77);
   assert.equal(changed.skills.fighting.xp,oldXP);
@@ -180,8 +181,8 @@ test("A3 independent weapon and four-slot armour practice conserves both budgets
 });
 test("A3 offline practice uses frozen kit, no retroactive effectiveness, no duplicate credit",()=>{
   let s=newGame(0);s.skills.fighting.level=50;s.coins=10000000;
-  s=buyEquipment(s,"greatsword",{grade:7,quality:"masterwork"},0).state;
-  for(const slot of ["head","torso","arms","legs"])s=buyEquipment(s,slot+":plate",{grade:7,quality:"masterwork"},0).state;
+  s=purchaseThrough(s,"greatsword",{grade:7,quality:"masterwork"},0).state;
+  for(const slot of ["head","torso","arms","legs"])s=purchaseThrough(s,slot+":plate",{grade:7,quality:"masterwork"},0).state;
   s=chooseActivity(s,"fighting",0,()=>.5).state;
   const started=settle(s,1,()=>.5).state;
   const end=20*YEAR;
@@ -268,7 +269,7 @@ test("A7 departure finishes recovery and banks fractional Fighting work",()=>{
 });
 test("A3 proficiency updates at a boundary without rewriting the unfinished fight",()=>{
   let s=newGame(0);s.skills.fighting.level=50;s.coins=10000000;
-  s=buyEquipment(s,"greatsword",{grade:7,quality:"masterwork"},0).state;
+  s=purchaseThrough(s,"greatsword",{grade:7,quality:"masterwork"},0).state;
   s=chooseActivity(s,"fighting",0,()=>.5).state;
   const first=settle(s,100000,()=>.5).state;
   const trained=activateExpertise({...first,expertise:{...first.expertise,greatsword:expertiseThreshold(7)}});
