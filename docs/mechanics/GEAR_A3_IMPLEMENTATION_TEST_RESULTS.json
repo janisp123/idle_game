@@ -1,0 +1,12 @@
+{
+  "method": "Committed module text evaluated with dependency loader; test body same as native Node test. Native CLI/CI pending.",
+  "result": {
+    "quotes": 17952,
+    "legal": 544,
+    "conditionChecks": 4992,
+    "sessions": 960,
+    "duels": 960,
+    "transactions": 63,
+    "statSections": 21
+  }
+}
