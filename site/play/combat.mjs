@@ -47,11 +47,11 @@ const validGear = gear => gear && typeof gear === "object" && !Array.isArray(gea
   gear.weaponKg >= 0 && gear.weaponKg <= 12;
 const effectBounds=Object.freeze({proficiency:[0.4,1],flatAttack:[0,100],damageMultiplier:[1,20],
   accuracy:[0,0.2],penetration:[0,0.2],guard:[0,100],resistance:[0,20],
-  mobility:[0,20],dodge:[0,0.2]});
+  mobility:[0,20],dodge:[0,0.25],speed:[0,0.14],crit:[0,0.025],critDamage:[0,0.12],critResist:[0,0.025],critReduction:[0,0.12]});
 const validPiece = piece => Boolean(piece && Number.isSafeInteger(piece.maxHP) &&
   piece.maxHP > 0 && piece.maxHP <= 1000 && typeof piece.breakable === "boolean" &&
   Object.entries(effectBounds).every(([key,[min,max]])=>piece[key]===undefined||
-    Number.isFinite(piece[key])&&piece[key]>=min&&piece[key]<=max));
+    Number.isFinite(piece[key])&&piece[key]>=min&&piece[key]<=max+1e-12));
 
 function validCondition(condition) {
   return Boolean(condition && validPiece(condition.weapon) &&
