@@ -17,3 +17,8 @@ After committing both verified binary files, set DOMINANCE_ART in `site/play/com
 
 
 A9 verification: ZIP contents rechecked against both SHA-256 values above; exact files still absent from remote Git. [Chromium smoke](https://github.com/janisp123/idle_game/actions/runs/45568388725) passed 390/1440px verdict labels, loaded existing greatsword victory/defeat fallback images, no runtime or missing-resource errors, and no horizontal overflow. Screenshots attached in artifact 15001225954. This is NOT verification of missing custom images. Owner may explicitly defer them for playable alpha release while retaining this handoff as open; otherwise upload and activate before merging.
+
+
+## Owner-approved deferral (2026-11-25)
+
+Owner explicitly approved the playable alpha release using existing verified fallback artwork after final checks. This supersedes the earlier artwork-as-release-blocker instruction for PR #154 only. The two exact images remain a separate open task ALPHA-ART-001 in TD_LIST. When working on it, start a fresh branch from current main; do not reopen or reuse the merged release branch. All original checksum, activation and browser acceptance requirements remain. No artwork integration claimed.
