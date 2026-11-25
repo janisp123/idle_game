@@ -1,8 +1,8 @@
-# Idle Game
+# The Long Vigil · Idle Game
 
-*An evolving dark-fantasy idle RPG and open browser-game engineering project.*
+*An independent grimdark idle gladiator RPG and open browser-game engineering project.*
 
-Idle Game is an independent hobby project exploring a slower-paced fantasy RPG built around meaningful progression and respect for the player's time. Choose a path, let the world move, and return when it suits you.
+The Long Vigil is the playable game in the Idle Game hobby project. Fight automatically in the arena, earn equipment, train a specialist and support your character through survival work. Choose a path, let time pass and return when it suits you.
 
 **This project is actively evolving.** Mechanics, content, visuals and long-term plans may change as ideas are tested. The current build is an experiment, not a promise of a fixed final feature set.
 
@@ -11,7 +11,18 @@ Idle Game is an independent hobby project exploring a slower-paced fantasy RPG b
 - **[Play in your browser](https://janisp123.github.io/idle_game/play/)**
 - **[Visit the project website](https://janisp123.github.io/idle_game/)**
 
-The playable alpha lets you explore an early version of the world and its systems. Expect changes, rough edges and ongoing balancing. Progress is currently stored **locally in your browser**; there are no online accounts or cross-device save synchronization. This is not yet a finished or production-ready game.
+The playable alpha is an experimental, accelerated test build. Expect changes, rough edges and ongoing balancing. Progress is stored **locally in your browser** and alpha saves may be reset; there are no online accounts, multiplayer or cross-device save synchronization. This is not a production-ready game.
+
+## What you can play now
+
+- Automatic physical combat in five arenas, with bow, spear, sword & shield, greatsword or war hammer.
+- Arena coins and equipment from Non-grade through S, with Poor, Common, Fine and unbreakable Masterwork quality, four armour slots and material/handling trade-offs.
+- Separate retained weapon and armour expertise; equipment purchase gates use activated Fighting level and coins, not character class. All arena difficulties can be attempted.
+- Strength, dexterity and endurance; eleven activities: Fighting, Hunting, Fishing, Foraging, Woodcutting, Mining, Smithing, Construction, Cooking, Farming and Training.
+- Unlimited offline elapsed time, queued work and explicit Skill Master claims. Effective stats and gear are frozen during absence; skill XP is capped at one unclaimed level bar.
+- Expandable live character statistics with actual source breakdowns, and developer-only production-linked combat and systems simulations.
+
+The long-term balance target is one specialized endgame build after approximately six months of sustained normal-profile progression, not a calendar lock or guaranteed outcome. Current alpha timing is deliberately accelerated.
 
 ## Guiding ideas
 
