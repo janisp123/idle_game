@@ -11,7 +11,7 @@ import {
   queueSetDuration, queueSwap, queueRemoveLast,
   MAX_WAGONS, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
-  xpToNextLevel, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
+  xpToNextLevel, activityRewardCapped, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
 } from "./engine.mjs?v=bal-002";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=bal-002";
@@ -543,7 +543,7 @@ function renderWagons() {
       meter.setAttribute("role", "progressbar");
       meter.setAttribute("aria-label", ACTIVITIES[wagon.activity].title +
         (wagon.plannedMs === UNTIL_LEVEL_UP
-          ? " progress toward Skill Master readiness" : " work period progress"));
+          ? " progress toward full XP" : " work period progress"));
       meter.setAttribute("aria-valuemin", "0");
       meter.setAttribute("aria-valuemax", "100");
       meter.setAttribute("aria-valuenow", "0");
@@ -669,7 +669,7 @@ function updatePlanningMode() {
   ui.queueAmountLabel.hidden = untilReady;
   ui.queuePlannerHint.textContent = planningHint +
     (untilReady
-      ? " Stops only when both XP and Skill Master resources are ready. This does not level up automatically."
+      ? " Stops at the full XP bar. Claim the level with the Skill Master yourself."
       : "");
   ui.queueConfirm.textContent = untilReady
     ? (state.wagons.length === 1 ? "Start until ↑ LvL Up" : "Add until ↑ LvL Up")
@@ -857,7 +857,6 @@ function render() {
       ? (() => {
           const readiness = skillMasterReadiness(state, wagon.activity);
           const ratio = 100 * state.skills[wagon.activity].xp / readiness.requiredXP;
-          // Full XP alone is not finished if the Skill Master still lacks spoils.
           return readiness.ready ? 100 : Math.min(99, ratio);
         })()
       : 100 * state.productiveElapsedMs / wagon.plannedMs;
@@ -871,7 +870,7 @@ function render() {
     Array.from(difficulty.children).forEach((option,tier) => { option.disabled = !canSelectDifficulty(id,skill.level,tier); });
     difficulty.value = String(state.difficulties[id] ?? 0);
     activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level) +
-      (skill.xp >= xpToNextLevel(skill.level) ? " · Master ready" : "");
+      (skill.xp >= xpToNextLevel(skill.level) ? " · Rewards paused" : "");
     const available = lootChances(id, skill.level);
     const recipes = recipeOptions(id, skill.level);
     activityRewardLabels.get(id).textContent = recipes.length
@@ -915,7 +914,7 @@ function render() {
     const ready = selectedSkill.xp >= required;
     ui.skillLevel.textContent = "Level " + number(selectedSkill.level);
     ui.skillXp.textContent = ready
-      ? "XP full · Seek the Skill Master to advance"
+      ? "XP full · All rewards paused · Seek the Skill Master"
       : number(selectedSkill.xp) + " / " + number(required) + " skill XP";
     ui.skillFill.style.width = Math.min(100, selectedSkill.xp / required * 100).toFixed(2) + "%";
   } else {
@@ -948,9 +947,10 @@ function render() {
     ui.transitionProgress.setAttribute("aria-valuenow", String(Math.round(percent)));
     ui.transitionProgress.setAttribute("aria-label", phaseName);
   }
-  const combat = current?.category === "combat" && !transition
+  const capped=activityRewardCapped(state);
+  const combat = current?.category === "combat" && !transition && !capped
     ? combatAtTime(state.combatSession) : null;
-  ui.activityProgress.hidden = Boolean(transition || current?.category === "combat");
+  ui.activityProgress.hidden = Boolean(transition || capped || current?.category === "combat");
   ui.combatPanel.hidden = !combat;
   const flow=combat ? combatFlowState(combat,state.combatSession) : null;
   showCombatFlow(flow);
@@ -1013,7 +1013,7 @@ function render() {
     ui.description.hidden = Boolean(combat);
     ui.description.textContent = combat ? "" : transition
       ? "Your character finishes their work, travels and prepares before the new task begins."
-      : sceneActivity.description;
+      : capped ? "All rewards paused: this skill has a full XP bar. Visit the Skill Master to resume, or choose another activity." : sceneActivity.description;
     // Every live turn selects its actual combat event / attacker weapon /
     // defender shield / player outcome. Other activities retain static art.
     const sceneId = transition ? transition.targetActivity : state.activity;
@@ -1040,7 +1040,7 @@ function render() {
     ui.sceneCaption.textContent = combatArt?.label ??
       (sceneId === "fighting" ? "THE FIGHTING PIT" : sceneActivity.zone.toUpperCase());
     if (!transition) {
-      const percentage = Math.min(100, 100 * state.progressMs / sceneActivity.durationMs);
+      const percentage = capped ? 0 : Math.min(100, 100 * state.progressMs / sceneActivity.durationMs);
       ui.actionFill.style.width = percentage.toFixed(2) + "%";
       ui.activityProgress.setAttribute("aria-valuenow", String(Math.round(percentage)));
     }
