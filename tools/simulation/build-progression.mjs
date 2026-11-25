@@ -105,14 +105,11 @@ function trajectory(modules, scenario, seed) {
   };
   const shop=()=>{
     checkAffordability();
-    // Fixed transparent baseline policy: outfit one build in successive common
-    // grades, then Masterwork. The farm scenario rushes S directly instead.
-    if(farm) for(const key of ids)buy(key,FINAL_ITEM);
-    else for(let grade=0;grade<=7;grade++){
-      const target={grade,quality:'common'};
+    // All policies use the same legal sequential shop path as play.
+    for(let stage=0;stage<32;stage++){
+      const target={grade:Math.floor(stage/4),quality:smith.ITEM_QUALITIES[stage%4]};
       for(const key of ids)buy(key,target);
     }
-    if(!farm)for(const key of ids)buy(key,FINAL_ITEM);
     if(firstSWeapon===null&&targetSame(state.equipment[loadout],FINAL_ITEM))firstSWeapon=time/DAY;
     if(firstSSet===null&&ids.every(key=>targetSame(state.equipment[key],FINAL_ITEM)))firstSSet=time/DAY;
     checkAffordability();
