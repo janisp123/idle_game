@@ -237,7 +237,7 @@ let currentScheduledFill = null;
 let lastCombatEventKey = null;
 
 const CATEGORY_LABELS = Object.freeze({
-  combat: "Fighting", craft: "Survival Work", training: "Training"
+  combat: "Combat", craft: "Survival Work"
 });
 const categoryActivities = new Map(Object.keys(CATEGORY_LABELS).map(id => [id, []]));
 let selectedCategory = null;
@@ -357,7 +357,7 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
   row.append(body);
   activityRewardLabels.set(id, detail);
   activityLevelLabels.set(id, rank);
-  categoryActivities.get(task.category in CATEGORY_LABELS ? task.category : "other").push(row);
+  categoryActivities.get(task.category === "training" ? "combat" : task.category).push(row);
   activityButtons.set(id, { row, startButton, queueButton, levelButton, difficulty });
 }
 for (const item of ITEM_KEYS) {
