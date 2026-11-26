@@ -1,5 +1,5 @@
 import { ARMOUR_SLOTS, pieceProtection } from "./armour.mjs?v=bal-002";
-import { GRADES, validTier } from "./difficulty.mjs?v=alpha-gear-a2";
+import { GRADES, validTier } from "./difficulty.mjs?v=gear-a3";
 import { proficiency,validExpertise,fullExpertise } from "./expertise.mjs?v=alpha-gear-a3";
 
 export const ITEM_GRADES = Object.freeze([...GRADES]);

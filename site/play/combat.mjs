@@ -1,7 +1,7 @@
 import { chooseArena } from "./arenas.mjs?v=bal-002";
 /** Seeded, bounded arena timeline shared by play, prizes and the simulator. */
-import { resolvePhysicalDuel } from "./physical-duel.mjs?v=bal-002";
-import { equippedCondition,equipmentBonuses,validTrainingKit } from "./smith.mjs?v=bal-002";
+import { resolvePhysicalDuel } from "./physical-duel.mjs?v=gear-a3";
+import { equippedCondition,equipmentBonuses,validTrainingKit } from "./smith.mjs?v=gear-a3";
 import { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
 import { armourStats, initialArmour } from "./armour.mjs?v=bal-002";
@@ -11,7 +11,7 @@ export { COMBAT_ART } from "./combat-art.mjs?v=glad-003";
 
 export const BOUT_MS = 200_000;
 export const RESURRECTION_MS = 20_000;
-import { arenaBenchmark, validTier } from "./difficulty.mjs?v=alpha-gear-a2";
+import { arenaBenchmark, validTier } from "./difficulty.mjs?v=gear-a3";
 const ENCOUNTERS=[
   {role:"Tank",weapon:"sword_shield",sets:["plate"]},
   {role:"Vanguard",weapon:"greatsword",sets:["leather","plate"]},

@@ -1,6 +1,6 @@
 import { APPRENTICE_BALANCE, apprenticeProgress, MASTER_CONSENT_VERSION, normalizeMasterConsent } from "./apprentice.mjs?v=apprentice-a2";
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
-import { settleArenaPrizes } from "./arena-wallet.mjs?v=cap-001";
+import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import {
   ACTIVITY_STAT_WEIGHTS, blankAttributeEffort, validAttributeEffort, awardAttributeTime
 } from "./attributes.mjs?v=glad-001";
@@ -12,7 +12,7 @@ export {
 } from "./attributes.mjs?v=glad-001";
 import {
   validCombatSession, startCombatSession, advanceCombatSession, BOUT_MS, RESURRECTION_MS
-} from "./combat.mjs?v=bal-002";
+} from "./combat.mjs?v=gear-a3";
 import { COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
 import { ARMOUR_SLOTS, ARMOUR_TIERS, initialArmour, armourOption, armourStats } from "./armour.mjs?v=bal-002";
@@ -76,7 +76,7 @@ export const ITEM_LABELS = Object.freeze({
   ...EXTRA_LOOT_LABELS,
   ...PRODUCTION_LABELS
 });
-import { STARTER_ITEM, isEquipmentItem, smithQuote, trainingKit, trainingEffects } from "./smith.mjs?v=bal-002";
+import { STARTER_ITEM, isEquipmentItem, smithQuote, trainingKit, trainingEffects } from "./smith.mjs?v=gear-a3";
 
 const equipmentIds = new Set([
   ...Object.keys(COMBAT_LOADOUTS),
@@ -93,7 +93,7 @@ function validEquipment(state) {
       (armour[id] === "none" || Object.hasOwn(equipment, id + ":" + armour[id]))));
 }
 
-import { canSelectDifficulty, workMultiplier } from "./difficulty.mjs?v=alpha-gear-a2";
+import { canSelectDifficulty, workMultiplier } from "./difficulty.mjs?v=gear-a3";
 export function setDifficulty(state,id,tier,now=Date.now(),random=Math.random) {
   if(!Object.hasOwn(ACTIVITIES,id)||!canSelectDifficulty(id,state.skills[id].level,tier))
     throw new RangeError("Difficulty locked");
