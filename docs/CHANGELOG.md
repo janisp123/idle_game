@@ -2,7 +2,7 @@
 
 ## APPRENTICE-A4-03 · STARTED (2026-11-26, chat)
 
-Owner requested continuation. Mandatory level-10 planner verified 7,115 assertions; implement shared settled purchases, login transaction after offline/Master, manual purchase gate, exact reports and tests. Draft PR #184. No deployment before browser/economy gates.
+Owner requested continuation. Mandatory level-10 planner verified 7,115 assertions; implement shared settled purchases, login transaction after offline/Master, manual purchase gate, exact reports and tests. Draft PR #184. Engine and read-only UI wired; [integration evidence](mechanics/APPRENTICE_A4_INTEGRATION.md), 27 integration + 7,115 planner checks native PASS at cf7c4a46. Older Master and browser fixture corrections 2437d197/9ef16e86 await final verification. No merge/deployment. Next A4-04: finish full regression and browser/save tests; actual mandatory economy, final release gates.
 
 ## APPRENTICE-A4-02 · STARTED (2026-11-26, chat)
 
