@@ -166,8 +166,11 @@ function trajectory(modules, scenario, seed) {
           }
         }
       }
-      if((state.difficulties.fighting??0)!==grade)
-        state=engine.setDifficulty(state,'fighting',grade,time,rng).state;
+      if((state.difficulties.fighting??0)!==grade){
+        // Historical fixed-grade counterfactual for comparison only. This tool
+        // does not represent the new automatic player progression policy.
+        state={...engine.activateExpertise(state),difficulties:{...state.difficulties,fighting:grade},autoFight:{stage:grade,streak:0,blocked:-1,highest:-1}};
+      }
     }
     if(mixed&&time%DAY===0&&time<end){
       const wanted=Math.floor(time/DAY)%7<5?'fighting':'mining';
