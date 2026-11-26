@@ -2,7 +2,7 @@
 
 ## AUTO-FIGHT-02 · STARTED (2026-11-26, chat)
 
-Owner approved continuing after production policy research; draft PR #183, branch `research/auto-fight-policy-001`, baseline de5853ae. Implement 3 wins / 1 loss / 10 retry wins, pure deterministic state, online-only stage updates. Previous 90,720 real duels and 1,680 offline wallet checks saved. Next: policy module and targeted tests, then integrate committed live bout boundaries, frozen offline mode, UI and economy verification. No deployment yet.
+Owner approved continuing after production policy research; draft PR #183, branch `research/auto-fight-policy-001`, baseline de5853ae. Implement 3 wins / 1 loss / 10 retry wins, pure deterministic state, online-only stage updates. Previous 90,720 real duels and 1,680 offline wallet checks saved. Policy foundation implemented: `site/play/auto-fight.mjs`, `tools/test_auto_fight.mjs`, [verification and integration record](mechanics/AUTO_FIGHT_POLICY_IMPLEMENTATION.md). 10,782 assertions / 654 reachable states PASS in connector JavaScript; native workflow added, CI unverified. Next AUTO-FIGHT-03: actual persisted state and committed foreground-only settlement, frozen offline mode, cap/queue/reload tests, UI and economy. No live gameplay change or deployment.
 
 ## APPRENTICE-A3 · MERGED AND DEPLOYED (2026-11-26, chat)
 
