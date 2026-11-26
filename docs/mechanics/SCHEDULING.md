@@ -1,5 +1,7 @@
 # Work cycles, schedules, offline settlement and save migration — IMPLEMENTED (alpha)
 
+APPRENTICE-A3 retains the existing save schema and ownership. Within the same rules version the frozen bout behavior is unchanged; unpaid bouts spanning the balance release use the new resolver and opponent/prize tables. Historical combat rules are not versioned in this early alpha. No automatic save reset or duplication of previously paid prizes is introduced.
+
 **Source/tuning:** [engine.mjs](../../site/play/engine.mjs) → `TIMING_PROFILE`, `TIMING_PROFILES`, `BASE_CYCLE_MS`, `SCHEDULE_BALANCE`, `MAX_WAGONS`, `ACTIVITIES`, `UNTIL_LEVEL_UP`, `settle`, `readSave`. The planner UI is [app.mjs](../../site/play/app.mjs).
 
 ## Work and transition durations

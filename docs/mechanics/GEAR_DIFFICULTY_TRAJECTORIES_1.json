@@ -1,0 +1,1829 @@
+{
+  "total": 8192,
+  "rows": [
+    {
+      "style": "greatsword",
+      "family": "plate",
+      "day": 30,
+      "grade": 2,
+      "gear": {
+        "greatsword": {
+          "grade": 2,
+          "quality": "masterwork"
+        },
+        "head:plate": {
+          "grade": 2,
+          "quality": "masterwork"
+        },
+        "torso:plate": {
+          "grade": 2,
+          "quality": "masterwork"
+        },
+        "arms:plate": {
+          "grade": 2,
+          "quality": "masterwork"
+        },
+        "legs:plate": {
+          "grade": 2,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 56,
+        "DEX": 56,
+        "END": 53
+      },
+      "skill": 16,
+      "expertise": {
+        "greatsword": 505.3388888888889,
+        "sword_shield": 0,
+        "hammer": 0,
+        "bow": 0,
+        "spear": 0,
+        "none": 4.694444444444445,
+        "padded": 0,
+        "leather": 0,
+        "plate": 500.64444444444445
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 63,
+          "defeats": 1,
+          "draws": 0,
+          "winRate": 98.4375,
+          "coinsPerHour": 567
+        },
+        {
+          "arena": 3,
+          "wins": 6,
+          "defeats": 58,
+          "draws": 0,
+          "winRate": 9.375,
+          "coinsPerHour": 81
+        },
+        {
+          "arena": 4,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 5,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 6,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 7,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        }
+      ],
+      "bestArena": 2,
+      "bestCoins": 567,
+      "ownCoins": 567
+    },
+    {
+      "style": "greatsword",
+      "family": "plate",
+      "day": 90,
+      "grade": 5,
+      "gear": {
+        "greatsword": {
+          "grade": 5,
+          "quality": "masterwork"
+        },
+        "head:plate": {
+          "grade": 5,
+          "quality": "masterwork"
+        },
+        "torso:plate": {
+          "grade": 5,
+          "quality": "masterwork"
+        },
+        "arms:plate": {
+          "grade": 5,
+          "quality": "masterwork"
+        },
+        "legs:plate": {
+          "grade": 5,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 97,
+        "DEX": 97,
+        "END": 90
+      },
+      "skill": 33,
+      "expertise": {
+        "greatsword": 1694.9722222222222,
+        "sword_shield": 0,
+        "hammer": 0,
+        "bow": 0,
+        "spear": 0,
+        "none": 4.694444444444445,
+        "padded": 0,
+        "leather": 0,
+        "plate": 1690.2777777777778
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 864
+        },
+        {
+          "arena": 4,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1224
+        },
+        {
+          "arena": 5,
+          "wins": 19,
+          "defeats": 45,
+          "draws": 0,
+          "winRate": 29.6875,
+          "coinsPerHour": 491.625
+        },
+        {
+          "arena": 6,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 7,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        }
+      ],
+      "bestArena": 4,
+      "bestCoins": 1224,
+      "ownCoins": 491.625
+    },
+    {
+      "style": "greatsword",
+      "family": "plate",
+      "day": 150,
+      "grade": 6,
+      "gear": {
+        "greatsword": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "head:plate": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "torso:plate": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "arms:plate": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "legs:plate": {
+          "grade": 6,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 126,
+        "DEX": 125,
+        "END": 116
+      },
+      "skill": 45,
+      "expertise": {
+        "greatsword": 2941.2277777777776,
+        "sword_shield": 0,
+        "hammer": 0,
+        "bow": 0,
+        "spear": 0,
+        "none": 4.694444444444445,
+        "padded": 0,
+        "leather": 0,
+        "plate": 2936.5333333333333
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 864
+        },
+        {
+          "arena": 4,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1224
+        },
+        {
+          "arena": 5,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1656
+        },
+        {
+          "arena": 6,
+          "wins": 36,
+          "defeats": 28,
+          "draws": 0,
+          "winRate": 56.25,
+          "coinsPerHour": 1235.25
+        },
+        {
+          "arena": 7,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        }
+      ],
+      "bestArena": 5,
+      "bestCoins": 1656,
+      "ownCoins": 1235.25
+    },
+    {
+      "style": "greatsword",
+      "family": "plate",
+      "day": 180,
+      "grade": 7,
+      "gear": {
+        "greatsword": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "head:plate": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "torso:plate": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "arms:plate": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "legs:plate": {
+          "grade": 7,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 139,
+        "DEX": 138,
+        "END": 128
+      },
+      "skill": 51,
+      "expertise": {
+        "greatsword": 3589.1111111111113,
+        "sword_shield": 0,
+        "hammer": 0,
+        "bow": 0,
+        "spear": 0,
+        "none": 4.694444444444445,
+        "padded": 0,
+        "leather": 0,
+        "plate": 3584.4166666666665
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 864
+        },
+        {
+          "arena": 4,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1224
+        },
+        {
+          "arena": 5,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1656
+        },
+        {
+          "arena": 6,
+          "wins": 62,
+          "defeats": 2,
+          "draws": 0,
+          "winRate": 96.875,
+          "coinsPerHour": 2127.375
+        },
+        {
+          "arena": 7,
+          "wins": 19,
+          "defeats": 45,
+          "draws": 0,
+          "winRate": 29.6875,
+          "coinsPerHour": 844.3125
+        }
+      ],
+      "bestArena": 6,
+      "bestCoins": 2127.375,
+      "ownCoins": 844.3125
+    },
+    {
+      "style": "hammer",
+      "family": "padded",
+      "day": 30,
+      "grade": 3,
+      "gear": {
+        "hammer": {
+          "grade": 3,
+          "quality": "masterwork"
+        },
+        "head:padded": {
+          "grade": 3,
+          "quality": "masterwork"
+        },
+        "torso:padded": {
+          "grade": 3,
+          "quality": "masterwork"
+        },
+        "arms:padded": {
+          "grade": 3,
+          "quality": "masterwork"
+        },
+        "legs:padded": {
+          "grade": 3,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 57,
+        "DEX": 56,
+        "END": 53
+      },
+      "skill": 17,
+      "expertise": {
+        "greatsword": 0,
+        "sword_shield": 0,
+        "hammer": 510,
+        "bow": 0,
+        "spear": 0,
+        "none": 4.683333333333334,
+        "padded": 505.31666666666666,
+        "leather": 0,
+        "plate": 0
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 30,
+          "defeats": 34,
+          "draws": 0,
+          "winRate": 46.875,
+          "coinsPerHour": 405
+        },
+        {
+          "arena": 4,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 5,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 6,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 7,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        }
+      ],
+      "bestArena": 2,
+      "bestCoins": 576,
+      "ownCoins": 405
+    },
+    {
+      "style": "hammer",
+      "family": "padded",
+      "day": 90,
+      "grade": 5,
+      "gear": {
+        "hammer": {
+          "grade": 5,
+          "quality": "masterwork"
+        },
+        "head:padded": {
+          "grade": 5,
+          "quality": "masterwork"
+        },
+        "torso:padded": {
+          "grade": 5,
+          "quality": "masterwork"
+        },
+        "arms:padded": {
+          "grade": 5,
+          "quality": "masterwork"
+        },
+        "legs:padded": {
+          "grade": 5,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 98,
+        "DEX": 98,
+        "END": 91
+      },
+      "skill": 33,
+      "expertise": {
+        "greatsword": 0,
+        "sword_shield": 0,
+        "hammer": 1719.9166666666667,
+        "bow": 0,
+        "spear": 0,
+        "none": 4.683333333333334,
+        "padded": 1715.2333333333333,
+        "leather": 0,
+        "plate": 0
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 864
+        },
+        {
+          "arena": 4,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1224
+        },
+        {
+          "arena": 5,
+          "wins": 33,
+          "defeats": 31,
+          "draws": 0,
+          "winRate": 51.5625,
+          "coinsPerHour": 853.875
+        },
+        {
+          "arena": 6,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 7,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        }
+      ],
+      "bestArena": 4,
+      "bestCoins": 1224,
+      "ownCoins": 853.875
+    },
+    {
+      "style": "hammer",
+      "family": "padded",
+      "day": 150,
+      "grade": 6,
+      "gear": {
+        "hammer": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "head:padded": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "torso:padded": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "arms:padded": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "legs:padded": {
+          "grade": 6,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 127,
+        "DEX": 127,
+        "END": 117
+      },
+      "skill": 46,
+      "expertise": {
+        "greatsword": 0,
+        "sword_shield": 0,
+        "hammer": 2983.9777777777776,
+        "bow": 0,
+        "spear": 0,
+        "none": 4.683333333333334,
+        "padded": 2979.2944444444443,
+        "leather": 0,
+        "plate": 0
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 864
+        },
+        {
+          "arena": 4,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1224
+        },
+        {
+          "arena": 5,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1656
+        },
+        {
+          "arena": 6,
+          "wins": 50,
+          "defeats": 14,
+          "draws": 0,
+          "winRate": 78.125,
+          "coinsPerHour": 1715.625
+        },
+        {
+          "arena": 7,
+          "wins": 2,
+          "defeats": 62,
+          "draws": 0,
+          "winRate": 3.125,
+          "coinsPerHour": 88.875
+        }
+      ],
+      "bestArena": 6,
+      "bestCoins": 1715.625,
+      "ownCoins": 1715.625
+    },
+    {
+      "style": "hammer",
+      "family": "padded",
+      "day": 180,
+      "grade": 7,
+      "gear": {
+        "hammer": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "head:padded": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "torso:padded": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "arms:padded": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "legs:padded": {
+          "grade": 7,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 140,
+        "DEX": 140,
+        "END": 128
+      },
+      "skill": 52,
+      "expertise": {
+        "greatsword": 0,
+        "sword_shield": 0,
+        "hammer": 3636.661111111111,
+        "bow": 0,
+        "spear": 0,
+        "none": 4.683333333333334,
+        "padded": 3631.9777777777776,
+        "leather": 0,
+        "plate": 0
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 864
+        },
+        {
+          "arena": 4,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1224
+        },
+        {
+          "arena": 5,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1656
+        },
+        {
+          "arena": 6,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 2196
+        },
+        {
+          "arena": 7,
+          "wins": 38,
+          "defeats": 26,
+          "draws": 0,
+          "winRate": 59.375,
+          "coinsPerHour": 1688.625
+        }
+      ],
+      "bestArena": 6,
+      "bestCoins": 2196,
+      "ownCoins": 1688.625
+    },
+    {
+      "style": "bow",
+      "family": "leather",
+      "day": 30,
+      "grade": 2,
+      "gear": {
+        "bow": {
+          "grade": 2,
+          "quality": "masterwork"
+        },
+        "head:leather": {
+          "grade": 2,
+          "quality": "masterwork"
+        },
+        "torso:leather": {
+          "grade": 2,
+          "quality": "masterwork"
+        },
+        "arms:leather": {
+          "grade": 2,
+          "quality": "masterwork"
+        },
+        "legs:leather": {
+          "grade": 2,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 56,
+        "DEX": 56,
+        "END": 53
+      },
+      "skill": 16,
+      "expertise": {
+        "greatsword": 0,
+        "sword_shield": 0,
+        "hammer": 0,
+        "bow": 505.01666666666665,
+        "spear": 0,
+        "none": 4.688888888888889,
+        "padded": 0,
+        "leather": 500.3277777777778,
+        "plate": 0
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 62,
+          "defeats": 2,
+          "draws": 0,
+          "winRate": 96.875,
+          "coinsPerHour": 558
+        },
+        {
+          "arena": 3,
+          "wins": 4,
+          "defeats": 60,
+          "draws": 0,
+          "winRate": 6.25,
+          "coinsPerHour": 54
+        },
+        {
+          "arena": 4,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 5,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 6,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 7,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        }
+      ],
+      "bestArena": 2,
+      "bestCoins": 558,
+      "ownCoins": 558
+    },
+    {
+      "style": "bow",
+      "family": "leather",
+      "day": 90,
+      "grade": 5,
+      "gear": {
+        "bow": {
+          "grade": 5,
+          "quality": "masterwork"
+        },
+        "head:leather": {
+          "grade": 5,
+          "quality": "masterwork"
+        },
+        "torso:leather": {
+          "grade": 5,
+          "quality": "masterwork"
+        },
+        "arms:leather": {
+          "grade": 5,
+          "quality": "masterwork"
+        },
+        "legs:leather": {
+          "grade": 5,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 97,
+        "DEX": 97,
+        "END": 90
+      },
+      "skill": 33,
+      "expertise": {
+        "greatsword": 0,
+        "sword_shield": 0,
+        "hammer": 0,
+        "bow": 1694.6166666666666,
+        "spear": 0,
+        "none": 4.688888888888889,
+        "padded": 0,
+        "leather": 1689.9277777777777,
+        "plate": 0
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 864
+        },
+        {
+          "arena": 4,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1224
+        },
+        {
+          "arena": 5,
+          "wins": 30,
+          "defeats": 34,
+          "draws": 0,
+          "winRate": 46.875,
+          "coinsPerHour": 776.25
+        },
+        {
+          "arena": 6,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 7,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        }
+      ],
+      "bestArena": 4,
+      "bestCoins": 1224,
+      "ownCoins": 776.25
+    },
+    {
+      "style": "bow",
+      "family": "leather",
+      "day": 150,
+      "grade": 6,
+      "gear": {
+        "bow": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "head:leather": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "torso:leather": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "arms:leather": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "legs:leather": {
+          "grade": 6,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 126,
+        "DEX": 125,
+        "END": 116
+      },
+      "skill": 45,
+      "expertise": {
+        "greatsword": 0,
+        "sword_shield": 0,
+        "hammer": 0,
+        "bow": 2940.911111111111,
+        "spear": 0,
+        "none": 4.688888888888889,
+        "padded": 0,
+        "leather": 2936.222222222222,
+        "plate": 0
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 864
+        },
+        {
+          "arena": 4,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1224
+        },
+        {
+          "arena": 5,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1656
+        },
+        {
+          "arena": 6,
+          "wins": 46,
+          "defeats": 18,
+          "draws": 0,
+          "winRate": 71.875,
+          "coinsPerHour": 1578.375
+        },
+        {
+          "arena": 7,
+          "wins": 2,
+          "defeats": 62,
+          "draws": 0,
+          "winRate": 3.125,
+          "coinsPerHour": 88.875
+        }
+      ],
+      "bestArena": 5,
+      "bestCoins": 1656,
+      "ownCoins": 1578.375
+    },
+    {
+      "style": "bow",
+      "family": "leather",
+      "day": 180,
+      "grade": 7,
+      "gear": {
+        "bow": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "head:leather": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "torso:leather": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "arms:leather": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "legs:leather": {
+          "grade": 7,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 139,
+        "DEX": 138,
+        "END": 128
+      },
+      "skill": 51,
+      "expertise": {
+        "greatsword": 0,
+        "sword_shield": 0,
+        "hammer": 0,
+        "bow": 3589.2277777777776,
+        "spear": 0,
+        "none": 4.688888888888889,
+        "padded": 0,
+        "leather": 3584.538888888889,
+        "plate": 0
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 864
+        },
+        {
+          "arena": 4,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1224
+        },
+        {
+          "arena": 5,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1656
+        },
+        {
+          "arena": 6,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 2196
+        },
+        {
+          "arena": 7,
+          "wins": 33,
+          "defeats": 31,
+          "draws": 0,
+          "winRate": 51.5625,
+          "coinsPerHour": 1466.4375
+        }
+      ],
+      "bestArena": 6,
+      "bestCoins": 2196,
+      "ownCoins": 1466.4375
+    },
+    {
+      "style": "sword_shield",
+      "family": "plate",
+      "day": 30,
+      "grade": 2,
+      "gear": {
+        "sword_shield": {
+          "grade": 2,
+          "quality": "masterwork"
+        },
+        "head:plate": {
+          "grade": 2,
+          "quality": "masterwork"
+        },
+        "torso:plate": {
+          "grade": 2,
+          "quality": "masterwork"
+        },
+        "arms:plate": {
+          "grade": 2,
+          "quality": "masterwork"
+        },
+        "legs:plate": {
+          "grade": 2,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 55,
+        "DEX": 55,
+        "END": 52
+      },
+      "skill": 16,
+      "expertise": {
+        "greatsword": 0,
+        "sword_shield": 477.7111111111111,
+        "hammer": 0,
+        "bow": 0,
+        "spear": 0,
+        "none": 4.677777777777778,
+        "padded": 0,
+        "leather": 0,
+        "plate": 473.03333333333336
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 60,
+          "defeats": 4,
+          "draws": 0,
+          "winRate": 93.75,
+          "coinsPerHour": 540
+        },
+        {
+          "arena": 3,
+          "wins": 1,
+          "defeats": 63,
+          "draws": 0,
+          "winRate": 1.5625,
+          "coinsPerHour": 13.5
+        },
+        {
+          "arena": 4,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 5,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 6,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 7,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        }
+      ],
+      "bestArena": 2,
+      "bestCoins": 540,
+      "ownCoins": 540
+    },
+    {
+      "style": "sword_shield",
+      "family": "plate",
+      "day": 90,
+      "grade": 4,
+      "gear": {
+        "sword_shield": {
+          "grade": 4,
+          "quality": "masterwork"
+        },
+        "head:plate": {
+          "grade": 4,
+          "quality": "masterwork"
+        },
+        "torso:plate": {
+          "grade": 4,
+          "quality": "masterwork"
+        },
+        "arms:plate": {
+          "grade": 4,
+          "quality": "masterwork"
+        },
+        "legs:plate": {
+          "grade": 4,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 97,
+        "DEX": 97,
+        "END": 89
+      },
+      "skill": 32,
+      "expertise": {
+        "greatsword": 0,
+        "sword_shield": 1678.088888888889,
+        "hammer": 0,
+        "bow": 0,
+        "spear": 0,
+        "none": 4.677777777777778,
+        "padded": 0,
+        "leather": 0,
+        "plate": 1673.411111111111
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 864
+        },
+        {
+          "arena": 4,
+          "wins": 59,
+          "defeats": 5,
+          "draws": 0,
+          "winRate": 92.1875,
+          "coinsPerHour": 1128.375
+        },
+        {
+          "arena": 5,
+          "wins": 2,
+          "defeats": 62,
+          "draws": 0,
+          "winRate": 3.125,
+          "coinsPerHour": 51.75
+        },
+        {
+          "arena": 6,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        },
+        {
+          "arena": 7,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        }
+      ],
+      "bestArena": 4,
+      "bestCoins": 1128.375,
+      "ownCoins": 1128.375
+    },
+    {
+      "style": "sword_shield",
+      "family": "plate",
+      "day": 150,
+      "grade": 6,
+      "gear": {
+        "sword_shield": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "head:plate": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "torso:plate": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "arms:plate": {
+          "grade": 6,
+          "quality": "masterwork"
+        },
+        "legs:plate": {
+          "grade": 6,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 126,
+        "DEX": 125,
+        "END": 115
+      },
+      "skill": 45,
+      "expertise": {
+        "greatsword": 0,
+        "sword_shield": 2893.8055555555557,
+        "hammer": 0,
+        "bow": 0,
+        "spear": 0,
+        "none": 4.677777777777778,
+        "padded": 0,
+        "leather": 0,
+        "plate": 2889.1277777777777
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 864
+        },
+        {
+          "arena": 4,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1224
+        },
+        {
+          "arena": 5,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1656
+        },
+        {
+          "arena": 6,
+          "wins": 34,
+          "defeats": 30,
+          "draws": 0,
+          "winRate": 53.125,
+          "coinsPerHour": 1166.625
+        },
+        {
+          "arena": 7,
+          "wins": 0,
+          "defeats": 64,
+          "draws": 0,
+          "winRate": 0,
+          "coinsPerHour": 0
+        }
+      ],
+      "bestArena": 5,
+      "bestCoins": 1656,
+      "ownCoins": 1166.625
+    },
+    {
+      "style": "sword_shield",
+      "family": "plate",
+      "day": 180,
+      "grade": 7,
+      "gear": {
+        "sword_shield": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "head:plate": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "torso:plate": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "arms:plate": {
+          "grade": 7,
+          "quality": "masterwork"
+        },
+        "legs:plate": {
+          "grade": 7,
+          "quality": "masterwork"
+        }
+      },
+      "stats": {
+        "STR": 138,
+        "DEX": 137,
+        "END": 127
+      },
+      "skill": 51,
+      "expertise": {
+        "greatsword": 0,
+        "sword_shield": 3540.8555555555554,
+        "hammer": 0,
+        "bow": 0,
+        "spear": 0,
+        "none": 4.677777777777778,
+        "padded": 0,
+        "leather": 0,
+        "plate": 3536.177777777778
+      },
+      "opts": [
+        {
+          "arena": 0,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 216
+        },
+        {
+          "arena": 1,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 360
+        },
+        {
+          "arena": 2,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 576
+        },
+        {
+          "arena": 3,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 864
+        },
+        {
+          "arena": 4,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1224
+        },
+        {
+          "arena": 5,
+          "wins": 64,
+          "defeats": 0,
+          "draws": 0,
+          "winRate": 100,
+          "coinsPerHour": 1656
+        },
+        {
+          "arena": 6,
+          "wins": 61,
+          "defeats": 3,
+          "draws": 0,
+          "winRate": 95.3125,
+          "coinsPerHour": 2093.0625
+        },
+        {
+          "arena": 7,
+          "wins": 11,
+          "defeats": 53,
+          "draws": 0,
+          "winRate": 17.1875,
+          "coinsPerHour": 488.8125
+        }
+      ],
+      "bestArena": 6,
+      "bestCoins": 2093.0625,
+      "ownCoins": 488.8125
+    }
+  ]
+}

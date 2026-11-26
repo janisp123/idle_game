@@ -1,7 +1,7 @@
-import { ARENA_SCHEDULE_BOUTS, BOUT_MS, RESURRECTION_MS, combatAtTime, validCombatSession } from "./combat.mjs?v=bal-002";
-import { validTier } from "./difficulty.mjs?v=alpha-gear-a2";
+import { ARENA_SCHEDULE_BOUTS, BOUT_MS, RESURRECTION_MS, combatAtTime, validCombatSession } from "./combat.mjs?v=gear-a3";
+import { validTier } from "./difficulty.mjs?v=gear-a3";
 
-const WIN_PRIZES = Object.freeze([12, 20, 32, 48, 68, 92, 122, 158]);
+const WIN_PRIZES = Object.freeze([12, 20, 32, 48, 68, 92, 122, 185]);
 
 export function arenaReward(grade) {
   if (!validTier(grade)) throw new RangeError("Invalid arena grade");

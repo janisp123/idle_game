@@ -158,7 +158,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=apprentice-a2/,
+  assert.match(html, /app\.mjs\?v=gear-a3/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -262,8 +262,10 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     elements.get("itemGrade").value="7";
     elements.get("itemGrade").fire("change");
     assert.equal(elements.get("smithBuy").disabled,true);
-    assert.match(elements.get("smithBuy").textContent,/Fighting 50 required/);
-    assert.match(elements.get("expertiseStats").textContent,/40%.*60% penalty/);
+    assert.equal(elements.get("itemGrade").value,"0","forged selection resets to next legal grade");
+    assert.equal(elements.get("itemGrade").disabled,true);
+    assert.match(elements.get("smithBuy").textContent,/Need 24 coins/);
+    assert.match(elements.get("expertiseStats").textContent,/increment proficiency 100%/);
     elements.get("itemGrade").value="0";
     elements.get("itemGrade").fire("change");
 
@@ -845,13 +847,21 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     handlers.get("window:storage")({key:SAVE_KEY,newValue:wallet});
     elements.get("itemQuality").value = "fine";
     elements.get("itemQuality").fire("change");
+    assert.equal(elements.get("itemQuality").value,"common");
     elements.get("smithBuy").fire("click");
-    const bought = JSON.parse(store.get(SAVE_KEY));
-    assert.equal(bought.coins, 380);
-    assert.equal(bought.equipment.sword_shield.quality, "fine");
-    assert.equal(bought.equipment.greatsword.quality, "poor");
+    let bought=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(bought.coins,455);
+    assert.equal(bought.equipment.sword_shield.quality,"common");
     elements.get("smithBuy").fire("click");
-    assert.equal(JSON.parse(store.get(SAVE_KEY)).coins, 380);
+    bought=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(bought.coins,380);
+    assert.equal(bought.equipment.sword_shield.quality,"fine");
+    assert.equal(bought.equipment.greatsword.quality,"poor");
+    elements.get("smithBuy").fire("click");
+    assert.equal(JSON.parse(store.get(SAVE_KEY)).coins,255);
+    assert.equal(elements.get("itemGrade").value,"1");
+    assert.equal(elements.get("itemQuality").value,"poor");
+    assert.equal(elements.get("smithBuy").disabled,true);
     assert.equal(selectedCount(), 1);
 
     // Alpha Tools: a reset and one-day test are momentary switches, while

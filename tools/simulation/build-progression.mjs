@@ -82,16 +82,22 @@ function trajectory(modules, scenario, seed) {
   });
   state=engine.setCombatLoadout(state,loadout,time,rng).state;
   const checkpoints=[snapshot()];
-  state=engine.queueStartActivity(state,'fighting',null,time,rng).state;
+  state=engine.chooseActivity(state,'fighting',time,rng).state;
+  // Full-credit prices telescope across all legal intermediate purchases.
+  // Affordability is a budget milestone, not a direct purchase or skill-gate bypass.
+  const remainingCost=(key,target)=>{
+    const current=state.equipment[key];
+    if(current&&(current.grade>target.grade||current.grade===target.grade&&
+      smith.ITEM_QUALITIES.indexOf(current.quality)>=smith.ITEM_QUALITIES.indexOf(target.quality)))return 0;
+    return smith.equipmentPrice(target)-(current?smith.equipmentPrice(current):-smith.SMITH_BALANCE.firstArmourCost);
+  };
   const checkAffordability=()=>{
-    const quotes=ids.map(key=>smith.smithQuote(state,key,FINAL_ITEM));
-    const anyS=ids.map(key=>smith.smithQuote(state,key,{grade:7,quality:state.equipment[key]?.quality??'poor'}));
-    if(firstAnySAffordable===null&&anyS.some(q=>q.improves&&q.affordable))firstAnySAffordable=time/DAY;
+    const costs=ids.map(key=>remainingCost(key,FINAL_ITEM));
+    const anyS=ids.map(key=>remainingCost(key,{grade:7,quality:'poor'}));
+    if(firstAnySAffordable===null&&anyS.some(cost=>cost<=state.coins))firstAnySAffordable=time/DAY;
     if(firstAnyS===null&&ids.some(key=>state.equipment[key]?.grade===7))firstAnyS=time/DAY;
-    if(firstSWeaponAffordable===null&&(targetSame(state.equipment[loadout],FINAL_ITEM)||(quotes[0].improves&&quotes[0].affordable)))
-      firstSWeaponAffordable=time/DAY;
-    if(firstSSetAffordable===null&&ids.every((key,i)=>targetSame(state.equipment[key],FINAL_ITEM)||quotes[i].improves)
-       &&quotes.reduce((sum,q)=>sum+q.cost,0)<=state.coins) firstSSetAffordable=time/DAY;
+    if(firstSWeaponAffordable===null&&costs[0]<=state.coins)firstSWeaponAffordable=time/DAY;
+    if(firstSSetAffordable===null&&costs.reduce((sum,cost)=>sum+cost,0)<=state.coins)firstSSetAffordable=time/DAY;
   };
   const buy=(key,target)=>{
     if(targetSame(state.equipment[key],target))return;
@@ -105,14 +111,11 @@ function trajectory(modules, scenario, seed) {
   };
   const shop=()=>{
     checkAffordability();
-    // Fixed transparent baseline policy: outfit one build in successive common
-    // grades, then Masterwork. The farm scenario rushes S directly instead.
-    if(farm) for(const key of ids)buy(key,FINAL_ITEM);
-    else for(let grade=0;grade<=7;grade++){
-      const target={grade,quality:'common'};
+    // All policies use the same legal sequential shop path as play.
+    for(let stage=0;stage<32;stage++){
+      const target={grade:Math.floor(stage/4),quality:smith.ITEM_QUALITIES[stage%4]};
       for(const key of ids)buy(key,target);
     }
-    if(!farm)for(const key of ids)buy(key,FINAL_ITEM);
     if(firstSWeapon===null&&targetSame(state.equipment[loadout],FINAL_ITEM))firstSWeapon=time/DAY;
     if(firstSSet===null&&ids.every(key=>targetSame(state.equipment[key],FINAL_ITEM)))firstSSet=time/DAY;
     checkAffordability();
@@ -187,9 +190,9 @@ export async function runBuildBaseline({profiles=['normal','alpha'],scenarios=BA
     boutMs:modules.combat.BOUT_MS,
     scenarios:scenarios.map(s=>trajectory(modules,s,seed))
   })));
-  return {version:'ALPHA-GEAR-001-A3',kind:'production-engine progression and economy trajectory',
+  return {version:'APPRENTICE-A3',kind:'production-engine progression and economy trajectory',
     limitations:['One deterministic seed per scenario; not a confidence interval.',
-      'Fixed greatsword/plate purchase policy and target-stat/whole-build arena selection; not an optimal progression search. Selection policy changed from A1, so before/after includes that policy change.',
+      'Sequential full-credit purchase policy and target-stat/whole-build arena selection; not an optimal progression search. Farm variants also buy legal intermediate stages.',
       'Rapid hourly visits test aggressive play, not a proven earliest possible claim.',
       'Weekly checkpoint settlements may split absence without claiming; outcomes reflect current engine.',
       'Affordability ignores skill gates; purchases enforce both.',

@@ -1,7 +1,7 @@
 import { chooseArena } from "./arenas.mjs?v=bal-002";
 /** Seeded, bounded arena timeline shared by play, prizes and the simulator. */
-import { resolvePhysicalDuel } from "./physical-duel.mjs?v=bal-002";
-import { equippedCondition,equipmentBonuses,validTrainingKit } from "./smith.mjs?v=bal-002";
+import { resolvePhysicalDuel } from "./physical-duel.mjs?v=gear-a3";
+import { equippedCondition,equipmentBonuses,validTrainingKit } from "./smith.mjs?v=gear-a3";
 import { COMBAT_SKILLS, COMBAT_LOADOUTS, DEFAULT_COMBAT_LOADOUT, validCombatLoadout }
   from "./combat-skills.mjs?v=glad-002";
 import { armourStats, initialArmour } from "./armour.mjs?v=bal-002";
@@ -11,7 +11,7 @@ export { COMBAT_ART } from "./combat-art.mjs?v=glad-003";
 
 export const BOUT_MS = 200_000;
 export const RESURRECTION_MS = 20_000;
-import { arenaBenchmark, validTier } from "./difficulty.mjs?v=alpha-gear-a2";
+import { arenaBenchmark, validTier } from "./difficulty.mjs?v=gear-a3";
 const ENCOUNTERS=[
   {role:"Tank",weapon:"sword_shield",sets:["plate"]},
   {role:"Vanguard",weapon:"greatsword",sets:["leather","plate"]},
@@ -47,11 +47,11 @@ const validGear = gear => gear && typeof gear === "object" && !Array.isArray(gea
   gear.weaponKg >= 0 && gear.weaponKg <= 12;
 const effectBounds=Object.freeze({proficiency:[0.4,1],flatAttack:[0,100],damageMultiplier:[1,20],
   accuracy:[0,0.2],penetration:[0,0.2],guard:[0,100],resistance:[0,20],
-  mobility:[0,20],dodge:[0,0.2]});
+  mobility:[0,20],dodge:[0,0.25],speed:[0,0.14],crit:[0,0.025],critDamage:[0,0.12],critResist:[0,0.025],critReduction:[0,0.12]});
 const validPiece = piece => Boolean(piece && Number.isSafeInteger(piece.maxHP) &&
   piece.maxHP > 0 && piece.maxHP <= 1000 && typeof piece.breakable === "boolean" &&
   Object.entries(effectBounds).every(([key,[min,max]])=>piece[key]===undefined||
-    Number.isFinite(piece[key])&&piece[key]>=min&&piece[key]<=max));
+    Number.isFinite(piece[key])&&piece[key]>=min&&piece[key]<=max+1e-12));
 
 function validCondition(condition) {
   return Boolean(condition && validPiece(condition.weapon) &&

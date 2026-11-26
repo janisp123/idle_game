@@ -48,7 +48,8 @@ test('saved session snapshots preserve frozen power, start bout, seed and exact 
   const output=simulateBatch({snapshot:{combatSession:session},battles:30,trace:1});
   assert.equal(output.startBout,8);
   assert.equal(output.seed,3377);
-  assert.equal(output.player.gearAttack,11);
+  assert.equal(output.player.gearAttack,player.gearAttack);
+  assert.equal(output.player.gearAttack,10);
   assert.equal(output.playerBuild,null);
   assert.deepEqual(output.samples[0].events,
     combatAtTime({...session,elapsedMs:8*BOUT_MS}).events);

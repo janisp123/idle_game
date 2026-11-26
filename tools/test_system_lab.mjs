@@ -179,11 +179,13 @@ test('CLI can run multi-scenario file, JSON input and list modules',()=>{
 });
 
 test("equipment lab reports an actual smith purchase", () => {
-  const result = simulateEquipment({ slot: "arms", gear: "padded", coins: 100, quality: "common" });
+  const forbidden=simulateEquipment({slot:"arms",gear:"padded",coins:100,quality:"common"});
+  assert.equal(forbidden.purchased,false);
+  const result = simulateEquipment({ slot: "arms", gear: "padded", coins: 100, quality: "poor" });
   assert.equal(result.purchased, true);
-  assert.equal(result.coins, 31);
+  assert.equal(result.coins, 76);
   assert.equal(result.equippedArmour.arms, "padded");
-  assert.ok(result.bonuses.defense > 0);
+  assert.ok(result.armourAfter.physicalReductionPct > 0);
 });
 
 

@@ -1,6 +1,6 @@
 # The Apprentice — progressive automation implementation plan
 
-**APPRENTICE-PLAN-001 — design and staged implementation, 2026-11-25.** Owner requested the plan, then approved starting implementation. A1 foundation merged 5b996be (PR #177); A2 auto-Master is in PR #178. Other automation remains proposed. Scope: make experienced players need less attention, retain all five existing weapon classes, no separate apprentice grind, no paid automation or upkeep. Subsequent batches are scoped separately; do not assume provisional economy or feature thresholds approved.
+**APPRENTICE-PLAN-001 — design and staged implementation, 2026-11-25.** Owner requested the plan, then approved starting implementation. A1 foundation merged 5b996be (PR #177); A2 auto-Master merged 0136237 (PR #178), Pages 45663460990 passed. Other automation remains proposed. Scope: make experienced players need less attention, retain all five existing weapon classes, no separate apprentice grind, no paid automation or upkeep. Subsequent batches are scoped separately; do not assume provisional economy or feature thresholds approved.
 
 ## 1. Direction and unresolved policy
 
@@ -47,12 +47,14 @@ Login chores must not automatically fill multiple levels retroactively. First se
 
 ## 4. Gear prerequisite and automation
 
+Owner requires higher-grade Poor to be a genuine improvement over previous-grade Masterwork. See [GEAR-RESEARCH-001 numerical study](mechanics/GEAR_PROGRESSION_STUDY.md) for 376,800 source-linked duels and proposed cumulative grade perks. Owner approved the combined candidate and A3 implementation in PR #181; see [combined validation](mechanics/GEAR_COMBINED_VALIDATION.md).
+
 Current smithQuote in `site/play/smith.mjs` accepts higher grades with nondecreasing quality and itemPower, uses cumulative price differences and Fighting-level gates. Engine buyEquipment settles first and auto-equips armour family on purchase. This conflicts with new sequential grade progression.
 
 Proposed rules:
 - Track by actual equipment ID (five weapon loadouts, slot:family armour IDs). For a new armour piece, buy Non-grade Poor first; current grade quality can improve. Higher grade requires current grade Masterwork and exactly next grade, normally starts Poor. No skipping multiple grades or purchasing high-grade first armour. S Masterwork terminal. Existing owned higher grades retained under any approved save policy; no forced downgrade.
-- Manual quality upgrades may pay cumulative intermediate cost; exact requirement to buy each intermediate quality is open. Auto-quality chooses only existing, selected items in deterministic priority order and advances to highest affordable permitted quality within current grade, or sequentially one step at a time with equivalent cost. Preserve reserve, no zero/negative charges, no new grade, no new equipment, no re-equipping or switching families. Do not use buyEquipment unchanged for unequipped armour (currently auto-equips). Extract shared validated purchase path with explicit equip policy; preserve frozen combat boundaries and prior earned practice.
-- Grade price formula is unresolved: compare current price differences against nonrefundable quality expenditure and grade base increment; prevent negative prices, rebate/skip exploits and excessively expensive progress. Simulate all 8 grades x 4 qualities x real IDs, Fighting gates, unowned and starter cases; verify wallet conservation and 180-day progression across five weapons and three armoured combinations. Do not rebalance silently.
+- A3 implements strict sequential quality steps and full cumulative credit. Auto-quality chooses only existing, selected items in deterministic priority order and advances to highest affordable permitted quality within current grade, or sequentially one step at a time with equivalent cost. Preserve reserve, no zero/negative charges, no new grade, no new equipment, no re-equipping or switching families. Do not use buyEquipment unchanged for unequipped armour (currently auto-equips). Extract shared validated purchase path with explicit equip policy; preserve frozen combat boundaries and prior earned practice.
+- Historical research question (resolved for A3: full cumulative credit, existing price table): compare current price differences against nonrefundable quality expenditure and grade base increment; prevent negative prices, rebate/skip exploits and excessively expensive progress. Simulate all 8 grades x 4 qualities x real IDs, Fighting gates, unowned and starter cases; verify wallet conservation and 180-day progression across five weapons and three armoured combinations. Do not rebalance silently.
 - Auto upgrade only after explicit opt-in and unlocked threshold. Quote at settled state; check actual availability and reserve on every purchase; commit once and report exact changes. Use same manual eligibility rules, not a privileged shortcut.
 
 ## 5. Login transaction

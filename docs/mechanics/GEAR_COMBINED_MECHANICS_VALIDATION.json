@@ -1,0 +1,108 @@
+{
+  "parity": 5400,
+  "legacy": 900,
+  "legacyChanged": 816,
+  "capacityChecks": 2496,
+  "weaponStages": 480,
+  "armourStages": 1920,
+  "speed": [
+    {
+      "g": 0,
+      "q": "poor",
+      "direct": 900,
+      "observedBroken": 891,
+      "eligible": 17321,
+      "broken": 778,
+      "skips": 0,
+      "removed": 0,
+      "expected": 0,
+      "observedRate": 0
+    },
+    {
+      "g": 0,
+      "q": "masterwork",
+      "direct": 900,
+      "observedBroken": 0,
+      "eligible": 18199,
+      "broken": 0,
+      "skips": 0,
+      "removed": 0,
+      "expected": 0,
+      "observedRate": 0
+    },
+    {
+      "g": 3,
+      "q": "poor",
+      "direct": 900,
+      "observedBroken": 886,
+      "eligible": 18556,
+      "broken": 108,
+      "skips": 1466,
+      "removed": 1466,
+      "expected": 1113.359999999471,
+      "observedRate": 0.07900409571028238
+    },
+    {
+      "g": 3,
+      "q": "masterwork",
+      "direct": 900,
+      "observedBroken": 0,
+      "eligible": 18798,
+      "broken": 0,
+      "skips": 1475,
+      "removed": 1475,
+      "expected": 1127.8799999994578,
+      "observedRate": 0.07846579423342909
+    },
+    {
+      "g": 7,
+      "q": "poor",
+      "direct": 900,
+      "observedBroken": 815,
+      "eligible": 16596,
+      "broken": 12,
+      "skips": 2534,
+      "removed": 2534,
+      "expected": 2323.4400000003943,
+      "observedRate": 0.1526873945529043
+    },
+    {
+      "g": 7,
+      "q": "masterwork",
+      "direct": 900,
+      "observedBroken": 0,
+      "eligible": 16720,
+      "broken": 0,
+      "skips": 2565,
+      "removed": 2565,
+      "expected": 2340.8000000003785,
+      "observedRate": 0.1534090909090909
+    }
+  ],
+  "legacyExamples": [
+    {
+      "w": "greatsword",
+      "f": "padded",
+      "arena": "open_field",
+      "seed": 397813,
+      "before": "defeat",
+      "after": "defeat"
+    },
+    {
+      "w": "greatsword",
+      "f": "padded",
+      "arena": "open_field",
+      "seed": 398532,
+      "before": "defeat",
+      "after": "defeat"
+    },
+    {
+      "w": "greatsword",
+      "f": "padded",
+      "arena": "open_field",
+      "seed": 399251,
+      "before": "defeat",
+      "after": "defeat"
+    }
+  ]
+}

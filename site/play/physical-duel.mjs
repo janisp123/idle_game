@@ -3,11 +3,11 @@ import { dodgeChance } from "./armour.mjs?v=bal-002";
 export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 5 });
 const WEAPONS = Object.freeze({
   bow: { move: "shot", ranged: true, type: "piercing", range: 2, power: 11, recovery: 2 },
-  dagger: { move: "dagger", type: "piercing", range: 0, power: 4, recovery: 2, flatScale: .75, gradeScale: .72, strengthScale: .90 },
+  dagger: { move: "dagger", type: "piercing", range: 0, power: 4, recovery: 2, flatScale: .75, gradeScale: .80, strengthScale: .90 },
   spear: { move: "thrust", clearance: 1, type: "piercing", range: 1, power: 12, recovery: 2 },
   sword_shield: { move: "cut", type: "slashing", range: 0, power: 8, recovery: 2 },
   greatsword: { move: "swing", clearance: 2, type: "slashing", range: 1, power: 14, recovery: 2 },
-  hammer: { move: "hammer", type: "blunt", range: 0, power: 17, recovery: 3 }
+  hammer: { move: "hammer", type: "blunt", range: 0, power: 16, recovery: 3 }
 });
 const BASH = Object.freeze({ move: "shield_bash", type: "blunt", range: 0, power: 4, recovery: 3, flatScale: .70, gradeScale: .75 });
 const BANDS = Object.freeze(["Close", "Reach", "Far"]);
@@ -22,6 +22,11 @@ const MATERIAL_FACTORS=Object.freeze({
   plate:Object.freeze({piercing:.80,slashing:1.0,blunt:.18})
 });
 const TACTICS=Object.freeze({slowApproach:.75,quickMobility:85,retreatLead:-3,shortSpearImpact:.80,constrainedSwing:.85,openSwing:1.08,guardOpenTurns:3,reachInterruptTurns:2,reachSpearImpact:1.18,daggerHandling:.75,farShotImpact:1.68,reachShotImpact:1.48,closeShotImpact:.60});
+// Grade handling is shared by combat and the intact-stat breakdown.
+function handlingScale(piece) {
+  const multiplier=piece.damageMultiplier??1;
+  return piece.hp>0&&Number.isFinite(multiplier)?Math.min(1,Math.max(0,(multiplier-1)/5)):0;
+}
 function attackComponents(actor,attack,activePiece){
   const equipped=activePiece.hp>0;
   const flatScale=attack.flatScale??1,gradeScale=attack.gradeScale??1,strengthScale=attack.strengthScale??1;
@@ -45,7 +50,7 @@ function piece(profile, fallback) {
     flatAttack:profile?.flatAttack,damageMultiplier:profile?.damageMultiplier,
     accuracy:profile?.accuracy??0,penetration:profile?.penetration??0,proficiency:profile?.proficiency??1,
     guard:profile?.guard,resistance:profile?.resistance??0,
-    mobility:profile?.mobility??0,dodge:profile?.dodge??0 };
+    mobility:profile?.mobility??0,dodge:profile?.dodge??0,speed:profile?.speed??0,crit:profile?.crit??0,critDamage:profile?.critDamage??0,critResist:profile?.critResist??0,critReduction:profile?.critReduction??0 };
 }
 
 function healthParts(end){return {base:28,endurance:end*1.6,total:Math.max(1,Math.round(28+end*1.6))};}
@@ -109,7 +114,7 @@ function vitals(target) {
 export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
   const actors = [fighter(player, "player"), fighter(enemy, "enemy")];
   const [you, foe] = actors;
-  const roll = seededRandom(seed);
+  const roll = seededRandom(seed); const speedRoll=seededRandom((seed^0x85ebca6b)>>>0);
   // Independent initiative stream, not affected by conditional attack rolls.
   const initiativeRoll=seededRandom((seed^0x9e3779b9)>>>0);
   const events = [];
@@ -178,9 +183,10 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
           (terrain.cover ?? 0) * (target.shield.hp > 0 ? 0.10 : 0.04) : 0;
       const activePiece=attack===BASH?actor.shield:actor.weapon;
       const equipped=activePiece.hp>0;
+      if(equipped && speedRoll()<activePiece.speed)actor.recovery=Math.max(0,actor.recovery-1);
       const handling=attack.move==="dagger"?TACTICS.daggerHandling:1;
       const aim = AIM.base + (equipped?activePiece.accuracy*handling:0) + (actor.dex - target.dex) * AIM.dex + (actor.skill - target.skill) * AIM.skill +
-        (distance === 0 && bow ? AIM.closeBow : 0) + (distance===2&&bow?AIM.farBow:0) + (shortSpear ? AIM.closeSpear : attack.move==="thrust"&&distance===1?AIM.reachSpear:0) - obscuredShot - constriction * AIM.clearance;
+        (distance === 0 && bow ? AIM.closeBow : 0) + (distance===2&&bow?AIM.farBow:0) + (shortSpear ? AIM.closeSpear : attack.move==="thrust"&&distance===1?AIM.reachSpear:0) - obscuredShot - constriction * AIM.clearance * (actor.loadout==='greatsword'?1-.55*handlingScale(activePiece):1);
       if (roll() >= Math.max(AIM.minimum, Math.min(AIM.maximum, aim))) {
         record(actor, target, "miss", { move: attack.move });
         continue;
@@ -193,14 +199,14 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       const guardRoll = roll();
       const block = target.shield.hp > 0 && guardRoll < (attack.type === "blunt" ? GUARD.bluntBlock : GUARD.block)*target.shield.proficiency*(target.guardOpen>0?GUARD.openFactor:1);
       const parry = !block && target.loadout === "greatsword" && target.weapon.hp > 0 &&
-        target.recovery <= 1 && guardRoll < (target.recovery===0?GUARD.parry:GUARD.recoveringParry)*target.weapon.proficiency*(target.guardOpen>0?GUARD.openFactor:1);
+        target.recovery <= 1 && guardRoll < (target.recovery===0?GUARD.parry+.03*handlingScale(target.weapon):GUARD.recoveringParry+.03*handlingScale(target.weapon))*target.weapon.proficiency*(target.guardOpen>0?GUARD.openFactor:1);
       const intact = actor.weapon.hp > 0 || attack.move === "dagger" || attack === BASH;
       // Broken weapons retain only improvised base damage, never their grade
       // or flat bonus. The bow's backup dagger retains the kit's bonus only
       // while the kit is intact; the shield bash uses the actual shield.
       const base = attackComponents(actor,attack,activePiece).base *
-        (intact ? 1 : 0.55) * (shortSpear ? TACTICS.shortSpearImpact : attack.move==="thrust"&&distance===1?TACTICS.reachSpearImpact:1) * (attack.move==="swing"?(constriction>0?TACTICS.constrainedSwing:TACTICS.openSwing):1) * (counter && attack !== BASH ? 1.18 : 1);
-      const vital = !block && !parry && guardRoll > 0.96;
+        (intact ? 1 : 0.55) * (shortSpear ? TACTICS.shortSpearImpact : attack.move==="thrust"&&distance===1?TACTICS.reachSpearImpact:1) * (attack.move==="swing"?(constriction>0?TACTICS.constrainedSwing+.13*handlingScale(activePiece):TACTICS.openSwing):1) * (counter && attack !== BASH ? 1.18 : 1);
+      const vital = !block && !parry && guardRoll > 1-Math.max(0,.04+(equipped?activePiece.crit:0)-intactArmourSum(target,"critResist"));
       const penetration=equipped?activePiece.penetration*handling:0;
       const materialProtection=protection(target,attack.type)*(1-penetration);
       const shotImpact=attack.ranged?(distance===2?TACTICS.farShotImpact:distance===1?TACTICS.reachShotImpact:TACTICS.closeShotImpact):1;
@@ -208,7 +214,7 @@ export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
       // Separate material protection from grade resistance: equal-grade
       // equipment approximately cancels scaling, lower-grade armour does not.
       const resistance=intactArmourSum(target,"resistance");
-      const impact = Math.max(1, Math.round(base * shotImpact * (vital ? 1.65 : 1) *
+      const impact = Math.max(1, Math.round(base * shotImpact * (vital ? 1+Math.max(0,.65+(equipped?activePiece.critDamage:0)-intactArmourSum(target,"critReduction")) : 1) *
         (block ? blockImpact : parry ? 0.35 : 1) *
         (1 - Math.min(80, materialProtection) / 100) /
         (1+resistance*(1-penetration)) - flatGuard(target) * GUARD.flatReduction));
@@ -254,19 +260,19 @@ export function physicalBuildStats(snapshot){
   return {health:healthParts(a.end),mobility:mobility(a),baseMobility:a.gear.mobilityPct,
     gradeMobility:intactArmourSum(a,"mobility"),protection:protection(a),
     guard:flatGuard(a),guardDamageReduction:flatGuard(a)*GUARD.flatReduction,
-    resistance:intactArmourSum(a,"resistance"),gradedDodge:intactArmourSum(a,"dodge"),
+    resistance:intactArmourSum(a,"resistance"),speed:a.weapon.speed,crit:a.weapon.crit,critDamage:a.weapon.critDamage,critResist:intactArmourSum(a,"critResist"),critReduction:intactArmourSum(a,"critReduction"),gradedDodge:intactArmourSum(a,"dodge"),
     naturalDodge:dodgeChance(mobility(a),0),dodge:dodgeChance(mobility(a),intactArmourSum(a,"dodge")),
     initiativeScore:a.dex+mobility(a)/10,initiativeDex:a.dex,initiativeMobility:mobility(a)/10,
     aimBase:AIM.base,accuracy:a.weapon.accuracy,aimMinimum:AIM.minimum,aimMaximum:AIM.maximum,
-    aimDexPerPoint:AIM.dex,aimSkillPerLevel:AIM.skill,aimCloseBow:AIM.closeBow,aimCloseSpear:AIM.closeSpear,aimClearance:AIM.clearance,
+    aimDexPerPoint:AIM.dex,aimSkillPerLevel:AIM.skill,aimCloseBow:AIM.closeBow,aimCloseSpear:AIM.closeSpear,aimClearance:AIM.clearance*(a.loadout==='greatsword'?1-.55*handlingScale(a.weapon):1),
     penetration:a.weapon.penetration,materialFactors:Object.fromEntries(Object.keys(ARMOUR_FACTOR).map(type=>[type,protection(a)>0?protection(a,type)/protection(a):0])),
     materialProtection:Object.fromEntries(Object.keys(ARMOUR_FACTOR).map(type=>[type,protection(a,type)])),
-    tactics:TACTICS,guardRules:GUARD,aimFarBow:AIM.farBow,aimReachSpear:AIM.reachSpear,
+    tactics:{...TACTICS,constrainedSwing:TACTICS.constrainedSwing+(a.loadout==='greatsword'?.13*handlingScale(a.weapon):0)},guardRules:GUARD,aimFarBow:AIM.farBow,aimReachSpear:AIM.reachSpear,
     attacks:attacks.map(attack=>({...attack,...attackComponents(a,attack,attack===BASH?a.shield:a.weapon),
       condition:attack===BASH?a.shield:a.weapon})),
     block:a.shield.hp>0?GUARD.block*a.shield.proficiency:0,
     bluntBlock:a.shield.hp>0?GUARD.bluntBlock*a.shield.proficiency:0,
-    parry:a.loadout==="greatsword"?GUARD.parry*a.weapon.proficiency:0,
-    recoveryParry:a.loadout==="greatsword"?GUARD.recoveringParry*a.weapon.proficiency:0,
+    parry:a.loadout==="greatsword"?(GUARD.parry+.03*handlingScale(a.weapon))*a.weapon.proficiency:0,
+    recoveryParry:a.loadout==="greatsword"?(GUARD.recoveringParry+.03*handlingScale(a.weapon))*a.weapon.proficiency:0,
     arrows:a.arrows,weapon:a.weapon,shield:a.shield,armour:a.armour};
 }

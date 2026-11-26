@@ -1,9 +1,9 @@
-import { characterStats } from "./character-stats.mjs?v=apprentice-a2";
+import { characterStats } from "./character-stats.mjs?v=gear-a3";
 import { MASTER_CONSENT_VERSION } from "./apprentice.mjs?v=apprentice-a2";
 import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
 import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
-import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=alpha-gear-a2";
-import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel } from "./smith.mjs?v=bal-002";
+import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=gear-a3";
+import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel, nextEquipmentUpgrade } from "./smith.mjs?v=gear-a3";
 import {
   setDifficulty, buyEquipment, activateExpertise, arenaBoutProgress, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
@@ -13,9 +13,9 @@ import {
   getApprenticeProgress, queueCapacity, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, activityRewardCapped, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=apprentice-a2";
+} from "./engine.mjs?v=gear-a3";
 
-import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=bal-002";
+import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=gear-a3";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-art-001";
 import { combatFlowState } from "./combat-flow.mjs?v=glad-003";
 import { combatReadoutForEvent, workReadoutForReport } from "./result-readout.mjs?v=alpha-gear-a5";
@@ -23,7 +23,7 @@ import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats, dodgeChance }
   from "./armour.mjs?v=bal-002";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=apprentice-a2";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=gear-a3";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -97,7 +97,8 @@ function shopTarget() {
 }
 
 function resetSmithSelection() {
-  const item = state.equipment[shopTarget()] ?? STARTER_ITEM;
+  const current = state.equipment[shopTarget()];
+  const item = nextEquipmentUpgrade(current) ?? current ?? STARTER_ITEM;
   ui.itemGrade.value = String(item.grade);
   ui.itemQuality.value = item.quality;
   ui.smithStatus.textContent = "";
@@ -146,21 +147,26 @@ function renderArmour() {
   const slot = ARMOUR_SLOT_BY_ID[selectedEquipmentSlot];
   const id = shopTarget();
   const item = state.equipment[id];
-  const quote = id ? smithQuote(state, id, selectedSpec()) : null;
+  const next = id ? nextEquipmentUpgrade(item) : null;
+  const target = next ?? item ?? STARTER_ITEM;
+  ui.itemGrade.value = String(target.grade);
+  ui.itemQuality.value = target.quality;
+  const quote = next ? smithQuote(state, id, next) : null;
   const name = slot ? slot.name : COMBAT_LOADOUTS[state.combatLoadout].name;
   ui.equipmentEditHeading.textContent = name + (item ?
     " · " + ITEM_GRADES[item.grade] + " " + titleCase(item.quality) : "");
   ui.armourEditor.hidden = !slot;
   ui.armourChoice.value = selectedFamily;
-  ui.itemGrade.disabled = !id;
-  ui.itemQuality.disabled = !id;
+  // These fields show the only legal next stage, not a free grade selector.
+  ui.itemGrade.disabled = true;
+  ui.itemQuality.disabled = true;
   ui.smithBuy.disabled = !quote?.available;
   const quotedCost=quote?.cost ? number(quote.cost) + " coins" : "";
   ui.smithBuy.textContent = quote?.reason==="fighting_level" ?
     "Fighting " + quote.requiredFightingLevel + " required · " + quotedCost :
     quote?.reason==="coins" ? "Need " + quotedCost :
     quote?.available ? (item ? "Improve" : "Buy and equip") + " · " + quotedCost :
-    "Choose an improvement";
+    id && !next ? "S Masterwork · Maximum" : "Select equipment";
   ui.smithEquip.hidden = !slot || (id && !item);
   ui.smithEquip.disabled = !slot || state.armour[slot.id] === selectedFamily;
   ui.smithEquip.textContent = selectedFamily === "none" ? "Unequip" : "Equip owned armour";
@@ -172,7 +178,7 @@ function renderArmour() {
   ui.expertiseStats.textContent=(slot?(track==="none"?"Unarmoured":titleCase(track)):COMBAT_LOADOUTS[track].name)+
     " expertise · "+practice.hours.toFixed(1)+" h · "+ITEM_GRADES[practice.rank]+
     (practice.nextHours===null?" mastered":" · Next "+ITEM_GRADES[practice.rank+1]+": "+number(practice.nextHours)+" h")+
-    (id?" · Selected gear bonus "+Math.round(effectiveness*100)+"% (−"+Math.round((1-effectiveness)*100)+"% penalty)":"")+
+    (id?" · Target-grade increment proficiency "+Math.round(effectiveness*100)+"% (prior mastered grades retained)":"")+
     " · Applies next bout";
   const gear = armourStats(state.armour, state.combatLoadout);
   const bonus = equipmentBonuses(state);
@@ -1359,6 +1365,7 @@ function start(coordinatedLogin = false) {
     state = result.state;
     reportProgress(result);
     ui.smithStatus.textContent = result.purchased ? "Equipment ready." : "Purchase unavailable.";
+    // Render selects the next legal step after the committed purchase.
     writeSave();
     render();
   });

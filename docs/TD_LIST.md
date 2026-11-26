@@ -8,14 +8,24 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## APPRENTICE-A3 — Sequential equipment progression and tested combat balance
+
+- **Goal:** Implement the owner-approved combined research candidate from PR #179; 32 stages, cumulative expertise, perks, durability, NPC and tactical balance.
+- **Acceptance:** Legal next-stage purchase only, positive full-credit debits, Fighting gates, actual shared effects, safe snapshots and stat sources, production simulator parity, complete CI and browser verification. Preserve open arena access, S mastery 4000h and five weapon classes; no auto-purchases yet.
+- **Status:** IN_REVIEW — draft [PR #181](https://github.com/janisp123/idle_game/pull/181), not merged or deployed.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+
 ## APPRENTICE-A2 — Automatic Skill Master on login
 
 - **Goal:** At 50 earned activity levels, permit optional automatic Master claims on game entry.
 - **Acceptance:** Explicit versioned consent; shared exact manual tribute and one claim per ready skill, settle first with no retroactive gains, locked UI below threshold, report after saved commit, reload/visibility/stale-save tests, no other automation.
-- **Status:** IN_REVIEW — PR #178.
+- **Status:** DONE — PR #178 merged 0136237; website 45663329577, systems 45663329342, combat 45663329312, protocol 45663329349 and Pages 45663460990 passed.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #178).
 
 ## APPRENTICE-A1 — Earned scheduling and Personal Assistant
 

@@ -25,6 +25,7 @@ on:
       - 'tools/test_combat_simulator.mjs'
       - 'tools/simulation/**'
       - 'tools/test_system_lab.mjs'
+      - 'tools/test_gear_progression_a3.mjs'
       - 'docs/mechanics/SYSTEM_LAB.md'
       - 'docs/mechanics/README.md'
       - 'docs/mechanics/CHANGING_BALANCE.md'
@@ -51,6 +52,7 @@ jobs:
       - name: Run complete isolated production-parity tests
         run: |
           node --check tools/system-lab.mjs
+          node tools/test_gear_progression_a3.mjs
           node --test tools/test_system_lab.mjs
           node --test tools/simulation/clan-fixtures.test.mjs
           node --test tools/simulation/apprentice.test.mjs
