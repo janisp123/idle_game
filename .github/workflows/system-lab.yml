@@ -26,6 +26,7 @@ on:
       - 'tools/simulation/**'
       - 'tools/test_system_lab.mjs'
       - 'tools/test_gear_progression_a3.mjs'
+      - 'tools/test_auto_equipment.mjs'
       - 'tools/auto-fight-economy.mjs'
       - 'docs/mechanics/AUTO_FIGHT_ECONOMY_PILOT.json'
       - 'docs/mechanics/SYSTEM_LAB.md'
@@ -55,6 +56,7 @@ jobs:
         run: |
           node --check tools/system-lab.mjs
           node tools/test_gear_progression_a3.mjs
+          node tools/test_auto_equipment.mjs
           node --test tools/test_system_lab.mjs
           node --test tools/simulation/clan-fixtures.test.mjs
           node --test tools/simulation/apprentice.test.mjs
