@@ -169,7 +169,7 @@ try{
     await shot("stats-"+width);
     await navigate("persist-"+width);
     const upgrade=await evaluate(`(()=>{const $=id=>document.getElementById(id),s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));
-      $("apprenticeMenu").open=true;const report=$("apprenticeEquipmentReport");
+      $("apprenticeMenu").open=true;document.querySelector('[data-loadout="bow"]').click();const report=$("apprenticeEquipmentReport");
       return {s,report:report.textContent,hidden:report.hidden,status:$("apprenticeEquipmentStatus").textContent,next:$("apprenticeEquipmentNext").textContent,cost:$("apprenticeEquipmentCost").textContent,
         controls:$("apprenticeEquipmentStatus").parentElement.querySelectorAll("input,button,select").length,disabled:$("smithBuy").disabled};})()`);
     assert.equal(upgrade.s.coins,8750);assert.equal(upgrade.s.combatLoadout,"bow");
