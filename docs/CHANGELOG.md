@@ -1,5 +1,10 @@
 # Changelog and task handoffs
 
+## TEAM-011 — complete max-stat endgame meta audit (2026-11-26)
+
+[Report](mechanics/TEAM_011_ENDGAME.md), three compact outputs, PR #190, run 45876350664 all PASS. 14,072,400 scored battles +225 parity; STR141 DEX141 END129 Fighting52 Teamwork50 behaviour50. Max MW dual spear/greatsword/bow/hammer/shield 70.50/62.90/61.85/41.08/39.03%; plate spear emerging meta, 68.67% tournament score but bow counters exist. Aggressive plate bow+defensive plate greatsword 73.72% held. Strong environment and role differences; some extreme hard counters. Next targeted spear/shield/hammer/plate sensitivity at max, counter validation, then competitive daily offline and lower grades. No production changes or merge.
+
+
 ## TEAM-010 — complete broad wear audit (2026-11-26)
 
 [Report](mechanics/TEAM_010_WEAR.md), nine compact result files, PR #190, run 45873421935 all PASS. 32,962,800 scored battles +675 parity. S Common selected dual spear 68.7/64.4/66.2% A/B/C; any armour breaks 0/77.9/61.1%. S C Masterwork dual spear/greatsword/bow/hammer/shield 69.3/62.1/53.9/42.4/38.8%. Benchmark stats and Teamwork25, not fully max endgame. Owner ENDGAME-BALANCE-001: next prioritize realistic max/near-max stats, S Masterwork, Teamwork50 and mastery50, independent weapon tuning and competitive offline. No production changes or merge.
