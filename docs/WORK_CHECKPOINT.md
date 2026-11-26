@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## TEAM-008 — offline session behaviour audit underway
+
+Owner requested daily/shorter login experience tests. `tools/offline-behaviour-audit.mjs` ccb6c71d, workflow 32f036c3. Disposable V17 engine normal timing, TEAM-007 experimental resolver/strike only, role tags added to frozen snapshots; unchanged production settlement, XP cap, rewards, expertise, smith and arena dice. NG/D/S synthetic Fighting 10/25/52, productive effort 120/1200/3700h, grade Common and trained active gear; Teamwork25, mastery1/25/50. 12 builds, previous NPC search-selected good and poor roles, normal, explicit spear+bow mixed. Seed20261204, 48 paired sessions per build/role/window (1/4/8/24h), empty/90%-full Fighting bar plus two full-bar controls. Track coins, wins, capped XP, practice, smith upgrades, paired and independent shifted-seed earnings, >=15/30% advantage. Normal tagged/untagged settlement parity; wallet and inactive practice assertions. Behaviour XP not implemented/tested. No live changes. Collect results and save report.
+
 ## TEAM-007 — individual behaviour audit verified (2026-11-26, chat)
 
 [Report](mechanics/TEAM_007_INDIVIDUAL.md), compact results G0/G3/G7, PR #190, native run 45851377250 all nine jobs PASS. 6,345,216 battles + 1080 exact normal parity fixtures. Max mastery best vs poor NPC +9.0/9.6/10.1 pp (NG/D/S), best vs normal +3.9/5.0/5.1 pp. S spear/archer defensive/aggressive 65.3% vs reverse 44.4%; individual roles meaningful, mixed roles not universally better. S selected best mastery curve 54.9/56.6/58.4%; normal 53.3%. Retain Normal, distinguish zero-reach Range, test mixed mastery, role duration, progression/frozen offline/economy before release. Research only; no gameplay change, no merge. Owner decision required for runtime work.
