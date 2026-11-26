@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## AUTO-FIGHT-05 · STARTED (2026-11-26, chat)
+
+Owner requested continuation. PR #183, baseline main de5853ae, UI verified 20533112. Six-month economy validation: isolated normal profile, automatic online progression, fixed offline stage, real sequential shop, Master, cap and wallet. No reward retune or deployment before results. Next: reproducible trajectory harness and batches.
+
 ## AUTO-FIGHT-04 · STARTED (2026-11-26, chat)
 
 Owner requested continuation. Draft PR #183, prior head 95119338: all four CI workflows PASS (website 45786243883, combat 45786243889, systems 45786243928, protocol 45786243936). Implemented read-only progression panel and shared foreground action settlement. [Verification](mechanics/AUTO_FIGHT_UI_VALIDATION.md): tested code head 20533112, website 45787216857 (117 regressions, Chromium at 390/1440, passive advance, gear action, reload, offline visibility and alpha day), combat 45787216940, systems 45787216852, protocol 45787216872 all PASS. Next AUTO-FIGHT-05 six-month automatic economy validation, then final CI and release. No merge or deployment.
