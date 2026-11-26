@@ -1,4 +1,4 @@
-import { TIMING_PROFILE, enterGame } from "./engine.mjs?v=auto-fight-03";
+import { TIMING_PROFILE, enterGame } from "./engine.mjs?v=apprentice-a4";
 import { awardAttributeTime,blankAttributeEffort } from "./attributes.mjs?v=glad-001";
 import { EXPERTISE_BALANCE } from "./expertise.mjs?v=alpha-gear-a3";
 import { ARMOUR_TIERS } from "./armour.mjs?v=bal-002";
