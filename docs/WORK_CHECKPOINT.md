@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## TEAM-008 — initial offline audit failed; corrected harness
+
+Native run 45865450687: S/50 job 140066978878 and D/25 job 140066979290 failed with RangeError Invalid combat seed at simulate line 105; signed JS XOR generated negative seed. No valid results from these jobs. Fixed unsigned normalization (`>>>0`) in harness commit 7f41628c, no production changes. Rerun required; do not interpret failure as gameplay evidence.
+
 ## TEAM-008 — offline session behaviour audit underway
 
 Owner requested daily/shorter login experience tests. `tools/offline-behaviour-audit.mjs` ccb6c71d, workflow 32f036c3. Disposable V17 engine normal timing, TEAM-007 experimental resolver/strike only, role tags added to frozen snapshots; unchanged production settlement, XP cap, rewards, expertise, smith and arena dice. NG/D/S synthetic Fighting 10/25/52, productive effort 120/1200/3700h, grade Common and trained active gear; Teamwork25, mastery1/25/50. 12 builds, previous NPC search-selected good and poor roles, normal, explicit spear+bow mixed. Seed20261204, 48 paired sessions per build/role/window (1/4/8/24h), empty/90%-full Fighting bar plus two full-bar controls. Track coins, wins, capped XP, practice, smith upgrades, paired and independent shifted-seed earnings, >=15/30% advantage. Normal tagged/untagged settlement parity; wallet and inactive practice assertions. Behaviour XP not implemented/tested. No live changes. Collect results and save report.
