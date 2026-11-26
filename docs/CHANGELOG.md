@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## APPRENTICE-A4-02 · STARTED (2026-11-26, chat)
+
+Owner approved level 10 and mandatory equipment automation: no off switch, chosen loadout remains player-controlled. Weakest-first, no manual purchase priorities/reserve, existing prices/gates. Scope is equipment only; existing optional auto-Master and future clan permissions unchanged. Implement pure purchase planner and tests, then coordinated login transaction and UI. Baseline 4413077e, draft PR #184.
+
 ## APPRENTICE-A4 · STARTED (2026-11-26, chat)
 
 Owner approved automatic quality AND grade upgrades of chosen/equipped gear and long-term decision-maker-only design. Baseline 4413077e; AUTO-FIGHT-001 PR #183 merged, final four CI PASS and Pages 45800800431 SUCCESS. New branch feature/apprentice-a4. First validate deterministic purchasing priorities and unlock accessibility; preserve exact smith gates, coins, frozen offline settlement and player equipment choices. Clan contribution automation remains dependent on real server. [Research complete](mechanics/APPRENTICE_A4_RESEARCH.md): 12 trajectories, 742,759 bouts, 2,160 offline checks, 1,848 legal purchases. Weakest-first recommended. Level75 inaccessible within 180 days; level50 zero specialist upgrades saved, level20 saves 80. Exact threshold unresolved; next pure planner and tests, then login integration. Raw output and harness saved in draft PR #184. Native CLI unverified. No gameplay changes/deployment.
