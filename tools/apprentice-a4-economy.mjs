@@ -96,7 +96,11 @@ try{
  for(const n of await readdir(play))if(n.endsWith(".mjs"))await copyFile(join(play,n),join(dir,n));
  const ep=join(dir,"engine.mjs"),src=await readFile(ep,"utf8");
  if(!src.includes('export const TIMING_PROFILE = "alpha";'))throw Error("profile changed");
- await writeFile(ep,src.replace('export const TIMING_PROFILE = "alpha";','export const TIMING_PROFILE = "normal";'));
+// Historical manual-shop counterfactual ONLY in the isolated developer copy.
+    // A4 mandatory runtime purchases are tested separately; never publish this copy.
+    const manualGate="if(autoEquipmentUnlocked(result.state)&&Object.hasOwn(result.state.equipment,id))";
+ if(!src.includes(manualGate))throw Error("Historical comparator gate changed");
+ await writeFile(ep,src.replace('export const TIMING_PROFILE = "alpha";','export const TIMING_PROFILE = "normal";').replace(manualGate,"if(false)"));
  const names=["armour","difficulty","combat-skills","expertise","arenas","smith","physical-duel","combat-verdict","combat-art","combat","arena-wallet","attributes","loot","production","apprentice","auto-fight","engine"];
  const modules=Object.fromEntries(await Promise.all(names.map(async n=>[n,await import(pathToFileURL(join(dir,n+".mjs")).href)])));
  const specs=process.argv[2]?JSON.parse(process.argv[2]):[{"style":"greatsword","family":"plate","policy":"weakest","visitDays":1,"liveMinutes":5},{"style":"bow","family":"padded","policy":"weakest","visitDays":1,"liveMinutes":5},{"style":"spear","family":"leather","policy":"weakest","visitDays":1,"liveMinutes":5},{"style":"greatsword","family":"plate","policy":"weakest","visitDays":1,"liveMinutes":5,"mixed":true},{"style":"greatsword","family":"plate","policy":"weapon-first","visitDays":1,"liveMinutes":5},{"style":"bow","family":"padded","policy":"weapon-first","visitDays":1,"liveMinutes":5},{"style":"spear","family":"leather","policy":"weapon-first","visitDays":1,"liveMinutes":5},{"style":"greatsword","family":"plate","policy":"weapon-first","visitDays":1,"liveMinutes":5,"mixed":true},{"style":"greatsword","family":"plate","policy":"cheapest","visitDays":1,"liveMinutes":5},{"style":"bow","family":"padded","policy":"cheapest","visitDays":1,"liveMinutes":5},{"style":"spear","family":"leather","policy":"cheapest","visitDays":1,"liveMinutes":5},{"style":"greatsword","family":"plate","policy":"cheapest","visitDays":1,"liveMinutes":5,"mixed":true}];
