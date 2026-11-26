@@ -1,5 +1,5 @@
-import {loginReport} from "./login-report.mjs?v=apprentice-a5";
-import {ACTIVITIES,ITEM_LABELS} from "./engine.mjs?v=apprentice-a4";
+import {loginReport} from "./login-report.mjs?v=team-003";
+import {ACTIVITIES,ITEM_LABELS} from "./engine.mjs?v=team-003";
 import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=gear-a3";
 import {ITEM_GRADES} from "./smith.mjs?v=gear-a3";
 const $=id=>document.getElementById(id),num=n=>new Intl.NumberFormat("en-GB",{maximumFractionDigits:2}).format(n);
