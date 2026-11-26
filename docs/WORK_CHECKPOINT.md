@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## APPRENTICE-A4-05 — release candidate (PR #184)
+
+Owner requested release; reviewed approved scope and complete source diff. All four CI PASS at 583360bb: website 45809205649, systems 45809205762, combat 45809205680, protocol 45809205748. [Economy and evidence](mechanics/APPRENTICE_A4_MANDATORY_VALIDATION.md). No new dependencies or public developer bypasses, no reward/gear/mastery tuning, no forced V16 reset. Mandatory selected gear upgrade at earned level10 on safe coordinated page entry; initial armour acquisition and gear choices remain manual. No-Web-Locks/storage failure path tested and honestly unavailable; no authoritative concurrency guarantee. Next confirm final-head checks, protected merge, verify main and Pages; actual release evidence in PR #184 conversation. A5 unified login report is the next proposed batch, real clan automation server-gated.
+
 ## APPRENTICE-A4-04 — actual mandatory economy complete (draft PR #184)
 
 [Validation and raw evidence](mechanics/APPRENTICE_A4_MANDATORY_VALIDATION.md); `tools/apprentice-a4-mandatory-economy.mjs`. 30 trajectories, 1,672,886 settled bouts, 4,476 frozen offline checks, 2,822 auto + 1,399 manual purchases; all wallet checks PASS. All 15 daily five-minute builds unlock day15, full S MW days166–169, 108–113 auto upgrades each. Weekly C, mixed A, zero foreground B. All four CI PASS at 5d0ec222 (website 45808927769, systems 45808927768, combat 45808927774, protocol 45808927739). Added safe-storage recovery and no-Web-Locks browser tests at 0aecaf71; native economy pilot gate 0a42231f; all four workflows PASS at code head 0a42231f (website 45809013740 incl failed-save recovery/no locks, systems 45809013724 exact native pilot, combat 45809013761, protocol 45809013774). No merge/deployment. Next A4-05: final scope/final-head CI review and protected merge + Pages. One seed per case, no server-authoritative concurrency. PR #184.
