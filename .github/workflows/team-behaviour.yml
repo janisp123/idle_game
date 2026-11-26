@@ -1,9 +1,10 @@
-name: Team behaviour tactical audit
+name: Team behaviour refinement audit
 on:
   pull_request:
     branches: [main]
     paths:
       - 'tools/team-behaviour-audit.mjs'
+      - 'tools/team-behaviour-refine.mjs'
       - '.github/workflows/team-behaviour.yml'
   workflow_dispatch:
 permissions:
@@ -26,13 +27,13 @@ jobs:
         env:
           GRADE: ${{ matrix.grade }}
           MASTERY: ${{ matrix.mastery }}
-        run: node tools/team-behaviour-audit.mjs "$GRADE" "$MASTERY" > behaviour.json
+        run: node tools/team-behaviour-refine.mjs "$GRADE" "$MASTERY" > behaviour.json
       - name: Print verified summary
         run: |
           node --input-type=module -e '
             import {readFileSync} from "node:fs";
             const {cells,...r}=JSON.parse(readFileSync("behaviour.json","utf8"));
-            console.log("TEAM_BEHAVIOUR "+JSON.stringify(r));'
+            console.log("TEAM_REFINED "+JSON.stringify(r));'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: team-behaviour-${{ matrix.grade }}-${{ matrix.mastery }}
