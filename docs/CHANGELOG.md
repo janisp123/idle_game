@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## APPRENTICE-A4-05 · STARTED / RELEASE CANDIDATE (2026-11-26, chat)
+
+Owner requested final release of mandatory equipment progression. Head 583360bb passed all four workflows: website 45809205649, systems 45809205762, combat 45809205680, protocol 45809205748. Reviewed runtime and developer-only changes: level10 earned unlock, exact existing sequential prices and gates, chosen equipped items only, no toggle, no off-kit spending, login-only after frozen offline settlement, safe commit before report; no reward or expertise retuning. Initial armour choice remains manual, existing optional Master consent unchanged. Final-head CI, protected merge and Pages verification required; actual release evidence recorded in PR #184 conversation.
+
 ## APPRENTICE-A4-04 · STARTED (2026-11-26, chat)
 
 Owner requested continuation. Head d1207f59: 117 regression tests PASS, systems 45806458496, combat 45806458514, protocol 45806458619 PASS; Chromium 45806458567 failed disabled-button assertion (initial armour still purchasable). Correct fixture to select owned weapon. [Mandatory economy study](mechanics/APPRENTICE_A4_MANDATORY_VALIDATION.md) complete: 30 trajectories, 1,672,886 bouts, 2,822 automatic purchases, 4,476 frozen offline checks. Daily level10 day15, all 15 full S MW days166–169. All four CI PASS at 5d0ec222; additional failure-path browser tests and exact native pilot reproduction PASS at code head 0a42231f (website 45809013740, systems 45809013724, combat 45809013761, protocol 45809013774). No deployment. Next A4-05 final CI and release.
