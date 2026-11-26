@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## TEAM-001 · STARTED (2026-11-26, chat)
+
+Owner approved two gladiators from the start, shared character base attributes, independent gear and expertise, automatic upgrades, symmetrical team combat. Pets and tactics postponed. [PR #188](https://github.com/janisp123/idle_game/pull/188) foundation first; test before wiring into live engine. ACTIVE-PROGRESSION-001 merged d6a56fae; systems 45819489538 and protocol 45819489532 PASS. A5 merged e8d6dbd0 and Pages 45812960184 SUCCESS.
+
 ## ACTIVE-PROGRESSION-001 · STARTED (2026-11-26, chat)
 
 Owner explicitly requests permanent design rule for independent active-choice progression, automatic login mastery, and meaningful combination performance. Documentation only; separate from paused research PR #186. No formula or gameplay change. [PR #187](https://github.com/janisp123/idle_game/pull/187) records rule in AGENTS and DECISIONS; pending protected merge. Research PR #186 remains paused.
