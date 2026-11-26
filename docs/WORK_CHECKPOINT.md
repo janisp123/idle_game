@@ -1,5 +1,10 @@
 # Current working checkpoint
 
+## TEAM-008 — complete offline login audit
+
+[Report](mechanics/TEAM_008_OFFLINE.md), [results](mechanics/TEAM_008_OFFLINE.json), PR #190, run 45865654833 all nine PASS. 128,538 settlements / 16,184,349 counted bouts (overlap/repetition), 108 parity. Max mastery daily good vs poor NG +0.03%, D +0.56%, S +6.09%; S separate-session good earns more 87.7%, >=15% advantage 11.6%. Normal wins ~100/99.5/90.2%; overmatched opponents, competitive-frontier audit needed. Full XP bars zero rewards. activeHours erroneous; use practice/bouts. Behaviour XP not implemented. Research only, no merge.
+
+
 ## TEAM-008 — partial results (corrected run 45865654833)
 
 Six NG/D jobs passed; S still pending at first check. [Available results](mechanics/TEAM_008_OFFLINE_PARTIAL.json). NG/D synthetic fixtures substantially overmatch same-grade NPCs (normal 431.97/429.87 wins per 432 bouts). Max mastery empty XP bar 24h coins good/normal/poor NG 7343.59/7343.44/7341.40, D 28814.65/28801.28/28654.13. Near-full XP caps all rewards by 8h NG and by 24h D; full bar zero. D upgrades same five per day; NG auto smith locked. This is a valid ceiling-case, not evidence of matched-stage tactic failure. Fixture stats too strong to answer tactical efficacy near frontier; retest representative competitive builds (normal 40–70% wins) with actual settlement and cap. `activeHours` output is erroneous (productiveElapsedMs tracks another feature, zero despite fighting); use practice and settled bouts, fix metric in next run. No live changes.
