@@ -1,4 +1,4 @@
-name: Individual fighter behaviour audit
+name: Offline behaviour session audit
 on:
   pull_request:
     branches: [main]
@@ -6,6 +6,7 @@ on:
       - 'tools/team-behaviour-audit.mjs'
       - 'tools/team-behaviour-refine.mjs'
       - 'tools/individual-behaviour-audit.mjs'
+      - 'tools/offline-behaviour-audit.mjs'
       - '.github/workflows/team-behaviour.yml'
   workflow_dispatch:
 permissions:
@@ -28,13 +29,13 @@ jobs:
         env:
           GRADE: ${{ matrix.grade }}
           MASTERY: ${{ matrix.mastery }}
-        run: node tools/individual-behaviour-audit.mjs "$GRADE" "$MASTERY" > behaviour.json
+        run: node tools/offline-behaviour-audit.mjs "$GRADE" "$MASTERY" > behaviour.json
       - name: Print verified summary
         run: |
           node --input-type=module -e '
             import {readFileSync} from "node:fs";
-            const {cells,...r}=JSON.parse(readFileSync("behaviour.json","utf8"));
-            console.log("TEAM_INDIVIDUAL "+JSON.stringify(r));'
+            const {rows,...r}=JSON.parse(readFileSync("behaviour.json","utf8"));
+            console.log("TEAM_OFFLINE "+JSON.stringify(r));'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: team-behaviour-${{ matrix.grade }}-${{ matrix.mastery }}
