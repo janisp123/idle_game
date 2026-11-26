@@ -2,7 +2,7 @@
 
 ## AUTO-FIGHT-03 · STARTED (2026-11-26, chat)
 
-Owner requested continuation on draft PR #183, branch `research/auto-fight-policy-001`; policy foundation tested. Integrate saved stage and streak, actual committed live bout results, conservative foreground detection, frozen offline rewards, cap/queue and save tests. No release until UI, economy and CI gates. Next: engine integration and regression tests.
+Owner requested continuation on draft PR #183, branch `research/auto-fight-policy-001`; policy foundation tested. Integrate saved stage and streak, actual committed live bout results, conservative foreground detection, frozen offline rewards, cap/queue and save tests. No release until UI, economy and CI gates. Implemented persisted policy and short foreground committed-bout settlement; default offline fixed-stage, manual selector removed. [Integration report](mechanics/AUTO_FIGHT_INTEGRATION.md). Native 29 integration and 10,782 policy assertions passed at 673fa82a; systems/protocol passed; legacy combat/website fixture failures corrected subsequently, final-head full CI pending. Next AUTO-FIGHT-04 full progression display, browser/action/visibility boundary tests and AUTO-FIGHT-05 economy validation. No merge/deployment.
 
 ## AUTO-FIGHT-02 · STARTED (2026-11-26, chat)
 
