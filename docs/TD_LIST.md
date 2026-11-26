@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## AUTO-MASTER-001 — Automatic Skill Master from first entry and throughout online play
+
+- **Goal:** Mandatory, always-enabled Skill Master from the first entry; automatically activate ready activity levels and Teamwork on login and during active online play. Remove the 50-level unlock and optional consent toggle.
+- **Acceptance:** Settle frozen offline rewards before any claims; no offline auto-level loops or retroactive benefits. During online play, process each newly earned level at its actual committed progression boundary, resume eligible work without manual claims, and retain existing XP requirements and exact Master tribute. Preserve active-choice-only progression, queued work, independent mastery and unrelated equipment automation. Remove obsolete locked/consent/manual-claim UI; report actual committed advances, preserve existing saves where practical, and test fresh entry, returning, continuous play, cap/queue transitions, Teamwork, max-level, visibility, reload, failed save and stale/multi-tab boundaries. Browser-local alpha foreground session is the provisional online boundary; do not claim server-authoritative login. No numerical combat balancing or lower-tier balance sweep in this task.
+- **Status:** PARTIAL — approved direction and source inspection; runtime and tests not yet implemented. See feature/auto-master-online.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## TEAM-001 — Two-gladiator combat team
 
 - **Goal:** Two player gladiators from first entry, shared base attributes, separate selected equipment and expertise, automatic upgrades, real deterministic 2v2 combat; no pets or tactics now.

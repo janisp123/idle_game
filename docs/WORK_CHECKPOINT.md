@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## AUTO-MASTER-001 — started, not implemented
+
+Owner-approved mandatory first-entry and continuous online Skill Master. Branch `feature/auto-master-online`, baseline `997ded2d`; scope in TD_LIST and DECISIONS. Existing optional 50-level entry gate and login-only Teamwork verified in source. No runtime edits or tests yet. Next: chronological live claim handling, offline-first entry, UI, targeted native/real-browser regression and final CI. Keep combat balance research separate; no release yet.
+
 ## TEAM-004 — combined release candidate
 
 TEAM-004 owner approved +40% team-only coin payout and centered geometry after sensitivity (cf1fdfe5 all six CI PASS; 24 trajectories, 1,606,627 progression bouts and 230,400 direct comparisons). Runtime payout Math.round(old solo prize × 1.4) per victory; no price/XP/damage changes. Centered 8/9/10 tiles, mirrored traversal. Team timeline V2, alpha save V17 with explicit reset notice for V16. Two independent Alpha Max Stats armour-family selections; team shared productive floor 3700h, selected weapon and chosen armour floors 3400h each, Fighting 52; no inactive expertise/gear/coin grant. Combined [audit](mechanics/TEAM_004_COMBINED.json) native run 45836661957 all eight jobs PASS: five daily pure Fighting scenarios completed both S Masterwork kits days171–178, weekly/mixed did not. Browser regression at 3065ee2b/a6b5983c initially failed due to uninitialized second-family select; fixed 0e6466b9. Final browser/CI and release pending; no deployment. V16 alpha reset will discard existing local test progress only when released, under ALPHA-FOCUS-001. Next verify final head, inspect overlaps, merge only after all gates, verify Pages.
