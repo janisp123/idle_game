@@ -1,0 +1,51 @@
+# Manager-only gameplay — implementation plan
+
+2026-11-26 · PR #192 · baseline 6f273fad · AUTO-MASTER-001 / PERMANENT-FIGHT-001 / AUTO-ACTIVITY-001 / MANAGER-UI-001 / TACTIC-UI-001
+
+## Approved target
+
+The only player-managed gameplay choices are each gladiator's weapon, whole armour family and fighting tactic. Everything else runs automatically; progress is visible, not a task list. Preserve independent active-choice mastery, exact treasury, immutable started bouts, honest reports, modularity and the approved maximum-stats/S Masterwork-only combat balance policy. Functional fresh-save, economy-ledger and migration tests are not lower-grade combat balancing.
+
+## 1. Finish and integrate the automation dependency
+
+PR #191 head b7216c768b221730ee2c8e5c816ddd81bf75f7cf: targeted 4/4 automation tests, system lab, combat simulator, project protocol and team audit/sensitivity pass; website 45885148269 fails obsolete XP-cap wording assertion in test_game_ui.mjs:864. Real Chromium skipped. Fix relevant assertion, validate actual foreground claims, stale/multi-tab writes, queue boundaries, exact debits and no retroactive combat effects. Run all required final-head checks and verify merge/deployment. Rebase/retarget #192 from integrated main, retaining all scope and evidence; no premature merge.
+
+## 2. Permanent combat + one autonomous work lane
+
+Extract reusable pure combat settlement and noncombat work settlement from engine.mjs. Add small coordinator with a single authoritative wall-clock cursor, separately persisted lane cursors/partial progress, immutable in-flight combat snapshot, active work/transition and rotation index. Process chronological boundaries: settle completed work and combat rewards at old inputs; apply ready Master claims, expertise activation and legal purchases; update next-bout snapshots and rotate work after its level claim. Never duplicate formulas or allow UI/simulator paths to diverge.
+
+Proposed pacing: both lanes independently earn their own skill XP and genuine rewards; share existing total attribute-time budget (100 XP/productive hour), apportion overlapping productive time between lane weight distributions, initially equal shares when both productive and full share if only one productive. Use exact integer/rational accounting with conserved remainder. Combat expertise is only credited for actual eligible bouts. Exact time allocation and offline semantics are provisional; do not silently double growth.
+
+Proposed offline policy: retain frozen levels, attributes, active builds and difficulty; each lane can earn up to the existing one-bar cap, independently. No Master claims, purchases or subsequent work-level rotation in absence; on return settle both lanes first, then claim and resume/rotate. Fighting is permanently assigned, not exempt from the offline reward cap. No elapsed-time or restart exploits; bounded settlement even over decades.
+
+Tests: online simultaneous progress, one lane capped/stalled, immutable old bout, exact prize cursor, coincident boundaries, movement/preparation, clock reversal, reload/visibility/storage errors, no duplicate effort, bounded long absences. Compare frozen raw resolver traces.
+
+## 3. Deterministic noncombat rotation
+
+New activity-rotation.mjs, data-driven ordered list of the ten existing noncombat skills. Proposed order Hunting, Fishing, Foraging, Woodcutting, Mining, Farming, Smithing, Construction, Cooking, Training. Start next activity immediately after automatic successful level claim, respecting existing transitions if retained. No user start/stop/queue/priority, no queue slot gate. Keep partial earned XP when a craft lacks ingredients; skip blocked craft and retry on next circular pass. Use actual recipeOptions, real input counts and eligible recipes; no free XP or goods, no infinite skip loop. Training/gathering guarantee a fallback.
+
+IMPORTANT: claimSettledMaster currently takes ALL remaining outputs of the advanced gathering skill, including crafting inputs. With immediate level claims, a fresh rotation can destroy its own ingredients before Smithing/Construction/Cooking. Proposed remedy is an automatic ingredient reserve for real upcoming production needs, tribute takes only unreserved surplus. Specify a finite deterministic reserve algorithm using actual recipe dependencies (including limestone+fuel, level-gated ore), preserve integer ledgers and show reserve/tribute. This is a change to the prior tribute economy, requiring explicit design approval before release; alternative XP-only Master tribute can be considered separately. Do not implement a hidden free-material workaround. Validate multi-rotation eventual production XP, partial craft progress and starvation prevention using real recipes. Noncombat difficulty selection must also be automated; retain existing default until a tested automatic policy is approved rather than silently choosing max difficulty.
+
+## 4. Whole-kit equipment transaction
+
+In team/engine add atomic complete-family selection, using existing smithQuote for each missing starter piece. Keep current four internal armour slots, all ownership/individual stages, exact shared wallet and independent expertise. Player selects padded/leather/plate once. Proposed UX: if unowned/unaffordable, store desired family as pending, visibly save toward full set and equip atomically when affordable; pending acquisition should take priority over discretionary upgrades so it cannot starve. Retain old active kit until all pieces owned. Never grant free items or remove prior ownership. Initial no-armour save and mixed legacy kits require migration policy; do not discard gear or silently spend funds. Gear upgrades remain active-kit-only; existing prices/grade gates retained. Keep existing low-level per-piece APIs internal for simulation/legacy compatibility; no production UI per-piece controls. No combat number changes.
+
+Tests: exact quotes/debits, missing subset, insufficient funds, switching back, independent fighter kits, no mixed-family result from player action, pending cancellation by new selection, frozen bout, maxed kit, save validation.
+
+## 5. Independent tactical choices
+
+Read #189/#190 research results and verify what is actually implemented. PR #190 research uses Protect Companion, Focus Fire and Maintain Range, not a shipped Aggressive/Balanced/Defensive feature. Add small data-driven behaviour policy with saved per-fighter selection, default Balanced proposed. Aggressive seeks offense, Balanced adapts, Defensive prioritizes survival/companion protection; exact behaviour/targeting/movement and recovery costs must be tested, not invented as arbitrary stat multipliers. If tactics earn mastery, only selected tactic during real participation earns XP; cap and auto activation as previously agreed. Preserve shared Teamwork as coordination, not a generic damage buff. Apply selected changes only next bout; simulator and runtime use identical resolver.
+
+## 6. Read-only progression + mobile UI
+
+One equipment screen: Gladiator I / II buttons; five weapon buttons; Padded / Leather / Plate buttons; Aggressive / Balanced / Defensive buttons once real mechanics exist. Show selected state, brief actual tactical differences, pending set cost if needed and compact current equipment progress, not editable grade/quality fields. Remove all activity picker, manual difficulty, queue scheduling, route editing, queue unlock and manual Master controls. Activity display: current work, level/XP bar, next work and last genuine resource gains/consumption. Battle display remains separate and continuous. Compact event feed and reopening login summary show actual earned/spent coins, levels, gear upgrades and materials, without spam; detailed stats in one collapsible panel. Keep alpha tools separate developer controls. Accessible button labels, keyboard/focus, selected semantics, 390px mobile and desktop tests.
+
+## 7. Integrate and verify
+
+Migrate saves versionedly with ownership, XP, resources, partial progress, frozen combat and exact paid cursor preserved when possible. Any incompatible reset must follow existing alpha rules with explicit notice; no silent loss. Remove obsolete scheduler APIs only after all callers/fixtures migrated. Update mechanics handbook, decisions and tests. All source modular, developer harness imports real runtime functions.
+
+Combat balance only maximum stats, S-grade Masterwork, maximum relevant mastery/Teamwork. Five weapons x three armour sets x three tactics = 45 nominal fighter builds, 2,025 ordered two-fighter builds; account for exchangeable slots where symmetry is validated. Compare across all five arenas, representative opponent archetypes and then broad tournament/screening followed by independent holdout seeds for leaders, weak builds, counters, mirror and slot effects. No universally dominant build; meaningful context-dependent choices, reproducible seeds and uncertainty. Do not run lower-tier combat balance sweeps. Persist actual reports, samples and failures. Full functional CI and real browser smoke at mobile/desktop, final main readback and Pages validation. No deployment until all required gates pass.
+
+## Current state / decisions still needed
+
+Plan only, no runtime changes from this milestone. #191 is not merged/deployed; #192 stacked and draft. Proposed activity order, shared effort split, offline work pause at one cap, ingredient reserve/tribute change, initial/pending armour acquisition, noncombat difficulty policy and exact tactic behaviours are provisional. Validate before committing numbers, and obtain explicit approval for economy/tribute or incompatible save-policy changes. First concrete action: resolve #191 website regression and release dependency; then implement and verify coordinator without changing combat balance.
