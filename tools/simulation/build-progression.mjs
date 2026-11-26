@@ -29,7 +29,11 @@ async function withProfile(profile, run) {
     const pattern = /export const TIMING_PROFILE = "(alpha|normal)";/g;
     if ([...source.matchAll(pattern)].length !== 1)
       throw new Error('Timing profile declaration changed; inspect the source before benchmarking');
-    await writeFile(enginePath,source.replace(pattern,'export const TIMING_PROFILE = "'+profile+'";'));
+// Historical manual-shop counterfactual ONLY in the isolated developer copy.
+    // A4 mandatory runtime purchases are tested separately; never publish this copy.
+    const manualGate="if(autoEquipmentUnlocked(result.state)&&Object.hasOwn(result.state.equipment,id))";
+    if(!source.includes(manualGate))throw Error("Historical comparator gate changed");
+    await writeFile(enginePath,source.replace(pattern,'export const TIMING_PROFILE = "'+profile+'";').replace(manualGate,"if(false)"));
     const load = name => import(pathToFileURL(join(dir,name)).href);
     const [engine,attrs,smith,combat,armour,difficulty,wallet] = await Promise.all(
       ['engine.mjs','attributes.mjs','smith.mjs','combat.mjs','armour.mjs','difficulty.mjs','arena-wallet.mjs'].map(load));
