@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## TEAM-007 — individual fighter behaviour research underway
+
+Owner approved testing separate Aggressive, Defensive, Tactical and Keep Distance behaviours per gladiator, not implementation. `tools/individual-behaviour-audit.mjs` 8c70977e; workflow 44c76978. Four roles × four roles plus normal baseline; roles follow equipment snapshots when slots reverse. Aggressive active turn +22% outgoing impact, +25% incoming impact, 1.5x approach progress; Defensive -20% outgoing and incoming impact, recovery escort and guard-specific interception; Tactical reachable-target focus; Range existing action-cost retreat. Provisional activation .35–.90 from mastery 1–50; explicit strike modifiers are experimental tradeoffs not approved balance. Temporary production modules only, baseline exact trace parity asserted. Seed 20261202, 16 search/32 holdout per cell; 512 search/1024 independent NPC holdout per build and role pair, 12 teams, eight opponents, five arenas, NG/D/S × 1/25/50. 6,345,216 planned bouts, compare selected same vs mixed vs poor role pairs and NPC generalization. General Teamwork held 25, NPC enemy 1. No gameplay changes; PR #190. Next collect results, identify dominance and meaningful niche, then owner decision.
+
 ## TEAM-006 — second behaviour candidate verified (2026-11-26, chat)
 
 [Report](mechanics/TEAM_006_REFINED.md), [results](mechanics/TEAM_006_REFINED.json), PR #190, 45848442829 all nine jobs PASS. 3,290,112 battles, 1080 baseline parity fixtures. Focus2 broad gains +2.4–3.2 pp at max mastery; Range2 small improvement vs normal but not superior to Range1; Protect2 reduces losses but still fails overall. Own-team refined policy +2.5–3.5 pp vs normal, no need for pets. Recommend further targeted differentiation/protection work or owner-approved Focus2 integration, not wholesale deployment. No gameplay changes; progression/economy/offline untested.
