@@ -1,5 +1,6 @@
 /* Full viewport return report. Independent from the gameplay layout. */
-.login-report{position:fixed;inset:0;margin:0;width:100%;max-width:none;height:100%;max-height:none;box-sizing:border-box;border:0;background:#100d0b;color:#efdec4;padding:0;overflow:hidden;font-family:system-ui,sans-serif;font-size:14px}
+html:has(.login-report[open]){overflow:hidden}
+.login-report{position:fixed;inset:0;margin:0;width:100vw;max-width:none;height:100dvh;max-height:none;box-sizing:border-box;border:0;background:#100d0b;color:#efdec4;padding:0;overflow:hidden;font-family:system-ui,sans-serif;font-size:14px}
 .login-report[open]{display:flex;flex-direction:column}
 .login-report::backdrop{background:#100d0b}
 .login-report-head,.login-report-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px clamp(14px,4vw,48px);background:#1c1611;flex:none}
