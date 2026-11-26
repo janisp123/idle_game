@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## APPRENTICE-A4-04 · STARTED (2026-11-26, chat)
+
+Owner requested continuation. Head d1207f59: 117 regression tests PASS, systems 45806458496, combat 45806458514, protocol 45806458619 PASS; Chromium 45806458567 failed disabled-button assertion (initial armour still purchasable). Correct fixture to select owned weapon. Run actual mandatory login trajectories, safe-save/browser checks and preserve results. No release before gates.
+
 ## APPRENTICE-A4-03 · STARTED (2026-11-26, chat)
 
 Owner requested continuation. Mandatory level-10 planner verified 7,115 assertions; implement shared settled purchases, login transaction after offline/Master, manual purchase gate, exact reports and tests. Draft PR #184. Engine and read-only UI wired; [integration evidence](mechanics/APPRENTICE_A4_INTEGRATION.md), 27 integration + 7,115 planner checks native PASS at cf7c4a46. Older Master and browser fixture corrections 2437d197/9ef16e86 await final verification. No merge/deployment. Next A4-04: finish full regression and browser/save tests; actual mandatory economy, final release gates.
