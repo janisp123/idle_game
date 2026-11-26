@@ -1,9 +1,10 @@
+import {tacticSnapshots,awardTacticPractice,activateTactics} from "./manager-tactics.mjs?v=manager-tactics-001";
 import { APPRENTICE_BALANCE, apprenticeProgress, MASTER_CONSENT_VERSION, normalizeMasterConsent } from "./apprentice.mjs?v=auto-master-001";
 import { previewAutoEquipment, AUTO_EQUIPMENT_AT, MAX_AUTO_EQUIPMENT_PURCHASES } from "./auto-equipment.mjs?v=auto-master-001";
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
 import { initialTeam,validGladiator,teamSnapshots,awardTeamPractice,activateTeamPractice,previewTeamUpgrade,upgradeTeam,chooseTeamWeapon,chooseTeamArmour } from "./team.mjs?v=team-001";
 import { initialTeamwork,validTeamwork,awardTeamwork,activateTeamworkOnLogin } from "./teamwork.mjs?v=team-002";
-import { validTeamSession,startTeamSession,settleTeamSession } from "./team-timeline.mjs?v=team-004";
+import { validTeamSession,startTeamSession,settleTeamSession } from "./team-timeline.mjs?v=manager-tactics-001";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
 import {
@@ -420,10 +421,11 @@ export function desiredArenaPlayer(state){
 const arenaFields=["downtimeMs","sampledBouts","bouts","victories","defeats","doubleDeaths","coins"];
 export function desiredArenaTeam(state){
   const p=desiredArenaPlayer(state);
-  return teamSnapshots(teamFromState(state),p);
+  const snapshots=teamSnapshots(teamFromState(state),p);
+  return state.managerTactics?tacticSnapshots(state.managerTactics,snapshots):snapshots;
 }
 function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
-  let team=teamFromState(state),teamwork=state.teamwork,desired=desiredArenaTeam(state);
+  let team=teamFromState(state),teamwork=state.teamwork,desired=desiredArenaTeam(state),managerTactics=state.managerTactics;
   let autoFight=state.autoFight??initialAutoFight(desired.first.difficulty);
   if(online&&(!validAutoFight(autoFight)||autoFight.stage!==desired.first.difficulty))throw new RangeError("Invalid committed team stage");
   let session=state.combatSession??startTeamSession(desired,teamwork.level,state.settledAtMs>>>0);
@@ -435,6 +437,7 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
     const prize=settleTeamSession(session,duration,outcomeCaches?.get(cacheKey));
     team=awardTeamPractice(team,session.players,prize.practiceMs);
     teamwork=awardTeamwork(teamwork,prize.bouts);
+    if(managerTactics)managerTactics=awardTacticPractice(managerTactics,session.players,prize.practiceMs);
     session=prize.session;
     for(const key of arenaFields)totals[key]+=prize[key];
     for(const id of Object.keys(practiceMs))practiceMs[id]+=prize.practiceMs[id];
@@ -444,7 +447,7 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
       desired=Object.fromEntries(Object.entries(desired).map(([id,p])=>[id,{...p,difficulty:autoFight.stage}]));
     }
   };
-  const result=()=>({...totals,session,team,teamwork,practiceMs,expertise:team.first.expertise,autoFight});
+  const result=()=>({...totals,session,team,teamwork,practiceMs,expertise:team.first.expertise,autoFight,...(managerTactics?{managerTactics}:{})});
   if(online||JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level){
     const remaining=(BOUT_MS-session.elapsedMs%BOUT_MS)%BOUT_MS;
     if(elapsedMs<remaining){run(elapsedMs);return result();}
@@ -512,13 +515,13 @@ function settleUncappedWork(state, now, random, frozenEffort, xpRandom = random,
     const prize=settleArenaBuild(state,elapsedMs,outcomeCaches,online);
     productiveMs-=prize.downtimeMs;
     next.expertise=prize.expertise;
-    if(prize.team){next.teamSecond=prize.team.second;next.teamwork=prize.teamwork;}
+    if(prize.team){next.teamSecond=prize.team.second;next.teamwork=prize.teamwork;if(prize.managerTactics)next.managerTactics=prize.managerTactics;}
     next.combatSession = prize.session;
     if(online){next.autoFight=prize.autoFight;if(prize.autoFight.stage!==(state.difficulties.fighting??0))next.difficulties={...state.difficulties,fighting:prize.autoFight.stage};}
     next.coins = safeAdd(state.coins, prize.coins);
     report.gainedCoins = prize.coins;
     if (prize.bouts || prize.downtimeMs) {
-      const { session: _session, expertise: _expertise, autoFight: _autoFight,team:_team,teamwork:_teamwork,...arena } = prize;
+      const { session: _session, expertise: _expertise, autoFight: _autoFight,team:_team,teamwork:_teamwork,managerTactics:_tactics,...arena } = prize;
       report.arena = arena;
     }
   }
@@ -644,6 +647,23 @@ function settleWork(state,now,random,frozenEffort,stopAtCap=false,online=false){
 }
 
 
+
+/** Manager coordinator adapter: one existing capped activity, no queue or
+ * claims. Returns the true cap cursor and existing reward reports. Both
+ * manager lanes receive the same immutable shared starting snapshot. */
+export function settleManagerLane(state,now,random=Math.random,online=false){
+  if(state.transition||state.wagons.length!==1||state.wagons[0].activity!==state.activity||
+    state.wagons[0].plannedMs!==null)throw new RangeError("Invalid manager lane projection");
+  if(online&&(now-state.settledAtMs>LIVE_FIGHT_MAX_MS||now<state.settledAtMs))
+    throw new RangeError("Invalid live lane interval");
+  return settleWork(state,now,random,state.attributeEffortActive,true,online);
+}
+/** Exact productive prefix of the same frozen combat schedule, used only
+ * to apportion overlapping attribute time, never to pay rewards twice. */
+export function managerCombatProductivePrefix(state,elapsedMs,online=false){
+  if(state.activity!=="fighting"||!isCount(elapsedMs))throw new RangeError("Invalid combat prefix");
+  return elapsedMs?elapsedMs-settleArenaBuild(state,elapsedMs,new Map(),online).downtimeMs:0;
+}
 
 /**
  * Travel and preparation are real elapsed time, even with the page closed.
@@ -974,7 +994,7 @@ export function skillSpoils(skillId) {
 }
 
 /** Quoted tribute at the exact current inventory snapshot. No fees/currency. */
-export function skillMasterOffer(state) {
+export function skillMasterOffer(state, reserve = {}) {
   const ready = [], blocked = [], tribute = {};
   for (const skillId of SKILL_IDS) {
     const skill = state.skills[skillId];
@@ -986,7 +1006,12 @@ export function skillMasterOffer(state) {
       continue;
     }
     ready.push(skillId);
-    for (const key of spoils) if (state.items[key] > 0) tribute[key] = state.items[key];
+    for (const key of spoils) {
+      const keep=reserve[key]??0;
+      if(!isCount(keep))throw new RangeError("Invalid Master ingredient reserve");
+      const surplus=Math.max(0,state.items[key]-keep);
+      if(surplus>0)tribute[key]=surplus;
+    }
   }
   return { ready, blocked, tribute };
 }
@@ -1000,8 +1025,8 @@ export function learnFromMaster(state, now = Date.now(), random = Math.random) {
 }
 
 // Both manual confirmation and explicitly consented login use this exact mutation.
-function claimSettledMaster(outcome) {
-  const offer = skillMasterOffer(outcome.state);
+function claimSettledMaster(outcome, reserve = {}) {
+  const offer = skillMasterOffer(outcome.state,reserve);
   if (!offer.ready.length) throw new RangeError("No mastery available to claim");
   const skills = { ...outcome.state.skills };
   const items = { ...outcome.state.items };
@@ -1009,7 +1034,7 @@ function claimSettledMaster(outcome) {
     const old = skills[skillId];
     skills[skillId] = { level: old.level + 1, xp: 0 };
   }
-  for (const key of Object.keys(offer.tribute)) items[key] = 0;
+  for (const [key,amount] of Object.entries(offer.tribute)) items[key] -= amount;
   return { ...outcome, state: {
     ...outcome.state, skills, items,
     // Claimed levels are visible immediately; combat applies at the boundary.
@@ -1027,17 +1052,21 @@ export function setAutoMasterConsent(state, enabled) {
 }
 
 /** All automatic chores share the exact existing settled claim and smith mutations. */
-export function automateSettledProgress(outcome) {
+export function automateSettledProgress(outcome, reserve = {}, equipmentPolicy = upgradeSettledEquipment) {
   let result=outcome;
-  if(skillMasterOffer(result.state).ready.length){
-    result=claimSettledMaster(result);
+  if(skillMasterOffer(result.state,reserve).ready.length){
+    result=claimSettledMaster(result,reserve);
     result={...result,levelsGained:Object.fromEntries(result.mastery.ready.map(id=>[id,1]))};
   }
   if(result.state.teamSecond){
     const teamwork=activateTeamworkOnLogin(result.state.teamwork);
     result={...result,state:{...result.state,teamwork},teamworkLevelGained:teamwork.level-result.state.teamwork.level};
   }
-  return upgradeSettledEquipment(result);
+  if(result.state.managerTactics){
+    const a=activateTactics(result.state.managerTactics);
+    result={...result,state:{...result.state,managerTactics:a.tactics},tacticAdvances:a.advances};
+  }
+  return equipmentPolicy(result);
 }
 
 /** Entry settles the entire absence at the original frozen build before chores. */

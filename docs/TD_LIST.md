@@ -8,11 +8,49 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## AUTO-ACTIVITY-001 — Fully autonomous activity rotation
+
+[Staged implementation plan](mechanics/MANAGER_IMPLEMENTATION_PLAN.md).
+
+- **Goal:** No selectable activities or player-managed route. Keep permanent fighting plus a single automatic noncombat work activity. Work until one next level is earned; claim automatically through the Master, then proceed to the next activity and repeat. Training participates in the same rotation.
+- **Acceptance:** Remove all activity start/schedule/priority/wagon editing controls and queue-slot unlocks; replace with read-only current/next activity, skill XP, actual materials, levels and upgrades. No activity starvation or deadlocks, especially material-dependent production and Master tribute; preserve real resource conservation and frozen offline settlement, avoid doubled effort across combat and work, validate migration of old manual routes and exact saved progress. All three independent strategic choices per gladiator remain buttons. No lower-grade combat balance sweep. Use genuine resolver and engine; no cosmetic-only automation.
+- **Status:** IN_REVIEW — Phase 3 manager-only rotation and provisional bounded ingredient reserve candidate; tests pending, not connected to public runtime.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## TACTIC-UI-001 — Independent gladiator fighting tactics
+
+- **Goal:** Each gladiator chooses Aggressive, Balanced or Defensive through three buttons alongside weapon and whole armour set. Default Balanced.
+- **Acceptance:** Verify existing research and runtime first; reuse tested behaviour where compatible, no invented or cosmetic-only tactics. Independent saved selection, meaningful behaviour in actual combat, changes apply at the next bout boundary, frozen offline builds, no universal optimal stance, endgame-only balance validation at maximum stats and S Masterwork until owner approval. No arbitrary flat stat buffs. Explain actual effects concisely; no dropdown.
+- **Status:** IN_REVIEW — actual three-role candidate and frozen tactic mastery; max-only screening and UI integration pending in PR #192.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## MANAGER-UI-001 — Button-based gladiator equipment and simplified activities
+
+- **Goal:** Mobile-first strategic equipment controls: two gladiator buttons, five weapon buttons, three whole armour-family buttons (padded/leather/plate); no individual piece or manual grade/quality selection. Training belongs in automatic rotation; remove all player work selection and scheduling per AUTO-ACTIVITY-001; remove repetitive stats, retain optional detailed Character Stats.
+- **Acceptance:** Atomic complete-set equip/acquisition with existing prices, exact shared treasury, no mixed-family selection through player UI, no automatic selection against player choice, retained owned progress, frozen in-flight battles, no per-piece upgrade controls. Clearly show affordability, equipped family, and selection. Validate existing saves, phone and desktop, and real engine/simulation parity. No combat retuning.
+- **Status:** IN_REVIEW — Phase 4 whole-set engine candidate; button UI and full integration pending in PR #192.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## PERMANENT-FIGHT-001 — Fighting always active, outside selectable activities
+
+- **Goal:** Fighting is permanent, automatic and cannot be disabled; remove its entry from the selectable activities list. Training shares the other activities group.
+- **Acceptance:** Genuine permanent fighting engine behavior, not merely hiding its control; automatic noncombat rotation cannot stop combat. Define separate combat/work time, rewards, caps, transitions, shared attributes and wallet consistently; do not double-credit the same effort. Preserve frozen offline settlement and automatic Master/gear policy. Test simultaneous work/combat, exact rewards, save/reload and mobile presentation. No endgame balance retuning or lower-grade balance sweep in this task.
+- **Status:** IN_REVIEW — Phase 2 coordinator candidate added in PR #192; functional tests and UI/rotation integration pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## HOBBY-002 — Revised hobby-project statement
 
 - **Goal:** Remove the permanent free-game pledge from active policy, README and website; explain learning goals and hope for sustainable hosting. No monetization implementation or license change.
 - **Acceptance:** Matching public wording and updated active rules, no payment or ad features, website checks and deployment.
-- **Status:** IN_REVIEW — candidate PR #191, tests pending.
+- **Status:** IN_REVIEW — PR #191 merged 3cc0df4, six workflows passed; Pages verification pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -21,7 +59,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Mandatory, always-enabled Skill Master from the first entry; automatically activate ready activity levels and Teamwork on login and during active online play. Remove the 50-level unlock and optional consent toggle; automatic selected weapon/armour quality and grade upgrades from first entry and throughout online play.
 - **Acceptance:** Settle frozen offline rewards before any claims; no offline auto-level loops or retroactive benefits. During online play, process each newly earned level at its actual committed progression boundary, resume eligible work without manual claims, and retain existing XP requirements and exact Master tribute. Preserve active-choice-only progression, queued work, independent mastery and unrelated equipment automation. Remove obsolete locked/consent/manual-claim UI; report actual committed advances, preserve existing saves where practical, and test fresh entry, returning, continuous play, cap/queue transitions, Teamwork, max-level, visibility, reload, failed save and stale/multi-tab boundaries. Browser-local alpha foreground session is the provisional online boundary; do not claim server-authoritative login. Mandatory equipment automation from first entry and continuously online for both gladiators: remove ten-earned-level gate and manual quality/grade purchase controls; keep existing sequential legal quotes, costs, Fighting requirements, weakest-first stable ordering and shared treasury. Upgrade only selected owned items; never change equipment type or fill empty slots automatically. Settle offline at frozen build first, apply upgrades on return/online at safe committed boundaries without altering in-flight bouts or retroactive rewards. Show next upgrade, costs and actual committed purchases. Preserve manual strategic loadout selection (including existing acquisition of an unowned chosen type, not manual grade/quality upgrading). Test insufficient funds, gated grades, exact debits, two-fighter priority, switching and inactive gear, reload, visibility and report correctness. No numerical combat balancing or lower-tier balance sweep in this task.
-- **Status:** IN_REVIEW — PR #191 runtime candidate, four targeted tests passed; final UI and release checks pending.
+- **Status:** IN_REVIEW — PR #191 merged 3cc0df4; six workflows passed; Pages verification pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

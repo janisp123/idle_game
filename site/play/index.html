@@ -1,296 +1,69 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0c0807">
-  <meta name="description" content="An evolving dark-fantasy idle RPG alpha. Try an experimental browser build where the rules, content and balance are still taking shape.">
-  <title>Play — Idle Game</title>
-  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=auto-fight-04">
-  <link rel="stylesheet" href="./login-report.css?v=apprentice-a5">
-  <link rel="stylesheet" href="./team-ui.css?v=team-004">
-  <script type="module" src="./app.mjs?v=auto-master-001"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0c0807">
+<title>The Long Vigil — Play</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./game.css">
+<link rel="stylesheet" href="./manager-ui.css?v=manager-001">
+<script type="module" src="./manager-app.mjs?v=manager-001"></script>
 </head>
 <body>
-  <a class="skip-link" href="#game">Skip to game</a>
-  <header class="topbar">
-    <a class="wordmark" href="../" aria-label="Back to Idle Game home"><span class="crest" aria-hidden="true">☠</span><span>IDLE / GAME</span></a>
-    <nav aria-label="Game navigation">
-      <a href="../">Home</a>
-      <a href="https://github.com/janisp123/idle_game" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-      <a href="https://discord.gg/uuZut99uQ4" target="_blank" rel="noopener noreferrer">Discord ↗</a>
-    </nav>
-  </header>
-  <main id="game" class="shell">
-    <div class="page-heading">
-      <div>
-        <p class="eyebrow">✣ THE FIRST EMBER · THE LONG VIGIL</p>
-        <h1>THE <em>LONG VIGIL</em></h1>
-      </div>
-      <div><div class="status-pill" id="saveStatus" role="status">Local save</div><button id="loginReportReopen" class="small-button" type="button" hidden>Last login report</button></div>
-    </div>
-
-    <section id="saveResetNotice" class="panel" aria-label="Alpha save reset" hidden>
-      <p role="status">Alpha progression was reset for the two-gladiator combat update or because the previous save could not be read. A new two-gladiator team was created.</p>
-      <button id="dismissSaveReset" class="small-button" type="button">Dismiss</button>
-    </section>
-    <div class="game-grid">
-      <aside class="sidebar">
-        <section class="panel character" aria-labelledby="character-heading">
-          <p class="section-index">I · THE WANDERER</p>
-          <div class="character-top">
-            <div class="portrait" aria-hidden="true"><span class="portrait-emblem">✥</span></div>
-            <div>
-              <h2 id="character-heading">Wanderer</h2>
-            </div>
-          </div>
-          <div class="player-name-edit">
-            <label for="nameInput">Character name</label>
-            <div class="name-row">
-              <input id="nameInput" type="text" maxlength="40" value="Wanderer" autocomplete="off" aria-label="Character name">
-              <button id="saveName" type="button" class="small-button">Save</button>
-            </div>
-          </div>
-          <details id="characterStatsPanel" class="armour-cabinet character-stats-panel">
-            <summary class="armour-summary">CHARACTER STATS <span aria-hidden="true">✥</span></summary>
-            <div id="characterAttributes" class="character-attributes" aria-label="Character attributes"></div>
-            <p id="characterStatsNotice" class="stat-breakdown-note"></p>
-            <div id="characterStatsBreakdown" class="stat-breakdown" aria-label="Character power and activity modifiers"></div>
-          </details>
-          <details id="armourCabinet" class="armour-cabinet">
-            <summary class="armour-summary">EQUIPMENT <span id="coinWallet">0 coins</span><span aria-hidden="true">✥</span></summary>
-            <div id="teamEquipmentSelector" hidden><label for="teamFighterChoice">Manage gladiator</label><select id="teamFighterChoice"><option value="first">Gladiator 1</option><option value="second">Gladiator 2</option></select><p id="teamLoadouts" class="hint"></p></div>
-            <div class="weapon-cabinet" aria-label="Equipped weapon">
-              <p class="equipment-section-label">WEAPONS</p>
-              <div id="weaponSlots" class="weapon-slots" role="group" aria-label="Choose your weapon style"></div>
-              <p class="weapon-skills" id="combatSkillsText">Heavy Swing · Blade Guard</p>
-            </div>
-            <p class="equipment-section-label armour-section-label">ARMOUR</p>
-            <div id="armourSlots" class="armour-slots" aria-label="Equipped armour slots"></div>
-            <div id="equipmentEditor" class="equipment-editor" aria-label="Smith shop">
-              <p id="equipmentEditHeading" class="equipment-edit-heading">Head</p>
-              <div id="armourEditor" class="armour-choice">
-                <label for="armourChoice">Armour family</label>
-                <select id="armourChoice"></select>
-              </div>
-              <div class="smith-selects">
-                <label>Next grade <select id="itemGrade"></select></label>
-                <label>Next quality <select id="itemQuality"></select></label>
-              </div>
-              <button id="smithBuy" class="small-button" type="button">Buy</button>
-              <button id="smithEquip" class="small-button" type="button" hidden>Equip</button>
-              <p id="smithStatus" role="status"></p>
-            </div>
-            <p id="expertiseStats" class="gear-stats" aria-label="Selected equipment expertise"></p>
-            <div id="gearStats" class="gear-stats" aria-label="Equipped weight, mobility and protections"></div>
-          </details>
-        </section>
-
-        <section class="panel skill-focus" aria-labelledby="skill-heading">
-          <p class="section-index">THE PATH OF MASTERY</p>
-          <h2 id="skill-heading" class="engraved-title">SKILL PROGRESS</h2>
-          <div class="skill-meta"><span id="skillTitle">Choose an activity</span><strong id="skillLevel">—</strong></div>
-          <div class="meter skill-meter" aria-label="XP toward next skill level"><span id="skillFill"></span></div>
-          <p class="hint" id="skillXp">Each activity has independent XP.</p>
-          <p class="hint" id="masterStatus">Skill Master automatic · Ready skills advance and pay tribute.</p>
-        </section>
-
-        <section class="panel actions" aria-labelledby="actions-heading">
-          <p class="section-index">II · ACTIVITIES</p>
-          <h2 id="actions-heading" class="engraved-title">ACTIVITIES</h2>
-          <p id="queueUnlockHint" class="hint"></p>
-          <div id="activityNav" class="activity-navigation">
-            <button id="openActivities" class="activity-nav-button" type="button" aria-controls="activityCategories" aria-expanded="false">Choose activity <span aria-hidden="true">›</span></button>
-            <div id="activityCategories" class="activity-nav-screen" hidden aria-label="Activity categories">
-              <button id="backToActivities" class="activity-back" type="button">‹ Back</button>
-              <div id="activityCategoryChoices" class="activity-category-choices"></div>
-            </div>
-            <div id="activityListScreen" class="activity-nav-screen" hidden aria-label="Activities in selected category">
-              <button id="backToCategories" class="activity-back" type="button">‹ Back to activities</button>
-              <p id="activityCategoryTitle" class="activity-nav-label"></p>
-              <div id="activityChoices" class="activity-choices" aria-label="Choose work"></div>
-            </div>
-          </div>
-
-          <div id="queuePlanner" class="queue-planner" hidden>
-            <p class="activity-nav-label" id="queuePlannerTitle">How long should the selected activity run?</p>
-            <p class="hint" id="queuePlannerHint"></p>
-            <div class="planner-fields">
-              <label id="queueAmountLabel" for="queueAmount">Do it for</label>
-              <select id="queueAmount" aria-label="Number of minutes, hours or days"></select>
-              <select id="queueUnit" aria-label="Minutes, hours or days">
-                <option value="minutes">Minutes</option><option value="hours">Hours</option><option value="days">Days</option>
-                <option value="untilLevelUp">↑ Until LvL Up!</option>
-              </select>
-            </div>
-            <div class="planner-actions">
-              <button type="button" id="queueConfirm" class="activity-start">Add timed task</button>
-              <button type="button" id="queueCancel" class="activity-start">Cancel</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel actions apprentice-panel" aria-labelledby="apprentice-heading">
-          <h2 id="apprentice-heading" class="engraved-title">PERSONAL ASSISTANT</h2>
-          <details id="apprenticeMenu">
-            <summary class="activity-nav-button">Your Apprentice <span aria-hidden="true">›</span></summary>
-            <div class="apprentice-content">
-              <p class="master-voice">“I have watched your battles. Take me as your apprentice. Teach me your ways, and I will take care of more of your chores.”</p>
-              <p id="apprenticeLevel" class="activity-nav-label">0 earned levels</p>
-              <p id="apprenticeSlots" class="hint">1 / 5 activity slots unlocked</p>
-              <p id="apprenticeNext" class="hint">Next activity slot unlocks at LvL 10.</p>
-              <p id="apprenticeLegacy" class="hint" hidden>Your existing route is preserved. No new slots may be added above your unlocked capacity.</p>
-              <div class="apprentice-option"><strong>Automatic Skill Master</strong><span id="apprenticeMaster">Always active</span></div>
-              <p id="apprenticeMasterReport" class="hint" role="status" hidden></p>
-              <div class="apprentice-option"><strong>Automatic equipment upgrades</strong><span id="apprenticeEquipmentStatus">Always active</span><p id="apprenticeEquipmentNext" class="hint"></p><p id="apprenticeEquipmentCost" class="hint"></p><p id="apprenticeEquipmentReport" role="status" class="hint" hidden></p></div>
-              <label class="apprentice-option"><input type="checkbox" disabled> Automatic clan donations <span>Planned · Online clans required</span></label>
-            </div>
-          </details>
-        </section>
-
-        <section class="panel actions" aria-labelledby="clan-heading">
-          <p class="section-index">III · CLAN</p>
-          <h2 id="clan-heading" class="engraved-title">CLAN</h2>
-          <details id="clanMenu">
-            <summary class="activity-nav-button">Open Clan <span aria-hidden="true">›</span></summary>
-            <div class="activity-nav-screen" id="clanContent">
-              <p class="hint" id="clanAvailability">Clans are planned. Shared membership and warehouses require online accounts; they are not available in this browser-only alpha.</p>
-              <p class="activity-nav-label">Your clan</p>
-              <p class="hint">Membership is unavailable in this build.</p>
-              <div class="activity-category-choices">
-                <button class="activity-nav-button" type="button" disabled aria-describedby="clanAvailability">Search clans</button>
-                <button class="activity-nav-button" type="button" disabled aria-describedby="clanAvailability">Create a clan</button>
-              </div>
-              <p class="hint">Founding a clan will require at least seven days of play. Leaving a clan will prevent joining or founding another for seven days.</p>
-            </div>
-          </details>
-        </section>
-
-      </aside>
-
-      <div class="main-column">
-        <section class="scene-panel" aria-labelledby="scene-heading">
-          <div class="scene-head"><span class="section-index">IV · THE WILDS</span><span id="sceneTag">WAITING FOR ORDERS</span></div>
-          <div class="scene-banner" aria-hidden="true"><span class="banner-mark">✣</span><span id="sceneBanner">THE LONG VIGIL</span></div>
-          <div class="illustration">
-            <img id="sceneImage" src="./assets/hunting.webp" alt="A grim warrior facing wolves in a dark forest" width="960" height="540">
-            <div class="image-veil" aria-hidden="true"></div>
-            <div class="image-caption" id="sceneCaption">THE WOLF ROAD</div>
-          </div>
-          <div id="combatFlow" class="combat-flow" hidden aria-label="Automatic combat action timeline">
-            <div class="combat-flow-steps" aria-hidden="true">
-              <span class="combat-flow-step" id="combatFlowStep0"><span class="combat-flow-icon" id="combatFlowIcon0">✦</span><span id="combatFlowLabel0">Ready</span></span>
-              <span class="combat-flow-step" id="combatFlowStep1"><span class="combat-flow-icon" id="combatFlowIcon1">⚄</span><span id="combatFlowLabel1">Battle</span></span>
-              <span class="combat-flow-step" id="combatFlowStep2"><span class="combat-flow-icon" id="combatFlowIcon2">⚄</span><span id="combatFlowLabel2">Defend</span></span>
-              <span class="combat-flow-step" id="combatFlowStep3"><span class="combat-flow-icon" id="combatFlowIcon3">⚔</span><span id="combatFlowLabel3">Move</span></span>
-              <span class="combat-flow-step" id="combatFlowStep4"><span class="combat-flow-icon" id="combatFlowIcon4">⌛</span><span id="combatFlowLabel4">Duel result</span></span>
-            </div>
-            <div id="combatFlowMeter" class="combat-flow-meter" role="progressbar" aria-label="Current combat action" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="combatFlowFill"></span></div>
-          </div>
-          <section id="autoFightProgress" class="auto-fight-progress" hidden aria-label="Automatic fighting progression">
-            <div class="auto-fight-grades">
-              <div><span>Current difficulty</span><strong id="autoFightStage">Non-grade</strong></div>
-              <div><span>Highest defeated</span><strong id="autoFightHighest">None yet</strong></div>
-            </div>
-            <p id="autoFightNext"></p>
-            <div id="autoFightMeter" class="meter auto-fight-meter" role="progressbar" aria-label="Wins toward next difficulty" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="autoFightFill"></span></div>
-            <p id="autoFightStatus"></p>
-            <p id="teamworkStatus" class="hint" hidden></p>
-            <p class="hint">Offline fighting stays at the current difficulty.</p>
-          </section>
-          <section id="wagonQueue" class="wagon-queue" hidden aria-label="Your activity route">
-            <p class="wagon-queue-heading">YOUR ROUTE · THREE TASKS</p>
-            <div id="wagonList" class="wagon-list" aria-label="Ordered activity tasks"></div>
-          </section>
-          <div class="scene-bottom">
-            <div>
-              <h2 id="scene-heading">Choose an activity</h2>
-              <p id="activityDescription">A wolf prowls the treeline. Stone lies buried beneath the hills. Your journey begins with one decision.</p>
-            </div>
-          </div>
-          <section id="combatPanel" class="combat-panel" hidden aria-label="Live combat event">
-            <p id="combatEventTitle" class="combat-event-title">THE FIGHTING PIT</p>
-            <span id="combatTurns" class="combat-turns" aria-label="Duel turns"></span>
-            <p id="combatGround" class="combat-ground"></p>
-            <div id="arenaPositioning" class="arena-positioning" aria-label="Pre-bout positioning">
-              <span id="playerPositioning"></span>
-              <span id="enemyPositioning"></span>
-              <span id="positioningResult"></span>
-            </div>
-          </section>
-          <div id="transitionStatus" class="transition-status" hidden>
-            <p id="transitionPhase" class="transition-phase" role="status" aria-live="polite">Getting ready to start new activity</p>
-            <div class="meter activity-meter transition-meter" id="transitionProgress" role="progressbar" aria-label="Changing activity" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="transitionFill"></span></div>
-          </div>
-          <div class="meter activity-meter" id="activityProgress" role="progressbar" aria-label="Current activity progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="actionFill"></span></div>
-        </section>
-
-        <section id="resultPanel" class="result-panel" aria-label="Latest activity result">
-          <div id="teamBattleReadout" hidden aria-label="Four combatants"></div>
-          <div id="combatReadout" class="result-combat" hidden aria-label="Latest resolved combat action">
-            <div class="result-side result-side-player">
-              <span class="result-side-name">YOU</span>
-              <label class="vital HP"><span id="playerHPText">Health</span><progress id="playerHP" aria-label="player Health"></progress></label>
-              <label class="vital Armour"><span id="playerArmourText">Armour</span><progress id="playerArmour" aria-label="player Armour"></progress></label>
-              <small id="playerWear" class="gear-wear"></small>
-              <div id="playerResult" class="result-tokens" aria-label="Your combat result"></div>
-            </div>
-            <span class="result-versus" aria-hidden="true">✣</span>
-            <div class="result-side result-side-enemy">
-              <span class="result-side-name">ENEMY</span>
-              <label class="vital HP"><span id="enemyHPText">Health</span><progress id="enemyHP" aria-label="enemy Health"></progress></label>
-              <label class="vital Armour"><span id="enemyArmourText">Armour</span><progress id="enemyArmour" aria-label="enemy Armour"></progress></label>
-              <small id="enemyWear" class="gear-wear"></small>
-              <div id="enemyResult" class="result-tokens" aria-label="Enemy combat result"></div>
-            </div>
-          </div>
-          <div id="workReadout" class="result-work" aria-label="Latest completed work">
-            <span id="workResultTitle" class="result-activity-name">READY</span>
-            <div id="workResultTokens" class="result-tokens" aria-label="Resources and experience gained"></div>
-          </div>
-          <p id="resultNotice" class="result-notice" role="status" aria-live="polite"></p>
-        </section>
-
-
-      </div>
-      <aside class="right-rail" aria-label="Resources and progress">
-        <details id="resourcesPanel" class="panel inventory" aria-labelledby="inventory-heading">
-          <summary id="inventory-heading" class="resources-summary">RESOURCES <span aria-hidden="true">✥</span></summary>
-          <div id="resourceList"></div>
-        </details>
-        <details id="alphaTools" class="panel alpha-tools" aria-label="Alpha test tools" hidden>
-          <summary class="alpha-tools-title">ALPHA TOOLS <span aria-hidden="true">⚙</span></summary>
-          <div class="alpha-tools-controls">
-            <label class="alpha-toggle">
-              <span>Reset all progress</span>
-              <input type="checkbox" id="alphaReset" role="switch" aria-label="Reset all progress">
-            </label>
-            <button type="button" id="alphaDay" class="alpha-day-button">Test 24 hours idle</button>
-            <label class="alpha-toggle">
-              <span>Activity speed ×10</span>
-              <input type="checkbox" id="alphaSpeed" role="switch" aria-label="Increase all activity speed ten times">
-            </label>
-            <label>Max Stats armour expertise <select id="alphaFamily"><option value="none">Unarmoured</option><option value="padded">Padded</option><option value="leather">Leather</option><option value="plate" selected>Plate</option></select></label>
-            <label id="alphaSecondFamilyLabel" hidden>Gladiator 2 armour expertise <select id="alphaSecondFamily"><option value="none">Unarmoured</option><option value="padded">Padded</option><option value="leather" selected>Leather</option><option value="plate">Plate</option></select></label>
-            <button type="button" id="alphaMaxStats" class="alpha-day-button">Max Stats · six-month build</button>
-            <button type="button" id="alphaCoins" class="alpha-day-button">+100,000 arena coins</button>
-            <p class="hint">Test only. Max Stats trains each gladiator’s currently selected weapon and individually chosen armour family; does not buy equipment.</p>
-            <p id="alphaStatus" class="alpha-tools-status" role="status" aria-live="polite"></p>
-          </div>
-        </details>
-      </aside>
-    </div>
-    <footer aria-label="Project credit"><p>Made by Janis Paegle 2026</p></footer>
-  </main>
-  <dialog id="loginReport" class="login-report" aria-labelledby="loginReportHeading">
-    <header class="login-report-head">
-      <div><p class="login-report-eyebrow">THE LONG VIGIL · CHARACTER ANALYTICS</p><h2 id="loginReportHeading">Welcome back</h2><p id="loginReportElapsed"></p></div>
-      <button type="button" id="loginReportDismiss" autofocus>Continue to game <span aria-hidden="true">×</span></button>
-    </header>
-    <div id="loginReportBody" class="login-report-body"></div>
-    <footer class="login-report-footer"><span id="loginReportCountdown">Auto-close in 10s</span><span>Reopen your last login report from the game header.</span></footer>
-  </dialog>
+<a class="skip-link" href="#game">Skip to game</a>
+<header class="manager-top"><a href="../">✣ THE LONG VIGIL</a><span id="saveStatus" role="status">Loading…</span></header>
+<main id="game" class="manager-shell">
+<header class="manager-heading"><div><p class="eyebrow">THE ARENA · ALPHA</p><h1 id="character-heading">Your gladiators</h1></div><strong id="coinWallet">0 coins</strong></header>
+<p id="migrationNotice" role="status" hidden></p>
+<div class="manager-grid">
+<section class="manager-card" aria-labelledby="gladiatorsHeading">
+<h2 id="gladiatorsHeading">Gladiators</h2>
+<div id="fighterButtons" class="choice-grid two" role="group" aria-label="Choose gladiator"></div>
+<p id="teamLoadouts" class="quiet"></p>
+<h3>Weapon</h3><div id="weaponButtons" class="choice-grid two" role="group" aria-label="Choose weapon"></div>
+<h3>Armour set</h3><div id="armourButtons" class="choice-grid three" role="group" aria-label="Choose armour set"></div>
+<p id="armourStatus" class="quiet"></p>
+<h3>Fighting tactic</h3><div id="tacticButtons" class="choice-grid three" role="group" aria-label="Choose fighting tactic"></div>
+<p id="tacticStatus" class="quiet"></p>
+<p class="quiet">Equipment upgrades automatically. Changes take effect in the next battle.</p>
+</section>
+<section class="manager-card arena-card" aria-labelledby="arenaHeading">
+<h2 id="arenaHeading">Arena <span class="live-label">Automatic</span></h2>
+<img class="arena-art" src="./assets/fighting.webp" alt="Gladiators in the arena" width="960" height="540">
+<div class="line"><strong id="arenaStage">Non-grade</strong><span id="fightingLevel">Fighting Lv 1</span></div>
+<progress id="fightingXP" aria-label="Fighting experience" value="0" max="40"></progress>
+<p id="arenaNext" class="quiet"></p>
+<p id="battleEvent" class="battle-event">Preparing the arena</p>
+<div id="battleFighters" class="battle-grid" aria-label="Live combatants"></div>
+<p id="battleResult" class="quiet">Battles run automatically.</p>
+</section>
+<section class="manager-card" aria-labelledby="workHeading">
+<h2 id="workHeading">Activities <span class="live-label">Automatic</span></h2>
+<div class="line"><strong id="currentWork">Hunting</strong><span id="workLevel">Lv 1</span></div>
+<progress id="workXP" aria-label="Current activity skill experience" value="0" max="40"></progress>
+<p id="workStatus" class="quiet"></p><p id="nextWork"></p>
+<details><summary>All activity levels</summary><div id="activityLevels" class="skill-list"></div></details>
+</section>
+<section class="manager-card" aria-labelledby="progressHeading">
+<h2 id="progressHeading">Progress</h2>
+<button id="loginReportReopen" type="button" class="secondary">Last login report</button>
+<p id="latestProgress" class="quiet">No completed rewards yet.</p>
+<ul id="progressFeed" class="progress-feed" aria-label="Recent committed progress"></ul>
+<details><summary>Resources</summary><div id="resourceList" class="skill-list"></div></details>
+</section>
+<section class="manager-card stats-card">
+<details id="characterStatsPanel"><summary>Character stats</summary><div id="characterStats"></div></details>
+</section>
+<details id="alphaTools" class="manager-card stats-card" hidden>
+<summary>Alpha testing tools</summary>
+<p class="quiet">Local developer tools. Not normal gameplay.</p>
+<div class="choice-grid two"><button id="alphaMaxStats" type="button">Max stats</button><button id="alphaCoins" type="button">+100,000 coins</button><button id="alphaDay" type="button">Test 24 hours idle</button><button id="alphaSpeed" type="button" aria-pressed="false">Speed ×10</button><button id="alphaReset" type="button">Reset progress</button></div>
+<p id="alphaStatus" role="status" class="quiet"></p>
+</details>
+</div>
+<footer>Local browser alpha · The Long Vigil</footer>
+</main>
+<dialog id="loginReport" aria-labelledby="loginReportHeading"><h2 id="loginReportHeading">Last login report</h2><p id="loginReportSummary"></p><ul id="loginReportBody" class="progress-feed"></ul><button id="loginReportDismiss" type="button" autofocus>Continue</button></dialog>
 </body>
 </html>

@@ -2,6 +2,10 @@
 
 **Purpose:** the human-readable, maintained reference for **what the playable game actually calculates**, where to tune it, what tests prevent regressions, and which mechanics are not implemented. Read this before editing progression, balance, drops, combat, scheduling or offline settlement. This handbook is **our game specification**, separate from `docs/library/`'s general engineering research.
 
+## Manager-only redesign (draft PR #192)
+
+[Implementation plan](MANAGER_IMPLEMENTATION_PLAN.md) · [Max-only tactic screen](MANAGER_TACTICS_SCREEN.md). Candidate runtime `manager-lanes.mjs`, `activity-rotation.mjs`, `manager-equipment.mjs`, `manager-tactics.mjs`, `manager-app.mjs`; old shipped mechanics remain below until release. Phase 7 candidate tests and endgame sensitivity pending; no public deployment.
+
 ## Read the mechanic you are changing
 
 | Mechanic | Exact formula and invariants | Executable source / tuning |

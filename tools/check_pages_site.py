@@ -155,32 +155,13 @@ def check():
         game_parser.close()
         assert game_parser.lang == "en", "Game must declare English document language"
         assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
-        assert {"game", "activityChoices", "resourceList", "sceneImage",
-                "activityProgress", "actionFill", "sceneBanner", "character-heading",
-                "resultPanel", "combatReadout", "playerResult", "enemyResult",
-                "workReadout", "workResultTokens",
-                "skillTitle", "skillLevel", "skillXp", "skillFill", "nameInput", "saveName", "gearStats",
-                "coinWallet", "equipmentEditor", "equipmentEditHeading", "armourEditor",
-                "smithBuy", "itemGrade", "itemQuality"}.issubset(game_parser.ids), "Missing essential gameplay UI"
-        assert not ({"level", "xpText", "xpFill", "lifetimeXp"} & game_parser.ids), (
-            "Character must have no global level or XP widget"
-        )
-        assert not ({"rateText", "countdown", "timeInvested", "testDay", "actionCount"} & game_parser.ids), (
-            "Time, action counts, and testing controls must not be exposed to players"
-        )
-        app_js = (play_root / "app.mjs").read_text(encoding="utf-8")
-        for leak in ("baseMinutes", "SEC / ACTION", "toLocaleTimeString", "elapsedMs",
-                     "timeInvested", "testDay", "gainedXP", "per cycle"):
-            assert leak not in app_js, f"Player-facing time/action detail leaked: {leak}"
-        assert "workReadoutForReport(report" in app_js and "aria-valuenow" in app_js
-        assert "state.skills[id]" in app_js and "skillFill" in app_js
-        assert "state.totalXP" not in app_js and "state.level" not in app_js
-        assert 'role="progressbar"' in game_html
-        assert "logList" not in game_html, "Chronicle must be fully replaced by result readout"
-        assert "Welcome back." not in game_html
-        assert "returnPanel" not in game_html
-        assert "./iron-ui.css" in game_html, "The shared dark-fantasy theme must be active"
-        assert 'class="right-rail"' in game_html, "Resource/progress panel must exist"
+        assert {"game","fighterButtons","weaponButtons","armourButtons","tacticButtons","currentWork","workXP","nextWork","battleFighters","progressFeed","resourceList","characterStatsPanel","loginReport"}.issubset(game_parser.ids), "Missing manager UI"
+        assert not ({"activityChoices","queuePlanner","wagonQueue","smithBuy","itemGrade","itemQuality","armourChoice","teamFighterChoice"} & game_parser.ids), "Obsolete player controls"
+        assert "<select" not in game_html, "Manager uses buttons, not dropdowns"
+        assert "manager-app.mjs" in game_html and "manager-ui.css" in game_html
+        assert "role=\"progressbar\"" in game_html or "<progress" in game_html
+        assert (play_root / "manager-app.mjs").is_file()
+        assert (play_root / "manager-migration.mjs").is_file()
         verify_links(game_parser, play_root)
         checked_links += len(game_parser.links)
         engine_source = (play_root / "engine.mjs").read_text(encoding="utf-8")

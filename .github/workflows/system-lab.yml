@@ -68,6 +68,11 @@ jobs:
           node tools/test_auto_equipment.mjs
           node tools/test_auto_equipment_integration.mjs
           node --test tools/test_auto_master_online.mjs
+          node --test tools/test_manager_lanes.mjs
+          node --test tools/test_activity_rotation.mjs
+          node --test tools/test_manager_equipment.mjs
+          node --test tools/test_manager_tactics.mjs
+          node --test tools/test_manager_integration.mjs
           node tools/test_login_report.mjs
           node tools/test_team_foundation.mjs
           node tools/test_team_combat.mjs
@@ -77,6 +82,16 @@ jobs:
           node --test tools/simulation/clan-fixtures.test.mjs
           node --test tools/simulation/apprentice.test.mjs
           node tools/system-lab.mjs --config tools/simulation/clan-example.json > clan-fixture-report.json
+      - name: Screen max-stat S Masterwork tactics
+        run: |
+          node tools/manager-tactics-audit.mjs > manager-tactics-audit.json
+          node --input-type=module -e 'import {readFileSync} from "node:fs";const r=JSON.parse(readFileSync("manager-tactics-audit.json"));console.log(JSON.stringify({profile:r.profile,seed:r.seed,calls:r.calls,configs:r.configs,top:r.screen.slice(0,5),validation:r.validation}));'
+      - name: Attach tactic screening evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: manager-tactics-audit
+          path: manager-tactics-audit.json
+          if-no-files-found: error
       - name: Reproduce automatic Fighting economy pilot
         run: |
           node tools/auto-fight-economy.mjs '[{"style":"greatsword","family":"plate","visitDays":1,"liveMinutes":30}]' > auto-economy-pilot.json

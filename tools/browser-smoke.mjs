@@ -20,7 +20,7 @@ const server=createServer(async(req,res)=>{
     if(pathname.endsWith("/"))pathname+="index.html";
     const file=resolve(root,"."+pathname);
     if(!file.startsWith(root+sep))throw Error("outside site");
-    const bytes=await readFile(file);
+    const bytes=await readFile(pathname==="/play/index.html"&&new URL(req.url,"http://127.0.0.1").searchParams.has("legacy")?resolve("tools/fixtures/legacy-play.html"):file);
     res.writeHead(200,{"Content-Type":types[extname(file)]??"application/octet-stream","Cache-Control":"no-store"});
     res.end(bytes);
   }catch{failures.push(req.url);res.writeHead(404);res.end();}
@@ -59,7 +59,7 @@ async function evaluate(expression){
   return result.result.value;
 }
 async function navigate(label,storage=null,beforeStart="",keepReport=false){
-  const url=origin+"/play/?smoke="+label;
+  const url=origin+"/play/?legacy=1&smoke="+label;
   // pagehide saves the old running character. Install synthetic fixtures on
   // the NEW document before modules start, not into the departing page.
   const inject=(storage||beforeStart)?await send("Page.addScriptToEvaluateOnNewDocument",{source:
@@ -337,6 +337,31 @@ try{
     assert.deepEqual(idle.before.autoFight,idle.after.autoFight);
     console.log(JSON.stringify({width,autoFight:true,liveStage:online.after.autoFight.stage,offlineStage:hidden.after.autoFight.stage,liveCoins:online.after.coins,offlineCoins:hidden.after.coins}));
     console.log("Browser smoke passed at "+width+"px: reset notice, alpha controls, persistence and real verdicts.");
+    // Actual public manager route (legacy fixtures above remain independent).
+    const managerKey="idle-game-manager-v1";
+    const url=origin+"/play/?manager="+width;
+    const script=await send("Page.addScriptToEvaluateOnNewDocument",{source:`if(location.href===${JSON.stringify(url)}){localStorage.removeItem(${JSON.stringify(managerKey)});localStorage.removeItem("idle-game-manager-clock-v1");localStorage.removeItem(${JSON.stringify(saveKey)});Date.now=()=>${fixedNow};}`});
+    await send("Page.navigate",{url});
+    await until(async()=>{const status=await evaluate(`({ready:document.getElementById("saveStatus")?.getAttribute("data-game-ready"),notice:document.getElementById("migrationNotice")?.textContent,status:document.getElementById("saveStatus")?.textContent})`);if(status?.status==="Progress not saved")throw Error(status.notice);if(runtimeErrors.length)throw Error(runtimeErrors.at(-1));return status?.ready==="true";},"manager loaded "+width);
+    await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:script.identifier});
+    const check=await evaluate(`(()=>({selects:document.querySelectorAll("select").length,counts:["fighterButtons","weaponButtons","armourButtons","tacticButtons"].map(id=>document.getElementById(id).querySelectorAll("button").length),overflow:document.documentElement.scrollWidth-innerWidth,activity:JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).activity,work:document.getElementById("currentWork").textContent}))()`);
+    assert.equal(check.selects,0);assert.deepEqual(check.counts,[2,5,3,3]);assert.ok(check.overflow<=2);assert.equal(check.activity,"fighting");assert.equal(check.work,"Hunting");
+    await evaluate('document.querySelector("#fighterButtons [data-choice=second]").click();document.querySelector("#weaponButtons [data-choice=hammer]").click()');
+    await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).teamSecond.combatLoadout==="hammer"`),"manager weapon");
+    await evaluate('document.querySelector("#armourButtons [data-choice=plate]").click();document.querySelector("#tacticButtons [data-choice=defensive]").click()');
+    await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return s.armourRequests.second==="plate"&&s.managerTactics.second.selected==="defensive"&&s.managerTactics.first.selected==="balanced";})()`),"manager independent choices");
+    await evaluate(`Date.now=()=>${fixedNow+10000}`);
+    await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return s.skills.hunting.xp>0&&s.skills.fighting.xp>0&&document.querySelectorAll(".battle-fighter").length===4;})()`),"manager simultaneous work and combat");
+    await shot("manager-"+width);
+    await evaluate('document.getElementById("alphaTools").open=true;document.getElementById("alphaCoins").click()');
+    await until(()=>evaluate('document.getElementById("alphaStatus").textContent==="Test credit added."'),"manager test coins");
+    await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return Object.values(s.teamSecond.armour).every(x=>x==="plate")&&s.armourRequests.second===null;})()`),"manager atomic armour acquisition");
+    await evaluate('document.getElementById("loginReportReopen").click()');
+    assert.equal(await evaluate('document.getElementById("loginReport").open'),true);
+    await evaluate('document.getElementById("loginReportDismiss").click()');
+    assert.ok(await evaluate("document.documentElement.scrollWidth-innerWidth<=2"));
+    console.log("Manager public route passed "+width+"px");
+
   }
   assert.deepEqual(runtimeErrors,[],"browser runtime errors");
   assert.deepEqual(failures,[],"missing local resources");

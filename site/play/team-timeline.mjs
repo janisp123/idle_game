@@ -6,7 +6,8 @@ import { chooseArena } from "./arenas.mjs?v=bal-002";
 import { arenaReward } from "./arena-wallet.mjs?v=gear-a3";
 import { TEAM_IDS,awardTeamPractice } from "./team.mjs?v=team-001";
 import { awardTeamwork,coordinationChance } from "./teamwork.mjs?v=team-002";
-import { resolveTeamBattle } from "./team-combat.mjs?v=team-004";
+import { resolveTeamBattle } from "./team-combat.mjs?v=manager-tactics-001";
+import {validTacticSnapshot} from "./manager-tactics.mjs?v=manager-tactics-001";
 
 export const TEAM_TIMELINE_VERSION=2;
 export const TEAM_REWARD_PERCENT=140;
@@ -17,7 +18,7 @@ const own=(o,k)=>Object.hasOwn(o,k);
 function validSnapshots(s){
   if(!s||typeof s!=="object"||Array.isArray(s)||Object.keys(s).length!==TEAM_IDS.length)return false;
   return TEAM_IDS.every(id=>own(s,id)&&s[id]?.trainingKit&&
-    validCombatSession({elapsedMs:0,seed:0,player:s[id]})&&
+    validCombatSession({elapsedMs:0,seed:0,player:s[id]})&&validTacticSnapshot(s[id])&&
     ["difficulty","str","dex","end","skill"].every(k=>s[id][k]===s[TEAM_IDS[0]][k])&&
     Number.isInteger(s[id].difficulty)&&s[id].difficulty>=0&&s[id].difficulty<=7&&
     ["str","dex","end","skill"].every(k=>s[id][k]<=1e6));

@@ -97,7 +97,7 @@ test("compact results use only real event/report values and correct combat side"
 });
 
 test("real browser-app entrypoint renders skill UI and reloads a current saved character", async () => {
-  const html = readFileSync(new URL("../site/play/index.html", import.meta.url), "utf8");
+  const html = readFileSync(new URL("./fixtures/legacy-play.html", import.meta.url), "utf8");
   const queueCss = readFileSync(new URL("../site/play/iron-ui.css", import.meta.url), "utf8");
   const skillPanel = html.match(/<section class="panel skill-focus"[\s\S]*?<\/section>/)?.[0];
   assert.ok(skillPanel?.includes('id="skillXp"') && skillPanel.includes('id="masterStatus"') && !skillPanel.includes('id="visitMaster"'), "Master and skill XP share one panel");
@@ -922,7 +922,7 @@ test("mobile recovery keeps both vital labels and bars aligned at equal widths",
   const {join}=await import("node:path");
   const dir=fs.mkdtempSync(join(tmpdir(),"arena-layout-"));
   try {
-    const source=fs.readFileSync("site/play/index.html","utf8");
+    const source=fs.readFileSync("tools/fixtures/legacy-play.html","utf8");
     const panel=source.slice(source.indexOf('<div id="combatReadout"'),source.indexOf('<div id="workReadout"')).replace(' hidden','');
     const css=fs.readFileSync("site/play/iron-ui.css","utf8");
     const page=join(dir,"arena.html");

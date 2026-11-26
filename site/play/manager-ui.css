@@ -1,0 +1,38 @@
+:root{color-scheme:dark}
+body{font-family:system-ui,sans-serif;min-width:280px;background:#100d0b;color:#e8d8bf}
+.manager-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px max(16px,calc((100vw - 1060px)/2));border-bottom:1px solid #584638;background:#1b1511;font-size:13px}
+.manager-top a{font-weight:750;letter-spacing:.07em}
+.manager-top span{color:#b29e86;text-align:right}
+.manager-shell{width:min(1060px,calc(100% - 24px));margin:auto;padding:18px 0}
+.manager-heading,.line{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.manager-heading{margin-bottom:16px}.manager-heading h1{font:normal clamp(24px,4vw,36px) Georgia,serif;margin:4px 0}
+#coinWallet{color:#e2bd7e;white-space:nowrap;font-size:15px}
+.manager-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+.manager-card{min-width:0;padding:16px;background:#1c1612;border:1px solid #584638;border-radius:8px}
+.manager-card h2{font:normal 23px Georgia,serif;margin:0 0 12px;color:#e6c99e;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.manager-card h3{font-size:13px;color:#c8b29b;margin:14px 0 6px}
+.choice-grid{display:grid;gap:6px}.choice-grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.choice-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+button{min-height:44px;padding:8px 7px;border:1px solid #624d3b;background:#2a211a;color:#e8d8bf;border-radius:6px;font-size:13px;cursor:pointer;overflow-wrap:anywhere}
+button[aria-pressed=true]{border:2px solid #d3aa6d;background:#453523;color:#ffdfaa;font-weight:700;padding:7px 6px}
+button:disabled{opacity:.55;cursor:not-allowed}
+button.secondary{width:100%;margin-bottom:8px}
+.quiet{color:#b9a48c;font-size:13px;margin:8px 0;overflow-wrap:anywhere}
+.live-label{font:600 11px system-ui,sans-serif;color:#b9c99c}
+.arena-art{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:5px;margin-bottom:8px}
+.line{font-size:14px}progress{display:block;width:100%;height:10px;margin:8px 0;accent-color:#ba925b}
+.battle-event{font-size:14px;font-weight:600;margin:10px 0}
+.battle-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.battle-fighter{padding:8px;border:1px solid #4c3a2e;border-radius:5px;font-size:12px;min-width:0}
+.battle-fighter strong{display:block;overflow-wrap:anywhere}.battle-fighter small{color:#b9a48c;display:block}
+.battle-fighter.enemy{border-color:#73483c}.battle-fighter progress{accent-color:#9e5546}
+.progress-feed{list-style:none;padding:0;margin:6px 0;max-height:260px;overflow:auto}
+.progress-feed li{padding:7px 0;border-bottom:1px solid #3c2d24;font-size:13px;overflow-wrap:anywhere}
+details summary{cursor:pointer;font-weight:650;padding:8px 0;color:#e2c59a}
+.skill-list{display:grid;grid-template-columns:1fr auto;gap:5px 10px;font-size:13px;color:#d1bda3}
+.stats-card{grid-column:1/-1}.stat-section{border-top:1px solid #49392c;padding:4px 0}
+#characterStats .skill-list{padding-bottom:10px}
+#migrationNotice{padding:10px;border:1px solid #ad8756;color:#e4c99d;font-size:13px}
+dialog{background:#201914;border:1px solid #8d6946;border-radius:8px;color:#e8d8bf;max-width:min(560px,calc(100vw - 24px));width:100%;padding:18px}
+dialog::backdrop{background:#080605cc}dialog button{width:100%}footer{text-align:center;color:#ab957f;font-size:12px;margin:20px}
+@media(max-width:700px){.manager-grid{grid-template-columns:minmax(0,1fr)}.manager-card{padding:12px}.manager-top{padding:12px}.manager-heading{align-items:flex-end}.manager-card h2{font-size:21px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}

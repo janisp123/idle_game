@@ -1,0 +1,468 @@
+{
+  "profile": {
+    "grade": 7,
+    "itemGrade": 7,
+    "quality": "masterwork",
+    "str": 141,
+    "dex": 141,
+    "end": 129,
+    "skill": 52
+  },
+  "seed": 20261126,
+  "calls": 64125,
+  "configs": 2025,
+  "top": [
+    {
+      "first": "greatsword:leather:aggressive",
+      "second": "bow:leather:aggressive",
+      "bouts": 25,
+      "wins": 20,
+      "draws": 0,
+      "losses": 5,
+      "score": 20
+    },
+    {
+      "first": "greatsword:leather:balanced",
+      "second": "bow:leather:aggressive",
+      "bouts": 25,
+      "wins": 20,
+      "draws": 0,
+      "losses": 5,
+      "score": 20
+    },
+    {
+      "first": "greatsword:leather:balanced",
+      "second": "bow:leather:balanced",
+      "bouts": 25,
+      "wins": 20,
+      "draws": 0,
+      "losses": 5,
+      "score": 20
+    },
+    {
+      "first": "greatsword:plate:balanced",
+      "second": "bow:plate:aggressive",
+      "bouts": 25,
+      "wins": 20,
+      "draws": 0,
+      "losses": 5,
+      "score": 20
+    },
+    {
+      "first": "bow:leather:balanced",
+      "second": "spear:plate:balanced",
+      "bouts": 25,
+      "wins": 19,
+      "draws": 0,
+      "losses": 6,
+      "score": 19
+    }
+  ],
+  "validation": [
+    {
+      "first": "sword_shield:plate:aggressive",
+      "second": "bow:leather:aggressive",
+      "bouts": 300,
+      "wins": 133,
+      "draws": 0,
+      "losses": 167,
+      "score": 133
+    },
+    {
+      "first": "sword_shield:plate:aggressive",
+      "second": "bow:leather:balanced",
+      "bouts": 300,
+      "wins": 131,
+      "draws": 1,
+      "losses": 168,
+      "score": 131.5
+    },
+    {
+      "first": "sword_shield:plate:aggressive",
+      "second": "bow:leather:defensive",
+      "bouts": 300,
+      "wins": 126,
+      "draws": 2,
+      "losses": 172,
+      "score": 127
+    },
+    {
+      "first": "sword_shield:plate:balanced",
+      "second": "bow:leather:aggressive",
+      "bouts": 300,
+      "wins": 142,
+      "draws": 0,
+      "losses": 158,
+      "score": 142
+    },
+    {
+      "first": "sword_shield:plate:balanced",
+      "second": "bow:leather:balanced",
+      "bouts": 300,
+      "wins": 142,
+      "draws": 1,
+      "losses": 157,
+      "score": 142.5
+    },
+    {
+      "first": "sword_shield:plate:balanced",
+      "second": "bow:leather:defensive",
+      "bouts": 300,
+      "wins": 132,
+      "draws": 0,
+      "losses": 168,
+      "score": 132
+    },
+    {
+      "first": "sword_shield:plate:defensive",
+      "second": "bow:leather:aggressive",
+      "bouts": 300,
+      "wins": 132,
+      "draws": 1,
+      "losses": 167,
+      "score": 132.5
+    },
+    {
+      "first": "sword_shield:plate:defensive",
+      "second": "bow:leather:balanced",
+      "bouts": 300,
+      "wins": 136,
+      "draws": 1,
+      "losses": 163,
+      "score": 136.5
+    },
+    {
+      "first": "sword_shield:plate:defensive",
+      "second": "bow:leather:defensive",
+      "bouts": 300,
+      "wins": 128,
+      "draws": 1,
+      "losses": 171,
+      "score": 128.5
+    },
+    {
+      "first": "spear:plate:aggressive",
+      "second": "bow:leather:aggressive",
+      "bouts": 300,
+      "wins": 157,
+      "draws": 0,
+      "losses": 143,
+      "score": 157
+    },
+    {
+      "first": "spear:plate:aggressive",
+      "second": "bow:leather:balanced",
+      "bouts": 300,
+      "wins": 158,
+      "draws": 0,
+      "losses": 142,
+      "score": 158
+    },
+    {
+      "first": "spear:plate:aggressive",
+      "second": "bow:leather:defensive",
+      "bouts": 300,
+      "wins": 151,
+      "draws": 0,
+      "losses": 149,
+      "score": 151
+    },
+    {
+      "first": "spear:plate:balanced",
+      "second": "bow:leather:aggressive",
+      "bouts": 300,
+      "wins": 158,
+      "draws": 0,
+      "losses": 142,
+      "score": 158
+    },
+    {
+      "first": "spear:plate:balanced",
+      "second": "bow:leather:balanced",
+      "bouts": 300,
+      "wins": 162,
+      "draws": 0,
+      "losses": 138,
+      "score": 162
+    },
+    {
+      "first": "spear:plate:balanced",
+      "second": "bow:leather:defensive",
+      "bouts": 300,
+      "wins": 156,
+      "draws": 0,
+      "losses": 144,
+      "score": 156
+    },
+    {
+      "first": "spear:plate:defensive",
+      "second": "bow:leather:aggressive",
+      "bouts": 300,
+      "wins": 150,
+      "draws": 0,
+      "losses": 150,
+      "score": 150
+    },
+    {
+      "first": "spear:plate:defensive",
+      "second": "bow:leather:balanced",
+      "bouts": 300,
+      "wins": 153,
+      "draws": 0,
+      "losses": 147,
+      "score": 153
+    },
+    {
+      "first": "spear:plate:defensive",
+      "second": "bow:leather:defensive",
+      "bouts": 300,
+      "wins": 150,
+      "draws": 0,
+      "losses": 150,
+      "score": 150
+    },
+    {
+      "first": "hammer:padded:aggressive",
+      "second": "spear:leather:aggressive",
+      "bouts": 300,
+      "wins": 149,
+      "draws": 1,
+      "losses": 150,
+      "score": 149.5
+    },
+    {
+      "first": "hammer:padded:aggressive",
+      "second": "spear:leather:balanced",
+      "bouts": 300,
+      "wins": 150,
+      "draws": 1,
+      "losses": 149,
+      "score": 150.5
+    },
+    {
+      "first": "hammer:padded:aggressive",
+      "second": "spear:leather:defensive",
+      "bouts": 300,
+      "wins": 154,
+      "draws": 0,
+      "losses": 146,
+      "score": 154
+    },
+    {
+      "first": "hammer:padded:balanced",
+      "second": "spear:leather:aggressive",
+      "bouts": 300,
+      "wins": 150,
+      "draws": 1,
+      "losses": 149,
+      "score": 150.5
+    },
+    {
+      "first": "hammer:padded:balanced",
+      "second": "spear:leather:balanced",
+      "bouts": 300,
+      "wins": 150,
+      "draws": 1,
+      "losses": 149,
+      "score": 150.5
+    },
+    {
+      "first": "hammer:padded:balanced",
+      "second": "spear:leather:defensive",
+      "bouts": 300,
+      "wins": 157,
+      "draws": 0,
+      "losses": 143,
+      "score": 157
+    },
+    {
+      "first": "hammer:padded:defensive",
+      "second": "spear:leather:aggressive",
+      "bouts": 300,
+      "wins": 151,
+      "draws": 1,
+      "losses": 148,
+      "score": 151.5
+    },
+    {
+      "first": "hammer:padded:defensive",
+      "second": "spear:leather:balanced",
+      "bouts": 300,
+      "wins": 151,
+      "draws": 1,
+      "losses": 148,
+      "score": 151.5
+    },
+    {
+      "first": "hammer:padded:defensive",
+      "second": "spear:leather:defensive",
+      "bouts": 300,
+      "wins": 157,
+      "draws": 0,
+      "losses": 143,
+      "score": 157
+    },
+    {
+      "first": "greatsword:plate:aggressive",
+      "second": "greatsword:plate:aggressive",
+      "bouts": 300,
+      "wins": 166,
+      "draws": 0,
+      "losses": 134,
+      "score": 166
+    },
+    {
+      "first": "greatsword:plate:aggressive",
+      "second": "greatsword:plate:balanced",
+      "bouts": 300,
+      "wins": 170,
+      "draws": 0,
+      "losses": 130,
+      "score": 170
+    },
+    {
+      "first": "greatsword:plate:aggressive",
+      "second": "greatsword:plate:defensive",
+      "bouts": 300,
+      "wins": 163,
+      "draws": 0,
+      "losses": 137,
+      "score": 163
+    },
+    {
+      "first": "greatsword:plate:balanced",
+      "second": "greatsword:plate:aggressive",
+      "bouts": 300,
+      "wins": 175,
+      "draws": 0,
+      "losses": 125,
+      "score": 175
+    },
+    {
+      "first": "greatsword:plate:balanced",
+      "second": "greatsword:plate:balanced",
+      "bouts": 300,
+      "wins": 169,
+      "draws": 1,
+      "losses": 130,
+      "score": 169.5
+    },
+    {
+      "first": "greatsword:plate:balanced",
+      "second": "greatsword:plate:defensive",
+      "bouts": 300,
+      "wins": 164,
+      "draws": 1,
+      "losses": 135,
+      "score": 164.5
+    },
+    {
+      "first": "greatsword:plate:defensive",
+      "second": "greatsword:plate:aggressive",
+      "bouts": 300,
+      "wins": 173,
+      "draws": 0,
+      "losses": 127,
+      "score": 173
+    },
+    {
+      "first": "greatsword:plate:defensive",
+      "second": "greatsword:plate:balanced",
+      "bouts": 300,
+      "wins": 166,
+      "draws": 1,
+      "losses": 133,
+      "score": 166.5
+    },
+    {
+      "first": "greatsword:plate:defensive",
+      "second": "greatsword:plate:defensive",
+      "bouts": 300,
+      "wins": 165,
+      "draws": 1,
+      "losses": 134,
+      "score": 165.5
+    },
+    {
+      "first": "spear:plate:aggressive",
+      "second": "spear:plate:aggressive",
+      "bouts": 300,
+      "wins": 189,
+      "draws": 1,
+      "losses": 110,
+      "score": 189.5
+    },
+    {
+      "first": "spear:plate:aggressive",
+      "second": "spear:plate:balanced",
+      "bouts": 300,
+      "wins": 187,
+      "draws": 1,
+      "losses": 112,
+      "score": 187.5
+    },
+    {
+      "first": "spear:plate:aggressive",
+      "second": "spear:plate:defensive",
+      "bouts": 300,
+      "wins": 184,
+      "draws": 1,
+      "losses": 115,
+      "score": 184.5
+    },
+    {
+      "first": "spear:plate:balanced",
+      "second": "spear:plate:aggressive",
+      "bouts": 300,
+      "wins": 192,
+      "draws": 1,
+      "losses": 107,
+      "score": 192.5
+    },
+    {
+      "first": "spear:plate:balanced",
+      "second": "spear:plate:balanced",
+      "bouts": 300,
+      "wins": 188,
+      "draws": 1,
+      "losses": 111,
+      "score": 188.5
+    },
+    {
+      "first": "spear:plate:balanced",
+      "second": "spear:plate:defensive",
+      "bouts": 300,
+      "wins": 184,
+      "draws": 1,
+      "losses": 115,
+      "score": 184.5
+    },
+    {
+      "first": "spear:plate:defensive",
+      "second": "spear:plate:aggressive",
+      "bouts": 300,
+      "wins": 195,
+      "draws": 0,
+      "losses": 105,
+      "score": 195
+    },
+    {
+      "first": "spear:plate:defensive",
+      "second": "spear:plate:balanced",
+      "bouts": 300,
+      "wins": 192,
+      "draws": 0,
+      "losses": 108,
+      "score": 192
+    },
+    {
+      "first": "spear:plate:defensive",
+      "second": "spear:plate:defensive",
+      "bouts": 300,
+      "wins": 185,
+      "draws": 0,
+      "losses": 115,
+      "score": 185
+    }
+  ]
+}

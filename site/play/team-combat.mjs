@@ -1,6 +1,7 @@
 // Team geometry and decisions; all damage and durability use physical-actions.
 import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=team-002";
 import { coordinationChance } from "./teamwork.mjs?v=team-002";
+import {TACTIC_BALANCE,tacticActivation,validTacticSnapshot} from "./manager-tactics.mjs?v=manager-tactics-001";
 export const TEAM_COMBAT_BALANCE=Object.freeze({maxRoster:6,maxRounds:PHYSICAL_RULES.turnLimit,
   rearSpace:3,interceptRecovery:1,focusWeight:2,healthWeight:1.5});
 const alive=a=>a.hp>0;
@@ -12,7 +13,7 @@ const other=(actors,a)=>actors.filter(b=>b.side!==a.side&&alive(b));
 const allies=(actors,a)=>actors.filter(b=>b.side===a.side&&b!==a&&alive(b));
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
 export const teamArenaWidth=terrain=>2*TEAM_COMBAT_BALANCE.rearSpace+clamp(terrain.startDistance??2,0,2)+2;
-const validRoster=r=>Array.isArray(r)&&r.length>0&&r.length<=TEAM_COMBAT_BALANCE.maxRoster&&r.every(a=>a&&Object.hasOwn(WEAPONS,a.loadout)&&a.loadout!=="dagger"&&["str","dex","end","skill"].every(k=>Number.isFinite(a[k])&&a[k]>=0&&a[k]<=1e6));
+const validRoster=r=>Array.isArray(r)&&r.length>0&&r.length<=TEAM_COMBAT_BALANCE.maxRoster&&r.every(a=>a&&Object.hasOwn(WEAPONS,a.loadout)&&a.loadout!=="dagger"&&validTacticSnapshot(a)&&["str","dex","end","skill"].every(k=>Number.isFinite(a[k])&&a[k]>=0&&a[k]<=1e6));
 function makeActors(roster,side,terrain){
   const start=clamp(terrain.startDistance??2,0,2)+1;
   return roster.map((snapshot,i)=>{
@@ -38,7 +39,12 @@ function chooseTarget(a,actors,coordinated,roll){
     const focus=peers.filter(c=>c.targetId===b.id).length;
     const score=-(Math.max(0,d-range)*3+d*.25)+(coordinated?
       (1-b.hp/b.maxHP)*TEAM_COMBAT_BALANCE.healthWeight+focus*TEAM_COMBAT_BALANCE.focusWeight:0);
-    return {b,score:score+(reachable?1:0),tie:roll()};
+    // Only take extra focus opportunities if already reachable or no foe is.
+    const eligible=reachable||!enemies.some(e=>distance(a,e)<=range);
+    const role=a.activeTactic,bonus=eligible?(role==="aggressive"?
+      (1-b.hp/b.maxHP)*TACTIC_BALANCE.aggressiveHealth+focus*TACTIC_BALANCE.aggressiveFocus:
+      role==="balanced"&&!coordinated?(1-b.hp/b.maxHP)*TACTIC_BALANCE.balancedHealth+focus*TACTIC_BALANCE.balancedFocus:0):0;
+    return {b,score:score+bonus+(reachable?1:0),tie:roll()};
   }).sort((a,b)=>b.score-a.score||a.tie-b.tie)[0]?.b;
 }
 function move(a,target,actors,height,width,retreat,roll){
@@ -72,9 +78,9 @@ function intercept(a,target,actors,round,chance,roll){
   // guard-open, broken or in worse health than the ally.
   if(activeWeapon(a).ranged)return target;
   const guard=allies(actors,target).filter(g=>g.shield.hp>0&&!g.stagger&&!g.guardOpen&&g.intercepted!==round&&
-    gap(g,target)===1&&g.hp/g.maxHP>=target.hp/target.maxHP)
+    gap(g,target)===1&&g.hp/g.maxHP>=target.hp/target.maxHP&&g.activeTactic!=="aggressive")
     .sort((a,b)=>b.hp/b.maxHP-a.hp/a.maxHP)[0];
-  if(!guard||roll()>=chance)return target;
+  if(!guard||roll()>=(guard.activeTactic==="defensive"?Math.max(chance,tacticActivation(guard.tacticLevel)):chance))return target;
   // Swap adjacent allies: the protector occupies the originally reachable tile.
   const {x,y}=guard;guard.x=target.x;guard.y=target.y;target.x=x;target.y=y;
   guard.approach=0;target.approach=0;
@@ -87,6 +93,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   const actors=[...makeActors(players,"player",terrain),...makeActors(enemies,"enemy",terrain)];
   const height=Math.max(players.length,enemies.length),width=teamArenaWidth(terrain),roll=seededRandom(seed),speedRoll=seededRandom((seed^0x85ebca6b)>>>0),
     initiative=seededRandom((seed^0x9e3779b9)>>>0),decision=seededRandom((seed^0x517cc1b7)>>>0);
+  const tactical=seededRandom((seed^0x4f7b3241)>>>0);
   const events=[];let round=0;
   const record=(a,b,type,extra={})=>{
     events.push({type,round,actor:a?.id??null,target:b?.id??null,damage:0,...extra,
@@ -108,20 +115,38 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
         const damage=wound(source,a,2);record(source,a,"bleed",{damage});
         if(!alive(a))continue;
       }
+      a.activeTactic=null;
       if(a.stagger>0){a.stagger--;record(a,null,"stagger");continue;}
+      if(a.tactic!==undefined&&tactical()<tacticActivation(a.tacticLevel))a.activeTactic=a.tactic;
       const coordinated=decision()<chance[a.side],target=chooseTarget(a,actors,coordinated,decision);
       if(!target)continue;
       a.targetId=target.id;
       const active=activeWeapon(a),bow=bowActive(a);
+      // Defensive fighters may escort threatened allies only when they
+      // cannot take a ready attack. Real tile movement and turn cost.
+      if(a.activeTactic==="defensive"&&a.shield.hp>0&&!a.guardOpen){
+        const ward=allies(actors,a).filter(b=>b.shield.hp===0).sort((b,c)=>b.hp/b.maxHP-c.hp/c.maxHP)[0];
+        const threats=ward?other(actors,a).filter(e=>!activeWeapon(e).ranged&&distance(e,ward)<=activeWeapon(e).range+1):[];
+        if(ward&&gap(a,ward)>1&&threats.length&&(a.recovery>0||!other(actors,a).some(e=>distance(a,e)<=active.range))){
+          const candidates=adjacent(a,actors,height,width,a.side).filter(p=>gap(p,ward)<gap(a,ward))
+            .map(p=>({p,d:gap(p,ward),threat:Math.min(...threats.map(e=>gap(p,e))),tie:tactical()})).sort((b,c)=>b.d-c.d||b.threat-c.threat||b.tie-c.tie);
+          if(candidates.length){Object.assign(a,candidates[0].p);a.approach=0;a.recovery=Math.max(0,a.recovery-1);record(a,ward,"approach",{tactic:"escort"});continue;}
+        }
+      }
+      // Defensive reach weapons preserve space at the cost of a ready turn.
+      if(a.activeTactic==="defensive"&&a.recovery===0&&active.range>0&&a.retreats>0&&distance(a,target)<active.range&&
+        mobility(a)>=mobility(target)+TACTICS.retreatLead&&move(a,target,actors,height,width,true,tactical)){
+        a.retreats--;a.approach=0;record(a,target,"retreat",{tactic:"maintain_range"});continue;
+      }
       if(a.recovery>0){
         a.recovery--;
-        if(bow&&a.retreats>0&&distance(a,target)<2&&mobility(a)>=mobility(target)+TACTICS.retreatLead&&move(a,target,actors,height,width,true,decision)){
+        if(bow&&a.activeTactic!=="aggressive"&&a.retreats>0&&distance(a,target)<2&&mobility(a)>=mobility(target)+TACTICS.retreatLead&&move(a,target,actors,height,width,true,decision)){
           a.retreats--;a.approach=0;record(a,target,"retreat");
         }
         continue;
       }
       if(distance(a,target)>active.range){
-        a.approach+=mobility(a)>=TACTICS.quickMobility?1:TACTICS.slowApproach;
+        a.approach+=(mobility(a)>=TACTICS.quickMobility?1:TACTICS.slowApproach)*(a.activeTactic==="aggressive"?TACTIC_BALANCE.aggressiveApproach:1);
         if(a.approach>=(terrain.approachSteps??1)){
           a.approach=0;move(a,target,actors,height,width,false,decision);
         }
