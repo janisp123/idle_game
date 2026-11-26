@@ -1,4 +1,4 @@
-name: Armour durability and build diversity audit
+name: Armour wear and competitive diversity audit
 on:
   pull_request:
     branches: [main]
@@ -8,6 +8,7 @@ on:
       - 'tools/individual-behaviour-audit.mjs'
       - 'tools/offline-behaviour-audit.mjs'
       - 'tools/armour-durability-audit.mjs'
+      - 'tools/armour-wear-audit.mjs'
       - '.github/workflows/team-behaviour.yml'
   workflow_dispatch:
 permissions:
@@ -15,7 +16,7 @@ permissions:
 jobs:
   behaviour:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -26,17 +27,17 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
-      - name: Compare material durability and role diversity
+      - name: Compare scaled wear and broad competitive build diversity
         env:
           GRADE: ${{ matrix.grade }}
           CANDIDATE: ${{ matrix.candidate }}
-        run: node tools/armour-durability-audit.mjs "$GRADE" "$CANDIDATE" > behaviour.json
+        run: node tools/armour-wear-audit.mjs "$GRADE" "$CANDIDATE" > behaviour.json
       - name: Print verified summary
         run: |
           node --input-type=module -e '
             import {readFileSync} from "node:fs";
-            const {equipment,screened,...r}=JSON.parse(readFileSync("behaviour.json","utf8"));
-            console.log("TEAM_ARMOUR "+JSON.stringify(r));'
+            const {screened,validated,...r}=JSON.parse(readFileSync("behaviour.json","utf8"));
+            console.log("TEAM_WEAR "+JSON.stringify(r));'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: team-behaviour-${{ matrix.grade }}-${{ matrix.candidate }}
