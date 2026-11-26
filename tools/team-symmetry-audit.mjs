@@ -8,7 +8,7 @@ import {fileURLToPath,pathToFileURL} from "node:url";
 import {createPlayerSnapshot} from "./combat-simulator.mjs";
 import {seededCombatRandom} from "../site/play/combat.mjs";
 import {ARENAS} from "../site/play/arenas.mjs";
-import {resolveTeamBattle as baseline} from "../site/play/team-combat.mjs";
+import {resolveTeamBattle as centered} from "../site/play/team-combat.mjs";
 const seed=20261127,grade=Number(process.argv[2]??0),samples=128;
 assert.ok([0,3,7].includes(grade));
 const rng=seededCombatRandom(seed),seeds=Array.from({length:samples},()=>Math.floor(rng()*2**32));
@@ -18,19 +18,11 @@ try{
  for(const name of await readdir(play))if(name.endsWith(".mjs"))await copyFile(join(play,name),join(dir,name));
  const p=join(dir,"team-combat.mjs");let src=await readFile(p,"utf8");
  const rep=(a,b)=>{assert.ok(src.includes(a),a);src=src.replace(a,b);};
- // Equal rear space for either side at every start distance (8/9/10 tiles).
- // Mirror deterministic fallback neighbour traversal relative to each side.
- rep('function adjacent(a,actors,height){','function adjacent(a,actors,height,width,side){\n  const d=side==="player"?1:-1;');
- rep('[[a.x-1,a.y],[a.x+1,a.y],[a.x,a.y-1],[a.x,a.y+1]]','[[a.x-d,a.y],[a.x+d,a.y],[a.x,a.y-1],[a.x,a.y+1]]');
- rep('x<TEAM_COMBAT_BALANCE.width','x<width');
- rep('function move(a,target,actors,height,retreat,roll){','function move(a,target,actors,height,width,retreat,roll){');
- rep('adjacent(a,actors,height);','adjacent(a,actors,height,width,a.side);');
- rep('adjacent(p,actors,height))','adjacent(p,actors,height,width,a.side))');
- rep('const height=Math.max(players.length,enemies.length),roll=','const height=Math.max(players.length,enemies.length),width=7+clamp(terrain.startDistance??2,0,2)+1,roll=');
- rep('move(a,target,actors,height,true,decision)','move(a,target,actors,height,width,true,decision)');
- rep('move(a,target,actors,height,false,decision)','move(a,target,actors,height,width,false,decision)');
+ // Reverse only the approved geometry changes in a disposable copy for comparison.
+ rep('function adjacent(a,actors,height,width,side){\n  const d=side==="player"?1:-1;','function adjacent(a,actors,height,width,side){\n  const d=1;');
+ rep('width=teamArenaWidth(terrain),roll=','width=9,roll=');
  await writeFile(p,src);
- const {resolveTeamBattle:centered}=await import(pathToFileURL(p).href);
+ const {resolveTeamBattle:baseline}=await import(pathToFileURL(p).href);
  const pairs=[
   ["tank_archer",["sword_shield","plate"],["bow","leather"]],
   ["hammer_spear",["hammer","plate"],["spear","leather"]],
