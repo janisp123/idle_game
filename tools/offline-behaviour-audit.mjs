@@ -102,7 +102,7 @@ try{
   const s=fixture(name,mode,origin,fraction),base=e.desiredArenaTeam(s);
   assert.equal(base.first.behaviour,mode.split("/")[0]);
   assert.equal(base.second.behaviour,mode.split("/")[1]);
-  const result=e.enterGameWithApprentice(s,origin+duration*H,c.seededCombatRandom(origin^0x3f87a2)),next=result.state;
+  const result=e.enterGameWithApprentice(s,origin+duration*H,c.seededCombatRandom((origin^0x3f87a2)>>>0)),next=result.state;
   const a=result.offlineArena??{},coins=a.coins??0,spent=result.autoEquipment?.spent??0;
   assert.equal(next.coins,s.coins+coins-spent);assert.deepEqual(next.autoFight,s.autoFight);
   assert.ok(next.skills.fighting.xp<=e.xpToNextLevel(level));
