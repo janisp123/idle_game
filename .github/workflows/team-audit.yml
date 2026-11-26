@@ -1,0 +1,67 @@
+name: Team combat and economy audit
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'site/play/**'
+      - 'tools/team-*-audit.mjs'
+      - '.github/workflows/team-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  combat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: node tools/team-balance-audit.mjs > team-balance.json
+      - name: Print audit summary
+        run: |
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            const r=JSON.parse(readFileSync("team-balance.json","utf8"));
+            console.log("TEAM_BALANCE_COUNTS "+JSON.stringify(r.counts));
+            for(const grade of [0,3,7]){
+              const rows=r.matrix.filter(x=>x.grade===grade).sort((a,b)=>b.winPct-a.winPct);
+              const slim=x=>({first:r.builds[x.first],second:r.builds[x.second],wins:x.wins,bouts:x.bouts,winPct:x.winPct});
+              console.log("TEAM_MATRIX "+JSON.stringify({grade,mean:rows.reduce((n,x)=>n+x.winPct,0)/rows.length,best:rows.slice(0,5).map(slim),worst:rows.slice(-5).map(slim)}));
+            }
+            for(const row of r.mirrors)console.log("TEAM_MIRROR "+JSON.stringify({grade:row.grade,name:row.name,forward:row.forward.winPct,reverse:row.reverse.winPct}));
+            for(const row of r.coordination)console.log("TEAM_COORDINATION "+JSON.stringify({grade:row.grade,name:row.name,level:row.level,winPct:row.winPct}));
+            for(const row of r.dominance)console.log("TEAM_DOMINANCE "+JSON.stringify(row));'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: team-balance-report
+          path: team-balance.json
+          retention-days: 7
+  economy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [tank_archer, hammer_spear, dual_bow, dual_shield, tank_archer_long, weekly, mixed]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Run six-month scenario
+        env:
+          TEAM_SCENARIO: ${{ matrix.scenario }}
+        run: node tools/team-economy-audit.mjs "$TEAM_SCENARIO" > team-economy.json
+      - name: Print final and checkpoint results
+        run: |
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            const r=JSON.parse(readFileSync("team-economy.json","utf8"));
+            console.log("TEAM_ECONOMY "+JSON.stringify(r));'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: team-economy-${{ matrix.scenario }}
+          path: team-economy.json
+          retention-days: 7
