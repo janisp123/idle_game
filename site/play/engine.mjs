@@ -645,6 +645,23 @@ function settleWork(state,now,random,frozenEffort,stopAtCap=false,online=false){
 
 
 
+/** Manager coordinator adapter: one existing capped activity, no queue or
+ * claims. Returns the true cap cursor and existing reward reports. Both
+ * manager lanes receive the same immutable shared starting snapshot. */
+export function settleManagerLane(state,now,random=Math.random,online=false){
+  if(state.transition||state.wagons.length!==1||state.wagons[0].activity!==state.activity||
+    state.wagons[0].plannedMs!==null)throw new RangeError("Invalid manager lane projection");
+  if(online&&(now-state.settledAtMs>LIVE_FIGHT_MAX_MS||now<state.settledAtMs))
+    throw new RangeError("Invalid live lane interval");
+  return settleWork(state,now,random,state.attributeEffortActive,true,online);
+}
+/** Exact productive prefix of the same frozen combat schedule, used only
+ * to apportion overlapping attribute time, never to pay rewards twice. */
+export function managerCombatProductivePrefix(state,elapsedMs,online=false){
+  if(state.activity!=="fighting"||!isCount(elapsedMs))throw new RangeError("Invalid combat prefix");
+  return elapsedMs?elapsedMs-settleArenaBuild(state,elapsedMs,new Map(),online).downtimeMs:0;
+}
+
 /**
  * Travel and preparation are real elapsed time, even with the page closed.
  * At most three transition phases and one old/full new-work batch are resolved,

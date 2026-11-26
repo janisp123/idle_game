@@ -41,7 +41,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Fighting is permanent, automatic and cannot be disabled; remove its entry from the selectable activities list. Training shares the other activities group.
 - **Acceptance:** Genuine permanent fighting engine behavior, not merely hiding its control; automatic noncombat rotation cannot stop combat. Define separate combat/work time, rewards, caps, transitions, shared attributes and wallet consistently; do not double-credit the same effort. Preserve frozen offline settlement and automatic Master/gear policy. Test simultaneous work/combat, exact rewards, save/reload and mobile presentation. No endgame balance retuning or lower-grade balance sweep in this task.
-- **Status:** PARTIAL — approved, engine design and implementation pending; current single activity timeline cannot satisfy this.
+- **Status:** IN_REVIEW — Phase 2 coordinator candidate added in PR #192; functional tests and UI/rotation integration pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

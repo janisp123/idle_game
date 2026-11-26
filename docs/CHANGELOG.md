@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## PERMANENT-FIGHT-001 · Phase 2 coordinator candidate (2026-11-26, chat)
+
+PERMANENT-FIGHT-001 Phase 2 candidate: #191 Pages 45888338750 SUCCESS, prior merge verified. New manager-lanes.mjs reuses existing capped lane settlement and real combat prefix; shared attribute budget split by exact productive overlap with alternating odd milliseconds, separately persisted work progress and one wall clock; frozen offline claims and live automation boundaries. Current work is fixed (rotation/transition/tribute integration Phase 3); module not connected to browser or public save. Proposed effort split and offline policy not yet validated. Seven targeted tests added; CI NOT RUN at commit. No combat tuning. Next verify functional tests and address failures, then integrate rotation and resolve tribute.
+
 ## AUTO-MASTER-001 / HOBBY-002 · MERGED (2026-11-26, chat)
 
 PR #191 merged into main at `3cc0df4e995abf61631a117974f39b2cd6606256`; final head `280e60a4d476fdd7af173e76749d74e3140acf3c` passed all six workflows: website 45888168066 (117/117 engine/UI; mobile/desktop Chromium), systems 45888168099, simulator 45888168035, protocol 45888168056, team audit 45888168129, sensitivity 45888168020. Main readback confirms automatic settlement code. Pages run 45888338750 still pending at this milestone; do not claim deployment. PR #192 rebased via merge of current main, preserving the approved manager plan and prior test fixes. No new gameplay changes. Next: verify Pages, then implement permanent combat/work coordinator and resolve tribute policy before release.
