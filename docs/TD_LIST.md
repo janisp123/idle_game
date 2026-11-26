@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## AUTO-ACTIVITY-001 — Fully autonomous activity rotation
+
+- **Goal:** No selectable activities or player-managed route. Keep permanent fighting plus a single automatic noncombat work activity. Work until one next level is earned; claim automatically through the Master, then proceed to the next activity and repeat. Training participates in the same rotation.
+- **Acceptance:** Remove all activity start/schedule/priority/wagon editing controls and queue-slot unlocks; replace with read-only current/next activity, skill XP, actual materials, levels and upgrades. No activity starvation or deadlocks, especially material-dependent production and Master tribute; preserve real resource conservation and frozen offline settlement, avoid doubled effort across combat and work, validate migration of old manual routes and exact saved progress. All three independent strategic choices per gladiator remain buttons. No lower-grade combat balance sweep. Use genuine resolver and engine; no cosmetic-only automation.
+- **Status:** PARTIAL — owner-approved direction recorded; requires PERMANENT-FIGHT-001 and AUTO-MASTER-001. Proposed fixed round-robin and blocked-recipe skip/retry require actual validation; offline rotation/tribute/effort allocation not yet specified. Runtime unchanged.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## TACTIC-UI-001 — Independent gladiator fighting tactics
 
 - **Goal:** Each gladiator chooses Aggressive, Balanced or Defensive through three buttons alongside weapon and whole armour set. Default Balanced.
@@ -19,7 +28,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 ## MANAGER-UI-001 — Button-based gladiator equipment and simplified activities
 
-- **Goal:** Mobile-first strategic equipment controls: two gladiator buttons, five weapon buttons, three whole armour-family buttons (padded/leather/plate); no individual piece or manual grade/quality selection. Training belongs with other activities; remove repetitive stats, retain optional detailed Character Stats.
+- **Goal:** Mobile-first strategic equipment controls: two gladiator buttons, five weapon buttons, three whole armour-family buttons (padded/leather/plate); no individual piece or manual grade/quality selection. Training belongs in automatic rotation; remove all player work selection and scheduling per AUTO-ACTIVITY-001; remove repetitive stats, retain optional detailed Character Stats.
 - **Acceptance:** Atomic complete-set equip/acquisition with existing prices, exact shared treasury, no mixed-family selection through player UI, no automatic selection against player choice, retained owned progress, frozen in-flight battles, no per-piece upgrade controls. Clearly show affordability, equipped family, and selection. Validate existing saves, phone and desktop, and real engine/simulation parity. No combat retuning.
 - **Status:** PARTIAL — approved, development stacked on PR #191.
 - **Added by:** chat.
@@ -29,7 +38,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## PERMANENT-FIGHT-001 — Fighting always active, outside selectable activities
 
 - **Goal:** Fighting is permanent, automatic and cannot be disabled; remove its entry from the selectable activities list. Training shares the other activities group.
-- **Acceptance:** Genuine permanent fighting engine behavior, not merely hiding its control; selecting/scheduling other activities cannot stop combat. Define separate combat/work time, rewards, caps, transitions, shared attributes and wallet consistently; do not double-credit the same effort. Preserve frozen offline settlement and automatic Master/gear policy. Test simultaneous work/combat, exact rewards, save/reload and mobile presentation. No endgame balance retuning or lower-grade balance sweep in this task.
+- **Acceptance:** Genuine permanent fighting engine behavior, not merely hiding its control; automatic noncombat rotation cannot stop combat. Define separate combat/work time, rewards, caps, transitions, shared attributes and wallet consistently; do not double-credit the same effort. Preserve frozen offline settlement and automatic Master/gear policy. Test simultaneous work/combat, exact rewards, save/reload and mobile presentation. No endgame balance retuning or lower-grade balance sweep in this task.
 - **Status:** PARTIAL — approved, engine design and implementation pending; current single activity timeline cannot satisfy this.
 - **Added by:** chat.
 - **Requested by:** Owner.
