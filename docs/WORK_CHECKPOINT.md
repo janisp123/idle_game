@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## Manager-only Phase 7 — integrated validation started
+
+Phase 7 STARTED: Phase 6 head daeac504 all six CI PASS including actual manager browser 390/1440px and three migration tests (website 45891951280). Added integrated seeded 720 live ticks + 60 offline return checks for all ten work skills, exact per-item and wallet ledger, shared time and save roundtrip. Added separate max-only endgame workflow/harness, six isolated candidate policies (baseline, spear reach, plate material, shield guard, hammer recovery, combined), 25 opponent teams all five arenas, side-paired sensitivity, independent holdout, broad all 2025 ordered builds for baseline/search-selected candidate, fresh elite/counter holdout. No runtime combat tuning in this milestone. CI and numerical evidence pending. Existing reserve/pacing provisional; no deployment before tested balance and owner approval of tribute. #192 draft.
+
 ## MANAGER-UI-001 — Phase 6 public interface candidate
 
 First Phase 6 CI at b27c0ee0: site structure/syntax/117 historical tests PASS; website 45891729753 failed new manager startup at 390px. Found incorrect requiredAutoFightWins argument (needs progress object, not grade). Fixed it, capture chosen fighter at click, settle return before choice, retain expanded stat subsections, display committed battle summaries, check alpha coin completion rather than racing automatic spending, improve browser diagnostics, add three migration tests. New CI pending.
