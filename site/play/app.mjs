@@ -1,6 +1,6 @@
-import {renderTeamBattle,teamBattleView,teamworkText} from "./team-view.mjs?v=team-003";
-import {teamCombatAtTime} from "./team-timeline.mjs?v=team-003";
-import { initLoginReport, showLoginReport, clearLoginReport } from "./login-report-ui.mjs?v=team-003";
+import {renderTeamBattle,teamBattleView,teamworkText} from "./team-view.mjs?v=team-004";
+import {teamCombatAtTime} from "./team-timeline.mjs?v=team-004";
+import { initLoginReport, showLoginReport, clearLoginReport } from "./login-report-ui.mjs?v=team-004";
 import { requiredAutoFightWins } from "./auto-fight.mjs?v=auto-fight-03";
 import { characterStats } from "./character-stats.mjs?v=apprentice-a4";
 import { MASTER_CONSENT_VERSION } from "./apprentice.mjs?v=apprentice-a2";
@@ -17,7 +17,7 @@ import {
   getApprenticeProgress, queueCapacity, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, activityRewardCapped, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=team-003";
+} from "./engine.mjs?v=team-004";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=gear-a3";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-art-001";
@@ -27,7 +27,7 @@ import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats, dodgeChance }
   from "./armour.mjs?v=bal-002";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=apprentice-a4";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=team-004";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -924,6 +924,7 @@ function renderApprentice() {
 }
 
 function render() {
+  $("alphaSecondFamilyLabel").hidden=!state.teamSecond;
   renderApprentice();
   const current = state.activity ? ACTIVITIES[state.activity] : null;
   ui.alphaSpeed.checked = alphaClock?.speed === 10;
@@ -1369,8 +1370,10 @@ function start(coordinatedLogin = false) {
   ui.alphaMax.addEventListener("click",()=>{
     const weapon=COMBAT_LOADOUTS[state.combatLoadout].name;
     const family=ui.alphaFamily.value;
-    applyTest(()=>alphaMaxStats(state,family,gameNow()),
-      "TEST ONLY · Six-month benchmark applied: "+weapon+" + "+family+". Fighting Lv 52 minimum; no free gear or coins.");
+    const secondFamily=$("alphaSecondFamily").value;
+    const second=state.teamSecond?" · "+COMBAT_LOADOUTS[state.teamSecond.combatLoadout].name+" + "+secondFamily:"";
+    applyTest(()=>alphaMaxStats(state,family,gameNow(),Math.random,secondFamily),
+      "TEST ONLY · Six-month benchmark applied: "+weapon+" + "+family+second+". Fighting Lv 52 minimum; no free gear or coins.");
   });
   ui.alphaCoins.addEventListener("click",()=>applyTest(()=>alphaGrantCoins(state,gameNow()),
     "TEST ONLY · Added 100,000 arena coins."));
