@@ -1,5 +1,10 @@
 # Current working checkpoint
 
+## TEAM-006 — behaviour candidate verified (2026-11-26, chat)
+
+[Report](mechanics/TEAM_006_BEHAVIOUR.md), [results](mechanics/TEAM_006_BEHAVIOUR.json), research PR #190. Native run 45844151597 all nine jobs PASS; 1,714,176 battles and 1080 exact normal trace parity fixtures. Strong conditional niches for Focus and Range; broad gains modest (own-team policy +0.2–1.7 pp); Protect is harmful to tank+archer despite increased interception. Do not ship first candidate. Refine focus reachability, range timing and guard formation; retest against normal with independent seeds. No live changes, no pets, no merge.
+
+
 ## TEAM-006 — selectable behaviour research
 
 Owner requested testing of Protect Companion, Focus Fire and Maintain Range instead of adding a pet. Research-only PR #190, source main 997ded2d. Harness tools/team-behaviour-audit.mjs (7befbc07), native run 45844151597 at 112a39ee. Temporary resolver copy; normal exact trace parity asserted; same physical strikes, stats, grade, gear and economy. Protect moves an intact-shield fighter toward a threatened non-shield ally at cost of a ready action; adjacent interception commitment rises with mastery and retains existing recovery. Focus increases target selection weight for wounded/shared targets, potentially costing movement; Range spends ready action and finite retreat budget to increase nearest enemy distance, mobility-gated. Separate tactical RNG; provisional activation probability 25%–85% from mastery 1–50, general Teamwork 25. Nine jobs (NG/D/S × 1/25/50), 12 teams, eight opponents, five arenas, 32 search and 64 holdout seeds per cell; 128 NPC/arena-dice seeds per team/mode. Tests are not evidence of implementation approval. Prior TEAM-005 evidence in PR #189. Next collect all results, compare fixed/team-specific/context policy, examine real intercept/action cost and mastery curves; no live changes.
