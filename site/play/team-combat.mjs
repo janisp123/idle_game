@@ -41,11 +41,27 @@ function chooseTarget(a,actors,coordinated,roll){
 function move(a,target,actors,height,retreat,roll){
   const opponents=other(actors,a);
   const nearest=p=>Math.min(...opponents.map(e=>gap(p,e)));
-  const before=retreat?nearest(a):gap(a,target);
-  const best=adjacent(a,actors,height).map(p=>({p,score:retreat?nearest(p)-before:before-gap(p,target),tie:roll()}))
-    .filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.tie-b.tie)[0];
-  if(!best)return false;
-  Object.assign(a,best.p);return true;
+  const steps=adjacent(a,actors,height);
+  if(retreat){
+    const before=nearest(a);
+    const best=steps.map(p=>({p,score:nearest(p)-before,tie:roll()}))
+      .filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.tie-b.tie)[0];
+    if(!best)return false;Object.assign(a,best.p);return true;
+  }
+  // Find the shortest walkable route to a legal attack tile, including
+  // lateral detours around either team. Small bounded grid; no teleport.
+  const key=p=>p.x+":"+p.y,seen=new Set([key(a)]);
+  const queue=steps.map(p=>({p,first:p,tie:roll()})).sort((a,b)=>a.tie-b.tie);
+  for(const {p} of queue)seen.add(key(p));
+  const range=activeWeapon(a).range;
+  for(let i=0;i<queue.length;i++){
+    const {p,first}=queue[i];
+    if(distance(p,target)<=range){Object.assign(a,first);return true;}
+    for(const next of adjacent(p,actors,height)){
+      const k=key(next);if(seen.has(k))continue;seen.add(k);queue.push({p:next,first});
+    }
+  }
+  return false;
 }
 function intercept(a,target,actors,round,chance,roll){
   // A nearby shield bearer can step into a reachable attack, never teleport.
