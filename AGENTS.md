@@ -21,6 +21,10 @@
 
 See DECISIONS.md and paused STRATEGY-001 research PR #186. No candidate companion species, tactic effects or numerical progression formula is approved by this rule alone. No resumption of paused implementation without owner instruction.
 
+## Owner-approved automation direction — AUTO-MASTER-001 (2026-11-26)
+
+The player is a gladiator manager. Mandatory automatic Skill Master and selected weapon/armour grade and quality upgrades are available from first entry and throughout active online play. No activity-level unlocks, opt-in controls or manual level/grade/quality upgrade chores. Preserve meaningful combat loadout decisions, active-choice-only progress, existing tribute, legal upgrade prices/gates, exact shared treasury and frozen offline settlement. Apply changes at safe chronological boundaries, never retroactively. This supersedes older conflicting login-only and 50/10-level automation wording; implementation pending in PR #191. No unapproved tactical options or combat balance changes.
+
 ## Core architecture rule — MODULAR-001 (2026-11-26)
 
 **Owner-approved.** Keep systems modular, independently testable, easy to edit and expandable. Use a single source of truth for actual formulas, with pure mechanics separated from orchestration, save/settlement, UI and test adapters. Team combat operates on bounded rosters, not hard-coded two-fighter strike logic; playable team size remains two until explicitly changed. Keep tuning constants in the responsible modules and extend developer simulations to import the same actual resolver. Do not add speculative features or abstractions merely for flexibility.
