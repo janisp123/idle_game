@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## TEAM-008 — partial results (corrected run 45865654833)
+
+Six NG/D jobs passed; S still pending at first check. [Available results](mechanics/TEAM_008_OFFLINE_PARTIAL.json). NG/D synthetic fixtures substantially overmatch same-grade NPCs (normal 431.97/429.87 wins per 432 bouts). Max mastery empty XP bar 24h coins good/normal/poor NG 7343.59/7343.44/7341.40, D 28814.65/28801.28/28654.13. Near-full XP caps all rewards by 8h NG and by 24h D; full bar zero. D upgrades same five per day; NG auto smith locked. This is a valid ceiling-case, not evidence of matched-stage tactic failure. Fixture stats too strong to answer tactical efficacy near frontier; retest representative competitive builds (normal 40–70% wins) with actual settlement and cap. `activeHours` output is erroneous (productiveElapsedMs tracks another feature, zero despite fighting); use practice and settled bouts, fix metric in next run. No live changes.
+
 ## TEAM-008 — initial offline audit failed; corrected harness
 
 Native run 45865450687: S/50 job 140066978878 and D/25 job 140066979290 failed with RangeError Invalid combat seed at simulate line 105; signed JS XOR generated negative seed. No valid results from these jobs. Fixed unsigned normalization (`>>>0`) in harness commit 7f41628c, no production changes. Rerun required; do not interpret failure as gameplay evidence.
