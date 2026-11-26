@@ -3,21 +3,20 @@ import {teamCombatAtTime} from "./team-timeline.mjs?v=team-004";
 import { initLoginReport, showLoginReport, clearLoginReport } from "./login-report-ui.mjs?v=team-004";
 import { requiredAutoFightWins } from "./auto-fight.mjs?v=auto-fight-03";
 import { characterStats } from "./character-stats.mjs?v=apprentice-a4";
-import { MASTER_CONSENT_VERSION } from "./apprentice.mjs?v=apprentice-a2";
 import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
 import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
 import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=gear-a3";
 import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel, nextEquipmentUpgrade } from "./smith.mjs?v=gear-a3";
 import {
   setDifficulty, buyEquipment, autoEquipmentPreview, autoEquipmentUnlocked, activateExpertise, arenaBoutProgress, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
-  effectiveAttributeProgress, masteryAwardForNextLevel,
-  lootChances, recipeOptions, newGame, newTeamGame, setTeamWeapon, setTeamArmour, buyTeamEquipment, chooseActivity, readSave, settle, settleLive,
-  enterGame, enterGameWithApprentice, setAutoMasterConsent, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
+  effectiveAttributeProgress,
+  lootChances, recipeOptions, newGame, newTeamGame, setTeamWeapon, setTeamArmour, buyTeamEquipment, chooseActivity, readSave, settle, settleLive, settleLiveWithApprentice,
+  enterGame, enterGameWithApprentice, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
   getApprenticeProgress, queueCapacity, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
-  xpToNextLevel, activityRewardCapped, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=team-004";
+  xpToNextLevel, activityRewardCapped, skillMasterReadiness, setCombatLoadout, setArmourChoice
+} from "./engine.mjs?v=auto-master-001";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=gear-a3";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-art-001";
@@ -44,9 +43,7 @@ const ui = {
   backToActivities: $("backToActivities"), backToCategories: $("backToCategories"),
   categoryTitle: $("activityCategoryTitle"),
   skillTitle: $("skillTitle"), skillLevel: $("skillLevel"), skillXp: $("skillXp"), skillFill: $("skillFill"),
-  masterStatus: $("masterStatus"), visitMaster: $("visitMaster"), masterAudience: $("masterAudience"),
-  masterSkills: $("masterSkills"), masterTribute: $("masterTribute"), masterWarning: $("masterWarning"),
-  masterConfirm: $("masterConfirm"), masterCancel: $("masterCancel"),
+  masterStatus: $("masterStatus"),
   sceneTag: $("sceneTag"), sceneImage: $("sceneImage"), sceneCaption: $("sceneCaption"),
   combatPanel: $("combatPanel"), combatEventTitle: $("combatEventTitle"),
   combatTurns: $("combatTurns"),
@@ -171,6 +168,7 @@ function renderArmour() {
   ui.itemGrade.disabled = true;
   ui.itemQuality.disabled = true;
   const automatic=Boolean(item&&autoEquipmentUnlocked(state));
+  ui.smithBuy.hidden = automatic;
   ui.smithBuy.disabled = automatic||!quote?.available;
   const quotedCost=quote?.cost ? number(quote.cost) + " coins" : "";
   ui.smithBuy.textContent = automatic&&next ? "Upgraded by your apprentice" : quote?.reason==="fighting_level" ?
@@ -240,8 +238,8 @@ function foregroundContinuous(){
 function foregroundAction(action){
   const now=gameNow();
   if(!foregroundContinuous())return action(state,now);
-  const before=settleLive(state,now);
-  const result=action(before.state,now);
+  const before=commitAutomaticSettlement(state,now,true);
+  const result=action(before.state,before.state.settledAtMs);
   const reports=[...(before.reports??[before.report]),...(result.reports??[result.report])].filter(Boolean);
   return {...result,reports};
 }
@@ -265,7 +263,6 @@ const visibleTokenSignatures = new Map();
 let lastSavedAt = 0;
 let storageWorks = true;
 let lastStoredText = null;
-let autoLoginSupported = false;
 let planningActivity = null;
 let planningHint = "";
 let lastWagonSignature = null;
@@ -565,7 +562,7 @@ function updateWagonSkillLabels() {
     if (label.textContent !== value) label.textContent = value;
     label.setAttribute("aria-label", ACTIVITIES[activity].title + ", skill level " +
       number(skill.level) + ", " + percent + "% toward the next level" +
-      (percent === 100 ? "; visit the Skill Master to advance" : ""));
+      (percent === 100 ? "; automatic Skill Master pending" : ""));
   }
 }
 
@@ -761,95 +758,9 @@ ui.queueConfirm.addEventListener("click", () => {
 });
 
 function renderMaster() {
-  const offer = skillMasterOffer(state);
-  const count = offer.ready.length;
-  ui.masterStatus.hidden = true; // No repeated readiness instructions on the small screen.
-  ui.visitMaster.disabled = count === 0;
-  ui.visitMaster.title = count === 0 ? "No skills ready to level up" : "";
-  if (!count) ui.masterAudience.hidden = true;
-  ui.visitMaster.textContent = count ? "Seek the Master · " + number(count) + " ready" : "Seek the Master";
-  ui.visitMaster.setAttribute("aria-expanded", String(!ui.masterAudience.hidden));
-  if (ui.masterAudience.hidden) return;
-  const readyLines = offer.ready.map(id => {
-    const item = document.createElement("p");
-    const award = masteryAwardForNextLevel(id, state.skills[id].level);
-    const bonus = Object.entries(award).map(([stat,points]) =>
-      "+" + number(points) + " " + stat).join(", ");
-    item.textContent = ACTIVITIES[id].title + ": Level " + number(state.skills[id].level) +
-      " → " + number(state.skills[id].level + 1) + " · " + bonus;
-    return item;
-  });
-  if (!readyLines.length) {
-    const item = document.createElement("p");
-    item.textContent = "No skill can advance yet. Fill its XP bar, then bring the spoils of that work.";
-    readyLines.push(item);
-  }
-  ui.masterSkills.replaceChildren(...readyLines);
-  const resources = Object.entries(offer.tribute);
-  const tributeLines = resources.map(([id, qty]) => {
-    const item = document.createElement("p");
-    item.textContent = number(qty) + " " + ITEM_LABELS[id];
-    return item;
-  });
-  if (!tributeLines.length) {
-    const item = document.createElement("p");
-    item.textContent = "No materials are produced by these skills.";
-    tributeLines.push(item);
-  }
-  ui.masterTribute.replaceChildren(...tributeLines);
-  ui.masterWarning.textContent = offer.blocked.length
-    ? "Other skills still lack proof of their labour. The Master will leave those unchanged."
-    : "Surrendered resources cannot be recovered.";
-  ui.masterConfirm.disabled = count === 0;
-  ui.masterConfirm.setAttribute("aria-label", "Surrender listed resources and advance " +
-    number(count) + " ready skills once");
+  ui.masterStatus.textContent=storageWorks?"Skill Master automatic · Ready skills advance and surrender their produced resources.":"Automatic Skill Master unavailable: save storage blocked.";
 }
 
-ui.visitMaster.addEventListener("click", () => {
-  if (ui.visitMaster.disabled) return;
-  ui.masterAudience.hidden = !ui.masterAudience.hidden;
-  render();
-});
-ui.masterCancel.addEventListener("click", () => {
-  ui.masterAudience.hidden = true;
-  render();
-});
-ui.masterConfirm.addEventListener("click", () => {
-  // Freeze the offer against the settled inventory before asking the player.
-  // The next ordinary tick handles the time elapsed during confirmation.
-  const outcome = (foregroundContinuous()?settleLive:settle)(state,gameNow());
-  breakForegroundContinuity();
-  state = outcome.state;
-  reportProgress(outcome);
-  const offer = skillMasterOffer(state);
-  if (!offer.ready.length) {
-    message("The Master sees no skill ready for his lessons.");
-    writeSave();
-    render();
-    return;
-  }
-  const due = Object.entries(offer.tribute).map(([id, qty]) =>
-    number(qty) + " " + ITEM_LABELS[id]);
-  const warning = "THE MASTER'S DUE\nAdvance " + number(offer.ready.length) +
-    " skill(s), one level each?\n\nLose ALL their current-level XP and every resource listed:" +
-    (due.length ? "\n" + due.join("\n") : "\nNo material spoils from these skills.") +
-    "\n\nThis cannot be undone.";
-  if (!window.confirm(warning)) {
-    writeSave();
-    render();
-    return;
-  }
-  const result = learnFromMaster(state, state.settledAtMs);
-  state = result.state;
-  ui.masterAudience.hidden = true;
-  message("The Master claims his due. " + number(result.mastery.ready.length) +
-    " skill" + (result.mastery.ready.length === 1 ? " has" : "s have") +
-    " risen. +" + number(result.mastery.ready.length) +
-    " permanent attribute " + (result.mastery.ready.length === 1 ? "point" : "points") +
-    " allocated.");
-  writeSave();
-  render();
-});
 
 let previousStatsMarkup="";
 function renderCharacterStats(){
@@ -898,25 +809,15 @@ function renderApprentice() {
   $("apprenticeNext").textContent = progress.nextSlotAt === null
     ? "All activity slots unlocked."
     : "Next activity slot unlocks at LvL " + number(progress.nextSlotAt) + ".";
-  const autoMaster = $("apprenticeAutoMaster");
-  autoMaster.checked = state.apprenticeMasterConsent === MASTER_CONSENT_VERSION;
-  autoMaster.disabled = !progress.autoMasterUnlocked || !storageWorks || !autoLoginSupported;
-  $("apprenticeMaster").textContent = !progress.autoMasterUnlocked
-    ? "Unlocks at LvL " + number(progress.autoMasterAt)
-    : !autoLoginSupported || !storageWorks
-      ? "Unavailable · This browser requires safe local save and login coordination."
-      : autoMaster.checked
-        ? "Enabled · On next login, advance ready skills and pay their full tribute."
-        : "Optional · On login, advance ready skills and surrender ALL their produced resources.";
+  $("apprenticeMaster").textContent=storageWorks?"Always active · Ready skills advance and pay tribute automatically.":"Unavailable · Safe local save required.";
   const equipment=autoEquipmentPreview(state);
   const next=equipment.next;
   const status=$("apprenticeEquipmentStatus");
-  status.textContent=!equipment.unlocked?"Unlocks at LvL "+equipment.unlockAt:
-    !autoLoginSupported||!storageWorks?"Unavailable · Safe local save and login coordination required.":
+  status.textContent=!storageWorks?"Unavailable · Safe local save required.":
     equipment.reason==="complete"?"All equipped gear is S Masterwork.":
-    "Active · Equipped gear upgrades automatically on login.";
+    "Active · Equipped gear upgrades automatically while playing.";
   $("apprenticeEquipmentNext").textContent=equipment.unlocked&&next?(next.fighterId?"Gladiator "+(next.fighterId==="first"?"1":"2")+" · ":"")+equipmentLabel(next.id)+" · "+ITEM_GRADES[next.current.grade]+" "+titleCase(next.current.quality)+" → "+ITEM_GRADES[next.target.grade]+" "+titleCase(next.target.quality):"";
-  $("apprenticeEquipmentCost").textContent=equipment.unlocked&&next?number(state.coins)+" / "+number(next.cost)+" coins"+(equipment.reason==="fighting_level"?" · Fighting "+next.requiredFightingLevel+" required":next.available?" · Ready on next login":" · Saving"):"";
+  $("apprenticeEquipmentCost").textContent=equipment.unlocked&&next?number(state.coins)+" / "+number(next.cost)+" coins"+(equipment.reason==="fighting_level"?" · Fighting "+next.requiredFightingLevel+" required":next.available?" · Ready to upgrade":" · Saving"):"";
   $("apprenticeLegacy").hidden = used <= progress.slots;
   $("queueUnlockHint").textContent = progress.nextSlotAt === null
     ? "All activity slots unlocked."
@@ -1019,7 +920,7 @@ function render() {
     const ready = selectedSkill.xp >= required;
     ui.skillLevel.textContent = "Level " + number(selectedSkill.level);
     ui.skillXp.textContent = ready
-      ? "XP full · All rewards paused · Seek the Skill Master"
+      ? "XP full · Automatic Skill Master pending"
       : number(selectedSkill.xp) + " / " + number(required) + " skill XP";
     ui.skillFill.style.width = Math.min(100, selectedSkill.xp / required * 100).toFixed(2) + "%";
   } else {
@@ -1065,7 +966,7 @@ function render() {
   $("autoFightMeter").hidden=required===null;
   $("autoFightMeter").setAttribute("aria-valuenow",String(required===null?0:Math.round(100*policy.streak/required)));
   $("autoFightFill").style.width=(required===null?0:100*policy.streak/required)+"%";
-  $("autoFightStatus").textContent=state.activity==="fighting"&&capped?"Rewards paused · Visit the Skill Master":
+  $("autoFightStatus").textContent=state.activity==="fighting"&&capped?"Rewards paused · Awaiting automatic Skill Master":
     transition?"Activity changing":"Difficulty adjusts automatically while playing.";
   const teamMode=Boolean(state.teamSecond);
   const teamCombat=teamMode&&current?.category==="combat"&&!transition&&!capped&&state.combatSession?teamCombatAtTime(state.combatSession):null;
@@ -1146,7 +1047,7 @@ function render() {
     ui.description.hidden = Boolean(combat||teamCombat);
     ui.description.textContent = combat||teamCombat ? "" : transition
       ? "Your character finishes their work, travels and prepares before the new task begins."
-      : capped ? "All rewards paused: this skill has a full XP bar. Visit the Skill Master to resume, or choose another activity." : sceneActivity.description;
+      : capped ? "All rewards paused: this skill has a full XP bar. The Skill Master advances it automatically when safe saving is available." : sceneActivity.description;
     // Every live turn selects its actual combat event / attacker weapon /
     // defender shield / player outcome. Other activities retain static art.
     const sceneId = transition ? transition.targetActivity : state.activity;
@@ -1180,6 +1081,23 @@ function render() {
   }
 }
 
+// Never report or retain an automatic debit/claim unless the save succeeded.
+// Local storage remains an optimistic, single-device alpha, not server authority.
+function commitAutomaticSettlement(previous,now,continuous){
+  if(!storageWorks)return continuous?settleLive(previous,now):enterGame(previous,now);
+  const result=continuous?settleLiveWithApprentice(previous,now):enterGameWithApprentice(previous,now);
+  if(!(result.mastery||result.autoEquipment?.upgrades.length||result.teamworkLevelGained))return result;
+  if(persistState(result.state)){
+    state=result.state;
+    if(result.mastery)showApprenticeMasterReport(result);
+    if(result.autoEquipment?.upgrades.length)showApprenticeEquipmentReport(result);
+    if(result.teamworkLevelGained)message("Teamwork advanced to LvL "+number(result.state.teamwork.level)+".");
+    return result;
+  }
+  // persistState may have replaced state with a newer tab's snapshot.
+  return {state,report:null,reports:[]};
+}
+
 function tick() {
   if (document.visibilityState !== "visible") { breakForegroundContinuity(); return; }
   const wall=performance.now();
@@ -1187,7 +1105,7 @@ function tick() {
   lastForegroundTick=wall;
   const before = state.transition;
   const priorPolicy=state.autoFight;
-  const result = (continuous?settleLive:settle)(state, gameNow());
+  const result = commitAutomaticSettlement(state,gameNow(),continuous);
   state = activateExpertise(result.state);
   const gained = reportProgress(result);
   announceArrival(before);
@@ -1198,7 +1116,7 @@ function tick() {
 function returnToGame() {
   breakForegroundContinuity();
   const before = state.transition;
-  const result = enterGame(state, gameNow());
+  const result = commitAutomaticSettlement(state,gameNow(),false);
   state = result.state;
   reportProgress(result);
   announceArrival(before);
@@ -1272,7 +1190,6 @@ function showApprenticeMasterReport(result) {
 }
 
 function start(coordinatedLogin = false) {
-  autoLoginSupported = coordinatedLogin;
   initLoginReport();
   let loginSummary=null;
   let saved = null;
@@ -1302,7 +1219,7 @@ function start(coordinatedLogin = false) {
   } else {
     const now = gameNow();
     const before=state;
-    const result = autoLoginSupported && storageWorks
+    const result = storageWorks
       ? enterGameWithApprentice(state, now)
       : enterGame(state, now);
     if (result.mastery || result.autoEquipment?.upgrades.length || result.teamworkLevelGained) {
@@ -1326,26 +1243,9 @@ function start(coordinatedLogin = false) {
       state = result.state;
       reportProgress(result);
       const committed=writeSave();
-      loginSummary={before,outcome:result,options:{saved:committed,automationUnavailable:!autoLoginSupported||!storageWorks}};
+      loginSummary={before,outcome:result,options:{saved:committed,automationUnavailable:!storageWorks}};
     }
   }
-
-  $("apprenticeAutoMaster").addEventListener("change", () => {
-    const control = $("apprenticeAutoMaster");
-    if (control.disabled) { render(); return; }
-    const enabled = control.checked;
-    if (enabled && !window.confirm("AUTOMATIC SKILL MASTER\n\nOn future game entries, advance every ready skill once and surrender ALL owned resources produced by those skills. Coins and unrelated materials remain. No additional confirmation each login. Enable?")) {
-      render(); return;
-    }
-    try {
-      const next = setAutoMasterConsent(state, enabled);
-      if (persistState(next)) {
-        state = next;
-        message(enabled ? "Apprentice enabled for future logins." : "Automatic Skill Master disabled.");
-      }
-    } catch { message("Automatic Skill Master is unavailable."); }
-    render();
-  });
 
   $("dismissSaveReset").addEventListener("click",()=>{$("saveResetNotice").hidden=true;});
   // All alpha controls are visibly local test actions, absent in normal mode.
@@ -1362,7 +1262,7 @@ function start(coordinatedLogin = false) {
       ui.saveStatus.textContent="Saved on this device";
       latestWorkResult=null;
       lastCombatEventKey=null;
-      ui.masterAudience.hidden=true;
+
       reportProgress(result);
       render();
       ui.alphaStatus.textContent=description;
@@ -1402,7 +1302,7 @@ function start(coordinatedLogin = false) {
       selectedEquipmentSlot = "head";
       selectedFamily = "padded";
       resetSmithSelection();
-      ui.masterAudience.hidden=true;
+
       hideQueuePlanner();
       showActivityScreen("root",null);
       writeSave();

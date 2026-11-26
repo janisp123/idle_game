@@ -1,5 +1,5 @@
-import { APPRENTICE_BALANCE, apprenticeProgress, MASTER_CONSENT_VERSION, normalizeMasterConsent } from "./apprentice.mjs?v=apprentice-a2";
-import { previewAutoEquipment, AUTO_EQUIPMENT_AT, MAX_AUTO_EQUIPMENT_PURCHASES } from "./auto-equipment.mjs?v=apprentice-a4";
+import { APPRENTICE_BALANCE, apprenticeProgress, MASTER_CONSENT_VERSION, normalizeMasterConsent } from "./apprentice.mjs?v=auto-master-001";
+import { previewAutoEquipment, AUTO_EQUIPMENT_AT, MAX_AUTO_EQUIPMENT_PURCHASES } from "./auto-equipment.mjs?v=auto-master-001";
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
 import { initialTeam,validGladiator,teamSnapshots,awardTeamPractice,activateTeamPractice,previewTeamUpgrade,upgradeTeam,chooseTeamWeapon,chooseTeamArmour } from "./team.mjs?v=team-001";
 import { initialTeamwork,validTeamwork,awardTeamwork,activateTeamworkOnLogin } from "./teamwork.mjs?v=team-002";
@@ -131,7 +131,7 @@ export const autoEquipmentPreview = state => {
   const n=previewTeamUpgrade(teamFromState(state),state.coins,state.skills.fighting.level);
   return {...base,reason:n?.quote.reason??"complete",next:n?{id:n.itemId,fighterId:n.id,current:n.current,target:n.target,cost:n.quote.cost,requiredFightingLevel:n.quote.requiredFightingLevel,available:n.quote.available}:null};
 };
-export const autoEquipmentUnlocked = state => getApprenticeProgress(state).earnedLevels >= AUTO_EQUIPMENT_AT;
+export const autoEquipmentUnlocked = () => true;
 export const queueCapacity = state => getApprenticeProgress(state).slots;
 /**
  * Independent skill progression and batch reward tuning.
@@ -773,9 +773,9 @@ export function settleLive(state,now=Date.now(),random=Math.random){
   const cursorCurrent=!session||(session.prizeCursor??0)===Math.floor(session.elapsedMs/BOUT_MS);
   return settleInternal(state,now,random,cursorCurrent&&now>=state.settledAtMs&&now-state.settledAtMs<=LIVE_FIGHT_MAX_MS);
 }
-function settleInternal(state, now, random, online) {
+function settleInternal(state, now, random, online, stopFinalAtCap=false) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
-  if (!state.wagons?.length) return settleTransition(state, now, random, state.attributeEffort,false,online);
+  if (!state.wagons?.length) return state.transition ? settleTransition(state, now, random, state.attributeEffort,false,online) : settleWork(state,now,random,state.attributeEffort,stopFinalAtCap,online);
   const end = Math.max(now, state.settledAtMs);
   let next = state;
   const reports = [];
@@ -797,7 +797,7 @@ function settleInternal(state, now, random, online) {
     }
     const first = next.wagons[0];
     if (!first || first.plannedMs === null) {
-      const result = settleWork(next, end, random, state.attributeEffort,false,online);
+      const result = settleWork(next, end, random, state.attributeEffort,stopFinalAtCap,online);
       next = result.state;
       addReports(result);
       break;
@@ -828,7 +828,7 @@ function settleInternal(state, now, random, online) {
         targetActivity, phase: !capped&&(next.activity==="fighting"||next.progressMs>0) ? "finishing" : "moving",
         phaseProgressMs: 0
       } };
-    if (!next.transition && next.settledAtMs === end) break;
+    if ((stopFinalAtCap && capped) || (!next.transition && next.settledAtMs === end)) break;
   }
   return { state: next, reports, report: reports.at(-1) ?? emptyReport(next, end - state.settledAtMs) };
 }
@@ -1026,16 +1026,11 @@ export function setAutoMasterConsent(state, enabled) {
   return {...state, apprenticeMasterConsent: enabled ? MASTER_CONSENT_VERSION : 0};
 }
 
-/** Login-only orchestration; ordinary ticks and visibility catch-up remain enterGame.
- * No repeated offline Master claims or retroactive rewards from newly claimed levels.
- */
-export function enterGameWithApprentice(state, now = Date.now(), random = Math.random) {
-  const allowed = state.apprenticeMasterConsent === MASTER_CONSENT_VERSION &&
-    getApprenticeProgress(state).autoMasterUnlocked;
-  const outcome = enterGame(state, now, random);
+/** All automatic chores share the exact existing settled claim and smith mutations. */
+export function automateSettledProgress(outcome) {
   let result=outcome;
-  if(allowed&&skillMasterOffer(outcome.state).ready.length){
-    result=claimSettledMaster(outcome);
+  if(skillMasterOffer(result.state).ready.length){
+    result=claimSettledMaster(result);
     result={...result,levelsGained:Object.fromEntries(result.mastery.ready.map(id=>[id,1]))};
   }
   if(result.state.teamSecond){
@@ -1043,6 +1038,62 @@ export function enterGameWithApprentice(state, now = Date.now(), random = Math.r
     result={...result,state:{...result.state,teamwork},teamworkLevelGained:teamwork.level-result.state.teamwork.level};
   }
   return upgradeSettledEquipment(result);
+}
+
+/** Entry settles the entire absence at the original frozen build before chores. */
+export function enterGameWithApprentice(state, now = Date.now(), random = Math.random) {
+  return automateSettledProgress(enterGame(state,now,random));
+}
+
+/** Foreground automation: process rewards in chronological short segments.
+ * The browser must establish foreground continuity; longer gaps are offline.
+ * Keep the low-level settleLive adapter for existing raw settlement fixtures.
+ */
+export function settleLiveWithApprentice(state,now=Date.now(),random=Math.random){
+  if(!validTime(now))throw new RangeError("Invalid clock");
+  const session=state.combatSession;
+  const cursorCurrent=!session||(session.prizeCursor??0)===Math.floor(session.elapsedMs/BOUT_MS);
+  if(!cursorCurrent||now<state.settledAtMs||now-state.settledAtMs>LIVE_FIGHT_MAX_MS)
+    return enterGameWithApprentice(state,now,random);
+  let next=state, teamworkLevelGained=0, spent=0, lastReport=emptyReport(state,0);
+  const reports=[], levelsGained={}, tribute={}, upgrades=[];
+  const apply=()=>{
+    const a=automateSettledProgress({state:activateExpertise(next)});
+    next=a.state;
+    for(const [id,n] of Object.entries(a.levelsGained??{}))levelsGained[id]=(levelsGained[id]??0)+n;
+    for(const [id,n] of Object.entries(a.mastery?.tribute??{}))tribute[id]=(tribute[id]??0)+n;
+    teamworkLevelGained+=a.teamworkLevelGained??0;
+    spent+=a.autoEquipment?.spent??0;
+    upgrades.push(...(a.autoEquipment?.upgrades??[]));
+  };
+  apply();
+  // A foreground interval is at most ten logical seconds; split at a work,
+  // travel, or bout boundary and at the exact XP cap found by settleWork.
+  for(let step=0;next.settledAtMs<now;step++){
+    if(step>=64)throw new Error("Automatic foreground settlement bound exceeded");
+    const before=next.settledAtMs;
+    let segment=now-before;
+    if(next.transition){
+      const t=next.transition;
+      if(t.phase==="finishing")segment=Math.min(segment,Math.max(1,finishingDuration(next)));
+      else segment=Math.min(segment,Math.max(1,remainingTransitionMs(next)));
+    }else if(next.activity==="fighting"){
+      segment=Math.min(segment,BOUT_MS-((next.combatSession?.elapsedMs??0)%BOUT_MS));
+    }else if(next.activity){
+      segment=Math.min(segment,Math.max(1,ACTIVITIES[next.activity].durationMs-next.progressMs));
+    }
+    const outcome=settleInternal(next,before+segment,random,true,true);
+    next=outcome.state;
+    for(const r of outcome.reports??[outcome.report])if(r&&(r.completed||r.arena))reports.push(r);
+    lastReport=outcome.report??lastReport;
+    apply();
+    if(next.settledAtMs===before&&activityRewardCapped(next))
+      throw new Error("Unclaimable automatic skill cap");
+  }
+  const ready=Object.keys(levelsGained);
+  return {state:next,reports,report:reports.at(-1)??lastReport,levelsGained,teamworkLevelGained,
+    ...(ready.length?{mastery:{ready,blocked:[],tribute}}:{}),
+    autoEquipment:{upgrades,spent,preview:autoEquipmentPreview(next)}};
 }
 
 /**

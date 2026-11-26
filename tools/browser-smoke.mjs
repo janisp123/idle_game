@@ -104,10 +104,10 @@ try{
     assert.equal(landing.artWidth,1672);assert.equal(landing.artHeight,941);assert.equal(landing.artSrc,"./assets/gladiator-shield-clash.png");assert.ok(landing.artFits&&landing.featureFirst&&landing.overflow<=2,"landing artwork sizing, order or overflow");
     await shot("landing-"+width);
     const hobby=await evaluate(`(()=>{const section=document.getElementById("hobby");section.scrollIntoView({block:"start",behavior:"instant"});const box=section.querySelector("h2").getBoundingClientRect();return {copy:section.innerText,items:section.querySelectorAll("li").length,heading:box.top>=0&&box.bottom<=innerHeight,overflow:document.documentElement.scrollWidth-innerWidth};})()`);
-    assert.match(hobby.copy,/It will always be 100% free/);
+    assert.match(hobby.copy,/personal hobby project, not a business model/);assert.doesNotMatch(hobby.copy,/It will always be 100% free/);
     assert.match(hobby.copy,/loss of progress are possible/);
-    assert.match(hobby.copy,/No donations or financial contributions/);
-    assert.equal(hobby.items,5);assert.ok(hobby.heading,"hobby heading in viewport: "+JSON.stringify(hobby));assert.ok(hobby.overflow<=2,"hobby horizontal overflow: "+hobby.overflow);
+    assert.match(hobby.copy,/reliable servers/);
+    assert.equal(hobby.items,0);assert.ok(hobby.heading,"hobby heading in viewport: "+JSON.stringify(hobby));assert.ok(hobby.overflow<=2,"hobby horizontal overflow: "+hobby.overflow);
     await shot("hobby-"+width);
     await navigate("clean-"+width,{[saveKey]:null,[clockKey]:null});
     const fresh=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));return {activity:s.activity,route:s.wagons,transition:s.transition,difficulty:s.difficulties.fighting??0,coins:s.coins,level:s.skills.fighting.level,second:s.teamSecond?.combatLoadout,teamwork:s.teamwork,combat:!document.getElementById("teamBattleReadout").hidden};})()`);
@@ -121,7 +121,7 @@ try{
     await shot("team-"+width);
     await evaluate(`Date.now=()=>${fixedNow}`);
     const apprentice=await evaluate(`(()=>{const menu=document.getElementById("apprenticeMenu");menu.querySelector("summary").click();const result={open:menu.open,text:menu.innerText,locked:[...menu.querySelectorAll("input")].every(i=>i.disabled),overflow:document.documentElement.scrollWidth-innerWidth};menu.querySelector("summary").click();return result;})()`);
-    assert.ok(apprentice.open&&apprentice.locked&&apprentice.overflow<=2);assert.match(apprentice.text,/0 earned levels/i);assert.match(apprentice.text,/Unlocks at LvL 50/);assert.match(apprentice.text,/Unlocks at LvL 10/);assert.match(apprentice.text,/1 \/ 5 activity slots unlocked/);
+    assert.ok(apprentice.open&&apprentice.locked&&apprentice.overflow<=2);assert.match(apprentice.text,/0 earned levels/i);assert.match(apprentice.text,/Always active/);assert.match(apprentice.text,/upgrades automatically/);assert.match(apprentice.text,/1 \/ 5 activity slots unlocked/);
     const teamMax=await evaluate(`(()=>{const $=id=>document.getElementById(id);$("alphaTools").open=true;$("alphaFamily").value="plate";$("alphaSecondFamily").value="leather";$("alphaMaxStats").click();const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));return {first:s.expertise,second:s.teamSecond.expertise,coins:s.coins};})()`);
     assert.equal(teamMax.first.greatsword,3400*14400000);assert.equal(teamMax.first.plate,3400*14400000);assert.equal(teamMax.second.hammer,3400*14400000);assert.equal(teamMax.second.leather,3400*14400000);assert.equal(teamMax.second.bow,0);assert.equal(teamMax.coins,0);
     const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=16;s.name="Old alpha";return JSON.stringify(s);})()`);
@@ -133,7 +133,7 @@ try{
     assert.equal(await evaluate('document.getElementById("character-heading").textContent'),"Wanderer");
     await evaluate('document.getElementById("dismissSaveReset").click()');
     assert.equal(await evaluate('document.getElementById("saveResetNotice").hidden'),true);
-    const compact=await evaluate(`(()=>{const panel=document.getElementById("resourcesPanel"),list=document.getElementById("resourceList"),summary=panel.querySelector("summary");const closed=!panel.open;summary.click();const opened=panel.open&&list.getBoundingClientRect().height>0;summary.click();const folded=!panel.open;const skill=document.querySelector(".skill-focus");return {closed,opened,folded,combined:skill.contains(document.getElementById("visitMaster"))&&skill.contains(document.getElementById("skillXp"))&&skill.contains(document.getElementById("masterAudience")),overflow:document.documentElement.scrollWidth-innerWidth};})()`);
+    const compact=await evaluate(`(()=>{const panel=document.getElementById("resourcesPanel"),list=document.getElementById("resourceList"),summary=panel.querySelector("summary");const closed=!panel.open;summary.click();const opened=panel.open&&list.getBoundingClientRect().height>0;summary.click();const folded=!panel.open;const skill=document.querySelector(".skill-focus");return {closed,opened,folded,combined:skill.contains(document.getElementById("masterStatus"))&&skill.contains(document.getElementById("skillXp"))&&!document.getElementById("visitMaster"),overflow:document.documentElement.scrollWidth-innerWidth};})()`);
     assert.ok(compact.closed&&compact.opened&&compact.folded&&compact.combined&&compact.overflow<=2,"compact skill and resources layout");
     const clan=await evaluate(`(()=>{const menu=document.getElementById("clanMenu"),summary=menu.querySelector("summary");const closed=!menu.open;summary.click();menu.scrollIntoView({block:"start"});return {closed,open:menu.open,text:menu.innerText,disabled:[...menu.querySelectorAll("button")].every(b=>b.disabled),count:menu.querySelectorAll("button").length,overflow:document.documentElement.scrollWidth-innerWidth};})()`);
     assert.ok(clan.closed&&clan.open&&clan.disabled&&clan.count===2&&clan.overflow<=2);
@@ -179,7 +179,14 @@ try{
     assert.notEqual(statView.before,statView.after);
     assert.ok(statView.overflow<=2,"stat sheet horizontal overflow");
     await shot("stats-"+width);
-    await navigate("persist-"+width,null,"",true);
+    // Online automation now runs while the previous page is open, so a
+    // funded selected bow cannot be assumed to remain unupgraded until reload.
+    // Explicitly verify the foreground path, then use an independent pristine
+    // funded fixture for the login-report debit and no-repeat assertions.
+    await evaluate(`(()=>{const key=${JSON.stringify(saveKey)},s=JSON.parse(localStorage.getItem(key));s.coins=200000;s.combatLoadout="bow";s.equipment.bow={grade:0,quality:"poor"};s.equipment.greatsword={grade:0,quality:"poor"};const value=JSON.stringify(s);localStorage.setItem(key,value);dispatchEvent(new StorageEvent("storage",{key,newValue:value}));})()`);
+    await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));return s.combatLoadout==="bow"&&s.equipment.bow.grade===6&&s.equipment.bow.quality==="poor"&&s.coins===8750&&s.equipment.greatsword.grade===0;})()`),"foreground exact bow upgrades "+width);
+    const fundedBow=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.coins=200000;s.combatLoadout="bow";s.equipment.bow={grade:0,quality:"poor"};s.equipment.greatsword={grade:0,quality:"poor"};return JSON.stringify(s);})()`);
+    await navigate("persist-"+width,{[saveKey]:fundedBow},"",true);
     const report=await evaluate(`(()=>{const d=document.getElementById("loginReport"),b=d.getBoundingClientRect();return {open:d.open,modal:d.matches(":modal"),width:b.width,height:b.height,viewportW:innerWidth,viewportH:innerHeight,body:document.getElementById("loginReportBody").innerText,countdown:document.getElementById("loginReportCountdown").textContent,overflow:d.scrollWidth-d.clientWidth};})()`);
     assert.ok(report.open&&report.modal&&report.width===report.viewportW&&report.height===report.viewportH&&report.overflow<=2,JSON.stringify(report));
     assert.match(report.body,/Encounters/);assert.match(report.body,/Victories/);assert.match(report.body,/Losses/);assert.match(report.body,/191,250/);assert.match(report.body,/8,750/);assert.match(report.body,/Bow/);assert.match(report.countdown,/Auto-close in (10|9)s/);
@@ -215,7 +222,7 @@ try{
     assert.equal(recovered.s.coins,755);assert.equal(recovered.s.equipment.greatsword.quality,"masterwork");assert.equal(recovered.hidden,false);
     await navigate("equipment-no-lock-"+width,{[saveKey]:failureFixture,[clockKey]:null},"Object.defineProperty(navigator,'locks',{value:undefined});");
     const unavailable=await evaluate(`(()=>({s:JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),status:document.getElementById("apprenticeEquipmentStatus").textContent,hidden:document.getElementById("apprenticeEquipmentReport").hidden}))()`);
-    assert.equal(unavailable.s.coins,1000);assert.equal(unavailable.hidden,true);assert.match(unavailable.status,/Unavailable/);
+    assert.equal(unavailable.s.coins,755);assert.equal(unavailable.hidden,false);assert.match(unavailable.status,/Active/);
     const analyticsFixture=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=apprentice-a4");const s=e.newGame(Date.now()-3600000);s.skills.fighting.level=11;s.coins=1000;return JSON.stringify(e.chooseActivity(s,"fighting",s.settledAtMs,()=>.5).state);})()`);
     await navigate("analytics-timer-"+width,{[saveKey]:analyticsFixture,[clockKey]:null},"",true);
     const shown=await evaluate(`(()=>({open:document.getElementById("loginReport").open,started:performance.now(),text:document.getElementById("loginReportBody").innerText}))()`);
@@ -230,21 +237,14 @@ try{
     const pause=await evaluate(`(()=>{const key=${JSON.stringify(saveKey)},before=JSON.parse(localStorage.getItem(key));
       document.getElementById("alphaDay").click();const after=JSON.parse(localStorage.getItem(key));
       return {before,after,notice:document.getElementById("skillXp").textContent,reset:document.getElementById("saveResetNotice").hidden};})()`);
-    assert.match(pause.notice,/All rewards paused/);assert.equal(pause.reset,true);
-    for(const key of ["items","attributeEffort","expertise","coins","skills"])assert.deepEqual(pause.before[key],pause.after[key]);
+    assert.equal(pause.reset,true);assert.ok(pause.before.skills.mining.level>=2);assert.equal(pause.after.skills.mining.level,pause.before.skills.mining.level);assert.equal(pause.after.skills.mining.xp,40*pause.after.skills.mining.level);
     await shot("capped-"+width);
     const veteran=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=apprentice-a2");let s=e.newGame(Date.now());s.skills.fishing.level=51;s.skills.mining.xp=e.xpToNextLevel(1);s.items.stone=12;s.items.log=3;s.coins=44;return JSON.stringify(s);})()`);
-    await navigate("master-opt-in-"+width,{[saveKey]:veteran,[clockKey]:null});
-    const optIn=await evaluate(`(()=>{const el=document.getElementById("apprenticeAutoMaster"),key=${JSON.stringify(saveKey)};window.confirm=()=>false;el.click();const cancelled=!el.checked&&JSON.parse(localStorage.getItem(key)).apprenticeMasterConsent===0;window.confirm=()=>true;el.click();document.dispatchEvent(new Event("visibilitychange"));const s=JSON.parse(localStorage.getItem(key));return {cancelled,enabled:el.checked,disabled:el.disabled,s};})()`);
-    assert.ok(optIn.cancelled&&optIn.enabled&&!optIn.disabled);assert.equal(optIn.s.apprenticeMasterConsent,1);assert.equal(optIn.s.skills.mining.level,1);assert.equal(optIn.s.items.stone,12);
-    await navigate("master-claim-"+width);
-    const claimed=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),p=document.getElementById("apprenticeMasterReport");return {s,report:p.textContent,hidden:p.hidden};})()`);
-    assert.equal(claimed.s.skills.mining.level,2);assert.equal(claimed.s.skills.mining.xp,0);assert.equal(claimed.s.items.stone,0);assert.equal(claimed.s.items.log,3);assert.equal(claimed.s.coins,44);assert.equal(claimed.hidden,false);assert.match(claimed.report,/Mining LvL 2/);assert.match(claimed.report,/12 Stone/i);
+    await navigate("master-automatic-"+width,{[saveKey]:veteran,[clockKey]:null});
+    const claimed=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),p=document.getElementById("apprenticeMasterReport");return {s,report:p.textContent,hidden:p.hidden,toggle:!!document.getElementById("apprenticeAutoMaster")};})()`);
+    assert.equal(claimed.s.skills.mining.level,2);assert.equal(claimed.s.skills.mining.xp,0);assert.equal(claimed.s.items.stone,0);assert.equal(claimed.s.items.log,3);assert.equal(claimed.s.coins,44);assert.equal(claimed.hidden,false);assert.equal(claimed.toggle,false);assert.match(claimed.report,/Mining LvL 2/);assert.match(claimed.report,/12 Stone/i);
     await navigate("master-repeat-"+width);
     assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})).skills.mining.level`),2);
-    assert.equal(await evaluate('document.getElementById("apprenticeMasterReport").hidden'),true);
-    await evaluate('document.getElementById("apprenticeAutoMaster").click()');
-    assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})).apprenticeMasterConsent`),0);
     for(const mode of ["impressive_victory","humiliation"]){
       // Only synthetic saves created by production functions in this temporary
       // browser. Pick an actual resolved qualifying final event, never fake it.

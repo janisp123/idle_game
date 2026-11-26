@@ -7,13 +7,13 @@ test("only activated levels count, fresh characters have one slot",()=>{
   for(const id of SKILL_IDS)s.skills[id].xp=xpToNextLevel(1);
   s.skills.forged={level:9999,xp:0};
   assert.equal(earnedActivityLevels(s,SKILL_IDS),0);
-  assert.deepEqual(apprenticeProgress(s,SKILL_IDS),{earnedLevels:0,slots:1,nextSlotAt:10,autoMasterUnlocked:false,autoMasterAt:50});
+  assert.deepEqual(apprenticeProgress(s,SKILL_IDS),{earnedLevels:0,slots:1,nextSlotAt:10,autoMasterUnlocked:true,autoMasterAt:0});
 });
 test("boundary unlocks, no starting levels counted, no slot growth beyond five",()=>{
   for(const [earned,slots,next,master] of [[0,1,10,false],[9,1,10,false],[10,2,20,false],[19,2,20,false],[20,3,30,false],[29,3,30,false],[30,4,40,false],[39,4,40,false],[40,5,null,false],[49,5,null,false],[50,5,null,true],[500,5,null,true]]){
     const s=newGame(0);
     s.skills.fighting.level=earned+1;
-    assert.deepEqual(apprenticeProgress(s,SKILL_IDS),{earnedLevels:earned,slots,nextSlotAt:next,autoMasterUnlocked:master,autoMasterAt:50});
+    assert.deepEqual(apprenticeProgress(s,SKILL_IDS),{earnedLevels:earned,slots,nextSlotAt:next,autoMasterUnlocked:true,autoMasterAt:0});
   }
 });
 test("distributed earned levels count equally and policy does not mutate the save",()=>{
@@ -66,19 +66,15 @@ test("legacy valid over-capacity route survives; additional slots are denied",()
   assert.equal(out.state.wagons.length,1);
 });
 
-test("auto-Master requires earned 50 and explicit current-policy consent",()=>{
-  let s=newGame(0);s.skills.fishing.level=50;s.skills.mining.xp=xpToNextLevel(1);s.items.stone=9;
-  assert.throws(()=>setAutoMasterConsent(s,true),RangeError);
-  assert.equal(enterGameWithApprentice({...s,apprenticeMasterConsent:1},0,()=>.5).state.skills.mining.level,1);
-  s.skills.fishing.level=51;
-  assert.equal(enterGameWithApprentice(s,0,()=>.5).state.skills.mining.level,1);
-  const old={...s};delete old.apprenticeMasterConsent;
-  assert.equal(readSave(old).apprenticeMasterConsent,0);
-  for(const invalid of [true,2,"1",null,{}])assert.equal(readSave({...s,apprenticeMasterConsent:invalid}).apprenticeMasterConsent,0);
-  s=setAutoMasterConsent(s,true);
-  assert.equal(readSave(JSON.stringify(s)).apprenticeMasterConsent,1);
-  assert.equal(setAutoMasterConsent(s,false).apprenticeMasterConsent,0);
-  assert.equal(enterGame(s,0,()=>.5).state.skills.mining.level,1);
+test("auto-Master is mandatory at zero earned levels, legacy consent irrelevant",()=>{
+  for(const consent of [0,1,2,undefined]){
+    const s=newGame(0);s.skills.mining.xp=xpToNextLevel(1);s.items.stone=9;s.apprenticeMasterConsent=consent;
+    assert.equal(enterGame(s,0,()=>.5).state.skills.mining.level,1);
+    const out=enterGameWithApprentice(s,0,()=>.5);
+    assert.deepEqual(out.state.skills.mining,{level:2,xp:0});
+    assert.equal(out.state.items.stone,0);
+    assert.equal(out.mastery.tribute.stone,9);
+  }
 });
 test("login auto-Master uses identical tribute and claims each ready skill once",()=>{
   let s=newGame(0);s.skills.fishing.level=51;

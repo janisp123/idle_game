@@ -6,7 +6,7 @@ function verify(e,s,c){
  const same=(a,b,msg)=>check(JSON.stringify(a)===JSON.stringify(b),msg);
  const rng=()=>.5,poor={grade:0,quality:"poor"},common={grade:0,quality:"common"};
  const make=(level,coins)=>{const x=e.newGame(0);return {...x,coins,skills:{...x.skills,fighting:{level,xp:0}}};};
- let x=make(10,1000);check(!e.autoEquipmentUnlocked(x),"nine locked");check(e.enterGameWithApprentice(x,0,rng).state.coins===1000,"locked no spend");check(e.buyEquipment(x,"greatsword",common,0,rng).purchased,"preunlock manual");
+ let x=make(1,1000);check(e.autoEquipmentUnlocked(x),"first entry unlocked");check(e.enterGameWithApprentice(x,0,rng).state.coins<1000,"first entry automatic spend");check(e.buyEquipment(x,"greatsword",common,0,rng).purchaseBlocked==="automatic_equipment","manual blocked from start");
  x=make(11,1000);check(e.autoEquipmentUnlocked(x),"ten unlocked");const before=JSON.stringify(x);
  check(e.buyEquipment(x,"greatsword",common,0,rng).purchaseBlocked==="automatic_equipment","manual selected blocked");check(e.buyEquipment(x,"bow",common,0,rng).purchaseBlocked==="automatic_equipment","manual offloadout blocked");
  const bought=e.buyEquipment(x,"head:plate",poor,0,rng);check(bought.purchased&&bought.state.armour.head==="plate","initial chosen armour remains");check(e.buyEquipment(bought.state,"head:plate",common,0,rng).purchaseBlocked==="automatic_equipment","manual armour upgrade blocked");

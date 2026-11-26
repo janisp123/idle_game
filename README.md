@@ -26,25 +26,13 @@ The Long Vigil is an evolving idle RPG, not a fixed feature list. The game is de
 
 ## A Hobby, Not a Business
 
-The Long Vigil is my first gaming project, built out of curiosity, passion and a desire to create something enjoyable.
+The Long Vigil is my first game and a personal hobby project, not a business model. I started it to learn more about coding and game development, explore new ideas and create something enjoyable.
 
-**It will always be 100% free.**
+My hope is to eventually turn it into a full-fledged game with reliable servers and a stable experience. If the project ever generates enough income to help cover hosting and development costs, that would help make this possible.
 
-- No advertisements.
-- No microtransactions.
-- No subscriptions.
-- No pay-to-win mechanics.
-- No donations or financial contributions.
+Development may be slow or irregular. Bugs, balance issues, unfinished features and loss of progress are possible. I cannot guarantee uninterrupted availability, preservation of progress or regular updates.
 
-Not even a button to buy me a coffee.
-
-There is, however, a catch. This is an independent hobby project, not a commercial product. Development may be slow or irregular. Bugs, balance issues, unfinished features and loss of progress are possible.
-
-By choosing to play, you acknowledge and accept these risks. I cannot guarantee uninterrupted availability, preservation of progress or regular updates.
-
-Constructive feedback is always welcome, but please respect that this project is developed in my free time.
-
-Enjoy the game for what it is — something made for the joy of creating.
+Constructive feedback is always welcome. Please remember that I develop this project in my free time.
 
 ## Open engineering library
 

@@ -1,0 +1,50 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import * as e from "../site/play/engine.mjs";
+const rng=()=>.5;
+test("fresh account claims automatically with exact tribute and no duplicate",()=>{
+  const s=e.newTeamGame(0);s.skills.mining.xp=e.xpToNextLevel(1);s.items.stone=12;s.items.log=3;
+  const result=e.enterGameWithApprentice(s,0,rng);
+  assert.deepEqual(result.state.skills.mining,{level:2,xp:0});
+  assert.equal(result.mastery.tribute.stone,12);
+  assert.equal(result.state.items.log,3);
+  assert.equal(result.state.items.stone,0);
+  assert.equal(e.enterGameWithApprentice(result.state,0,rng).mastery,undefined);
+});
+test("foreground claim at cap immediately continues next level",()=>{
+  let s=e.chooseActivity(e.newTeamGame(0),"mining",0,rng).state;
+  s={...s,skills:{...s.skills,mining:{level:1,xp:e.xpToNextLevel(1)-1}}};
+  const duration=e.ACTIVITIES.mining.durationMs;
+  s={...s,progressMs:duration-1};
+  const out=e.settleLiveWithApprentice(s,1,rng);
+  assert.equal(out.state.skills.mining.level,2);
+  assert.equal(out.state.skills.mining.xp,0);
+  assert.equal(out.levelsGained.mining,1);
+  assert.equal(out.state.settledAtMs,1);
+  const next=e.settleLiveWithApprentice(out.state,2,rng);
+  assert.equal(next.state.skills.mining.level,2);
+  assert.equal(next.state.progressMs,1);
+});
+test("both gladiators upgrade from level one using only exact legal coin debits",()=>{
+  const s={...e.newTeamGame(0),coins:1000};
+  const result=e.settleLiveWithApprentice(s,0,rng);
+  assert.ok(result.autoEquipment.upgrades.some(x=>x.fighterId==="first"));
+  assert.ok(result.autoEquipment.upgrades.some(x=>x.fighterId==="second"));
+  assert.equal(s.coins-result.state.coins,result.autoEquipment.spent);
+  assert.equal(result.state.combatLoadout,s.combatLoadout);
+  assert.equal(result.state.teamSecond.combatLoadout,s.teamSecond.combatLoadout);
+  assert.deepEqual(result.state.equipment.hammer,s.equipment.hammer);
+  assert.equal(e.settleLiveWithApprentice(result.state,0,rng).autoEquipment.upgrades.length,0);
+});
+test("offline remains capped and frozen before return; Teamwork claim is once",()=>{
+  const s=e.chooseActivity(e.newTeamGame(0),"mining",0,rng).state;
+  s.teamwork={level:1,xp:100};
+  const raw=e.enterGame(s,24*e.DAY_MS,rng);
+  assert.equal(raw.state.skills.mining.level,1);
+  assert.equal(raw.state.teamwork.level,1);
+  const result=e.enterGameWithApprentice(s,24*e.DAY_MS,rng);
+  assert.equal(result.state.skills.mining.level,2);
+  assert.equal(result.state.teamwork.level,2);
+  assert.deepEqual(result.state.attributeEffort,raw.state.attributeEffort);
+  assert.equal(result.mastery.tribute.stone,raw.state.items.stone);
+});

@@ -21,6 +21,10 @@
 
 See DECISIONS.md and paused STRATEGY-001 research PR #186. No candidate companion species, tactic effects or numerical progression formula is approved by this rule alone. No resumption of paused implementation without owner instruction.
 
+## Owner-approved automation direction — AUTO-MASTER-001 (2026-11-26)
+
+The player is a gladiator manager. Mandatory automatic Skill Master and selected weapon/armour grade and quality upgrades are available from first entry and throughout active online play. No activity-level unlocks, opt-in controls or manual level/grade/quality upgrade chores. Preserve meaningful combat loadout decisions, active-choice-only progress, existing tribute, legal upgrade prices/gates, exact shared treasury and frozen offline settlement. Apply changes at safe chronological boundaries, never retroactively. This supersedes older conflicting login-only and 50/10-level automation wording; implementation pending in PR #191. No unapproved tactical options or combat balance changes.
+
 ## Core architecture rule — MODULAR-001 (2026-11-26)
 
 **Owner-approved.** Keep systems modular, independently testable, easy to edit and expandable. Use a single source of truth for actual formulas, with pure mechanics separated from orchestration, save/settlement, UI and test adapters. Team combat operates on bounded rosters, not hard-coded two-fighter strike logic; playable team size remains two until explicitly changed. Keep tuning constants in the responsible modules and extend developer simulations to import the same actual resolver. Do not add speculative features or abstractions merely for flexibility.
@@ -35,9 +39,9 @@ This does **not** mean the game has no save mechanism: existing save/load, norma
 
 **GLAD-001 through GLAD-005 are deployed** (PRs #144, #146, #148, #150, #152). The later ALPHA-GEAR-001 update (#154), art (#156), character statistics (#157/#158) and simulator synchronization (#159) supersede earlier prototype assumptions. Current game: three attributes, eleven activities, five physical weapons, four armour slots, grade/quality equipment, arena coins, retained weapon/armour expertise and five arenas. Old magic, 41 activities, eleven armour slots and scroll enchantments are historical only. Do not restart completed GLAD batches. Read remote TD_LIST and checkpoint for the next specifically approved task; future clans/multiplayer remain unimplemented.
 
-## Permanent free-game commitment — FREE-001 (2026-11-25)
+## Hobby-project direction — HOBBY-002 (2026-11-26)
 
-The Long Vigil is the Owner's first game and will always be 100% free. Do not add, propose as a revenue plan, or integrate advertisements (even optional/rewarded), paid access or content, microtransactions, subscriptions, pay-to-win, donation/tip links, Buy Me a Coffee or any monetization for this game. It is an independent noncommercial hobby project; do not promise a development schedule, uninterrupted availability, bug-free balance or preservation of test progress. Welcome constructive feedback. This policy does not change the MIT license or bind other projects or third-party reuse. See `docs/DECISIONS.md` FREE-001.
+The Long Vigil is the Owner's personal learning and game-development hobby, not a business model. The permanent no-monetization promise FREE-001 is explicitly superseded. Future revenue may help cover server and development costs; no particular advertising, purchase, paid access or monetization feature is approved by this change. Do not introduce any without separate Owner approval. No availability, data retention or update guarantees. Keep the README and public site consistent; the MIT license is unchanged.
 
 ## Core principle — QUAL-001: quality and security over quantity
 
