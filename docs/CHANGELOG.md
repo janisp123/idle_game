@@ -2,7 +2,7 @@
 
 ## ACTIVE-PROGRESSION-001 · STARTED (2026-11-26, chat)
 
-Owner explicitly requests permanent design rule for independent active-choice progression, automatic login mastery, and meaningful combination performance. Documentation only; separate from paused research PR #186. No formula or gameplay change.
+Owner explicitly requests permanent design rule for independent active-choice progression, automatic login mastery, and meaningful combination performance. Documentation only; separate from paused research PR #186. No formula or gameplay change. [PR #187](https://github.com/janisp123/idle_game/pull/187) records rule in AGENTS and DECISIONS; pending protected merge. Research PR #186 remains paused.
 
 ## APPRENTICE-A5 · STARTED (2026-11-26, chat)
 
