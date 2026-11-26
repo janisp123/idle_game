@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## APPRENTICE-A5 — analytical login report (draft PR #185)
+
+Owner requested full-screen analytical return report; close manually or auto after 10 real seconds. [Implementation and evidence](mechanics/APPRENTICE_A5_LOGIN_REPORT.md). Pure settled outcome projection, actual combat/rewards/XP/resource flows/attributes/expertise/committed chores, no gameplay change. Same-session reopen for untimed review. Native projection PASS systems 45812490224; 117 regressions PASS, mobile timer 10063ms at website 45812525144; desktop scrollbar gap corrected ac008aaf, save failure assertions f1c2c2cf, final checks pending. A4 merged 9cdc3364 and Pages 45810631099 SUCCESS. Next final browser/CI verification and protected PR #185 merge + Pages. Branch feature/apprentice-a5.
+
 ## APPRENTICE-A4-05 — release candidate (PR #184)
 
 Owner requested release; reviewed approved scope and complete source diff. All four CI PASS at 583360bb: website 45809205649, systems 45809205762, combat 45809205680, protocol 45809205748. [Economy and evidence](mechanics/APPRENTICE_A4_MANDATORY_VALIDATION.md). No new dependencies or public developer bypasses, no reward/gear/mastery tuning, no forced V16 reset. Mandatory selected gear upgrade at earned level10 on safe coordinated page entry; initial armour acquisition and gear choices remain manual. No-Web-Locks/storage failure path tested and honestly unavailable; no authoritative concurrency guarantee. Next confirm final-head checks, protected merge, verify main and Pages; actual release evidence in PR #184 conversation. A5 unified login report is the next proposed batch, real clan automation server-gated.

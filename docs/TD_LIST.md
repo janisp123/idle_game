@@ -8,14 +8,23 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## APPRENTICE-A5 — Full-screen analytical login report
+
+- **Goal:** On returning entry, show an unmistakable full-screen report of actual offline progress and committed automation. Dismiss manually or after ten real seconds; reopen for review in same session.
+- **Acceptance:** Exact aggregate encounter/win/loss and coin ledger, XP and level changes, resource gained/used/tribute, attributes and expertise, grouped actual upgrade stages and costs, capped/route status, no fabricated reward or success on failed save; full mobile/desktop modal and timer verification. No changes to mechanics.
+- **Status:** IN_REVIEW — [PR #185](https://github.com/janisp123/idle_game/pull/185) implementation and tests in progress.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## APPRENTICE-A4 — Automatic equipped equipment progression
 
 - **Goal:** Once unlocked at ten earned activity levels, assistant handles quality and grade upgrades for selected weapon and equipped armour, never changes loadout. Show planned upgrade and cost/progress; player decides strategy, not individual purchase clicks.
 - **Acceptance:** Mandatory at 10 earned activity levels (no toggle), weakest-first, shared exact smith quote and sequential grade gates, deterministic bounded purchase loop, no off-loadout purchases/forced armour, settle offline first, safe save/reload, committed report, UI and economy regressions. Clan donations separately server-gated.
-- **Status:** IN_REVIEW — runtime, UI, economy and safety verification complete in [PR #184](https://github.com/janisp123/idle_game/pull/184); final-head release checks and Pages pending. [Validation](mechanics/APPRENTICE_A4_MANDATORY_VALIDATION.md).
+- **Status:** DONE — [PR #184](https://github.com/janisp123/idle_game/pull/184) merged 9cdc3364; final CI 45810515851/45810515837/45810515788/45810515860 PASS, Pages 45810631099 SUCCESS. [Validation](mechanics/APPRENTICE_A4_MANDATORY_VALIDATION.md).
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #184).
 
 ## AUTO-FIGHT-001 — Automatic Fighting difficulty progression
 

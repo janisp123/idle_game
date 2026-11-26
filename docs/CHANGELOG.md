@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## APPRENTICE-A5 · STARTED (2026-11-26, chat)
+
+Owner approved full-screen analytical login report, dismiss manually or automatically after 10 seconds. Include actual offline encounters, wins, losses, rewards, skill/attribute/expertise progress, resource flows and committed automation upgrades/tribute. Baseline 9cdc3364; A4 merged PR #184 and Pages 45810631099 SUCCESS. Read-only report; no progression/economy changes. [Implementation and evidence](mechanics/APPRENTICE_A5_LOGIN_REPORT.md). Native projection PASS, 117 regressions PASS, mobile timer 10063ms; desktop scrollbar gap corrected, new failed-save assertions pending final browser checks. Same-session report reopen; no save migration. Draft PR #185; next all final CI and merge/Pages verification.
+
 ## APPRENTICE-A4-05 · STARTED / RELEASE CANDIDATE (2026-11-26, chat)
 
 Owner requested final release of mandatory equipment progression. Head 583360bb passed all four workflows: website 45809205649, systems 45809205762, combat 45809205680, protocol 45809205748. Reviewed runtime and developer-only changes: level10 earned unlock, exact existing sequential prices and gates, chosen equipped items only, no toggle, no off-kit spending, login-only after frozen offline settlement, safe commit before report; no reward or expertise retuning. Initial armour choice remains manual, existing optional Master consent unchanged. Final-head CI, protected merge and Pages verification required; actual release evidence recorded in PR #184 conversation.

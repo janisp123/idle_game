@@ -17,6 +17,10 @@ test("the final recovery tick leads into a fresh arena bout", () => {
   assert.equal(combatFlowState(next).current, 0);
 });
 class FakeElement {
+  open = false;
+  showModal(){this.open=true;}
+  close(){this.open=false;this.fire('close');}
+  focus(){}
   children = [];
   listeners = new Map();
   attributes = new Map();
@@ -158,7 +162,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=apprentice-a4/,
+  assert.match(html, /app\.mjs\?v=apprentice-a5/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -242,6 +246,9 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
   Date.now = () => now;
   try {
     await import("../site/play/app.mjs?smoke-test");
+    assert.equal(elements.get("loginReport").open,true);
+    elements.get("loginReportDismiss").fire("click");
+    assert.equal(elements.get("loginReport").open,false);
     assert.deepEqual(elements.get("queueAmount").children.map(option => Number(option.value)),
       Array.from({ length: SCHEDULE_BALANCE.maxDurationUnits - SCHEDULE_BALANCE.minDurationUnits + 1 },
         (_, i) => i + SCHEDULE_BALANCE.minDurationUnits),
