@@ -32,7 +32,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=glad-001";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 16; // BAL-002 changes replayed frozen duel outcomes; disposable V15 alpha saves reset
+export const GAME_VERSION = 17; // TEAM-004: incompatible frozen team outcomes; disposable V16 alpha saves reset
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
