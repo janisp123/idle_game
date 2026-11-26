@@ -193,7 +193,10 @@ try{
     assert.deepEqual(repeat.s.equipment,upgrade.s.equipment);assert.equal(repeat.s.coins,upgrade.s.coins);assert.equal(repeat.hidden,true);
     const failureFixture=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=apprentice-a4");const s=e.newGame(Date.now());s.skills.fighting.level=11;s.coins=1000;return JSON.stringify(s);})()`);
     await navigate("equipment-write-fail-"+width,{[saveKey]:failureFixture,[clockKey]:null},
-      "const realSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k==="+JSON.stringify(saveKey)+")throw new Error('synthetic write failure');return realSet.call(this,k,v);};");
+      "const realSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k==="+JSON.stringify(saveKey)+")throw new Error('synthetic write failure');return realSet.call(this,k,v);};",true);
+    const failReport=await evaluate('document.getElementById("loginReportBody").innerText');
+    assert.match(failReport,/Progress could not be saved/);assert.match(failReport,/No upgrades purchased/);
+    await evaluate('document.getElementById("loginReportDismiss").click()');
     const failed=await evaluate(`(()=>{const $=id=>document.getElementById(id);return {s:JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),reportHidden:$("apprenticeEquipmentReport").hidden,notice:$("apprenticeEquipmentStatus").textContent,wallet:$("coinWallet").textContent};})()`);
     assert.equal(failed.s.coins,1000);assert.equal(failed.s.equipment.greatsword.quality,"poor");assert.equal(failed.reportHidden,true);assert.match(failed.notice,/Unavailable/);assert.match(failed.wallet,/1,000 coins/);
     await navigate("equipment-write-recover-"+width,{[saveKey]:failureFixture,[clockKey]:null});
