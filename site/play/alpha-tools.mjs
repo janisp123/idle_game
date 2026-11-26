@@ -1,4 +1,4 @@
-import { TIMING_PROFILE, enterGame } from "./engine.mjs?v=apprentice-a4";
+import { TIMING_PROFILE, enterGame } from "./engine.mjs?v=team-004";
 import { awardAttributeTime,blankAttributeEffort } from "./attributes.mjs?v=glad-001";
 import { EXPERTISE_BALANCE } from "./expertise.mjs?v=alpha-gear-a3";
 import { ARMOUR_TIERS } from "./armour.mjs?v=bal-002";
@@ -18,9 +18,9 @@ function requireAlpha(){
  * Only the current weapon and one explicitly chosen armour family are trained.
  * Settle at the old build first. Never add items, coins or elapsed time here.
  */
-export function alphaMaxStats(state,family,now,random=Math.random){
+export function alphaMaxStats(state,family,now,random=Math.random,secondFamily=family){
   requireAlpha();
-  if(!ARMOUR_TIERS.includes(family))throw new RangeError("Choose one armour family");
+  if(!ARMOUR_TIERS.includes(family)||!ARMOUR_TIERS.includes(secondFamily))throw new RangeError("Choose one armour family");
   const result=enterGame(state,now,random),old=result.state;
   const floor=awardAttributeTime(blankAttributeEffort(),"fighting",
     SIX_MONTH_BUILD.productiveHours*3600000);
@@ -33,12 +33,23 @@ export function alphaMaxStats(state,family,now,random=Math.random){
     SIX_MONTH_BUILD.weaponHours*EXPERTISE_BALANCE.unitsPerHour);
   expertise[family]=Math.max(expertise[family],
     SIX_MONTH_BUILD.armourHours*EXPERTISE_BALANCE.unitsPerHour);
-  const changed=fighting!==old.skills.fighting||
+  // Separate test floors; never train inactive weapons or unselected families.
+  // Rounded down from the two-fighter six-month baseline, including casualties.
+  let teamSecond=old.teamSecond;
+  if(teamSecond){
+    const second={...teamSecond.expertise};
+    second[teamSecond.combatLoadout]=Math.max(second[teamSecond.combatLoadout],3400*EXPERTISE_BALANCE.unitsPerHour);
+    second[secondFamily]=Math.max(second[secondFamily],3400*EXPERTISE_BALANCE.unitsPerHour);
+    teamSecond={...teamSecond,expertise:second,expertiseActive:{...second}};
+    expertise[old.combatLoadout]=Math.max(old.expertise[old.combatLoadout],3400*EXPERTISE_BALANCE.unitsPerHour);
+    expertise[family]=Math.max(old.expertise[family],3400*EXPERTISE_BALANCE.unitsPerHour);
+  }
+  const changed=fighting!==old.skills.fighting||JSON.stringify(teamSecond)!==JSON.stringify(old.teamSecond)||
     Object.keys(attributeEffort).some(id=>attributeEffort[id]!==old.attributeEffort[id])||
     Object.keys(expertise).some(id=>expertise[id]!==old.expertise[id]);
   if(!changed)return result;
   return {...result,state:{...old,attributeEffort,skills:{...old.skills,fighting},
-    expertise,expertiseActive:{...expertise},attributeEffortActive:{...attributeEffort}}};
+    expertise,expertiseActive:{...expertise},attributeEffortActive:{...attributeEffort},...(teamSecond?{teamSecond}:{})}};
 }
 /** Explicit local test credit, not an arena prize. Existing fights are untouched. */
 export function alphaGrantCoins(state,now,random=Math.random){
