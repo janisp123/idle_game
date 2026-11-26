@@ -1,5 +1,10 @@
 # Changelog and task handoffs
 
+## TEAM-006 — behaviour candidate verified (2026-11-26, chat)
+
+[Report](mechanics/TEAM_006_BEHAVIOUR.md), [results](mechanics/TEAM_006_BEHAVIOUR.json), research PR #190. Native run 45844151597 all nine jobs PASS; 1,714,176 battles and 1080 exact normal trace parity fixtures. Strong conditional niches for Focus and Range; broad gains modest (own-team policy +0.2–1.7 pp); Protect is harmful to tank+archer despite increased interception. Do not ship first candidate. Refine focus reachability, range timing and guard formation; retest against normal with independent seeds. No live changes, no pets, no merge.
+
+
 ## TEAM-004 · STARTED / COMBINED CANDIDATE (2026-11-26, chat)
 
 TEAM-004 owner approved +40% team-only coin payout and centered geometry after sensitivity (cf1fdfe5 all six CI PASS; 24 trajectories, 1,606,627 progression bouts and 230,400 direct comparisons). Runtime payout Math.round(old solo prize × 1.4) per victory; no price/XP/damage changes. Centered 8/9/10 tiles, mirrored traversal. Team timeline V2, alpha save V17 with explicit reset notice for V16. Two independent Alpha Max Stats armour-family selections; team shared productive floor 3700h, selected weapon and chosen armour floors 3400h each, Fighting 52; no inactive expertise/gear/coin grant. Combined [audit](mechanics/TEAM_004_COMBINED.json) native run 45836661957 all eight jobs PASS: five daily pure Fighting scenarios completed both S Masterwork kits days171–178, weekly/mixed did not. Browser regression at 3065ee2b/a6b5983c initially failed due to uninitialized second-family select; fixed 0e6466b9. Final browser/CI and release pending; no deployment. V16 alpha reset will discard existing local test progress only when released, under ALPHA-FOCUS-001. Next verify final head, inspect overlaps, merge only after all gates, verify Pages.
