@@ -1,5 +1,10 @@
 # Current working checkpoint
 
+## TEAM-010 — complete broad wear audit (2026-11-26)
+
+[Report](mechanics/TEAM_010_WEAR.md), nine compact result files, PR #190, run 45873421935 all PASS. 32,962,800 scored battles +675 parity. S Common selected dual spear 68.7/64.4/66.2% A/B/C; any armour breaks 0/77.9/61.1%. S C Masterwork dual spear/greatsword/bow/hammer/shield 69.3/62.1/53.9/42.4/38.8%. Benchmark stats and Teamwork25, not fully max endgame. Owner ENDGAME-BALANCE-001: next prioritize realistic max/near-max stats, S Masterwork, Teamwork50 and mastery50, independent weapon tuning and competitive offline. No production changes or merge.
+
+
 Owner decision ENDGAME-BALANCE-001: prioritize S-grade/top stats, Masterwork and mature expertise/tactics for buffs/nerfs and future PvP; NG/D secondary sanity checks. See AGENTS.md. Finish current TEAM-010 run before tuning.
 
 ## TEAM-010 — broad competitive armour wear research underway
