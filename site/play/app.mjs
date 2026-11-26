@@ -1,3 +1,4 @@
+import { initLoginReport, showLoginReport, clearLoginReport } from "./login-report-ui.mjs?v=apprentice-a5";
 import { requiredAutoFightWins } from "./auto-fight.mjs?v=auto-fight-03";
 import { characterStats } from "./character-stats.mjs?v=apprentice-a4";
 import { MASTER_CONSENT_VERSION } from "./apprentice.mjs?v=apprentice-a2";
@@ -1249,6 +1250,8 @@ function showApprenticeMasterReport(result) {
 
 function start(coordinatedLogin = false) {
   autoLoginSupported = coordinatedLogin;
+  initLoginReport();
+  let loginSummary=null;
   let saved = null;
   let clockText = null;
   try {
@@ -1274,6 +1277,7 @@ function start(coordinatedLogin = false) {
     writeSave();
   } else {
     const now = gameNow();
+    const before=state;
     const result = autoLoginSupported && storageWorks
       ? enterGameWithApprentice(state, now)
       : enterGame(state, now);
@@ -1284,17 +1288,21 @@ function start(coordinatedLogin = false) {
         reportProgress(result);
         if(result.mastery)showApprenticeMasterReport(result);
         showApprenticeEquipmentReport(result);
+        loginSummary={before,outcome:result,options:{saved:true}};
       } else {
-        const ordinary = enterGame(state, now);
+        const fallbackBefore=state;
+        const ordinary = enterGame(fallbackBefore, now);
         state = ordinary.state;
         reportProgress(ordinary);
-        writeSave();
+        const committed=writeSave();
+        loginSummary={before:fallbackBefore,outcome:ordinary,options:{saved:committed,automationUnavailable:true}};
         message("Apprentice skipped: automatic chores could not be safely saved.");
       }
     } else {
       state = result.state;
       reportProgress(result);
-      writeSave();
+      const committed=writeSave();
+      loginSummary={before,outcome:result,options:{saved:committed,automationUnavailable:!autoLoginSupported||!storageWorks}};
     }
   }
 
@@ -1358,6 +1366,7 @@ function start(coordinatedLogin = false) {
       alphaClock=null;
       breakForegroundContinuity();
       state=newStartingCharacter(Date.now());
+      clearLoginReport();
       $("apprenticeMasterReport").hidden=true;
       $("apprenticeEquipmentReport").hidden=true;
       latestWorkResult=null;
@@ -1481,6 +1490,7 @@ function start(coordinatedLogin = false) {
     }
   });
   render();
+  if(loginSummary)showLoginReport(loginSummary.before,loginSummary.outcome,loginSummary.options);
   window.setInterval(tick, 250);
   ui.saveStatus.setAttribute("data-game-ready","true");
 }
