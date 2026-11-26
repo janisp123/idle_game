@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## AUTO-FIGHT-02 · STARTED (2026-11-26, chat)
+
+Owner approved continuing after production policy research; draft PR #183, branch `research/auto-fight-policy-001`, baseline de5853ae. Implement 3 wins / 1 loss / 10 retry wins, pure deterministic state, online-only stage updates. Previous 90,720 real duels and 1,680 offline wallet checks saved. Next: policy module and targeted tests, then integrate committed live bout boundaries, frozen offline mode, UI and economy verification. No deployment yet.
+
 ## APPRENTICE-A3 · MERGED AND DEPLOYED (2026-11-26, chat)
 
 PR #181 merged db64da3307a0dffa0108297afb616ef69473f1e4; final head a22a693 passed website 45762861902, combat 45762862614, systems 45762861936 (native 17,952 purchase checks, 4,992 conditions, 960 sessions/duels and 63 purchases), protocol 45762861941. Merged main readback and [Pages deployment 45762976976](https://github.com/janisp123/idle_game/actions/runs/45762976976) passed. Research #179 and policy #180 merged via same commit; original raw reports and harnesses preserved. No save reset; unpaid combat spanning the balance release uses new rules. Next A4 optional quality-only automation; precise unlock threshold and coin-reserve policy remain to be confirmed.
