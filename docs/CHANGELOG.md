@@ -2,7 +2,7 @@
 
 ## AUTO-FIGHT-04 · STARTED (2026-11-26, chat)
 
-Owner requested continuation. Draft PR #183, prior head 95119338: all four CI workflows PASS (website 45786243883, combat 45786243889, systems 45786243928, protocol 45786243936). Add compact live progression panel, shared foreground action settlement and real browser boundary tests. Next implement and verify; economy remains separate.
+Owner requested continuation. Draft PR #183, prior head 95119338: all four CI workflows PASS (website 45786243883, combat 45786243889, systems 45786243928, protocol 45786243936). Implemented read-only progression panel and shared foreground action settlement. [Verification](mechanics/AUTO_FIGHT_UI_VALIDATION.md): tested code head 20533112, website 45787216857 (117 regressions, Chromium at 390/1440, passive advance, gear action, reload, offline visibility and alpha day), combat 45787216940, systems 45787216852, protocol 45787216872 all PASS. Next AUTO-FIGHT-05 six-month automatic economy validation, then final CI and release. No merge or deployment.
 
 ## AUTO-FIGHT-03 · STARTED (2026-11-26, chat)
 
