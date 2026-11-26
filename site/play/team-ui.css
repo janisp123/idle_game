@@ -1,0 +1,10 @@
+/* Team controls are scoped to the two-fighter view. */
+#teamEquipmentSelector{margin:.6rem 0}
+#teamFighterChoice{width:100%;max-width:100%;margin:.25rem 0}
+.team-vitals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
+.team-fighter{min-width:0;border:1px solid currentColor;border-radius:.25rem;padding:.45rem;display:grid;gap:.2rem;overflow-wrap:anywhere}
+.team-fighter strong,.team-fighter small{font-size:.78rem}
+.team-fighter progress{width:100%;height:.65rem}
+.team-fighter[data-fighter^="enemy"]{opacity:.88}
+#teamBattleReadout>p{font-size:.85rem;margin:.25rem 0 .5rem}
+#teamBattleReadout[hidden],#teamEquipmentSelector[hidden],#teamworkStatus[hidden]{display:none}
