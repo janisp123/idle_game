@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## APPRENTICE-A4-03 — mandatory login engine and read-only UI integrated (draft PR #184)
+
+[Integration evidence](mechanics/APPRENTICE_A4_INTEGRATION.md). Mandatory at 10 earned levels; coordinated login settles offline, optional Master, then selected gear; owned manual upgrades refused, initial armour acquisition and loadout choice remain. 27 integration + 7,115 planner checks native PASS at cf7c4a46 (systems 45806301130, then old Master fixture failed); combat/protocol PASS. Legacy fixtures corrected; latest Chromium assertions 9ef16e86 and Master fix 2437d197 not yet fully verified. Historical manual economy isolated comparator, actual mandatory six-month economy still pending. No deployment. Next A4-04: finish regression/real browser and safe-save tests, run real mandatory login economy across builds/cadences, then final release. Login-only, no storage/Web Locks support means unavailable; no off switch. Branch `feature/apprentice-a4`, PR #184.
+
 ## APPRENTICE-A4-02 — mandatory level-10 planner implemented (draft PR #184)
 
 Owner approved equipment automation at 10 combined earned activity levels, mandatory/no off switch. Player chooses weapon and armour, assistant chooses sequential upgrades; no reserve or priorities settings. [Planner verification and handoff](mechanics/APPRENTICE_A4_PLANNER.md). Pure `site/play/auto-equipment.mjs`, `tools/test_auto_equipment.mjs`: 7,115 assertions PASS in connector JS, first faulty fixture corrected. Native system-lab gate added, verification pending. No runtime wiring or deployment. Next A4-03: shared settled purchase path and coordinated login after offline/Master, block manual grade/quality upgrading once unlocked without restricting loadout or initial armour choice; safe persistence, engine/UI/browser tests, report next purchase; then economy and release. Existing optional Master consent unaffected. Branch `feature/apprentice-a4`, PR #184.
