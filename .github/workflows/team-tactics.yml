@@ -1,0 +1,40 @@
+name: Team tactical choice audit
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/team-tactics-audit.mjs'
+      - '.github/workflows/team-tactics.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  strategy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        grade: [0,3,7]
+        level: [1,50]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Run full composition search and independent holdout
+        env:
+          GRADE: ${{ matrix.grade }}
+          LEVEL: ${{ matrix.level }}
+        run: node tools/team-tactics-audit.mjs "$GRADE" "$LEVEL" > tactics.json
+      - name: Print compact verified evidence
+        run: |
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            const {matrix,held,ranking,...r}=JSON.parse(readFileSync("tactics.json","utf8"));
+            console.log("TEAM_TACTICS "+JSON.stringify({...r,ranking:[...ranking.slice(0,10),...ranking.slice(-10)]}));'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: team-tactics-${{ matrix.grade }}-${{ matrix.level }}
+          path: tactics.json
+          retention-days: 7
