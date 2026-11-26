@@ -14,7 +14,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** No selectable activities or player-managed route. Keep permanent fighting plus a single automatic noncombat work activity. Work until one next level is earned; claim automatically through the Master, then proceed to the next activity and repeat. Training participates in the same rotation.
 - **Acceptance:** Remove all activity start/schedule/priority/wagon editing controls and queue-slot unlocks; replace with read-only current/next activity, skill XP, actual materials, levels and upgrades. No activity starvation or deadlocks, especially material-dependent production and Master tribute; preserve real resource conservation and frozen offline settlement, avoid doubled effort across combat and work, validate migration of old manual routes and exact saved progress. All three independent strategic choices per gladiator remain buttons. No lower-grade combat balance sweep. Use genuine resolver and engine; no cosmetic-only automation.
-- **Status:** PARTIAL — owner-approved direction recorded; requires PERMANENT-FIGHT-001 and AUTO-MASTER-001. Proposed fixed round-robin and blocked-recipe skip/retry require actual validation; offline rotation/tribute/effort allocation not yet specified. Runtime unchanged.
+- **Status:** IN_REVIEW — Phase 3 manager-only rotation and provisional bounded ingredient reserve candidate; tests pending, not connected to public runtime.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

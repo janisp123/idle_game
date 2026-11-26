@@ -26,7 +26,8 @@ test("separate cap and frozen offline settlement, no replay",()=>{
   const returned=m.enterManagerGame(r.state,end,rng);
   assert.equal(returned.state.skills.fighting.level,2);
   assert.equal(returned.state.skills.hunting.level,2);
-  assert.equal(returned.state.items.hide,0);
+  assert.ok(returned.state.items.hide>0,"real construction inputs retained");
+  assert.equal(returned.state.managerWork.activity,"fishing");
 });
 test("foreground advances a work skill without interrupting current combat",()=>{
   let s=m.newManagerGame(0,"hunting");
@@ -37,7 +38,9 @@ test("foreground advances a work skill without interrupting current combat",()=>
   assert.ok(r.state.combatSession);assert.equal(r.state.activity,"fighting");
   const next=m.settleManagerLive(r.state,2,rng);
   assert.equal(next.state.combatSession.seed,r.state.combatSession.seed);
-  assert.equal(next.state.managerWork.progressMs,1);
+  assert.equal(next.state.managerWork.activity,"fishing");
+  assert.equal(next.state.managerWork.progressMs,0);
+  assert.ok(next.state.managerWork.travelMs>0);
 });
 test("blocked production grants no work effort and combat continues",()=>{
   const s=m.newManagerGame(0,"smithing");

@@ -991,7 +991,7 @@ export function skillSpoils(skillId) {
 }
 
 /** Quoted tribute at the exact current inventory snapshot. No fees/currency. */
-export function skillMasterOffer(state) {
+export function skillMasterOffer(state, reserve = {}) {
   const ready = [], blocked = [], tribute = {};
   for (const skillId of SKILL_IDS) {
     const skill = state.skills[skillId];
@@ -1003,7 +1003,12 @@ export function skillMasterOffer(state) {
       continue;
     }
     ready.push(skillId);
-    for (const key of spoils) if (state.items[key] > 0) tribute[key] = state.items[key];
+    for (const key of spoils) {
+      const keep=reserve[key]??0;
+      if(!isCount(keep))throw new RangeError("Invalid Master ingredient reserve");
+      const surplus=Math.max(0,state.items[key]-keep);
+      if(surplus>0)tribute[key]=surplus;
+    }
   }
   return { ready, blocked, tribute };
 }
@@ -1017,8 +1022,8 @@ export function learnFromMaster(state, now = Date.now(), random = Math.random) {
 }
 
 // Both manual confirmation and explicitly consented login use this exact mutation.
-function claimSettledMaster(outcome) {
-  const offer = skillMasterOffer(outcome.state);
+function claimSettledMaster(outcome, reserve = {}) {
+  const offer = skillMasterOffer(outcome.state,reserve);
   if (!offer.ready.length) throw new RangeError("No mastery available to claim");
   const skills = { ...outcome.state.skills };
   const items = { ...outcome.state.items };
@@ -1026,7 +1031,7 @@ function claimSettledMaster(outcome) {
     const old = skills[skillId];
     skills[skillId] = { level: old.level + 1, xp: 0 };
   }
-  for (const key of Object.keys(offer.tribute)) items[key] = 0;
+  for (const [key,amount] of Object.entries(offer.tribute)) items[key] -= amount;
   return { ...outcome, state: {
     ...outcome.state, skills, items,
     // Claimed levels are visible immediately; combat applies at the boundary.
@@ -1044,10 +1049,10 @@ export function setAutoMasterConsent(state, enabled) {
 }
 
 /** All automatic chores share the exact existing settled claim and smith mutations. */
-export function automateSettledProgress(outcome) {
+export function automateSettledProgress(outcome, reserve = {}) {
   let result=outcome;
-  if(skillMasterOffer(result.state).ready.length){
-    result=claimSettledMaster(result);
+  if(skillMasterOffer(result.state,reserve).ready.length){
+    result=claimSettledMaster(result,reserve);
     result={...result,levelsGained:Object.fromEntries(result.mastery.ready.map(id=>[id,1]))};
   }
   if(result.state.teamSecond){

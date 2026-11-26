@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## AUTO-ACTIVITY-001 · Phase 3 rotation candidate (2026-11-26, chat)
+
+AUTO-ACTIVITY-001 Phase 3 candidate: Phase 2 head f6cd8afd all six workflows PASS (website 45889067349, systems 45889067385, simulator 45889067366, protocol 45889067340, team audit 45889067402, sensitivity 45889067363). Implemented ten-work round-robin, skip/retry blocked recipes, one-level claim then rotation, travel/preparation timer, conserved overlap after travel, bounded ingredient reserve (one conservative level per eligible recipe alternative, actual stock only) and exact surplus tribute. Existing public/legacy Master default unchanged. Work remains frozen at one cap offline until entry. Provisional reserve/pacing policy still requires owner approval for release; no combat balance changes. Six new targeted tests, including seeded ten-activity ledger trajectory, not yet run at commit. Manager save prototype version 2; not wired to UI. Next verify tests, fix failures, then complete whole-set equipment transaction.
+
 ## PERMANENT-FIGHT-001 · Phase 2 coordinator candidate (2026-11-26, chat)
 
 PERMANENT-FIGHT-001 Phase 2 candidate: #191 Pages 45888338750 SUCCESS, prior merge verified. New manager-lanes.mjs reuses existing capped lane settlement and real combat prefix; shared attribute budget split by exact productive overlap with alternating odd milliseconds, separately persisted work progress and one wall clock; frozen offline claims and live automation boundaries. Current work is fixed (rotation/transition/tribute integration Phase 3); module not connected to browser or public save. Proposed effort split and offline policy not yet validated. Seven targeted tests added; CI NOT RUN at commit. No combat tuning. Next verify functional tests and address failures, then integrate rotation and resolve tribute.

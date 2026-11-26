@@ -7,12 +7,13 @@ import {
   recipeOptions, PRODUCTION_RECIPES, LIVE_FIGHT_MAX_MS, autoEquipmentPreview
 } from "./engine.mjs?v=manager-lanes-001";
 import {BOUT_MS} from "./combat.mjs?v=gear-a3";
+import {WORK_ROTATION,ingredientReserve,rotateManagerWork,rotationTravelMs} from "./activity-rotation.mjs?v=manager-rotation-001";
 
-export const MANAGER_LANES_VERSION=1;
+export const MANAGER_LANES_VERSION=2;
 const count=n=>Number.isSafeInteger(n)&&n>=0;
-const validWork=id=>id!=="fighting"&&Object.hasOwn(ACTIVITIES,id);
+const validWork=id=>WORK_ROTATION.includes(id);
 const route=id=>[{activity:id,plannedMs:null}];
-const blankWork=id=>({activity:id,progressMs:0});
+const blankWork=id=>({activity:id,progressMs:0,travelMs:0});
 const projection=(s,work=false)=>work?{
   ...s,activity:s.managerWork.activity,progressMs:s.managerWork.progressMs,
   transition:null,wagons:route(s.managerWork.activity),productiveElapsedMs:0,combatSession:null
@@ -23,7 +24,8 @@ function validManagerShape(s){
     s.wagons[0].plannedMs===null&&s.fightingRemainderMs===0&&s.productiveElapsedMs===0&&
     validWork(s.managerWork?.activity)&&count(s.managerWork.progressMs)&&
     s.managerWork.progressMs<ACTIVITIES[s.managerWork.activity].durationMs&&
-    [0,1].includes(s.overlapParity);
+    count(s.managerWork.travelMs)&&s.managerWork.travelMs<=Math.max(...WORK_ROTATION.map(id=>rotationTravelMs(id,s.managerWork.activity)))&&
+    (!s.managerWork.travelMs||s.managerWork.progressMs===0)&&[0,1].includes(s.overlapParity);
 }
 function requireManager(s){if(!validManagerShape(s))throw new RangeError("Invalid manager state");}
 export function newManagerGame(now=Date.now(),firstWork="hunting"){
@@ -50,14 +52,14 @@ export function assignManagerWork(s,id){
   requireManager(s);
   if(!validWork(id))throw new RangeError("Invalid noncombat work");
   if(s.managerWork.activity===id)return s;
-  return {...s,managerWork:blankWork(id)};
+  return {...s,managerWork:{...blankWork(id),travelMs:rotationTravelMs(s.managerWork.activity,id)}};
 }
 function laneTime(before,after){
   const total=ATTRIBUTE_IDS.reduce((n,id)=>n+after.attributeEffort[id]-before.attributeEffort[id],0);
   if(!count(total)||total%100)throw new Error("Nonconserving lane effort");
   return total/100;
 }
-function workEnd(s,end){
+function workEnd(s,end,start){
   const id=s.managerWork.activity;
   if(!PRODUCTION_RECIPES[id])return end;
   const options=recipeOptions(id,s.skills[id].level);
@@ -71,8 +73,8 @@ function workEnd(s,end){
     }
     capacity+=Math.min(...recipe.inputs.map(item=>s.items[item]??0));
   }
-  if(!capacity)return s.settledAtMs;
-  return Math.min(end,s.settledAtMs+Math.max(0,capacity*ACTIVITIES[id].durationMs-s.managerWork.progressMs));
+  if(!capacity)return start;
+  return start+Math.min(end-start,Math.max(0,capacity*ACTIVITIES[id].durationMs-s.managerWork.progressMs));
 }
 function replay(random){
   const values=[];
@@ -83,7 +85,10 @@ function pair(s,end,random,online){
   const combatRoll=replay(random),workRoll=replay(random);
   const run=target=>({
     combat:settleManagerLane(combat,target,combatRoll(),online),
-    work:settleManagerLane(work,workEnd(s,target),workRoll(),online)
+    work:(()=>{
+      const start=Math.min(target,s.settledAtMs+s.managerWork.travelMs);
+      return settleManagerLane({...work,settledAtMs:start},workEnd(s,target,start),workRoll(),online);
+    })()
   });
   let a=run(end);
   if(online){
@@ -94,8 +99,10 @@ function pair(s,end,random,online){
   }
   const c=a.combat.state,w=a.work.state;
   const combatMs=laneTime(s,c),workMs=laneTime(s,w);
-  const overlap=workMs>=c.settledAtMs-s.settledAtMs?combatMs:
-    workMs?managerCombatProductivePrefix(combat,workMs,online):0;
+  const combatWall=c.settledAtMs-s.settledAtMs;
+  const workStart=Math.min(end-s.settledAtMs,s.managerWork.travelMs);
+  const prefix=t=>t>=combatWall?combatMs:managerCombatProductivePrefix(combat,t,online);
+  const overlap=workMs?prefix(Math.min(combatWall,workStart+workMs))-prefix(Math.min(combatWall,workStart)):0;
   if(!count(overlap)||overlap>Math.min(combatMs,workMs))throw new Error("Invalid productive overlap");
   // Alternate odd overlap milliseconds between lanes; exact 100-weight
   // total per wall millisecond, no fractional or lost shared effort.
@@ -108,7 +115,7 @@ function pair(s,end,random,online){
   }));
   const next={...c,skills:{...c.skills,[work.activity]:w.skills[work.activity]},
     items:w.items,attributeEffort,settledAtMs:end,
-    managerWork:{activity:work.activity,progressMs:w.progressMs},
+    managerWork:{activity:work.activity,progressMs:w.progressMs,travelMs:Math.max(0,s.managerWork.travelMs-(end-s.settledAtMs))},
     overlapParity:(s.overlapParity+overlap)%2};
   const reports=[a.combat.report,a.work.report].filter(r=>r&&(r.completed||r.arena));
   return {state:next,reports,report:reports.at(-1),effort:{combatMs,workMs,overlap,combatTime,workTime}};
@@ -120,7 +127,9 @@ export function settleManagerOffline(s,now=Date.now(),random=Math.random){
 }
 export function enterManagerGame(s,now=Date.now(),random=Math.random){
   const out=settleManagerOffline(s,now,random);
-  return automateSettledProgress({...out,state:activateExpertise(out.state)});
+  const active=activateExpertise(out.state),reserve=ingredientReserve(active);
+  const claimed=automateSettledProgress({...out,state:active},reserve);
+  return {...claimed,state:rotateManagerWork(claimed.state,claimed.mastery?.ready??[]),ingredientReserve:reserve};
 }
 export function settleManagerLive(s,now=Date.now(),random=Math.random){
   requireManager(s);if(!count(now))throw new RangeError("Invalid clock");
@@ -128,8 +137,9 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
   const reports=[],levelsGained={},tribute={},upgrades=[];let spent=0,teamworkLevelGained=0;
   let next=s;
   const apply=()=>{
-    const out=automateSettledProgress({state:activateExpertise(next)});
-    next=out.state;
+    const active=activateExpertise(next);
+    const out=automateSettledProgress({state:active},ingredientReserve(active));
+    next=rotateManagerWork(out.state,out.mastery?.ready??[]);
     for(const [id,n] of Object.entries(out.levelsGained??{}))levelsGained[id]=(levelsGained[id]??0)+n;
     for(const [id,n] of Object.entries(out.mastery?.tribute??{}))tribute[id]=(tribute[id]??0)+n;
     teamworkLevelGained+=out.teamworkLevelGained??0;
@@ -140,7 +150,7 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
     if(i>=64)throw new Error("Manager live boundary limit");
     const before=next.settledAtMs;
     const segment=Math.min(now-before,BOUT_MS-((next.combatSession?.elapsedMs??0)%BOUT_MS),
-      ACTIVITIES[next.managerWork.activity].durationMs-next.managerWork.progressMs,
+      next.managerWork.travelMs||ACTIVITIES[next.managerWork.activity].durationMs-next.managerWork.progressMs,
       ACTIVITIES.fighting.durationMs-next.progressMs);
     const outcome=pair(next,before+segment,random,true);
     next=outcome.state;reports.push(...outcome.reports);apply();
@@ -149,5 +159,6 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
   const ready=Object.keys(levelsGained);
   return {state:next,reports,report:reports.at(-1),levelsGained,teamworkLevelGained,
     ...(ready.length?{mastery:{ready,blocked:[],tribute}}:{}),
+    ingredientReserve:ingredientReserve(next),
     autoEquipment:{upgrades,spent,preview:autoEquipmentPreview(next)}};
 }
