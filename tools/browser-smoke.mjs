@@ -139,6 +139,10 @@ try{
     assert.match(clan.text,/Search clans/);assert.match(clan.text,/Create a clan/);
     await shot("clan-"+width);
     await evaluate('document.getElementById("clanMenu").querySelector("summary").click()');
+    // Preserve the original single-fighter economy regression as a legacy
+    // save fixture; fresh team behavior is verified separately above.
+    const soloFixture=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=team-003");return JSON.stringify(e.chooseActivity(e.newGame(Date.now()),"fighting",Date.now(),()=>.5).state);})()`);
+    await navigate("legacy-solo-regression-"+width,{[saveKey]:soloFixture,[clockKey]:null});
     const result=await evaluate(`(()=>{const $=id=>document.getElementById(id);
       $("alphaTools").open=true;$("alphaFamily").value="leather";
       $("alphaMaxStats").click();$("alphaCoins").click();$("alphaCoins").click();
