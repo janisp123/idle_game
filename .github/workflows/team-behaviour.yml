@@ -1,0 +1,40 @@
+name: Team behaviour tactical audit
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/team-behaviour-audit.mjs'
+      - '.github/workflows/team-behaviour.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  behaviour:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        grade: [0,3,7]
+        mastery: [1,25,50]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Compare behaviour against production automatic combat
+        env:
+          GRADE: ${{ matrix.grade }}
+          MASTERY: ${{ matrix.mastery }}
+        run: node tools/team-behaviour-audit.mjs "$GRADE" "$MASTERY" > behaviour.json
+      - name: Print verified summary
+        run: |
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            const {cells,...r}=JSON.parse(readFileSync("behaviour.json","utf8"));
+            console.log("TEAM_BEHAVIOUR "+JSON.stringify(r));'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: team-behaviour-${{ matrix.grade }}-${{ matrix.mastery }}
+          path: behaviour.json
+          retention-days: 7
