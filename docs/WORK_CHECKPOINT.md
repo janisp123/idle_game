@@ -1,5 +1,10 @@
 # Current working checkpoint
 
+## TEAM-007 — individual behaviour audit verified (2026-11-26, chat)
+
+[Report](mechanics/TEAM_007_INDIVIDUAL.md), compact results G0/G3/G7, PR #190, native run 45851377250 all nine jobs PASS. 6,345,216 battles + 1080 exact normal parity fixtures. Max mastery best vs poor NPC +9.0/9.6/10.1 pp (NG/D/S), best vs normal +3.9/5.0/5.1 pp. S spear/archer defensive/aggressive 65.3% vs reverse 44.4%; individual roles meaningful, mixed roles not universally better. S selected best mastery curve 54.9/56.6/58.4%; normal 53.3%. Retain Normal, distinguish zero-reach Range, test mixed mastery, role duration, progression/frozen offline/economy before release. Research only; no gameplay change, no merge. Owner decision required for runtime work.
+
+
 ## TEAM-007 — individual fighter behaviour research underway
 
 Owner approved testing separate Aggressive, Defensive, Tactical and Keep Distance behaviours per gladiator, not implementation. `tools/individual-behaviour-audit.mjs` 8c70977e; workflow 44c76978. Four roles × four roles plus normal baseline; roles follow equipment snapshots when slots reverse. Aggressive active turn +22% outgoing impact, +25% incoming impact, 1.5x approach progress; Defensive -20% outgoing and incoming impact, recovery escort and guard-specific interception; Tactical reachable-target focus; Range existing action-cost retreat. Provisional activation .35–.90 from mastery 1–50; explicit strike modifiers are experimental tradeoffs not approved balance. Temporary production modules only, baseline exact trace parity asserted. Seed 20261202, 16 search/32 holdout per cell; 512 search/1024 independent NPC holdout per build and role pair, 12 teams, eight opponents, five arenas, NG/D/S × 1/25/50. 6,345,216 planned bouts, compare selected same vs mixed vs poor role pairs and NPC generalization. General Teamwork held 25, NPC enemy 1. No gameplay changes; PR #190. Next collect results, identify dominance and meaningful niche, then owner decision.
