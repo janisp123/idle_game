@@ -32,7 +32,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Mobile-first strategic equipment controls: two gladiator buttons, five weapon buttons, three whole armour-family buttons (padded/leather/plate); no individual piece or manual grade/quality selection. Training belongs in automatic rotation; remove all player work selection and scheduling per AUTO-ACTIVITY-001; remove repetitive stats, retain optional detailed Character Stats.
 - **Acceptance:** Atomic complete-set equip/acquisition with existing prices, exact shared treasury, no mixed-family selection through player UI, no automatic selection against player choice, retained owned progress, frozen in-flight battles, no per-piece upgrade controls. Clearly show affordability, equipped family, and selection. Validate existing saves, phone and desktop, and real engine/simulation parity. No combat retuning.
-- **Status:** PARTIAL — approved, development stacked on PR #191.
+- **Status:** IN_REVIEW — Phase 4 whole-set engine candidate; button UI and full integration pending in PR #192.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

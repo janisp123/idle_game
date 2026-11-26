@@ -8,8 +8,9 @@ import {
 } from "./engine.mjs?v=manager-lanes-001";
 import {BOUT_MS} from "./combat.mjs?v=gear-a3";
 import {WORK_ROTATION,ingredientReserve,rotateManagerWork,rotationTravelMs} from "./activity-rotation.mjs?v=manager-rotation-001";
+import {blankArmourRequests,validArmourRequests,requestArmourSet,selectManagerWeapon,automateManagerEquipment,managerEquipmentPreview} from "./manager-equipment.mjs?v=manager-gear-001";
 
-export const MANAGER_LANES_VERSION=2;
+export const MANAGER_LANES_VERSION=3;
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 const validWork=id=>WORK_ROTATION.includes(id);
 const route=id=>[{activity:id,plannedMs:null}];
@@ -25,13 +26,13 @@ function validManagerShape(s){
     validWork(s.managerWork?.activity)&&count(s.managerWork.progressMs)&&
     s.managerWork.progressMs<ACTIVITIES[s.managerWork.activity].durationMs&&
     count(s.managerWork.travelMs)&&s.managerWork.travelMs<=Math.max(...WORK_ROTATION.map(id=>rotationTravelMs(id,s.managerWork.activity)))&&
-    (!s.managerWork.travelMs||s.managerWork.progressMs===0)&&[0,1].includes(s.overlapParity);
+    (!s.managerWork.travelMs||s.managerWork.progressMs===0)&&[0,1].includes(s.overlapParity)&&validArmourRequests(s.armourRequests);
 }
 function requireManager(s){if(!validManagerShape(s))throw new RangeError("Invalid manager state");}
 export function newManagerGame(now=Date.now(),firstWork="hunting"){
   if(!validWork(firstWork))throw new RangeError("Invalid starting work");
   const s=chooseActivity(newTeamGame(now),"fighting",now).state;
-  return {...s,managerVersion:MANAGER_LANES_VERSION,managerWork:blankWork(firstWork),overlapParity:0};
+  return {...s,managerVersion:MANAGER_LANES_VERSION,managerWork:blankWork(firstWork),overlapParity:0,armourRequests:blankArmourRequests()};
 }
 export function readManagerGame(value){
   try{
@@ -42,7 +43,7 @@ export function readManagerGame(value){
     const s=readSave(raw);
     if(!s||!s.teamSecond)return null;
     return {...s,managerVersion:MANAGER_LANES_VERSION,
-      managerWork:{...raw.managerWork},overlapParity:raw.overlapParity};
+      managerWork:{...raw.managerWork},overlapParity:raw.overlapParity,armourRequests:{...raw.armourRequests}};
   }catch{return null;}
 }
 // Internal coordinator hook for Phase 3, never a player-facing action.
@@ -128,22 +129,23 @@ export function settleManagerOffline(s,now=Date.now(),random=Math.random){
 export function enterManagerGame(s,now=Date.now(),random=Math.random){
   const out=settleManagerOffline(s,now,random);
   const active=activateExpertise(out.state),reserve=ingredientReserve(active);
-  const claimed=automateSettledProgress({...out,state:active},reserve);
+  const claimed=automateSettledProgress({...out,state:active},reserve,automateManagerEquipment);
   return {...claimed,state:rotateManagerWork(claimed.state,claimed.mastery?.ready??[]),ingredientReserve:reserve};
 }
 export function settleManagerLive(s,now=Date.now(),random=Math.random){
   requireManager(s);if(!count(now))throw new RangeError("Invalid clock");
   if(now<s.settledAtMs||now-s.settledAtMs>LIVE_FIGHT_MAX_MS)return enterManagerGame(s,now,random);
-  const reports=[],levelsGained={},tribute={},upgrades=[];let spent=0,teamworkLevelGained=0;
+  const reports=[],levelsGained={},tribute={},upgrades=[],acquisitions=[],equipped=[];let spent=0,teamworkLevelGained=0;
   let next=s;
   const apply=()=>{
     const active=activateExpertise(next);
-    const out=automateSettledProgress({state:active},ingredientReserve(active));
+    const out=automateSettledProgress({state:active},ingredientReserve(active),automateManagerEquipment);
     next=rotateManagerWork(out.state,out.mastery?.ready??[]);
     for(const [id,n] of Object.entries(out.levelsGained??{}))levelsGained[id]=(levelsGained[id]??0)+n;
     for(const [id,n] of Object.entries(out.mastery?.tribute??{}))tribute[id]=(tribute[id]??0)+n;
     teamworkLevelGained+=out.teamworkLevelGained??0;
     spent+=out.autoEquipment?.spent??0;upgrades.push(...(out.autoEquipment?.upgrades??[]));
+    acquisitions.push(...(out.autoEquipment?.acquisitions??[]));equipped.push(...(out.autoEquipment?.equipped??[]));
   };
   apply();
   for(let i=0;next.settledAtMs<now;i++){
@@ -160,5 +162,32 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
   return {state:next,reports,report:reports.at(-1),levelsGained,teamworkLevelGained,
     ...(ready.length?{mastery:{ready,blocked:[],tribute}}:{}),
     ingredientReserve:ingredientReserve(next),
-    autoEquipment:{upgrades,spent,preview:autoEquipmentPreview(next)}};
+    autoEquipment:{upgrades,acquisitions,equipped,spent,preview:managerEquipmentPreview(next)}};
+}
+
+// Public integration adapters must settle the old selection first and commit
+// this single result. Never let the old single-lane mutation settle twice.
+export function chooseManagerArmour(s,id,family,now=s.settledAtMs,random=Math.random){
+  // Validate choice and register it only AFTER elapsed time is settled.
+  requestArmourSet(s,id,family);
+  const old=now===s.settledAtMs?{state:s,reports:[],levelsGained:{}}:settleManagerLive(s,now,random);
+  const selected=requestArmourSet(old.state,id,family);
+  const a=automateManagerEquipment({state:selected});
+  const prior=old.autoEquipment??{};
+  return {...old,state:a.state,autoEquipment:{...a.autoEquipment,
+    upgrades:[...(prior.upgrades??[]),...a.autoEquipment.upgrades],
+    acquisitions:[...(prior.acquisitions??[]),...a.autoEquipment.acquisitions],
+    equipped:[...(prior.equipped??[]),...a.autoEquipment.equipped],
+    spent:(prior.spent??0)+a.autoEquipment.spent}};
+}
+export function chooseManagerWeapon(s,id,loadout,now=s.settledAtMs,random=Math.random){
+  selectManagerWeapon(s,id,loadout);
+  const old=now===s.settledAtMs?{state:s,reports:[],levelsGained:{}}:settleManagerLive(s,now,random);
+  const a=automateManagerEquipment({state:selectManagerWeapon(old.state,id,loadout)});
+  const prior=old.autoEquipment??{};
+  return {...old,state:a.state,autoEquipment:{...a.autoEquipment,
+    upgrades:[...(prior.upgrades??[]),...a.autoEquipment.upgrades],
+    acquisitions:[...(prior.acquisitions??[]),...a.autoEquipment.acquisitions],
+    equipped:[...(prior.equipped??[]),...a.autoEquipment.equipped],
+    spent:(prior.spent??0)+a.autoEquipment.spent}};
 }

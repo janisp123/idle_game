@@ -1049,7 +1049,7 @@ export function setAutoMasterConsent(state, enabled) {
 }
 
 /** All automatic chores share the exact existing settled claim and smith mutations. */
-export function automateSettledProgress(outcome, reserve = {}) {
+export function automateSettledProgress(outcome, reserve = {}, equipmentPolicy = upgradeSettledEquipment) {
   let result=outcome;
   if(skillMasterOffer(result.state,reserve).ready.length){
     result=claimSettledMaster(result,reserve);
@@ -1059,7 +1059,7 @@ export function automateSettledProgress(outcome, reserve = {}) {
     const teamwork=activateTeamworkOnLogin(result.state.teamwork);
     result={...result,state:{...result.state,teamwork},teamworkLevelGained:teamwork.level-result.state.teamwork.level};
   }
-  return upgradeSettledEquipment(result);
+  return equipmentPolicy(result);
 }
 
 /** Entry settles the entire absence at the original frozen build before chores. */
