@@ -204,7 +204,7 @@ try{
           s=a.alphaMaxStats(s,"plate",start,()=>.5).state;s={...s,coins:4000000};
           s=e.buyEquipment(s,"greatsword",{grade:7,quality:"masterwork"},start,()=>.5).state;
           for(const slot of ["head","torso","arms","legs"])s=e.buyEquipment(s,slot+":plate",{grade:7,quality:"masterwork"},start,()=>.5).state;
-        }else{s.skills.fighting.level=2;s=e.setDifficulty(s,"fighting",7,start,()=>.5).state;}
+        }else{s.skills.fighting.level=2;s.difficulties.fighting=7;s.autoFight.stage=7;}
         s=e.chooseActivity(s,"fighting",start,()=>.5).state;
         s=e.settle(s,now,()=>.5).state;
         const expected=v.combatVerdict(c.combatAtTime(s.combatSession).event);
