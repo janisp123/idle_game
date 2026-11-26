@@ -179,7 +179,14 @@ try{
     assert.notEqual(statView.before,statView.after);
     assert.ok(statView.overflow<=2,"stat sheet horizontal overflow");
     await shot("stats-"+width);
-    await navigate("persist-"+width,null,"",true);
+    // Online automation now runs while the previous page is open, so a
+    // funded selected bow cannot be assumed to remain unupgraded until reload.
+    // Explicitly verify the foreground path, then use an independent pristine
+    // funded fixture for the login-report debit and no-repeat assertions.
+    await evaluate(`(()=>{const key=${JSON.stringify(saveKey)},s=JSON.parse(localStorage.getItem(key));s.coins=200000;s.combatLoadout="bow";s.equipment.bow={grade:0,quality:"poor"};s.equipment.greatsword={grade:0,quality:"poor"};const value=JSON.stringify(s);localStorage.setItem(key,value);dispatchEvent(new StorageEvent("storage",{key,newValue:value}));})()`);
+    await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));return s.combatLoadout==="bow"&&s.equipment.bow.grade===6&&s.equipment.bow.quality==="poor"&&s.coins===8750&&s.equipment.greatsword.grade===0;})()`),"foreground exact bow upgrades "+width);
+    const fundedBow=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.coins=200000;s.combatLoadout="bow";s.equipment.bow={grade:0,quality:"poor"};s.equipment.greatsword={grade:0,quality:"poor"};return JSON.stringify(s);})()`);
+    await navigate("persist-"+width,{[saveKey]:fundedBow},"",true);
     const report=await evaluate(`(()=>{const d=document.getElementById("loginReport"),b=d.getBoundingClientRect();return {open:d.open,modal:d.matches(":modal"),width:b.width,height:b.height,viewportW:innerWidth,viewportH:innerHeight,body:document.getElementById("loginReportBody").innerText,countdown:document.getElementById("loginReportCountdown").textContent,overflow:d.scrollWidth-d.clientWidth};})()`);
     assert.ok(report.open&&report.modal&&report.width===report.viewportW&&report.height===report.viewportH&&report.overflow<=2,JSON.stringify(report));
     assert.match(report.body,/Encounters/);assert.match(report.body,/Victories/);assert.match(report.body,/Losses/);assert.match(report.body,/191,250/);assert.match(report.body,/8,750/);assert.match(report.body,/Bow/);assert.match(report.countdown,/Auto-close in (10|9)s/);
