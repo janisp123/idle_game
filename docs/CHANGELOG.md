@@ -1,5 +1,10 @@
 # Changelog and task handoffs
 
+## TEAM-007 — individual behaviour audit verified (2026-11-26, chat)
+
+[Report](mechanics/TEAM_007_INDIVIDUAL.md), compact results G0/G3/G7, PR #190, native run 45851377250 all nine jobs PASS. 6,345,216 battles + 1080 exact normal parity fixtures. Max mastery best vs poor NPC +9.0/9.6/10.1 pp (NG/D/S), best vs normal +3.9/5.0/5.1 pp. S spear/archer defensive/aggressive 65.3% vs reverse 44.4%; individual roles meaningful, mixed roles not universally better. S selected best mastery curve 54.9/56.6/58.4%; normal 53.3%. Retain Normal, distinguish zero-reach Range, test mixed mastery, role duration, progression/frozen offline/economy before release. Research only; no gameplay change, no merge. Owner decision required for runtime work.
+
+
 ## TEAM-006 — second behaviour candidate verified (2026-11-26, chat)
 
 [Report](mechanics/TEAM_006_REFINED.md), [results](mechanics/TEAM_006_REFINED.json), PR #190, 45848442829 all nine jobs PASS. 3,290,112 battles, 1080 baseline parity fixtures. Focus2 broad gains +2.4–3.2 pp at max mastery; Range2 small improvement vs normal but not superior to Range1; Protect2 reduces losses but still fails overall. Own-team refined policy +2.5–3.5 pp vs normal, no need for pets. Recommend further targeted differentiation/protection work or owner-approved Focus2 integration, not wholesale deployment. No gameplay changes; progression/economy/offline untested.
