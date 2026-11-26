@@ -61,9 +61,10 @@ def check():
     assert {"main", "vision", "library"}.issubset(parser.ids)
     for phrase in ("The Long Vigil", "Life beyond the arena", "Earn your equipment", "may be reset", "Progression limits prevent endless rewards"):
         assert phrase in html, f"Missing current alpha landing information: {phrase}"
-    assert "hobby" in parser.ids, "Permanent free-game statement must be on landing page"
-    for phrase in ("A Hobby,", "Not a Business", "It will always be 100% free.", "No advertisements.", "No microtransactions.", "No subscriptions.", "No pay-to-win mechanics.", "No donations or financial contributions.", "Not even a button to buy me a coffee.", "loss of progress are possible", "Constructive feedback is always welcome"):
-        assert phrase in html, f"Missing FREE-001 commitment: {phrase}"
+    assert "hobby" in parser.ids, "Hobby-project statement must be on landing page"
+    for phrase in ("A Hobby,", "Not a Business", "personal hobby project, not a business model", "coding and game development", "reliable servers", "hosting and development costs", "loss of progress are possible", "Constructive feedback is always welcome"):
+        assert phrase in html, f"Missing HOBBY-002 statement: {phrase}"
+    assert "It will always be 100% free." not in html
     # Keep a single stable Play Now entry on the landing page.
     assert len(parser.play_controls) == 1, "Landing page needs exactly one Play Now control"
     play_tag, play_attrs = parser.play_controls[0]
@@ -96,6 +97,8 @@ def check():
     assert html.index('id="vision"') < html.index('id="hobby"')
     readme = (SITE.parent / "README.md").read_text(encoding="utf-8")
     assert readme.index("## The game") < readme.index("## A Hobby, Not a Business")
+    assert "It will always be 100% free." not in readme
+    assert "personal hobby project, not a business model" in readme
     theme = (SITE / "grimdark.css").read_text(encoding="utf-8")
     assert ".hero-art.hero-art-painted img" in theme
     assert "object-fit: contain" in theme, "Keep the complete painting visible"

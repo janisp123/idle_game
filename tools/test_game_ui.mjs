@@ -100,7 +100,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
   const html = readFileSync(new URL("../site/play/index.html", import.meta.url), "utf8");
   const queueCss = readFileSync(new URL("../site/play/iron-ui.css", import.meta.url), "utf8");
   const skillPanel = html.match(/<section class="panel skill-focus"[\s\S]*?<\/section>/)?.[0];
-  assert.ok(skillPanel?.includes('id="skillXp"') && skillPanel.includes('id="visitMaster"') && skillPanel.includes('id="masterAudience"'), "Master and skill XP share one panel");
+  assert.ok(skillPanel?.includes('id="skillXp"') && skillPanel.includes('id="masterStatus"') && !skillPanel.includes('id="visitMaster"'), "Master and skill XP share one panel");
   assert.doesNotMatch(html, /class="panel skill-master"/);
   assert.match(html, /<details id="resourcesPanel" class="panel inventory" aria-labelledby="inventory-heading">/);
   assert.match(html, /<summary id="inventory-heading" class="resources-summary">RESOURCES/);
@@ -162,7 +162,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=team-004/,
+  assert.match(html, /app\.mjs\?v=auto-master-001/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -198,7 +198,6 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
   const elements = new Map(ids.map(id => [id, new FakeElement()]));
   // Mirror the hidden HTML attribute in the minimal fake DOM.
-  elements.get("masterAudience").hidden = true;
   const originalNow = Date.now;
   const originalRandom = Math.random;
   Math.random = () => 0.5; // avoid stochastic 0-item single-cycle rewards in UI assertions
@@ -317,10 +316,8 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.ok(smithing.children[0].children[1].textContent.includes("Iron ingots (uses Iron ore)"));
     assert.ok(cooking.children[0].children[1].textContent.includes("Rations (uses Fish)"));
     assert.equal(elements.get("character-heading").textContent, "Marauder");
-    assert.equal(elements.get("visitMaster").disabled, true,
-      "Skill Master stays visibly dim until an actual skill can advance");
-    assert.equal(elements.get("masterStatus").hidden, true,
-      "no readiness tutorial appears above disabled Skill Master");
+    assert.equal(elements.has("visitMaster"),false);
+    assert.match(elements.get("masterStatus").textContent,/automatic/);
     const statRows = elements.get("characterAttributes").children;
     assert.equal(statRows.length, 3, "all three attributes render on the character");
     assert.deepEqual(statRows.map(row => row.children[0].textContent),
@@ -420,62 +417,14 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     now += 26 * ACTIVITIES.mining.durationMs;
     tick();
     state = JSON.parse(store.get(SAVE_KEY));
-    assert.equal(state.skills.mining.xp, 40, "the XP bar stops at one level");
-    assert.equal(state.skills.mining.level, 1);
-    assert.equal(elements.get("skillXp").textContent, "XP full · All rewards paused · Seek the Skill Master");
-    assert.equal(miningQueueLabel.textContent, "Mining LvL 1,100",
-      "at the Master gate show 100% rather than hiding or exceeding the cap");
-    assert.match(miningQueueLabel.getAttribute("aria-label"), /visit the Skill Master to advance/);
-
-    document.visibilityState = "hidden";
-    handlers.get("visibilitychange")();
-    now += ACTIVITIES.mining.durationMs * 2;
-    document.visibilityState = "visible";
-    handlers.get("visibilitychange")();
-    state = JSON.parse(store.get(SAVE_KEY));
-    assert.equal(state.skills.mining.level, 1, "returning never upgrades skills automatically");
-    assert.equal(state.skills.mining.xp, 40);
-    assert.equal(state.skills.hunting.level, 1);
-    assert.doesNotMatch(mining.children[0].children[1].textContent, /Copper ore/,
-      "rarer ore must remain locked until the Master teaches the new level");
-    const visitMaster = elements.get("visitMaster");
-    assert.match(visitMaster.textContent, /1 ready/);
-    assert.equal(visitMaster.disabled, false, "a ready skill unlocks the Master");
-    visitMaster.fire("click");
-    assert.equal(elements.get("masterAudience").hidden, false);
-    assert.equal(visitMaster.getAttribute("aria-expanded"), "true");
-    assert.ok(elements.get("masterSkills").children.some(row =>
-      /Mining: Level 1/.test(row.textContent) && /\+1 STR/.test(row.textContent)),
-      "Master previews the exact permanent stat gained by claiming Mining");
-    const originalStone = state.items.stone;
-    assert.ok(elements.get("masterTribute").children.some(row =>
-      row.textContent === originalStone.toLocaleString("en-GB") + " Stone"),
-      "trainer previews exact material cost before irreversible sacrifice");
-    elements.get("masterConfirm").fire("click");
-    state = JSON.parse(store.get(SAVE_KEY));
-    assert.equal(masterConfirmations, 1);
-    assert.equal(state.skills.mining.level, 1, "declining must not sacrifice inventory");
-    assert.equal(elements.get("characterAttributes").children[0].children[1].textContent,
-      "10","declining does not award any permanent stat");
-    assert.equal(state.items.stone, originalStone);
-    allowMasterTribute = true;
-    elements.get("masterConfirm").fire("click");
-    state = JSON.parse(store.get(SAVE_KEY));
-    assert.equal(masterConfirmations, 2);
-    assert.deepEqual(state.skills.mining, {level:2,xp:0});
-    const firstStat = elements.get("characterAttributes").children.find(row=>
-      row.children[0].textContent === "STR");
-    assert.ok(firstStat,"character displays STR");
-    assert.equal(firstStat.children[1].textContent,"11",
-      "confirmed Master claim adds one permanent STR");
-    assert.match(firstStat.children[1].title,/\+ 1 from claimed activity levels/,
-      "visible stat includes the actual claimed Master bonus");
-    assert.equal(miningQueueLabel.textContent, "Mining LvL 2,00",
-      "Master advancement updates the queue level and clears percent without rebuilding");
-    assert.equal(state.items.stone, 0, "Master takes every stone");
-    assert.equal(state.items.hide, 8, "hunting resources stay untouched");
-    assert.equal(elements.get("masterAudience").hidden, true);
-    assert.equal(visitMaster.disabled, true, "Master dims again after advancement");
+    assert.deepEqual(state.skills.mining,{level:2,xp:0},"automatic claim after capped gap");
+    assert.equal(state.items.stone,0,"exact tribute");
+    assert.equal(state.items.hide,8,"unrelated resources retained");
+    assert.equal(masterConfirmations,0,"no manual confirmation");
+    const firstStat=elements.get("characterAttributes").children.find(row=>row.children[0].textContent==="STR");
+    assert.equal(firstStat.children[1].textContent,"11");
+    assert.equal(miningQueueLabel.textContent,"Mining LvL 2,00");
+    assert.equal(elements.has("masterAudience"),false);
     assert.match(mining.children[0].children[1].textContent, /Iron ore/,
       "mining lists its working smithing input");
     const rows = elements.get("resourceList").children.filter(row => row.className === "item");

@@ -263,7 +263,6 @@ const visibleTokenSignatures = new Map();
 let lastSavedAt = 0;
 let storageWorks = true;
 let lastStoredText = null;
-let autoLoginSupported = false;
 let planningActivity = null;
 let planningHint = "";
 let lastWagonSignature = null;
@@ -563,7 +562,7 @@ function updateWagonSkillLabels() {
     if (label.textContent !== value) label.textContent = value;
     label.setAttribute("aria-label", ACTIVITIES[activity].title + ", skill level " +
       number(skill.level) + ", " + percent + "% toward the next level" +
-      (percent === 100 ? "; visit the Skill Master to advance" : ""));
+      (percent === 100 ? "; automatic Skill Master pending" : ""));
   }
 }
 
@@ -921,7 +920,7 @@ function render() {
     const ready = selectedSkill.xp >= required;
     ui.skillLevel.textContent = "Level " + number(selectedSkill.level);
     ui.skillXp.textContent = ready
-      ? "XP full · All rewards paused · Seek the Skill Master"
+      ? "XP full · Automatic Skill Master pending"
       : number(selectedSkill.xp) + " / " + number(required) + " skill XP";
     ui.skillFill.style.width = Math.min(100, selectedSkill.xp / required * 100).toFixed(2) + "%";
   } else {
@@ -1191,7 +1190,6 @@ function showApprenticeMasterReport(result) {
 }
 
 function start(coordinatedLogin = false) {
-  autoLoginSupported = coordinatedLogin;
   initLoginReport();
   let loginSummary=null;
   let saved = null;

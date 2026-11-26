@@ -67,6 +67,7 @@ jobs:
           node tools/test_gear_progression_a3.mjs
           node tools/test_auto_equipment.mjs
           node tools/test_auto_equipment_integration.mjs
+          node --test tools/test_auto_master_online.mjs
           node tools/test_login_report.mjs
           node tools/test_team_foundation.mjs
           node tools/test_team_combat.mjs

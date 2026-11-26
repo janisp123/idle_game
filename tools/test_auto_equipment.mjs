@@ -8,7 +8,7 @@ function verify(planner,smith,armour,combat){
  const item=n=>({grade:Math.floor(n/4),quality:smith.ITEM_QUALITIES[n%4]});
  const state=(n=0)=>({skills:{fighting:{level:50},mining:{level:1}},combatLoadout:"greatsword",armour:Object.fromEntries(armour.ARMOUR_SLOTS.map(s=>[s.id,"plate"])),equipment:{greatsword:item(n),bow:item(0),...Object.fromEntries(armour.ARMOUR_SLOTS.map(s=>[s.id+":plate",item(n)]))},coins:10_000_000});
  const p=s=>planner.previewAutoEquipment(s,levels);
- let s=state();s.skills.fighting.level=10;check(p(s).reason==="locked","9 locked");s.skills.mining.level=2;check(p(s).unlocked,"10 unlocked");
+ let s=state();s.skills.fighting.level=1;check(p(s).unlocked&&p(s).earnedLevels===0,"first entry unlocked");s.skills.mining.level=2;check(p(s).unlocked,"still unlocked");
  s.apprenticeAutoEquipment=false;check(p(s).next?.id==="greatsword","fake off flag ignored");
  s=state();s.coins=44;check(p(s).reason==="coins"&&p(s).next.cost===45,"save toward weakest");
  s=state(3);s.skills.fighting.level=4;s.skills.mining.level=8;check(p(s).reason==="fighting_level"&&p(s).next.target.grade===1,"grade gate");

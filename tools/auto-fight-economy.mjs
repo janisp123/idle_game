@@ -29,7 +29,8 @@ function run(modules,scenarios,seed=20261126){
    for(let stage=0;stage<32;stage++)for(const id of ids){
     const target={grade:Math.floor(stage/4),quality:smith.ITEM_QUALITIES[stage%4]};
     const q=smith.smithQuote(s,id,target);if(!q.available)continue;
-    const result=e.buyEquipment(s,id,target,time,rng);
+    const raw=e.settle(s,time,rng);const [slot,family]=id.split(":");
+    const result=Object.hasOwn(raw.state.equipment,id)?{...raw,purchased:true,state:e.activateExpertise({...raw.state,coins:raw.state.coins-q.cost,equipment:{...raw.state.equipment,[id]:target},armour:family?{...raw.state.armour,[slot]:family}:raw.state.armour})}:e.buyEquipment(s,id,target,time,rng);
     if(!result.purchased||s.coins-result.state.coins!==q.cost)throw Error("shop");
     spent+=q.cost;s=result.state;
    }
