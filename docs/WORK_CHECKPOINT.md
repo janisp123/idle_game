@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## TEAM-001 — two gladiator foundation (draft PR #188)
+
+Owner approved two gladiators immediately, independent equipment/expertise and shared base stats, one treasury, 2v2; pets/tactics postponed. [Plan and evidence](mechanics/TEAM_IMPLEMENTATION_PLAN.md). Pure module `site/play/team.mjs` 3ba023ac and tests ce60d886: 67 source-adapter assertions pass, 310 upgrade steps, exact 6,002,450 coins for ten already-owned NG starters to S MW, excludes initial armour purchase. Native CI added 2d93cf06, pending. No live import, balance change or battle simulation. Next shared action refactor with neutral trace parity, four-actor resolver and screening. ACTIVE-PROGRESSION-001 merged d6a56fae. PR #186 paused/superseded. A5 e8d6dbd0 Pages 45812960184 SUCCESS.
+
 ## APPRENTICE-A5 — analytical login report (draft PR #185)
 
 Owner requested full-screen analytical return report; close manually or auto after 10 real seconds. [Implementation and evidence](mechanics/APPRENTICE_A5_LOGIN_REPORT.md). Pure settled outcome projection, actual combat/rewards/XP/resource flows/attributes/expertise/committed chores, no gameplay change. Same-session reopen for untimed review. Native projection PASS systems 45812490224; 117 regressions PASS, mobile timer 10063ms at website 45812525144; desktop scrollbar gap corrected ac008aaf, save failure assertions f1c2c2cf, final checks pending. A4 merged 9cdc3364 and Pages 45810631099 SUCCESS. Next final browser/CI verification and protected PR #185 merge + Pages. Branch feature/apprentice-a5.
