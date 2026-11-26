@@ -1,0 +1,30 @@
+/* Full viewport return report. Independent from the gameplay layout. */
+.login-report{position:fixed;inset:0;margin:0;width:100%;max-width:none;height:100%;max-height:none;box-sizing:border-box;border:0;background:#100d0b;color:#efdec4;padding:0;overflow:hidden;font-family:system-ui,sans-serif;font-size:14px}
+.login-report[open]{display:flex;flex-direction:column}
+.login-report::backdrop{background:#100d0b}
+.login-report-head,.login-report-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px clamp(14px,4vw,48px);background:#1c1611;flex:none}
+.login-report-head{border-bottom:1px solid #674831}
+.login-report-head h2{font-size:clamp(25px,4vw,40px);margin:3px 0;color:#efdec4;font-family:Georgia,serif}
+.login-report-head p{margin:0;color:#c0ac94;font-size:12px}
+.login-report-head .login-report-eyebrow{letter-spacing:.13em;color:#bb925d;font-size:10px}
+#loginReportDismiss{border:1px solid #c29b65;background:#34251b;color:#f8e6cc;min-height:44px;padding:10px 14px;cursor:pointer;font-weight:650;border-radius:5px;max-width:45%;flex:none}
+#loginReportDismiss:focus-visible,#loginReportReopen:focus-visible{outline:2px solid #ffdda0;outline-offset:3px}
+.login-report-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:16px clamp(14px,4vw,48px) 24px;box-sizing:border-box}
+.login-report-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;max-width:1200px;margin:0 auto 12px}
+.login-report-kpi{border:1px solid #49382c;background:#211913;padding:12px;min-width:0;border-radius:5px;display:flex;flex-direction:column;gap:4px}
+.login-report-kpi span{font-size:11px;color:#c0ac94}
+.login-report-kpi strong{font-size:clamp(18px,3vw,32px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.login-report-kpi.positive strong{color:#b6d3a7}.login-report-kpi.negative strong{color:#e7a394}
+.login-report-section,.login-report-muted,.login-report-warning{max-width:1200px;margin:10px auto 0}
+.login-report-section{border:1px solid #49382c;background:#18130f;padding:12px;border-radius:5px}
+.login-report-section h3{font-size:14px;letter-spacing:.025em;color:#d8b787;margin:0 0 8px;font-weight:650}
+.login-report-section table{width:100%;border-collapse:collapse;table-layout:fixed;font-variant-numeric:tabular-nums}
+.login-report-section th,.login-report-section td{text-align:left;vertical-align:top;padding:7px 5px;border-bottom:1px solid #382a21;overflow-wrap:anywhere;font-size:13px;font-weight:400}
+.login-report-section th{color:#d8c4a9}.login-report-section thead th{color:#b5a088;font-size:11px;font-weight:650}
+.login-report-section td:not(:first-child),.login-report-section thead th:not(:first-child){text-align:right}
+.login-report-muted{color:#c0ac94;font-size:12px;line-height:1.5}
+.login-report-warning{border-left:3px solid #d8a05d;background:#2b2017;padding:10px;color:#ffdab0}
+.login-report-footer{border-top:1px solid #674831;color:#c0ac94;font-size:12px}
+#loginReportCountdown{font-variant-numeric:tabular-nums;color:#e8c591;font-weight:650;white-space:nowrap}
+#loginReportReopen{margin-top:6px}
+@media(max-width:720px){.login-report-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.login-report-kpi{padding:10px 8px}.login-report-section{padding:9px}.login-report-section th,.login-report-section td{font-size:12px;padding:6px 3px}.login-report-footer{font-size:11px;align-items:flex-start}.login-report-head{padding-top:max(12px,env(safe-area-inset-top))}.login-report-footer{padding-bottom:max(12px,env(safe-area-inset-bottom))}}
