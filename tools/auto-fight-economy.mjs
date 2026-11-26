@@ -8,7 +8,8 @@ function run(modules,scenarios,seed=20261126){
  if(e.TIMING_PROFILE!=="normal")throw Error("normal profile required");
  const DAY=86400000,HOUR=3600000,results=[];
  for(const spec of scenarios){
-  const {style,family,visitDays=1,liveMinutes=30,mixed=false,days=180}=spec;
+  const {style,family,visitDays=1,liveMinutes=30,mixed=false,days=180,liveStepMs=0}=spec;
+  if(!Number.isInteger(liveStepMs)||liveStepMs<0||liveStepMs>10000)throw Error("Invalid live step");
   const rng=c.seededCombatRandom(seed);
   let s=e.newGame(0),time=0,earned=0,spent=0,liveCoins=0,offlineCoins=0,liveBouts=0,offlineBouts=0,losses=0,advances=0,retreats=0,capVisits=0,firstS=null,firstSSet=null,firstSMastery=null,offlineChecks=0,visits=0;
   const ids=[style,...armour.ARMOUR_SLOTS.map(x=>x.id+":"+family)],checkpoints=[],gradeNights=Array(8).fill(0);
@@ -46,6 +47,7 @@ function run(modules,scenarios,seed=20261126){
    if(mixed){const wanted=Math.floor(time/DAY)%7<5?"fighting":"mining";if((s.transition?.targetActivity??s.activity)!==wanted)s=e.requestActivityChange(s,wanted,time,rng).state;}
    const liveEnd=Math.min(end,visitStart+liveMinutes*60000);
    while(time<liveEnd){
+    if(liveStepMs){record(e.settleLive(s,Math.min(liveEnd,time+liveStepMs),rng),true);s=e.activateExpertise(s);continue;}
     // Actual production live guard, at most 10 s. Accelerate time before the
     // next arena boundary via fixed settlement; only the final millisecond
     // is live. For transitions use bounded chunks (no skipped live finish).
