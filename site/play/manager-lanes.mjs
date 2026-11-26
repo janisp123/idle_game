@@ -10,7 +10,8 @@ import {BOUT_MS} from "./combat.mjs?v=gear-a3";
 import {WORK_ROTATION,ingredientReserve,rotateManagerWork,rotationTravelMs} from "./activity-rotation.mjs?v=manager-rotation-001";
 import {blankArmourRequests,validArmourRequests,requestArmourSet,selectManagerWeapon,automateManagerEquipment,managerEquipmentPreview} from "./manager-equipment.mjs?v=manager-gear-001";
 
-export const MANAGER_LANES_VERSION=3;
+import {blankTactics,validTactics,chooseTactic,validTacticSnapshot,activateTactics} from "./manager-tactics.mjs?v=manager-tactics-001";
+export const MANAGER_LANES_VERSION=4;
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 const validWork=id=>WORK_ROTATION.includes(id);
 const route=id=>[{activity:id,plannedMs:null}];
@@ -26,13 +27,14 @@ function validManagerShape(s){
     validWork(s.managerWork?.activity)&&count(s.managerWork.progressMs)&&
     s.managerWork.progressMs<ACTIVITIES[s.managerWork.activity].durationMs&&
     count(s.managerWork.travelMs)&&s.managerWork.travelMs<=Math.max(...WORK_ROTATION.map(id=>rotationTravelMs(id,s.managerWork.activity)))&&
-    (!s.managerWork.travelMs||s.managerWork.progressMs===0)&&[0,1].includes(s.overlapParity)&&validArmourRequests(s.armourRequests);
+    (!s.managerWork.travelMs||s.managerWork.progressMs===0)&&[0,1].includes(s.overlapParity)&&validArmourRequests(s.armourRequests)&&validTactics(s.managerTactics)&&
+    (!s.combatSession||Object.values(s.combatSession.players??{}).every(validTacticSnapshot));
 }
 function requireManager(s){if(!validManagerShape(s))throw new RangeError("Invalid manager state");}
 export function newManagerGame(now=Date.now(),firstWork="hunting"){
   if(!validWork(firstWork))throw new RangeError("Invalid starting work");
   const s=chooseActivity(newTeamGame(now),"fighting",now).state;
-  return {...s,managerVersion:MANAGER_LANES_VERSION,managerWork:blankWork(firstWork),overlapParity:0,armourRequests:blankArmourRequests()};
+  return {...s,managerVersion:MANAGER_LANES_VERSION,managerWork:blankWork(firstWork),overlapParity:0,armourRequests:blankArmourRequests(),managerTactics:blankTactics()};
 }
 export function readManagerGame(value){
   try{
@@ -43,7 +45,7 @@ export function readManagerGame(value){
     const s=readSave(raw);
     if(!s||!s.teamSecond)return null;
     return {...s,managerVersion:MANAGER_LANES_VERSION,
-      managerWork:{...raw.managerWork},overlapParity:raw.overlapParity,armourRequests:{...raw.armourRequests}};
+      managerWork:{...raw.managerWork},overlapParity:raw.overlapParity,armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
   }catch{return null;}
 }
 // Internal coordinator hook for Phase 3, never a player-facing action.
@@ -135,7 +137,7 @@ export function enterManagerGame(s,now=Date.now(),random=Math.random){
 export function settleManagerLive(s,now=Date.now(),random=Math.random){
   requireManager(s);if(!count(now))throw new RangeError("Invalid clock");
   if(now<s.settledAtMs||now-s.settledAtMs>LIVE_FIGHT_MAX_MS)return enterManagerGame(s,now,random);
-  const reports=[],levelsGained={},tribute={},upgrades=[],acquisitions=[],equipped=[];let spent=0,teamworkLevelGained=0;
+  const reports=[],levelsGained={},tribute={},upgrades=[],acquisitions=[],equipped=[],tacticAdvances=[];let spent=0,teamworkLevelGained=0;
   let next=s;
   const apply=()=>{
     const active=activateExpertise(next);
@@ -143,7 +145,7 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
     next=rotateManagerWork(out.state,out.mastery?.ready??[]);
     for(const [id,n] of Object.entries(out.levelsGained??{}))levelsGained[id]=(levelsGained[id]??0)+n;
     for(const [id,n] of Object.entries(out.mastery?.tribute??{}))tribute[id]=(tribute[id]??0)+n;
-    teamworkLevelGained+=out.teamworkLevelGained??0;
+    teamworkLevelGained+=out.teamworkLevelGained??0;tacticAdvances.push(...(out.tacticAdvances??[]));
     spent+=out.autoEquipment?.spent??0;upgrades.push(...(out.autoEquipment?.upgrades??[]));
     acquisitions.push(...(out.autoEquipment?.acquisitions??[]));equipped.push(...(out.autoEquipment?.equipped??[]));
   };
@@ -159,7 +161,7 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
     if(next.settledAtMs<=before)throw new Error("Manager clock failed to advance");
   }
   const ready=Object.keys(levelsGained);
-  return {state:next,reports,report:reports.at(-1),levelsGained,teamworkLevelGained,
+  return {state:next,reports,report:reports.at(-1),levelsGained,teamworkLevelGained,tacticAdvances,
     ...(ready.length?{mastery:{ready,blocked:[],tribute}}:{}),
     ingredientReserve:ingredientReserve(next),
     autoEquipment:{upgrades,acquisitions,equipped,spent,preview:managerEquipmentPreview(next)}};
@@ -190,4 +192,12 @@ export function chooseManagerWeapon(s,id,loadout,now=s.settledAtMs,random=Math.r
     acquisitions:[...(prior.acquisitions??[]),...a.autoEquipment.acquisitions],
     equipped:[...(prior.equipped??[]),...a.autoEquipment.equipped],
     spent:(prior.spent??0)+a.autoEquipment.spent}};
+}
+
+export function chooseManagerTactic(s,id,tactic,now=s.settledAtMs,random=Math.random){
+  chooseTactic(s.managerTactics,id,tactic);
+  const old=now===s.settledAtMs?{state:s,reports:[],levelsGained:{}}:settleManagerLive(s,now,random);
+  const next={...old.state,managerTactics:chooseTactic(old.state.managerTactics,id,tactic)};
+  const a=activateTactics(next.managerTactics);
+  return {...old,state:{...next,managerTactics:a.tactics},tacticAdvances:[...(old.tacticAdvances??[]),...a.advances]};
 }

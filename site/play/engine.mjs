@@ -1,9 +1,10 @@
+import {tacticSnapshots,awardTacticPractice,activateTactics} from "./manager-tactics.mjs?v=manager-tactics-001";
 import { APPRENTICE_BALANCE, apprenticeProgress, MASTER_CONSENT_VERSION, normalizeMasterConsent } from "./apprentice.mjs?v=auto-master-001";
 import { previewAutoEquipment, AUTO_EQUIPMENT_AT, MAX_AUTO_EQUIPMENT_PURCHASES } from "./auto-equipment.mjs?v=auto-master-001";
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
 import { initialTeam,validGladiator,teamSnapshots,awardTeamPractice,activateTeamPractice,previewTeamUpgrade,upgradeTeam,chooseTeamWeapon,chooseTeamArmour } from "./team.mjs?v=team-001";
 import { initialTeamwork,validTeamwork,awardTeamwork,activateTeamworkOnLogin } from "./teamwork.mjs?v=team-002";
-import { validTeamSession,startTeamSession,settleTeamSession } from "./team-timeline.mjs?v=team-004";
+import { validTeamSession,startTeamSession,settleTeamSession } from "./team-timeline.mjs?v=manager-tactics-001";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
 import {
@@ -420,10 +421,11 @@ export function desiredArenaPlayer(state){
 const arenaFields=["downtimeMs","sampledBouts","bouts","victories","defeats","doubleDeaths","coins"];
 export function desiredArenaTeam(state){
   const p=desiredArenaPlayer(state);
-  return teamSnapshots(teamFromState(state),p);
+  const snapshots=teamSnapshots(teamFromState(state),p);
+  return state.managerTactics?tacticSnapshots(state.managerTactics,snapshots):snapshots;
 }
 function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
-  let team=teamFromState(state),teamwork=state.teamwork,desired=desiredArenaTeam(state);
+  let team=teamFromState(state),teamwork=state.teamwork,desired=desiredArenaTeam(state),managerTactics=state.managerTactics;
   let autoFight=state.autoFight??initialAutoFight(desired.first.difficulty);
   if(online&&(!validAutoFight(autoFight)||autoFight.stage!==desired.first.difficulty))throw new RangeError("Invalid committed team stage");
   let session=state.combatSession??startTeamSession(desired,teamwork.level,state.settledAtMs>>>0);
@@ -435,6 +437,7 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
     const prize=settleTeamSession(session,duration,outcomeCaches?.get(cacheKey));
     team=awardTeamPractice(team,session.players,prize.practiceMs);
     teamwork=awardTeamwork(teamwork,prize.bouts);
+    if(managerTactics)managerTactics=awardTacticPractice(managerTactics,session.players,prize.practiceMs);
     session=prize.session;
     for(const key of arenaFields)totals[key]+=prize[key];
     for(const id of Object.keys(practiceMs))practiceMs[id]+=prize.practiceMs[id];
@@ -444,7 +447,7 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
       desired=Object.fromEntries(Object.entries(desired).map(([id,p])=>[id,{...p,difficulty:autoFight.stage}]));
     }
   };
-  const result=()=>({...totals,session,team,teamwork,practiceMs,expertise:team.first.expertise,autoFight});
+  const result=()=>({...totals,session,team,teamwork,practiceMs,expertise:team.first.expertise,autoFight,...(managerTactics?{managerTactics}:{})});
   if(online||JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level){
     const remaining=(BOUT_MS-session.elapsedMs%BOUT_MS)%BOUT_MS;
     if(elapsedMs<remaining){run(elapsedMs);return result();}
@@ -512,13 +515,13 @@ function settleUncappedWork(state, now, random, frozenEffort, xpRandom = random,
     const prize=settleArenaBuild(state,elapsedMs,outcomeCaches,online);
     productiveMs-=prize.downtimeMs;
     next.expertise=prize.expertise;
-    if(prize.team){next.teamSecond=prize.team.second;next.teamwork=prize.teamwork;}
+    if(prize.team){next.teamSecond=prize.team.second;next.teamwork=prize.teamwork;if(prize.managerTactics)next.managerTactics=prize.managerTactics;}
     next.combatSession = prize.session;
     if(online){next.autoFight=prize.autoFight;if(prize.autoFight.stage!==(state.difficulties.fighting??0))next.difficulties={...state.difficulties,fighting:prize.autoFight.stage};}
     next.coins = safeAdd(state.coins, prize.coins);
     report.gainedCoins = prize.coins;
     if (prize.bouts || prize.downtimeMs) {
-      const { session: _session, expertise: _expertise, autoFight: _autoFight,team:_team,teamwork:_teamwork,...arena } = prize;
+      const { session: _session, expertise: _expertise, autoFight: _autoFight,team:_team,teamwork:_teamwork,managerTactics:_tactics,...arena } = prize;
       report.arena = arena;
     }
   }
@@ -1058,6 +1061,10 @@ export function automateSettledProgress(outcome, reserve = {}, equipmentPolicy =
   if(result.state.teamSecond){
     const teamwork=activateTeamworkOnLogin(result.state.teamwork);
     result={...result,state:{...result.state,teamwork},teamworkLevelGained:teamwork.level-result.state.teamwork.level};
+  }
+  if(result.state.managerTactics){
+    const a=activateTactics(result.state.managerTactics);
+    result={...result,state:{...result.state,managerTactics:a.tactics},tacticAdvances:a.advances};
   }
   return equipmentPolicy(result);
 }

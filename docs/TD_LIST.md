@@ -23,7 +23,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Each gladiator chooses Aggressive, Balanced or Defensive through three buttons alongside weapon and whole armour set. Default Balanced.
 - **Acceptance:** Verify existing research and runtime first; reuse tested behaviour where compatible, no invented or cosmetic-only tactics. Independent saved selection, meaningful behaviour in actual combat, changes apply at the next bout boundary, frozen offline builds, no universal optimal stance, endgame-only balance validation at maximum stats and S Masterwork until owner approval. No arbitrary flat stat buffs. Explain actual effects concisely; no dropdown.
-- **Status:** PARTIAL — owner approved UI/direction; runtime availability unverified; PR #190 is research-only and tests different named behaviours (Protect Companion, Focus Fire, Maintain Range), not a shipped three-stance feature. Reconcile semantics with tested evidence before wiring controls.
+- **Status:** IN_REVIEW — actual three-role candidate and frozen tactic mastery; max-only screening and UI integration pending in PR #192.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
