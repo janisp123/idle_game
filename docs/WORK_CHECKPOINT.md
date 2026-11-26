@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## TEAM-006 — refined candidate audit underway
+
+Owner requested refinements of all three behaviours, research only. Harness `tools/team-behaviour-refine.mjs` at 727a5df8, workflow 57409517. Protect2 uses recovery or no reachable attack to escort a threatened non-shield ally against melee; Focus2 limits added shared-target preference to reachable targets if any are reachable; Range2 prioritizes recovery repositioning, requires shorter-reach immediate threats and retains attack distance, ready-action retreat reserved for ranged weapons. Same production strikes and no raw stat buffs. Original and refined modes and Normal tested with fresh seed 20261201, identical matchup matrix, 32 search/64 holdout seeds, 512 NPC seeds, three grades and mastery levels. 3,290,112 planned bouts plus trace parity. No playable changes. Collect native results and report before recommending implementation.
+
 ## TEAM-006 — behaviour candidate verified (2026-11-26, chat)
 
 [Report](mechanics/TEAM_006_BEHAVIOUR.md), [results](mechanics/TEAM_006_BEHAVIOUR.json), research PR #190. Native run 45844151597 all nine jobs PASS; 1,714,176 battles and 1080 exact normal trace parity fixtures. Strong conditional niches for Focus and Range; broad gains modest (own-team policy +0.2–1.7 pp); Protect is harmful to tank+archer despite increased interception. Do not ship first candidate. Refine focus reachability, range timing and guard formation; retest against normal with independent seeds. No live changes, no pets, no merge.
