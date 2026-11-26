@@ -19,7 +19,7 @@ import { seededCombatRandom } from '../site/play/combat.mjs';
 
 test('the lab registry covers production-backed modules plus the synthetic clan fixture and is deterministic',()=>{
   assert.deepEqual(Object.keys(LAB_MODULES).sort(),
-    ['combat','activity','loot','crafting','attributes','master','equipment','queue','save','clan'].sort());
+    ['combat','teamCombat','activity','loot','crafting','attributes','master','equipment','queue','save','clan'].sort());
   const config=JSON.parse(readFileSync('tools/simulation/example-scenarios.json','utf8'));
   const before=JSON.stringify(config);
   const a=runLab(config),b=runLab(config);
