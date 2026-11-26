@@ -12,7 +12,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Two player gladiators from first entry, shared base attributes, separate selected equipment and expertise, automatic upgrades, real deterministic 2v2 combat; no pets or tactics now.
 - **Acceptance:** Independent selection/progression and exact treasury; meaningful matchup balance; six-month team economy; frozen offline/live/simulator parity; exact team rewards and report; validated save, mobile/desktop UI, final checks and deployment.
-- **Status:** PARTIAL — [PR #188](https://github.com/janisp123/idle_game/pull/188); pure foundation and 67 source-adapter checks complete, native CI pending. [Plan and evidence](mechanics/TEAM_IMPLEMENTATION_PLAN.md). No playable integration.
+- **Status:** IN_REVIEW — [PR #188](https://github.com/janisp123/idle_game/pull/188); full draft integration, combined balance audit PASS, final release checks pending. [Checkpoint](WORK_CHECKPOINT.md).
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
