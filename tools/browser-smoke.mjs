@@ -58,12 +58,12 @@ async function evaluate(expression){
   if(result.exceptionDetails)throw Error(result.exceptionDetails.exception?.description??result.exceptionDetails.text);
   return result.result.value;
 }
-async function navigate(label,storage=null){
+async function navigate(label,storage=null,beforeStart=""){
   const url=origin+"/play/?smoke="+label;
   // pagehide saves the old running character. Install synthetic fixtures on
   // the NEW document before modules start, not into the departing page.
-  const inject=storage?await send("Page.addScriptToEvaluateOnNewDocument",{source:
-    "if(location.href==="+JSON.stringify(url)+"){for(const [key,value] of Object.entries("+JSON.stringify(storage)+")){if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}}"}):null;
+  const inject=(storage||beforeStart)?await send("Page.addScriptToEvaluateOnNewDocument",{source:
+    "if(location.href==="+JSON.stringify(url)+"){for(const [key,value] of Object.entries("+JSON.stringify(storage??{})+")){if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}"+beforeStart+"}"}):null;
   const result=await send("Page.navigate",{url});
   assert.equal(result.errorText,undefined);
   await until(()=>evaluate(`location.href===${JSON.stringify(url)}&&document.readyState==="complete"&&document.getElementById("saveStatus")?.getAttribute("data-game-ready")==="true"`),"app loaded "+label);
@@ -115,7 +115,7 @@ try{
     await until(()=>evaluate('!document.getElementById("combatFlow").hidden'),"first automatic bout "+width);
     await evaluate(`Date.now=()=>${fixedNow}`);
     const apprentice=await evaluate(`(()=>{const menu=document.getElementById("apprenticeMenu");menu.querySelector("summary").click();const result={open:menu.open,text:menu.innerText,locked:[...menu.querySelectorAll("input")].every(i=>i.disabled),overflow:document.documentElement.scrollWidth-innerWidth};menu.querySelector("summary").click();return result;})()`);
-    assert.ok(apprentice.open&&apprentice.locked&&apprentice.overflow<=2);assert.match(apprentice.text,/0 earned levels/i);assert.match(apprentice.text,/Unlocks at LvL 50/);assert.match(apprentice.text,/1 \/ 5 activity slots unlocked/);
+    assert.ok(apprentice.open&&apprentice.locked&&apprentice.overflow<=2);assert.match(apprentice.text,/0 earned levels/i);assert.match(apprentice.text,/Unlocks at LvL 50/);assert.match(apprentice.text,/Unlocks at LvL 10/);assert.match(apprentice.text,/1 \/ 5 activity slots unlocked/);
     const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=15;s.name="Old alpha";return JSON.stringify(s);})()`);
     await navigate("reset-"+width,{[saveKey]:old,[clockKey]:JSON.stringify({version:1,realAnchorMs:0,gameAnchorMs:0,speed:10})});
     const notice=await evaluate('({hidden:document.getElementById("saveResetNotice").hidden,text:document.getElementById("saveResetNotice").textContent})');
@@ -182,6 +182,17 @@ try{
     await navigate("equipment-repeat-"+width);
     const repeat=await evaluate(`(()=>({s:JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),hidden:document.getElementById("apprenticeEquipmentReport").hidden}))()`);
     assert.deepEqual(repeat.s.equipment,upgrade.s.equipment);assert.equal(repeat.s.coins,upgrade.s.coins);assert.equal(repeat.hidden,true);
+    const failureFixture=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=apprentice-a4");const s=e.newGame(Date.now());s.skills.fighting.level=11;s.coins=1000;return JSON.stringify(s);})()`);
+    await navigate("equipment-write-fail-"+width,{[saveKey]:failureFixture,[clockKey]:null},
+      "const realSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k==="+JSON.stringify(saveKey)+")throw new Error('synthetic write failure');return realSet.call(this,k,v);};");
+    const failed=await evaluate(`(()=>{const $=id=>document.getElementById(id);return {s:JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),reportHidden:$("apprenticeEquipmentReport").hidden,notice:$("apprenticeEquipmentStatus").textContent,wallet:$("coinWallet").textContent};})()`);
+    assert.equal(failed.s.coins,1000);assert.equal(failed.s.equipment.greatsword.quality,"poor");assert.equal(failed.reportHidden,true);assert.match(failed.notice,/Unavailable/);assert.match(failed.wallet,/1,000 coins/);
+    await navigate("equipment-write-recover-"+width,{[saveKey]:failureFixture,[clockKey]:null});
+    const recovered=await evaluate(`(()=>({s:JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),hidden:document.getElementById("apprenticeEquipmentReport").hidden}))()`);
+    assert.equal(recovered.s.coins,755);assert.equal(recovered.s.equipment.greatsword.quality,"masterwork");assert.equal(recovered.hidden,false);
+    await navigate("equipment-no-lock-"+width,{[saveKey]:failureFixture,[clockKey]:null},"Object.defineProperty(navigator,'locks',{value:undefined});");
+    const unavailable=await evaluate(`(()=>({s:JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),status:document.getElementById("apprenticeEquipmentStatus").textContent,hidden:document.getElementById("apprenticeEquipmentReport").hidden}))()`);
+    assert.equal(unavailable.s.coins,1000);assert.equal(unavailable.hidden,true);assert.match(unavailable.status,/Unavailable/);
     const capped=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=cap-001");const start=Date.now()-86400000;
       const s=e.chooseActivity(e.newGame(start),"mining",start,()=>.5).state;return JSON.stringify(e.settle(s,Date.now(),()=>.5).state);})()`);
     await navigate("capped-"+width,{[saveKey]:capped,[clockKey]:null});
