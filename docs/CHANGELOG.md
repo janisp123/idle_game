@@ -2,6 +2,8 @@
 
 ## MANAGER-UI-001 · Phase 6 UI candidate (2026-11-26, chat)
 
+First Phase 6 CI at b27c0ee0: site structure/syntax/117 historical tests PASS; website 45891729753 failed new manager startup at 390px. Found incorrect requiredAutoFightWins argument (needs progress object, not grade). Fixed it, capture chosen fighter at click, settle return before choice, retain expanded stat subsections, display committed battle summaries, check alpha coin completion rather than racing automatic spending, improve browser diagnostics, add three migration tests. New CI pending.
+
 Phase 6 candidate: actual /play/ now manager-app.mjs + manager-ui.css, per-fighter weapon/whole-set/tactic buttons, permanent live battle, read-only work/next/progress/resources, optional stats and alpha tools. Legacy UI regression retained as tools/fixtures/legacy-play.html and browser server-only route. New manager save key; valid V17 team saves settle old elapsed timeline then migrate, retain old original key, preserve frozen active combat and partial selected work where possible; obsolete queue discarded. Invalid legacy starts separate manager save with notice; unreadable manager save not overwritten. Browser local lock and optimistic guard, no server authority. Phase 5 all six CI PASS; max-only screening 64,125 battles, 2,025 configs, 5 terrains, strongest anchor dual plate spear 65% (300), shield/bow best 47.5%; prior #192 comment contains full evidence. Tactics/tribute/pacing provisional. Phase 6 CI not run at commit; no merge/deployment. Next validate migration, actual manager browser and existing regression.
 
 ## TACTIC-UI-001 · Phase 5 candidate (2026-11-26, chat)

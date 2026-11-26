@@ -42,6 +42,8 @@ function reportLines(out){
 }
 function publish(out,entry=false,opening=state?.coins??0){
  const lines=reportLines(out);
+ const arenaLine=lines.find(line=>line.includes(" battles · "));
+ if(arenaLine)text("battleResult",arenaLine);
  if(lines.length){feed=[...lines.reverse(),...feed].slice(0,30);text("latestProgress",feed[0]);$("progressFeed").replaceChildren(...feed.map(x=>node("li",x)));}
  if(entry){loginLines=reportLines(out);loginSummary="Coins: "+fmt(opening)+" → "+fmt(out.state.coins)+". "+(loginLines.length?"Committed progress since last save.":"No new completed rewards.");}
 }
@@ -56,7 +58,7 @@ function render(){
  text("armourStatus",q?"Saving for "+title(pending)+" · "+fmt(q.cost)+" coins needed in total. Current: "+title(family??"mixed")+".":family==="none"?"No armour equipped. Choose a set.":family===null?"Legacy mixed armour retained until you choose a complete set.":title(family)+" set equipped.");
  const sk=t.skills[t.selected];text("tacticStatus",descriptions[t.selected]+" · Lv "+sk.level+(sk.level===50?" · Mastered":" · "+fmt(Math.floor(sk.xp/tacticRequiredXP(sk.level)*100))+"%"));
  text("arenaStage",ITEM_GRADES[state.difficulties.fighting??0]);text("fightingLevel","Fighting Lv "+state.skills.fighting.level);meter("fightingXP",state.skills.fighting);
- const af=state.autoFight;let required=requiredAutoFightWins(af.stage);text("arenaNext",required?"Next difficulty: "+af.streak+" / "+required+" wins · Teamwork Lv "+state.teamwork.level:"Teamwork Lv "+state.teamwork.level);
+ const af=state.autoFight;let required=requiredAutoFightWins(af);text("arenaNext",required?"Next difficulty: "+af.streak+" / "+required+" wins · Teamwork Lv "+state.teamwork.level:"Teamwork Lv "+state.teamwork.level);
  if(state.combatSession){const s=state.combatSession,key=JSON.stringify([s.seed,s.elapsedMs,s.players,s.teamworkLevel]);
    if(key!==battleKey){battleKey=key;lastBattle=teamCombatAtTime(s);}
    const ev=lastBattle.event,names={"player:0":"Gladiator I","player:1":"Gladiator II","enemy:0":"Opponent I","enemy:1":"Opponent II"};
@@ -69,7 +71,7 @@ function render(){
  const after=nextRotationActivity(state,id);text("nextWork","Next: "+(after?ACTIVITIES[after].title:"Waiting for materials"));
  renderList($("activityLevels"),WORK_ROTATION.map(id=>[ACTIVITIES[id].title,"Lv "+state.skills[id].level]));
  const reserve=ingredientReserve(state);renderList($("resourceList"),ITEM_KEYS.filter(k=>state.items[k]>0).map(k=>[label(k),fmt(state.items[k])+(reserve[k]?" · "+fmt(reserve[k])+" reserved":"")]));
- if($("characterStatsPanel").open){const stats=characterStats({...state,...g}),host=$("characterStats");host.replaceChildren(...stats.sections.map(s=>{const d=node("details");d.className="stat-section";d.append(node("summary",s.title+" · "+s.total));const list=node("div");list.className="skill-list";renderList(list,s.rows.map(r=>[r.label,r.value]));d.append(list);return d;}));}
+ if($("characterStatsPanel").open){const stats=characterStats({...state,...g}),host=$("characterStats"),open=new Set([...host.querySelectorAll("details[open]")].map(d=>d.dataset.section));host.replaceChildren(...stats.sections.map((s,i)=>{const d=node("details");d.className="stat-section";d.dataset.section=selected+":"+i;d.open=open.has(d.dataset.section);d.append(node("summary",s.title+" · "+s.total));const list=node("div");list.className="skill-list";renderList(list,s.rows.map(r=>[r.label,r.value]));d.append(list);return d;}));}
  $("alphaSpeed").setAttribute("aria-pressed",String(clock?.speed===10));
 }
 function lock(fn){return navigator.locks?.request?navigator.locks.request(MANAGER_SAVE_KEY,fn):Promise.resolve().then(fn);}
@@ -88,11 +90,11 @@ function commit(out,entry=false,newClock=clock){
  publish(out,entry,opening);render();text("saveStatus","Saved locally");return true;
 }
 function settleForAction(){return lastVisible&&document.visibilityState!=="hidden"?settleManagerLive(state,now()):enterManagerGame(state,now());}
-function choose(action){enqueue(()=>{if(!state||blocked)return;const out=action(state,now());commit(out);lastVisible=document.visibilityState!=="hidden";});}
+function choose(action){const fighter=selected;enqueue(()=>{if(!state||blocked)return;if(!lastVisible){if(!commit(enterManagerGame(state,now()),true))return;}const out=action(state,now(),fighter);if(commit(out))lastVisible=document.visibilityState!=="hidden";});}
 choice($("fighterButtons"),[["first","Gladiator I"],["second","Gladiator II"]],"first",id=>{selected=id;render();});
-choice($("weaponButtons"),Object.entries(COMBAT_LOADOUTS).map(([id,w])=>[id,w.name]),"greatsword",id=>choose((s,t)=>chooseManagerWeapon(s,selected,id,t)));
-choice($("armourButtons"),MANAGER_ARMOUR_FAMILIES.map(id=>[id,title(id)]),null,id=>choose((s,t)=>chooseManagerArmour(s,selected,id,t)));
-choice($("tacticButtons"),TACTIC_IDS.map(id=>[id,title(id)]),"balanced",id=>choose((s,t)=>chooseManagerTactic(s,selected,id,t)));
+choice($("weaponButtons"),Object.entries(COMBAT_LOADOUTS).map(([id,w])=>[id,w.name]),"greatsword",id=>choose((s,t,fighter)=>chooseManagerWeapon(s,fighter,id,t)));
+choice($("armourButtons"),MANAGER_ARMOUR_FAMILIES.map(id=>[id,title(id)]),null,id=>choose((s,t,fighter)=>chooseManagerArmour(s,fighter,id,t)));
+choice($("tacticButtons"),TACTIC_IDS.map(id=>[id,title(id)]),"balanced",id=>choose((s,t,fighter)=>chooseManagerTactic(s,fighter,id,t)));
 $("characterStatsPanel").addEventListener("toggle",render);
 $("loginReportReopen").addEventListener("click",()=>{text("loginReportSummary",loginSummary);$("loginReportBody").replaceChildren(...loginLines.map(x=>node("li",x)));$("loginReport").showModal();});
 $("loginReportDismiss").addEventListener("click",()=>$("loginReport").close());

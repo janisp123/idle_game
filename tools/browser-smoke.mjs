@@ -342,7 +342,7 @@ try{
     const url=origin+"/play/?manager="+width;
     const script=await send("Page.addScriptToEvaluateOnNewDocument",{source:`if(location.href===${JSON.stringify(url)}){localStorage.removeItem(${JSON.stringify(managerKey)});localStorage.removeItem("idle-game-manager-clock-v1");localStorage.removeItem(${JSON.stringify(saveKey)});Date.now=()=>${fixedNow};}`});
     await send("Page.navigate",{url});
-    await until(()=>evaluate(`location.href===${JSON.stringify(url)}&&document.getElementById("saveStatus")?.getAttribute("data-game-ready")==="true"`),"manager loaded "+width);
+    await until(async()=>{const status=await evaluate(`({ready:document.getElementById("saveStatus")?.getAttribute("data-game-ready"),notice:document.getElementById("migrationNotice")?.textContent,status:document.getElementById("saveStatus")?.textContent})`);if(status?.status==="Progress not saved")throw Error(status.notice);if(runtimeErrors.length)throw Error(runtimeErrors.at(-1));return status?.ready==="true";},"manager loaded "+width);
     await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:script.identifier});
     const check=await evaluate(`(()=>({selects:document.querySelectorAll("select").length,counts:["fighterButtons","weaponButtons","armourButtons","tacticButtons"].map(id=>document.getElementById(id).querySelectorAll("button").length),overflow:document.documentElement.scrollWidth-innerWidth,activity:JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).activity,work:document.getElementById("currentWork").textContent}))()`);
     assert.equal(check.selects,0);assert.deepEqual(check.counts,[2,5,3,3]);assert.ok(check.overflow<=2);assert.equal(check.activity,"fighting");assert.equal(check.work,"Hunting");
@@ -354,7 +354,7 @@ try{
     await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return s.skills.hunting.xp>0&&s.skills.fighting.xp>0&&document.querySelectorAll(".battle-fighter").length===4;})()`),"manager simultaneous work and combat");
     await shot("manager-"+width);
     await evaluate('document.getElementById("alphaTools").open=true;document.getElementById("alphaCoins").click()');
-    await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).coins>=100000`),"manager test coins");
+    await until(()=>evaluate('document.getElementById("alphaStatus").textContent==="Test credit added."'),"manager test coins");
     await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return Object.values(s.teamSecond.armour).every(x=>x==="plate")&&s.armourRequests.second===null;})()`),"manager atomic armour acquisition");
     await evaluate('document.getElementById("loginReportReopen").click()');
     assert.equal(await evaluate('document.getElementById("loginReport").open'),true);
