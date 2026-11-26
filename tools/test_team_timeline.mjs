@@ -75,7 +75,8 @@ assert.deepEqual(applied.teamwork,awardTeamwork(work,whole.bouts));
 assert.equal(applied.team.first.combatLoadout,"hammer");
 assert.deepEqual(applied.team.first.expertiseActive,team.first.expertiseActive);
 assert.deepEqual(applied.team.second.expertiseActive,team.second.expertiseActive);
-assert.throws(()=>applyTeamSettlement(team,{level:2,xp:0},session,duration));
+assert.equal(applyTeamSettlement(team,{level:2,xp:0},session,duration).teamwork.level,2);
+assert.throws(()=>applyTeamSettlement(team,work,{...session,teamworkLevel:2},duration));
 assert.deepEqual(session,clone,"no input mutation");
 console.log(JSON.stringify({teamTimeline:"PASS",seed,manualBouts:whole.bouts,manual,fallen,
   longBouts:long.bouts,longSampled:long.sampledBouts,longCoins:long.coins,
