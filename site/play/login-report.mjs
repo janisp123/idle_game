@@ -2,7 +2,7 @@
 // No reward calculation, random rolls, mutation, persistence or replay.
 import { effectiveAttributeProgress, attributeXP } from "./attributes.mjs?v=glad-001";
 import { expertiseHours } from "./expertise.mjs?v=alpha-gear-a3";
-import { SKILL_IDS, activityRewardCapped } from "./engine.mjs?v=team-003";
+import { SKILL_IDS, activityRewardCapped } from "./engine.mjs?v=team-004";
 
 export function loginReport(before,outcome,{saved=true,automationUnavailable=false}={}){
   const after=outcome.state, arena={bouts:0,victories:0,defeats:0,doubleDeaths:0,downtimeMs:0,coins:0};
