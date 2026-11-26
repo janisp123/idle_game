@@ -1289,6 +1289,7 @@ function start(coordinatedLogin = false) {
   if(!ALPHA_TOOLS_ENABLED&&alphaClock)alphaClock=setAlphaSpeed(alphaClock,Date.now(),1);
   ui.alphaTools.hidden=!ALPHA_TOOLS_ENABLED;
   ui.alphaFamily.value="plate";
+  $("alphaSecondFamily").value="leather";
   if (!state) {
     // Invalid/new character saves must not inherit an old acceleration clock.
     if (storageWorks) {
