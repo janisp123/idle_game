@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## AUTO-FIGHT-05 — six-month economy validation complete (draft PR #183)
+
+[Economy report and raw output links](mechanics/AUTO_FIGHT_ECONOMY.md); `tools/auto-fight-economy.mjs`. 33 primary 180-day production-engine trajectories, 1,870,574 settled bouts and 5,016 offline policy equality checks PASS. All 15 daily 30-minute builds full S Masterwork days166–170; three 5-min and three 60-min daily builds also full S. Weekly C, mixed A, zero-foreground NG arena. Five tick comparisons matched sampled final snapshots. One seed per case, not a population forecast. Retain existing coins/3-1-10/4000h mastery. Native pilot exact JSON reproduction and all four CI PASS at fcc3493c (website 45789407271, combat 45789407558, systems 45789407220, protocol 45789407268). No merge/deployment. Next AUTO-FIGHT-06: final head CI, scope/decision/backlog reconciliation, protected PR merge and verify main and Pages separately. PR #183.
+
 ## AUTO-FIGHT-04 — progression UI and foreground boundary verified (draft PR #183)
 
 [UI and browser verification](mechanics/AUTO_FIGHT_UI_VALIDATION.md). Read-only grade/history/next-retry panel, no active controls, shared foreground action settlement. Tested code head 20533112: website 45787216857 (117 regressions; real Chromium 390/1440, passive advance, gear boundary, reload, hidden catch-up and alpha idle day), combat 45787216940, systems 45787216852, protocol 45787216872 all PASS. Prior stale CSS fixture fixed. No new lifetime win/loss totals; no server-authoritative multi-tab test. No merge/deployment. Next AUTO-FIGHT-05: six-month automatic policy economy validation across builds and play cadences, then final release gates. Branch `research/auto-fight-policy-001`, PR #183.
