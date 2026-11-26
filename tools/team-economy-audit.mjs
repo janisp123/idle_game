@@ -7,6 +7,8 @@ import {fileURLToPath,pathToFileURL} from "node:url";
 const dir=await mkdtemp(join(tmpdir(),"vigil-team-economy-"));
 const DAY=86400000,seed=Number(process.argv[4]??20261126),rewardPct=Number(process.argv[3]??100);
 assert.ok([100,125,140].includes(rewardPct)&&Number.isSafeInteger(seed)&&seed>=0&&seed<=0xffffffff);
+// Vary the actual frozen arena schedule as well as the activity RNG.
+const origin=seed===20261126?0:seed*1000,day=ms=>(ms-origin)/DAY;
 const specs=[
  {name:"tank_archer",first:["sword_shield","plate"],second:["bow","leather"],visitDays:1,liveMinutes:5},
  {name:"hammer_spear",first:["hammer","plate"],second:["spear","leather"],visitDays:1,liveMinutes:5},
@@ -33,10 +35,10 @@ try{
  assert.ok(selected.length);
  for(const spec of selected){
   const random=c.seededCombatRandom(seed),ids=Object.fromEntries(team.TEAM_IDS.map(id=>[id,[spec[id][0],...armour.ARMOUR_SLOTS.map(s=>s.id+":"+spec[id][1])]]));
-  let s=e.newTeamGame(0),earned=0,spent=0,time=0,bouts=0,wins=0,losses=0,draws=0,liveBouts=0,offlineBouts=0,visits=0,manual=0,automatic=0,claims=0,unlockDay=null,firstS=null,fullS=null,offlineChecks=0;
+  let s=e.newTeamGame(origin),earned=0,spent=0,time=origin,bouts=0,wins=0,losses=0,draws=0,liveBouts=0,offlineBouts=0,visits=0,manual=0,automatic=0,claims=0,unlockDay=null,firstS=null,fullS=null,offlineChecks=0;
   const checkpoints=[],stageDays=Array(8).fill(0);
-  for(const id of team.TEAM_IDS)s=e.setTeamWeapon(s,id,spec[id][0],0,random).state;
-  s=e.chooseActivity(s,"fighting",0,random).state;
+  for(const id of team.TEAM_IDS)s=e.setTeamWeapon(s,id,spec[id][0],origin,random).state;
+  s=e.chooseActivity(s,"fighting",origin,random).state;
   const record=(result,live)=>{
    const prev=s;s=result.state;time=s.settledAtMs;
    for(const rep of result.reports??[result.report]){
@@ -63,7 +65,7 @@ try{
      if(!n?.quote.available)break;
      assert.ok(purchase(n.id,n.itemId,n.target));
     }
-   }else if(unlockDay===null)unlockDay=time/DAY;
+   }else if(unlockDay===null)unlockDay=day(time);
    const result=e.enterGameWithApprentice(s,time,random),report=result.autoEquipment;
    if(report){
     assert.equal(s.coins-result.state.coins,report.spent);
@@ -73,19 +75,19 @@ try{
    assert.deepEqual(result.state.autoFight,s.autoFight);
    s=result.state;assert.equal(s.coins,earned-spent);
    const owned=team.TEAM_IDS.flatMap(id=>ids[id].map(key=>e.teamFromState(s)[id].equipment[key]));
-   if(firstS===null&&owned.some(i=>i?.grade===7))firstS=time/DAY;
-   if(fullS===null&&owned.every(i=>i?.grade===7&&i?.quality==="masterwork"))fullS=time/DAY;
+   if(firstS===null&&owned.some(i=>i?.grade===7))firstS=day(time);
+   if(fullS===null&&owned.every(i=>i?.grade===7&&i?.quality==="masterwork"))fullS=day(time);
   }
-  const snapshot=()=>({day:time/DAY,fighting:s.skills.fighting.level,teamwork:s.teamwork,stage:s.autoFight.stage,highest:s.autoFight.highest,
+  const snapshot=()=>({day:day(time),fighting:s.skills.fighting.level,teamwork:s.teamwork,stage:s.autoFight.stage,highest:s.autoFight.highest,
     stats:Object.fromEntries(Object.entries(attributes.effectiveAttributeProgress(s.attributeEffort,s.skills)).map(([k,v])=>[k,v.value])),
     coins:s.coins,earned,spent,bouts,wins,losses,draws,liveBouts,offlineBouts,manual,automatic,
     fighters:Object.fromEntries(team.TEAM_IDS.map(id=>{const f=e.teamFromState(s)[id];return [id,{gear:ids[id].map(key=>f.equipment[key]??null),weaponHours:expertise.expertiseHours(f.expertise[spec[id][0]]),armourHours:expertise.expertiseHours(f.expertise[spec[id][1]])}]}))});
-  const end=180*DAY;
+  const end=origin+180*DAY;
   while(time<end){
    const start=time;visits++;
    if(e.skillMasterOffer(s).ready.length){const claim=e.learnFromMaster(s,time,random);claims+=claim.mastery.ready.length;s=claim.state;}
    shop();
-   if(spec.mixed){const wanted=Math.floor(time/DAY)%7<5?"fighting":"mining";if((s.transition?.targetActivity??s.activity)!==wanted)s=e.requestActivityChange(s,wanted,time,random).state;}
+   if(spec.mixed){const wanted=Math.floor(day(time))%7<5?"fighting":"mining";if((s.transition?.targetActivity??s.activity)!==wanted)s=e.requestActivityChange(s,wanted,time,random).state;}
    const liveEnd=Math.min(end,start+spec.liveMinutes*60000);
    while(time<liveEnd){
     if(!s.transition&&s.activity==="fighting"&&!e.activityRewardCapped(s)){
@@ -100,10 +102,10 @@ try{
    stageDays[s.autoFight.stage]++;
    const next=Math.min(end,start+spec.visitDays*DAY);
    if(time<next)record(e.enterGame(s,next,random),false);
-   if(Math.floor(time/DAY)%30===0||time===end)checkpoints.push(snapshot());
+   if(Math.floor(day(time))%30===0||time===end)checkpoints.push(snapshot());
    assert.ok(e.readSave(s),"valid saved team");
   }
   assert.equal(bouts,wins+losses+draws);assert.equal(bouts,liveBouts+offlineBouts);
-  console.log(JSON.stringify({spec,seed,rewardPct,profile:e.TIMING_PROFILE,visits,claims,unlockDay,firstS,fullS,offlineChecks,stageDays,final:snapshot(),checkpoints}));
+  console.log(JSON.stringify({spec,seed,origin,rewardPct,profile:e.TIMING_PROFILE,visits,claims,unlockDay,firstS,fullS,offlineChecks,stageDays,final:snapshot(),checkpoints}));
  }
 }finally{await rm(dir,{recursive:true,force:true});}
