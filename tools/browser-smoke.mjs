@@ -58,7 +58,7 @@ async function evaluate(expression){
   if(result.exceptionDetails)throw Error(result.exceptionDetails.exception?.description??result.exceptionDetails.text);
   return result.result.value;
 }
-async function navigate(label,storage=null,beforeStart=""){
+async function navigate(label,storage=null,beforeStart="",keepReport=false){
   const url=origin+"/play/?smoke="+label;
   // pagehide saves the old running character. Install synthetic fixtures on
   // the NEW document before modules start, not into the departing page.
@@ -68,6 +68,7 @@ async function navigate(label,storage=null,beforeStart=""){
   assert.equal(result.errorText,undefined);
   await until(()=>evaluate(`location.href===${JSON.stringify(url)}&&document.readyState==="complete"&&document.getElementById("saveStatus")?.getAttribute("data-game-ready")==="true"`),"app loaded "+label);
   if(inject)await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:inject.identifier});
+  if(!keepReport)await evaluate('(()=>{if(document.getElementById("loginReport").open)document.getElementById("loginReportDismiss").click();})()');
 }
 async function shot(name){
   const r=await send("Page.captureScreenshot",{format:"png",captureBeyondViewport:false});
@@ -167,7 +168,15 @@ try{
     assert.notEqual(statView.before,statView.after);
     assert.ok(statView.overflow<=2,"stat sheet horizontal overflow");
     await shot("stats-"+width);
-    await navigate("persist-"+width);
+    await navigate("persist-"+width,null,"",true);
+    const report=await evaluate(`(()=>{const d=document.getElementById("loginReport"),b=d.getBoundingClientRect();return {open:d.open,modal:d.matches(":modal"),width:b.width,height:b.height,viewportW:innerWidth,viewportH:innerHeight,body:document.getElementById("loginReportBody").innerText,countdown:document.getElementById("loginReportCountdown").textContent,overflow:d.scrollWidth-d.clientWidth};})()`);
+    assert.ok(report.open&&report.modal&&report.width===report.viewportW&&report.height===report.viewportH&&report.overflow<=2,JSON.stringify(report));
+    assert.match(report.body,/Encounters/);assert.match(report.body,/Victories/);assert.match(report.body,/Losses/);assert.match(report.body,/191,250/);assert.match(report.body,/8,750/);assert.match(report.body,/Bow/);assert.match(report.countdown,/Auto-close in (10|9)s/);
+    await shot("login-report-"+width);
+    await evaluate('document.getElementById("loginReportDismiss").click()');assert.equal(await evaluate('document.getElementById("loginReport").open'),false);
+    await evaluate('document.getElementById("loginReportReopen").click()');assert.equal(await evaluate('document.getElementById("loginReport").open'),true);
+    assert.match(await evaluate('document.getElementById("loginReportCountdown").textContent'),/Review mode/);
+    await evaluate('document.getElementById("loginReportDismiss").click()');
     const upgrade=await evaluate(`(()=>{const $=id=>document.getElementById(id),s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));
       $("apprenticeMenu").open=true;document.querySelector('[data-loadout="bow"]').click();const report=$("apprenticeEquipmentReport");
       return {s,report:report.textContent,hidden:report.hidden,status:$("apprenticeEquipmentStatus").textContent,next:$("apprenticeEquipmentNext").textContent,cost:$("apprenticeEquipmentCost").textContent,
@@ -193,6 +202,14 @@ try{
     await navigate("equipment-no-lock-"+width,{[saveKey]:failureFixture,[clockKey]:null},"Object.defineProperty(navigator,'locks',{value:undefined});");
     const unavailable=await evaluate(`(()=>({s:JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),status:document.getElementById("apprenticeEquipmentStatus").textContent,hidden:document.getElementById("apprenticeEquipmentReport").hidden}))()`);
     assert.equal(unavailable.s.coins,1000);assert.equal(unavailable.hidden,true);assert.match(unavailable.status,/Unavailable/);
+    const analyticsFixture=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=apprentice-a4");const s=e.newGame(Date.now()-3600000);s.skills.fighting.level=11;s.coins=1000;return JSON.stringify(e.chooseActivity(s,"fighting",s.settledAtMs,()=>.5).state);})()`);
+    await navigate("analytics-timer-"+width,{[saveKey]:analyticsFixture,[clockKey]:null},"",true);
+    const shown=await evaluate(`(()=>({open:document.getElementById("loginReport").open,started:performance.now(),text:document.getElementById("loginReportBody").innerText}))()`);
+    assert.ok(shown.open);assert.match(shown.text,/Coin ledger/);assert.match(shown.text,/Equipment expertise/);assert.match(shown.text,/Attributes/);
+    await delay(8000);assert.equal(await evaluate('document.getElementById("loginReport").open'),true);
+    await until(()=>evaluate('!document.getElementById("loginReport").open'),"10-second auto dismissal");
+    const closedAt=await evaluate("performance.now()");assert.ok(closedAt-shown.started>=8000&&closedAt-shown.started<=11500,"timer elapsed "+(closedAt-shown.started));
+    console.log(JSON.stringify({width,loginAnalytics:true,autoDismissMs:Math.round(closedAt-shown.started)}));
     const capped=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=cap-001");const start=Date.now()-86400000;
       const s=e.chooseActivity(e.newGame(start),"mining",start,()=>.5).state;return JSON.stringify(e.settle(s,Date.now(),()=>.5).state);})()`);
     await navigate("capped-"+width,{[saveKey]:capped,[clockKey]:null});
