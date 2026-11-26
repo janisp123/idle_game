@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## APPRENTICE-A4-04 — actual mandatory economy complete (draft PR #184)
+
+[Validation and raw evidence](mechanics/APPRENTICE_A4_MANDATORY_VALIDATION.md); `tools/apprentice-a4-mandatory-economy.mjs`. 30 trajectories, 1,672,886 settled bouts, 4,476 frozen offline checks, 2,822 auto + 1,399 manual purchases; all wallet checks PASS. All 15 daily five-minute builds unlock day15, full S MW days166–169, 108–113 auto upgrades each. Weekly C, mixed A, zero foreground B. All four CI PASS at 5d0ec222 (website 45808927769, systems 45808927768, combat 45808927774, protocol 45808927739). Added safe-storage recovery and no-Web-Locks browser tests at 0aecaf71; native economy pilot gate 0a42231f; latest checks pending. No merge/deployment. Next A4-05: confirm new browser/native gates, final scope/CI review and protected merge + Pages. One seed per case, no server-authoritative concurrency. PR #184.
+
 ## APPRENTICE-A4-03 — mandatory login engine and read-only UI integrated (draft PR #184)
 
 [Integration evidence](mechanics/APPRENTICE_A4_INTEGRATION.md). Mandatory at 10 earned levels; coordinated login settles offline, optional Master, then selected gear; owned manual upgrades refused, initial armour acquisition and loadout choice remain. 27 integration + 7,115 planner checks native PASS at cf7c4a46 (systems 45806301130, then old Master fixture failed); combat/protocol PASS. Legacy fixtures corrected; latest Chromium assertions 9ef16e86 and Master fix 2437d197 not yet fully verified. Historical manual economy isolated comparator, actual mandatory six-month economy still pending. No deployment. Next A4-04: finish regression/real browser and safe-save tests, run real mandatory login economy across builds/cadences, then final release. Login-only, no storage/Web Locks support means unavailable; no off switch. Branch `feature/apprentice-a4`, PR #184.
