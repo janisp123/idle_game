@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## AUTO-FIGHT-01 — research started (draft PR #183)
+
+Owner approved automatic fighting progression with **difficulty frozen offline** (no advance or retreat). [Policy screen and corrected contract](mechanics/AUTO_FIGHT_POLICY_SCREEN.md), [raw results](mechanics/AUTO_FIGHT_POLICY_SCREEN.json), `node tools/auto-fight-policy-screen.mjs`. Baseline de5853ae; 16,588,800 synthetic policy draws using existing empirical holdout, not new physical duels. 3 wins / 1 loss / 10 retry wins is provisional; further production-linked validation and offline boundary tests required. No gameplay change or deployment. Pending branch `research/auto-fight-policy-001`, [draft PR #183](https://github.com/janisp123/idle_game/pull/183). Next: production-linked simulation, then policy implementation and offline/online integration, preserving A3 and CAP-001.
+
 ## APPRENTICE-A3 — deployed
 
 PR #181 merged db64da3307a0dffa0108297afb616ef69473f1e4; final head a22a693 passed website 45762861902, combat 45762862614, systems 45762861936 (native 17,952 purchase checks, 4,992 conditions, 960 sessions/duels and 63 purchases), protocol 45762861941. Merged main readback and [Pages deployment 45762976976](https://github.com/janisp123/idle_game/actions/runs/45762976976) passed. Research #179 and policy #180 merged via same commit; original raw reports and harnesses preserved. No save reset; unpaid combat spanning the balance release uses new rules. Next A4 optional quality-only automation; precise unlock threshold and coin-reserve policy remain to be confirmed.
