@@ -2,6 +2,10 @@
 
 2026-11-26. Owner approved automatic quality **and** grade progression of selected equipment and stated the long-term goal: automate every repetitive chore; leave strategic decisions to the player. Baseline main 4413077e2ca2d26c8fb2cc853f9945ee23840481 (AUTO-FIGHT-001 deployed). Draft PR #184, branch feature/apprentice-a4. No live changes in this research batch.
 
+## Owner correction after research (2026-11-26)
+
+Approved level 10, mandatory equipment automation, no disabling. Weakest-first, no user-configured reserve or priorities. Earlier consent and threshold proposals below are superseded; other chores' consent policies are unchanged. Purchases initially on coordinated login only. Player retains weapon and armour selection; manual initial armour acquisition remains distinct from upgrade chores. Research evidence below is historical, not a test of the new threshold.
+
 ## Direction
 - Player chooses weapon and each of four armour families (including None). Assistant purchases the next legal quality or grade stage of the currently chosen/equipped gear; never switches weapons or armour, never spends on unused gear, never fills a deliberate None slot. An unowned armour selection still requires a player choice through the current shop. Stop at S Masterwork. Existing prices, activated Fighting gates, expertise and 32 sequential stages remain unchanged.
 - Default candidate: lowest nominal equipment stage first; ties stable weapon, head, torso, arms, legs order. If the selected next step is unaffordable, save rather than splurge on later items. Skip terminal items and choose among level-eligible items; when all remaining steps are level-locked, show required Fighting level. Preview and actual purchases use shared smithQuote/nextEquipmentUpgrade; show planned item, current/target stage, actual debit, available coins/progress and blocked reason. No mandatory player-managed per-item allowlist/priority settings. Explicit opt-in/disable remains prudent for spending; no forced reserve proposed (zero reserve for research; optional reserve policy remains open).
