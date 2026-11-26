@@ -9,6 +9,7 @@ export const ALPHA_TOOLS_ENABLED=TIMING_PROFILE==="alpha";
 export const SIX_MONTH_BUILD=Object.freeze({
   fightingLevel:52,productiveHours:4235,weaponHours:4235,armourHours:4213
 });
+export const TEAM_SIX_MONTH_BUILD=Object.freeze({fightingLevel:52,productiveHours:3700,weaponHours:3400,armourHours:3400});
 export const ALPHA_COIN_GRANT=100000;
 function requireAlpha(){
   if(!ALPHA_TOOLS_ENABLED)throw new RangeError("Alpha testing tools are disabled");
@@ -23,7 +24,7 @@ export function alphaMaxStats(state,family,now,random=Math.random,secondFamily=f
   if(!ARMOUR_TIERS.includes(family)||!ARMOUR_TIERS.includes(secondFamily))throw new RangeError("Choose one armour family");
   const result=enterGame(state,now,random),old=result.state;
   const floor=awardAttributeTime(blankAttributeEffort(),"fighting",
-    SIX_MONTH_BUILD.productiveHours*3600000);
+    (old.teamSecond?TEAM_SIX_MONTH_BUILD:SIX_MONTH_BUILD).productiveHours*3600000);
   const attributeEffort=Object.fromEntries(Object.entries(old.attributeEffort)
     .map(([id,value])=>[id,Math.max(value,floor[id])]));
   const fighting=old.skills.fighting.level>=SIX_MONTH_BUILD.fightingLevel?
@@ -38,11 +39,11 @@ export function alphaMaxStats(state,family,now,random=Math.random,secondFamily=f
   let teamSecond=old.teamSecond;
   if(teamSecond){
     const second={...teamSecond.expertise};
-    second[teamSecond.combatLoadout]=Math.max(second[teamSecond.combatLoadout],3400*EXPERTISE_BALANCE.unitsPerHour);
-    second[secondFamily]=Math.max(second[secondFamily],3400*EXPERTISE_BALANCE.unitsPerHour);
+    second[teamSecond.combatLoadout]=Math.max(second[teamSecond.combatLoadout],TEAM_SIX_MONTH_BUILD.weaponHours*EXPERTISE_BALANCE.unitsPerHour);
+    second[secondFamily]=Math.max(second[secondFamily],TEAM_SIX_MONTH_BUILD.weaponHours*EXPERTISE_BALANCE.unitsPerHour);
     teamSecond={...teamSecond,expertise:second,expertiseActive:{...second}};
-    expertise[old.combatLoadout]=Math.max(old.expertise[old.combatLoadout],3400*EXPERTISE_BALANCE.unitsPerHour);
-    expertise[family]=Math.max(old.expertise[family],3400*EXPERTISE_BALANCE.unitsPerHour);
+    expertise[old.combatLoadout]=Math.max(old.expertise[old.combatLoadout],TEAM_SIX_MONTH_BUILD.weaponHours*EXPERTISE_BALANCE.unitsPerHour);
+    expertise[family]=Math.max(old.expertise[family],TEAM_SIX_MONTH_BUILD.weaponHours*EXPERTISE_BALANCE.unitsPerHour);
   }
   const changed=fighting!==old.skills.fighting||JSON.stringify(teamSecond)!==JSON.stringify(old.teamSecond)||
     Object.keys(attributeEffort).some(id=>attributeEffort[id]!==old.attributeEffort[id])||
