@@ -1,4 +1,4 @@
-import { characterStats } from "./character-stats.mjs?v=gear-a3";
+import { characterStats } from "./character-stats.mjs?v=auto-fight-03";
 import { MASTER_CONSENT_VERSION } from "./apprentice.mjs?v=apprentice-a2";
 import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
 import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
@@ -7,13 +7,13 @@ import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote
 import {
   setDifficulty, buyEquipment, activateExpertise, arenaBoutProgress, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
-  lootChances, recipeOptions, newGame, chooseActivity, readSave, settle,
+  lootChances, recipeOptions, newGame, chooseActivity, readSave, settle, settleLive,
   enterGame, enterGameWithApprentice, setAutoMasterConsent, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
   getApprenticeProgress, queueCapacity, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, activityRewardCapped, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=gear-a3";
+} from "./engine.mjs?v=auto-fight-03";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=gear-a3";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-art-001";
@@ -23,7 +23,7 @@ import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats, dodgeChance }
   from "./armour.mjs?v=bal-002";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=gear-a3";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=auto-fight-03";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -217,12 +217,16 @@ function showCombatFlow(flow) {
 
 let state;
 let alphaClock = null;
+// A real foreground heartbeat, never persisted or inferred from an absence.
+let lastForegroundTick = null;
+function breakForegroundContinuity(){ lastForegroundTick=null; }
 function gameNow() { return alphaTime(alphaClock,Date.now()); }
 function persistAlphaClock(clock) {
   if (!storageWorks) return false;
   try {
     localStorage.setItem(ALPHA_CLOCK_KEY,JSON.stringify(clock));
     alphaClock=clock;
+    breakForegroundContinuity();
     ui.alphaSpeed.checked=clock.speed===10;
     return true;
   } catch {
@@ -345,7 +349,9 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
     weights.map(([stat, weight]) => stat + (weight >= 50 ? "++" : "+")).join(" · ");
   statGains.title = "Attribute XP share: " +
     weights.map(([stat, weight]) => stat + " " + weight + "%").join(", ");
-  const difficulty = document.createElement("select");
+  const difficulty = document.createElement(id==="fighting"?"small":"select");
+  if(id==="fighting")difficulty.textContent="Automatic difficulty";
+  else {
   difficulty.setAttribute("aria-label", task.title + " difficulty");
   difficulty.className = "activity-difficulty";
   difficultyGrades.forEach((grade,tier) => {
@@ -362,6 +368,7 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
     writeSave();
     render();
   });
+  }
   body.append(titleRow, detail, rank, statGains, difficulty);
   row.append(body);
   activityRewardLabels.set(id, detail);
@@ -396,6 +403,7 @@ function persistState(next) {
       const newer = readSave(actual);
       if (newer) {
         state = newer;
+        breakForegroundContinuity();
         lastStoredText = actual;
         latestWorkResult = null;
         $("apprenticeMasterReport").hidden = true;
@@ -924,8 +932,11 @@ function render() {
   }
   for (const [id, { row, startButton, queueButton, levelButton, difficulty }] of activityButtons) {
     const skill = state.skills[id];
-    Array.from(difficulty.children).forEach((option,tier) => { option.disabled = !canSelectDifficulty(id,skill.level,tier); });
-    difficulty.value = String(state.difficulties[id] ?? 0);
+    if(id==="fighting")difficulty.textContent="Automatic difficulty · "+difficultyGrades[state.autoFight.stage];
+    else {
+      Array.from(difficulty.children).forEach((option,tier) => { option.disabled = !canSelectDifficulty(id,skill.level,tier); });
+      difficulty.value = String(state.difficulties[id] ?? 0);
+    }
     activityLevelLabels.get(id).textContent = "Skill level " + number(skill.level) +
       (skill.xp >= xpToNextLevel(skill.level) ? " · Rewards paused" : "");
     const available = lootChances(id, skill.level);
@@ -1105,17 +1116,22 @@ function render() {
 }
 
 function tick() {
-  if (document.visibilityState === "hidden") return;
+  if (document.visibilityState !== "visible") { breakForegroundContinuity(); return; }
+  const wall=performance.now();
+  const continuous=lastForegroundTick!==null&&wall>=lastForegroundTick&&wall-lastForegroundTick<=1000;
+  lastForegroundTick=wall;
   const before = state.transition;
-  const result = settle(state, gameNow());
+  const priorPolicy=state.autoFight;
+  const result = (continuous?settleLive:settle)(state, gameNow());
   state = activateExpertise(result.state);
   const gained = reportProgress(result);
   announceArrival(before);
-  if (gained || (before && !state.transition) || gameNow() - lastSavedAt > 3000) writeSave();
+  if (gained || JSON.stringify(priorPolicy)!==JSON.stringify(state.autoFight) || (before && !state.transition) || Date.now() - lastSavedAt > 3000) writeSave();
   render();
 }
 
 function returnToGame() {
+  breakForegroundContinuity();
   const before = state.transition;
   const result = enterGame(state, gameNow());
   state = result.state;
@@ -1284,6 +1300,7 @@ function start(coordinatedLogin = false) {
       }
       localStorage.removeItem(ALPHA_CLOCK_KEY);
       alphaClock=null;
+      breakForegroundContinuity();
       state=newStartingCharacter(Date.now());
       $("apprenticeMasterReport").hidden=true;
       latestWorkResult=null;
@@ -1381,11 +1398,12 @@ function start(coordinatedLogin = false) {
   });
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") returnToGame();
-    else writeSave();
+    else { breakForegroundContinuity(); writeSave(); }
   });
-  window.addEventListener("pagehide", writeSave);
+  window.addEventListener("pagehide", () => { breakForegroundContinuity(); writeSave(); });
   window.addEventListener("storage", event => {
     if (event.key === ALPHA_CLOCK_KEY && ALPHA_TOOLS_ENABLED) {
+      breakForegroundContinuity();
       alphaClock=parseAlphaClock(event.newValue);
       ui.alphaSpeed.checked=alphaClock?.speed===10;
     }
@@ -1395,6 +1413,7 @@ function start(coordinatedLogin = false) {
       const newer = readSave(current);
       if (newer) {
         state = newer;
+        breakForegroundContinuity();
         lastStoredText = current;
         $("apprenticeMasterReport").hidden=true;
         latestWorkResult = null; // another tab's loot cannot be asserted locally
