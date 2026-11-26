@@ -1143,7 +1143,7 @@ test("Fighting is a distinct first activity and does not manufacture simulated c
   assert.equal(readSave(oldV5), null, "required current-build skills cannot be missing");
 });
 
-test("noncombat grades remain gated; all Fighting grades are open and survive reloading",async()=>{
+test("noncombat grades remain gated; automatic Fighting grades survive reloading",async()=>{
   const {setDifficulty}=await import("../site/play/engine.mjs");
   const {workMultiplier,benchmark}=await import("../site/play/difficulty.mjs");
   let state=newGame(0);
@@ -1156,8 +1156,9 @@ test("noncombat grades remain gated; all Fighting grades are open and survive re
     state.skills.mining.level++;
     state=setDifficulty(state,"mining",tier,0).state;
     assert.equal(readSave(state).difficulties.mining,tier);
-    state=setDifficulty(state,"fighting",tier,0).state;
-    assert.equal(readSave(state).difficulties.fighting,tier);
+    assert.throws(()=>setDifficulty(state,"fighting",tier,0),/automatically/);
+    state={...state,difficulties:{...state.difficulties,fighting:tier},autoFight:{stage:tier,streak:0,blocked:-1,highest:-1}};
+    assert.equal(readSave(state).autoFight.stage,tier);
     const model=benchmark(tier), weight={STR:100};
     assert.ok(workMultiplier(tier,weight,{STR:{value:model.stat}})>1);
     assert.ok(workMultiplier(tier,weight,{STR:{value:model.stat/2}})<1);
@@ -1351,7 +1352,8 @@ test("ALPHA-GEAR-001 attempting S cannot artificially accelerate productive Figh
   let s=e.newGame(0);s.skills.fighting={level:30,xp:0};
   s.attributeEffort=awardAttributeTime(s.attributeEffort,"fighting",180*e.DAY_MS);
   s=e.chooseActivity(s,"fighting",0,()=>.5).state;
-  const high=e.setDifficulty(s,"fighting",7,0,()=>.5).state;
+  // Developer fixture for a fixed-stage reward comparison, not a player action.
+  const high={...s,difficulties:{...s.difficulties,fighting:7},autoFight:{stage:7,streak:0,blocked:-1,highest:-1}};
   const lowResult=e.settle(s,5*e.MINUTE_MS,()=>.5);
   const highResult=e.settle(high,5*e.MINUTE_MS,()=>.5);
   assert.ok(highResult.state.skills.fighting.xp<=lowResult.state.skills.fighting.xp);

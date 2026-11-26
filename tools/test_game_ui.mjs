@@ -158,7 +158,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=gear-a3/,
+  assert.match(html, /app\.mjs\?v=auto-fight-04/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -183,7 +183,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "controls are first");
   assert.match(queueCss, /\.activity-choices \.activity-actions \.activity-icon-button\s*\{[^}]*width:30px/s,
     "desktop icons remain compact");
-  assert.match(html, /iron-ui\.css\?v=apprentice-a1/,
+  assert.match(html, /iron-ui\.css\?v=auto-fight-04/,
     "stat UI stylesheet cache version is changed");
   assert.match(queueCss, /\.activity-choices \.activity-title-line > strong\s*\{[^}]*overflow-wrap:break-word/s,
     "long skill names may wrap rather than be hidden behind controls");
@@ -287,8 +287,9 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(elements.get("activityCategoryTitle").textContent, "Combat");
     const fightingCards = elements.get("activityChoices").children;
     assert.equal(fightingCards.length, 2);
-    assert.equal(fightingCards[0].children[0].children[4].children[7].disabled,false,
-      "even a fresh player may challenge S opponents");
+    assert.match(fightingCards[0].children[0].children[4].textContent,/Automatic difficulty/,
+      "Fighting difficulty is automatic, not a selector");
+    assert.equal(fightingCards[0].children[0].children[4].children.length,0);
     assert.equal(elements.get("combatPanel").hidden, true,
       "ordinary activity selection has no simulated fight");
     assert.equal(fightingCards[0].children[0].children[0].children[0].textContent, "Fighting");

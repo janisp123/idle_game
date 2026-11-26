@@ -1,5 +1,25 @@
 # Changelog and task handoffs
 
+## AUTO-FIGHT-06 · STARTED / RELEASE CANDIDATE (2026-11-26, chat)
+
+Owner approved final checks, merge and deployment of automatic Fighting (PR #183). Prior head 1d9f248f passed website 45789563076, combat 45789562818, systems 45789563061 and protocol 45789562955. Scope reviewed: progression, foreground/offline boundary, UI, developer tests/research and documentation only; no price, XP, equipment, mastery or timing retuning. Final-head checks required after documentation reconciliation. Next: ready PR, protected merge, read main and verify Pages separately. Actual merge/deployment evidence will be recorded in PR conversation.
+
+## AUTO-FIGHT-05 · STARTED (2026-11-26, chat)
+
+Owner requested continuation. PR #183, baseline main de5853ae, UI verified 20533112. Six-month economy validation: isolated normal profile, automatic online progression, fixed offline stage, real sequential shop, Master, cap and wallet. No reward retune or deployment before results. Completed [economy study](mechanics/AUTO_FIGHT_ECONOMY.md), executable harness and four raw outputs: 33 trajectories, 1,870,574 settled bouts, 5,016 fixed offline policy checks; all 15 daily 30-min builds S MW days166–170; three daily 5-min and three daily 60-min also S MW; weekly C, mixed A. Five tick comparisons matched final snapshots. Native pilot exact output and four CI PASS at fcc3493c (website 45789407271, combat 45789407558, systems 45789407220, protocol 45789407268). No rewards retuned. Next AUTO-FIGHT-06 release gate review, final-head checks and deployment. No merge/deployment yet.
+
+## AUTO-FIGHT-04 · STARTED (2026-11-26, chat)
+
+Owner requested continuation. Draft PR #183, prior head 95119338: all four CI workflows PASS (website 45786243883, combat 45786243889, systems 45786243928, protocol 45786243936). Implemented read-only progression panel and shared foreground action settlement. [Verification](mechanics/AUTO_FIGHT_UI_VALIDATION.md): tested code head 20533112, website 45787216857 (117 regressions, Chromium at 390/1440, passive advance, gear action, reload, offline visibility and alpha day), combat 45787216940, systems 45787216852, protocol 45787216872 all PASS. Next AUTO-FIGHT-05 six-month automatic economy validation, then final CI and release. No merge or deployment.
+
+## AUTO-FIGHT-03 · STARTED (2026-11-26, chat)
+
+Owner requested continuation on draft PR #183, branch `research/auto-fight-policy-001`; policy foundation tested. Integrate saved stage and streak, actual committed live bout results, conservative foreground detection, frozen offline rewards, cap/queue and save tests. No release until UI, economy and CI gates. Implemented persisted policy and short foreground committed-bout settlement; default offline fixed-stage, manual selector removed. [Integration report](mechanics/AUTO_FIGHT_INTEGRATION.md). Native 29 integration and 10,782 policy assertions passed at 673fa82a; systems/protocol passed; legacy combat/website fixture failures corrected subsequently, final-head full CI pending. Next AUTO-FIGHT-04 full progression display, browser/action/visibility boundary tests and AUTO-FIGHT-05 economy validation. No merge/deployment.
+
+## AUTO-FIGHT-02 · STARTED (2026-11-26, chat)
+
+Owner approved continuing after production policy research; draft PR #183, branch `research/auto-fight-policy-001`, baseline de5853ae. Implement 3 wins / 1 loss / 10 retry wins, pure deterministic state, online-only stage updates. Previous 90,720 real duels and 1,680 offline wallet checks saved. Policy foundation implemented: `site/play/auto-fight.mjs`, `tools/test_auto_fight.mjs`, [verification and integration record](mechanics/AUTO_FIGHT_POLICY_IMPLEMENTATION.md). 10,782 assertions / 654 reachable states PASS in connector JavaScript; native workflow added, CI unverified. Next AUTO-FIGHT-03: actual persisted state and committed foreground-only settlement, frozen offline mode, cap/queue/reload tests, UI and economy. No live gameplay change or deployment.
+
 ## APPRENTICE-A3 · MERGED AND DEPLOYED (2026-11-26, chat)
 
 PR #181 merged db64da3307a0dffa0108297afb616ef69473f1e4; final head a22a693 passed website 45762861902, combat 45762862614, systems 45762861936 (native 17,952 purchase checks, 4,992 conditions, 960 sessions/duels and 63 purchases), protocol 45762861941. Merged main readback and [Pages deployment 45762976976](https://github.com/janisp123/idle_game/actions/runs/45762976976) passed. Research #179 and policy #180 merged via same commit; original raw reports and harnesses preserved. No save reset; unpaid combat spanning the balance release uses new rules. Next A4 optional quality-only automation; precise unlock threshold and coin-reserve policy remain to be confirmed.

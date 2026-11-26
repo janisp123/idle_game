@@ -204,7 +204,7 @@ try{
           s=a.alphaMaxStats(s,"plate",start,()=>.5).state;s={...s,coins:4000000};
           s=e.buyEquipment(s,"greatsword",{grade:7,quality:"masterwork"},start,()=>.5).state;
           for(const slot of ["head","torso","arms","legs"])s=e.buyEquipment(s,slot+":plate",{grade:7,quality:"masterwork"},start,()=>.5).state;
-        }else{s.skills.fighting.level=2;s=e.setDifficulty(s,"fighting",7,start,()=>.5).state;}
+        }else{s.skills.fighting.level=2;s.difficulties.fighting=7;s.autoFight.stage=7;}
         s=e.chooseActivity(s,"fighting",start,()=>.5).state;
         s=e.settle(s,now,()=>.5).state;
         const expected=v.combatVerdict(c.combatAtTime(s.combatSession).event);
@@ -226,6 +226,61 @@ try{
       await shot(mode+"-"+width);
       console.log(JSON.stringify({width,mode,...view}));
     }
+
+    // Real production winning bout at a known boundary; no synthetic verdicts.
+    const autoFixture=await evaluate(`(async()=>{
+      const e=await import("./engine.mjs?v=auto-fight-03"),c=await import("./combat.mjs?v=gear-a3");
+      const now=Date.now();let s=e.chooseActivity(e.newGame(now),"fighting",now,()=>.5).state;
+      s.skills.fighting={level:50,xp:0};s.autoFight={stage:0,streak:9,blocked:1,highest:0};
+      const player=e.desiredArenaPlayer(s);
+      for(let seed=1;seed<2000;seed++){
+        const session={...c.startCombatSession(player,seed),elapsedMs:c.BOUT_MS-500,prizeCursor:0};
+        if(c.combatAtTime(session).outcome==="victory"){s.combatSession=session;break;}
+      }
+      if(!s.combatSession||!e.readSave(s))throw Error("Invalid auto-fight fixture");
+      return JSON.stringify(s);
+    })()`);
+    await navigate("auto-fight-online-"+width,{[saveKey]:autoFixture,[clockKey]:null});
+    const initial=await evaluate(`(()=>{const $=id=>document.getElementById(id),p=$("autoFightProgress");
+      p.scrollIntoView({block:"center"});return {hidden:p.hidden,stage:$("autoFightStage").textContent,highest:$("autoFightHighest").textContent,next:$("autoFightNext").textContent,
+      meter:$("autoFightMeter").getAttribute("aria-valuenow"),controls:p.querySelectorAll("button,input,select").length,overflow:document.documentElement.scrollWidth-innerWidth};})()`);
+    assert.equal(initial.hidden,false);assert.equal(initial.stage,"Non-grade");assert.equal(initial.highest,"Non-grade");
+    assert.match(initial.next,/Retry F.*9 \/ 10/);assert.equal(initial.meter,"90");assert.equal(initial.controls,0);assert.ok(initial.overflow<=2);
+    await shot("auto-fight-retry-"+width);
+    // No player input: a normal visible tick completes the tenth retry win.
+    await evaluate("new Promise(resolve=>setTimeout(resolve,550))");
+    await evaluate(`Date.now=()=>${fixedNow+500}`);
+    await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})).autoFight.stage===1`),"automatic live advance "+width);
+    const passive=await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}))`);
+    assert.equal(passive.coins,12);assert.equal(passive.autoFight.highest,0);
+    assert.equal(passive.combatLoadout,"greatsword");assert.equal(passive.autoFight.streak,0);
+    await navigate("auto-fight-gear-"+width,{[saveKey]:autoFixture,[clockKey]:null});
+    // Wait for the ordinary real foreground heartbeat, then make the next
+    // gear action cross the bout boundary synchronously in the same task.
+    await evaluate("new Promise(resolve=>setTimeout(resolve,550))");
+    const online=await evaluate(`(()=>{const key=${JSON.stringify(saveKey)},before=JSON.parse(localStorage.getItem(key));
+      Date.now=()=>${fixedNow+500};document.querySelector('[data-loadout="bow"]').click();
+      const after=JSON.parse(localStorage.getItem(key));return {before,after,stage:document.getElementById("autoFightStage").textContent,next:document.getElementById("autoFightNext").textContent};})()`);
+    assert.equal(online.after.autoFight.stage,1);assert.equal(online.after.autoFight.streak,0);
+    assert.equal(online.after.coins-online.before.coins,12);assert.equal(online.after.combatLoadout,"bow");
+    assert.equal(online.stage,"F");assert.match(online.next,/Next: E.*0 \/ 3/);
+    await navigate("auto-fight-reload-"+width);
+    const reload=await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}))`);
+    assert.deepEqual(reload.autoFight,online.after.autoFight);assert.equal(reload.coins,online.after.coins);
+    // Returning from an absent interval pays the same old-grade reward but
+    // never completes the retry, including visibility catch-up.
+    await navigate("auto-fight-offline-"+width,{[saveKey]:autoFixture,[clockKey]:null});
+    const hidden=await evaluate(`(()=>{const key=${JSON.stringify(saveKey)},before=JSON.parse(localStorage.getItem(key));
+      Object.defineProperty(document,"visibilityState",{configurable:true,value:"hidden"});
+      document.dispatchEvent(new Event("visibilitychange"));Date.now=()=>${fixedNow+500};
+      Object.defineProperty(document,"visibilityState",{configurable:true,value:"visible"});
+      document.dispatchEvent(new Event("visibilitychange"));delete document.visibilityState;
+      const after=JSON.parse(localStorage.getItem(key));return {before,after,next:document.getElementById("autoFightNext").textContent};})()`);
+    assert.deepEqual(hidden.after.autoFight,hidden.before.autoFight);assert.equal(hidden.after.coins-hidden.before.coins,12);
+    assert.match(hidden.next,/Retry F.*9 \/ 10/);
+    const idle=await evaluate(`(()=>{const key=${JSON.stringify(saveKey)},before=JSON.parse(localStorage.getItem(key));document.getElementById("alphaDay").click();return {before,after:JSON.parse(localStorage.getItem(key))};})()`);
+    assert.deepEqual(idle.before.autoFight,idle.after.autoFight);
+    console.log(JSON.stringify({width,autoFight:true,liveStage:online.after.autoFight.stage,offlineStage:hidden.after.autoFight.stage,liveCoins:online.after.coins,offlineCoins:hidden.after.coins}));
     console.log("Browser smoke passed at "+width+"px: reset notice, alpha controls, persistence and real verdicts.");
   }
   assert.deepEqual(runtimeErrors,[],"browser runtime errors");

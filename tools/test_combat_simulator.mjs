@@ -109,7 +109,7 @@ test("SIM-003 synthetic kits exactly match real engine snapshots, including novi
     state.combatLoadout=loadout;state.armour={head:"padded",torso:"plate",arms:"leather",legs:"none"};
     state.equipment[loadout]=spec;
     for(const [slot,family] of Object.entries(state.armour))if(family!=="none")state.equipment[slot+":"+family]=spec;
-    state.skills.fighting={level:52,xp:0};state.difficulties.fighting=grade;
+    state.skills.fighting={level:52,xp:0};state.difficulties.fighting=grade;state.autoFight.stage=grade;
     const practice=mode==="novice"?blankExpertise():fullExpertise();
     practice[loadout]=1000*EXPERTISE_BALANCE.unitsPerHour;
     state.expertise={...practice};state.expertiseActive={...practice};

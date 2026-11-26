@@ -26,6 +26,8 @@ on:
       - 'tools/simulation/**'
       - 'tools/test_system_lab.mjs'
       - 'tools/test_gear_progression_a3.mjs'
+      - 'tools/auto-fight-economy.mjs'
+      - 'docs/mechanics/AUTO_FIGHT_ECONOMY_PILOT.json'
       - 'docs/mechanics/SYSTEM_LAB.md'
       - 'docs/mechanics/README.md'
       - 'docs/mechanics/CHANGING_BALANCE.md'
@@ -57,6 +59,17 @@ jobs:
           node --test tools/simulation/clan-fixtures.test.mjs
           node --test tools/simulation/apprentice.test.mjs
           node tools/system-lab.mjs --config tools/simulation/clan-example.json > clan-fixture-report.json
+      - name: Reproduce automatic Fighting economy pilot
+        run: |
+          node tools/auto-fight-economy.mjs '[{"style":"greatsword","family":"plate","visitDays":1,"liveMinutes":30}]' > auto-economy-pilot.json
+          node --input-type=module -e '
+            import assert from "node:assert/strict";
+            import {readFileSync} from "node:fs";
+            const result=JSON.parse(readFileSync("auto-economy-pilot.json","utf8"));
+            const expected=JSON.parse(readFileSync("docs/mechanics/AUTO_FIGHT_ECONOMY_PILOT.json","utf8"));
+            assert.deepEqual(result,expected);
+            console.log(JSON.stringify({autoEconomy:"exact pilot match",firstSSet:result[0].firstSSet,offlineChecks:result[0].offlineChecks,earned:result[0].final.earned}));
+          '
       - name: Validate scenario input without accepting private saves
         env:
           SCENARIO_INPUT: ${{ inputs.scenario || '{"scenarios":[{"module":"loot","activity":"mining","level":25,"units":100,"trials":250},{"module":"crafting","activity":"construction","level":10,"workCycles":100,"inventory":{"limestone":100,"fuel":70},"trials":250}]}' }}
