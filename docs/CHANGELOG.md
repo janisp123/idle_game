@@ -1,5 +1,10 @@
 # Changelog and task handoffs
 
+## TEAM-006 — second behaviour candidate verified (2026-11-26, chat)
+
+[Report](mechanics/TEAM_006_REFINED.md), [results](mechanics/TEAM_006_REFINED.json), PR #190, 45848442829 all nine jobs PASS. 3,290,112 battles, 1080 baseline parity fixtures. Focus2 broad gains +2.4–3.2 pp at max mastery; Range2 small improvement vs normal but not superior to Range1; Protect2 reduces losses but still fails overall. Own-team refined policy +2.5–3.5 pp vs normal, no need for pets. Recommend further targeted differentiation/protection work or owner-approved Focus2 integration, not wholesale deployment. No gameplay changes; progression/economy/offline untested.
+
+
 ## TEAM-006 — behaviour candidate verified (2026-11-26, chat)
 
 [Report](mechanics/TEAM_006_BEHAVIOUR.md), [results](mechanics/TEAM_006_BEHAVIOUR.json), research PR #190. Native run 45844151597 all nine jobs PASS; 1,714,176 battles and 1080 exact normal trace parity fixtures. Strong conditional niches for Focus and Range; broad gains modest (own-team policy +0.2–1.7 pp); Protect is harmful to tank+archer despite increased interception. Do not ship first candidate. Refine focus reachability, range timing and guard formation; retest against normal with independent seeds. No live changes, no pets, no merge.
