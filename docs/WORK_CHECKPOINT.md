@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## STRATEGY-001 — research paused at owner request (draft PR #186)
+
+ACTIVE-PROGRESSION-001: only currently used choices gain their own levels/expertise/upgrades; retain individual progress when switching, no shared or bulk progression. Reversible selection does not mean interchangeable mastery. Do not resume testing or implementation until owner asks. Initial NG screen 36,000 candidate duels, 4,500 neutral exact event parity, raw `docs/mechanics/STRATEGY_SCREEN_NG.json` at 03a9d23a. Candidate harness `tools/strategy-candidate.mjs`, native `tools/strategy-screen.mjs`; connector adapter initially failed missing combat-verdict dependency, corrected before actual run. Wins per 4,500: balanced 2190, assault 2317, guard 2123, skirmish 1938, hound 2344, raven 2838, swarm 2386, sentinel 2726. Raven/sentinel appear too strong; one seed set, NG only, no companion/tactic progression formula or unlock approved. No gameplay changes. Next when authorized: decide separate active-choice progression and rebalance candidates across grades, then integration.
+
 ## APPRENTICE-A5 — analytical login report (draft PR #185)
 
 Owner requested full-screen analytical return report; close manually or auto after 10 real seconds. [Implementation and evidence](mechanics/APPRENTICE_A5_LOGIN_REPORT.md). Pure settled outcome projection, actual combat/rewards/XP/resource flows/attributes/expertise/committed chores, no gameplay change. Same-session reopen for untimed review. Native projection PASS systems 45812490224; 117 regressions PASS, mobile timer 10063ms at website 45812525144; desktop scrollbar gap corrected ac008aaf, save failure assertions f1c2c2cf, final checks pending. A4 merged 9cdc3364 and Pages 45810631099 SUCCESS. Next final browser/CI verification and protected PR #185 merge + Pages. Branch feature/apprentice-a5.
