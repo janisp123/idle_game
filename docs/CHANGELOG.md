@@ -2,7 +2,7 @@
 
 ## APPRENTICE-A4-02 · STARTED (2026-11-26, chat)
 
-Owner approved level 10 and mandatory equipment automation: no off switch, chosen loadout remains player-controlled. Weakest-first, no manual purchase priorities/reserve, existing prices/gates. Scope is equipment only; existing optional auto-Master and future clan permissions unchanged. Implement pure purchase planner and tests, then coordinated login transaction and UI. Baseline 4413077e, draft PR #184.
+Owner approved level 10 and mandatory equipment automation: no off switch, chosen loadout remains player-controlled. Weakest-first, no manual purchase priorities/reserve, existing prices/gates. Scope is equipment only; existing optional auto-Master and future clan permissions unchanged. Pure planner implemented and 7,115 assertions PASS in connector JS; [verification](mechanics/APPRENTICE_A4_PLANNER.md). Native gate added, not yet verified. Next shared settled purchase/login integration and UI, no manual upgrade bypass; runtime unchanged. Baseline 4413077e, draft PR #184.
 
 ## APPRENTICE-A4 · STARTED (2026-11-26, chat)
 
