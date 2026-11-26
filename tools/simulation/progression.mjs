@@ -28,7 +28,10 @@ export function simulateActivity(options={}) {
   for(let i=0;i<runs;i++){
     const s=structuredClone(base), rng=sourceSeed(options,i);
     let started=chooseActivity(s,activity,s.settledAtMs,rng).state;
-    if(tier) started=setDifficulty(started,activity,tier,started.settledAtMs,rng).state;
+    if(tier&&activity==="fighting"){
+      if(options.state!==undefined)throw new RangeError("Fixed arena override requires a synthetic research state");
+      started={...started,difficulties:{...started.difficulties,fighting:tier},autoFight:{stage:tier,streak:0,blocked:-1,highest:-1}};
+    }else if(tier) started=setDifficulty(started,activity,tier,started.settledAtMs,rng).state;
     const before=structuredClone(started);
     const out=enterGame(started,started.settledAtMs+elapsedMs,rng);
     const after=out.state;
