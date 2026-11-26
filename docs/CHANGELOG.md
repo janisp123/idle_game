@@ -2,6 +2,8 @@
 
 ## TACTIC-UI-001 · Phase 5 candidate (2026-11-26, chat)
 
+Phase 5 first run 45891051417 at 9a8cb322: 4/5 new tactic tests PASS; actual offline practice test failed because fresh alpha Fighting cap (40 XP) occurred before the first completed 200s bout, legitimately leaving tactic XP unchanged. Screening skipped. Increase Fighting level only in that functional fixture so it contains completed bouts; retain exact cap and activation assertions. No production change.
+
 TACTIC-UI-001 Phase 5 candidate: Phase 4 head 5b5f4068 all six workflows PASS. Read #190 TEAM-006/007/011 research (max prior audit included experimental damage and material wear, not directly comparable). New three-role policy uses real approach speed/focus, protection/escort and finite retreat tradeoffs, no changes to physical strike formulas. Balanced uses opportunistic focus; aggressive foregoes voluntary retreat/interception while active; defensive escorts when no ready attack and maintains reach at action cost. Exact behavior and activation/XP rates provisional. Per-fighter selected tactic, capped actual frozen practice milliseconds, active-only advancement, default Balanced, manager prototype save v4. Legacy snapshots with no tactic preserve old trace. Five targeted functional tests and max-only 2025-ordered-config screen with independent anchor holdout added, NOT RUN at commit. No public UI integration, deployment or final balance approval. Next verify tests and saved screen, assess meta, then UI integration.
 
 ## MANAGER-UI-001 · Phase 4 whole-set candidate (2026-11-26, chat)

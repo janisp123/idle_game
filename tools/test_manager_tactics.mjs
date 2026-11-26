@@ -36,7 +36,8 @@ test("save selection does not rewrite started bout; next snapshot changes",()=>{
   assert.equal(m.readManagerGame(JSON.stringify(out.state)).combatSession.players.first.tactic,"balanced");
 });
 test("actual offline practice is frozen and capped; return activates once",()=>{
-  let s=m.newManagerGame(0);s.managerTactics.first.skills.balanced.xp=t.tacticRequiredXP(1)-1;
+  let s=m.newManagerGame(0);s.skills.fighting.level=52; // enough cap room for actual complete bouts
+  s.managerTactics.first.skills.balanced.xp=t.tacticRequiredXP(1)-1;
   const raw=m.settleManagerOffline(s,BOUT_MS*3,rng);
   assert.equal(raw.state.managerTactics.first.skills.balanced.level,1);
   assert.equal(raw.state.managerTactics.first.skills.balanced.xp,t.tacticRequiredXP(1));
