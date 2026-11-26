@@ -6,9 +6,11 @@ import { chooseArena } from "./arenas.mjs?v=bal-002";
 import { arenaReward } from "./arena-wallet.mjs?v=gear-a3";
 import { TEAM_IDS,awardTeamPractice } from "./team.mjs?v=team-001";
 import { awardTeamwork,coordinationChance } from "./teamwork.mjs?v=team-002";
-import { resolveTeamBattle } from "./team-combat.mjs?v=team-002";
+import { resolveTeamBattle } from "./team-combat.mjs?v=team-004";
 
-export const TEAM_TIMELINE_VERSION=1;
+export const TEAM_TIMELINE_VERSION=2;
+export const TEAM_REWARD_PERCENT=140;
+export const teamArenaReward=grade=>Math.round(arenaReward(grade)*TEAM_REWARD_PERCENT/100);
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 const uint=n=>count(n)&&n<=0xffffffff;
 const own=(o,k)=>Object.hasOwn(o,k);
@@ -97,7 +99,7 @@ export function settleTeamSession(session,elapsedMs,cache=new Map()) {
     return overlap&&at(Math.floor(ms/BOUT_MS)).downtime?overlap:0;
   };
   downtimeMs+=partial(end)-partial(session.elapsedMs);
-  const coins=counts.victory*arenaReward(session.players[TEAM_IDS[0]].difficulty);
+  const coins=counts.victory*teamArenaReward(session.players[TEAM_IDS[0]].difficulty);
   return {session:{...session,elapsedMs:end,prizeCursor:complete},bouts,
     victories:counts.victory,defeats:counts.defeat,doubleDeaths:counts.double_death,
     coins,downtimeMs,practiceMs,sampledBouts:sampled.size};
