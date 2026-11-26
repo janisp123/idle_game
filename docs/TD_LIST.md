@@ -12,10 +12,10 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal:** Implement the owner-approved combined research candidate from PR #179; 32 stages, cumulative expertise, perks, durability, NPC and tactical balance.
 - **Acceptance:** Legal next-stage purchase only, positive full-credit debits, Fighting gates, actual shared effects, safe snapshots and stat sources, production simulator parity, complete CI and browser verification. Preserve open arena access, S mastery 4000h and five weapon classes; no auto-purchases yet.
-- **Status:** IN_REVIEW — draft [PR #181](https://github.com/janisp123/idle_game/pull/181), not merged or deployed.
+- **Status:** DONE — PR #181 merged db64da33, final four workflows passed, Pages 45762976976 passed.
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #181).
 
 
 ## APPRENTICE-A2 — Automatic Skill Master on login
