@@ -8,6 +8,14 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## ARENA-UI-002 — Minimal arena presentation
+
+- **Goal / acceptance:** ARENA-UI-002 — Owner approved 2026-11-26: replace live strike narration and individual HP bars with compact opposing teams (HP, armour, weapon, stance icons), actual rolled environment in center, a single 0–100 calculation meter and a truthful resolved result/reward. Keep existing dark theme, no combat/reward/timing/save changes. Use actual frozen session and committed results; no invented enemy stances or fake rewards; optional debug only in existing developer tooling. Mobile uses compact side-by-side teams around center, stack if too narrow. New presentation unit and Chromium checks. STARTED by chat; baseline 1d058ce7 (#192 merged).
+- **Status:** IN_REVIEW — implementation started.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## AUTO-ACTIVITY-001 — Fully autonomous activity rotation
 
 [Staged implementation plan](mechanics/MANAGER_IMPLEMENTATION_PLAN.md).
