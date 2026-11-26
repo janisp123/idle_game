@@ -8,6 +8,8 @@ The only player-managed gameplay choices are each gladiator's weapon, whole armo
 
 ## 1. Finish and integrate the automation dependency
 
+**Milestone:** PR #191 merged into main at `3cc0df4e995abf61631a117974f39b2cd6606256`; final head `280e60a4d476fdd7af173e76749d74e3140acf3c` passed all six workflows: website 45888168066 (117/117 engine/UI; mobile/desktop Chromium), systems 45888168099, simulator 45888168035, protocol 45888168056, team audit 45888168129, sensitivity 45888168020. Main readback confirms automatic settlement code. Pages run 45888338750 still pending at this milestone; do not claim deployment. PR #192 rebased via merge of current main, preserving the approved manager plan and prior test fixes. No new gameplay changes. Next: verify Pages, then implement permanent combat/work coordinator and resolve tribute policy before release.
+
 PR #191 head b7216c768b221730ee2c8e5c816ddd81bf75f7cf: targeted 4/4 automation tests, system lab, combat simulator, project protocol and team audit/sensitivity pass; website 45885148269 fails obsolete XP-cap wording assertion in test_game_ui.mjs:864. Real Chromium skipped. Fix relevant assertion, validate actual foreground claims, stale/multi-tab writes, queue boundaries, exact debits and no retroactive combat effects. Run all required final-head checks and verify merge/deployment. Rebase/retarget #192 from integrated main, retaining all scope and evidence; no premature merge.
 
 ## 2. Permanent combat + one autonomous work lane
