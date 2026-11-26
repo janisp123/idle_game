@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## TEAM-004 — sensitivity verified
+
+[Report](mechanics/TEAM_004_SENSITIVITY.md), [results](mechanics/TEAM_004_SENSITIVITY.json). Native all six workflows PASS cf1fdfe5; sensitivity 11 jobs PASS 45835269294. +40% reaches full S Masterwork both fighters day171–174 in 8/8, +25% 1/8, baseline 0/8. Larger mirrored tests show small side deviations (max 3.83 pp), centered arena corrects unequal space with little balance effect. Trained adjacent grades remain dominant but novice high grade can lose to mastered lower gear. Recommended combined candidate +40% team-only payout and centered geometry; validate combined, alpha controls and release gates. No gameplay changes in this audit; no deployment.
+
 ## TEAM-004 — combat and economy audit
 
 TEAM-004 — native audit baseline: [report](mechanics/TEAM_004_BALANCE.md), [compact results](mechanics/TEAM_004_BASELINE.json), PR #188. Browser code head bbc1fe74 all four PASS including Chromium 390/1440 and 117 regressions. Audit head 2fdad95d [run 45834609305](https://github.com/janisp123/idle_game/actions/runs/45834609305) all eight jobs PASS: 74,160 direct fights, 401,127 progression bouts, 1,106 frozen-stage checks. S vs NG 1,440/1,440 wins; matched NPC mean NG/D/S 68.07/49.65/50.48%; adjacent grade gap very strong, mirror/slot asymmetry requires follow-up. Daily pure Fighting first S days165–170, all ten S Common/Fine by day180 but no complete S Masterwork double kit. Weekly and mixed slower. No tuning changes; current economy slower than prior solo baseline. Next: independent-seed paired symmetry/grade verification, isolated team purse sensitivity (+25%/+40%) before selecting balance, then resolve alpha old-solo entry and max-stats tool, release gates. Not merged/deployed.
