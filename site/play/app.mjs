@@ -1,3 +1,4 @@
+import { requiredAutoFightWins } from "./auto-fight.mjs?v=auto-fight-03";
 import { characterStats } from "./character-stats.mjs?v=auto-fight-03";
 import { MASTER_CONSENT_VERSION } from "./apprentice.mjs?v=apprentice-a2";
 import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
@@ -116,7 +117,7 @@ function equipmentButton(parent, label, className, activate) {
 
 for (const [id, loadout] of Object.entries(COMBAT_LOADOUTS)) {
   const button = equipmentButton(ui.weaponSlots, loadout.name, "weapon-slot", () => {
-    const result = setCombatLoadout(state, id, gameNow());
+    const result = foregroundAction((s,now)=>setCombatLoadout(s,id,now));
     state = result.state;
     selectedEquipmentSlot = "weapon";
     resetSmithSelection();
@@ -220,6 +221,20 @@ let alphaClock = null;
 // A real foreground heartbeat, never persisted or inferred from an absence.
 let lastForegroundTick = null;
 function breakForegroundContinuity(){ lastForegroundTick=null; }
+function foregroundContinuous(){
+  const wall=performance.now();
+  return document.visibilityState==="visible"&&lastForegroundTick!==null&&wall>=lastForegroundTick&&wall-lastForegroundTick<=1000;
+}
+// Ordinary foreground actions must not consume an arena completion as offline.
+// Settle once at the old build, then run the mutation at the same logical time.
+function foregroundAction(action){
+  const now=gameNow();
+  if(!foregroundContinuous())return action(state,now);
+  const before=settleLive(state,now);
+  const result=action(before.state,now);
+  const reports=[...(before.reports??[before.report]),...(result.reports??[result.report])].filter(Boolean);
+  return {...result,reports};
+}
 function gameNow() { return alphaTime(alphaClock,Date.now()); }
 function persistAlphaClock(clock) {
   if (!storageWorks) return false;
@@ -362,7 +377,7 @@ for (const [id, task] of Object.entries(ACTIVITIES)) {
     difficulty.append(option);
   });
   difficulty.addEventListener("change", () => {
-    const result = setDifficulty(state,id,Number(difficulty.value),gameNow());
+    const result = foregroundAction((s,now)=>setDifficulty(s,id,Number(difficulty.value),now));
     state = result.state;
     reportProgress(result);
     writeSave();
@@ -622,7 +637,7 @@ function renderWagons() {
       readyShortcut.setAttribute("aria-label", readyShortcut.title);
       readyShortcut.hidden = wagon.plannedMs === UNTIL_LEVEL_UP;
       readyShortcut.addEventListener("click", () => {
-        applyQueueChange(queueSetDuration(state, i, UNTIL_LEVEL_UP, gameNow()),
+        applyQueueChange(foregroundAction((s,now)=>queueSetDuration(s,i,UNTIL_LEVEL_UP,now)),
           "Now scheduled until ready to level up.");
       });
       heading.append(readyShortcut);
@@ -654,7 +669,7 @@ function renderWagons() {
       const apply = () => {
         const plan = unit.value === UNTIL_LEVEL_UP ? UNTIL_LEVEL_UP :
           Number(amount.value) * durationUnitMs(unit.value);
-        applyQueueChange(queueSetDuration(state, i, plan, gameNow()),
+        applyQueueChange(foregroundAction((s,now)=>queueSetDuration(s,i,plan,now)),
           "Hourglass stop condition updated.");
       };
       amount.addEventListener("change", apply);
@@ -675,11 +690,11 @@ function renderWagons() {
       controls.append(button);
     };
     if (i > 0) control("←", "Move " + ACTIVITIES[wagon.activity].title + " earlier",
-      () => applyQueueChange(queueSwap(state, i - 1, gameNow()), "Route rearranged."));
+      () => applyQueueChange(foregroundAction((s,now)=>queueSwap(s,i-1,now)), "Route rearranged."));
     if (i < wagons.length - 1) control("→", "Move " + ACTIVITIES[wagon.activity].title + " later",
-      () => applyQueueChange(queueSwap(state, i, gameNow()), "Route rearranged."));
+      () => applyQueueChange(foregroundAction((s,now)=>queueSwap(s,i,now)), "Route rearranged."));
     if (i === wagons.length - 1 && i > 0) control("Remove", "Remove final future hourglass",
-      () => applyQueueChange(queueRemoveLast(state, gameNow()), "Future hourglass removed."));
+      () => applyQueueChange(foregroundAction((s,now)=>queueRemoveLast(s,now)), "Future hourglass removed."));
     card.append(controls);
     return card;
   });
@@ -724,7 +739,7 @@ ui.queueConfirm.addEventListener("click", () => {
   const task = planningActivity;
   hideQueuePlanner();
   const startsImmediately = state.wagons.length === 1;
-  applyQueueChange(queueInsertTimedActivity(state, task, plan, gameNow()),
+  applyQueueChange(foregroundAction((s,now)=>queueInsertTimedActivity(s,task,plan,now)),
     startsImmediately
       ? "Starting " + ACTIVITIES[task].title.toLowerCase() +
         (plan === UNTIL_LEVEL_UP ? " until ready to level up, then returning to " :
@@ -791,7 +806,8 @@ ui.masterCancel.addEventListener("click", () => {
 ui.masterConfirm.addEventListener("click", () => {
   // Freeze the offer against the settled inventory before asking the player.
   // The next ordinary tick handles the time elapsed during confirmation.
-  const outcome = settle(state, gameNow());
+  const outcome = (foregroundContinuous()?settleLive:settle)(state,gameNow());
+  breakForegroundContinuity();
   state = outcome.state;
   reportProgress(outcome);
   const offer = skillMasterOffer(state);
@@ -1016,6 +1032,20 @@ function render() {
     ui.transitionProgress.setAttribute("aria-label", phaseName);
   }
   const capped=activityRewardCapped(state);
+  const policy=state.autoFight;
+  const progression=$("autoFightProgress");
+  progression.hidden=state.activity!=="fighting"&&transition?.targetActivity!=="fighting";
+  $("autoFightStage").textContent=difficultyGrades[policy.stage];
+  $("autoFightHighest").textContent=policy.highest<0?"None yet":difficultyGrades[policy.highest];
+  const required=requiredAutoFightWins(policy);
+  const retry=required!==null&&policy.blocked===policy.stage+1;
+  $("autoFightNext").textContent=required===null?"Maximum difficulty reached":
+    (retry?"Retry ":"Next: ")+difficultyGrades[policy.stage+1]+" · "+policy.streak+" / "+required+" consecutive wins";
+  $("autoFightMeter").hidden=required===null;
+  $("autoFightMeter").setAttribute("aria-valuenow",String(required===null?0:Math.round(100*policy.streak/required)));
+  $("autoFightFill").style.width=(required===null?0:100*policy.streak/required)+"%";
+  $("autoFightStatus").textContent=state.activity==="fighting"&&capped?"Rewards paused · Visit the Skill Master":
+    transition?"Activity changing":"Difficulty adjusts automatically while playing.";
   const combat = current?.category === "combat" && !transition && !capped
     ? combatAtTime(state.combatSession) : null;
   ui.activityProgress.hidden = Boolean(transition || capped || current?.category === "combat");
@@ -1156,9 +1186,9 @@ function startActivityNow(kind) {
         " now? This will replace your remaining scheduled route. Earned items and XP stay.")) return;
   hideQueuePlanner();
   showActivityScreen("root", null);
-  const result = state.wagons.length
-    ? requestActivityChange(state, kind, gameNow())
-    : queueStartActivity(state, kind, null, gameNow());
+  const result = foregroundAction((s,now)=>s.wagons.length
+    ? requestActivityChange(s,kind,now)
+    : queueStartActivity(s,kind,null,now));
   applyQueueChange(result, "Changing to " + ACTIVITIES[kind].title.toLowerCase() + " now.");
 }
 
@@ -1370,7 +1400,7 @@ function start(coordinatedLogin = false) {
   ui.itemQuality.addEventListener("change", renderArmour);
   ui.smithEquip.addEventListener("click", () => {
     if (ui.smithEquip.disabled) return;
-    const result = setArmourChoice(state, selectedEquipmentSlot, selectedFamily, gameNow());
+    const result = foregroundAction((s,now)=>setArmourChoice(s,selectedEquipmentSlot,selectedFamily,now));
     state = result.state;
     reportProgress(result);
     writeSave();
@@ -1378,7 +1408,7 @@ function start(coordinatedLogin = false) {
   });
   ui.smithBuy.addEventListener("click", () => {
     if (ui.smithBuy.disabled) return;
-    const result = buyEquipment(state, shopTarget(), selectedSpec(), gameNow());
+    const result = foregroundAction((s,now)=>buyEquipment(s,shopTarget(),selectedSpec(),now));
     state = result.state;
     reportProgress(result);
     ui.smithStatus.textContent = result.purchased ? "Equipment ready." : "Purchase unavailable.";
