@@ -1,10 +1,10 @@
 # The Apprentice — progressive automation implementation plan
 
-**APPRENTICE-PLAN-001 — design and staged implementation, 2026-11-25.** Owner requested the plan, then approved starting implementation. A1 foundation merged 5b996be (PR #177); A2 auto-Master merged 0136237 (PR #178), Pages 45663460990 passed. Other automation remains proposed. Scope: make experienced players need less attention, retain all five existing weapon classes, no separate apprentice grind, no paid automation or upkeep. Subsequent batches are scoped separately; do not assume provisional economy or feature thresholds approved.
+**APPRENTICE-PLAN-001 — design and staged implementation, 2026-11-25.** Owner requested the plan, then approved starting implementation. A1 foundation merged 5b996be (PR #177); A2 auto-Master merged 0136237 (PR #178), Pages 45663460990 passed. A4 revised by owner 2026-11-26: automatic quality AND grade progression of chosen gear; see [A4 research plan](mechanics/APPRENTICE_A4_RESEARCH.md). Long-term goal is decision-maker-only gameplay. Other chore implementations remain staged. Scope: make experienced players need less attention, retain all five existing weapon classes, no separate apprentice grind, no paid automation or upkeep. Subsequent batches are scoped separately; do not assume provisional economy or feature thresholds approved.
 
 ## 1. Direction and unresolved policy
 
-Owner direction: new players have one active activity and no scheduling; unlock a second slot after 10 combined activity levels, then continue in tens. At combined level 50, unlock automatic activity advancement on login; show the locked option and level requirement before then. Personal Assistant menu introduces an apprentice who learns from the character and takes care of chores. Unlock automatic quality upgrading of existing equipment, never automatic new-grade purchases; require current-grade Masterwork before buying the next grade. Unlock automatic clan donation. Retain existing weapons; do not add weapon classes. No automatic recurring obligations.
+Owner direction: new players have one active activity and no scheduling; unlock a second slot after 10 combined activity levels, then continue in tens. At combined level 50, unlock automatic activity advancement on login; show the locked option and level requirement before then. Personal Assistant menu introduces an apprentice who learns from the character and takes care of chores. Unlock automatic sequential quality AND next-grade upgrading of currently chosen equipment; current-grade Masterwork still required before buying the next grade. No automatic changes to selected weapon or armour family. Unlock automatic clan donation. Retain existing weapons; do not add weapon classes. No automatic recurring obligations.
 
 Recommended interpretation for approval: earnedLevels = sum over actual SKILL_IDS of (activated level - 1). Starting eleven level-1 skills contribute zero. Full XP alone is not an earned level; only activated levels count. No separate XP counter, login streak, calendar age or spendable points. Unlocks never expire; alpha reset starts a new character. Recommend optional settings default OFF, explicit informed consent for resource and coin expenditure, permanent access once earned.
 
@@ -16,7 +16,7 @@ Recommended interpretation for approval: earnedLevels = sum over actual SKILL_ID
 | 30 | Fourth slot | proposed extension beyond current engine capacity |
 | 40 | Fifth slot (proposed maximum) | proposed extension |
 | 50 | Automatic Skill Master on login | Owner threshold |
-| 75 | Automatic equipment quality upgrades | proposed threshold |
+| 75 | Automatic equipment quality and grade upgrades | provisional threshold, validate accessibility |
 | 100 | Automatic clan contribution on login | proposed threshold, server dependency |
 | 125 | Follow clan material priorities | optional later proposal |
 | 150 | Repeat configured rotation | optional later proposal |
@@ -32,8 +32,8 @@ Add top-level foldable Personal Assistant alongside Activities and Clan. Show in
 | Personal Assistant > Progress | earnedActivityLevels(state), apprenticeUnlocks(state), nextUnlock(state), queueCapacity(state) |
 | Activities | queueCapacity(state) everywhere, locked scheduling slots with thresholds, manual switch always accessible |
 | Personal Assistant > Skill Master | autoMasterEnabled, explicit tribute explanation, previewMaster, runAutoMaster; optional per-skill exclusions proposed |
-| Equipment / Smith | smithQuote grade/quality eligibility, reason text and required Masterwork; no auto-grade or weapon changes |
-| Personal Assistant > Equipment | autoQualityEnabled, owned/equipped item allowlist in user priority order, minimum coin reserve, previewAutoQuality, runAutoQuality |
+| Equipment / Smith | smithQuote grade/quality eligibility, reason text and required Masterwork; no automatic weapon/armour choice changes |
+| Personal Assistant > Equipment | one opt-in for chosen loadout, automatic purchase priorities, preview next upgrade/price, runAutoEquipment; optional reserve remains a candidate, not required micromanagement |
 | Personal Assistant > Clan | autoDonateEnabled, approved materials/quantities and reserve, manual daily allowance, server availability; previewDonation and donateResources shared with manual path |
 | Personal Assistant > Report | offline XP/resources/fights, claimed levels, tribute, quality upgrades and actual coin spending, donations, skipped reasons and resumed queue; report values from committed state changes |
 
@@ -64,7 +64,7 @@ Recommended order to review (donation-before-Master is a proposal, because curre
 2. Determine eligible automation from activated levels; take snapshot to prevent cascaded actions from newly reached thresholds within the same login (or explicitly approve immediate unlock behavior).
 3. If enabled and real clan server available, preview/execute the configured donation within manual once-daily eligibility and stock/reserve, before tribute; if server unavailable skip honestly, do not fake success or block unrelated chores. Later server should settle authoritative inventory and donation atomically.
 4. If unlocked/enabled and ready, perform exact Skill Master offer once, with previously accepted tribute policy, no fresh confirmation popup for consented routine. No partial levels, no negative resources, no extrapolation through lost capped time. Report what was surrendered, including zero. If policy changes, require fresh opt-in; possible selected-skill protection needs design.
-5. Apply enabled quality upgrades to selected owned gear only, with deterministic budget and no grade purchase. Use post-Master fighting level and actual inventory, preserve combat snapshots; report exact debits.
+5. Apply enabled sequential quality and grade upgrades to chosen/equipped gear only, with deterministic budget, after Master. Use post-Master fighting level and actual inventory, preserve combat snapshots; report exact debits.
 6. Resume existing queue; optional future rotation/priority rules never override manual changes unexpectedly. A2 commits the resulting local state before showing an exact transient claim report; A5 will add the bounded persistent latest-login report. Later save authoritative resulting state and report together; avoid double application across refreshes/tabs/retries. Read-only renders and visibility/storage callbacks must not duplicate chores. For browser alpha, re-read latest state, serialise via available cross-tab coordination and verify persistence before success; real server uses idempotency/transaction and server clock. No private save upload to CI.
 
 Manual actions always remain possible, no offline automatic Master loop, no resource generation at cap, no daily allowance banking or offline donation accrual. Automatic donations are online login chores, not server running donations while absent. If manual contribution already used day allowance, auto skips. No clan leave/rejoin bypass or ability to withdraw donated materials. Server authority and actual clan feature remain blockers.
@@ -77,7 +77,7 @@ Manual actions always remain possible, no offline automatic Master loop, no reso
 | A1 | Pure unlock helper, preferences validation, Personal Assistant menu, dynamic queue capacity and gate | 0/9/10/19/20/49/50 boundaries; 1..max slots, valid old save, no duplicate or capped rewards; mobile and desktop; all controls locked correctly |
 | A2 | Shared manual Master transaction and login-only auto-Master | Opt-in, current exact tribute, one level per ready activity, no negative stock, refresh/visibility/tabs, save failure, no retroactive progress, accurate report |
 | A3 | Sequential equipment grade eligibility and price audit (manual first) | All quality/grade transitions and costs, no skips, existing gear policy, Fighting gates, all five weapons unchanged; 180-day measured economy |
-| A4 | Apprentice automatic quality purchases | Owned item selection, reserve, priority, deterministic budget, no grade purchases, no equip changes, duplicate login/retry and failure tests |
+| A4 | Apprentice automatic equipment progression | Chosen loadout only; sequential quality and grade purchases, deterministic saving priority, existing gates, no equip changes, duplicate login/retry and failure tests |
 | A5 | Login report and QoL polish | Offline report plus committed chores/skip reasons; no forced tutorial, clutter, fake success or player data exposure |
 | A6 | Clan donation adapter/test fixtures | Extend existing synthetic clan lab; real execution gated on authoritative accounts, inventory, daily cap and warehouse transactions |
 | A7 | Optional rotation/resource-priority automation | Define starvation/input handling, capped all activities, no infinite loops, manual override, server priority changes; separate approval |
