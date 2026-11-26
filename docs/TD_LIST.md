@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## AUTO-FIGHT-001 — Automatic Fighting difficulty progression
+
+- **Goal:** Automatically climb and retreat through eight existing arena grades; no active combat controls or manual Fighting difficulty selection. Offline remains fixed at the committed stage.
+- **Acceptance:** Tested 3/1/10 policy, saved stage/streak/history, committed live bout boundary, frozen offline payout, cap/queue/save parity, mobile/desktop progression readout, six-month economy validation, final CI and Pages.
+- **Status:** IN_REVIEW — [PR #183](https://github.com/janisp123/idle_game/pull/183); [economy and evidence](mechanics/AUTO_FIGHT_ECONOMY.md). Owner approved release; final-head checks and merge/Pages verification pending. Actual completion recorded after main readback.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet (release pending).
+
 ## APPRENTICE-A3 — Sequential equipment progression and tested combat balance
 
 - **Goal:** Implement the owner-approved combined research candidate from PR #179; 32 stages, cumulative expertise, perks, durability, NPC and tactical balance.
