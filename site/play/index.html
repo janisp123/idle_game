@@ -10,8 +10,8 @@
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css?v=auto-fight-04">
   <link rel="stylesheet" href="./login-report.css?v=apprentice-a5">
-  <link rel="stylesheet" href="./team-ui.css?v=team-003">
-  <script type="module" src="./app.mjs?v=team-003"></script>
+  <link rel="stylesheet" href="./team-ui.css?v=team-004">
+  <script type="module" src="./app.mjs?v=team-004"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -285,9 +285,10 @@
               <input type="checkbox" id="alphaSpeed" role="switch" aria-label="Increase all activity speed ten times">
             </label>
             <label>Max Stats armour expertise <select id="alphaFamily"><option value="none">Unarmoured</option><option value="padded">Padded</option><option value="leather">Leather</option><option value="plate" selected>Plate</option></select></label>
+            <label id="alphaSecondFamilyLabel" hidden>Gladiator 2 armour expertise <select id="alphaSecondFamily"><option value="none">Unarmoured</option><option value="padded">Padded</option><option value="leather" selected>Leather</option><option value="plate">Plate</option></select></label>
             <button type="button" id="alphaMaxStats" class="alpha-day-button">Max Stats · six-month build</button>
             <button type="button" id="alphaCoins" class="alpha-day-button">+100,000 arena coins</button>
-            <p class="hint">Test only. Max Stats trains the currently selected weapon and chosen armour family; does not buy equipment.</p>
+            <p class="hint">Test only. Max Stats trains each gladiator’s currently selected weapon and individually chosen armour family; does not buy equipment.</p>
             <p id="alphaStatus" class="alpha-tools-status" role="status" aria-live="polite"></p>
           </div>
         </details>
