@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## AUTO-FIGHT-04 — progression UI and foreground boundary verified (draft PR #183)
+
+[UI and browser verification](mechanics/AUTO_FIGHT_UI_VALIDATION.md). Read-only grade/history/next-retry panel, no active controls, shared foreground action settlement. Tested code head 20533112: website 45787216857 (117 regressions; real Chromium 390/1440, passive advance, gear boundary, reload, hidden catch-up and alpha idle day), combat 45787216940, systems 45787216852, protocol 45787216872 all PASS. Prior stale CSS fixture fixed. No new lifetime win/loss totals; no server-authoritative multi-tab test. No merge/deployment. Next AUTO-FIGHT-05: six-month automatic policy economy validation across builds and play cadences, then final release gates. Branch `research/auto-fight-policy-001`, PR #183.
+
 ## AUTO-FIGHT-03 — engine and foreground integration implemented (draft PR #183)
 
 [Integration report](mechanics/AUTO_FIGHT_INTEGRATION.md), `tools/test_auto_fight_integration.mjs`. Persisted stage/streak/history; live committed bout changes only, fixed offline settlement, manual Fighting selector replaced with current-stage text. 29 integration + 10,782 policy assertions PASS in native Node on combat run 45786044755 at 673fa82a; systems and protocol PASS on that head. Legacy fixture failures in combat and website identified/corrected at 0000c898/b753ee10; final-head full CI still pending. No merge/deploy. Next AUTO-FIGHT-04: full progression UI and browser/action/visibility boundary tests; then AUTO-FIGHT-05 six-month automatic economy validation and final CI/Pages. Read integration report for explicit limitations (foreground manual action may consume boundary without progression, conservative catch-up; existing optimistic multi-tab save model). Branch `research/auto-fight-policy-001`, PR #183.
