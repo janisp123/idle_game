@@ -1,6 +1,6 @@
 import {renderTeamBattle,teamBattleView,teamworkText} from "./team-view.mjs?v=team-003";
 import {teamCombatAtTime} from "./team-timeline.mjs?v=team-003";
-import { initLoginReport, showLoginReport, clearLoginReport } from "./login-report-ui.mjs?v=apprentice-a5";
+import { initLoginReport, showLoginReport, clearLoginReport } from "./login-report-ui.mjs?v=team-003";
 import { requiredAutoFightWins } from "./auto-fight.mjs?v=auto-fight-03";
 import { characterStats } from "./character-stats.mjs?v=apprentice-a4";
 import { MASTER_CONSENT_VERSION } from "./apprentice.mjs?v=apprentice-a2";
