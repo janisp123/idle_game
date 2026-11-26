@@ -10,7 +10,8 @@
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css?v=auto-fight-04">
   <link rel="stylesheet" href="./login-report.css?v=apprentice-a5">
-  <script type="module" src="./app.mjs?v=apprentice-a5"></script>
+  <link rel="stylesheet" href="./team-ui.css?v=team-003">
+  <script type="module" src="./app.mjs?v=team-003"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -60,6 +61,7 @@
           </details>
           <details id="armourCabinet" class="armour-cabinet">
             <summary class="armour-summary">EQUIPMENT <span id="coinWallet">0 coins</span><span aria-hidden="true">✥</span></summary>
+            <div id="teamEquipmentSelector" hidden><label for="teamFighterChoice">Manage gladiator</label><select id="teamFighterChoice"><option value="first">Gladiator 1</option><option value="second">Gladiator 2</option></select><p id="teamLoadouts" class="hint"></p></div>
             <div class="weapon-cabinet" aria-label="Equipped weapon">
               <p class="equipment-section-label">WEAPONS</p>
               <div id="weaponSlots" class="weapon-slots" role="group" aria-label="Choose your weapon style"></div>
@@ -223,6 +225,7 @@
             <p id="combatEventTitle" class="combat-event-title">THE FIGHTING PIT</p>
             <span id="combatTurns" class="combat-turns" aria-label="Duel turns"></span>
             <p id="combatGround" class="combat-ground"></p>
+            <p id="teamworkStatus" class="hint" hidden></p>
             <div id="arenaPositioning" class="arena-positioning" aria-label="Pre-bout positioning">
               <span id="playerPositioning"></span>
               <span id="enemyPositioning"></span>
@@ -237,6 +240,7 @@
         </section>
 
         <section id="resultPanel" class="result-panel" aria-label="Latest activity result">
+          <div id="teamBattleReadout" hidden aria-label="Four combatants"></div>
           <div id="combatReadout" class="result-combat" hidden aria-label="Latest resolved combat action">
             <div class="result-side result-side-player">
               <span class="result-side-name">YOU</span>
