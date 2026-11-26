@@ -1,0 +1,66 @@
+name: Team reward and positioning sensitivity
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'site/play/**'
+      - 'tools/team-*-audit.mjs'
+      - '.github/workflows/team-sensitivity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  economy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [tank_archer, hammer_spear, dual_bow, dual_shield]
+        seed: [20261126, 20261127]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Compare actual six-month progression
+        env:
+          SCENARIO: ${{ matrix.scenario }}
+          SEED: ${{ matrix.seed }}
+        run: |
+          for rate in 100 125 140; do
+            node tools/team-economy-audit.mjs "$SCENARIO" "$rate" "$SEED" > "economy-$rate.json"
+            printf 'TEAM_SENSITIVITY '; cat "economy-$rate.json"
+          done
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: team-sensitivity-${{ matrix.scenario }}-${{ matrix.seed }}
+          path: economy-*.json
+          retention-days: 7
+  symmetry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        grade: [0,3,7]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Compare baseline and centered arena
+        env:
+          GRADE: ${{ matrix.grade }}
+        run: node tools/team-symmetry-audit.mjs "$GRADE" > symmetry.json
+      - name: Print compact summary
+        run: |
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            const r=JSON.parse(readFileSync("symmetry.json","utf8"));
+            console.log("TEAM_SYMMETRY "+JSON.stringify({grade:r.grade,seed:r.seed,counts:r.counts,mirror:r.mirror.map(x=>({mode:x.mode,name:x.name,sideBias:x.sideBias,slotEffect:x.slotEffect,cells:Object.fromEntries(Object.entries(x.cells).map(([k,v])=>[k,{wins:v.wins,losses:v.losses,draws:v.draws,bouts:v.bouts,scorePct:v.scorePct}]))})),dominance:r.dominance}));'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: team-symmetry-${{ matrix.grade }}
+          path: symmetry.json
+          retention-days: 7
