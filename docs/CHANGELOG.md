@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## STRATEGY-001 · STARTED (2026-11-26, chat)
+
+Owner approved combat tactics and companions as reversible strategic selections, no permanent bonuses or player activity priorities. Research candidate effects in an isolated copy of the production duel resolver before choosing numeric rules. No change to current activity system, gear expertise, save, arena payout or deployed gameplay in research batch. Baseline e8d6dbd0; A5 merged and Pages 45812960184 SUCCESS. Next: controlled paired-seed matchup screens, inspect weak/strong options and propose candidate for integration.
+
 ## APPRENTICE-A5 · STARTED (2026-11-26, chat)
 
 Owner approved full-screen analytical login report, dismiss manually or automatically after 10 seconds. Include actual offline encounters, wins, losses, rewards, skill/attribute/expertise progress, resource flows and committed automation upgrades/tribute. Baseline 9cdc3364; A4 merged PR #184 and Pages 45810631099 SUCCESS. Read-only report; no progression/economy changes. [Implementation and evidence](mechanics/APPRENTICE_A5_LOGIN_REPORT.md). Native projection PASS, 117 regressions PASS, mobile timer 10063ms; desktop scrollbar gap corrected, new failed-save assertions pending final browser checks. Same-session report reopen; no save migration. Draft PR #185; next all final CI and merge/Pages verification.
