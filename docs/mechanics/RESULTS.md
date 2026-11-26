@@ -1,5 +1,11 @@
 # Compact action results — implemented presentation
 
+## Manager arena presentation (ARENA-UI-002 candidate)
+
+ARENA-UI-002 candidate: pure frozen bout presentation adapter and compact SVG icon view; real rolled terrain, static start HP/armour, distinct weapon/armour/tactic symbols; enemy stance omitted because NPC snapshots have none. Side-by-side 3-column match, no per-fighter progress or event narration; real committed bout progress 0–99, 100% on exact saved verdict, hold 1.8s presentation only, persistent last committed result, batch/offline summary not falsely attached to a roster. No engine, reward, duration, save schema or balance changes. Three unit tests and 390/1440 browser checks for layout, frozen 99%→committed 100%→next bout, prize cursor, icons, no tiny HP bars. Tests pending.
+
+Legacy historical strip below remains for developer regression fixtures; public manager view supersedes its live narration.
+
 The owner replaced the entire large Chronicle in all activities with one small results strip beneath the action scene. This is **not a running log**. Each new resolved action replaces the last visible outcome; status messages have one restrained line rather than accumulating.
 
 ## Fighting

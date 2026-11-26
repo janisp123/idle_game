@@ -1,6 +1,8 @@
 # Current working checkpoint
 
-## ARENA-UI-002 — started
+## ARENA-UI-002 — candidate
+
+ARENA-UI-002 candidate: pure frozen bout presentation adapter and compact SVG icon view; real rolled terrain, static start HP/armour, distinct weapon/armour/tactic symbols; enemy stance omitted because NPC snapshots have none. Side-by-side 3-column match, no per-fighter progress or event narration; real committed bout progress 0–99, 100% on exact saved verdict, hold 1.8s presentation only, persistent last committed result, batch/offline summary not falsely attached to a roster. No engine, reward, duration, save schema or balance changes. Three unit tests and 390/1440 browser checks for layout, frozen 99%→committed 100%→next bout, prize cursor, icons, no tiny HP bars. Tests pending.
 
 ARENA-UI-002 — Owner approved 2026-11-26: replace live strike narration and individual HP bars with compact opposing teams (HP, armour, weapon, stance icons), actual rolled environment in center, a single 0–100 calculation meter and a truthful resolved result/reward. Keep existing dark theme, no combat/reward/timing/save changes. Use actual frozen session and committed results; no invented enemy stances or fake rewards; optional debug only in existing developer tooling. Mobile uses compact side-by-side teams around center, stack if too narrow. New presentation unit and Chromium checks. STARTED by chat; baseline 1d058ce7 (#192 merged).
 

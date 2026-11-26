@@ -352,6 +352,8 @@ try{
     await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return s.armourRequests.second==="plate"&&s.managerTactics.second.selected==="defensive"&&s.managerTactics.first.selected==="balanced";})()`),"manager independent choices");
     await evaluate(`Date.now=()=>${fixedNow+10000}`);
     await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return s.skills.hunting.xp>0&&s.skills.fighting.xp>0&&document.querySelectorAll(".battle-fighter").length===4;})()`),"manager simultaneous work and combat");
+    const arena=await evaluate(`(()=>({phase:document.getElementById("battleFighters").dataset.phase,percent:document.getElementById("battleCalculation").value,environment:document.getElementById("arenaEnvironment").textContent,bars:document.querySelectorAll(".battle-fighter progress").length,players:document.getElementById("arenaPlayers").children.length,enemies:document.getElementById("arenaEnemies").children.length,icons:document.querySelectorAll(".arena-match svg").length,overflow:document.documentElement.scrollWidth-innerWidth}))()`);
+    assert.equal(arena.phase,"calculating");assert.ok(arena.percent>=0&&arena.percent<100);assert.notEqual(arena.environment,"—");assert.equal(arena.bars,0);assert.equal(arena.players,2);assert.equal(arena.enemies,2);assert.ok(arena.icons>=17);assert.ok(arena.overflow<=2);
     await shot("manager-"+width);
     await evaluate('document.getElementById("alphaTools").open=true;document.getElementById("alphaCoins").click()');
     await until(()=>evaluate('document.getElementById("alphaStatus").textContent==="Test credit added."'),"manager test coins");
@@ -360,7 +362,27 @@ try{
     assert.equal(await evaluate('document.getElementById("loginReport").open'),true);
     await evaluate('document.getElementById("loginReportDismiss").click()');
     assert.ok(await evaluate("document.documentElement.scrollWidth-innerWidth<=2"));
-    console.log("Manager public route passed "+width+"px");
+    // Use a valid frozen real bout at 99%, then cross its prize boundary.
+    const resultUrl=origin+"/play/?arena-result="+width;
+    const setup=await evaluate(`(async()=>{const key=${JSON.stringify(managerKey)},s=JSON.parse(localStorage.getItem(key));
+      const m=await import("/play/manager-lanes.mjs"),e=await import("/play/engine.mjs"),t=await import("/play/team-timeline.mjs"),c=await import("/play/combat.mjs");
+      s.skills.fighting.level=52;s.skills.fighting.xp=0;s.progressMs=0;s.settledAtMs=${fixedNow+10000};
+      s.combatSession={...t.startTeamSession(e.desiredArenaTeam(s),s.teamwork.level,73),elapsedMs:c.BOUT_MS-1000};
+      if(!m.readManagerGame(s))throw Error("Invalid fixture");
+      const r=t.settleTeamSession(s.combatSession,1000);return {save:JSON.stringify(s),outcome:r.victories?"victory":r.defeats?"defeat":"double_death",coins:r.coins};})()`);
+    const inject=await send("Page.addScriptToEvaluateOnNewDocument",{source:`if(location.href===${JSON.stringify(resultUrl)}){localStorage.setItem(${JSON.stringify(managerKey)},${JSON.stringify(setup.save)});Date.now=()=>${fixedNow+10000};}`});
+    await send("Page.navigate",{url:resultUrl});
+    await until(()=>evaluate('document.getElementById("saveStatus")?.getAttribute("data-game-ready")==="true" && document.getElementById("battleCalculation").value===99'),"arena 99% frozen fixture");
+    await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:inject.identifier});
+    await evaluate(`Date.now=()=>${fixedNow+11000}`);
+    await until(()=>evaluate('document.getElementById("battleFighters").dataset.phase==="resolved"'),"arena committed verdict");
+    const verdict=await evaluate(`(()=>({outcome:document.getElementById("battleFighters").dataset.outcome,value:document.getElementById("battleCalculation").value,cursor:JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).combatSession.prizeCursor,reward:document.getElementById("arenaReward").textContent}))()`);
+    assert.equal(verdict.outcome,setup.outcome);assert.equal(verdict.value,100);assert.equal(verdict.cursor,1);if(setup.coins)assert.match(verdict.reward,new RegExp("\\+"+setup.coins));
+    await shot("arena-result-"+width);
+    await until(()=>evaluate('document.getElementById("battleFighters").dataset.phase==="calculating"'),"arena next bout");
+    assert.equal(await evaluate('document.getElementById("battleCalculation").value'),0);
+    assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).combatSession.prizeCursor`),1);
+    console.log("Manager public route and minimal arena verdict passed "+width+"px");
 
   }
   assert.deepEqual(runtimeErrors,[],"browser runtime errors");
