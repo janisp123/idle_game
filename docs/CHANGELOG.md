@@ -2,6 +2,8 @@
 
 ## MANAGER-UI-001 / PERMANENT-FIGHT-001 · STARTED (2026-11-26, chat)
 
+Owner additionally approved three independent fighting tactic buttons (Aggressive / Balanced / Defensive) per gladiator; provisional Balanced default. PR #190 verified open research-only, tests Protect Companion / Focus Fire / Maintain Range rather than the requested three stances. No claim of implemented stance system; reconcile actual behaviour and endgame evidence before exposing controls. TACTIC-UI-001 recorded; no code/tests for new manager UI yet.
+
 Owner approved whole-family armour selection, button-only gladiator/equipment choices, no grade/quality UI, Training grouped with other activities, fewer redundant stats and permanently active Fighting. Branch `feature/manager-ui` based on PR #191 head `b7216c768b221730ee2c8e5c816ddd81bf75f7cf` (automation dependency not yet merged). Current `settleInternal` uses one exclusive activity; removing the Fighting button alone would strand combat. Split that engine work from button simplification, preserve actual fighting until replacement is validated. Next: implement atomic whole-set selection using real smith quotes and concise buttons; test; separately design permanent combat/work lanes. No code or tests yet.
 
 ## AUTO-MASTER-001 · STARTED (2026-11-26, chat)

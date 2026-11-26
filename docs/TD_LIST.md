@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## TACTIC-UI-001 — Independent gladiator fighting tactics
+
+- **Goal:** Each gladiator chooses Aggressive, Balanced or Defensive through three buttons alongside weapon and whole armour set. Default Balanced.
+- **Acceptance:** Verify existing research and runtime first; reuse tested behaviour where compatible, no invented or cosmetic-only tactics. Independent saved selection, meaningful behaviour in actual combat, changes apply at the next bout boundary, frozen offline builds, no universal optimal stance, endgame-only balance validation at maximum stats and S Masterwork until owner approval. No arbitrary flat stat buffs. Explain actual effects concisely; no dropdown.
+- **Status:** PARTIAL — owner approved UI/direction; runtime availability unverified; PR #190 is research-only and tests different named behaviours (Protect Companion, Focus Fire, Maintain Range), not a shipped three-stance feature. Reconcile semantics with tested evidence before wiring controls.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## MANAGER-UI-001 — Button-based gladiator equipment and simplified activities
 
 - **Goal:** Mobile-first strategic equipment controls: two gladiator buttons, five weapon buttons, three whole armour-family buttons (padded/leather/plate); no individual piece or manual grade/quality selection. Training belongs with other activities; remove repetitive stats, retain optional detailed Character Stats.
