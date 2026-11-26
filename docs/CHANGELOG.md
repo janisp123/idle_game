@@ -1,5 +1,10 @@
 # Changelog and task handoffs
 
+## TEAM-009 — complete durability and diversity audit (2026-11-26)
+
+[Report](mechanics/TEAM_009_ARMOUR.md), compact results G0/G3/G7, PR #190, native run 45872049505 all nine PASS. 3,563,880 scored battles plus 900 parity. Moderate/strong material HP changes armour breakage but almost no win-rate effect; S dual aggressive plate hammers 37.4% held across all three models. Preliminary S counters 61.3/78.8/31.3%. Restricted screening pool and four seeds generalize poorly; no proof of universal weapon viability or meta-free balance. Moderate candidate only; next broaden opponents and seeds, test wear/grade interactions, mixed armour and competitive offline frontier. No gameplay changes or merge.
+
+
 ## TEAM-007 — individual behaviour audit verified (2026-11-26, chat)
 
 [Report](mechanics/TEAM_007_INDIVIDUAL.md), compact results G0/G3/G7, PR #190, native run 45851377250 all nine jobs PASS. 6,345,216 battles + 1080 exact normal parity fixtures. Max mastery best vs poor NPC +9.0/9.6/10.1 pp (NG/D/S), best vs normal +3.9/5.0/5.1 pp. S spear/archer defensive/aggressive 65.3% vs reverse 44.4%; individual roles meaningful, mixed roles not universally better. S selected best mastery curve 54.9/56.6/58.4%; normal 53.3%. Retain Normal, distinguish zero-reach Range, test mixed mastery, role duration, progression/frozen offline/economy before release. Research only; no gameplay change, no merge. Owner decision required for runtime work.
