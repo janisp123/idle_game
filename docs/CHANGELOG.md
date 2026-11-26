@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## APPRENTICE-A4 · STARTED (2026-11-26, chat)
+
+Owner approved automatic quality AND grade upgrades of chosen/equipped gear and long-term decision-maker-only design. Baseline 4413077e; AUTO-FIGHT-001 PR #183 merged, final four CI PASS and Pages 45800800431 SUCCESS. New branch feature/apprentice-a4. First validate deterministic purchasing priorities and unlock accessibility; preserve exact smith gates, coins, frozen offline settlement and player equipment choices. Clan contribution automation remains dependent on real server. No deployment or numeric unlock change in research batch.
+
 ## AUTO-FIGHT-06 · STARTED / RELEASE CANDIDATE (2026-11-26, chat)
 
 Owner approved final checks, merge and deployment of automatic Fighting (PR #183). Prior head 1d9f248f passed website 45789563076, combat 45789562818, systems 45789563061 and protocol 45789562955. Scope reviewed: progression, foreground/offline boundary, UI, developer tests/research and documentation only; no price, XP, equipment, mastery or timing retuning. Final-head checks required after documentation reconciliation. Next: ready PR, protected merge, read main and verify Pages separately. Actual merge/deployment evidence will be recorded in PR conversation.
