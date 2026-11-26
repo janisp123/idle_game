@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## TEAM-002 — modular combat and Teamwork (draft PR #188)
+
+[Resolver and pilot evidence](mechanics/TEAM_002_RESOLVER.md), raw TEAM_002_PILOT.json. Shared strike extracted, bounded roster-based 1..6/side engine (playable plan 2v2), separate Teamwork skill cap and login activation helper, developer `teamCombat` bulk module. 3,000 full original duel traces identical (fingerprint 3868377314); 3,000 NG pilot bouts: shield+bow 62.4→65.2%, dual bow 59.2→72.0%, hammer+spear 74.6→75.6% from Teamwork1→50. No retuning. Early native stat regression missing material import fixed 376eab2e; final CI pending. No live team save/reward/UI integration. Next native validation, broader grade/combination/economy tests and actual settlement wiring. Owner wants modular, details later. Foundation native systems 45821758917 passed 67 tests.
+
 ## TEAM-001 — two gladiator foundation (draft PR #188)
 
 Owner approved two gladiators immediately, independent equipment/expertise and shared base stats, one treasury, 2v2; pets/tactics postponed. [Plan and evidence](mechanics/TEAM_IMPLEMENTATION_PLAN.md). Pure module `site/play/team.mjs` 3ba023ac and tests ce60d886: 67 source-adapter assertions pass, 310 upgrade steps, exact 6,002,450 coins for ten already-owned NG starters to S MW, excludes initial armour purchase. Native CI added 2d93cf06, pending. No live import, balance change or battle simulation. Next shared action refactor with neutral trace parity, four-actor resolver and screening. ACTIVE-PROGRESSION-001 merged d6a56fae. PR #186 paused/superseded. A5 e8d6dbd0 Pages 45812960184 SUCCESS.
