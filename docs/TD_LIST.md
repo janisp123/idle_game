@@ -11,8 +11,8 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## APPRENTICE-A4 — Automatic equipped equipment progression
 
 - **Goal:** Once unlocked/enabled, assistant handles quality and grade upgrades for selected weapon and equipped armour, never changes loadout. Show planned upgrade and cost/progress; player decides strategy, not individual purchase clicks.
-- **Acceptance:** Research priority and accessible threshold, shared exact smith quote and sequential grade gates, deterministic bounded purchase loop, no off-loadout purchases/forced armour, settle offline first, explicit consent and safe save/reload, committed report, UI and economy regressions. Clan donations separately server-gated.
-- **Status:** IN_REVIEW — research/implementation in draft [PR #184](https://github.com/janisp123/idle_game/pull/184); no gameplay changes yet.
+- **Acceptance:** Mandatory at 10 earned activity levels (no toggle), weakest-first, shared exact smith quote and sequential grade gates, deterministic bounded purchase loop, no off-loadout purchases/forced armour, settle offline first, safe save/reload, committed report, UI and economy regressions. Clan donations separately server-gated.
+- **Status:** IN_REVIEW — planner foundation implemented; runtime integration pending in draft [PR #184](https://github.com/janisp123/idle_game/pull/184); no gameplay changes yet.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
