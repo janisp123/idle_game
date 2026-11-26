@@ -5,7 +5,8 @@ import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {fileURLToPath,pathToFileURL} from "node:url";
 const dir=await mkdtemp(join(tmpdir(),"vigil-team-economy-"));
-const DAY=86400000,seed=20261126;
+const DAY=86400000,seed=Number(process.argv[4]??20261126),rewardPct=Number(process.argv[3]??100);
+assert.ok([100,125,140].includes(rewardPct)&&Number.isSafeInteger(seed)&&seed>=0&&seed<=0xffffffff);
 const specs=[
  {name:"tank_archer",first:["sword_shield","plate"],second:["bow","leather"],visitDays:1,liveMinutes:5},
  {name:"hammer_spear",first:["hammer","plate"],second:["spear","leather"],visitDays:1,liveMinutes:5},
@@ -21,6 +22,11 @@ try{
  const ep=join(dir,"engine.mjs"),src=await readFile(ep,"utf8");
  assert.ok(src.includes('export const TIMING_PROFILE = "alpha";'));
  await writeFile(ep,src.replace('export const TIMING_PROFILE = "alpha";','export const TIMING_PROFILE = "normal";'));
+ // Counterfactual only in temporary developer copy; round per victory, not per batch.
+ const timeline=join(dir,"team-timeline.mjs"),timelineSrc=await readFile(timeline,"utf8");
+ const payout="counts.victory*arenaReward(session.players[TEAM_IDS[0]].difficulty)";
+ assert.ok(timelineSrc.includes(payout));
+ await writeFile(timeline,timelineSrc.replace(payout,"counts.victory*Math.round(arenaReward(session.players[TEAM_IDS[0]].difficulty)*"+rewardPct+"/100)"));
  const load=n=>import(pathToFileURL(join(dir,n+".mjs")).href);
  const [e,c,smith,armour,attributes,expertise,team]=await Promise.all(["engine","combat","smith","armour","attributes","expertise","team"].map(load));
  const selected=process.argv[2]?specs.filter(x=>x.name===process.argv[2]):specs;
@@ -98,6 +104,6 @@ try{
    assert.ok(e.readSave(s),"valid saved team");
   }
   assert.equal(bouts,wins+losses+draws);assert.equal(bouts,liveBouts+offlineBouts);
-  console.log(JSON.stringify({spec,seed,profile:e.TIMING_PROFILE,visits,claims,unlockDay,firstS,fullS,offlineChecks,stageDays,final:snapshot(),checkpoints}));
+  console.log(JSON.stringify({spec,seed,rewardPct,profile:e.TIMING_PROFILE,visits,claims,unlockDay,firstS,fullS,offlineChecks,stageDays,final:snapshot(),checkpoints}));
  }
 }finally{await rm(dir,{recursive:true,force:true});}
