@@ -2,7 +2,7 @@
 import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=team-002";
 import { coordinationChance } from "./teamwork.mjs?v=team-002";
 export const TEAM_COMBAT_BALANCE=Object.freeze({maxRoster:6,maxRounds:PHYSICAL_RULES.turnLimit,
-  width:9,interceptRecovery:1,focusWeight:2,healthWeight:1.5});
+  rearSpace:3,interceptRecovery:1,focusWeight:2,healthWeight:1.5});
 const alive=a=>a.hp>0;
 const gap=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
 const distance=(a,b)=>Math.max(0,gap(a,b)-1);
@@ -11,20 +11,23 @@ const bowActive=a=>activeWeapon(a)===WEAPONS.bow;
 const other=(actors,a)=>actors.filter(b=>b.side!==a.side&&alive(b));
 const allies=(actors,a)=>actors.filter(b=>b.side===a.side&&b!==a&&alive(b));
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+export const teamArenaWidth=terrain=>2*TEAM_COMBAT_BALANCE.rearSpace+clamp(terrain.startDistance??2,0,2)+2;
 const validRoster=r=>Array.isArray(r)&&r.length>0&&r.length<=TEAM_COMBAT_BALANCE.maxRoster&&r.every(a=>a&&Object.hasOwn(WEAPONS,a.loadout)&&a.loadout!=="dagger"&&["str","dex","end","skill"].every(k=>Number.isFinite(a[k])&&a[k]>=0&&a[k]<=1e6));
 function makeActors(roster,side,terrain){
   const start=clamp(terrain.startDistance??2,0,2)+1;
   return roster.map((snapshot,i)=>{
     // Front-line melee, rear-line ranged. Symmetric coordinates, no class lock.
     const rear=snapshot.loadout==="bow"&&roster.some(x=>x.loadout!=="bow")?1:0;
-    const x=side==="player"?3-rear:3+start+rear;
+    const front=TEAM_COMBAT_BALANCE.rearSpace;
+    const x=side==="player"?front-rear:front+start+rear;
     return {...fighter(snapshot,side),id:side+":"+i,x,y:i,approach:0,
       retreats:terrain.retreatSpace??(terrain.retreat===false?0:3),intercepted:-1,targetId:null,bleedSource:null,actions:0};
   });
 }
-function adjacent(a,actors,height){
-  return [[a.x-1,a.y],[a.x+1,a.y],[a.x,a.y-1],[a.x,a.y+1]]
-    .filter(([x,y])=>x>=0&&x<TEAM_COMBAT_BALANCE.width&&y>=0&&y<height&&
+function adjacent(a,actors,height,width,side){
+  const d=side==="player"?1:-1;
+  return [[a.x-d,a.y],[a.x+d,a.y],[a.x,a.y-1],[a.x,a.y+1]]
+    .filter(([x,y])=>x>=0&&x<width&&y>=0&&y<height&&
       !actors.some(b=>alive(b)&&b!==a&&b.x===x&&b.y===y)).map(([x,y])=>({x,y}));
 }
 function chooseTarget(a,actors,coordinated,roll){
@@ -38,10 +41,10 @@ function chooseTarget(a,actors,coordinated,roll){
     return {b,score:score+(reachable?1:0),tie:roll()};
   }).sort((a,b)=>b.score-a.score||a.tie-b.tie)[0]?.b;
 }
-function move(a,target,actors,height,retreat,roll){
+function move(a,target,actors,height,width,retreat,roll){
   const opponents=other(actors,a);
   const nearest=p=>Math.min(...opponents.map(e=>gap(p,e)));
-  const steps=adjacent(a,actors,height);
+  const steps=adjacent(a,actors,height,width,a.side);
   if(retreat){
     const before=nearest(a);
     const best=steps.map(p=>({p,score:nearest(p)-before,tie:roll()}))
@@ -57,7 +60,7 @@ function move(a,target,actors,height,retreat,roll){
   for(let i=0;i<queue.length;i++){
     const {p,first}=queue[i];
     if(distance(p,target)<=range){Object.assign(a,first);return true;}
-    for(const next of adjacent(p,actors,height)){
+    for(const next of adjacent(p,actors,height,width,a.side)){
       const k=key(next);if(seen.has(k))continue;seen.add(k);queue.push({p:next,first});
     }
   }
@@ -82,7 +85,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
     throw new RangeError("Invalid team combat input");
   const chance={player:coordinationChance(levels.player),enemy:coordinationChance(levels.enemy)};
   const actors=[...makeActors(players,"player",terrain),...makeActors(enemies,"enemy",terrain)];
-  const height=Math.max(players.length,enemies.length),roll=seededRandom(seed),speedRoll=seededRandom((seed^0x85ebca6b)>>>0),
+  const height=Math.max(players.length,enemies.length),width=teamArenaWidth(terrain),roll=seededRandom(seed),speedRoll=seededRandom((seed^0x85ebca6b)>>>0),
     initiative=seededRandom((seed^0x9e3779b9)>>>0),decision=seededRandom((seed^0x517cc1b7)>>>0);
   const events=[];let round=0;
   const record=(a,b,type,extra={})=>{
@@ -112,7 +115,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
       const active=activeWeapon(a),bow=bowActive(a);
       if(a.recovery>0){
         a.recovery--;
-        if(bow&&a.retreats>0&&distance(a,target)<2&&mobility(a)>=mobility(target)+TACTICS.retreatLead&&move(a,target,actors,height,true,decision)){
+        if(bow&&a.retreats>0&&distance(a,target)<2&&mobility(a)>=mobility(target)+TACTICS.retreatLead&&move(a,target,actors,height,width,true,decision)){
           a.retreats--;a.approach=0;record(a,target,"retreat");
         }
         continue;
@@ -120,7 +123,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
       if(distance(a,target)>active.range){
         a.approach+=mobility(a)>=TACTICS.quickMobility?1:TACTICS.slowApproach;
         if(a.approach>=(terrain.approachSteps??1)){
-          a.approach=0;move(a,target,actors,height,false,decision);
+          a.approach=0;move(a,target,actors,height,width,false,decision);
         }
         record(a,target,"approach");continue;
       }
