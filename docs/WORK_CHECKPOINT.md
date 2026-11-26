@@ -1,5 +1,13 @@
 # Current working checkpoint
 
+## APPRENTICE-A4 — approved automatic equipment progression research (draft PR #184)
+
+Owner direction: player chooses strategy/loadout, assistant removes repetitive chores, including legal quality AND grade upgrades; future clan donations/upgrades under real authority. [Research and implementation contract](mechanics/APPRENTICE_A4_RESEARCH.md), [raw data](mechanics/APPRENTICE_A4_ECONOMY.json), `tools/apprentice-a4-economy.mjs`. Baseline 4413077e. 12 × 180-day runs, 742,759 settled bouts, 2,160 offline checks and 1,848 legal purchases. Weakest-first recommended; all specialists reached S MW days166–169. Level75 never reached; level50 saves zero specialist purchases; level20 saves 80 each, unlock days41–42. Exact unlock threshold remains to confirm; earlier 5/10 worth testing. Native CLI not yet verified; no live gameplay changes. Next A4-02 pure selected-equipment planner, tests, consent/login integration after threshold decision. Draft branch `feature/apprentice-a4`, [PR #184](https://github.com/janisp123/idle_game/pull/184).
+
+## AUTO-FIGHT-001 — deployed
+
+PR #183 merged 4413077e2ca2d26c8fb2cc853f9945ee23840481, final head 98626bc0 all four CI PASS, Pages 45800800431 SUCCESS. Main source verified; previous pending checkpoints below historical. No forced V16 reset.
+
 ## AUTO-FIGHT-06 — release candidate (PR #183)
 
 Owner approved final release. Head 1d9f248f passed all four workflows: website 45789563076, combat 45789562818, systems 45789563061, protocol 45789562955. [Economy](mechanics/AUTO_FIGHT_ECONOMY.md), [browser evidence](mechanics/AUTO_FIGHT_UI_VALIDATION.md), [engine integration](mechanics/AUTO_FIGHT_INTEGRATION.md). Scope reviewed; no changes to prices, XP, equipment, timing profile or mastery. Existing valid V16 saves migrate without forced reset; legacy pending manual grade uses in-flight stage. Single-seed economy limitations and existing optimistic multi-tab save model remain. Next: confirm final-head checks, merge PR #183 via protected flow and verify main + Pages. Actual MERGED/DEPLOYED status recorded in PR conversation after verification; carry into next main journal update.
