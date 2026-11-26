@@ -21,7 +21,7 @@ function requireAlpha(){
  */
 export function alphaMaxStats(state,family,now,random=Math.random,secondFamily=family){
   requireAlpha();
-  if(!ARMOUR_TIERS.includes(family)||!ARMOUR_TIERS.includes(secondFamily))throw new RangeError("Choose one armour family");
+  if(!ARMOUR_TIERS.includes(family)||(state.teamSecond&&!ARMOUR_TIERS.includes(secondFamily)))throw new RangeError("Choose one armour family");
   const result=enterGame(state,now,random),old=result.state;
   const floor=awardAttributeTime(blankAttributeEffort(),"fighting",
     (old.teamSecond?TEAM_SIX_MONTH_BUILD:SIX_MONTH_BUILD).productiveHours*3600000);
