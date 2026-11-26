@@ -23,7 +23,8 @@ export function loginReport(before,outcome,{saved=true,automationUnavailable=fal
   const mastery=saved?outcome.mastery:null;
   const equipment={};
   for(const step of upgrades){
-    const row=equipment[step.id]??={id:step.id,from:{...step.from},to:{...step.to},steps:0,cost:0};
+    const key=(step.fighterId??"")+":"+step.id;
+    const row=equipment[key]??={id:step.id,...(step.fighterId?{fighterId:step.fighterId}:{}),from:{...step.from},to:{...step.to},steps:0,cost:0};
     row.to={...step.to};row.steps++;row.cost+=step.cost;
   }
   const oldStats=effectiveAttributeProgress(before.attributeEffortActive,before.skills);
@@ -31,10 +32,15 @@ export function loginReport(before,outcome,{saved=true,automationUnavailable=fal
   const attributes=Object.keys(stats).map(id=>({id,from:oldStats[id].value,to:stats[id].value,
     xp:attributeXP(Math.max(0,after.attributeEffort[id]-before.attributeEffort[id]))}));
   const expertise=Object.keys(after.expertise).filter(id=>after.expertise[id]>before.expertise[id]).map(id=>({id,hours:expertiseHours(after.expertise[id]-before.expertise[id])}));
+  if(after.teamSecond&&before.teamSecond){
+    for(const id of Object.keys(after.teamSecond.expertise))if(after.teamSecond.expertise[id]>before.teamSecond.expertise[id])expertise.push({id,fighterId:"second",hours:expertiseHours(after.teamSecond.expertise[id]-before.teamSecond.expertise[id])});
+    for(const x of expertise)if(!x.fighterId)x.fighterId="first";
+  }
   const skills=SKILL_IDS.filter(id=>work[id]||after.skills[id].level!==before.skills[id].level).map(id=>({id,completed:work[id]?.completed??0,xp:work[id]?.xp??0,from:before.skills[id].level,to:after.skills[id].level,ready:activityRewardCapped(after,id)}));
   return {elapsedMs:Math.max(0,after.settledAtMs-before.settledAtMs),saved,automationUnavailable,
     arena:{...arena,losses:arena.defeats+arena.doubleDeaths,winRate:arena.bouts?arena.victories/arena.bouts:null},
     wallet:{before:before.coins,earned:arena.coins,spent,after:after.coins},gained,consumed,tribute:{...(mastery?.tribute??{})},
+    ...(after.teamwork&&before.teamwork?{teamwork:{from:before.teamwork.level,to:saved?after.teamwork.level:before.teamwork.level,xp:after.teamwork.xp}}:{}),
     skills,attributes,expertise,upgrades:Object.values(equipment),upgradeCount:upgrades.length,levels:mastery?.ready.length??0,
     activity:after.activity,transition:after.transition?.targetActivity??null,route:after.wagons.map(w=>w.activity),
     capped:SKILL_IDS.filter(id=>activityRewardCapped(after,id)),stage:after.autoFight.stage};
