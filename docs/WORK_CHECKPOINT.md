@@ -1,5 +1,10 @@
 # Current working checkpoint
 
+## TEAM-011 — endgame-first meta audit underway
+
+Owner requested all-max endgame meta test. `tools/endgame-meta-audit.mjs` 2e788bb9, workflow 09b50f74, PR #190. S grade only. Read production TEAM_SIX_MONTH_BUILD (Fighting52, 3700 productive hours) and derive STR/DEX/END through real awardAttributeTime/effectiveAttributeProgress with actual blank skills; attributes uncapped so this is approved representative max, not mathematical cap. Teamwork50, behaviour50, active expertise 4000h (full S threshold), Masterwork all slots; comparison near (3400h active expertise, same stats/Masterwork) and Common (4000h, same stats). Mixed-slot variants assume each selected family fully trained as a synthetic late-game ceiling, not six-month progression claim. Temporary TEAM-007 roles and TEAM-010 C material wear, moderate durability; no runtime changes. All 2850 uniform-armour team/role configurations vs 25 teams x5 environments x8 screening seeds, 30-team validation and 45-team held, plus all 2850 candidates as counter searches vs each selected global/dual-weapon leader; independent counter validation and side-reversed elite/counter round robin. Full per-config results via artifacts, compact log TEAM_ENDGAME. Seed20261207, 75 masterwork parity checks per job. Not all 2850×2850 pairs; not a proof of absence of any meta, no untested claims. Later test competitive NPC daily settlement and tune only after results. Primary full Masterwork profile governs balance.
+
+
 ## TEAM-010 — complete broad wear audit (2026-11-26)
 
 [Report](mechanics/TEAM_010_WEAR.md), nine compact result files, PR #190, run 45873421935 all PASS. 32,962,800 scored battles +675 parity. S Common selected dual spear 68.7/64.4/66.2% A/B/C; any armour breaks 0/77.9/61.1%. S C Masterwork dual spear/greatsword/bow/hammer/shield 69.3/62.1/53.9/42.4/38.8%. Benchmark stats and Teamwork25, not fully max endgame. Owner ENDGAME-BALANCE-001: next prioritize realistic max/near-max stats, S Masterwork, Teamwork50 and mastery50, independent weapon tuning and competitive offline. No production changes or merge.
