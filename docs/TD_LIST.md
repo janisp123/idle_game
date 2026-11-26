@@ -8,6 +8,24 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## MANAGER-UI-001 — Button-based gladiator equipment and simplified activities
+
+- **Goal:** Mobile-first strategic equipment controls: two gladiator buttons, five weapon buttons, three whole armour-family buttons (padded/leather/plate); no individual piece or manual grade/quality selection. Training belongs with other activities; remove repetitive stats, retain optional detailed Character Stats.
+- **Acceptance:** Atomic complete-set equip/acquisition with existing prices, exact shared treasury, no mixed-family selection through player UI, no automatic selection against player choice, retained owned progress, frozen in-flight battles, no per-piece upgrade controls. Clearly show affordability, equipped family, and selection. Validate existing saves, phone and desktop, and real engine/simulation parity. No combat retuning.
+- **Status:** PARTIAL — approved, development stacked on PR #191.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## PERMANENT-FIGHT-001 — Fighting always active, outside selectable activities
+
+- **Goal:** Fighting is permanent, automatic and cannot be disabled; remove its entry from the selectable activities list. Training shares the other activities group.
+- **Acceptance:** Genuine permanent fighting engine behavior, not merely hiding its control; selecting/scheduling other activities cannot stop combat. Define separate combat/work time, rewards, caps, transitions, shared attributes and wallet consistently; do not double-credit the same effort. Preserve frozen offline settlement and automatic Master/gear policy. Test simultaneous work/combat, exact rewards, save/reload and mobile presentation. No endgame balance retuning or lower-grade balance sweep in this task.
+- **Status:** PARTIAL — approved, engine design and implementation pending; current single activity timeline cannot satisfy this.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## HOBBY-002 — Revised hobby-project statement
 
 - **Goal:** Remove the permanent free-game pledge from active policy, README and website; explain learning goals and hope for sustainable hosting. No monetization implementation or license change.
