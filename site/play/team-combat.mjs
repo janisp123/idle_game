@@ -53,9 +53,12 @@ function intercept(a,target,actors,round,chance,roll){
   // guard-open, broken or in worse health than the ally.
   if(activeWeapon(a).ranged)return target;
   const guard=allies(actors,target).filter(g=>g.shield.hp>0&&!g.stagger&&!g.guardOpen&&g.intercepted!==round&&
-    gap(g,target)===1&&distance(a,g)<=activeWeapon(a).range&&g.hp/g.maxHP>=target.hp/target.maxHP)
+    gap(g,target)===1&&g.hp/g.maxHP>=target.hp/target.maxHP)
     .sort((a,b)=>b.hp/b.maxHP-a.hp/a.maxHP)[0];
   if(!guard||roll()>=chance)return target;
+  // Swap adjacent allies: the protector occupies the originally reachable tile.
+  const {x,y}=guard;guard.x=target.x;guard.y=target.y;target.x=x;target.y=y;
+  guard.approach=0;target.approach=0;
   guard.intercepted=round;guard.recovery=Math.max(guard.recovery,TEAM_COMBAT_BALANCE.interceptRecovery);return guard;
 }
 export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player:1,enemy:1}){
@@ -67,7 +70,6 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
     initiative=seededRandom((seed^0x9e3779b9)>>>0),decision=seededRandom((seed^0x517cc1b7)>>>0);
   const events=[];let round=0;
   const record=(a,b,type,extra={})=>{
-    if(extra.damage>0&&b&&type!=="bleed"&&b.bleed>0)b.bleedSource=a.id;
     events.push({type,round,actor:a?.id??null,target:b?.id??null,damage:0,...extra,
       vitals:Object.fromEntries(actors.map(c=>[c.id,{...vitals(c),x:c.x,y:c.y}]))});
   };
@@ -109,7 +111,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
       const actual=intercept(a,target,actors,round,chance[target.side],decision);
       if(actual!==target)record(actual,a,"intercept",{protected:target.id});
       resolveStrike(a,actual,{active,bow,distance:Math.min(2,distance(a,actual)),terrain,roll,speedRoll,record,
-        interruptApproach:b=>{b.approach=0;}});
+        interruptApproach:b=>{b.approach=0;},onBleed:(source,b)=>{b.bleedSource=source.id;}});
     }
   }
   const totals=side=>actors.filter(a=>a.side===side).reduce((r,a)=>({hp:r.hp+a.hp,maxHP:r.maxHP+a.maxHP,inflicted:r.inflicted+a.inflicted}),{hp:0,maxHP:0,inflicted:0});
