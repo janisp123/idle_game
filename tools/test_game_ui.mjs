@@ -861,7 +861,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
       "each button click simulates exactly one additional day");
     assert.deepEqual(afterSecondDay.items,afterDay.items,"no capped loot on repeated 24h");
     assert.deepEqual(afterSecondDay.attributeEffort,afterDay.attributeEffort,"no capped attribute XP");
-    assert.match(elements.get("skillXp").textContent,/All rewards paused/);
+    assert.match(elements.get("skillXp").textContent,/Automatic Skill Master pending/);
     assert.equal(afterSecondDay.skills.mining.level,1,
       "repeated 24h clicks still cannot level up automatically");
     assert.equal(elements.get("alphaTools").hidden,false);
