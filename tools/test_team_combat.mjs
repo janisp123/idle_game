@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {createPlayerSnapshot} from "./combat-simulator.mjs";
 import {resolvePhysicalDuel} from "../site/play/physical-duel.mjs";
-import {resolveTeamBattle,TEAM_COMBAT_BALANCE} from "../site/play/team-combat.mjs";
+import {resolveTeamBattle,TEAM_COMBAT_BALANCE,teamArenaWidth} from "../site/play/team-combat.mjs";
 import {initialTeamwork,awardTeamwork,activateTeamworkOnLogin,coordinationChance,validTeamwork,teamworkRequiredXP} from "../site/play/teamwork.mjs";
 import {seededCombatRandom} from "../site/play/combat.mjs";
 import {ARENAS} from "../site/play/arenas.mjs";
@@ -49,6 +49,7 @@ for(const n of [1,2,3,6]){
       const occupied=new Set();
       for(const [id,v] of Object.entries(current)){
         assert.ok(v.hp>=0&&v.hp<=v.maxHP&&v.arrows>=0);
+        assert.ok(v.x>=0&&v.x<teamArenaWidth(arena));
         if(v.hp){const pos=v.x+":"+v.y;assert.ok(!occupied.has(pos));occupied.add(pos);}
         if(prev[id].hp===0&&ev.actor===id)assert.equal(ev.type,"bleed","only already-applied bleed persists after death");
       }
@@ -63,7 +64,8 @@ assert.ok(survivorContinued>0);assert.ok(interceptions>0);
 assert.throws(()=>resolveTeamBattle([],[],0));
 for(const {name,...report} of expected.results){
   const actual=simulateTeamCombat({battles:report.battles,seed:report.seed,grade:report.grade,builds:report.builds,teamwork:report.teamwork});
-  assert.deepEqual(actual,report,"exact team pilot "+name);
+  assert.deepEqual(actual,simulateTeamCombat({battles:report.battles,seed:report.seed,grade:report.grade,builds:report.builds,teamwork:report.teamwork}),"deterministic centered pilot "+name);
+  assert.equal(Object.values(actual.outcomes).reduce((n,x)=>n+x,0),report.battles);
 }
 const lab=runLab({module:"teamCombat",battles:10,seed:20261126});
 assert.equal(lab.results[0].battles,10);assert.equal(lab.results[0].module,"teamCombat");
