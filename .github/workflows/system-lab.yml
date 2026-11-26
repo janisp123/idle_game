@@ -29,6 +29,8 @@ on:
       - 'tools/test_auto_equipment.mjs'
       - 'tools/test_auto_equipment_integration.mjs'
       - 'tools/auto-fight-economy.mjs'
+      - 'tools/apprentice-a4-mandatory-economy.mjs'
+      - 'docs/mechanics/APPRENTICE_A4_MANDATORY_DAILY.json'
       - 'docs/mechanics/AUTO_FIGHT_ECONOMY_PILOT.json'
       - 'docs/mechanics/SYSTEM_LAB.md'
       - 'docs/mechanics/README.md'
@@ -118,6 +120,17 @@ jobs:
             const report=JSON.parse(readFileSync("build-progression-report.json","utf8"));
             for(const p of report.reports)for(const s of p.scenarios)
               console.log(JSON.stringify({profile:p.profile, ...s}));
+          '
+      - name: Reproduce mandatory equipment economy pilot
+        run: |
+          node tools/apprentice-a4-mandatory-economy.mjs '[{"style":"greatsword","family":"plate","liveMinutes":5}]' > mandatory-economy-pilot.json
+          node --input-type=module -e '
+            import assert from "node:assert/strict";
+            import {readFileSync} from "node:fs";
+            const result=JSON.parse(readFileSync("mandatory-economy-pilot.json","utf8"));
+            const expected=JSON.parse(readFileSync("docs/mechanics/APPRENTICE_A4_MANDATORY_DAILY.json","utf8")).filter(x=>x.style==="greatsword"&&x.family==="plate");
+            assert.deepEqual(result,expected);
+            console.log(JSON.stringify({mandatoryEconomy:"exact pilot match",unlock:result[0].unlockDays[10],automatic:result[0].automatic,fullS:result[0].firstSSet}));
           '
       - name: Run full paired-build and economy audit
         if: github.event_name == 'workflow_dispatch' && inputs.full_balance == true
