@@ -4,17 +4,15 @@ Head, Torso, Arms and Legs each equip None, Padded, Leather or Plate. The four s
 
 A fresh character can select any of the five Non-grade Poor weapons. Bow includes a backup dagger in its equipment profile, and Sword & Shield includes a heater shield. The bow switches to its dagger when arrows run out or the bow breaks. Armour is initially empty. Buy a family for a specific slot, then equip or unequip the owned piece for free. Select a weapon or armour slot to edit one item.
 
-## Item grades and quality
+## APPRENTICE-A3 — equipment rules (PR #181)
 
-Item grade runs from Non-grade to S, independently of arena difficulty. Quality runs from Poor to Common, Fine and Masterwork. In `smith.mjs`, item power is three times the grade index plus a quality bonus of 0, 2, 5 or 9. Weapon power adds raw damage. Each equipped armour piece adds flat guard equal to its power divided by four and rounded up, alongside the family's base protection. A purchase charges the difference between the old and new cumulative prices, and first-time armour adds a 24-coin purchase cost. Neither grade nor quality can go down in an improvement.
+Each item has 32 ordered stages (eight grades × Poor, Common, Fine, Masterwork). Buy exactly the next stage; next grade starts Poor only after current Masterwork. New armour starts Non-grade Poor (24 coins); five starter weapons are already owned. Existing ownership is retained. Full-credit cost = target cumulative price minus current cumulative price; no refund or skip. Fighting gates 1/5/10/17/25/33/40/50. Price tables unchanged: full S Masterwork weapon 600,245; complete five-item set 3,001,321.
 
-Purchases settle prior work at the old frozen build, deduct coins once and start a new duel snapshot. The condition profile defines maximum HP as 24 plus three times power and marks Masterwork unbreakable. Each battle uses these values to initialize its equipment condition. The shop has no condition controls.
+Grade index g, quality index q (0..3): nominal flat power = 4g+q. Let P(t) be existing proficiency for grade t at current practice. Effective flat = sum(4P(t), t=1..g)+qP(g); weapon rounds to integer, each armour piece guard = ceil(effective flat/4). Effective multiplier M = 1 + sum((1.35^t−1.35^(t−1))P(t), t=1..g) + 1.35^g × (qualityFactor−1)P(g); quality factors 1/1.04/1.09/1.15. Prior mastered grade increments remain fully effective. Resistance = coverage × (M−1) × material coefficient (.95 padded, 1 leather, 1.15 plate). Existing style accuracy/penetration and armour mobility/dodge factors also use incremental proficiency. Additional weapon recovery skip = 2 percentage points/grade, accuracy = 1 pp/grade after F, critical chance = .5 pp/grade after E, critical multiplier bonus = .03/grade after D. Armour additional dodge = .5 pp/grade after F times family factor 1/.65/.15 and coverage; critical avoidance/reduction use the same crit curves weighted by coverage. All effective bonuses are accumulated per grade with P(t). Existing proficiency thresholds including 4000h for S remain.
 
-## Arena prizes and saves
+Condition HP = 24+3g+12q. Masterwork unbreakable; condition resets per bout. Broken gear loses its relevant bonuses; worn weight stays. No automatic purchases in A3. Shop shows only the next stage and actual quote. Within the same rules version existing equipment/stats freeze for the current bout. Old alpha snapshots spanning a software release are interpreted by the updated resolver, not replayed under a retained historical ruleset. Existing paid balances are not reset.
 
-Completed victories pay 12, 20, 32, 48, 68, 92, 122 or 158 coins from Non-grade through S. A saved cursor tracks the last paid bout, and double deaths and defeats pay zero. The interim resolver repeats 256 seeded bouts per frozen build. Settlement resolves at most a single period, counts repeats arithmetically, and uses the same outcomes in live and offline play. V11 saves record coins, owned gear, equipped armour, and the frozen combat snapshot. Earlier alpha saves reset once with a clear notice.
-
-Source: `site/play/armour.mjs`, `smith.mjs`, `arena-wallet.mjs` and `engine.mjs`.
+Victory payouts NG through S: 12/20/32/48/68/92/122/185 coins. Defeat/double death pay zero. Saved prize cursor prevents duplicate payments. See [combined validation](GEAR_COMBINED_VALIDATION.md) for research evidence. All sections below are historical development notes where superseded by these rules.
 
 ## ALPHA-GEAR-001 A1 — provisional access and prices
 

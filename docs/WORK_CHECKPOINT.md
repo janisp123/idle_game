@@ -6,9 +6,11 @@ Core shared modules, next-stage shop UI, character stat breakdown and actual pro
 
 Research evidence remains on PR #179, [combined report](https://github.com/janisp123/idle_game/blob/docs/gear-progression-balance-study/docs/mechanics/GEAR_COMBINED_VALIDATION.md). PR #180 policy overlaps shared documentation. Keep current 4000h S mastery, open arena access, 32 strictly sequential equipment stages, full-credit pricing, unbreakable Masterwork. A4 auto-quality purchases remain separate.
 
+
+Final integration: all four CI checks passed on d38a503, cache chain updated, research and policy consolidated. [Combined research](mechanics/GEAR_COMBINED_VALIDATION.md) and all original harnesses/raw outputs retained. No reset; unpaid bouts across balance version change use updated rules. Next verify consolidated head and deployment.
 ## APPRENTICE-A2 — PR #178
 
-Automatic Master on page entry after offline settlement, derived 50-level gate, versioned explicit consent, shared claim mutation and exact committed report. Visibility catch-up/ordinary ticks and alpha idle-day tool remain non-claiming. Web Locks serialize login chores; stale snapshot checks reject observed conflicting saves; no claim where coordination unavailable. True transactional concurrency requires future server. No tribute, weapons, equipment or donation changes. Next final CI and Pages.
+Automatic Master on page entry after offline settlement, derived 50-level gate, versioned explicit consent, shared claim mutation and exact committed report. Visibility catch-up/ordinary ticks and alpha idle-day tool remain non-claiming. Web Locks serialize login chores; stale snapshot checks reject observed conflicting saves; no claim where coordination unavailable. True transactional concurrency requires future server. No tribute, weapons, equipment or donation changes. PR #178 merged 0136237; all four final workflows passed, Pages 45663460990 passed.
 
 ## APPRENTICE-A1 — PR #177
 
