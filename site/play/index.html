@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="./iron-ui.css?v=auto-fight-04">
   <link rel="stylesheet" href="./login-report.css?v=apprentice-a5">
   <link rel="stylesheet" href="./team-ui.css?v=team-004">
-  <script type="module" src="./app.mjs?v=team-004"></script>
+  <script type="module" src="./app.mjs?v=auto-master-001"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -94,19 +94,7 @@
           <div class="skill-meta"><span id="skillTitle">Choose an activity</span><strong id="skillLevel">—</strong></div>
           <div class="meter skill-meter" aria-label="XP toward next skill level"><span id="skillFill"></span></div>
           <p class="hint" id="skillXp">Each activity has independent XP.</p>
-          <p class="hint" id="masterStatus">No skills are ready for the Master yet.</p>
-          <button id="visitMaster" class="activity-start master-visit" type="button" aria-controls="masterAudience" aria-expanded="false">Seek the Master</button>
-          <div id="masterAudience" class="master-audience" hidden>
-            <p class="master-voice">“I will take all you hold from the skills I advance. Spend wisely before you accept.”</p>
-            <div id="masterSkills" class="master-summary" aria-label="Skills ready for training"></div>
-            <p class="master-subtitle">THE TRIBUTE TO BE SURRENDERED</p>
-            <div id="masterTribute" class="master-summary" aria-label="Exact inventory to sacrifice"></div>
-            <p id="masterWarning" class="hint"></p>
-            <div class="master-actions">
-              <button id="masterConfirm" class="activity-start" type="button">Surrender and learn</button>
-              <button id="masterCancel" class="activity-start activity-queue-button" type="button">Leave</button>
-            </div>
-          </div>
+          <p class="hint" id="masterStatus">Skill Master automatic · Ready skills advance and pay tribute.</p>
         </section>
 
         <section class="panel actions" aria-labelledby="actions-heading">
@@ -154,9 +142,9 @@
               <p id="apprenticeSlots" class="hint">1 / 5 activity slots unlocked</p>
               <p id="apprenticeNext" class="hint">Next activity slot unlocks at LvL 10.</p>
               <p id="apprenticeLegacy" class="hint" hidden>Your existing route is preserved. No new slots may be added above your unlocked capacity.</p>
-              <label class="apprentice-option"><input id="apprenticeAutoMaster" type="checkbox" disabled aria-describedby="apprenticeMaster"> Automatic Skill Master on login <span id="apprenticeMaster">Unlocks at LvL 50</span></label>
+              <div class="apprentice-option"><strong>Automatic Skill Master</strong><span id="apprenticeMaster">Always active</span></div>
               <p id="apprenticeMasterReport" class="hint" role="status" hidden></p>
-              <div class="apprentice-option"><strong>Automatic equipment upgrades</strong><span id="apprenticeEquipmentStatus">Unlocks at LvL 10</span><p id="apprenticeEquipmentNext" class="hint"></p><p id="apprenticeEquipmentCost" class="hint"></p><p id="apprenticeEquipmentReport" role="status" class="hint" hidden></p></div>
+              <div class="apprentice-option"><strong>Automatic equipment upgrades</strong><span id="apprenticeEquipmentStatus">Always active</span><p id="apprenticeEquipmentNext" class="hint"></p><p id="apprenticeEquipmentCost" class="hint"></p><p id="apprenticeEquipmentReport" role="status" class="hint" hidden></p></div>
               <label class="apprentice-option"><input type="checkbox" disabled> Automatic clan donations <span>Planned · Online clans required</span></label>
             </div>
           </details>

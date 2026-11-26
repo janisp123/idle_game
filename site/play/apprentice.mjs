@@ -4,7 +4,7 @@
 export const APPRENTICE_BALANCE=Object.freeze({
   levelsPerSlot:10,
   maxSlots:5,
-  autoMaster:50
+  autoMaster:0
 });
 
 /** The caller supplies actual SKILL_IDS from the engine; never count arbitrary keys. */

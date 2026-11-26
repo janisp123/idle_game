@@ -3,7 +3,7 @@ import { earnedActivityLevels } from "./apprentice.mjs?v=apprentice-a2";
 import { ARMOUR_SLOTS, ARMOUR_TIERS } from "./armour.mjs?v=bal-002";
 import { COMBAT_LOADOUTS } from "./combat-skills.mjs?v=gear-a3";
 import { itemPower, isEquipmentItem, nextEquipmentUpgrade, smithQuote, ITEM_GRADES, ITEM_QUALITIES } from "./smith.mjs?v=gear-a3";
-export const AUTO_EQUIPMENT_AT=10;
+export const AUTO_EQUIPMENT_AT=0;
 export const MAX_AUTO_EQUIPMENT_PURCHASES=(1+ARMOUR_SLOTS.length)*(ITEM_GRADES.length*ITEM_QUALITIES.length-1);
 export function chosenEquipmentIds(state){
   if(!Object.hasOwn(COMBAT_LOADOUTS,state.combatLoadout))throw new RangeError("Invalid chosen weapon");

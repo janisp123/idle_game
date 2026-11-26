@@ -2,6 +2,10 @@
 
 **Runtime:** [engine.mjs](../../site/play/engine.mjs), [attributes.mjs](../../site/play/attributes.mjs). **Tune:** `SKILL_BALANCE`, the per-activity `ACTIVITIES` rows, `MASTER_DEFAULT_ITEM_MINIMUM` / `MASTER_ITEM_MINIMUM_OVERRIDES` in engine, and `ATTRIBUTE_BALANCE` / `ACTIVITY_STAT_WEIGHTS` in attributes. No global character level.
 
+## AUTO-MASTER-001 candidate (PR #191)
+
+During a continuous foreground session, ready skills and Teamwork advance automatically and selected owned gear upgrades at existing legal prices. Returning first settles the full absence at frozen power; no auto-leveling during absence. Full tribute still applies. This supersedes manual confirmation and login-only unlock descriptions below after release. Candidate pending tests.
+
 ## CAP-001 — reward cap (supersedes earlier uncapped reward descriptions)
 
 The first complete productive XP cycle that fills the current-level bar is the final rewarding work for that skill. All later skill XP, loot, craft inputs/outputs, arena coins, productive attribute effort and expertise stop until the player explicitly advances that skill with the Master. Full XP is sufficient eligibility even if all outputs were spent; the Master still takes all remaining eligible owned outputs, never unrelated goods or coins. Time spent capped is not productive and cannot be reclaimed retroactively. No global calendar cutoff or automatic level-up. A mid-bout Fighting cap pauses the saved combat clock; resuming that activity after claiming preserves the fight. Leaving a capped arena abandons only the unfinished bout, never already settled rewards.

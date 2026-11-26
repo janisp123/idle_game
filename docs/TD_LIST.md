@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## HOBBY-002 — Revised hobby-project statement
+
+- **Goal:** Remove the permanent free-game pledge from active policy, README and website; explain learning goals and hope for sustainable hosting. No monetization implementation or license change.
+- **Acceptance:** Matching public wording and updated active rules, no payment or ad features, website checks and deployment.
+- **Status:** IN_REVIEW — candidate PR #191, tests pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## AUTO-MASTER-001 — Automatic Skill Master and equipment progression from first entry
 
 - **Goal:** Mandatory, always-enabled Skill Master from the first entry; automatically activate ready activity levels and Teamwork on login and during active online play. Remove the 50-level unlock and optional consent toggle; automatic selected weapon/armour quality and grade upgrades from first entry and throughout online play.
@@ -174,7 +183,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 ## FREE-001 — Permanent free-game commitment
 
-- **Goal:** Publish the owner-approved A Hobby, Not a Business statement on landing page and README, and establish permanent zero monetization in the project decision and agent rules.
+- **Goal:** Historical FREE-001 release; the permanent free-game promise is superseded by HOBBY-002 (PR #191).
 - **Acceptance:** Identical approved wording, no ads or financial contribution options, clear hobby risks, no game/save/license changes, static and actual mobile/desktop checks, Pages verification.
 - **Status:** DONE — PR #161 merged `4f752fc`, final website/protocol/systems checks passed, Pages 45595434419 succeeded and public text verified.
 - **Added by:** chat.
