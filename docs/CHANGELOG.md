@@ -1,5 +1,25 @@
 # Changelog and task handoffs
 
+## APPRENTICE-A4-05 · STARTED / RELEASE CANDIDATE (2026-11-26, chat)
+
+Owner requested final release of mandatory equipment progression. Head 583360bb passed all four workflows: website 45809205649, systems 45809205762, combat 45809205680, protocol 45809205748. Reviewed runtime and developer-only changes: level10 earned unlock, exact existing sequential prices and gates, chosen equipped items only, no toggle, no off-kit spending, login-only after frozen offline settlement, safe commit before report; no reward or expertise retuning. Initial armour choice remains manual, existing optional Master consent unchanged. Final-head CI, protected merge and Pages verification required; actual release evidence recorded in PR #184 conversation.
+
+## APPRENTICE-A4-04 · STARTED (2026-11-26, chat)
+
+Owner requested continuation. Head d1207f59: 117 regression tests PASS, systems 45806458496, combat 45806458514, protocol 45806458619 PASS; Chromium 45806458567 failed disabled-button assertion (initial armour still purchasable). Correct fixture to select owned weapon. [Mandatory economy study](mechanics/APPRENTICE_A4_MANDATORY_VALIDATION.md) complete: 30 trajectories, 1,672,886 bouts, 2,822 automatic purchases, 4,476 frozen offline checks. Daily level10 day15, all 15 full S MW days166–169. All four CI PASS at 5d0ec222; additional failure-path browser tests and exact native pilot reproduction PASS at code head 0a42231f (website 45809013740, systems 45809013724, combat 45809013761, protocol 45809013774). No deployment. Next A4-05 final CI and release.
+
+## APPRENTICE-A4-03 · STARTED (2026-11-26, chat)
+
+Owner requested continuation. Mandatory level-10 planner verified 7,115 assertions; implement shared settled purchases, login transaction after offline/Master, manual purchase gate, exact reports and tests. Draft PR #184. Engine and read-only UI wired; [integration evidence](mechanics/APPRENTICE_A4_INTEGRATION.md), 27 integration + 7,115 planner checks native PASS at cf7c4a46. Older Master and browser fixture corrections 2437d197/9ef16e86 await final verification. No merge/deployment. Next A4-04: finish full regression and browser/save tests; actual mandatory economy, final release gates.
+
+## APPRENTICE-A4-02 · STARTED (2026-11-26, chat)
+
+Owner approved level 10 and mandatory equipment automation: no off switch, chosen loadout remains player-controlled. Weakest-first, no manual purchase priorities/reserve, existing prices/gates. Scope is equipment only; existing optional auto-Master and future clan permissions unchanged. Pure planner implemented and 7,115 assertions PASS in connector JS; [verification](mechanics/APPRENTICE_A4_PLANNER.md). Native gate added, not yet verified. Next shared settled purchase/login integration and UI, no manual upgrade bypass; runtime unchanged. Baseline 4413077e, draft PR #184.
+
+## APPRENTICE-A4 · STARTED (2026-11-26, chat)
+
+Owner approved automatic quality AND grade upgrades of chosen/equipped gear and long-term decision-maker-only design. Baseline 4413077e; AUTO-FIGHT-001 PR #183 merged, final four CI PASS and Pages 45800800431 SUCCESS. New branch feature/apprentice-a4. First validate deterministic purchasing priorities and unlock accessibility; preserve exact smith gates, coins, frozen offline settlement and player equipment choices. Clan contribution automation remains dependent on real server. [Research complete](mechanics/APPRENTICE_A4_RESEARCH.md): 12 trajectories, 742,759 bouts, 2,160 offline checks, 1,848 legal purchases. Weakest-first recommended. Level75 inaccessible within 180 days; level50 zero specialist upgrades saved, level20 saves 80. Exact threshold unresolved; next pure planner and tests, then login integration. Raw output and harness saved in draft PR #184. Native CLI unverified. No gameplay changes/deployment.
+
 ## AUTO-FIGHT-06 · STARTED / RELEASE CANDIDATE (2026-11-26, chat)
 
 Owner approved final checks, merge and deployment of automatic Fighting (PR #183). Prior head 1d9f248f passed website 45789563076, combat 45789562818, systems 45789563061 and protocol 45789562955. Scope reviewed: progression, foreground/offline boundary, UI, developer tests/research and documentation only; no price, XP, equipment, mastery or timing retuning. Final-head checks required after documentation reconciliation. Next: ready PR, protected merge, read main and verify Pages separately. Actual merge/deployment evidence will be recorded in PR conversation.

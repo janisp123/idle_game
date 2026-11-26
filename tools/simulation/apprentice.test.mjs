@@ -83,7 +83,7 @@ test("auto-Master requires earned 50 and explicit current-policy consent",()=>{
 test("login auto-Master uses identical tribute and claims each ready skill once",()=>{
   let s=newGame(0);s.skills.fishing.level=51;
   s.skills.mining.xp=xpToNextLevel(1);s.skills.training.xp=xpToNextLevel(1);
-  s.items.stone=25;s.items.iron_ore=4;s.items.log=12;s.coins=123;
+  s.items.stone=25;s.items.iron_ore=4;s.items.log=12;s.coins=44;
   s=setAutoMasterConsent(s,true);
   const manual=learnFromMaster(s,0,()=>.5);
   const out=enterGameWithApprentice(s,0,()=>.5);
@@ -91,7 +91,7 @@ test("login auto-Master uses identical tribute and claims each ready skill once"
   assert.deepEqual(out.mastery,manual.mastery);
   assert.deepEqual(out.levelsGained,{mining:1,training:1});
   assert.equal(out.state.items.stone,0);assert.equal(out.state.items.iron_ore,0);
-  assert.equal(out.state.items.log,12);assert.equal(out.state.coins,123);
+  assert.equal(out.state.items.log,12);assert.equal(out.state.coins,44); // insufficient for the first mandatory upgrade
   const again=enterGameWithApprentice(readSave(JSON.stringify(out.state)),0,()=>.5);
   assert.equal(again.mastery,undefined);assert.deepEqual(again.state,out.state);
 });

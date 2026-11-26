@@ -1,4 +1,5 @@
 import { APPRENTICE_BALANCE, apprenticeProgress, MASTER_CONSENT_VERSION, normalizeMasterConsent } from "./apprentice.mjs?v=apprentice-a2";
+import { previewAutoEquipment, AUTO_EQUIPMENT_AT, MAX_AUTO_EQUIPMENT_PURCHASES } from "./auto-equipment.mjs?v=apprentice-a4";
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
@@ -121,6 +122,8 @@ const validTime = value => Number.isSafeInteger(value) && value >= 0;
 export const MAX_WAGONS = APPRENTICE_BALANCE.maxSlots;
 // Derived, not saved. Preexisting routes are read/settled without truncation.
 export const getApprenticeProgress = state => apprenticeProgress(state, SKILL_IDS);
+export const autoEquipmentPreview = state => previewAutoEquipment(state, SKILL_IDS);
+export const autoEquipmentUnlocked = state => getApprenticeProgress(state).earnedLevels >= AUTO_EQUIPMENT_AT;
 export const queueCapacity = state => getApprenticeProgress(state).slots;
 /**
  * Independent skill progression and batch reward tuning.
@@ -960,9 +963,12 @@ export function enterGameWithApprentice(state, now = Date.now(), random = Math.r
   const allowed = state.apprenticeMasterConsent === MASTER_CONSENT_VERSION &&
     getApprenticeProgress(state).autoMasterUnlocked;
   const outcome = enterGame(state, now, random);
-  if (!allowed || !skillMasterOffer(outcome.state).ready.length) return outcome;
-  const result = claimSettledMaster(outcome);
-  return {...result, levelsGained:Object.fromEntries(result.mastery.ready.map(id=>[id,1]))};
+  let result=outcome;
+  if(allowed&&skillMasterOffer(outcome.state).ready.length){
+    result=claimSettledMaster(outcome);
+    result={...result,levelsGained:Object.fromEntries(result.mastery.ready.map(id=>[id,1]))};
+  }
+  return upgradeSettledEquipment(result);
 }
 
 /**
@@ -993,16 +999,43 @@ export function setArmourChoice(state, slot, family, now = Date.now(), random = 
 export function buyEquipment(state, id, target, now = Date.now(), random = Math.random) {
   if (!equipmentIds.has(id) || !isEquipmentItem(target)) throw new RangeError("Unknown equipment");
   const result = settle(state, now, random);
+  // An initial armour purchase remains a strategic selection, not an upgrade.
+  if(autoEquipmentUnlocked(result.state)&&Object.hasOwn(result.state.equipment,id))
+    return {...result,purchaseBlocked:"automatic_equipment"};
+  return purchaseSettledEquipment(result,id,target,true);
+}
+
+// One shared purchase mutation. The assistant passes equip=false and only
+// calls it with the currently equipped owned item from the validated planner.
+function purchaseSettledEquipment(result,id,target,equip){
   const quote = smithQuote(result.state, id, target);
   if (!quote.available) return result;
   const slot = id.split(":")[0];
-  const armour = Object.hasOwn(result.state.armour, slot)
+  const armour = equip && Object.hasOwn(result.state.armour, slot)
     ? { ...result.state.armour, [slot]: id.split(":")[1] } : result.state.armour;
   const current = result.state;
   return { ...result, purchased: true, state: { ...current, armour,
     coins: current.coins - quote.cost, equipment: { ...current.equipment,
       [id]: { grade: target.grade, quality: target.quality } },
     attributeEffortActive:{...current.attributeEffort},expertiseActive:{...current.expertise} } };
+}
+
+function upgradeSettledEquipment(outcome){
+  let current=outcome.state;
+  if(!autoEquipmentUnlocked(current))return outcome;
+  const upgrades=[];
+  let spent=0;
+  for(let i=0;i<MAX_AUTO_EQUIPMENT_PURCHASES;i++){
+    const next=autoEquipmentPreview(current).next;
+    if(!next?.available)break;
+    const purchase=purchaseSettledEquipment({state:current},next.id,next.target,false);
+    if(!purchase.purchased||current.coins-purchase.state.coins!==next.cost)throw new Error("Automatic smith quote mismatch");
+    current=purchase.state;spent+=next.cost;
+    upgrades.push({id:next.id,from:next.current,to:next.target,cost:next.cost});
+  }
+  const preview=autoEquipmentPreview(current);
+  if(preview.next?.available)throw new Error("Automatic equipment purchase bound exceeded");
+  return {...outcome,state:current,autoEquipment:{upgrades,spent,preview}};
 }
 
 /** Legacy instant selection helper retained for historical engine fixtures only; the UI uses requestActivityChange. */

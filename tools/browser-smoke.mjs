@@ -58,12 +58,12 @@ async function evaluate(expression){
   if(result.exceptionDetails)throw Error(result.exceptionDetails.exception?.description??result.exceptionDetails.text);
   return result.result.value;
 }
-async function navigate(label,storage=null){
+async function navigate(label,storage=null,beforeStart=""){
   const url=origin+"/play/?smoke="+label;
   // pagehide saves the old running character. Install synthetic fixtures on
   // the NEW document before modules start, not into the departing page.
-  const inject=storage?await send("Page.addScriptToEvaluateOnNewDocument",{source:
-    "if(location.href==="+JSON.stringify(url)+"){for(const [key,value] of Object.entries("+JSON.stringify(storage)+")){if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}}"}):null;
+  const inject=(storage||beforeStart)?await send("Page.addScriptToEvaluateOnNewDocument",{source:
+    "if(location.href==="+JSON.stringify(url)+"){for(const [key,value] of Object.entries("+JSON.stringify(storage??{})+")){if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}"+beforeStart+"}"}):null;
   const result=await send("Page.navigate",{url});
   assert.equal(result.errorText,undefined);
   await until(()=>evaluate(`location.href===${JSON.stringify(url)}&&document.readyState==="complete"&&document.getElementById("saveStatus")?.getAttribute("data-game-ready")==="true"`),"app loaded "+label);
@@ -115,7 +115,7 @@ try{
     await until(()=>evaluate('!document.getElementById("combatFlow").hidden'),"first automatic bout "+width);
     await evaluate(`Date.now=()=>${fixedNow}`);
     const apprentice=await evaluate(`(()=>{const menu=document.getElementById("apprenticeMenu");menu.querySelector("summary").click();const result={open:menu.open,text:menu.innerText,locked:[...menu.querySelectorAll("input")].every(i=>i.disabled),overflow:document.documentElement.scrollWidth-innerWidth};menu.querySelector("summary").click();return result;})()`);
-    assert.ok(apprentice.open&&apprentice.locked&&apprentice.overflow<=2);assert.match(apprentice.text,/0 earned levels/i);assert.match(apprentice.text,/Unlocks at LvL 50/);assert.match(apprentice.text,/1 \/ 5 activity slots unlocked/);
+    assert.ok(apprentice.open&&apprentice.locked&&apprentice.overflow<=2);assert.match(apprentice.text,/0 earned levels/i);assert.match(apprentice.text,/Unlocks at LvL 50/);assert.match(apprentice.text,/Unlocks at LvL 10/);assert.match(apprentice.text,/1 \/ 5 activity slots unlocked/);
     const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=15;s.name="Old alpha";return JSON.stringify(s);})()`);
     await navigate("reset-"+width,{[saveKey]:old,[clockKey]:JSON.stringify({version:1,realAnchorMs:0,gameAnchorMs:0,speed:10})});
     const notice=await evaluate('({hidden:document.getElementById("saveResetNotice").hidden,text:document.getElementById("saveResetNotice").textContent})');
@@ -168,7 +168,31 @@ try{
     assert.ok(statView.overflow<=2,"stat sheet horizontal overflow");
     await shot("stats-"+width);
     await navigate("persist-"+width);
-    assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})).coins`),200000);
+    const upgrade=await evaluate(`(()=>{const $=id=>document.getElementById(id),s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));
+      $("apprenticeMenu").open=true;document.querySelector('[data-loadout="bow"]').click();const report=$("apprenticeEquipmentReport");
+      return {s,report:report.textContent,hidden:report.hidden,status:$("apprenticeEquipmentStatus").textContent,next:$("apprenticeEquipmentNext").textContent,cost:$("apprenticeEquipmentCost").textContent,
+        controls:$("apprenticeEquipmentStatus").parentElement.querySelectorAll("input,button,select").length,disabled:$("smithBuy").disabled};})()`);
+    assert.equal(upgrade.s.coins,8750);assert.equal(upgrade.s.combatLoadout,"bow");
+    assert.equal(upgrade.s.equipment.bow.grade,6);assert.equal(upgrade.s.equipment.bow.quality,"poor");
+    assert.equal(upgrade.s.equipment.greatsword.grade,0);
+    assert.equal(upgrade.hidden,false);assert.match(upgrade.report,/191,250 coins/);
+    assert.match(upgrade.status,/Active/);assert.match(upgrade.next,/Bow/);assert.match(upgrade.cost,/8,750/);
+    assert.equal(upgrade.controls,0);assert.equal(upgrade.disabled,true);
+    await shot("auto-equipment-"+width);
+    await navigate("equipment-repeat-"+width);
+    const repeat=await evaluate(`(()=>({s:JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),hidden:document.getElementById("apprenticeEquipmentReport").hidden}))()`);
+    assert.deepEqual(repeat.s.equipment,upgrade.s.equipment);assert.equal(repeat.s.coins,upgrade.s.coins);assert.equal(repeat.hidden,true);
+    const failureFixture=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=apprentice-a4");const s=e.newGame(Date.now());s.skills.fighting.level=11;s.coins=1000;return JSON.stringify(s);})()`);
+    await navigate("equipment-write-fail-"+width,{[saveKey]:failureFixture,[clockKey]:null},
+      "const realSet=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k==="+JSON.stringify(saveKey)+")throw new Error('synthetic write failure');return realSet.call(this,k,v);};");
+    const failed=await evaluate(`(()=>{const $=id=>document.getElementById(id);return {s:JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),reportHidden:$("apprenticeEquipmentReport").hidden,notice:$("apprenticeEquipmentStatus").textContent,wallet:$("coinWallet").textContent};})()`);
+    assert.equal(failed.s.coins,1000);assert.equal(failed.s.equipment.greatsword.quality,"poor");assert.equal(failed.reportHidden,true);assert.match(failed.notice,/Unavailable/);assert.match(failed.wallet,/1,000 coins/);
+    await navigate("equipment-write-recover-"+width,{[saveKey]:failureFixture,[clockKey]:null});
+    const recovered=await evaluate(`(()=>({s:JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),hidden:document.getElementById("apprenticeEquipmentReport").hidden}))()`);
+    assert.equal(recovered.s.coins,755);assert.equal(recovered.s.equipment.greatsword.quality,"masterwork");assert.equal(recovered.hidden,false);
+    await navigate("equipment-no-lock-"+width,{[saveKey]:failureFixture,[clockKey]:null},"Object.defineProperty(navigator,'locks',{value:undefined});");
+    const unavailable=await evaluate(`(()=>({s:JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),status:document.getElementById("apprenticeEquipmentStatus").textContent,hidden:document.getElementById("apprenticeEquipmentReport").hidden}))()`);
+    assert.equal(unavailable.s.coins,1000);assert.equal(unavailable.hidden,true);assert.match(unavailable.status,/Unavailable/);
     const capped=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=cap-001");const start=Date.now()-86400000;
       const s=e.chooseActivity(e.newGame(start),"mining",start,()=>.5).state;return JSON.stringify(e.settle(s,Date.now(),()=>.5).state);})()`);
     await navigate("capped-"+width,{[saveKey]:capped,[clockKey]:null});
@@ -178,13 +202,13 @@ try{
     assert.match(pause.notice,/All rewards paused/);assert.equal(pause.reset,true);
     for(const key of ["items","attributeEffort","expertise","coins","skills"])assert.deepEqual(pause.before[key],pause.after[key]);
     await shot("capped-"+width);
-    const veteran=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=apprentice-a2");let s=e.newGame(Date.now());s.skills.fishing.level=51;s.skills.mining.xp=e.xpToNextLevel(1);s.items.stone=12;s.items.log=3;s.coins=50;return JSON.stringify(s);})()`);
+    const veteran=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=apprentice-a2");let s=e.newGame(Date.now());s.skills.fishing.level=51;s.skills.mining.xp=e.xpToNextLevel(1);s.items.stone=12;s.items.log=3;s.coins=44;return JSON.stringify(s);})()`);
     await navigate("master-opt-in-"+width,{[saveKey]:veteran,[clockKey]:null});
     const optIn=await evaluate(`(()=>{const el=document.getElementById("apprenticeAutoMaster"),key=${JSON.stringify(saveKey)};window.confirm=()=>false;el.click();const cancelled=!el.checked&&JSON.parse(localStorage.getItem(key)).apprenticeMasterConsent===0;window.confirm=()=>true;el.click();document.dispatchEvent(new Event("visibilitychange"));const s=JSON.parse(localStorage.getItem(key));return {cancelled,enabled:el.checked,disabled:el.disabled,s};})()`);
     assert.ok(optIn.cancelled&&optIn.enabled&&!optIn.disabled);assert.equal(optIn.s.apprenticeMasterConsent,1);assert.equal(optIn.s.skills.mining.level,1);assert.equal(optIn.s.items.stone,12);
     await navigate("master-claim-"+width);
     const claimed=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})),p=document.getElementById("apprenticeMasterReport");return {s,report:p.textContent,hidden:p.hidden};})()`);
-    assert.equal(claimed.s.skills.mining.level,2);assert.equal(claimed.s.skills.mining.xp,0);assert.equal(claimed.s.items.stone,0);assert.equal(claimed.s.items.log,3);assert.equal(claimed.s.coins,50);assert.equal(claimed.hidden,false);assert.match(claimed.report,/Mining LvL 2/);assert.match(claimed.report,/12 Stone/i);
+    assert.equal(claimed.s.skills.mining.level,2);assert.equal(claimed.s.skills.mining.xp,0);assert.equal(claimed.s.items.stone,0);assert.equal(claimed.s.items.log,3);assert.equal(claimed.s.coins,44);assert.equal(claimed.hidden,false);assert.match(claimed.report,/Mining LvL 2/);assert.match(claimed.report,/12 Stone/i);
     await navigate("master-repeat-"+width);
     assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})).skills.mining.level`),2);
     assert.equal(await evaluate('document.getElementById("apprenticeMasterReport").hidden'),true);
@@ -202,8 +226,8 @@ try{
         let s=e.newGame(start);
         if(mode==="impressive_victory"){
           s=a.alphaMaxStats(s,"plate",start,()=>.5).state;s={...s,coins:4000000};
-          s=e.buyEquipment(s,"greatsword",{grade:7,quality:"masterwork"},start,()=>.5).state;
-          for(const slot of ["head","torso","arms","legs"])s=e.buyEquipment(s,slot+":plate",{grade:7,quality:"masterwork"},start,()=>.5).state;
+          for(const slot of ["head","torso","arms","legs"])s=e.buyEquipment(s,slot+":plate",{grade:0,quality:"poor"},start,()=>.5).state;
+          s=e.enterGameWithApprentice(s,start,()=>.5).state;
         }else{s.skills.fighting.level=2;s.difficulties.fighting=7;s.autoFight.stage=7;}
         s=e.chooseActivity(s,"fighting",start,()=>.5).state;
         s=e.settle(s,now,()=>.5).state;

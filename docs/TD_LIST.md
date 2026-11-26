@@ -8,14 +8,23 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## APPRENTICE-A4 — Automatic equipped equipment progression
+
+- **Goal:** Once unlocked at ten earned activity levels, assistant handles quality and grade upgrades for selected weapon and equipped armour, never changes loadout. Show planned upgrade and cost/progress; player decides strategy, not individual purchase clicks.
+- **Acceptance:** Mandatory at 10 earned activity levels (no toggle), weakest-first, shared exact smith quote and sequential grade gates, deterministic bounded purchase loop, no off-loadout purchases/forced armour, settle offline first, safe save/reload, committed report, UI and economy regressions. Clan donations separately server-gated.
+- **Status:** IN_REVIEW — runtime, UI, economy and safety verification complete in [PR #184](https://github.com/janisp123/idle_game/pull/184); final-head release checks and Pages pending. [Validation](mechanics/APPRENTICE_A4_MANDATORY_VALIDATION.md).
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## AUTO-FIGHT-001 — Automatic Fighting difficulty progression
 
 - **Goal:** Automatically climb and retreat through eight existing arena grades; no active combat controls or manual Fighting difficulty selection. Offline remains fixed at the committed stage.
 - **Acceptance:** Tested 3/1/10 policy, saved stage/streak/history, committed live bout boundary, frozen offline payout, cap/queue/save parity, mobile/desktop progression readout, six-month economy validation, final CI and Pages.
-- **Status:** IN_REVIEW — [PR #183](https://github.com/janisp123/idle_game/pull/183); [economy and evidence](mechanics/AUTO_FIGHT_ECONOMY.md). Owner approved release; final-head checks and merge/Pages verification pending. Actual completion recorded after main readback.
+- **Status:** DONE — [PR #183](https://github.com/janisp123/idle_game/pull/183) merged 4413077e; final CI 45800661391/45800661359/45800661411/45800661340 PASS, Pages 45800800431 SUCCESS. [Economy evidence](mechanics/AUTO_FIGHT_ECONOMY.md).
 - **Added by:** chat.
 - **Requested by:** Owner.
-- **Implemented by:** Not yet (release pending).
+- **Implemented by:** chat (PR #183).
 
 ## APPRENTICE-A3 — Sequential equipment progression and tested combat balance
 

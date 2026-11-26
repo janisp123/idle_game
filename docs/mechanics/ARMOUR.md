@@ -1,5 +1,9 @@
 # Equipment and the smith
 
+## APPRENTICE-A4 — automatic equipped-item upgrades (release candidate)
+
+At ten combined earned activity levels, the assistant automatically upgrades the chosen owned weapon and non-None equipped armour on coordinated page entry, after ordinary offline settlement and any optional Master claim. No off switch, reserve or configurable purchase priority. Lowest nominal stage first; ties weapon then armour slot order. Save toward the next eligible legal upgrade. Exact existing smith prices and Fighting gates apply, no skips or refunds. Manual upgrades of owned items are blocked after unlock; initial armour acquisition and free equipment selection remain strategic player actions. No purchases on ordinary offline settlement, visibility return or ticks. Commit before displaying success; unsafe storage/unsupported coordination reports unavailable. The active bout retains its old equipment until the next boundary. See [mandatory economy validation](APPRENTICE_A4_MANDATORY_VALIDATION.md).
+
 Head, Torso, Arms and Legs each equip None, Padded, Leather or Plate. The four slots cover 12%, 33%, 31% and 24% of the fighter respectively. A full Padded suit provides 12% physical reduction, Leather provides 22%, and Plate provides 50%. Mixed suits contribute in proportion to each slot's coverage. Heavier gear reduces mobility and can reduce initiative. The smith's equipment panel shows the equipped build's total weight, mobility, armour, attack and guard.
 
 A fresh character can select any of the five Non-grade Poor weapons. Bow includes a backup dagger in its equipment profile, and Sword & Shield includes a heater shield. The bow switches to its dagger when arrows run out or the bow breaks. Armour is initially empty. Buy a family for a specific slot, then equip or unequip the owned piece for free. Select a weapon or armour slot to edit one item.

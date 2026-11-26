@@ -1,12 +1,12 @@
 import { requiredAutoFightWins } from "./auto-fight.mjs?v=auto-fight-03";
-import { characterStats } from "./character-stats.mjs?v=auto-fight-03";
+import { characterStats } from "./character-stats.mjs?v=apprentice-a4";
 import { MASTER_CONSENT_VERSION } from "./apprentice.mjs?v=apprentice-a2";
 import { combatVerdict } from "./combat-verdict.mjs?v=alpha-gear-a5";
 import { expertiseProgress,proficiency } from "./expertise.mjs?v=alpha-gear-a3";
 import { GRADES as difficultyGrades, benchmark, arenaBenchmark, canSelectDifficulty } from "./difficulty.mjs?v=gear-a3";
 import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote, equipmentUnlockLevel, nextEquipmentUpgrade } from "./smith.mjs?v=gear-a3";
 import {
-  setDifficulty, buyEquipment, activateExpertise, arenaBoutProgress, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
+  setDifficulty, buyEquipment, autoEquipmentPreview, autoEquipmentUnlocked, activateExpertise, arenaBoutProgress, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
   lootChances, recipeOptions, newGame, chooseActivity, readSave, settle, settleLive,
   enterGame, enterGameWithApprentice, setAutoMasterConsent, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
@@ -14,7 +14,7 @@ import {
   getApprenticeProgress, queueCapacity, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, activityRewardCapped, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=auto-fight-03";
+} from "./engine.mjs?v=apprentice-a4";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=gear-a3";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-art-001";
@@ -24,7 +24,7 @@ import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats, dodgeChance }
   from "./armour.mjs?v=bal-002";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=auto-fight-03";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=apprentice-a4";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -161,9 +161,10 @@ function renderArmour() {
   // These fields show the only legal next stage, not a free grade selector.
   ui.itemGrade.disabled = true;
   ui.itemQuality.disabled = true;
-  ui.smithBuy.disabled = !quote?.available;
+  const automatic=Boolean(item&&autoEquipmentUnlocked(state));
+  ui.smithBuy.disabled = automatic||!quote?.available;
   const quotedCost=quote?.cost ? number(quote.cost) + " coins" : "";
-  ui.smithBuy.textContent = quote?.reason==="fighting_level" ?
+  ui.smithBuy.textContent = automatic&&next ? "Upgraded by your apprentice" : quote?.reason==="fighting_level" ?
     "Fighting " + quote.requiredFightingLevel + " required · " + quotedCost :
     quote?.reason==="coins" ? "Need " + quotedCost :
     quote?.available ? (item ? "Improve" : "Buy and equip") + " · " + quotedCost :
@@ -422,6 +423,7 @@ function persistState(next) {
         lastStoredText = actual;
         latestWorkResult = null;
         $("apprenticeMasterReport").hidden = true;
+        $("apprenticeEquipmentReport").hidden = true;
         message("Save updated in another tab. Please retry your action.");
       } else {
         storageWorks = false;
@@ -897,6 +899,15 @@ function renderApprentice() {
       : autoMaster.checked
         ? "Enabled · On next login, advance ready skills and pay their full tribute."
         : "Optional · On login, advance ready skills and surrender ALL their produced resources.";
+  const equipment=autoEquipmentPreview(state);
+  const next=equipment.next;
+  const status=$("apprenticeEquipmentStatus");
+  status.textContent=!equipment.unlocked?"Unlocks at LvL "+equipment.unlockAt:
+    !autoLoginSupported||!storageWorks?"Unavailable · Safe local save and login coordination required.":
+    equipment.reason==="complete"?"All equipped gear is S Masterwork.":
+    "Active · Equipped gear upgrades automatically on login.";
+  $("apprenticeEquipmentNext").textContent=equipment.unlocked&&next?equipmentLabel(next.id)+" · "+ITEM_GRADES[next.current.grade]+" "+titleCase(next.current.quality)+" → "+ITEM_GRADES[next.target.grade]+" "+titleCase(next.target.quality):"";
+  $("apprenticeEquipmentCost").textContent=equipment.unlocked&&next?number(state.coins)+" / "+number(next.cost)+" coins"+(equipment.reason==="fighting_level"?" · Fighting "+next.requiredFightingLevel+" required":next.available?" · Ready on next login":" · Saving"):"";
   $("apprenticeLegacy").hidden = used <= progress.slots;
   $("queueUnlockHint").textContent = progress.nextSlotAt === null
     ? "All activity slots unlocked."
@@ -1212,6 +1223,20 @@ function planActivity(kind, untilLevelUp = false) {
   ui.queuePlanner.hidden = false;
 }
 
+function equipmentLabel(id){
+  if(COMBAT_LOADOUTS[id])return COMBAT_LOADOUTS[id].name;
+  const [slot,family]=id.split(":");
+  return titleCase(family)+" "+ARMOUR_SLOT_BY_ID[slot].name;
+}
+function showApprenticeEquipmentReport(result){
+  const report=result.autoEquipment,target=$("apprenticeEquipmentReport");
+  if(!report?.upgrades.length){target.hidden=true;return;}
+  const final=new Map();
+  for(const step of report.upgrades)final.set(step.id,step.to);
+  target.textContent="Apprentice purchased "+number(report.upgrades.length)+" upgrades for "+number(report.spent)+" coins. "+Array.from(final,([id,item])=>equipmentLabel(id)+": "+ITEM_GRADES[item.grade]+" "+titleCase(item.quality)).join("; ")+ ".";
+  target.hidden=false;
+  message(target.textContent);
+}
 function showApprenticeMasterReport(result) {
   const target = $("apprenticeMasterReport");
   const levels = result.mastery.ready.map(id => ACTIVITIES[id].title + " LvL " + number(result.state.skills[id].level));
@@ -1252,18 +1277,19 @@ function start(coordinatedLogin = false) {
     const result = autoLoginSupported && storageWorks
       ? enterGameWithApprentice(state, now)
       : enterGame(state, now);
-    if (result.mastery) {
+    if (result.mastery || result.autoEquipment?.upgrades.length) {
       // No success notification or applied sacrifice until the new save is committed.
       if (persistState(result.state)) {
         state = result.state;
         reportProgress(result);
-        showApprenticeMasterReport(result);
+        if(result.mastery)showApprenticeMasterReport(result);
+        showApprenticeEquipmentReport(result);
       } else {
         const ordinary = enterGame(state, now);
         state = ordinary.state;
         reportProgress(ordinary);
         writeSave();
-        message("Apprentice skipped: automatic advancement could not be safely saved.");
+        message("Apprentice skipped: automatic chores could not be safely saved.");
       }
     } else {
       state = result.state;
@@ -1333,6 +1359,7 @@ function start(coordinatedLogin = false) {
       breakForegroundContinuity();
       state=newStartingCharacter(Date.now());
       $("apprenticeMasterReport").hidden=true;
+      $("apprenticeEquipmentReport").hidden=true;
       latestWorkResult=null;
       lastCombatEventKey=null;
       lastWagonSignature=null;
@@ -1446,6 +1473,7 @@ function start(coordinatedLogin = false) {
         breakForegroundContinuity();
         lastStoredText = current;
         $("apprenticeMasterReport").hidden=true;
+      $("apprenticeEquipmentReport").hidden=true;
         latestWorkResult = null; // another tab's loot cannot be asserted locally
         render();
         message("Save updated from another tab.");
