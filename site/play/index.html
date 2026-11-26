@@ -8,8 +8,8 @@
   <title>Play — Idle Game</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
-  <link rel="stylesheet" href="./iron-ui.css?v=apprentice-a1">
-  <script type="module" src="./app.mjs?v=auto-fight-03"></script>
+  <link rel="stylesheet" href="./iron-ui.css?v=auto-fight-04">
+  <script type="module" src="./app.mjs?v=auto-fight-04"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -198,6 +198,16 @@
             </div>
             <div id="combatFlowMeter" class="combat-flow-meter" role="progressbar" aria-label="Current combat action" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="combatFlowFill"></span></div>
           </div>
+          <section id="autoFightProgress" class="auto-fight-progress" hidden aria-label="Automatic fighting progression">
+            <div class="auto-fight-grades">
+              <div><span>Current difficulty</span><strong id="autoFightStage">Non-grade</strong></div>
+              <div><span>Highest defeated</span><strong id="autoFightHighest">None yet</strong></div>
+            </div>
+            <p id="autoFightNext"></p>
+            <div id="autoFightMeter" class="meter auto-fight-meter" role="progressbar" aria-label="Wins toward next difficulty" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="autoFightFill"></span></div>
+            <p id="autoFightStatus"></p>
+            <p class="hint">Offline fighting stays at the current difficulty.</p>
+          </section>
           <section id="wagonQueue" class="wagon-queue" hidden aria-label="Your activity route">
             <p class="wagon-queue-heading">YOUR ROUTE · THREE TASKS</p>
             <div id="wagonList" class="wagon-list" aria-label="Ordered activity tasks"></div>
