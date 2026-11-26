@@ -2,7 +2,7 @@
 
 ## APPRENTICE-A4-04 · STARTED (2026-11-26, chat)
 
-Owner requested continuation. Head d1207f59: 117 regression tests PASS, systems 45806458496, combat 45806458514, protocol 45806458619 PASS; Chromium 45806458567 failed disabled-button assertion (initial armour still purchasable). Correct fixture to select owned weapon. Run actual mandatory login trajectories, safe-save/browser checks and preserve results. No release before gates.
+Owner requested continuation. Head d1207f59: 117 regression tests PASS, systems 45806458496, combat 45806458514, protocol 45806458619 PASS; Chromium 45806458567 failed disabled-button assertion (initial armour still purchasable). Correct fixture to select owned weapon. [Mandatory economy study](mechanics/APPRENTICE_A4_MANDATORY_VALIDATION.md) complete: 30 trajectories, 1,672,886 bouts, 2,822 automatic purchases, 4,476 frozen offline checks. Daily level10 day15, all 15 full S MW days166–169. All four CI PASS at 5d0ec222; additional failure-path browser tests and native pilot gate pending. No deployment. Next A4-05 final CI and release.
 
 ## APPRENTICE-A4-03 · STARTED (2026-11-26, chat)
 
