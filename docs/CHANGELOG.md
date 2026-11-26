@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## TEAM-003 · STARTED (2026-11-26, chat)
+
+Owner approved playable integration. TEAM-002 final head 6f3ea1d7 all four CI PASS (website 45828503737, systems 45828503661, combat 45828503697, protocol 45828503640). First integrate versioned frozen team timeline and exact reward/practice settlement in isolated modules; then save/engine/login, UI, test and deploy. No final balance tuning yet. PR #188.
+
 ## TEAM-002 · STARTED (2026-11-26, chat)
 
 Owner approved modular team combat and slow Teamwork skill: decisions improve, no generic damage bonus. Extend developer systems lab for bulk team fights; support roster-based resolver with bounded actor counts, initially 2v2 only in eventual playable integration. Shared physical attack primitives, exact legacy duel trace parity, no live team wiring yet. PR #188. Foundation native 67 checks passed (systems 45821758917).
