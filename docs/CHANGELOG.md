@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## ACTIVE-PROGRESSION-001 · STARTED (2026-11-26, chat)
+
+Owner explicitly requests permanent design rule for independent active-choice progression, automatic login mastery, and meaningful combination performance. Documentation only; separate from paused research PR #186. No formula or gameplay change. [PR #187](https://github.com/janisp123/idle_game/pull/187) records rule in AGENTS and DECISIONS; pending protected merge. Research PR #186 remains paused.
+
 ## APPRENTICE-A5 · STARTED (2026-11-26, chat)
 
 Owner approved full-screen analytical login report, dismiss manually or automatically after 10 seconds. Include actual offline encounters, wins, losses, rewards, skill/attribute/expertise progress, resource flows and committed automation upgrades/tribute. Baseline 9cdc3364; A4 merged PR #184 and Pages 45810631099 SUCCESS. Read-only report; no progression/economy changes. [Implementation and evidence](mechanics/APPRENTICE_A5_LOGIN_REPORT.md). Native projection PASS, 117 regressions PASS, mobile timer 10063ms; desktop scrollbar gap corrected, new failed-save assertions pending final browser checks. Same-session report reopen; no save migration. Draft PR #185; next all final CI and merge/Pages verification.
