@@ -1,8 +1,8 @@
 # Current working checkpoint
 
-## AUTO-FIGHT-01 — research started (draft PR #183)
+## AUTO-FIGHT-01 — production research complete, implementation pending (draft PR #183)
 
-Owner approved automatic fighting progression with **difficulty frozen offline** (no advance or retreat). [Policy screen and corrected contract](mechanics/AUTO_FIGHT_POLICY_SCREEN.md), [raw results](mechanics/AUTO_FIGHT_POLICY_SCREEN.json), `node tools/auto-fight-policy-screen.mjs`. Baseline de5853ae; 16,588,800 synthetic policy draws using existing empirical holdout, not new physical duels. 3 wins / 1 loss / 10 retry wins is provisional; further production-linked validation and offline boundary tests required. No gameplay change or deployment. Pending branch `research/auto-fight-policy-001`, [draft PR #183](https://github.com/janisp123/idle_game/pull/183). Next: production-linked simulation, then policy implementation and offline/online integration, preserving A3 and CAP-001.
+Owner approved automatic fighting progression with **difficulty frozen offline** (no advance or retreat). [Initial empirical screen](mechanics/AUTO_FIGHT_POLICY_SCREEN.md), [production-linked validation](mechanics/AUTO_FIGHT_PRODUCTION_VALIDATION.md), [raw results](mechanics/AUTO_FIGHT_PRODUCTION_VALIDATION.json), `node tools/auto-fight-production-validation.mjs`. Baseline de5853ae; 16,588,800 synthetic policy draws followed by 90,720 actual unpatched production duel outcomes and 1,680 fixed-stage wallet checks. 3/1/10 preferred candidate: trajectory 84.23% online and 90.19% offline income relative to hindsight fixed-tier benchmark, 17.48% losses, 3.14 changes/h. Native CI not verified. No gameplay changes/deployment. Pending branch `research/auto-fight-policy-001`, [draft PR #183](https://github.com/janisp123/idle_game/pull/183). Next AUTO-FIGHT-02/03: pure policy and online/offline settlement integration, then UI, six-month economy, tests and deploy; preserve A3, CAP-001 and OFF-001. Early retry on gear change remains unvalidated.
 
 ## APPRENTICE-A3 — deployed
 
