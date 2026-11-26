@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## TEAM-002 · STARTED (2026-11-26, chat)
+
+Owner approved modular team combat and slow Teamwork skill: decisions improve, no generic damage bonus. Extend developer systems lab for bulk team fights; support roster-based resolver with bounded actor counts, initially 2v2 only in eventual playable integration. Shared physical attack primitives, exact legacy duel trace parity, no live team wiring yet. PR #188. Foundation native 67 checks passed (systems 45821758917).
+
 ## TEAM-001 · STARTED (2026-11-26, chat)
 
 Owner approved two gladiators from the start, shared character base attributes, independent gear and expertise, automatic upgrades, symmetrical team combat. Pets and tactics postponed. [PR #188](https://github.com/janisp123/idle_game/pull/188) foundation first; test before wiring into live engine. ACTIVE-PROGRESSION-001 merged d6a56fae; systems 45819489538 and protocol 45819489532 PASS. A5 merged e8d6dbd0 and Pages 45812960184 SUCCESS.
