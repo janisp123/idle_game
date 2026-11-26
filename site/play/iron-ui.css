@@ -1040,3 +1040,13 @@ footer p{color:#aa9680}
 .apprentice-option input{margin-top:3px}
 .apprentice-option span{grid-column:2;color:#bca383;font-size:11px;font-weight:400}
 #queueUnlockHint{margin:0 0 8px}
+
+/* AUTO-FIGHT-04: compact, read-only progression; no active battle controls. */
+.auto-fight-progress { margin: 10px 12px; padding: 10px 12px; border: 1px solid rgba(181,144,88,.35); }
+.auto-fight-progress[hidden], .auto-fight-meter[hidden] { display:none; }
+.auto-fight-grades { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.auto-fight-grades div { display:grid; gap: 3px; min-width:0; }
+.auto-fight-grades span, .auto-fight-progress p { font-size:.78rem; margin: 5px 0; overflow-wrap:anywhere; }
+.auto-fight-grades strong { font-size:1rem; color:#e3c38d; }
+.auto-fight-meter { height:6px; margin:6px 0; }
+.auto-fight-meter span { display:block; height:100%; background:#b59058; }
