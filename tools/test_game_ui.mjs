@@ -805,20 +805,15 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     elements.get("itemQuality").value = "fine";
     elements.get("itemQuality").fire("change");
     assert.equal(elements.get("itemQuality").value,"common");
-    elements.get("smithBuy").fire("click");
-    let bought=JSON.parse(store.get(SAVE_KEY));
-    assert.equal(bought.coins,455);
-    assert.equal(bought.equipment.sword_shield.quality,"common");
-    elements.get("smithBuy").fire("click");
-    bought=JSON.parse(store.get(SAVE_KEY));
-    assert.equal(bought.coins,380);
-    assert.equal(bought.equipment.sword_shield.quality,"fine");
+    assert.equal(elements.get("smithBuy").hidden,true,"owned gear is not manually upgraded");
+    assert.equal(elements.get("smithBuy").disabled,true);
+    tick();
+    const bought=JSON.parse(store.get(SAVE_KEY));
+    assert.equal(bought.coins,255);
+    assert.equal(bought.equipment.sword_shield.quality,"masterwork");
     assert.equal(bought.equipment.greatsword.quality,"poor");
-    elements.get("smithBuy").fire("click");
-    assert.equal(JSON.parse(store.get(SAVE_KEY)).coins,255);
     assert.equal(elements.get("itemGrade").value,"1");
     assert.equal(elements.get("itemQuality").value,"poor");
-    assert.equal(elements.get("smithBuy").disabled,true);
     assert.equal(selectedCount(), 1);
 
     // Alpha Tools: a reset and one-day test are momentary switches, while
