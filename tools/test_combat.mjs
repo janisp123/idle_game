@@ -6,7 +6,7 @@ import { newGame, chooseActivity, settle, enterGame, readSave, setCombatLoadout,
   buyEquipment, allAttributeProgress, learnFromMaster, effectiveAttributeProgress, xpToNextLevel } from "../site/play/engine.mjs";
 const YEAR = 365 * 24 * 3_600_000;
 const STEP_MS = 5_000;
-const fighterState=(now,level=2,tier=0)=>{const s=newGame(now);s.skills.fighting.level=level;s.difficulties.fighting=tier;return s;};
+const fighterState=(now,level=2,tier=0)=>{const s=newGame(now);s.skills.fighting.level=level;s.difficulties.fighting=tier;s.autoFight.stage=tier;return s;};
 test("changing armour mid-Fighting preserves earned progression and refreshes frozen power",()=>{
   const init=chooseActivity(fighterState(0),"fighting",0,()=>.5).state;
   init.items.stone=77;
@@ -211,7 +211,8 @@ test("A7 repeated edits cannot skip loss recovery or steal practice",()=>{
   const end=42+(lost+1)*BOUT_MS;
   const before=settle(first,end-20000,()=>.5).state;
   const switched=setCombatLoadout(before,"bow",end-20000,()=>.5).state;
-  const changed=setDifficulty(switched,"fighting",7,end-15000,()=>.5).state;
+  assert.throws(()=>setDifficulty(switched,"fighting",7,end-15000,()=>.5),/automatically/);
+  const changed=settle(switched,end-15000,()=>.5).state;
   const again=setCombatLoadout(changed,"spear",end-10000,()=>.5).state;
   assert.equal(again.combatSession.player.loadout,"greatsword");
   assert.equal(again.combatSession.player.difficulty,3);
@@ -222,7 +223,7 @@ test("A7 repeated edits cannot skip loss recovery or steal practice",()=>{
   assert.deepEqual(after.expertise,control.expertise);
   assert.equal(after.coins,control.coins);
   assert.equal(after.combatSession.player.loadout,"spear");
-  assert.equal(after.combatSession.player.difficulty,7);
+  assert.equal(after.combatSession.player.difficulty,3);
   const following=settle(after,end+BOUT_MS,()=>.5).state;
   assert.ok(following.expertise.spear>0);
   assert.equal(following.expertise.greatsword,after.expertise.greatsword);
