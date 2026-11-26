@@ -31,6 +31,7 @@ on:
       - 'tools/test_login_report.mjs'
       - 'tools/test_team_foundation.mjs'
       - 'tools/test_team_combat.mjs'
+      - 'tools/test_team_timeline.mjs'
       - 'docs/mechanics/TEAM_002_PILOT.json'
       - 'tools/auto-fight-economy.mjs'
       - 'tools/apprentice-a4-mandatory-economy.mjs'
@@ -68,6 +69,7 @@ jobs:
           node tools/test_login_report.mjs
           node tools/test_team_foundation.mjs
           node tools/test_team_combat.mjs
+          node tools/test_team_timeline.mjs
           node --test tools/test_system_lab.mjs
           node --test tools/simulation/clan-fixtures.test.mjs
           node --test tools/simulation/apprentice.test.mjs
