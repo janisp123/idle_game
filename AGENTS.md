@@ -1,5 +1,10 @@
 # Agent instructions — Idle Game and public research library
 
+## Endgame-first combat balance — ENDGAME-BALANCE-001 (2026-11-26)
+
+**Owner-approved priority.** The game is automatic and players progress through basic gear relatively quickly. Prioritize top-grade equipment (especially S-grade, including Masterwork), mature attributes, expertise and tactic mastery when evaluating weapon/armour/behaviour balance, meaningful choices, environmental counters and potential future PvP metas. Use high-end results to guide buffs and nerfs; NG and intermediate grades are secondary progression/sanity checks, not the primary balance target. Preserve meaningful gear advancement, reasonable early playability and existing progression constraints. Validate competitive endgame PvE offline earnings as well as matched-team combat; do not infer balance solely from overmatched farming fixtures.
+
+
 ## Mandatory research and simulation persistence — RESEARCH-SAVE-001 (2026-11-25)
 
 **Owner-approved; applies to chat, cw and codex. GitHub is the source of truth, not chat memory.** After every research or battle/game-system simulation session, including unsuccessful, negative, inconclusive or partial runs, save a durable, searchable record to the repository before reporting completion or moving to another task. Push meaningful milestones during long runs so a new chat can resume without reconstructing the conversation.
