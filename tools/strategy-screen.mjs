@@ -1,0 +1,12 @@
+import {readFile} from "node:fs/promises";
+import {resolvePhysicalDuel} from "../site/play/physical-duel.mjs";
+import {createPlayerSnapshot} from "./combat-simulator.mjs";
+import {ARENAS} from "../site/play/arenas.mjs";
+import {seededCombatRandom} from "../site/play/combat.mjs";
+import {candidateSource,screen} from "./strategy-candidate.mjs";
+const grade=Number(process.argv[2]??0),repeats=Number(process.argv[3]??12),seed=Number(process.argv[4]??20261126);
+if(![0,3,7].includes(grade)||!Number.isSafeInteger(repeats)||repeats<1||repeats>128)throw Error("Invalid screen configuration");
+const original=await readFile(new URL("../site/play/physical-duel.mjs",import.meta.url),"utf8");
+const patched=candidateSource(original).replace('"./armour.mjs?v=bal-002"',JSON.stringify(new URL("../site/play/armour.mjs?v=bal-002",import.meta.url).href));
+const {resolvePhysicalDuel:candidate}=await import("data:text/javascript;base64,"+Buffer.from(patched).toString("base64"));
+console.log(JSON.stringify(screen({baseline:resolvePhysicalDuel,candidate,createPlayerSnapshot,ARENAS,seededCombatRandom},grade,seed,repeats)));
