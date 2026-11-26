@@ -3,7 +3,7 @@ import {initialTeam,teamSnapshots,chooseTeamWeapon,awardTeamPractice} from "../s
 import {initialTeamwork,awardTeamwork} from "../site/play/teamwork.mjs";
 import {ARENA_SCHEDULE_BOUTS,BOUT_MS,RESURRECTION_MS} from "../site/play/combat.mjs";
 import {arenaReward} from "../site/play/arena-wallet.mjs";
-import {startTeamSession,validTeamSession,teamCombatAtTime,settleTeamSession,applyTeamSettlement} from "../site/play/team-timeline.mjs";
+import {startTeamSession,validTeamSession,teamCombatAtTime,settleTeamSession,applyTeamSettlement,teamArenaReward,TEAM_REWARD_PERCENT} from "../site/play/team-timeline.mjs";
 
 const seed=20261126,team=initialTeam(),shared={str:10,dex:10,end:10,skill:1,difficulty:0};
 const snapshots=teamSnapshots(team,shared),session=startTeamSession(snapshots,1,seed);
@@ -34,7 +34,9 @@ assert.deepEqual(current,whole.session);
 assert.deepEqual(sum(parts),sum([whole]));
 assert.deepEqual(practice(parts),whole.practiceMs);
 assert.equal(whole.bouts,whole.victories+whole.defeats+whole.doubleDeaths);
-assert.equal(whole.coins,whole.victories*arenaReward(0));
+assert.equal(TEAM_REWARD_PERCENT,140);
+for(let grade=0;grade<8;grade++)assert.equal(teamArenaReward(grade),Math.round(arenaReward(grade)*1.4));
+assert.equal(whole.coins,whole.victories*teamArenaReward(0));
 assert.ok(whole.downtimeMs>=0&&whole.downtimeMs<=duration);
 const manual={victory:0,defeat:0,double_death:0};
 let fallen=0;
