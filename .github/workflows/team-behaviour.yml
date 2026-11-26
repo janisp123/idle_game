@@ -1,4 +1,4 @@
-name: Offline behaviour session audit
+name: Armour durability and build diversity audit
 on:
   pull_request:
     branches: [main]
@@ -7,6 +7,7 @@ on:
       - 'tools/team-behaviour-refine.mjs'
       - 'tools/individual-behaviour-audit.mjs'
       - 'tools/offline-behaviour-audit.mjs'
+      - 'tools/armour-durability-audit.mjs'
       - '.github/workflows/team-behaviour.yml'
   workflow_dispatch:
 permissions:
@@ -19,25 +20,25 @@ jobs:
       fail-fast: false
       matrix:
         grade: [0,3,7]
-        mastery: [1,25,50]
+        candidate: [0,1,2]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
-      - name: Compare behaviour against production automatic combat
+      - name: Compare material durability and role diversity
         env:
           GRADE: ${{ matrix.grade }}
-          MASTERY: ${{ matrix.mastery }}
-        run: node tools/offline-behaviour-audit.mjs "$GRADE" "$MASTERY" > behaviour.json
+          CANDIDATE: ${{ matrix.candidate }}
+        run: node tools/armour-durability-audit.mjs "$GRADE" "$CANDIDATE" > behaviour.json
       - name: Print verified summary
         run: |
           node --input-type=module -e '
             import {readFileSync} from "node:fs";
-            const {rows,...r}=JSON.parse(readFileSync("behaviour.json","utf8"));
-            console.log("TEAM_OFFLINE "+JSON.stringify(r));'
+            const {equipment,screened,...r}=JSON.parse(readFileSync("behaviour.json","utf8"));
+            console.log("TEAM_ARMOUR "+JSON.stringify(r));'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: team-behaviour-${{ matrix.grade }}-${{ matrix.mastery }}
+          name: team-behaviour-${{ matrix.grade }}-${{ matrix.candidate }}
           path: behaviour.json
           retention-days: 7
