@@ -112,7 +112,7 @@ export function vitals(target) {
 
 
 // Shared physical strike. Geometry and turn policy belong to the caller.
-export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,speedRoll,record,interruptApproach}){
+export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,speedRoll,record,interruptApproach,onBleed=()=>{}}){
   const attack = actor.counter && actor.shield.hp > 0 ? BASH : active;
   const counter = actor.counter;
   actor.counter = false;
@@ -173,7 +173,7 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   }
   if (intact && attack.move !== "dagger" && attack !== BASH && wear(actor.weapon, 3)) broken.push("attack weapon");
   if (block && target.shield.hp > 0) target.counter = attack.type !== "blunt" && guardRoll < GUARD.counterChance;
-  if (!block && !parry && damage >= 8 && attack.type !== "blunt") target.bleed = Math.max(target.bleed, 2);
+  if (!block && !parry && damage >= 8 && attack.type !== "blunt") { target.bleed = Math.max(target.bleed, 2); onBleed(actor,target); }
   if (attack.type === "blunt" && (damage >= 8 || attack === BASH)) {
     target.stagger=1;
     // A heavy impact opens a guard without permanently breaking Masterwork.
