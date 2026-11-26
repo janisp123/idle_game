@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## TEAM-004 — combined release candidate
+
+TEAM-004 owner approved +40% team-only coin payout and centered geometry after sensitivity (cf1fdfe5 all six CI PASS; 24 trajectories, 1,606,627 progression bouts and 230,400 direct comparisons). Runtime payout Math.round(old solo prize × 1.4) per victory; no price/XP/damage changes. Centered 8/9/10 tiles, mirrored traversal. Team timeline V2, alpha save V17 with explicit reset notice for V16. Two independent Alpha Max Stats armour-family selections; team shared productive floor 3700h, selected weapon and chosen armour floors 3400h each, Fighting 52; no inactive expertise/gear/coin grant. Combined [audit](mechanics/TEAM_004_COMBINED.json) native run 45836661957 all eight jobs PASS: five daily pure Fighting scenarios completed both S Masterwork kits days171–178, weekly/mixed did not. Browser regression at 3065ee2b/a6b5983c initially failed due to uninitialized second-family select; fixed 0e6466b9. Final browser/CI and release pending; no deployment. V16 alpha reset will discard existing local test progress only when released, under ALPHA-FOCUS-001. Next verify final head, inspect overlaps, merge only after all gates, verify Pages.
+
 ## TEAM-004 — sensitivity verified
 
 [Report](mechanics/TEAM_004_SENSITIVITY.md), [results](mechanics/TEAM_004_SENSITIVITY.json). Native all six workflows PASS cf1fdfe5; sensitivity 11 jobs PASS 45835269294. +40% reaches full S Masterwork both fighters day171–174 in 8/8, +25% 1/8, baseline 0/8. Larger mirrored tests show small side deviations (max 3.83 pp), centered arena corrects unequal space with little balance effect. Trained adjacent grades remain dominant but novice high grade can lose to mastered lower gear. Recommended combined candidate +40% team-only payout and centered geometry; validate combined, alpha controls and release gates. No gameplay changes in this audit; no deployment.
