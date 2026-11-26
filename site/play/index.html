@@ -9,7 +9,8 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css?v=auto-fight-04">
-  <script type="module" src="./app.mjs?v=apprentice-a4"></script>
+  <link rel="stylesheet" href="./login-report.css?v=apprentice-a5">
+  <script type="module" src="./app.mjs?v=apprentice-a5"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -27,7 +28,7 @@
         <p class="eyebrow">✣ THE FIRST EMBER · THE LONG VIGIL</p>
         <h1>THE <em>LONG VIGIL</em></h1>
       </div>
-      <div class="status-pill" id="saveStatus" role="status">Local save</div>
+      <div><div class="status-pill" id="saveStatus" role="status">Local save</div><button id="loginReportReopen" class="small-button" type="button" hidden>Last login report</button></div>
     </div>
 
     <section id="saveResetNotice" class="panel" aria-label="Alpha save reset" hidden>
@@ -290,5 +291,13 @@
     </div>
     <footer aria-label="Project credit"><p>Made by Janis Paegle 2026</p></footer>
   </main>
+  <dialog id="loginReport" class="login-report" aria-labelledby="loginReportHeading">
+    <header class="login-report-head">
+      <div><p class="login-report-eyebrow">THE LONG VIGIL · CHARACTER ANALYTICS</p><h2 id="loginReportHeading">Welcome back</h2><p id="loginReportElapsed"></p></div>
+      <button type="button" id="loginReportDismiss" autofocus>Continue to game <span aria-hidden="true">×</span></button>
+    </header>
+    <div id="loginReportBody" class="login-report-body"></div>
+    <footer class="login-report-footer"><span id="loginReportCountdown">Auto-close in 10s</span><span>Reopen your last login report from the game header.</span></footer>
+  </dialog>
 </body>
 </html>
