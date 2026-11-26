@@ -5,7 +5,7 @@ import { combatAtTime, BOUT_MS } from "../site/play/combat.mjs";
 import { combatArtworkForEvent } from "../site/play/combat-art.mjs";
 import { combatFlowState } from "../site/play/combat-flow.mjs";
 import { combatReadoutForEvent, workReadoutForReport } from "../site/play/result-readout.mjs";
-import { newGame, chooseActivity, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP, xpToNextLevel } from "../site/play/engine.mjs";
+import { newGame, newTeamGame, chooseActivity, SCHEDULE_BALANCE, ACTIVITIES, ITEM_KEYS, SAVE_KEY, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS, MINUTE_MS, HOUR_MS, UNTIL_LEVEL_UP, xpToNextLevel } from "../site/play/engine.mjs";
 
 test("the final recovery tick leads into a fresh arena bout", () => {
   const session = { seed: 42, elapsedMs: BOUT_MS - 1,
@@ -162,7 +162,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     "the hourglass strip must be a grid, not a horizontally scrolling row");
   assert.doesNotMatch(queueCss, /\.wagon-list\s*\{[^}]*overflow-x:auto/s);
   const appSource = readFileSync(new URL("../site/play/app.mjs", import.meta.url), "utf8");
-  assert.match(html, /app\.mjs\?v=apprentice-a5/,
+  assert.match(html, /app\.mjs\?v=team-004/,
     "new stat UI must invalidate cached app JavaScript");
   assert.doesNotMatch(appSource, /queueMasteryMode/,
     "the app must not reference a removed planner control");
@@ -950,7 +950,7 @@ test("real browser-app entrypoint renders skill UI and reloads a current saved c
     assert.equal(store.has("idle-game-alpha-clock-v1"),false,
       "full reset removes acceleration and virtual-time offset");
     const reset=JSON.parse(store.get(SAVE_KEY));
-    assert.deepEqual(reset,chooseActivity(newGame(now), "fighting", now, ()=>.5).state,
+    assert.deepEqual(reset,chooseActivity(newTeamGame(now), "fighting", now, ()=>.5).state,
       "reset restores every starting default including levels, stats, coins and starting arena route");
     assert.equal(reset.skills.mining.level,1);
     assert.equal(reset.items.stone,0);

@@ -1,6 +1,9 @@
 import { APPRENTICE_BALANCE, apprenticeProgress, MASTER_CONSENT_VERSION, normalizeMasterConsent } from "./apprentice.mjs?v=apprentice-a2";
 import { previewAutoEquipment, AUTO_EQUIPMENT_AT, MAX_AUTO_EQUIPMENT_PURCHASES } from "./auto-equipment.mjs?v=apprentice-a4";
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
+import { initialTeam,validGladiator,teamSnapshots,awardTeamPractice,activateTeamPractice,previewTeamUpgrade,upgradeTeam,chooseTeamWeapon,chooseTeamArmour } from "./team.mjs?v=team-001";
+import { initialTeamwork,validTeamwork,awardTeamwork,activateTeamworkOnLogin } from "./teamwork.mjs?v=team-002";
+import { validTeamSession,startTeamSession,settleTeamSession } from "./team-timeline.mjs?v=team-004";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
 import {
@@ -29,7 +32,7 @@ export { LOOT_TABLES, lootChances } from "./loot.mjs?v=glad-001";
  * OFF-001: action rates and effective levels remain frozen while absent.
  */
 export const SAVE_KEY = "idle-game-prototype-v1";
-export const GAME_VERSION = 16; // BAL-002 changes replayed frozen duel outcomes; disposable V15 alpha saves reset
+export const GAME_VERSION = 17; // TEAM-004: incompatible frozen team outcomes; disposable V16 alpha saves reset
 // ALPHA: switch this single profile back to "normal" when testing is complete.
 // Existing browser saves record their own profile and migrate progress fractions on load.
 export const TIMING_PROFILE = "alpha";
@@ -122,7 +125,12 @@ const validTime = value => Number.isSafeInteger(value) && value >= 0;
 export const MAX_WAGONS = APPRENTICE_BALANCE.maxSlots;
 // Derived, not saved. Preexisting routes are read/settled without truncation.
 export const getApprenticeProgress = state => apprenticeProgress(state, SKILL_IDS);
-export const autoEquipmentPreview = state => previewAutoEquipment(state, SKILL_IDS);
+export const autoEquipmentPreview = state => {
+  const base=previewAutoEquipment(state,SKILL_IDS);
+  if(!state.teamSecond||!base.unlocked)return base;
+  const n=previewTeamUpgrade(teamFromState(state),state.coins,state.skills.fighting.level);
+  return {...base,reason:n?.quote.reason??"complete",next:n?{id:n.itemId,fighterId:n.id,current:n.current,target:n.target,cost:n.quote.cost,requiredFightingLevel:n.quote.requiredFightingLevel,available:n.quote.available}:null};
+};
 export const autoEquipmentUnlocked = state => getApprenticeProgress(state).earnedLevels >= AUTO_EQUIPMENT_AT;
 export const queueCapacity = state => getApprenticeProgress(state).slots;
 /**
@@ -194,6 +202,27 @@ export function newGame(now = Date.now()) {
   };
 }
 
+// First fighter retains the existing API; second fighter owns a separate record.
+// Explicit team entry until browser UI integration is ready.
+export function newTeamGame(now=Date.now()){
+  const state=newGame(now);
+  return {...state,teamSecond:initialTeam().second,teamwork:initialTeamwork()};
+}
+export function teamFromState(state){
+  if(!state.teamSecond)throw new RangeError("Not a team game");
+  const {combatLoadout,armour,equipment,expertise,expertiseActive}=state;
+  return {first:{combatLoadout,armour,equipment,expertise,expertiseActive},second:state.teamSecond};
+}
+function withTeam(state,team){
+  return {...state,...team.first,teamSecond:team.second};
+}
+const frozenGrade=s=>s?.players?.first?.difficulty??s?.player?.difficulty??0;
+function validTeamFields(s){
+  if(s.teamSecond===undefined&&s.teamwork===undefined)
+    return (s.combatSession===null||Boolean(s.combatSession?.player?.trainingKit))&&validCombatSession(s.combatSession);
+  return validGladiator(s.teamSecond)&&validTeamwork(s.teamwork)&&
+    (s.combatSession===null||validTeamSession(s.combatSession)&&s.combatSession.teamworkLevel<=s.teamwork.level);
+}
 /**
  * Loading under a new timing preset preserves the fraction of the unfinished
  * cycle/phase rather than treating an old long-duration save as corrupted.
@@ -216,8 +245,8 @@ export function readSave(value) {
         !isCount(s.fightingRemainderMs)||!isCount(s.coins) ||
         !validExpertise(s.expertise)||!validExpertise(s.expertiseActive)||
         Object.keys(s.expertise).some(id=>s.expertiseActive[id]>s.expertise[id])||
-        (s.combatSession!==null&&!s.combatSession?.player?.trainingKit)||
-        !validCombatLoadout(s.combatLoadout) || !validCombatSession(s.combatSession) ||
+        !validTeamFields(s)||
+        !validCombatLoadout(s.combatLoadout) ||
         !ITEM_KEYS.every(key => s.items[key] === undefined || isCount(s.items[key])) ||
         !validEquipment(s) ||
         (s.activity !== null && !Object.hasOwn(ACTIVITIES, s.activity)) ||
@@ -279,10 +308,10 @@ export function readSave(value) {
     // actual in-flight grade rather than relabeling an already resolved duel.
     const savedStage=difficulties.fighting??0;
     const inFlight=s.combatSession&&s.combatSession.elapsedMs%BOUT_MS!==0;
-    const stage=s.autoFight===undefined&&inFlight?(s.combatSession.player.difficulty??0):savedStage;
+    const stage=s.autoFight===undefined&&inFlight?frozenGrade(s.combatSession):savedStage;
     const autoFight=s.autoFight===undefined?initialAutoFight(stage):s.autoFight;
     if(!validAutoFight(autoFight)||autoFight.stage!==stage||
-      (inFlight&&(s.combatSession.player.difficulty??0)!==stage))return null;
+      (inFlight&&frozenGrade(s.combatSession)!==stage))return null;
     const skills = Object.fromEntries(SKILL_IDS.map(id => [id, { ...s.skills[id] }]));
     let newProgressMs = s.activity
       ? scalePartialProgress(s.progressMs, sourceWorkMs, ACTIVITIES[s.activity].durationMs) : 0;
@@ -306,6 +335,7 @@ export function readSave(value) {
       attributeEffortActive:{...s.attributeEffortActive},
       fightingRemainderMs:scalePartialProgress(s.fightingRemainderMs,sourceFightingMs,ACTIVITIES.fighting.durationMs),
       expertise:{...s.expertise},expertiseActive:{...s.expertiseActive},
+      ...(s.teamSecond?{teamSecond:structuredClone(s.teamSecond),teamwork:{...s.teamwork}}:{}),
       combatLoadout: s.combatLoadout,
       coins: s.coins,
       armour: { ...s.armour },
@@ -374,7 +404,8 @@ function variedTotal(base, random) {
 export function activateExpertise(state){
   const changed=Object.keys(state.expertise).some(id=>state.expertise[id]!==state.expertiseActive[id])||
     Object.keys(state.attributeEffort).some(id=>state.attributeEffort[id]!==state.attributeEffortActive[id]);
-  return changed?{...state,expertiseActive:{...state.expertise},attributeEffortActive:{...state.attributeEffort}}:state;
+  const active=changed?{...state,expertiseActive:{...state.expertise},attributeEffortActive:{...state.attributeEffort}}:state;
+  return active.teamSecond?withTeam(active,activateTeamPractice(teamFromState(active))):active;
 }
 export function desiredArenaPlayer(state){
   const attrs=combatAttributeProgress(state.attributeEffortActive,state.skills);
@@ -387,7 +418,45 @@ export function desiredArenaPlayer(state){
     str:attrs.STR.value,dex:attrs.DEX.value,end:attrs.END.value,skill:state.skills.fighting.level};
 }
 const arenaFields=["downtimeMs","sampledBouts","bouts","victories","defeats","doubleDeaths","coins"];
+export function desiredArenaTeam(state){
+  const p=desiredArenaPlayer(state);
+  return teamSnapshots(teamFromState(state),p);
+}
+function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
+  let team=teamFromState(state),teamwork=state.teamwork,desired=desiredArenaTeam(state);
+  let autoFight=state.autoFight??initialAutoFight(desired.first.difficulty);
+  if(online&&(!validAutoFight(autoFight)||autoFight.stage!==desired.first.difficulty))throw new RangeError("Invalid committed team stage");
+  let session=state.combatSession??startTeamSession(desired,teamwork.level,state.settledAtMs>>>0);
+  const totals=Object.fromEntries(arenaFields.map(k=>[k,0]));
+  const practiceMs={first:0,second:0};
+  const run=duration=>{
+    const cacheKey=JSON.stringify(["team",session.seed,session.players,session.teamworkLevel]);
+    if(outcomeCaches&&!outcomeCaches.has(cacheKey))outcomeCaches.set(cacheKey,new Map());
+    const prize=settleTeamSession(session,duration,outcomeCaches?.get(cacheKey));
+    team=awardTeamPractice(team,session.players,prize.practiceMs);
+    teamwork=awardTeamwork(teamwork,prize.bouts);
+    session=prize.session;
+    for(const key of arenaFields)totals[key]+=prize[key];
+    for(const id of Object.keys(practiceMs))practiceMs[id]+=prize.practiceMs[id];
+    if(online&&prize.bouts){
+      if(prize.bouts!==1||frozenGrade(session)!==autoFight.stage)throw new RangeError("Invalid live team boundary");
+      autoFight=finishAutoFightBout(autoFight,prize.victories?"victory":prize.defeats?"defeat":"double_death",true);
+      desired=Object.fromEntries(Object.entries(desired).map(([id,p])=>[id,{...p,difficulty:autoFight.stage}]));
+    }
+  };
+  const result=()=>({...totals,session,team,teamwork,practiceMs,expertise:team.first.expertise,autoFight});
+  if(online||JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level){
+    const remaining=(BOUT_MS-session.elapsedMs%BOUT_MS)%BOUT_MS;
+    if(elapsedMs<remaining){run(elapsedMs);return result();}
+    if(remaining)run(remaining);
+    session={...session,players:desired,teamworkLevel:teamwork.level};
+    elapsedMs-=remaining;
+  }
+  if(elapsedMs)run(elapsedMs);
+  return result();
+}
 function settleArenaBuild(state,elapsedMs,outcomeCaches,online=false){
+  if(state.teamSecond)return settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online);
   let desired=desiredArenaPlayer(state);
   let autoFight=state.autoFight??initialAutoFight(desired.difficulty);
   if(online&&(!validAutoFight(autoFight)||autoFight.stage!==desired.difficulty))throw new RangeError("Invalid committed Fighting stage");
@@ -443,12 +512,13 @@ function settleUncappedWork(state, now, random, frozenEffort, xpRandom = random,
     const prize=settleArenaBuild(state,elapsedMs,outcomeCaches,online);
     productiveMs-=prize.downtimeMs;
     next.expertise=prize.expertise;
+    if(prize.team){next.teamSecond=prize.team.second;next.teamwork=prize.teamwork;}
     next.combatSession = prize.session;
     if(online){next.autoFight=prize.autoFight;if(prize.autoFight.stage!==(state.difficulties.fighting??0))next.difficulties={...state.difficulties,fighting:prize.autoFight.stage};}
     next.coins = safeAdd(state.coins, prize.coins);
     report.gainedCoins = prize.coins;
     if (prize.bouts || prize.downtimeMs) {
-      const { session: _session, expertise: _expertise, autoFight: _autoFight, ...arena } = prize;
+      const { session: _session, expertise: _expertise, autoFight: _autoFight,team:_team,teamwork:_teamwork,...arena } = prize;
       report.arena = arena;
     }
   }
@@ -968,6 +1038,10 @@ export function enterGameWithApprentice(state, now = Date.now(), random = Math.r
     result=claimSettledMaster(outcome);
     result={...result,levelsGained:Object.fromEntries(result.mastery.ready.map(id=>[id,1]))};
   }
+  if(result.state.teamSecond){
+    const teamwork=activateTeamworkOnLogin(result.state.teamwork);
+    result={...result,state:{...result.state,teamwork},teamworkLevelGained:teamwork.level-result.state.teamwork.level};
+  }
   return upgradeSettledEquipment(result);
 }
 
@@ -1020,9 +1094,35 @@ function purchaseSettledEquipment(result,id,target,equip){
     attributeEffortActive:{...current.attributeEffort},expertiseActive:{...current.expertise} } };
 }
 
+export function setTeamWeapon(state,id,loadout,now=Date.now(),random=Math.random){
+  const result=settle(state,now,random),current=activateExpertise(result.state);
+  return {...result,state:withTeam(current,chooseTeamWeapon(teamFromState(current),id,loadout))};
+}
+export function setTeamArmour(state,id,slot,family,now=Date.now(),random=Math.random){
+  const result=settle(state,now,random),current=activateExpertise(result.state);
+  return {...result,state:withTeam(current,chooseTeamArmour(teamFromState(current),id,slot,family))};
+}
+export function buyTeamEquipment(state,fighterId,id,target,now=Date.now(),random=Math.random){
+  if(!equipmentIds.has(id)||!isEquipmentItem(target))throw new RangeError("Unknown equipment");
+  const result=settle(state,now,random),current=activateExpertise(result.state),team=teamFromState(current);
+  if(!Object.hasOwn(team,fighterId))throw new RangeError("Unknown gladiator");
+  const fighter=team[fighterId];
+  if(autoEquipmentUnlocked(current)&&Object.hasOwn(fighter.equipment,id))return {...result,purchaseBlocked:"automatic_equipment"};
+  const quote=smithQuote({...current,...fighter},id,target);
+  if(!quote.available)return result;
+  const [slot,family]=id.split(":");
+  const armour=family?{...fighter.armour,[slot]:family}:fighter.armour;
+  const updated={...fighter,armour,equipment:{...fighter.equipment,[id]:{...target}}};
+  return {...result,purchased:true,state:withTeam({...current,coins:current.coins-quote.cost},{...team,[fighterId]:updated})};
+}
 function upgradeSettledEquipment(outcome){
   let current=outcome.state;
   if(!autoEquipmentUnlocked(current))return outcome;
+  if(current.teamSecond){
+    const result=upgradeTeam(teamFromState(current),current.coins,current.skills.fighting.level);
+    current=withTeam({...current,coins:result.coins},result.team);
+    return {...outcome,state:current,autoEquipment:{upgrades:result.upgrades.map(u=>({...u,fighterId:u.id,id:u.itemId})),spent:result.spent,preview:autoEquipmentPreview(current)}};
+  }
   const upgrades=[];
   let spent=0;
   for(let i=0;i<MAX_AUTO_EQUIPMENT_PURCHASES;i++){

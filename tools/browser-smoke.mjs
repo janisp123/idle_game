@@ -110,14 +110,21 @@ try{
     assert.equal(hobby.items,5);assert.ok(hobby.heading,"hobby heading in viewport: "+JSON.stringify(hobby));assert.ok(hobby.overflow<=2,"hobby horizontal overflow: "+hobby.overflow);
     await shot("hobby-"+width);
     await navigate("clean-"+width,{[saveKey]:null,[clockKey]:null});
-    const fresh=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));return {activity:s.activity,route:s.wagons,transition:s.transition,difficulty:s.difficulties.fighting??0,coins:s.coins,level:s.skills.fighting.level,combat:!document.getElementById("combatFlow").hidden};})()`);
-    assert.equal(fresh.activity,"fighting");assert.deepEqual(fresh.route,[{activity:"fighting",plannedMs:null}]);assert.equal(fresh.transition,null);assert.equal(fresh.difficulty,0);assert.equal(fresh.level,1);assert.equal(fresh.coins,0);// Fixed clock does not create a combat session until positive time elapses.
+    const fresh=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));return {activity:s.activity,route:s.wagons,transition:s.transition,difficulty:s.difficulties.fighting??0,coins:s.coins,level:s.skills.fighting.level,second:s.teamSecond?.combatLoadout,teamwork:s.teamwork,combat:!document.getElementById("teamBattleReadout").hidden};})()`);
+    assert.equal(fresh.activity,"fighting");assert.deepEqual(fresh.route,[{activity:"fighting",plannedMs:null}]);assert.equal(fresh.transition,null);assert.equal(fresh.difficulty,0);assert.equal(fresh.level,1);assert.equal(fresh.coins,0);assert.equal(fresh.second,"bow");assert.deepEqual(fresh.teamwork,{level:1,xp:0});// Fixed clock does not create a combat session until positive time elapses.
     await evaluate(`(()=>{Date.now=()=>${fixedNow+1000};document.dispatchEvent(new Event("visibilitychange"));})()`);
-    await until(()=>evaluate('!document.getElementById("combatFlow").hidden'),"first automatic bout "+width);
+    await until(()=>evaluate('!document.getElementById("teamBattleReadout").hidden && document.querySelectorAll(".team-fighter").length===4'),"first automatic team bout "+width);
+    const teamView=await evaluate(`(()=>{const $=id=>document.getElementById(id),s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));return {count:document.querySelectorAll(".team-fighter").length,players:document.querySelectorAll(\'.team-fighter[data-fighter^="player"]\').length,overflow:document.documentElement.scrollWidth-innerWidth,teamwork:$("teamworkStatus").textContent};})()`);
+    assert.equal(teamView.count,4);assert.equal(teamView.players,2);assert.ok(teamView.overflow<=2);assert.match(teamView.teamwork,/Teamwork Lv 1/);
+    const choices=await evaluate(`(()=>{const $=id=>document.getElementById(id);$("armourCabinet").open=true;const selector=$("teamFighterChoice");selector.value="second";selector.dispatchEvent(new Event("change"));document.querySelector(\'[data-loadout="hammer"]\').click();const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));selector.value="first";selector.dispatchEvent(new Event("change"));return {first:s.combatLoadout,second:s.teamSecond.combatLoadout,frozen:s.combatSession.players.second.loadout,overflow:document.documentElement.scrollWidth-innerWidth};})()`);
+    assert.equal(choices.first,"greatsword");assert.equal(choices.second,"hammer");assert.equal(choices.frozen,"bow");assert.ok(choices.overflow<=2);
+    await shot("team-"+width);
     await evaluate(`Date.now=()=>${fixedNow}`);
     const apprentice=await evaluate(`(()=>{const menu=document.getElementById("apprenticeMenu");menu.querySelector("summary").click();const result={open:menu.open,text:menu.innerText,locked:[...menu.querySelectorAll("input")].every(i=>i.disabled),overflow:document.documentElement.scrollWidth-innerWidth};menu.querySelector("summary").click();return result;})()`);
     assert.ok(apprentice.open&&apprentice.locked&&apprentice.overflow<=2);assert.match(apprentice.text,/0 earned levels/i);assert.match(apprentice.text,/Unlocks at LvL 50/);assert.match(apprentice.text,/Unlocks at LvL 10/);assert.match(apprentice.text,/1 \/ 5 activity slots unlocked/);
-    const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=15;s.name="Old alpha";return JSON.stringify(s);})()`);
+    const teamMax=await evaluate(`(()=>{const $=id=>document.getElementById(id);$("alphaTools").open=true;$("alphaFamily").value="plate";$("alphaSecondFamily").value="leather";$("alphaMaxStats").click();const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));return {first:s.expertise,second:s.teamSecond.expertise,coins:s.coins};})()`);
+    assert.equal(teamMax.first.greatsword,3400*14400000);assert.equal(teamMax.first.plate,3400*14400000);assert.equal(teamMax.second.hammer,3400*14400000);assert.equal(teamMax.second.leather,3400*14400000);assert.equal(teamMax.second.bow,0);assert.equal(teamMax.coins,0);
+    const old=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));s.version=16;s.name="Old alpha";return JSON.stringify(s);})()`);
     await navigate("reset-"+width,{[saveKey]:old,[clockKey]:JSON.stringify({version:1,realAnchorMs:0,gameAnchorMs:0,speed:10})});
     const notice=await evaluate('({hidden:document.getElementById("saveResetNotice").hidden,text:document.getElementById("saveResetNotice").textContent})');
     assert.equal(notice.hidden,false);
@@ -134,13 +141,17 @@ try{
     assert.match(clan.text,/Search clans/);assert.match(clan.text,/Create a clan/);
     await shot("clan-"+width);
     await evaluate('document.getElementById("clanMenu").querySelector("summary").click()');
+    // Preserve the original single-fighter economy regression as a legacy
+    // save fixture; fresh team behavior is verified separately above.
+    const soloFixture=await evaluate(`(async()=>{const e=await import("./engine.mjs?v=team-004");return JSON.stringify(e.chooseActivity(e.newGame(Date.now()),"fighting",Date.now(),()=>.5).state);})()`);
+    await navigate("legacy-solo-regression-"+width,{[saveKey]:soloFixture,[clockKey]:null});
     const result=await evaluate(`(()=>{const $=id=>document.getElementById(id);
       $("alphaTools").open=true;$("alphaFamily").value="leather";
       $("alphaMaxStats").click();$("alphaCoins").click();$("alphaCoins").click();
       const s=JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}));
       $("alphaTools").scrollIntoView({block:"start"});return {s,hidden:$("alphaTools").hidden,
         status:$("alphaStatus").textContent,overflow:document.documentElement.scrollWidth-innerWidth};})()`);
-    assert.equal(result.hidden,false);assert.equal(result.s.version,16);assert.equal(result.s.skills.fighting.level,52);
+    assert.equal(result.hidden,false);assert.equal(result.s.version,17);assert.equal(result.s.skills.fighting.level,52);
     assert.equal(result.s.coins,200000);assert.equal(result.s.expertise.greatsword,4235*14400000);
     assert.equal(result.s.expertise.leather,4213*14400000);assert.equal(result.s.expertise.plate,0);
     assert.match(result.status,/100,000/);assert.ok(result.overflow<=2,"horizontal page overflow: "+result.overflow);

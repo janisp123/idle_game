@@ -16,8 +16,11 @@ import { simulateEquipment } from './simulation/equipment.mjs';
 import { simulateQueue,simulateSave } from './simulation/queue-save.mjs';
 import { simulateClan } from './simulation/clan-fixtures.mjs';
 
+import { simulateTeamCombat } from './simulation/team-combat.mjs';
+
 export const LAB_MODULES=Object.freeze({
   combat:simulateBatch,
+  teamCombat:simulateTeamCombat,
   activity:simulateActivity,
   loot:simulateLoot,
   crafting:simulateCrafting,

@@ -21,6 +21,10 @@
 
 See DECISIONS.md and paused STRATEGY-001 research PR #186. No candidate companion species, tactic effects or numerical progression formula is approved by this rule alone. No resumption of paused implementation without owner instruction.
 
+## Core architecture rule — MODULAR-001 (2026-11-26)
+
+**Owner-approved.** Keep systems modular, independently testable, easy to edit and expandable. Use a single source of truth for actual formulas, with pure mechanics separated from orchestration, save/settlement, UI and test adapters. Team combat operates on bounded rosters, not hard-coded two-fighter strike logic; playable team size remains two until explicitly changed. Keep tuning constants in the responsible modules and extend developer simulations to import the same actual resolver. Do not add speculative features or abstractions merely for flexibility.
+
 ## Golden rule — ALPHA-FOCUS-001: do not overengineer disposable test progress
 
 **Owner-approved, 2026-11-24.** Idle Game is in **early alpha**. Current browser saves are local testing state, **not committed, production-grade player progression**. When redesigning armour slots, weapon styles, combat rules, enchantments or other prototype mechanics, prioritize a clean, correct implementation and iteration speed; **do not spend development time on backwards-compatibility migrations or preserving accumulated alpha test progress unless the Owner specifically asks for it**. A clearly communicated reset of disposable alpha progress is acceptable if needed. Do not invent preservation requirements or delay useful changes for hypothetical users.

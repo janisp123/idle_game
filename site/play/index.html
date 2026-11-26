@@ -10,7 +10,8 @@
   <link rel="stylesheet" href="./game.css">
   <link rel="stylesheet" href="./iron-ui.css?v=auto-fight-04">
   <link rel="stylesheet" href="./login-report.css?v=apprentice-a5">
-  <script type="module" src="./app.mjs?v=apprentice-a5"></script>
+  <link rel="stylesheet" href="./team-ui.css?v=team-004">
+  <script type="module" src="./app.mjs?v=team-004"></script>
 </head>
 <body>
   <a class="skip-link" href="#game">Skip to game</a>
@@ -32,7 +33,7 @@
     </div>
 
     <section id="saveResetNotice" class="panel" aria-label="Alpha save reset" hidden>
-      <p role="status">Alpha progression was reset for the weapon, armour and arena balance update or because the previous save could not be read. A new character was created.</p>
+      <p role="status">Alpha progression was reset for the two-gladiator combat update or because the previous save could not be read. A new two-gladiator team was created.</p>
       <button id="dismissSaveReset" class="small-button" type="button">Dismiss</button>
     </section>
     <div class="game-grid">
@@ -60,6 +61,7 @@
           </details>
           <details id="armourCabinet" class="armour-cabinet">
             <summary class="armour-summary">EQUIPMENT <span id="coinWallet">0 coins</span><span aria-hidden="true">✥</span></summary>
+            <div id="teamEquipmentSelector" hidden><label for="teamFighterChoice">Manage gladiator</label><select id="teamFighterChoice"><option value="first">Gladiator 1</option><option value="second">Gladiator 2</option></select><p id="teamLoadouts" class="hint"></p></div>
             <div class="weapon-cabinet" aria-label="Equipped weapon">
               <p class="equipment-section-label">WEAPONS</p>
               <div id="weaponSlots" class="weapon-slots" role="group" aria-label="Choose your weapon style"></div>
@@ -207,6 +209,7 @@
             <p id="autoFightNext"></p>
             <div id="autoFightMeter" class="meter auto-fight-meter" role="progressbar" aria-label="Wins toward next difficulty" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="autoFightFill"></span></div>
             <p id="autoFightStatus"></p>
+            <p id="teamworkStatus" class="hint" hidden></p>
             <p class="hint">Offline fighting stays at the current difficulty.</p>
           </section>
           <section id="wagonQueue" class="wagon-queue" hidden aria-label="Your activity route">
@@ -237,6 +240,7 @@
         </section>
 
         <section id="resultPanel" class="result-panel" aria-label="Latest activity result">
+          <div id="teamBattleReadout" hidden aria-label="Four combatants"></div>
           <div id="combatReadout" class="result-combat" hidden aria-label="Latest resolved combat action">
             <div class="result-side result-side-player">
               <span class="result-side-name">YOU</span>
@@ -281,9 +285,10 @@
               <input type="checkbox" id="alphaSpeed" role="switch" aria-label="Increase all activity speed ten times">
             </label>
             <label>Max Stats armour expertise <select id="alphaFamily"><option value="none">Unarmoured</option><option value="padded">Padded</option><option value="leather">Leather</option><option value="plate" selected>Plate</option></select></label>
+            <label id="alphaSecondFamilyLabel" hidden>Gladiator 2 armour expertise <select id="alphaSecondFamily"><option value="none">Unarmoured</option><option value="padded">Padded</option><option value="leather" selected>Leather</option><option value="plate">Plate</option></select></label>
             <button type="button" id="alphaMaxStats" class="alpha-day-button">Max Stats · six-month build</button>
             <button type="button" id="alphaCoins" class="alpha-day-button">+100,000 arena coins</button>
-            <p class="hint">Test only. Max Stats trains the currently selected weapon and chosen armour family; does not buy equipment.</p>
+            <p class="hint">Test only. Max Stats trains each gladiator’s currently selected weapon and individually chosen armour family; does not buy equipment.</p>
             <p id="alphaStatus" class="alpha-tools-status" role="status" aria-live="polite"></p>
           </div>
         </details>

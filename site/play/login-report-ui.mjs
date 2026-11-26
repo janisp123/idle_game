@@ -1,11 +1,12 @@
-import {loginReport} from "./login-report.mjs?v=apprentice-a5";
-import {ACTIVITIES,ITEM_LABELS} from "./engine.mjs?v=apprentice-a4";
+import {loginReport} from "./login-report.mjs?v=team-004";
+import {ACTIVITIES,ITEM_LABELS} from "./engine.mjs?v=team-004";
 import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=gear-a3";
 import {ITEM_GRADES} from "./smith.mjs?v=gear-a3";
 const $=id=>document.getElementById(id),num=n=>new Intl.NumberFormat("en-GB",{maximumFractionDigits:2}).format(n);
 const title=s=>s[0].toUpperCase()+s.slice(1);
 const duration=ms=>{const sec=Math.floor(ms/1000);return sec<60?sec+"s":sec<3600?Math.floor(sec/60)+"m "+sec%60+"s":Math.floor(sec/3600)+"h "+Math.floor(sec%3600/60)+"m";};
 const name=id=>COMBAT_LOADOUTS[id]?.name??(id==="none"?"Unarmoured":id.split(":").reverse().map(title).join(" "));
+const fighterName=x=>(x.fighterId?"Gladiator "+(x.fighterId==="first"?"1":"2")+" · ":"")+name(x.id);
 const spec=i=>ITEM_GRADES[i.grade]+" "+title(i.quality);
 const activity=id=>ACTIVITIES[id]?.title??"None";
 let latest=null,timer=null,deadline=0;
@@ -29,12 +30,13 @@ function paint(r){
   else if(r.automationUnavailable)body.append(node("p","Automatic chores unavailable: safe login coordination or storage is required.","login-report-warning"));
   body.append(node("p","Arena outcomes use the game's settled offline schedule. Defeats: "+num(r.arena.defeats)+" · Double deaths: "+num(r.arena.doubleDeaths)+" · Recovery: "+duration(r.arena.downtimeMs)+" · Difficulty: "+ITEM_GRADES[r.stage]+".","login-report-muted"));
   table(body,"Coin ledger",["Movement","Coins"],[["Opening balance",num(r.wallet.before)],["Arena rewards","+"+num(r.wallet.earned)],["Assistant purchases","−"+num(r.wallet.spent)],["Closing balance",num(r.wallet.after)]],"");
-  table(body,"Assistant · equipment",["Equipment","Previous → new","Spent"],r.upgrades.map(x=>[name(x.id),spec(x.from)+" → "+spec(x.to)+" ("+x.steps+")",num(x.cost)]),"No upgrades purchased.");
+  table(body,"Assistant · equipment",["Equipment","Previous → new","Spent"],r.upgrades.map(x=>[fighterName(x),spec(x.from)+" → "+spec(x.to)+" ("+x.steps+")",num(x.cost)]),"No upgrades purchased.");
   table(body,"Skill progression · "+r.levels+" automatic levels",["Activity","Actions / XP gained","Level"],r.skills.map(x=>[activity(x.id),num(x.completed)+" / +"+num(x.xp),x.from===x.to?String(x.to)+(x.ready?" · Ready":""):x.from+" → "+x.to]),"No completed activity or skill advancement.");
+  if(r.teamwork)table(body,"Teamwork",["Level","Current XP"],[[r.teamwork.from===r.teamwork.to?String(r.teamwork.to):r.teamwork.from+" → "+r.teamwork.to,num(r.teamwork.xp)]],"");
   const flow=Object.keys({...r.gained,...r.consumed,...r.tribute}).map(id=>[ITEM_LABELS[id]??id,"+"+num(r.gained[id]??0),"−"+num(r.consumed[id]??0),"−"+num(r.tribute[id]??0)]);
   table(body,"Resources & Master tribute",["Resource","Earned","Used","Tribute"],flow,"No materials earned, used or surrendered.");
   table(body,"Attributes",["Attribute","Value","Training XP"],r.attributes.map(x=>[x.id,x.from===x.to?String(x.to):x.from+" → "+x.to,"+"+num(x.xp)]),"");
-  table(body,"Equipment expertise",["Track","Practice gained"],r.expertise.map(x=>[name(x.id),duration(x.hours*3600000)]),"No additional equipment practice.");
+  table(body,"Equipment expertise",["Track","Practice gained"],r.expertise.map(x=>[fighterName(x),duration(x.hours*3600000)]),"No additional equipment practice.");
   body.append(node("p","Current activity: "+activity(r.transition??r.activity)+". Route: "+r.route.map(activity).join(" → ")+(r.capped.length?". XP ready: "+r.capped.map(activity).join(", ")+".":".") ,"login-report-muted"));
 }
 function stop(){if(timer!==null){clearInterval(timer);timer=null;}}

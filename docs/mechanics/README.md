@@ -17,6 +17,10 @@
 | Work cycles, switches, schedule, offline and saves | [Scheduling & offline](SCHEDULING.md) | `site/play/engine.mjs` → `TIMING_PROFILE`, `TIMING_PROFILES`, `SCHEDULE_BALANCE`, `MAX_WAGONS` |
 | How to edit formulas without regressing saves | [Change checklist & tests](CHANGING_BALANCE.md) | `tools/test_game_engine.mjs`, `tools/test_combat.mjs`, `tools/test_game_ui.mjs` |
 
+## Two-gladiator release candidate (PR #188)
+
+[Team implementation](TEAM_IMPLEMENTATION_PLAN.md), [balance and reward sensitivity](TEAM_004_SENSITIVITY.md), [combined verified trajectories](TEAM_004_COMBINED.json). The draft uses `team-combat.mjs` centered width 8–10, `team-timeline.mjs` team-only reward Math.round(arenaReward(grade) × 1.4), independent selected gear/effort in `team.mjs`, shared Teamwork capped/login activation in `teamwork.mjs`, and V17 local save. The existing solo prize table is unchanged. See checkpoint for deployment status; candidate is not yet live.
+
 ## Authority and freshness
 
 1. **Owner decisions and safety constraints:** `docs/DECISIONS.md`, `AGENTS.md`, `docs/TD_LIST.md` (current remote `main`). Design ideas are not an implementation permit.

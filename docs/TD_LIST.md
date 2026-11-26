@@ -8,11 +8,20 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## TEAM-001 — Two-gladiator combat team
+
+- **Goal:** Two player gladiators from first entry, shared base attributes, separate selected equipment and expertise, automatic upgrades, real deterministic 2v2 combat; no pets or tactics now.
+- **Acceptance:** Independent selection/progression and exact treasury; meaningful matchup balance; six-month team economy; frozen offline/live/simulator parity; exact team rewards and report; validated save, mobile/desktop UI, final checks and deployment.
+- **Status:** IN_REVIEW — [PR #188](https://github.com/janisp123/idle_game/pull/188); full draft integration, combined balance audit PASS, final release checks pending. [Checkpoint](WORK_CHECKPOINT.md).
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## APPRENTICE-A5 — Full-screen analytical login report
 
 - **Goal:** On returning entry, show an unmistakable full-screen report of actual offline progress and committed automation. Dismiss manually or after ten real seconds; reopen for review in same session.
 - **Acceptance:** Exact aggregate encounter/win/loss and coin ledger, XP and level changes, resource gained/used/tribute, attributes and expertise, grouped actual upgrade stages and costs, capped/route status, no fabricated reward or success on failed save; full mobile/desktop modal and timer verification. No changes to mechanics.
-- **Status:** IN_REVIEW — [PR #185](https://github.com/janisp123/idle_game/pull/185) implementation and tests in progress.
+- **Status:** DONE — [PR #185](https://github.com/janisp123/idle_game/pull/185) merged e8d6dbd0; final four checks PASS, Pages 45812960184 SUCCESS.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

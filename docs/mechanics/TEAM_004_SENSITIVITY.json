@@ -1,0 +1,4532 @@
+{
+  "head": "cf1fdfe501cfeb1b16d5fd4777c27d84d41ad1f5",
+  "run_id": 45835269294,
+  "economy": [
+    {
+      "spec": {
+        "name": "dual_bow",
+        "first": [
+          "bow",
+          "leather"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "origin": 0,
+      "rewardPct": 100,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 168,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        10,
+        14,
+        17,
+        35,
+        29,
+        39,
+        26,
+        10
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 34,
+          "xp": 2971
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "coins": 58536,
+        "earned": 4619703,
+        "spent": 4561167,
+        "bouts": 66691,
+        "wins": 62241,
+        "losses": 4450,
+        "draws": 0,
+        "liveBouts": 278,
+        "offlineBouts": 66413,
+        "manual": 76,
+        "automatic": 229,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3608.4308730555554,
+            "armourHours": 3604.3969686111113
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3604.6922988888887,
+            "armourHours": 3600.5156141666666
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "dual_bow",
+        "first": [
+          "bow",
+          "leather"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "origin": 0,
+      "rewardPct": 125,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 169,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        8,
+        12,
+        19,
+        31,
+        27,
+        38,
+        30,
+        15
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 34,
+          "xp": 3140
+        },
+        "stage": 7,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 128
+        },
+        "coins": 141111,
+        "earned": 5903503,
+        "spent": 5762392,
+        "bouts": 66180,
+        "wins": 59071,
+        "losses": 7107,
+        "draws": 2,
+        "liveBouts": 263,
+        "offlineBouts": 65917,
+        "manual": 80,
+        "automatic": 236,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3532.9226155555557,
+            "armourHours": 3528.888711111111
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3533.834961111111,
+            "armourHours": 3529.6582763888887
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "dual_bow",
+        "first": [
+          "bow",
+          "leather"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "origin": 0,
+      "rewardPct": 140,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 168,
+      "fullS": 172,
+      "offlineChecks": 180,
+      "stageDays": [
+        15,
+        9,
+        16,
+        25,
+        23,
+        45,
+        37,
+        10
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 432
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "coins": 657353,
+        "earned": 6659995,
+        "spent": 6002642,
+        "bouts": 66649,
+        "wins": 61177,
+        "losses": 5472,
+        "draws": 0,
+        "liveBouts": 256,
+        "offlineBouts": 66393,
+        "manual": 83,
+        "automatic": 235,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3583.4772844444446,
+            "armourHours": 3579.44338
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3584.132078888889,
+            "armourHours": 3579.955394166667
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "dual_bow",
+        "first": [
+          "bow",
+          "leather"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261127,
+      "origin": 20261127000,
+      "rewardPct": 100,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 14,
+      "firstS": 167,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        14,
+        10,
+        19,
+        23,
+        27,
+        45,
+        33,
+        9
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 432
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 129
+        },
+        "coins": 102480,
+        "earned": 4743722,
+        "spent": 4641242,
+        "bouts": 67122,
+        "wins": 62080,
+        "losses": 5042,
+        "draws": 0,
+        "liveBouts": 230,
+        "offlineBouts": 66892,
+        "manual": 78,
+        "automatic": 228,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3624.9189355555554,
+            "armourHours": 3620.658827777778
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3617.733417222222,
+            "armourHours": 3613.5828647222224
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "dual_bow",
+        "first": [
+          "bow",
+          "leather"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261127,
+      "origin": 20261127000,
+      "rewardPct": 125,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 14,
+      "firstS": 167,
+      "fullS": 178,
+      "offlineChecks": 180,
+      "stageDays": [
+        8,
+        8,
+        25,
+        26,
+        30,
+        32,
+        37,
+        14
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 432
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 129
+        },
+        "coins": 136202,
+        "earned": 6138844,
+        "spent": 6002642,
+        "bouts": 67160,
+        "wins": 61469,
+        "losses": 5691,
+        "draws": 0,
+        "liveBouts": 238,
+        "offlineBouts": 66922,
+        "manual": 82,
+        "automatic": 236,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3611.5376855555555,
+            "armourHours": 3607.277577777778
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3609.584927777778,
+            "armourHours": 3605.4343752777777
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "dual_bow",
+        "first": [
+          "bow",
+          "leather"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261127,
+      "origin": 20261127000,
+      "rewardPct": 140,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 14,
+      "firstS": 168,
+      "fullS": 171,
+      "offlineChecks": 180,
+      "stageDays": [
+        8,
+        21,
+        9,
+        23,
+        30,
+        30,
+        50,
+        9
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 432
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 129
+        },
+        "coins": 780271,
+        "earned": 6782913,
+        "spent": 6002642,
+        "bouts": 67112,
+        "wins": 60189,
+        "losses": 6923,
+        "draws": 0,
+        "liveBouts": 275,
+        "offlineBouts": 66837,
+        "manual": 83,
+        "automatic": 235,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3587.234823611111,
+            "armourHours": 3582.9747158333334
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3589.3004975,
+            "armourHours": 3585.149945
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "hammer_spear",
+        "first": [
+          "hammer",
+          "plate"
+        ],
+        "second": [
+          "spear",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261127,
+      "origin": 20261127000,
+      "rewardPct": 100,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 14,
+      "firstS": 169,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        8,
+        14,
+        24,
+        18,
+        30,
+        41,
+        39,
+        6
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 34,
+          "xp": 3400
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "coins": 61299,
+        "earned": 4542391,
+        "spent": 4481092,
+        "bouts": 66532,
+        "wins": 59529,
+        "losses": 7003,
+        "draws": 0,
+        "liveBouts": 268,
+        "offlineBouts": 66264,
+        "manual": 78,
+        "automatic": 226,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3583.8553544444444,
+            "armourHours": 3580.0658366666667
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3520.37747,
+            "armourHours": 3516.2122125
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "hammer_spear",
+        "first": [
+          "hammer",
+          "plate"
+        ],
+        "second": [
+          "spear",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261127,
+      "origin": 20261127000,
+      "rewardPct": 125,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 14,
+      "firstS": 166,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        7,
+        8,
+        34,
+        15,
+        30,
+        38,
+        35,
+        13
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 432
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 130
+        },
+        "coins": 109854,
+        "earned": 5992371,
+        "spent": 5882517,
+        "bouts": 67463,
+        "wins": 60803,
+        "losses": 6660,
+        "draws": 0,
+        "liveBouts": 284,
+        "offlineBouts": 67179,
+        "manual": 85,
+        "automatic": 232,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3637.170851388889,
+            "armourHours": 3633.381333611111
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3573.5667905555556,
+            "armourHours": 3569.401533055556
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "hammer_spear",
+        "first": [
+          "hammer",
+          "plate"
+        ],
+        "second": [
+          "spear",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261127,
+      "origin": 20261127000,
+      "rewardPct": 140,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 14,
+      "firstS": 167,
+      "fullS": 171,
+      "offlineChecks": 180,
+      "stageDays": [
+        12,
+        17,
+        15,
+        16,
+        34,
+        34,
+        45,
+        7
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 34,
+          "xp": 3400
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 129
+        },
+        "coins": 727155,
+        "earned": 6729797,
+        "spent": 6002642,
+        "bouts": 66951,
+        "wins": 62238,
+        "losses": 4713,
+        "draws": 0,
+        "liveBouts": 268,
+        "offlineBouts": 66683,
+        "manual": 83,
+        "automatic": 235,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3635.7440908333333,
+            "armourHours": 3631.9545730555556
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3584.23644,
+            "armourHours": 3580.0711825
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "dual_shield",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "sword_shield",
+          "plate"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261127,
+      "origin": 20261127000,
+      "rewardPct": 100,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 14,
+      "firstS": 167,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        14,
+        9,
+        18,
+        29,
+        38,
+        34,
+        33,
+        5
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 34,
+          "xp": 3348
+        },
+        "stage": 7,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 129
+        },
+        "coins": 128921,
+        "earned": 4610013,
+        "spent": 4481092,
+        "bouts": 66844,
+        "wins": 63021,
+        "losses": 3821,
+        "draws": 2,
+        "liveBouts": 254,
+        "offlineBouts": 66590,
+        "manual": 78,
+        "automatic": 226,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3657.671483888889,
+            "armourHours": 3653.5366341666668
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3647.439528888889,
+            "armourHours": 3643.413415277778
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "dual_shield",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "sword_shield",
+          "plate"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261127,
+      "origin": 20261127000,
+      "rewardPct": 125,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 14,
+      "firstS": 168,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        12,
+        8,
+        20,
+        24,
+        32,
+        35,
+        36,
+        13
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 432
+        },
+        "stage": 7,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "coins": 173130,
+        "earned": 6055647,
+        "spent": 5882517,
+        "bouts": 66781,
+        "wins": 60769,
+        "losses": 6012,
+        "draws": 0,
+        "liveBouts": 263,
+        "offlineBouts": 66518,
+        "manual": 82,
+        "automatic": 235,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3620.1554652777777,
+            "armourHours": 3616.0206155555557
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3609.22734,
+            "armourHours": 3605.2012263888887
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "dual_shield",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "sword_shield",
+          "plate"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261127,
+      "origin": 20261127000,
+      "rewardPct": 140,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 14,
+      "firstS": 166,
+      "fullS": 172,
+      "offlineChecks": 180,
+      "stageDays": [
+        14,
+        4,
+        23,
+        21,
+        34,
+        35,
+        37,
+        12
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 864
+        },
+        "stage": 7,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 130
+        },
+        "coins": 846867,
+        "earned": 6849509,
+        "spent": 6002642,
+        "bouts": 67493,
+        "wins": 61382,
+        "losses": 6111,
+        "draws": 0,
+        "liveBouts": 235,
+        "offlineBouts": 67258,
+        "manual": 82,
+        "automatic": 236,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3661.7175358333334,
+            "armourHours": 3657.582686111111
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3651.3475608333333,
+            "armourHours": 3647.321447222222
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "tank_archer",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261127,
+      "origin": 20261127000,
+      "rewardPct": 100,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 14,
+      "firstS": 167,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        14,
+        4,
+        31,
+        29,
+        24,
+        29,
+        39,
+        10
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 34,
+          "xp": 2959
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 129
+        },
+        "coins": 97562,
+        "earned": 4498579,
+        "spent": 4401017,
+        "bouts": 66969,
+        "wins": 61356,
+        "losses": 5613,
+        "draws": 0,
+        "liveBouts": 253,
+        "offlineBouts": 66716,
+        "manual": 76,
+        "automatic": 227,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3494.0387475,
+            "armourHours": 3491.5874805555554
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3679.6176144444444,
+            "armourHours": 3674.919953888889
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "tank_archer",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261127,
+      "origin": 20261127000,
+      "rewardPct": 125,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 14,
+      "firstS": 166,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        8,
+        11,
+        25,
+        32,
+        16,
+        40,
+        40,
+        8
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 432
+        },
+        "stage": 7,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 130
+        },
+        "coins": 140097,
+        "earned": 6022614,
+        "spent": 5882517,
+        "bouts": 67420,
+        "wins": 62880,
+        "losses": 4540,
+        "draws": 0,
+        "liveBouts": 246,
+        "offlineBouts": 67174,
+        "manual": 86,
+        "automatic": 231,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3536.474613611111,
+            "armourHours": 3534.023346666667
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3713.762506388889,
+            "armourHours": 3709.0648458333335
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "tank_archer",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261127,
+      "origin": 20261127000,
+      "rewardPct": 140,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 14,
+      "firstS": 166,
+      "fullS": 173,
+      "offlineChecks": 180,
+      "stageDays": [
+        14,
+        10,
+        24,
+        17,
+        30,
+        44,
+        31,
+        10
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 864
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 130
+        },
+        "coins": 627475,
+        "earned": 6630117,
+        "spent": 6002642,
+        "bouts": 67555,
+        "wins": 62464,
+        "losses": 5091,
+        "draws": 0,
+        "liveBouts": 257,
+        "offlineBouts": 67298,
+        "manual": 82,
+        "automatic": 236,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3535.0258205555556,
+            "armourHours": 3532.5745536111112
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3716.8406880555553,
+            "armourHours": 3712.1430275
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "tank_archer",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "origin": 0,
+      "rewardPct": 100,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 168,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        17,
+        4,
+        28,
+        22,
+        35,
+        37,
+        31,
+        6
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 34,
+          "xp": 3400
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "coins": 66700,
+        "earned": 4387642,
+        "spent": 4320942,
+        "bouts": 66496,
+        "wins": 61108,
+        "losses": 5387,
+        "draws": 1,
+        "liveBouts": 287,
+        "offlineBouts": 66209,
+        "manual": 77,
+        "automatic": 225,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3492.3221475,
+            "armourHours": 3489.6308244444444
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3656.584480833333,
+            "armourHours": 3651.903766666667
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "tank_archer",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "origin": 0,
+      "rewardPct": 125,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 168,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        13,
+        13,
+        22,
+        23,
+        32,
+        32,
+        36,
+        9
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 432
+        },
+        "stage": 7,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "coins": 168824,
+        "earned": 5570841,
+        "spent": 5402017,
+        "bouts": 66741,
+        "wins": 61001,
+        "losses": 5739,
+        "draws": 1,
+        "liveBouts": 253,
+        "offlineBouts": 66488,
+        "manual": 80,
+        "automatic": 233,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3501.56036,
+            "armourHours": 3498.8690369444444
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3668.7263233333333,
+            "armourHours": 3664.0456091666665
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "tank_archer",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "origin": 0,
+      "rewardPct": 140,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 168,
+      "fullS": 174,
+      "offlineChecks": 180,
+      "stageDays": [
+        17,
+        4,
+        13,
+        34,
+        35,
+        27,
+        45,
+        5
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 34,
+          "xp": 3400
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 129
+        },
+        "coins": 457089,
+        "earned": 6459731,
+        "spent": 6002642,
+        "bouts": 66910,
+        "wins": 60630,
+        "losses": 6279,
+        "draws": 1,
+        "liveBouts": 253,
+        "offlineBouts": 66657,
+        "manual": 82,
+        "automatic": 236,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3461.496885,
+            "armourHours": 3458.8055619444444
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3673.411794722222,
+            "armourHours": 3668.7310805555558
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "dual_shield",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "sword_shield",
+          "plate"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "origin": 0,
+      "rewardPct": 100,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 50,
+      "unlockDay": 15,
+      "firstS": 170,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        17,
+        5,
+        13,
+        43,
+        24,
+        36,
+        38,
+        4
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 51,
+        "teamwork": {
+          "level": 34,
+          "xp": 2732
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 139,
+          "END": 128
+        },
+        "coins": 46831,
+        "earned": 4287698,
+        "spent": 4240867,
+        "bouts": 66080,
+        "wins": 59336,
+        "losses": 6744,
+        "draws": 0,
+        "liveBouts": 269,
+        "offlineBouts": 65811,
+        "manual": 78,
+        "automatic": 223,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3573.8035633333334,
+            "armourHours": 3569.789421111111
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3576.7970283333334,
+            "armourHours": 3572.758857222222
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "dual_shield",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "sword_shield",
+          "plate"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "origin": 0,
+      "rewardPct": 125,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 169,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        8,
+        13,
+        24,
+        18,
+        34,
+        35,
+        43,
+        5
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 432
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "coins": 97769,
+        "earned": 5619911,
+        "spent": 5522142,
+        "bouts": 66457,
+        "wins": 59725,
+        "losses": 6732,
+        "draws": 0,
+        "liveBouts": 271,
+        "offlineBouts": 66186,
+        "manual": 82,
+        "automatic": 232,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3594.202875,
+            "armourHours": 3590.1887327777777
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3603.222694722222,
+            "armourHours": 3599.184523611111
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "dual_shield",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "sword_shield",
+          "plate"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "origin": 0,
+      "rewardPct": 140,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 167,
+      "fullS": 173,
+      "offlineChecks": 180,
+      "stageDays": [
+        8,
+        12,
+        17,
+        27,
+        38,
+        28,
+        44,
+        6
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 432
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 129
+        },
+        "coins": 632137,
+        "earned": 6634779,
+        "spent": 6002642,
+        "bouts": 66970,
+        "wins": 61468,
+        "losses": 5502,
+        "draws": 0,
+        "liveBouts": 232,
+        "offlineBouts": 66738,
+        "manual": 85,
+        "automatic": 233,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3636.4177555555557,
+            "armourHours": 3632.4036133333334
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3644.9061519444444,
+            "armourHours": 3640.867980833333
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "hammer_spear",
+        "first": [
+          "hammer",
+          "plate"
+        ],
+        "second": [
+          "spear",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "origin": 0,
+      "rewardPct": 100,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 165,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        13,
+        8,
+        17,
+        33,
+        34,
+        38,
+        21,
+        16
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 1606
+        },
+        "stage": 7,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 130
+        },
+        "coins": 100833,
+        "earned": 4822150,
+        "spent": 4721317,
+        "bouts": 67696,
+        "wins": 62787,
+        "losses": 4909,
+        "draws": 0,
+        "liveBouts": 273,
+        "offlineBouts": 67423,
+        "manual": 78,
+        "automatic": 229,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3680.3928825,
+            "armourHours": 3676.425125
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3622.6589169444446,
+            "armourHours": 3618.43875
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "hammer_spear",
+        "first": [
+          "hammer",
+          "plate"
+        ],
+        "second": [
+          "spear",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "origin": 0,
+      "rewardPct": 125,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 167,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        12,
+        14,
+        9,
+        30,
+        34,
+        37,
+        33,
+        11
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 864
+        },
+        "stage": 7,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 129
+        },
+        "coins": 123611,
+        "earned": 6006128,
+        "spent": 5882517,
+        "bouts": 66921,
+        "wins": 61596,
+        "losses": 5325,
+        "draws": 0,
+        "liveBouts": 246,
+        "offlineBouts": 66675,
+        "manual": 81,
+        "automatic": 236,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3630.041184166667,
+            "armourHours": 3626.073426666667
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3569.3459925,
+            "armourHours": 3565.1258255555554
+          }
+        }
+      }
+    },
+    {
+      "spec": {
+        "name": "hammer_spear",
+        "first": [
+          "hammer",
+          "plate"
+        ],
+        "second": [
+          "spear",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "origin": 0,
+      "rewardPct": 140,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 166,
+      "fullS": 174,
+      "offlineChecks": 180,
+      "stageDays": [
+        12,
+        14,
+        16,
+        29,
+        28,
+        44,
+        29,
+        8
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 1296
+        },
+        "stage": 7,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 130
+        },
+        "coins": 624817,
+        "earned": 6627459,
+        "spent": 6002642,
+        "bouts": 67434,
+        "wins": 63693,
+        "losses": 3741,
+        "draws": 0,
+        "liveBouts": 233,
+        "offlineBouts": 67201,
+        "manual": 83,
+        "automatic": 235,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3683.1114366666666,
+            "armourHours": 3679.1436791666665
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 7,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 3644.1357547222224,
+            "armourHours": 3639.915587777778
+          }
+        }
+      }
+    }
+  ],
+  "symmetry": [
+    {
+      "grade": 3,
+      "seed": 20261127,
+      "counts": {
+        "mirror": 25600,
+        "dominance": 51200
+      },
+      "mirror": [
+        {
+          "mode": "baseline",
+          "name": "tank_archer",
+          "sideBias": 0.21484375,
+          "slotEffect": -0.4296875,
+          "cells": {
+            "AA": {
+              "wins": 313,
+              "losses": 325,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 49.0625
+            },
+            "BB": {
+              "wins": 316,
+              "losses": 322,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 49.53125
+            },
+            "AB": {
+              "wins": 323,
+              "losses": 314,
+              "draws": 3,
+              "bouts": 640,
+              "scorePct": 50.703125
+            },
+            "BA": {
+              "wins": 328,
+              "losses": 308,
+              "draws": 4,
+              "bouts": 640,
+              "scorePct": 51.5625
+            }
+          }
+        },
+        {
+          "mode": "baseline",
+          "name": "hammer_spear",
+          "sideBias": -2.3828125,
+          "slotEffect": -3.828125,
+          "cells": {
+            "AA": {
+              "wins": 286,
+              "losses": 354,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 44.6875
+            },
+            "BB": {
+              "wins": 305,
+              "losses": 335,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 47.65625
+            },
+            "AB": {
+              "wins": 288,
+              "losses": 349,
+              "draws": 3,
+              "bouts": 640,
+              "scorePct": 45.234375
+            },
+            "BA": {
+              "wins": 336,
+              "losses": 299,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 52.890625
+            }
+          }
+        },
+        {
+          "mode": "baseline",
+          "name": "dual_bow",
+          "sideBias": -1.40625,
+          "slotEffect": 0,
+          "cells": {
+            "AA": {
+              "wins": 310,
+              "losses": 328,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 48.59375
+            },
+            "BB": {
+              "wins": 310,
+              "losses": 328,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 48.59375
+            },
+            "AB": {
+              "wins": 310,
+              "losses": 328,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 48.59375
+            },
+            "BA": {
+              "wins": 310,
+              "losses": 328,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 48.59375
+            }
+          }
+        },
+        {
+          "mode": "baseline",
+          "name": "dual_shield",
+          "sideBias": -1.328125,
+          "slotEffect": 0,
+          "cells": {
+            "AA": {
+              "wins": 305,
+              "losses": 322,
+              "draws": 13,
+              "bouts": 640,
+              "scorePct": 48.671875
+            },
+            "BB": {
+              "wins": 305,
+              "losses": 322,
+              "draws": 13,
+              "bouts": 640,
+              "scorePct": 48.671875
+            },
+            "AB": {
+              "wins": 305,
+              "losses": 322,
+              "draws": 13,
+              "bouts": 640,
+              "scorePct": 48.671875
+            },
+            "BA": {
+              "wins": 305,
+              "losses": 322,
+              "draws": 13,
+              "bouts": 640,
+              "scorePct": 48.671875
+            }
+          }
+        },
+        {
+          "mode": "baseline",
+          "name": "greatsword_spear",
+          "sideBias": -0.0390625,
+          "slotEffect": 1.09375,
+          "cells": {
+            "AA": {
+              "wins": 332,
+              "losses": 308,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 51.875
+            },
+            "BB": {
+              "wins": 313,
+              "losses": 327,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 48.90625
+            },
+            "AB": {
+              "wins": 324,
+              "losses": 316,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 50.625
+            },
+            "BA": {
+              "wins": 309,
+              "losses": 329,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 48.4375
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "tank_archer",
+          "sideBias": -0.17578125,
+          "slotEffect": -0.5859375,
+          "cells": {
+            "AA": {
+              "wins": 319,
+              "losses": 319,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 50
+            },
+            "BB": {
+              "wins": 313,
+              "losses": 325,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 49.0625
+            },
+            "AB": {
+              "wins": 317,
+              "losses": 323,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 49.53125
+            },
+            "BA": {
+              "wins": 322,
+              "losses": 313,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 50.703125
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "hammer_spear",
+          "sideBias": -2.3828125,
+          "slotEffect": -3.828125,
+          "cells": {
+            "AA": {
+              "wins": 286,
+              "losses": 354,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 44.6875
+            },
+            "BB": {
+              "wins": 305,
+              "losses": 335,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 47.65625
+            },
+            "AB": {
+              "wins": 288,
+              "losses": 349,
+              "draws": 3,
+              "bouts": 640,
+              "scorePct": 45.234375
+            },
+            "BA": {
+              "wins": 336,
+              "losses": 299,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 52.890625
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "dual_bow",
+          "sideBias": -1.640625,
+          "slotEffect": 0,
+          "cells": {
+            "AA": {
+              "wins": 308,
+              "losses": 329,
+              "draws": 3,
+              "bouts": 640,
+              "scorePct": 48.359375
+            },
+            "BB": {
+              "wins": 308,
+              "losses": 329,
+              "draws": 3,
+              "bouts": 640,
+              "scorePct": 48.359375
+            },
+            "AB": {
+              "wins": 308,
+              "losses": 329,
+              "draws": 3,
+              "bouts": 640,
+              "scorePct": 48.359375
+            },
+            "BA": {
+              "wins": 308,
+              "losses": 329,
+              "draws": 3,
+              "bouts": 640,
+              "scorePct": 48.359375
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "dual_shield",
+          "sideBias": -1.328125,
+          "slotEffect": 0,
+          "cells": {
+            "AA": {
+              "wins": 305,
+              "losses": 322,
+              "draws": 13,
+              "bouts": 640,
+              "scorePct": 48.671875
+            },
+            "BB": {
+              "wins": 305,
+              "losses": 322,
+              "draws": 13,
+              "bouts": 640,
+              "scorePct": 48.671875
+            },
+            "AB": {
+              "wins": 305,
+              "losses": 322,
+              "draws": 13,
+              "bouts": 640,
+              "scorePct": 48.671875
+            },
+            "BA": {
+              "wins": 305,
+              "losses": 322,
+              "draws": 13,
+              "bouts": 640,
+              "scorePct": 48.671875
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "greatsword_spear",
+          "sideBias": -0.0390625,
+          "slotEffect": 1.09375,
+          "cells": {
+            "AA": {
+              "wins": 332,
+              "losses": 308,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 51.875
+            },
+            "BB": {
+              "wins": 313,
+              "losses": 327,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 48.90625
+            },
+            "AB": {
+              "wins": 324,
+              "losses": 316,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 50.625
+            },
+            "BA": {
+              "wins": 309,
+              "losses": 329,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 48.4375
+            }
+          }
+        }
+      ],
+      "dominance": [
+        {
+          "mode": "baseline",
+          "high": 3,
+          "low": 2,
+          "stat": 10,
+          "expertiseMode": "trained",
+          "strong": {
+            "wins": 3131,
+            "losses": 68,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 3131.5,
+            "intercepts": 1075,
+            "winPct": 97.84375,
+            "scorePct": 97.859375
+          },
+          "weak": {
+            "wins": 62,
+            "losses": 3137,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 62.5,
+            "intercepts": 1087,
+            "winPct": 1.9375,
+            "scorePct": 1.953125
+          }
+        },
+        {
+          "mode": "baseline",
+          "high": 3,
+          "low": 2,
+          "stat": 10,
+          "expertiseMode": "novice",
+          "strong": {
+            "wins": 2435,
+            "losses": 752,
+            "draws": 13,
+            "bouts": 3200,
+            "score": 2441.5,
+            "intercepts": 2116,
+            "winPct": 76.09375,
+            "scorePct": 76.296875
+          },
+          "weak": {
+            "wins": 659,
+            "losses": 2528,
+            "draws": 13,
+            "bouts": 3200,
+            "score": 665.5,
+            "intercepts": 2164,
+            "winPct": 20.59375,
+            "scorePct": 20.796875
+          }
+        },
+        {
+          "mode": "baseline",
+          "high": 3,
+          "low": 2,
+          "stat": 150,
+          "expertiseMode": "trained",
+          "strong": {
+            "wins": 3133,
+            "losses": 65,
+            "draws": 2,
+            "bouts": 3200,
+            "score": 3134,
+            "intercepts": 1722,
+            "winPct": 97.90625,
+            "scorePct": 97.9375
+          },
+          "weak": {
+            "wins": 45,
+            "losses": 3155,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 45,
+            "intercepts": 1768,
+            "winPct": 1.40625,
+            "scorePct": 1.40625
+          }
+        },
+        {
+          "mode": "baseline",
+          "high": 3,
+          "low": 2,
+          "stat": 150,
+          "expertiseMode": "novice",
+          "strong": {
+            "wins": 2354,
+            "losses": 839,
+            "draws": 7,
+            "bouts": 3200,
+            "score": 2357.5,
+            "intercepts": 2224,
+            "winPct": 73.5625,
+            "scorePct": 73.671875
+          },
+          "weak": {
+            "wins": 784,
+            "losses": 2410,
+            "draws": 6,
+            "bouts": 3200,
+            "score": 787,
+            "intercepts": 2195,
+            "winPct": 24.5,
+            "scorePct": 24.59375
+          }
+        },
+        {
+          "mode": "centered",
+          "high": 3,
+          "low": 2,
+          "stat": 10,
+          "expertiseMode": "trained",
+          "strong": {
+            "wins": 3131,
+            "losses": 68,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 3131.5,
+            "intercepts": 1073,
+            "winPct": 97.84375,
+            "scorePct": 97.859375
+          },
+          "weak": {
+            "wins": 62,
+            "losses": 3137,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 62.5,
+            "intercepts": 1087,
+            "winPct": 1.9375,
+            "scorePct": 1.953125
+          }
+        },
+        {
+          "mode": "centered",
+          "high": 3,
+          "low": 2,
+          "stat": 10,
+          "expertiseMode": "novice",
+          "strong": {
+            "wins": 2435,
+            "losses": 753,
+            "draws": 12,
+            "bouts": 3200,
+            "score": 2441,
+            "intercepts": 2114,
+            "winPct": 76.09375,
+            "scorePct": 76.28125
+          },
+          "weak": {
+            "wins": 656,
+            "losses": 2531,
+            "draws": 13,
+            "bouts": 3200,
+            "score": 662.5,
+            "intercepts": 2162,
+            "winPct": 20.5,
+            "scorePct": 20.703125
+          }
+        },
+        {
+          "mode": "centered",
+          "high": 3,
+          "low": 2,
+          "stat": 150,
+          "expertiseMode": "trained",
+          "strong": {
+            "wins": 3134,
+            "losses": 64,
+            "draws": 2,
+            "bouts": 3200,
+            "score": 3135,
+            "intercepts": 1719,
+            "winPct": 97.9375,
+            "scorePct": 97.96875
+          },
+          "weak": {
+            "wins": 46,
+            "losses": 3154,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 46,
+            "intercepts": 1766,
+            "winPct": 1.4375,
+            "scorePct": 1.4375
+          }
+        },
+        {
+          "mode": "centered",
+          "high": 3,
+          "low": 2,
+          "stat": 150,
+          "expertiseMode": "novice",
+          "strong": {
+            "wins": 2352,
+            "losses": 841,
+            "draws": 7,
+            "bouts": 3200,
+            "score": 2355.5,
+            "intercepts": 2222,
+            "winPct": 73.5,
+            "scorePct": 73.609375
+          },
+          "weak": {
+            "wins": 782,
+            "losses": 2412,
+            "draws": 6,
+            "bouts": 3200,
+            "score": 785,
+            "intercepts": 2190,
+            "winPct": 24.4375,
+            "scorePct": 24.53125
+          }
+        }
+      ]
+    },
+    {
+      "grade": 7,
+      "seed": 20261127,
+      "counts": {
+        "mirror": 25600,
+        "dominance": 51200
+      },
+      "mirror": [
+        {
+          "mode": "baseline",
+          "name": "tank_archer",
+          "sideBias": 0.29296875,
+          "slotEffect": 0.0390625,
+          "cells": {
+            "AA": {
+              "wins": 292,
+              "losses": 346,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 45.78125
+            },
+            "BB": {
+              "wins": 340,
+              "losses": 300,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 53.125
+            },
+            "AB": {
+              "wins": 327,
+              "losses": 312,
+              "draws": 1,
+              "bouts": 640,
+              "scorePct": 51.171875
+            },
+            "BA": {
+              "wins": 324,
+              "losses": 310,
+              "draws": 6,
+              "bouts": 640,
+              "scorePct": 51.09375
+            }
+          }
+        },
+        {
+          "mode": "baseline",
+          "name": "hammer_spear",
+          "sideBias": -0.1953125,
+          "slotEffect": 1.796875,
+          "cells": {
+            "AA": {
+              "wins": 292,
+              "losses": 346,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 45.78125
+            },
+            "BB": {
+              "wins": 317,
+              "losses": 323,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 49.53125
+            },
+            "AB": {
+              "wins": 344,
+              "losses": 296,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 53.75
+            },
+            "BA": {
+              "wins": 320,
+              "losses": 318,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 50.15625
+            }
+          }
+        },
+        {
+          "mode": "baseline",
+          "name": "dual_bow",
+          "sideBias": -2.03125,
+          "slotEffect": 0,
+          "cells": {
+            "AA": {
+              "wins": 307,
+              "losses": 333,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 47.96875
+            },
+            "BB": {
+              "wins": 307,
+              "losses": 333,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 47.96875
+            },
+            "AB": {
+              "wins": 307,
+              "losses": 333,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 47.96875
+            },
+            "BA": {
+              "wins": 307,
+              "losses": 333,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 47.96875
+            }
+          }
+        },
+        {
+          "mode": "baseline",
+          "name": "dual_shield",
+          "sideBias": 3.828125,
+          "slotEffect": 0,
+          "cells": {
+            "AA": {
+              "wins": 342,
+              "losses": 293,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 53.828125
+            },
+            "BB": {
+              "wins": 342,
+              "losses": 293,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 53.828125
+            },
+            "AB": {
+              "wins": 342,
+              "losses": 293,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 53.828125
+            },
+            "BA": {
+              "wins": 342,
+              "losses": 293,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 53.828125
+            }
+          }
+        },
+        {
+          "mode": "baseline",
+          "name": "greatsword_spear",
+          "sideBias": 1.328125,
+          "slotEffect": -2.0703125,
+          "cells": {
+            "AA": {
+              "wins": 318,
+              "losses": 322,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 49.6875
+            },
+            "BB": {
+              "wins": 338,
+              "losses": 301,
+              "draws": 1,
+              "bouts": 640,
+              "scorePct": 52.890625
+            },
+            "AB": {
+              "wins": 314,
+              "losses": 323,
+              "draws": 3,
+              "bouts": 640,
+              "scorePct": 49.296875
+            },
+            "BA": {
+              "wins": 341,
+              "losses": 297,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 53.4375
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "tank_archer",
+          "sideBias": 0.44921875,
+          "slotEffect": 0.0390625,
+          "cells": {
+            "AA": {
+              "wins": 289,
+              "losses": 349,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 45.3125
+            },
+            "BB": {
+              "wins": 345,
+              "losses": 295,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 53.90625
+            },
+            "AB": {
+              "wins": 327,
+              "losses": 310,
+              "draws": 3,
+              "bouts": 640,
+              "scorePct": 51.328125
+            },
+            "BA": {
+              "wins": 325,
+              "losses": 309,
+              "draws": 6,
+              "bouts": 640,
+              "scorePct": 51.25
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "hammer_spear",
+          "sideBias": -0.1953125,
+          "slotEffect": 1.796875,
+          "cells": {
+            "AA": {
+              "wins": 292,
+              "losses": 346,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 45.78125
+            },
+            "BB": {
+              "wins": 317,
+              "losses": 323,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 49.53125
+            },
+            "AB": {
+              "wins": 344,
+              "losses": 296,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 53.75
+            },
+            "BA": {
+              "wins": 320,
+              "losses": 318,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 50.15625
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "dual_bow",
+          "sideBias": -1.5625,
+          "slotEffect": 0,
+          "cells": {
+            "AA": {
+              "wins": 310,
+              "losses": 330,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 48.4375
+            },
+            "BB": {
+              "wins": 310,
+              "losses": 330,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 48.4375
+            },
+            "AB": {
+              "wins": 310,
+              "losses": 330,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 48.4375
+            },
+            "BA": {
+              "wins": 310,
+              "losses": 330,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 48.4375
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "dual_shield",
+          "sideBias": 3.828125,
+          "slotEffect": 0,
+          "cells": {
+            "AA": {
+              "wins": 342,
+              "losses": 293,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 53.828125
+            },
+            "BB": {
+              "wins": 342,
+              "losses": 293,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 53.828125
+            },
+            "AB": {
+              "wins": 342,
+              "losses": 293,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 53.828125
+            },
+            "BA": {
+              "wins": 342,
+              "losses": 293,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 53.828125
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "greatsword_spear",
+          "sideBias": 1.328125,
+          "slotEffect": -2.0703125,
+          "cells": {
+            "AA": {
+              "wins": 318,
+              "losses": 322,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 49.6875
+            },
+            "BB": {
+              "wins": 338,
+              "losses": 301,
+              "draws": 1,
+              "bouts": 640,
+              "scorePct": 52.890625
+            },
+            "AB": {
+              "wins": 314,
+              "losses": 323,
+              "draws": 3,
+              "bouts": 640,
+              "scorePct": 49.296875
+            },
+            "BA": {
+              "wins": 341,
+              "losses": 297,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 53.4375
+            }
+          }
+        }
+      ],
+      "dominance": [
+        {
+          "mode": "baseline",
+          "high": 7,
+          "low": 6,
+          "stat": 10,
+          "expertiseMode": "trained",
+          "strong": {
+            "wins": 3119,
+            "losses": 81,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 3119,
+            "intercepts": 1011,
+            "winPct": 97.46875,
+            "scorePct": 97.46875
+          },
+          "weak": {
+            "wins": 75,
+            "losses": 3125,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 75,
+            "intercepts": 962,
+            "winPct": 2.34375,
+            "scorePct": 2.34375
+          }
+        },
+        {
+          "mode": "baseline",
+          "high": 7,
+          "low": 6,
+          "stat": 10,
+          "expertiseMode": "novice",
+          "strong": {
+            "wins": 31,
+            "losses": 3168,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 31.5,
+            "intercepts": 836,
+            "winPct": 0.96875,
+            "scorePct": 0.984375
+          },
+          "weak": {
+            "wins": 3163,
+            "losses": 37,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 3163,
+            "intercepts": 826,
+            "winPct": 98.84375,
+            "scorePct": 98.84375
+          }
+        },
+        {
+          "mode": "baseline",
+          "high": 7,
+          "low": 6,
+          "stat": 150,
+          "expertiseMode": "trained",
+          "strong": {
+            "wins": 3156,
+            "losses": 44,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 3156,
+            "intercepts": 1626,
+            "winPct": 98.625,
+            "scorePct": 98.625
+          },
+          "weak": {
+            "wins": 59,
+            "losses": 3141,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 59,
+            "intercepts": 1601,
+            "winPct": 1.84375,
+            "scorePct": 1.84375
+          }
+        },
+        {
+          "mode": "baseline",
+          "high": 7,
+          "low": 6,
+          "stat": 150,
+          "expertiseMode": "novice",
+          "strong": {
+            "wins": 42,
+            "losses": 3158,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 42,
+            "intercepts": 1481,
+            "winPct": 1.3125,
+            "scorePct": 1.3125
+          },
+          "weak": {
+            "wins": 3130,
+            "losses": 69,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 3130.5,
+            "intercepts": 1457,
+            "winPct": 97.8125,
+            "scorePct": 97.828125
+          }
+        },
+        {
+          "mode": "centered",
+          "high": 7,
+          "low": 6,
+          "stat": 10,
+          "expertiseMode": "trained",
+          "strong": {
+            "wins": 3119,
+            "losses": 81,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 3119,
+            "intercepts": 1011,
+            "winPct": 97.46875,
+            "scorePct": 97.46875
+          },
+          "weak": {
+            "wins": 76,
+            "losses": 3124,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 76,
+            "intercepts": 962,
+            "winPct": 2.375,
+            "scorePct": 2.375
+          }
+        },
+        {
+          "mode": "centered",
+          "high": 7,
+          "low": 6,
+          "stat": 10,
+          "expertiseMode": "novice",
+          "strong": {
+            "wins": 31,
+            "losses": 3168,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 31.5,
+            "intercepts": 836,
+            "winPct": 0.96875,
+            "scorePct": 0.984375
+          },
+          "weak": {
+            "wins": 3163,
+            "losses": 37,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 3163,
+            "intercepts": 825,
+            "winPct": 98.84375,
+            "scorePct": 98.84375
+          }
+        },
+        {
+          "mode": "centered",
+          "high": 7,
+          "low": 6,
+          "stat": 150,
+          "expertiseMode": "trained",
+          "strong": {
+            "wins": 3156,
+            "losses": 44,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 3156,
+            "intercepts": 1627,
+            "winPct": 98.625,
+            "scorePct": 98.625
+          },
+          "weak": {
+            "wins": 59,
+            "losses": 3141,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 59,
+            "intercepts": 1602,
+            "winPct": 1.84375,
+            "scorePct": 1.84375
+          }
+        },
+        {
+          "mode": "centered",
+          "high": 7,
+          "low": 6,
+          "stat": 150,
+          "expertiseMode": "novice",
+          "strong": {
+            "wins": 40,
+            "losses": 3160,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 40,
+            "intercepts": 1482,
+            "winPct": 1.25,
+            "scorePct": 1.25
+          },
+          "weak": {
+            "wins": 3129,
+            "losses": 70,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 3129.5,
+            "intercepts": 1460,
+            "winPct": 97.78125,
+            "scorePct": 97.796875
+          }
+        }
+      ]
+    },
+    {
+      "grade": 0,
+      "seed": 20261127,
+      "counts": {
+        "mirror": 25600,
+        "dominance": 51200
+      },
+      "mirror": [
+        {
+          "mode": "baseline",
+          "name": "tank_archer",
+          "sideBias": 1.81640625,
+          "slotEffect": -0.234375,
+          "cells": {
+            "AA": {
+              "wins": 306,
+              "losses": 327,
+              "draws": 7,
+              "bouts": 640,
+              "scorePct": 48.359375
+            },
+            "BB": {
+              "wins": 333,
+              "losses": 303,
+              "draws": 4,
+              "bouts": 640,
+              "scorePct": 52.34375
+            },
+            "AB": {
+              "wins": 337,
+              "losses": 298,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 53.046875
+            },
+            "BA": {
+              "wins": 337,
+              "losses": 292,
+              "draws": 11,
+              "bouts": 640,
+              "scorePct": 53.515625
+            }
+          }
+        },
+        {
+          "mode": "baseline",
+          "name": "hammer_spear",
+          "sideBias": 0.6640625,
+          "slotEffect": -2.8515625,
+          "cells": {
+            "AA": {
+              "wins": 307,
+              "losses": 333,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 47.96875
+            },
+            "BB": {
+              "wins": 330,
+              "losses": 309,
+              "draws": 1,
+              "bouts": 640,
+              "scorePct": 51.640625
+            },
+            "AB": {
+              "wins": 311,
+              "losses": 328,
+              "draws": 1,
+              "bouts": 640,
+              "scorePct": 48.671875
+            },
+            "BA": {
+              "wins": 348,
+              "losses": 292,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 54.375
+            }
+          }
+        },
+        {
+          "mode": "baseline",
+          "name": "dual_bow",
+          "sideBias": -3.4375,
+          "slotEffect": 0,
+          "cells": {
+            "AA": {
+              "wins": 297,
+              "losses": 341,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 46.5625
+            },
+            "BB": {
+              "wins": 297,
+              "losses": 341,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 46.5625
+            },
+            "AB": {
+              "wins": 297,
+              "losses": 341,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 46.5625
+            },
+            "BA": {
+              "wins": 297,
+              "losses": 341,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 46.5625
+            }
+          }
+        },
+        {
+          "mode": "baseline",
+          "name": "dual_shield",
+          "sideBias": 2.8125,
+          "slotEffect": 0,
+          "cells": {
+            "AA": {
+              "wins": 333,
+              "losses": 297,
+              "draws": 10,
+              "bouts": 640,
+              "scorePct": 52.8125
+            },
+            "BB": {
+              "wins": 333,
+              "losses": 297,
+              "draws": 10,
+              "bouts": 640,
+              "scorePct": 52.8125
+            },
+            "AB": {
+              "wins": 333,
+              "losses": 297,
+              "draws": 10,
+              "bouts": 640,
+              "scorePct": 52.8125
+            },
+            "BA": {
+              "wins": 333,
+              "losses": 297,
+              "draws": 10,
+              "bouts": 640,
+              "scorePct": 52.8125
+            }
+          }
+        },
+        {
+          "mode": "baseline",
+          "name": "greatsword_spear",
+          "sideBias": -3.2421875,
+          "slotEffect": -2.421875,
+          "cells": {
+            "AA": {
+              "wins": 279,
+              "losses": 356,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 43.984375
+            },
+            "BB": {
+              "wins": 319,
+              "losses": 318,
+              "draws": 3,
+              "bouts": 640,
+              "scorePct": 50.078125
+            },
+            "AB": {
+              "wins": 280,
+              "losses": 356,
+              "draws": 4,
+              "bouts": 640,
+              "scorePct": 44.0625
+            },
+            "BA": {
+              "wins": 311,
+              "losses": 325,
+              "draws": 4,
+              "bouts": 640,
+              "scorePct": 48.90625
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "tank_archer",
+          "sideBias": 1.81640625,
+          "slotEffect": -1.09375,
+          "cells": {
+            "AA": {
+              "wins": 310,
+              "losses": 323,
+              "draws": 7,
+              "bouts": 640,
+              "scorePct": 48.984375
+            },
+            "BB": {
+              "wins": 336,
+              "losses": 296,
+              "draws": 8,
+              "bouts": 640,
+              "scorePct": 53.125
+            },
+            "AB": {
+              "wins": 326,
+              "losses": 307,
+              "draws": 7,
+              "bouts": 640,
+              "scorePct": 51.484375
+            },
+            "BA": {
+              "wins": 338,
+              "losses": 291,
+              "draws": 11,
+              "bouts": 640,
+              "scorePct": 53.671875
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "hammer_spear",
+          "sideBias": 0.6640625,
+          "slotEffect": -2.8515625,
+          "cells": {
+            "AA": {
+              "wins": 307,
+              "losses": 333,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 47.96875
+            },
+            "BB": {
+              "wins": 330,
+              "losses": 309,
+              "draws": 1,
+              "bouts": 640,
+              "scorePct": 51.640625
+            },
+            "AB": {
+              "wins": 311,
+              "losses": 328,
+              "draws": 1,
+              "bouts": 640,
+              "scorePct": 48.671875
+            },
+            "BA": {
+              "wins": 348,
+              "losses": 292,
+              "draws": 0,
+              "bouts": 640,
+              "scorePct": 54.375
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "dual_bow",
+          "sideBias": -3.28125,
+          "slotEffect": 0,
+          "cells": {
+            "AA": {
+              "wins": 298,
+              "losses": 340,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 46.71875
+            },
+            "BB": {
+              "wins": 298,
+              "losses": 340,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 46.71875
+            },
+            "AB": {
+              "wins": 298,
+              "losses": 340,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 46.71875
+            },
+            "BA": {
+              "wins": 298,
+              "losses": 340,
+              "draws": 2,
+              "bouts": 640,
+              "scorePct": 46.71875
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "dual_shield",
+          "sideBias": 2.8125,
+          "slotEffect": 0,
+          "cells": {
+            "AA": {
+              "wins": 333,
+              "losses": 297,
+              "draws": 10,
+              "bouts": 640,
+              "scorePct": 52.8125
+            },
+            "BB": {
+              "wins": 333,
+              "losses": 297,
+              "draws": 10,
+              "bouts": 640,
+              "scorePct": 52.8125
+            },
+            "AB": {
+              "wins": 333,
+              "losses": 297,
+              "draws": 10,
+              "bouts": 640,
+              "scorePct": 52.8125
+            },
+            "BA": {
+              "wins": 333,
+              "losses": 297,
+              "draws": 10,
+              "bouts": 640,
+              "scorePct": 52.8125
+            }
+          }
+        },
+        {
+          "mode": "centered",
+          "name": "greatsword_spear",
+          "sideBias": -3.2421875,
+          "slotEffect": -2.421875,
+          "cells": {
+            "AA": {
+              "wins": 279,
+              "losses": 356,
+              "draws": 5,
+              "bouts": 640,
+              "scorePct": 43.984375
+            },
+            "BB": {
+              "wins": 319,
+              "losses": 318,
+              "draws": 3,
+              "bouts": 640,
+              "scorePct": 50.078125
+            },
+            "AB": {
+              "wins": 280,
+              "losses": 356,
+              "draws": 4,
+              "bouts": 640,
+              "scorePct": 44.0625
+            },
+            "BA": {
+              "wins": 311,
+              "losses": 325,
+              "draws": 4,
+              "bouts": 640,
+              "scorePct": 48.90625
+            }
+          }
+        }
+      ],
+      "dominance": [
+        {
+          "mode": "baseline",
+          "high": 1,
+          "low": 0,
+          "stat": 10,
+          "expertiseMode": "trained",
+          "strong": {
+            "wins": 3158,
+            "losses": 40,
+            "draws": 2,
+            "bouts": 3200,
+            "score": 3159,
+            "intercepts": 1118,
+            "winPct": 98.6875,
+            "scorePct": 98.71875
+          },
+          "weak": {
+            "wins": 21,
+            "losses": 3177,
+            "draws": 2,
+            "bouts": 3200,
+            "score": 22,
+            "intercepts": 1133,
+            "winPct": 0.65625,
+            "scorePct": 0.6875
+          }
+        },
+        {
+          "mode": "baseline",
+          "high": 1,
+          "low": 0,
+          "stat": 10,
+          "expertiseMode": "novice",
+          "strong": {
+            "wins": 3094,
+            "losses": 106,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 3094,
+            "intercepts": 1664,
+            "winPct": 96.6875,
+            "scorePct": 96.6875
+          },
+          "weak": {
+            "wins": 58,
+            "losses": 3141,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 58.5,
+            "intercepts": 1700,
+            "winPct": 1.8125,
+            "scorePct": 1.828125
+          }
+        },
+        {
+          "mode": "baseline",
+          "high": 1,
+          "low": 0,
+          "stat": 150,
+          "expertiseMode": "trained",
+          "strong": {
+            "wins": 3094,
+            "losses": 105,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 3094.5,
+            "intercepts": 1801,
+            "winPct": 96.6875,
+            "scorePct": 96.703125
+          },
+          "weak": {
+            "wins": 76,
+            "losses": 3123,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 76.5,
+            "intercepts": 1850,
+            "winPct": 2.375,
+            "scorePct": 2.390625
+          }
+        },
+        {
+          "mode": "baseline",
+          "high": 1,
+          "low": 0,
+          "stat": 150,
+          "expertiseMode": "novice",
+          "strong": {
+            "wins": 3017,
+            "losses": 183,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 3017,
+            "intercepts": 1907,
+            "winPct": 94.28125,
+            "scorePct": 94.28125
+          },
+          "weak": {
+            "wins": 141,
+            "losses": 3058,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 141.5,
+            "intercepts": 1959,
+            "winPct": 4.40625,
+            "scorePct": 4.421875
+          }
+        },
+        {
+          "mode": "centered",
+          "high": 1,
+          "low": 0,
+          "stat": 10,
+          "expertiseMode": "trained",
+          "strong": {
+            "wins": 3158,
+            "losses": 40,
+            "draws": 2,
+            "bouts": 3200,
+            "score": 3159,
+            "intercepts": 1115,
+            "winPct": 98.6875,
+            "scorePct": 98.71875
+          },
+          "weak": {
+            "wins": 21,
+            "losses": 3177,
+            "draws": 2,
+            "bouts": 3200,
+            "score": 22,
+            "intercepts": 1133,
+            "winPct": 0.65625,
+            "scorePct": 0.6875
+          }
+        },
+        {
+          "mode": "centered",
+          "high": 1,
+          "low": 0,
+          "stat": 10,
+          "expertiseMode": "novice",
+          "strong": {
+            "wins": 3094,
+            "losses": 106,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 3094,
+            "intercepts": 1661,
+            "winPct": 96.6875,
+            "scorePct": 96.6875
+          },
+          "weak": {
+            "wins": 60,
+            "losses": 3139,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 60.5,
+            "intercepts": 1700,
+            "winPct": 1.875,
+            "scorePct": 1.890625
+          }
+        },
+        {
+          "mode": "centered",
+          "high": 1,
+          "low": 0,
+          "stat": 150,
+          "expertiseMode": "trained",
+          "strong": {
+            "wins": 3094,
+            "losses": 105,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 3094.5,
+            "intercepts": 1797,
+            "winPct": 96.6875,
+            "scorePct": 96.703125
+          },
+          "weak": {
+            "wins": 76,
+            "losses": 3123,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 76.5,
+            "intercepts": 1846,
+            "winPct": 2.375,
+            "scorePct": 2.390625
+          }
+        },
+        {
+          "mode": "centered",
+          "high": 1,
+          "low": 0,
+          "stat": 150,
+          "expertiseMode": "novice",
+          "strong": {
+            "wins": 3017,
+            "losses": 183,
+            "draws": 0,
+            "bouts": 3200,
+            "score": 3017,
+            "intercepts": 1903,
+            "winPct": 94.28125,
+            "scorePct": 94.28125
+          },
+          "weak": {
+            "wins": 142,
+            "losses": 3057,
+            "draws": 1,
+            "bouts": 3200,
+            "score": 142.5,
+            "intercepts": 1955,
+            "winPct": 4.4375,
+            "scorePct": 4.453125
+          }
+        }
+      ]
+    }
+  ]
+}

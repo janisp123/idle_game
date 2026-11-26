@@ -1,0 +1,464 @@
+{
+  "baseline": "d6a56fae2e4be62684046844c6253fbdf4dbd169",
+  "source": "ebfab5ff0e02e8300b6ad47bedfbeaa3fedde325",
+  "parity": 3000,
+  "hash": 3868377314,
+  "results": [
+    {
+      "name": "tank_bow",
+      "module": "teamCombat",
+      "source": "site/play/team-combat.mjs (candidate, not live)",
+      "battles": 500,
+      "seed": 20261126,
+      "grade": 0,
+      "teamwork": 1,
+      "enemyTeamwork": 1,
+      "builds": [
+        {
+          "loadout": "sword_shield",
+          "armour": "plate"
+        },
+        {
+          "loadout": "bow",
+          "armour": "leather"
+        }
+      ],
+      "opponentBuilds": null,
+      "outcomes": {
+        "victory": 312,
+        "defeat": 188,
+        "double_death": 0
+      },
+      "winRatePct": 62.4,
+      "averageRounds": 19.884,
+      "intercepts": 19,
+      "byArena": {
+        "walled_courtyard": {
+          "battles": 107,
+          "victory": 64,
+          "defeat": 43,
+          "double_death": 0
+        },
+        "gatehouse_chamber": {
+          "battles": 95,
+          "victory": 63,
+          "defeat": 32,
+          "double_death": 0
+        },
+        "narrow_bridge": {
+          "battles": 99,
+          "victory": 68,
+          "defeat": 31,
+          "double_death": 0
+        },
+        "ruined_streets": {
+          "battles": 100,
+          "victory": 46,
+          "defeat": 54,
+          "double_death": 0
+        },
+        "open_field": {
+          "battles": 99,
+          "victory": 71,
+          "defeat": 28,
+          "double_death": 0
+        }
+      },
+      "fighters": {
+        "player:0": {
+          "damage": 11471,
+          "actions": 6761,
+          "survived": 219,
+          "intercepts": 4
+        },
+        "player:1": {
+          "damage": 24989,
+          "actions": 9698,
+          "survived": 331,
+          "intercepts": 0
+        }
+      },
+      "samples": []
+    },
+    {
+      "name": "tank_bow",
+      "module": "teamCombat",
+      "source": "site/play/team-combat.mjs (candidate, not live)",
+      "battles": 500,
+      "seed": 20261126,
+      "grade": 0,
+      "teamwork": 50,
+      "enemyTeamwork": 1,
+      "builds": [
+        {
+          "loadout": "sword_shield",
+          "armour": "plate"
+        },
+        {
+          "loadout": "bow",
+          "armour": "leather"
+        }
+      ],
+      "opponentBuilds": null,
+      "outcomes": {
+        "victory": 326,
+        "defeat": 174,
+        "double_death": 0
+      },
+      "winRatePct": 65.2,
+      "averageRounds": 20.658,
+      "intercepts": 67,
+      "byArena": {
+        "walled_courtyard": {
+          "battles": 107,
+          "victory": 67,
+          "defeat": 40,
+          "double_death": 0
+        },
+        "gatehouse_chamber": {
+          "battles": 95,
+          "victory": 66,
+          "defeat": 29,
+          "double_death": 0
+        },
+        "narrow_bridge": {
+          "battles": 99,
+          "victory": 75,
+          "defeat": 24,
+          "double_death": 0
+        },
+        "ruined_streets": {
+          "battles": 100,
+          "victory": 50,
+          "defeat": 50,
+          "double_death": 0
+        },
+        "open_field": {
+          "battles": 99,
+          "victory": 68,
+          "defeat": 31,
+          "double_death": 0
+        }
+      },
+      "fighters": {
+        "player:0": {
+          "damage": 11248,
+          "actions": 7091,
+          "survived": 235,
+          "intercepts": 57
+        },
+        "player:1": {
+          "damage": 25802,
+          "actions": 10108,
+          "survived": 347,
+          "intercepts": 0
+        }
+      },
+      "samples": []
+    },
+    {
+      "name": "dual_bow",
+      "module": "teamCombat",
+      "source": "site/play/team-combat.mjs (candidate, not live)",
+      "battles": 500,
+      "seed": 20261126,
+      "grade": 0,
+      "teamwork": 1,
+      "enemyTeamwork": 1,
+      "builds": [
+        {
+          "loadout": "bow",
+          "armour": "leather"
+        },
+        {
+          "loadout": "bow",
+          "armour": "leather"
+        }
+      ],
+      "opponentBuilds": null,
+      "outcomes": {
+        "victory": 296,
+        "defeat": 202,
+        "double_death": 2
+      },
+      "winRatePct": 59.2,
+      "averageRounds": 15.814,
+      "intercepts": 24,
+      "byArena": {
+        "walled_courtyard": {
+          "battles": 107,
+          "victory": 42,
+          "defeat": 65,
+          "double_death": 0
+        },
+        "gatehouse_chamber": {
+          "battles": 95,
+          "victory": 28,
+          "defeat": 66,
+          "double_death": 1
+        },
+        "narrow_bridge": {
+          "battles": 99,
+          "victory": 93,
+          "defeat": 5,
+          "double_death": 1
+        },
+        "ruined_streets": {
+          "battles": 100,
+          "victory": 39,
+          "defeat": 61,
+          "double_death": 0
+        },
+        "open_field": {
+          "battles": 99,
+          "victory": 94,
+          "defeat": 5,
+          "double_death": 0
+        }
+      },
+      "fighters": {
+        "player:0": {
+          "damage": 18373,
+          "actions": 6796,
+          "survived": 273,
+          "intercepts": 0
+        },
+        "player:1": {
+          "damage": 17525,
+          "actions": 6663,
+          "survived": 276,
+          "intercepts": 0
+        }
+      },
+      "samples": []
+    },
+    {
+      "name": "dual_bow",
+      "module": "teamCombat",
+      "source": "site/play/team-combat.mjs (candidate, not live)",
+      "battles": 500,
+      "seed": 20261126,
+      "grade": 0,
+      "teamwork": 50,
+      "enemyTeamwork": 1,
+      "builds": [
+        {
+          "loadout": "bow",
+          "armour": "leather"
+        },
+        {
+          "loadout": "bow",
+          "armour": "leather"
+        }
+      ],
+      "opponentBuilds": null,
+      "outcomes": {
+        "victory": 360,
+        "defeat": 139,
+        "double_death": 1
+      },
+      "winRatePct": 72,
+      "averageRounds": 15.982,
+      "intercepts": 28,
+      "byArena": {
+        "walled_courtyard": {
+          "battles": 107,
+          "victory": 67,
+          "defeat": 40,
+          "double_death": 0
+        },
+        "gatehouse_chamber": {
+          "battles": 95,
+          "victory": 55,
+          "defeat": 40,
+          "double_death": 0
+        },
+        "narrow_bridge": {
+          "battles": 99,
+          "victory": 96,
+          "defeat": 2,
+          "double_death": 1
+        },
+        "ruined_streets": {
+          "battles": 100,
+          "victory": 48,
+          "defeat": 52,
+          "double_death": 0
+        },
+        "open_field": {
+          "battles": 99,
+          "victory": 94,
+          "defeat": 5,
+          "double_death": 0
+        }
+      },
+      "fighters": {
+        "player:0": {
+          "damage": 19668,
+          "actions": 7003,
+          "survived": 323,
+          "intercepts": 0
+        },
+        "player:1": {
+          "damage": 19115,
+          "actions": 6798,
+          "survived": 324,
+          "intercepts": 0
+        }
+      },
+      "samples": []
+    },
+    {
+      "name": "hammer_spear",
+      "module": "teamCombat",
+      "source": "site/play/team-combat.mjs (candidate, not live)",
+      "battles": 500,
+      "seed": 20261126,
+      "grade": 0,
+      "teamwork": 1,
+      "enemyTeamwork": 1,
+      "builds": [
+        {
+          "loadout": "hammer",
+          "armour": "plate"
+        },
+        {
+          "loadout": "spear",
+          "armour": "padded"
+        }
+      ],
+      "opponentBuilds": null,
+      "outcomes": {
+        "victory": 373,
+        "defeat": 127,
+        "double_death": 0
+      },
+      "winRatePct": 74.6,
+      "averageRounds": 15.506,
+      "intercepts": 48,
+      "byArena": {
+        "walled_courtyard": {
+          "battles": 107,
+          "victory": 79,
+          "defeat": 28,
+          "double_death": 0
+        },
+        "gatehouse_chamber": {
+          "battles": 95,
+          "victory": 83,
+          "defeat": 12,
+          "double_death": 0
+        },
+        "narrow_bridge": {
+          "battles": 99,
+          "victory": 69,
+          "defeat": 30,
+          "double_death": 0
+        },
+        "ruined_streets": {
+          "battles": 100,
+          "victory": 86,
+          "defeat": 14,
+          "double_death": 0
+        },
+        "open_field": {
+          "battles": 99,
+          "victory": 56,
+          "defeat": 43,
+          "double_death": 0
+        }
+      },
+      "fighters": {
+        "player:0": {
+          "damage": 16465,
+          "actions": 7069,
+          "survived": 346,
+          "intercepts": 0
+        },
+        "player:1": {
+          "damage": 22107,
+          "actions": 6359,
+          "survived": 311,
+          "intercepts": 0
+        }
+      },
+      "samples": []
+    },
+    {
+      "name": "hammer_spear",
+      "module": "teamCombat",
+      "source": "site/play/team-combat.mjs (candidate, not live)",
+      "battles": 500,
+      "seed": 20261126,
+      "grade": 0,
+      "teamwork": 50,
+      "enemyTeamwork": 1,
+      "builds": [
+        {
+          "loadout": "hammer",
+          "armour": "plate"
+        },
+        {
+          "loadout": "spear",
+          "armour": "padded"
+        }
+      ],
+      "opponentBuilds": null,
+      "outcomes": {
+        "victory": 378,
+        "defeat": 122,
+        "double_death": 0
+      },
+      "winRatePct": 75.6,
+      "averageRounds": 15.368,
+      "intercepts": 54,
+      "byArena": {
+        "walled_courtyard": {
+          "battles": 107,
+          "victory": 82,
+          "defeat": 25,
+          "double_death": 0
+        },
+        "gatehouse_chamber": {
+          "battles": 95,
+          "victory": 84,
+          "defeat": 11,
+          "double_death": 0
+        },
+        "narrow_bridge": {
+          "battles": 99,
+          "victory": 69,
+          "defeat": 30,
+          "double_death": 0
+        },
+        "ruined_streets": {
+          "battles": 100,
+          "victory": 86,
+          "defeat": 14,
+          "double_death": 0
+        },
+        "open_field": {
+          "battles": 99,
+          "victory": 57,
+          "defeat": 42,
+          "double_death": 0
+        }
+      },
+      "fighters": {
+        "player:0": {
+          "damage": 15994,
+          "actions": 7011,
+          "survived": 356,
+          "intercepts": 0
+        },
+        "player:1": {
+          "damage": 22779,
+          "actions": 6225,
+          "survived": 313,
+          "intercepts": 0
+        }
+      },
+      "samples": []
+    }
+  ]
+}

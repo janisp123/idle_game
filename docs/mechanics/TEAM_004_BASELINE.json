@@ -1,0 +1,5094 @@
+{
+  "sourceHead": "2fdad95daed248e63cf067e4d474f9dd32402453",
+  "run_id": 45834609305,
+  "seed": 20261126,
+  "counts": {
+    "matrix": 54000,
+    "mirror": 2880,
+    "coordination": 5760,
+    "dominance": 11520
+  },
+  "matrixExtremes": [
+    {
+      "grade": 0,
+      "mean": 68.07222222222222,
+      "best": [
+        {
+          "first": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "greatsword",
+            "armour": "plate"
+          },
+          "wins": 72,
+          "bouts": 80,
+          "winPct": 90
+        },
+        {
+          "first": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "hammer",
+            "armour": "padded"
+          },
+          "wins": 70,
+          "bouts": 80,
+          "winPct": 87.5
+        },
+        {
+          "first": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "wins": 70,
+          "bouts": 80,
+          "winPct": 87.5
+        },
+        {
+          "first": {
+            "loadout": "greatsword",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "wins": 69,
+          "bouts": 80,
+          "winPct": 86.25
+        },
+        {
+          "first": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "sword_shield",
+            "armour": "leather"
+          },
+          "wins": 69,
+          "bouts": 80,
+          "winPct": 86.25
+        }
+      ],
+      "worst": [
+        {
+          "first": {
+            "loadout": "bow",
+            "armour": "padded"
+          },
+          "second": {
+            "loadout": "bow",
+            "armour": "padded"
+          },
+          "wins": 37,
+          "bouts": 80,
+          "winPct": 46.25
+        },
+        {
+          "first": {
+            "loadout": "greatsword",
+            "armour": "padded"
+          },
+          "second": {
+            "loadout": "sword_shield",
+            "armour": "padded"
+          },
+          "wins": 36,
+          "bouts": 80,
+          "winPct": 45
+        },
+        {
+          "first": {
+            "loadout": "sword_shield",
+            "armour": "padded"
+          },
+          "second": {
+            "loadout": "sword_shield",
+            "armour": "leather"
+          },
+          "wins": 35,
+          "bouts": 80,
+          "winPct": 43.75
+        },
+        {
+          "first": {
+            "loadout": "greatsword",
+            "armour": "padded"
+          },
+          "second": {
+            "loadout": "greatsword",
+            "armour": "padded"
+          },
+          "wins": 31,
+          "bouts": 80,
+          "winPct": 38.75
+        },
+        {
+          "first": {
+            "loadout": "sword_shield",
+            "armour": "padded"
+          },
+          "second": {
+            "loadout": "sword_shield",
+            "armour": "padded"
+          },
+          "wins": 26,
+          "bouts": 80,
+          "winPct": 32.5
+        }
+      ]
+    },
+    {
+      "grade": 3,
+      "mean": 49.65,
+      "best": [
+        {
+          "first": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "hammer",
+            "armour": "plate"
+          },
+          "wins": 64,
+          "bouts": 80,
+          "winPct": 80
+        },
+        {
+          "first": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "hammer",
+            "armour": "leather"
+          },
+          "wins": 63,
+          "bouts": 80,
+          "winPct": 78.75
+        },
+        {
+          "first": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "wins": 63,
+          "bouts": 80,
+          "winPct": 78.75
+        },
+        {
+          "first": {
+            "loadout": "greatsword",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "wins": 60,
+          "bouts": 80,
+          "winPct": 75
+        },
+        {
+          "first": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "hammer",
+            "armour": "padded"
+          },
+          "wins": 60,
+          "bouts": 80,
+          "winPct": 75
+        }
+      ],
+      "worst": [
+        {
+          "first": {
+            "loadout": "greatsword",
+            "armour": "leather"
+          },
+          "second": {
+            "loadout": "sword_shield",
+            "armour": "leather"
+          },
+          "wins": 21,
+          "bouts": 80,
+          "winPct": 26.25
+        },
+        {
+          "first": {
+            "loadout": "greatsword",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "greatsword",
+            "armour": "padded"
+          },
+          "wins": 21,
+          "bouts": 80,
+          "winPct": 26.25
+        },
+        {
+          "first": {
+            "loadout": "greatsword",
+            "armour": "padded"
+          },
+          "second": {
+            "loadout": "sword_shield",
+            "armour": "padded"
+          },
+          "wins": 20,
+          "bouts": 80,
+          "winPct": 25
+        },
+        {
+          "first": {
+            "loadout": "sword_shield",
+            "armour": "leather"
+          },
+          "second": {
+            "loadout": "greatsword",
+            "armour": "leather"
+          },
+          "wins": 18,
+          "bouts": 80,
+          "winPct": 22.5
+        },
+        {
+          "first": {
+            "loadout": "greatsword",
+            "armour": "padded"
+          },
+          "second": {
+            "loadout": "greatsword",
+            "armour": "leather"
+          },
+          "wins": 14,
+          "bouts": 80,
+          "winPct": 17.5
+        }
+      ]
+    },
+    {
+      "grade": 7,
+      "mean": 50.483333333333334,
+      "best": [
+        {
+          "first": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "hammer",
+            "armour": "padded"
+          },
+          "wins": 60,
+          "bouts": 80,
+          "winPct": 75
+        },
+        {
+          "first": {
+            "loadout": "spear",
+            "armour": "leather"
+          },
+          "second": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "wins": 56,
+          "bouts": 80,
+          "winPct": 70
+        },
+        {
+          "first": {
+            "loadout": "greatsword",
+            "armour": "padded"
+          },
+          "second": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "wins": 55,
+          "bouts": 80,
+          "winPct": 68.75
+        },
+        {
+          "first": {
+            "loadout": "greatsword",
+            "armour": "leather"
+          },
+          "second": {
+            "loadout": "spear",
+            "armour": "padded"
+          },
+          "wins": 55,
+          "bouts": 80,
+          "winPct": 68.75
+        },
+        {
+          "first": {
+            "loadout": "greatsword",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "spear",
+            "armour": "plate"
+          },
+          "wins": 55,
+          "bouts": 80,
+          "winPct": 68.75
+        }
+      ],
+      "worst": [
+        {
+          "first": {
+            "loadout": "bow",
+            "armour": "leather"
+          },
+          "second": {
+            "loadout": "sword_shield",
+            "armour": "leather"
+          },
+          "wins": 26,
+          "bouts": 80,
+          "winPct": 32.5
+        },
+        {
+          "first": {
+            "loadout": "sword_shield",
+            "armour": "padded"
+          },
+          "second": {
+            "loadout": "sword_shield",
+            "armour": "plate"
+          },
+          "wins": 25,
+          "bouts": 80,
+          "winPct": 31.25
+        },
+        {
+          "first": {
+            "loadout": "bow",
+            "armour": "padded"
+          },
+          "second": {
+            "loadout": "sword_shield",
+            "armour": "leather"
+          },
+          "wins": 24,
+          "bouts": 80,
+          "winPct": 30
+        },
+        {
+          "first": {
+            "loadout": "sword_shield",
+            "armour": "padded"
+          },
+          "second": {
+            "loadout": "sword_shield",
+            "armour": "leather"
+          },
+          "wins": 23,
+          "bouts": 80,
+          "winPct": 28.75
+        },
+        {
+          "first": {
+            "loadout": "sword_shield",
+            "armour": "plate"
+          },
+          "second": {
+            "loadout": "sword_shield",
+            "armour": "plate"
+          },
+          "wins": 20,
+          "bouts": 80,
+          "winPct": 25
+        }
+      ]
+    }
+  ],
+  "mirrors": [
+    {
+      "grade": 0,
+      "name": "tank_archer",
+      "forward": 42.5,
+      "reverse": 55
+    },
+    {
+      "grade": 0,
+      "name": "dual_bow",
+      "forward": 46.25,
+      "reverse": 46.25
+    },
+    {
+      "grade": 0,
+      "name": "dual_shield",
+      "forward": 55,
+      "reverse": 55
+    },
+    {
+      "grade": 0,
+      "name": "spear_bow",
+      "forward": 51.25,
+      "reverse": 41.25
+    },
+    {
+      "grade": 0,
+      "name": "hammer_greatsword",
+      "forward": 55,
+      "reverse": 43.75
+    },
+    {
+      "grade": 0,
+      "name": "hammer_spear",
+      "forward": 41.25,
+      "reverse": 55
+    },
+    {
+      "grade": 3,
+      "name": "tank_archer",
+      "forward": 45,
+      "reverse": 57.5
+    },
+    {
+      "grade": 3,
+      "name": "dual_bow",
+      "forward": 56.25,
+      "reverse": 56.25
+    },
+    {
+      "grade": 3,
+      "name": "dual_shield",
+      "forward": 53.75,
+      "reverse": 53.75
+    },
+    {
+      "grade": 3,
+      "name": "spear_bow",
+      "forward": 56.25,
+      "reverse": 47.5
+    },
+    {
+      "grade": 3,
+      "name": "hammer_greatsword",
+      "forward": 56.25,
+      "reverse": 55
+    },
+    {
+      "grade": 3,
+      "name": "hammer_spear",
+      "forward": 45,
+      "reverse": 62.5
+    },
+    {
+      "grade": 7,
+      "name": "tank_archer",
+      "forward": 48.75,
+      "reverse": 56.25
+    },
+    {
+      "grade": 7,
+      "name": "dual_bow",
+      "forward": 57.5,
+      "reverse": 57.5
+    },
+    {
+      "grade": 7,
+      "name": "dual_shield",
+      "forward": 67.5,
+      "reverse": 67.5
+    },
+    {
+      "grade": 7,
+      "name": "spear_bow",
+      "forward": 47.5,
+      "reverse": 52.5
+    },
+    {
+      "grade": 7,
+      "name": "hammer_greatsword",
+      "forward": 55,
+      "reverse": 47.5
+    },
+    {
+      "grade": 7,
+      "name": "hammer_spear",
+      "forward": 41.25,
+      "reverse": 60
+    }
+  ],
+  "coordination": [
+    {
+      "grade": 0,
+      "name": "tank_archer",
+      "level": 1,
+      "winPct": 72.5
+    },
+    {
+      "grade": 0,
+      "name": "tank_archer",
+      "level": 10,
+      "winPct": 72.5
+    },
+    {
+      "grade": 0,
+      "name": "tank_archer",
+      "level": 25,
+      "winPct": 75
+    },
+    {
+      "grade": 0,
+      "name": "tank_archer",
+      "level": 50,
+      "winPct": 77.5
+    },
+    {
+      "grade": 0,
+      "name": "dual_bow",
+      "level": 1,
+      "winPct": 57.5
+    },
+    {
+      "grade": 0,
+      "name": "dual_bow",
+      "level": 10,
+      "winPct": 57.5
+    },
+    {
+      "grade": 0,
+      "name": "dual_bow",
+      "level": 25,
+      "winPct": 57.5
+    },
+    {
+      "grade": 0,
+      "name": "dual_bow",
+      "level": 50,
+      "winPct": 60
+    },
+    {
+      "grade": 0,
+      "name": "dual_shield",
+      "level": 1,
+      "winPct": 55
+    },
+    {
+      "grade": 0,
+      "name": "dual_shield",
+      "level": 10,
+      "winPct": 55
+    },
+    {
+      "grade": 0,
+      "name": "dual_shield",
+      "level": 25,
+      "winPct": 58.75
+    },
+    {
+      "grade": 0,
+      "name": "dual_shield",
+      "level": 50,
+      "winPct": 55
+    },
+    {
+      "grade": 0,
+      "name": "spear_bow",
+      "level": 1,
+      "winPct": 75
+    },
+    {
+      "grade": 0,
+      "name": "spear_bow",
+      "level": 10,
+      "winPct": 75
+    },
+    {
+      "grade": 0,
+      "name": "spear_bow",
+      "level": 25,
+      "winPct": 75
+    },
+    {
+      "grade": 0,
+      "name": "spear_bow",
+      "level": 50,
+      "winPct": 77.5
+    },
+    {
+      "grade": 0,
+      "name": "hammer_greatsword",
+      "level": 1,
+      "winPct": 68.75
+    },
+    {
+      "grade": 0,
+      "name": "hammer_greatsword",
+      "level": 10,
+      "winPct": 68.75
+    },
+    {
+      "grade": 0,
+      "name": "hammer_greatsword",
+      "level": 25,
+      "winPct": 70
+    },
+    {
+      "grade": 0,
+      "name": "hammer_greatsword",
+      "level": 50,
+      "winPct": 70
+    },
+    {
+      "grade": 0,
+      "name": "hammer_spear",
+      "level": 1,
+      "winPct": 78.75
+    },
+    {
+      "grade": 0,
+      "name": "hammer_spear",
+      "level": 10,
+      "winPct": 80
+    },
+    {
+      "grade": 0,
+      "name": "hammer_spear",
+      "level": 25,
+      "winPct": 82.5
+    },
+    {
+      "grade": 0,
+      "name": "hammer_spear",
+      "level": 50,
+      "winPct": 85
+    },
+    {
+      "grade": 3,
+      "name": "tank_archer",
+      "level": 1,
+      "winPct": 41.25
+    },
+    {
+      "grade": 3,
+      "name": "tank_archer",
+      "level": 10,
+      "winPct": 42.5
+    },
+    {
+      "grade": 3,
+      "name": "tank_archer",
+      "level": 25,
+      "winPct": 50
+    },
+    {
+      "grade": 3,
+      "name": "tank_archer",
+      "level": 50,
+      "winPct": 55
+    },
+    {
+      "grade": 3,
+      "name": "dual_bow",
+      "level": 1,
+      "winPct": 42.5
+    },
+    {
+      "grade": 3,
+      "name": "dual_bow",
+      "level": 10,
+      "winPct": 42.5
+    },
+    {
+      "grade": 3,
+      "name": "dual_bow",
+      "level": 25,
+      "winPct": 46.25
+    },
+    {
+      "grade": 3,
+      "name": "dual_bow",
+      "level": 50,
+      "winPct": 53.75
+    },
+    {
+      "grade": 3,
+      "name": "dual_shield",
+      "level": 1,
+      "winPct": 37.5
+    },
+    {
+      "grade": 3,
+      "name": "dual_shield",
+      "level": 10,
+      "winPct": 40
+    },
+    {
+      "grade": 3,
+      "name": "dual_shield",
+      "level": 25,
+      "winPct": 35
+    },
+    {
+      "grade": 3,
+      "name": "dual_shield",
+      "level": 50,
+      "winPct": 36.25
+    },
+    {
+      "grade": 3,
+      "name": "spear_bow",
+      "level": 1,
+      "winPct": 47.5
+    },
+    {
+      "grade": 3,
+      "name": "spear_bow",
+      "level": 10,
+      "winPct": 51.25
+    },
+    {
+      "grade": 3,
+      "name": "spear_bow",
+      "level": 25,
+      "winPct": 56.25
+    },
+    {
+      "grade": 3,
+      "name": "spear_bow",
+      "level": 50,
+      "winPct": 55
+    },
+    {
+      "grade": 3,
+      "name": "hammer_greatsword",
+      "level": 1,
+      "winPct": 56.25
+    },
+    {
+      "grade": 3,
+      "name": "hammer_greatsword",
+      "level": 10,
+      "winPct": 55
+    },
+    {
+      "grade": 3,
+      "name": "hammer_greatsword",
+      "level": 25,
+      "winPct": 56.25
+    },
+    {
+      "grade": 3,
+      "name": "hammer_greatsword",
+      "level": 50,
+      "winPct": 58.75
+    },
+    {
+      "grade": 3,
+      "name": "hammer_spear",
+      "level": 1,
+      "winPct": 65
+    },
+    {
+      "grade": 3,
+      "name": "hammer_spear",
+      "level": 10,
+      "winPct": 65
+    },
+    {
+      "grade": 3,
+      "name": "hammer_spear",
+      "level": 25,
+      "winPct": 65
+    },
+    {
+      "grade": 3,
+      "name": "hammer_spear",
+      "level": 50,
+      "winPct": 65
+    },
+    {
+      "grade": 7,
+      "name": "tank_archer",
+      "level": 1,
+      "winPct": 41.25
+    },
+    {
+      "grade": 7,
+      "name": "tank_archer",
+      "level": 10,
+      "winPct": 37.5
+    },
+    {
+      "grade": 7,
+      "name": "tank_archer",
+      "level": 25,
+      "winPct": 38.75
+    },
+    {
+      "grade": 7,
+      "name": "tank_archer",
+      "level": 50,
+      "winPct": 43.75
+    },
+    {
+      "grade": 7,
+      "name": "dual_bow",
+      "level": 1,
+      "winPct": 50
+    },
+    {
+      "grade": 7,
+      "name": "dual_bow",
+      "level": 10,
+      "winPct": 48.75
+    },
+    {
+      "grade": 7,
+      "name": "dual_bow",
+      "level": 25,
+      "winPct": 53.75
+    },
+    {
+      "grade": 7,
+      "name": "dual_bow",
+      "level": 50,
+      "winPct": 53.75
+    },
+    {
+      "grade": 7,
+      "name": "dual_shield",
+      "level": 1,
+      "winPct": 25
+    },
+    {
+      "grade": 7,
+      "name": "dual_shield",
+      "level": 10,
+      "winPct": 25
+    },
+    {
+      "grade": 7,
+      "name": "dual_shield",
+      "level": 25,
+      "winPct": 26.25
+    },
+    {
+      "grade": 7,
+      "name": "dual_shield",
+      "level": 50,
+      "winPct": 27.5
+    },
+    {
+      "grade": 7,
+      "name": "spear_bow",
+      "level": 1,
+      "winPct": 57.5
+    },
+    {
+      "grade": 7,
+      "name": "spear_bow",
+      "level": 10,
+      "winPct": 57.5
+    },
+    {
+      "grade": 7,
+      "name": "spear_bow",
+      "level": 25,
+      "winPct": 60
+    },
+    {
+      "grade": 7,
+      "name": "spear_bow",
+      "level": 50,
+      "winPct": 61.25
+    },
+    {
+      "grade": 7,
+      "name": "hammer_greatsword",
+      "level": 1,
+      "winPct": 50
+    },
+    {
+      "grade": 7,
+      "name": "hammer_greatsword",
+      "level": 10,
+      "winPct": 50
+    },
+    {
+      "grade": 7,
+      "name": "hammer_greatsword",
+      "level": 25,
+      "winPct": 52.5
+    },
+    {
+      "grade": 7,
+      "name": "hammer_greatsword",
+      "level": 50,
+      "winPct": 56.25
+    },
+    {
+      "grade": 7,
+      "name": "hammer_spear",
+      "level": 1,
+      "winPct": 46.25
+    },
+    {
+      "grade": 7,
+      "name": "hammer_spear",
+      "level": 10,
+      "winPct": 50
+    },
+    {
+      "grade": 7,
+      "name": "hammer_spear",
+      "level": 25,
+      "winPct": 56.25
+    },
+    {
+      "grade": 7,
+      "name": "hammer_spear",
+      "level": 50,
+      "winPct": 62.5
+    }
+  ],
+  "dominance": [
+    {
+      "high": 1,
+      "low": 0,
+      "stat": 10,
+      "strong": {
+        "bouts": 480,
+        "wins": 478,
+        "losses": 2,
+        "draws": 0,
+        "aliveFirst": 456,
+        "aliveSecond": 472,
+        "rounds": 5145,
+        "intercepts": 103,
+        "winPct": 99.58333333333333,
+        "avgRounds": 10.71875
+      },
+      "weak": {
+        "bouts": 480,
+        "wins": 1,
+        "losses": 479,
+        "draws": 0,
+        "aliveFirst": 1,
+        "aliveSecond": 1,
+        "rounds": 5050,
+        "intercepts": 100,
+        "winPct": 0.20833333333333334,
+        "avgRounds": 10.520833333333334
+      }
+    },
+    {
+      "high": 1,
+      "low": 0,
+      "stat": 80,
+      "strong": {
+        "bouts": 480,
+        "wins": 473,
+        "losses": 7,
+        "draws": 0,
+        "aliveFirst": 455,
+        "aliveSecond": 471,
+        "rounds": 7467,
+        "intercepts": 128,
+        "winPct": 98.54166666666667,
+        "avgRounds": 15.55625
+      },
+      "weak": {
+        "bouts": 480,
+        "wins": 3,
+        "losses": 477,
+        "draws": 0,
+        "aliveFirst": 1,
+        "aliveSecond": 8,
+        "rounds": 7442,
+        "intercepts": 148,
+        "winPct": 0.625,
+        "avgRounds": 15.504166666666666
+      }
+    },
+    {
+      "high": 1,
+      "low": 0,
+      "stat": 150,
+      "strong": {
+        "bouts": 480,
+        "wins": 475,
+        "losses": 5,
+        "draws": 0,
+        "aliveFirst": 453,
+        "aliveSecond": 475,
+        "rounds": 8197,
+        "intercepts": 152,
+        "winPct": 98.95833333333333,
+        "avgRounds": 17.077083333333334
+      },
+      "weak": {
+        "bouts": 480,
+        "wins": 1,
+        "losses": 479,
+        "draws": 0,
+        "aliveFirst": 3,
+        "aliveSecond": 7,
+        "rounds": 8134,
+        "intercepts": 147,
+        "winPct": 0.20833333333333334,
+        "avgRounds": 16.945833333333333
+      }
+    },
+    {
+      "high": 3,
+      "low": 0,
+      "stat": 10,
+      "strong": {
+        "bouts": 480,
+        "wins": 480,
+        "losses": 0,
+        "draws": 0,
+        "aliveFirst": 480,
+        "aliveSecond": 480,
+        "rounds": 2572,
+        "intercepts": 47,
+        "winPct": 100,
+        "avgRounds": 5.358333333333333
+      },
+      "weak": {
+        "bouts": 480,
+        "wins": 0,
+        "losses": 480,
+        "draws": 0,
+        "aliveFirst": 0,
+        "aliveSecond": 0,
+        "rounds": 2520,
+        "intercepts": 29,
+        "winPct": 0,
+        "avgRounds": 5.25
+      }
+    },
+    {
+      "high": 3,
+      "low": 0,
+      "stat": 80,
+      "strong": {
+        "bouts": 480,
+        "wins": 480,
+        "losses": 0,
+        "draws": 0,
+        "aliveFirst": 480,
+        "aliveSecond": 480,
+        "rounds": 4028,
+        "intercepts": 78,
+        "winPct": 100,
+        "avgRounds": 8.391666666666667
+      },
+      "weak": {
+        "bouts": 480,
+        "wins": 0,
+        "losses": 480,
+        "draws": 0,
+        "aliveFirst": 0,
+        "aliveSecond": 0,
+        "rounds": 3996,
+        "intercepts": 75,
+        "winPct": 0,
+        "avgRounds": 8.325
+      }
+    },
+    {
+      "high": 3,
+      "low": 0,
+      "stat": 150,
+      "strong": {
+        "bouts": 480,
+        "wins": 480,
+        "losses": 0,
+        "draws": 0,
+        "aliveFirst": 480,
+        "aliveSecond": 480,
+        "rounds": 4358,
+        "intercepts": 88,
+        "winPct": 100,
+        "avgRounds": 9.079166666666667
+      },
+      "weak": {
+        "bouts": 480,
+        "wins": 0,
+        "losses": 480,
+        "draws": 0,
+        "aliveFirst": 0,
+        "aliveSecond": 0,
+        "rounds": 4350,
+        "intercepts": 93,
+        "winPct": 0,
+        "avgRounds": 9.0625
+      }
+    },
+    {
+      "high": 7,
+      "low": 0,
+      "stat": 10,
+      "strong": {
+        "bouts": 480,
+        "wins": 480,
+        "losses": 0,
+        "draws": 0,
+        "aliveFirst": 480,
+        "aliveSecond": 480,
+        "rounds": 1605,
+        "intercepts": 10,
+        "winPct": 100,
+        "avgRounds": 3.34375
+      },
+      "weak": {
+        "bouts": 480,
+        "wins": 0,
+        "losses": 480,
+        "draws": 0,
+        "aliveFirst": 0,
+        "aliveSecond": 0,
+        "rounds": 1603,
+        "intercepts": 9,
+        "winPct": 0,
+        "avgRounds": 3.339583333333333
+      }
+    },
+    {
+      "high": 7,
+      "low": 0,
+      "stat": 80,
+      "strong": {
+        "bouts": 480,
+        "wins": 480,
+        "losses": 0,
+        "draws": 0,
+        "aliveFirst": 480,
+        "aliveSecond": 480,
+        "rounds": 1694,
+        "intercepts": 12,
+        "winPct": 100,
+        "avgRounds": 3.529166666666667
+      },
+      "weak": {
+        "bouts": 480,
+        "wins": 0,
+        "losses": 480,
+        "draws": 0,
+        "aliveFirst": 0,
+        "aliveSecond": 0,
+        "rounds": 1696,
+        "intercepts": 13,
+        "winPct": 0,
+        "avgRounds": 3.533333333333333
+      }
+    },
+    {
+      "high": 7,
+      "low": 0,
+      "stat": 150,
+      "strong": {
+        "bouts": 480,
+        "wins": 480,
+        "losses": 0,
+        "draws": 0,
+        "aliveFirst": 480,
+        "aliveSecond": 480,
+        "rounds": 1715,
+        "intercepts": 12,
+        "winPct": 100,
+        "avgRounds": 3.5729166666666665
+      },
+      "weak": {
+        "bouts": 480,
+        "wins": 0,
+        "losses": 480,
+        "draws": 0,
+        "aliveFirst": 0,
+        "aliveSecond": 0,
+        "rounds": 1712,
+        "intercepts": 13,
+        "winPct": 0,
+        "avgRounds": 3.566666666666667
+      }
+    },
+    {
+      "high": 7,
+      "low": 6,
+      "stat": 10,
+      "strong": {
+        "bouts": 480,
+        "wins": 467,
+        "losses": 13,
+        "draws": 0,
+        "aliveFirst": 443,
+        "aliveSecond": 461,
+        "rounds": 3685,
+        "intercepts": 68,
+        "winPct": 97.29166666666667,
+        "avgRounds": 7.677083333333333
+      },
+      "weak": {
+        "bouts": 480,
+        "wins": 5,
+        "losses": 475,
+        "draws": 0,
+        "aliveFirst": 4,
+        "aliveSecond": 5,
+        "rounds": 3679,
+        "intercepts": 81,
+        "winPct": 1.0416666666666667,
+        "avgRounds": 7.664583333333334
+      }
+    },
+    {
+      "high": 7,
+      "low": 6,
+      "stat": 80,
+      "strong": {
+        "bouts": 480,
+        "wins": 478,
+        "losses": 2,
+        "draws": 0,
+        "aliveFirst": 465,
+        "aliveSecond": 473,
+        "rounds": 5957,
+        "intercepts": 134,
+        "winPct": 99.58333333333333,
+        "avgRounds": 12.410416666666666
+      },
+      "weak": {
+        "bouts": 480,
+        "wins": 2,
+        "losses": 478,
+        "draws": 0,
+        "aliveFirst": 2,
+        "aliveSecond": 2,
+        "rounds": 5925,
+        "intercepts": 144,
+        "winPct": 0.4166666666666667,
+        "avgRounds": 12.34375
+      }
+    },
+    {
+      "high": 7,
+      "low": 6,
+      "stat": 150,
+      "strong": {
+        "bouts": 480,
+        "wins": 477,
+        "losses": 3,
+        "draws": 0,
+        "aliveFirst": 463,
+        "aliveSecond": 475,
+        "rounds": 7130,
+        "intercepts": 132,
+        "winPct": 99.375,
+        "avgRounds": 14.854166666666666
+      },
+      "weak": {
+        "bouts": 480,
+        "wins": 2,
+        "losses": 478,
+        "draws": 0,
+        "aliveFirst": 2,
+        "aliveSecond": 2,
+        "rounds": 7052,
+        "intercepts": 147,
+        "winPct": 0.4166666666666667,
+        "avgRounds": 14.691666666666666
+      }
+    }
+  ],
+  "economy": [
+    {
+      "spec": {
+        "name": "tank_archer_long",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 30
+      },
+      "seed": 20261126,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 168,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        10,
+        12,
+        18,
+        23,
+        35,
+        40,
+        37,
+        5
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 34,
+          "xp": 2548
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "coins": 93961,
+        "earned": 4575053,
+        "spent": 4481092,
+        "bouts": 66508,
+        "wins": 60881,
+        "losses": 5626,
+        "draws": 1,
+        "liveBouts": 1614,
+        "offlineBouts": 64894,
+        "manual": 80,
+        "automatic": 224,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3467.7344019444445,
+            "armourHours": 3465.043078888889
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3655.405531666667,
+            "armourHours": 3650.7248175
+          }
+        }
+      },
+      "checkpoints": [
+        {
+          "day": 30,
+          "fighting": 16,
+          "teamwork": {
+            "level": 12,
+            "xp": 114
+          },
+          "stage": 2,
+          "highest": 2,
+          "stats": {
+            "STR": 56,
+            "DEX": 56,
+            "END": 53
+          },
+          "coins": 38770,
+          "earned": 176412,
+          "spent": 137642,
+          "bouts": 9278,
+          "wins": 8650,
+          "losses": 627,
+          "draws": 1,
+          "liveBouts": 270,
+          "offlineBouts": 9008,
+          "manual": 80,
+          "automatic": 38,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 487.9676327777778,
+              "armourHours": 485.2763097222222
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 510.53253,
+              "armourHours": 505.8518158333333
+            }
+          }
+        },
+        {
+          "day": 60,
+          "fighting": 25,
+          "teamwork": {
+            "level": 18,
+            "xp": 867
+          },
+          "stage": 3,
+          "highest": 4,
+          "stats": {
+            "STR": 81,
+            "DEX": 80,
+            "END": 74
+          },
+          "coins": 8400,
+          "earned": 590952,
+          "spent": 582552,
+          "bouts": 20285,
+          "wins": 18615,
+          "losses": 1669,
+          "draws": 1,
+          "liveBouts": 534,
+          "offlineBouts": 19751,
+          "manual": 80,
+          "automatic": 96,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1059.4346247222222,
+              "armourHours": 1056.7433016666666
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 1114.6488913888888,
+              "armourHours": 1109.9681772222223
+            }
+          }
+        },
+        {
+          "day": 90,
+          "fighting": 33,
+          "teamwork": {
+            "level": 23,
+            "xp": 1165
+          },
+          "stage": 4,
+          "highest": 5,
+          "stats": {
+            "STR": 98,
+            "DEX": 98,
+            "END": 91
+          },
+          "coins": 32826,
+          "earned": 1233468,
+          "spent": 1200642,
+          "bouts": 31646,
+          "wins": 28738,
+          "losses": 2907,
+          "draws": 1,
+          "liveBouts": 804,
+          "offlineBouts": 30842,
+          "manual": 80,
+          "automatic": 138,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1643.5692566666667,
+              "armourHours": 1640.877933611111
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1737.4353569444445,
+              "armourHours": 1732.7546427777777
+            }
+          }
+        },
+        {
+          "day": 120,
+          "fighting": 40,
+          "teamwork": {
+            "level": 27,
+            "xp": 2608
+          },
+          "stage": 5,
+          "highest": 6,
+          "stats": {
+            "STR": 114,
+            "DEX": 113,
+            "END": 106
+          },
+          "coins": 55323,
+          "earned": 2136990,
+          "spent": 2081667,
+          "bouts": 43432,
+          "wins": 39604,
+          "losses": 3827,
+          "draws": 1,
+          "liveBouts": 1074,
+          "offlineBouts": 42358,
+          "manual": 80,
+          "automatic": 173,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 2260.26514,
+              "armourHours": 2257.5738169444444
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 2385.858150833333,
+              "armourHours": 2381.177436666667
+            }
+          }
+        },
+        {
+          "day": 150,
+          "fighting": 46,
+          "teamwork": {
+            "level": 31,
+            "xp": 990
+          },
+          "stage": 6,
+          "highest": 6,
+          "stats": {
+            "STR": 128,
+            "DEX": 128,
+            "END": 117
+          },
+          "coins": 90710,
+          "earned": 3197852,
+          "spent": 3107142,
+          "bouts": 54514,
+          "wins": 49760,
+          "losses": 4753,
+          "draws": 1,
+          "liveBouts": 1344,
+          "offlineBouts": 53170,
+          "manual": 80,
+          "automatic": 194,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 2835.653746666667,
+              "armourHours": 2832.9624236111113
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 2995.179852777778,
+              "armourHours": 2990.499138611111
+            }
+          }
+        },
+        {
+          "day": 180,
+          "fighting": 52,
+          "teamwork": {
+            "level": 34,
+            "xp": 2548
+          },
+          "stage": 6,
+          "highest": 7,
+          "stats": {
+            "STR": 140,
+            "DEX": 140,
+            "END": 129
+          },
+          "coins": 93961,
+          "earned": 4575053,
+          "spent": 4481092,
+          "bouts": 66508,
+          "wins": 60881,
+          "losses": 5626,
+          "draws": 1,
+          "liveBouts": 1614,
+          "offlineBouts": 64894,
+          "manual": 80,
+          "automatic": 224,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 3467.7344019444445,
+              "armourHours": 3465.043078888889
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 3655.405531666667,
+              "armourHours": 3650.7248175
+            }
+          }
+        }
+      ]
+    },
+    {
+      "spec": {
+        "name": "dual_bow",
+        "first": [
+          "bow",
+          "leather"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 168,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        10,
+        14,
+        17,
+        35,
+        29,
+        39,
+        26,
+        10
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 34,
+          "xp": 2971
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "coins": 58536,
+        "earned": 4619703,
+        "spent": 4561167,
+        "bouts": 66691,
+        "wins": 62241,
+        "losses": 4450,
+        "draws": 0,
+        "liveBouts": 278,
+        "offlineBouts": 66413,
+        "manual": 76,
+        "automatic": 229,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3608.4308730555554,
+            "armourHours": 3604.3969686111113
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3604.6922988888887,
+            "armourHours": 3600.5156141666666
+          }
+        }
+      },
+      "checkpoints": [
+        {
+          "day": 30,
+          "fighting": 17,
+          "teamwork": {
+            "level": 12,
+            "xp": 627
+          },
+          "stage": 2,
+          "highest": 2,
+          "stats": {
+            "STR": 58,
+            "DEX": 57,
+            "END": 54
+          },
+          "coins": 19351,
+          "earned": 163648,
+          "spent": 144297,
+          "bouts": 9638,
+          "wins": 8290,
+          "losses": 1348,
+          "draws": 0,
+          "liveBouts": 52,
+          "offlineBouts": 9586,
+          "manual": 76,
+          "automatic": 43,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 3,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 513.2668402777778,
+              "armourHours": 509.23293583333333
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 511.40997416666664,
+              "armourHours": 507.23328944444444
+            }
+          }
+        },
+        {
+          "day": 60,
+          "fighting": 26,
+          "teamwork": {
+            "level": 18,
+            "xp": 1800
+          },
+          "stage": 4,
+          "highest": 3,
+          "stats": {
+            "STR": 81,
+            "DEX": 81,
+            "END": 74
+          },
+          "coins": 22846,
+          "earned": 587308,
+          "spent": 564462,
+          "bouts": 20638,
+          "wins": 18453,
+          "losses": 2185,
+          "draws": 0,
+          "liveBouts": 96,
+          "offlineBouts": 20542,
+          "manual": 76,
+          "automatic": 98,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1107.4639825,
+              "armourHours": 1103.4300780555557
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 1103.3622405555554,
+              "armourHours": 1099.1855558333334
+            }
+          }
+        },
+        {
+          "day": 90,
+          "fighting": 33,
+          "teamwork": {
+            "level": 23,
+            "xp": 1986
+          },
+          "stage": 4,
+          "highest": 4,
+          "stats": {
+            "STR": 99,
+            "DEX": 99,
+            "END": 92
+          },
+          "coins": 30119,
+          "earned": 1212716,
+          "spent": 1182597,
+          "bouts": 31942,
+          "wins": 29614,
+          "losses": 2328,
+          "draws": 0,
+          "liveBouts": 148,
+          "offlineBouts": 31794,
+          "manual": 76,
+          "automatic": 141,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1730.4988236111112,
+              "armourHours": 1726.4649191666667
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 1724.3748419444444,
+              "armourHours": 1720.1981572222223
+            }
+          }
+        },
+        {
+          "day": 120,
+          "fighting": 40,
+          "teamwork": {
+            "level": 27,
+            "xp": 2700
+          },
+          "stage": 5,
+          "highest": 5,
+          "stats": {
+            "STR": 115,
+            "DEX": 114,
+            "END": 106
+          },
+          "coins": 72889,
+          "earned": 2086966,
+          "spent": 2014077,
+          "bouts": 43445,
+          "wins": 40634,
+          "losses": 2811,
+          "draws": 0,
+          "liveBouts": 193,
+          "offlineBouts": 43252,
+          "manual": 76,
+          "automatic": 175,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 2358.7462708333333,
+              "armourHours": 2354.7123663888888
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 2351.0287027777777,
+              "armourHours": 2346.8520180555556
+            }
+          }
+        },
+        {
+          "day": 150,
+          "fighting": 46,
+          "teamwork": {
+            "level": 31,
+            "xp": 1524
+          },
+          "stage": 5,
+          "highest": 6,
+          "stats": {
+            "STR": 128,
+            "DEX": 128,
+            "END": 117
+          },
+          "coins": 73830,
+          "earned": 3113347,
+          "spent": 3039517,
+          "bouts": 54616,
+          "wins": 51095,
+          "losses": 3521,
+          "draws": 0,
+          "liveBouts": 233,
+          "offlineBouts": 54383,
+          "manual": 76,
+          "automatic": 197,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 2964.3101269444446,
+              "armourHours": 2960.2762225
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 2956.986928888889,
+              "armourHours": 2952.8102441666665
+            }
+          }
+        },
+        {
+          "day": 180,
+          "fighting": 52,
+          "teamwork": {
+            "level": 34,
+            "xp": 2971
+          },
+          "stage": 6,
+          "highest": 7,
+          "stats": {
+            "STR": 140,
+            "DEX": 140,
+            "END": 129
+          },
+          "coins": 58536,
+          "earned": 4619703,
+          "spent": 4561167,
+          "bouts": 66691,
+          "wins": 62241,
+          "losses": 4450,
+          "draws": 0,
+          "liveBouts": 278,
+          "offlineBouts": 66413,
+          "manual": 76,
+          "automatic": 229,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 3608.4308730555554,
+              "armourHours": 3604.3969686111113
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 3604.6922988888887,
+              "armourHours": 3600.5156141666666
+            }
+          }
+        }
+      ]
+    },
+    {
+      "spec": {
+        "name": "dual_shield",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "sword_shield",
+          "plate"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 50,
+      "unlockDay": 15,
+      "firstS": 170,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        17,
+        5,
+        13,
+        43,
+        24,
+        36,
+        38,
+        4
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 51,
+        "teamwork": {
+          "level": 34,
+          "xp": 2732
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 139,
+          "END": 128
+        },
+        "coins": 46831,
+        "earned": 4287698,
+        "spent": 4240867,
+        "bouts": 66080,
+        "wins": 59336,
+        "losses": 6744,
+        "draws": 0,
+        "liveBouts": 269,
+        "offlineBouts": 65811,
+        "manual": 78,
+        "automatic": 223,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3573.8035633333334,
+            "armourHours": 3569.789421111111
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3576.7970283333334,
+            "armourHours": 3572.758857222222
+          }
+        }
+      },
+      "checkpoints": [
+        {
+          "day": 30,
+          "fighting": 16,
+          "teamwork": {
+            "level": 12,
+            "xp": 199
+          },
+          "stage": 2,
+          "highest": 2,
+          "stats": {
+            "STR": 56,
+            "DEX": 56,
+            "END": 53
+          },
+          "coins": 14374,
+          "earned": 152016,
+          "spent": 137642,
+          "bouts": 9241,
+          "wins": 8382,
+          "losses": 859,
+          "draws": 0,
+          "liveBouts": 42,
+          "offlineBouts": 9199,
+          "manual": 78,
+          "automatic": 40,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 500.5903822222222,
+              "armourHours": 496.57624
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 499.6326133333333,
+              "armourHours": 495.5944422222222
+            }
+          }
+        },
+        {
+          "day": 60,
+          "fighting": 25,
+          "teamwork": {
+            "level": 18,
+            "xp": 1506
+          },
+          "stage": 3,
+          "highest": 3,
+          "stats": {
+            "STR": 80,
+            "DEX": 79,
+            "END": 74
+          },
+          "coins": 6711,
+          "earned": 562128,
+          "spent": 555417,
+          "bouts": 20221,
+          "wins": 17630,
+          "losses": 2591,
+          "draws": 0,
+          "liveBouts": 92,
+          "offlineBouts": 20129,
+          "manual": 78,
+          "automatic": 95,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1085.7938091666667,
+              "armourHours": 1081.7796669444444
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 1083.849296388889,
+              "armourHours": 1079.8111252777778
+            }
+          }
+        },
+        {
+          "day": 90,
+          "fighting": 33,
+          "teamwork": {
+            "level": 23,
+            "xp": 1589
+          },
+          "stage": 4,
+          "highest": 4,
+          "stats": {
+            "STR": 98,
+            "DEX": 98,
+            "END": 91
+          },
+          "coins": 32227,
+          "earned": 1142644,
+          "spent": 1110417,
+          "bouts": 31655,
+          "wins": 28422,
+          "losses": 3233,
+          "draws": 0,
+          "liveBouts": 126,
+          "offlineBouts": 31529,
+          "manual": 78,
+          "automatic": 135,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1712.569636111111,
+              "armourHours": 1708.5554938888888
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 5,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 5,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 5,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 5,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 1710.3586061111112,
+              "armourHours": 1706.320435
+            }
+          }
+        },
+        {
+          "day": 120,
+          "fighting": 39,
+          "teamwork": {
+            "level": 27,
+            "xp": 2671
+          },
+          "stage": 5,
+          "highest": 5,
+          "stats": {
+            "STR": 113,
+            "DEX": 113,
+            "END": 105
+          },
+          "coins": 110496,
+          "earned": 1913138,
+          "spent": 1802642,
+          "bouts": 42946,
+          "wins": 38222,
+          "losses": 4724,
+          "draws": 0,
+          "liveBouts": 174,
+          "offlineBouts": 42772,
+          "manual": 78,
+          "automatic": 160,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 2319.3722794444443,
+              "armourHours": 2315.358137222222
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 2317.4738397222222,
+              "armourHours": 2313.435668611111
+            }
+          }
+        },
+        {
+          "day": 150,
+          "fighting": 45,
+          "teamwork": {
+            "level": 31,
+            "xp": 1086
+          },
+          "stage": 5,
+          "highest": 6,
+          "stats": {
+            "STR": 127,
+            "DEX": 126,
+            "END": 117
+          },
+          "coins": 22705,
+          "earned": 2926972,
+          "spent": 2904267,
+          "bouts": 54217,
+          "wins": 48264,
+          "losses": 5953,
+          "draws": 0,
+          "liveBouts": 224,
+          "offlineBouts": 53993,
+          "manual": 78,
+          "automatic": 193,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 2926.573673611111,
+              "armourHours": 2922.559531388889
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 2928.1121608333333,
+              "armourHours": 2924.073989722222
+            }
+          }
+        },
+        {
+          "day": 180,
+          "fighting": 51,
+          "teamwork": {
+            "level": 34,
+            "xp": 2732
+          },
+          "stage": 6,
+          "highest": 7,
+          "stats": {
+            "STR": 140,
+            "DEX": 139,
+            "END": 128
+          },
+          "coins": 46831,
+          "earned": 4287698,
+          "spent": 4240867,
+          "bouts": 66080,
+          "wins": 59336,
+          "losses": 6744,
+          "draws": 0,
+          "liveBouts": 269,
+          "offlineBouts": 65811,
+          "manual": 78,
+          "automatic": 223,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 3573.8035633333334,
+              "armourHours": 3569.789421111111
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 3576.7970283333334,
+              "armourHours": 3572.758857222222
+            }
+          }
+        }
+      ]
+    },
+    {
+      "spec": {
+        "name": "weekly",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 7,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "profile": "normal",
+      "visits": 26,
+      "claims": 25,
+      "unlockDay": 70,
+      "firstS": null,
+      "fullS": null,
+      "offlineChecks": 26,
+      "stageDays": [
+        8,
+        8,
+        8,
+        2,
+        0,
+        0,
+        0,
+        0
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 26,
+        "teamwork": {
+          "level": 16,
+          "xp": 1284
+        },
+        "stage": 3,
+        "highest": 3,
+        "stats": {
+          "STR": 82,
+          "DEX": 82,
+          "END": 75
+        },
+        "coins": 64124,
+        "earned": 515296,
+        "spent": 451172,
+        "bouts": 21390,
+        "wins": 19223,
+        "losses": 2166,
+        "draws": 1,
+        "liveBouts": 48,
+        "offlineBouts": 21342,
+        "manual": 71,
+        "automatic": 93,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 4,
+                "quality": "poor"
+              },
+              {
+                "grade": 4,
+                "quality": "poor"
+              },
+              {
+                "grade": 4,
+                "quality": "poor"
+              },
+              {
+                "grade": 4,
+                "quality": "poor"
+              },
+              {
+                "grade": 4,
+                "quality": "poor"
+              }
+            ],
+            "weaponHours": 1117.9162422222223,
+            "armourHours": 1115.2249191666667
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 4,
+                "quality": "poor"
+              },
+              {
+                "grade": 3,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 3,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 3,
+                "quality": "masterwork"
+              },
+              {
+                "grade": 3,
+                "quality": "masterwork"
+              }
+            ],
+            "weaponHours": 1172.401108611111,
+            "armourHours": 1167.7203944444445
+          }
+        }
+      },
+      "checkpoints": [
+        {
+          "day": 180,
+          "fighting": 26,
+          "teamwork": {
+            "level": 16,
+            "xp": 1284
+          },
+          "stage": 3,
+          "highest": 3,
+          "stats": {
+            "STR": 82,
+            "DEX": 82,
+            "END": 75
+          },
+          "coins": 64124,
+          "earned": 515296,
+          "spent": 451172,
+          "bouts": 21390,
+          "wins": 19223,
+          "losses": 2166,
+          "draws": 1,
+          "liveBouts": 48,
+          "offlineBouts": 21342,
+          "manual": 71,
+          "automatic": 93,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 1117.9162422222223,
+              "armourHours": 1115.2249191666667
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 3,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 3,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 3,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 3,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 1172.401108611111,
+              "armourHours": 1167.7203944444445
+            }
+          }
+        }
+      ]
+    },
+    {
+      "spec": {
+        "name": "mixed",
+        "first": [
+          "hammer",
+          "plate"
+        ],
+        "second": [
+          "spear",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5,
+        "mixed": true
+      },
+      "seed": 20261126,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 60,
+      "unlockDay": 13,
+      "firstS": null,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        11,
+        13,
+        33,
+        30,
+        50,
+        39,
+        4,
+        0
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 41,
+        "teamwork": {
+          "level": 28,
+          "xp": 2272
+        },
+        "stage": 5,
+        "highest": 5,
+        "stats": {
+          "STR": 161,
+          "DEX": 117,
+          "END": 129
+        },
+        "coins": 42078,
+        "earned": 2473020,
+        "spent": 2430942,
+        "bouts": 46266,
+        "wins": 42722,
+        "losses": 3544,
+        "draws": 0,
+        "liveBouts": 174,
+        "offlineBouts": 46092,
+        "manual": 59,
+        "automatic": 203,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 6,
+                "quality": "fine"
+              },
+              {
+                "grade": 6,
+                "quality": "fine"
+              },
+              {
+                "grade": 6,
+                "quality": "fine"
+              },
+              {
+                "grade": 6,
+                "quality": "fine"
+              },
+              {
+                "grade": 6,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 2516.984859722222,
+            "armourHours": 2513.017102222222
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 6,
+                "quality": "common"
+              },
+              {
+                "grade": 6,
+                "quality": "common"
+              },
+              {
+                "grade": 6,
+                "quality": "common"
+              },
+              {
+                "grade": 6,
+                "quality": "common"
+              },
+              {
+                "grade": 6,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 2473.4638380555557,
+            "armourHours": 2469.2436711111113
+          }
+        }
+      },
+      "checkpoints": [
+        {
+          "day": 30,
+          "fighting": 14,
+          "teamwork": {
+            "level": 10,
+            "xp": 432
+          },
+          "stage": 3,
+          "highest": 2,
+          "stats": {
+            "STR": 63,
+            "DEX": 49,
+            "END": 53
+          },
+          "coins": 2044,
+          "earned": 111436,
+          "spent": 109392,
+          "bouts": 6769,
+          "wins": 5791,
+          "losses": 978,
+          "draws": 0,
+          "liveBouts": 33,
+          "offlineBouts": 6736,
+          "manual": 59,
+          "automatic": 49,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 2,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 2,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 2,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 2,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 2,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 361.69340416666665,
+              "armourHours": 357.72564666666665
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 2,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 2,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 2,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 2,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 2,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 353.27625083333334,
+              "armourHours": 349.0560838888889
+            }
+          }
+        },
+        {
+          "day": 60,
+          "fighting": 21,
+          "teamwork": {
+            "level": 15,
+            "xp": 432
+          },
+          "stage": 2,
+          "highest": 3,
+          "stats": {
+            "STR": 90,
+            "DEX": 69,
+            "END": 74
+          },
+          "coins": 17476,
+          "earned": 365468,
+          "spent": 347992,
+          "bouts": 14579,
+          "wins": 13326,
+          "losses": 1253,
+          "draws": 0,
+          "liveBouts": 57,
+          "offlineBouts": 14522,
+          "manual": 59,
+          "automatic": 97,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 3,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 3,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 3,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 3,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 3,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 790.6206558333333,
+              "armourHours": 786.6528983333334
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 3,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 3,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 3,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 3,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 3,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 775.5268452777777,
+              "armourHours": 771.3066783333334
+            }
+          }
+        },
+        {
+          "day": 90,
+          "fighting": 27,
+          "teamwork": {
+            "level": 19,
+            "xp": 966
+          },
+          "stage": 3,
+          "highest": 4,
+          "stats": {
+            "STR": 112,
+            "DEX": 83,
+            "END": 91
+          },
+          "coins": 11850,
+          "earned": 709092,
+          "spent": 697242,
+          "bouts": 22097,
+          "wins": 20129,
+          "losses": 1968,
+          "draws": 0,
+          "liveBouts": 86,
+          "offlineBouts": 22011,
+          "manual": 59,
+          "automatic": 127,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 4,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 4,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 4,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 4,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 1198.6370975,
+              "armourHours": 1194.66934
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 4,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 4,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1172.6513494444443,
+              "armourHours": 1168.4311825
+            }
+          }
+        },
+        {
+          "day": 120,
+          "fighting": 32,
+          "teamwork": {
+            "level": 22,
+            "xp": 1589
+          },
+          "stage": 4,
+          "highest": 5,
+          "stats": {
+            "STR": 131,
+            "DEX": 96,
+            "END": 105
+          },
+          "coins": 270254,
+          "earned": 1172896,
+          "spent": 902642,
+          "bouts": 29881,
+          "wins": 27166,
+          "losses": 2715,
+          "draws": 0,
+          "liveBouts": 114,
+          "offlineBouts": 29767,
+          "manual": 59,
+          "automatic": 139,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 4,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 4,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 4,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 4,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 1619.7656047222222,
+              "armourHours": 1615.7978472222221
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 4,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 4,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 4,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 4,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 1586.1686594444445,
+              "armourHours": 1581.9484925
+            }
+          }
+        },
+        {
+          "day": 150,
+          "fighting": 37,
+          "teamwork": {
+            "level": 26,
+            "xp": 432
+          },
+          "stage": 4,
+          "highest": 5,
+          "stats": {
+            "STR": 148,
+            "DEX": 107,
+            "END": 118
+          },
+          "coins": 56778,
+          "earned": 1787170,
+          "spent": 1730392,
+          "bouts": 38687,
+          "wins": 35470,
+          "losses": 3217,
+          "draws": 0,
+          "liveBouts": 147,
+          "offlineBouts": 38540,
+          "manual": 59,
+          "automatic": 177,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 2101.286293888889,
+              "armourHours": 2097.318536388889
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 5,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 5,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 2063.3304691666667,
+              "armourHours": 2059.1103022222223
+            }
+          }
+        },
+        {
+          "day": 180,
+          "fighting": 41,
+          "teamwork": {
+            "level": 28,
+            "xp": 2272
+          },
+          "stage": 5,
+          "highest": 5,
+          "stats": {
+            "STR": 161,
+            "DEX": 117,
+            "END": 129
+          },
+          "coins": 42078,
+          "earned": 2473020,
+          "spent": 2430942,
+          "bouts": 46266,
+          "wins": 42722,
+          "losses": 3544,
+          "draws": 0,
+          "liveBouts": 174,
+          "offlineBouts": 46092,
+          "manual": 59,
+          "automatic": 203,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 2516.984859722222,
+              "armourHours": 2513.017102222222
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 2473.4638380555557,
+              "armourHours": 2469.2436711111113
+            }
+          }
+        }
+      ]
+    },
+    {
+      "spec": {
+        "name": "tank_archer",
+        "first": [
+          "sword_shield",
+          "plate"
+        ],
+        "second": [
+          "bow",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 168,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        17,
+        4,
+        28,
+        22,
+        35,
+        37,
+        31,
+        6
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 34,
+          "xp": 3400
+        },
+        "stage": 6,
+        "highest": 7,
+        "stats": {
+          "STR": 140,
+          "DEX": 140,
+          "END": 129
+        },
+        "coins": 66700,
+        "earned": 4387642,
+        "spent": 4320942,
+        "bouts": 66496,
+        "wins": 61108,
+        "losses": 5387,
+        "draws": 1,
+        "liveBouts": 287,
+        "offlineBouts": 66209,
+        "manual": 77,
+        "automatic": 225,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3492.3221475,
+            "armourHours": 3489.6308244444444
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3656.584480833333,
+            "armourHours": 3651.903766666667
+          }
+        }
+      },
+      "checkpoints": [
+        {
+          "day": 30,
+          "fighting": 16,
+          "teamwork": {
+            "level": 12,
+            "xp": 134
+          },
+          "stage": 3,
+          "highest": 2,
+          "stats": {
+            "STR": 56,
+            "DEX": 56,
+            "END": 53
+          },
+          "coins": 21466,
+          "earned": 159108,
+          "spent": 137642,
+          "bouts": 9116,
+          "wins": 8371,
+          "losses": 744,
+          "draws": 1,
+          "liveBouts": 45,
+          "offlineBouts": 9071,
+          "manual": 77,
+          "automatic": 41,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 475.75349027777776,
+              "armourHours": 473.06216722222223
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 501.05981777777777,
+              "armourHours": 496.37910361111113
+            }
+          }
+        },
+        {
+          "day": 60,
+          "fighting": 26,
+          "teamwork": {
+            "level": 18,
+            "xp": 1800
+          },
+          "stage": 4,
+          "highest": 3,
+          "stats": {
+            "STR": 81,
+            "DEX": 81,
+            "END": 74
+          },
+          "coins": 15273,
+          "earned": 552600,
+          "spent": 537327,
+          "bouts": 20411,
+          "wins": 18936,
+          "losses": 1474,
+          "draws": 1,
+          "liveBouts": 90,
+          "offlineBouts": 20321,
+          "manual": 77,
+          "automatic": 94,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 1076.6032858333333,
+              "armourHours": 1073.9119627777777
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 4,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 1123.4323866666666,
+              "armourHours": 1118.7516725
+            }
+          }
+        },
+        {
+          "day": 90,
+          "fighting": 33,
+          "teamwork": {
+            "level": 23,
+            "xp": 1981
+          },
+          "stage": 4,
+          "highest": 4,
+          "stats": {
+            "STR": 98,
+            "DEX": 98,
+            "END": 92
+          },
+          "coins": 47331,
+          "earned": 1157748,
+          "spent": 1110417,
+          "bouts": 31817,
+          "wins": 29180,
+          "losses": 2636,
+          "draws": 1,
+          "liveBouts": 142,
+          "offlineBouts": 31675,
+          "manual": 77,
+          "automatic": 136,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1670.9027783333333,
+              "armourHours": 1668.2114552777778
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 5,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 5,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 5,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 5,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 1749.4057130555555,
+              "armourHours": 1744.7249988888889
+            }
+          }
+        },
+        {
+          "day": 120,
+          "fighting": 40,
+          "teamwork": {
+            "level": 28,
+            "xp": 432
+          },
+          "stage": 5,
+          "highest": 5,
+          "stats": {
+            "STR": 114,
+            "DEX": 113,
+            "END": 106
+          },
+          "coins": 41377,
+          "earned": 1943064,
+          "spent": 1901687,
+          "bouts": 43363,
+          "wins": 39446,
+          "losses": 3916,
+          "draws": 1,
+          "liveBouts": 195,
+          "offlineBouts": 43168,
+          "manual": 77,
+          "automatic": 170,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 2267.4254875,
+              "armourHours": 2264.7341644444446
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 5,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 2381.5249669444443,
+              "armourHours": 2376.844252777778
+            }
+          }
+        },
+        {
+          "day": 150,
+          "fighting": 46,
+          "teamwork": {
+            "level": 31,
+            "xp": 1896
+          },
+          "stage": 6,
+          "highest": 6,
+          "stats": {
+            "STR": 128,
+            "DEX": 128,
+            "END": 117
+          },
+          "coins": 108421,
+          "earned": 3012688,
+          "spent": 2904267,
+          "bouts": 54572,
+          "wins": 50503,
+          "losses": 4068,
+          "draws": 1,
+          "liveBouts": 232,
+          "offlineBouts": 54340,
+          "manual": 77,
+          "automatic": 194,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 2878.9392363888887,
+              "armourHours": 2876.247913333333
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 3003.2738575,
+              "armourHours": 2998.5931433333335
+            }
+          }
+        },
+        {
+          "day": 180,
+          "fighting": 52,
+          "teamwork": {
+            "level": 34,
+            "xp": 3400
+          },
+          "stage": 6,
+          "highest": 7,
+          "stats": {
+            "STR": 140,
+            "DEX": 140,
+            "END": 129
+          },
+          "coins": 66700,
+          "earned": 4387642,
+          "spent": 4320942,
+          "bouts": 66496,
+          "wins": 61108,
+          "losses": 5387,
+          "draws": 1,
+          "liveBouts": 287,
+          "offlineBouts": 66209,
+          "manual": 77,
+          "automatic": 225,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 3492.3221475,
+              "armourHours": 3489.6308244444444
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 3656.584480833333,
+              "armourHours": 3651.903766666667
+            }
+          }
+        }
+      ]
+    },
+    {
+      "spec": {
+        "name": "hammer_spear",
+        "first": [
+          "hammer",
+          "plate"
+        ],
+        "second": [
+          "spear",
+          "leather"
+        ],
+        "visitDays": 1,
+        "liveMinutes": 5
+      },
+      "seed": 20261126,
+      "profile": "normal",
+      "visits": 180,
+      "claims": 51,
+      "unlockDay": 15,
+      "firstS": 165,
+      "fullS": null,
+      "offlineChecks": 180,
+      "stageDays": [
+        13,
+        8,
+        17,
+        33,
+        34,
+        38,
+        21,
+        16
+      ],
+      "final": {
+        "day": 180,
+        "fighting": 52,
+        "teamwork": {
+          "level": 35,
+          "xp": 1606
+        },
+        "stage": 7,
+        "highest": 7,
+        "stats": {
+          "STR": 141,
+          "DEX": 141,
+          "END": 130
+        },
+        "coins": 100833,
+        "earned": 4822150,
+        "spent": 4721317,
+        "bouts": 67696,
+        "wins": 62787,
+        "losses": 4909,
+        "draws": 0,
+        "liveBouts": 273,
+        "offlineBouts": 67423,
+        "manual": 78,
+        "automatic": 229,
+        "fighters": {
+          "first": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              }
+            ],
+            "weaponHours": 3680.3928825,
+            "armourHours": 3676.425125
+          },
+          "second": {
+            "gear": [
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "fine"
+              },
+              {
+                "grade": 7,
+                "quality": "common"
+              }
+            ],
+            "weaponHours": 3622.6589169444446,
+            "armourHours": 3618.43875
+          }
+        }
+      },
+      "checkpoints": [
+        {
+          "day": 30,
+          "fighting": 16,
+          "teamwork": {
+            "level": 12,
+            "xp": 553
+          },
+          "stage": 2,
+          "highest": 2,
+          "stats": {
+            "STR": 56,
+            "DEX": 56,
+            "END": 53
+          },
+          "coins": 35094,
+          "earned": 172736,
+          "spent": 137642,
+          "bouts": 9177,
+          "wins": 8426,
+          "losses": 751,
+          "draws": 0,
+          "liveBouts": 51,
+          "offlineBouts": 9126,
+          "manual": 78,
+          "automatic": 40,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 497.55876861111113,
+              "armourHours": 493.59101111111113
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 2,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 489.21060444444447,
+              "armourHours": 484.9904375
+            }
+          }
+        },
+        {
+          "day": 60,
+          "fighting": 26,
+          "teamwork": {
+            "level": 19,
+            "xp": 432
+          },
+          "stage": 3,
+          "highest": 3,
+          "stats": {
+            "STR": 81,
+            "DEX": 81,
+            "END": 75
+          },
+          "coins": 29055,
+          "earned": 641772,
+          "spent": 612717,
+          "bouts": 20790,
+          "wins": 19164,
+          "losses": 1626,
+          "draws": 0,
+          "liveBouts": 96,
+          "offlineBouts": 20694,
+          "manual": 78,
+          "automatic": 101,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1128.530558611111,
+              "armourHours": 1124.5628011111112
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                },
+                {
+                  "grade": 4,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1108.9518455555556,
+              "armourHours": 1104.7316786111112
+            }
+          }
+        },
+        {
+          "day": 90,
+          "fighting": 33,
+          "teamwork": {
+            "level": 24,
+            "xp": 348
+          },
+          "stage": 4,
+          "highest": 4,
+          "stats": {
+            "STR": 99,
+            "DEX": 99,
+            "END": 92
+          },
+          "coins": 32371,
+          "earned": 1257088,
+          "spent": 1224717,
+          "bouts": 32143,
+          "wins": 29604,
+          "losses": 2539,
+          "draws": 0,
+          "liveBouts": 140,
+          "offlineBouts": 32003,
+          "manual": 78,
+          "automatic": 141,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1746.0609291666667,
+              "armourHours": 1742.0931716666666
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                },
+                {
+                  "grade": 5,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 1716.6679777777779,
+              "armourHours": 1712.4478108333333
+            }
+          }
+        },
+        {
+          "day": 120,
+          "fighting": 40,
+          "teamwork": {
+            "level": 28,
+            "xp": 1716
+          },
+          "stage": 4,
+          "highest": 5,
+          "stats": {
+            "STR": 115,
+            "DEX": 114,
+            "END": 107
+          },
+          "coins": 35836,
+          "earned": 2151298,
+          "spent": 2115462,
+          "bouts": 44215,
+          "wins": 41085,
+          "losses": 3130,
+          "draws": 0,
+          "liveBouts": 183,
+          "offlineBouts": 44032,
+          "manual": 78,
+          "automatic": 176,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 2406.0508777777777,
+              "armourHours": 2402.0831202777777
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "common"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                },
+                {
+                  "grade": 6,
+                  "quality": "poor"
+                }
+              ],
+              "weaponHours": 2369.5472644444444,
+              "armourHours": 2365.3270975
+            }
+          }
+        },
+        {
+          "day": 150,
+          "fighting": 46,
+          "teamwork": {
+            "level": 32,
+            "xp": 165
+          },
+          "stage": 5,
+          "highest": 6,
+          "stats": {
+            "STR": 129,
+            "DEX": 129,
+            "END": 118
+          },
+          "coins": 81856,
+          "earned": 3256623,
+          "spent": 3174767,
+          "bouts": 55513,
+          "wins": 51721,
+          "losses": 3792,
+          "draws": 0,
+          "liveBouts": 233,
+          "offlineBouts": 55280,
+          "manual": 78,
+          "automatic": 197,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                }
+              ],
+              "weaponHours": 3022.6549525,
+              "armourHours": 3018.687195
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "masterwork"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 6,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 2978.754627222222,
+              "armourHours": 2974.5344602777777
+            }
+          }
+        },
+        {
+          "day": 180,
+          "fighting": 52,
+          "teamwork": {
+            "level": 35,
+            "xp": 1606
+          },
+          "stage": 7,
+          "highest": 7,
+          "stats": {
+            "STR": 141,
+            "DEX": 141,
+            "END": 130
+          },
+          "coins": 100833,
+          "earned": 4822150,
+          "spent": 4721317,
+          "bouts": 67696,
+          "wins": 62787,
+          "losses": 4909,
+          "draws": 0,
+          "liveBouts": 273,
+          "offlineBouts": 67423,
+          "manual": 78,
+          "automatic": 229,
+          "fighters": {
+            "first": {
+              "gear": [
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                }
+              ],
+              "weaponHours": 3680.3928825,
+              "armourHours": 3676.425125
+            },
+            "second": {
+              "gear": [
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "fine"
+                },
+                {
+                  "grade": 7,
+                  "quality": "common"
+                }
+              ],
+              "weaponHours": 3622.6589169444446,
+              "armourHours": 3618.43875
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "direct": 74160,
+    "economy": 401127,
+    "offlineChecks": 1106
+  }
+}

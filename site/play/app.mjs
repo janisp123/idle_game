@@ -1,4 +1,6 @@
-import { initLoginReport, showLoginReport, clearLoginReport } from "./login-report-ui.mjs?v=apprentice-a5";
+import {renderTeamBattle,teamBattleView,teamworkText} from "./team-view.mjs?v=team-004";
+import {teamCombatAtTime} from "./team-timeline.mjs?v=team-004";
+import { initLoginReport, showLoginReport, clearLoginReport } from "./login-report-ui.mjs?v=team-004";
 import { requiredAutoFightWins } from "./auto-fight.mjs?v=auto-fight-03";
 import { characterStats } from "./character-stats.mjs?v=apprentice-a4";
 import { MASTER_CONSENT_VERSION } from "./apprentice.mjs?v=apprentice-a2";
@@ -9,13 +11,13 @@ import { ITEM_GRADES, ITEM_QUALITIES, STARTER_ITEM, equipmentBonuses, smithQuote
 import {
   setDifficulty, buyEquipment, autoEquipmentPreview, autoEquipmentUnlocked, activateExpertise, arenaBoutProgress, SAVE_KEY, ACTIVITIES, ITEM_KEYS, ITEM_LABELS, ATTRIBUTES, ACTIVITY_STAT_WEIGHTS, allAttributeProgress,
   effectiveAttributeProgress, masteryAwardForNextLevel,
-  lootChances, recipeOptions, newGame, chooseActivity, readSave, settle, settleLive,
+  lootChances, recipeOptions, newGame, newTeamGame, setTeamWeapon, setTeamArmour, buyTeamEquipment, chooseActivity, readSave, settle, settleLive,
   enterGame, enterGameWithApprentice, setAutoMasterConsent, queueStartActivity, queueInsertTimedActivity, requestActivityChange,
   queueSetDuration, queueSwap, queueRemoveLast,
   getApprenticeProgress, queueCapacity, SCHEDULE_BALANCE, MINUTE_MS, HOUR_MS, DAY_MS, TIMING_PROFILE, UNTIL_LEVEL_UP,
   SAME_ZONE_TRAVEL_MS, ZONE_TRAVEL_MS, PREPARATION_MS, INITIAL_PREPARATION_MS,
   xpToNextLevel, activityRewardCapped, skillMasterReadiness, skillMasterOffer, learnFromMaster, setCombatLoadout, setArmourChoice
-} from "./engine.mjs?v=apprentice-a4";
+} from "./engine.mjs?v=team-004";
 
 import { combatAtTime, COMBAT_LOADOUTS, COMBAT_SKILLS, BOUT_MS } from "./combat.mjs?v=gear-a3";
 import { combatArtworkForEvent } from "./combat-art.mjs?v=alpha-art-001";
@@ -25,7 +27,7 @@ import { ARMOUR_SLOTS, ARMOUR_SLOT_BY_ID, ARMOUR_CHOICES,
   armourOption, armourStats, dodgeChance }
   from "./armour.mjs?v=bal-002";
 import { ALPHA_CLOCK_KEY, ALPHA_DAY_MS, alphaTime, parseAlphaClock,
-  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=apprentice-a4";
+  setAlphaSpeed, advanceAlphaClock, ALPHA_TOOLS_ENABLED, alphaMaxStats, alphaGrantCoins } from "./alpha-tools.mjs?v=team-004";
 const $ = id => document.getElementById(id);
 const ui = {
   playerName: $("character-heading"), nameInput: $("nameInput"), saveName: $("saveName"),
@@ -80,6 +82,8 @@ for (let n = SCHEDULE_BALANCE.minDurationUnits; n <= SCHEDULE_BALANCE.maxDuratio
 }
 // The two existing combat styles are real equipment cards like armour slots,
  // not a separate full-width form above the folded equipment panel.
+let selectedFighter = "first";
+const equipmentState=()=>selectedFighter==="second"&&state.teamSecond?{...state,...state.teamSecond}:state;
 let selectedEquipmentSlot = "head";
 let selectedFamily = "padded";
 const weaponButtons = new Map();
@@ -94,12 +98,12 @@ function addOption(select, value, label) {
 }
 
 function shopTarget() {
-  return selectedEquipmentSlot === "weapon" ? state.combatLoadout :
+  return selectedEquipmentSlot === "weapon" ? equipmentState().combatLoadout :
     selectedFamily === "none" ? null : selectedEquipmentSlot + ":" + selectedFamily;
 }
 
 function resetSmithSelection() {
-  const current = state.equipment[shopTarget()];
+  const current = equipmentState().equipment[shopTarget()];
   const item = nextEquipmentUpgrade(current) ?? current ?? STARTER_ITEM;
   ui.itemGrade.value = String(item.grade);
   ui.itemQuality.value = item.quality;
@@ -118,7 +122,7 @@ function equipmentButton(parent, label, className, activate) {
 
 for (const [id, loadout] of Object.entries(COMBAT_LOADOUTS)) {
   const button = equipmentButton(ui.weaponSlots, loadout.name, "weapon-slot", () => {
-    const result = foregroundAction((s,now)=>setCombatLoadout(s,id,now));
+    const result = foregroundAction((s,now)=>s.teamSecond?setTeamWeapon(s,selectedFighter,id,now):setCombatLoadout(s,id,now));
     state = result.state;
     selectedEquipmentSlot = "weapon";
     resetSmithSelection();
@@ -132,7 +136,7 @@ for (const [id, loadout] of Object.entries(COMBAT_LOADOUTS)) {
 for (const slot of ARMOUR_SLOTS) {
   const button = equipmentButton(ui.armourSlots, slot.name, "armour-slot", () => {
     selectedEquipmentSlot = slot.id;
-    selectedFamily = state.armour[slot.id];
+    selectedFamily = equipmentState().armour[slot.id];
     resetSmithSelection();
     render();
   });
@@ -146,15 +150,19 @@ ITEM_QUALITIES.forEach(quality => addOption(ui.itemQuality, quality, titleCase(q
 const selectedSpec = () => ({ grade: Number(ui.itemGrade.value), quality: ui.itemQuality.value });
 
 function renderArmour() {
+  const kitState=equipmentState();
+  $("teamEquipmentSelector").hidden=!state.teamSecond;
+  $("teamFighterChoice").value=selectedFighter;
+  if(state.teamSecond)$("teamLoadouts").textContent="1: "+COMBAT_LOADOUTS[state.combatLoadout].name+" · 2: "+COMBAT_LOADOUTS[state.teamSecond.combatLoadout].name;
   const slot = ARMOUR_SLOT_BY_ID[selectedEquipmentSlot];
   const id = shopTarget();
-  const item = state.equipment[id];
+  const item = kitState.equipment[id];
   const next = id ? nextEquipmentUpgrade(item) : null;
   const target = next ?? item ?? STARTER_ITEM;
   ui.itemGrade.value = String(target.grade);
   ui.itemQuality.value = target.quality;
-  const quote = next ? smithQuote(state, id, next) : null;
-  const name = slot ? slot.name : COMBAT_LOADOUTS[state.combatLoadout].name;
+  const quote = next ? smithQuote(kitState, id, next) : null;
+  const name = slot ? slot.name : COMBAT_LOADOUTS[kitState.combatLoadout].name;
   ui.equipmentEditHeading.textContent = name + (item ?
     " · " + ITEM_GRADES[item.grade] + " " + titleCase(item.quality) : "");
   ui.armourEditor.hidden = !slot;
@@ -171,32 +179,32 @@ function renderArmour() {
     quote?.available ? (item ? "Improve" : "Buy and equip") + " · " + quotedCost :
     id && !next ? "S Masterwork · Maximum" : "Select equipment";
   ui.smithEquip.hidden = !slot || (id && !item);
-  ui.smithEquip.disabled = !slot || state.armour[slot.id] === selectedFamily;
+  ui.smithEquip.disabled = !slot || kitState.armour[slot.id] === selectedFamily;
   ui.smithEquip.textContent = selectedFamily === "none" ? "Unequip" : "Equip owned armour";
   ui.coinWallet.textContent = number(state.coins) + " coins";
 
-  const track=slot?selectedFamily:state.combatLoadout;
-  const practice=expertiseProgress(state.expertise[track]);
-  const effectiveness=proficiency(state.expertiseActive[track],id?selectedSpec().grade:0);
+  const track=slot?selectedFamily:kitState.combatLoadout;
+  const practice=expertiseProgress(kitState.expertise[track]);
+  const effectiveness=proficiency(kitState.expertiseActive[track],id?selectedSpec().grade:0);
   ui.expertiseStats.textContent=(slot?(track==="none"?"Unarmoured":titleCase(track)):COMBAT_LOADOUTS[track].name)+
     " expertise · "+practice.hours.toFixed(1)+" h · "+ITEM_GRADES[practice.rank]+
     (practice.nextHours===null?" mastered":" · Next "+ITEM_GRADES[practice.rank+1]+": "+number(practice.nextHours)+" h")+
     (id?" · Target-grade increment proficiency "+Math.round(effectiveness*100)+"% (prior mastered grades retained)":"")+
     " · Applies next bout";
-  const gear = armourStats(state.armour, state.combatLoadout);
-  const bonus = equipmentBonuses(state);
+  const gear = armourStats(kitState.armour, kitState.combatLoadout);
+  const bonus = equipmentBonuses(kitState);
   ui.gearStats.textContent = gear.totalKg + " kg · Move " + Math.min(100,Math.round(gear.mobilityPct+bonus.mobility)) +
     "% · Base armour " + gear.physicalReductionPct + "% · Attack +" + bonus.attack +
     " ×" + bonus.damageMultiplier.toFixed(2) + " · Guard +" + bonus.defense +
     " · Resistance +" + Math.round(bonus.resistance*100) + "% · Aim +" + Math.round(bonus.accuracy*100) +
     "% · Pierce +" + Math.round(bonus.penetration*100) + "% · Dodge " + Math.round(dodgeChance(Math.min(100,gear.mobilityPct+bonus.mobility),bonus.dodge)*100) + "%";
   for (const [style, button] of weaponButtons) {
-    button.setAttribute("data-equipped", String(style === state.combatLoadout));
-    button.setAttribute("aria-pressed", String(!slot && style === state.combatLoadout));
+    button.setAttribute("data-equipped", String(style === kitState.combatLoadout));
+    button.setAttribute("aria-pressed", String(!slot && style === kitState.combatLoadout));
   }
   for (const part of ARMOUR_SLOTS) {
     const button = armourButtons.get(part.id);
-    button.textContent = part.name + " · " + armourOption(part.id, state.armour[part.id]).name;
+    button.textContent = part.name + " · " + armourOption(part.id, kitState.armour[part.id]).name;
     button.setAttribute("aria-pressed", String(part.id === selectedEquipmentSlot));
   }
 }
@@ -846,7 +854,7 @@ ui.masterConfirm.addEventListener("click", () => {
 let previousStatsMarkup="";
 function renderCharacterStats(){
   if(!$("characterStatsPanel").open)return;
-  const model=characterStats(state),signature=JSON.stringify(model);
+  const model=characterStats(equipmentState()),signature=JSON.stringify(model);
   if(signature===previousStatsMarkup)return;
   previousStatsMarkup=signature;
   $("characterStatsNotice").textContent=model.notice;
@@ -907,7 +915,7 @@ function renderApprentice() {
     !autoLoginSupported||!storageWorks?"Unavailable · Safe local save and login coordination required.":
     equipment.reason==="complete"?"All equipped gear is S Masterwork.":
     "Active · Equipped gear upgrades automatically on login.";
-  $("apprenticeEquipmentNext").textContent=equipment.unlocked&&next?equipmentLabel(next.id)+" · "+ITEM_GRADES[next.current.grade]+" "+titleCase(next.current.quality)+" → "+ITEM_GRADES[next.target.grade]+" "+titleCase(next.target.quality):"";
+  $("apprenticeEquipmentNext").textContent=equipment.unlocked&&next?(next.fighterId?"Gladiator "+(next.fighterId==="first"?"1":"2")+" · ":"")+equipmentLabel(next.id)+" · "+ITEM_GRADES[next.current.grade]+" "+titleCase(next.current.quality)+" → "+ITEM_GRADES[next.target.grade]+" "+titleCase(next.target.quality):"";
   $("apprenticeEquipmentCost").textContent=equipment.unlocked&&next?number(state.coins)+" / "+number(next.cost)+" coins"+(equipment.reason==="fighting_level"?" · Fighting "+next.requiredFightingLevel+" required":next.available?" · Ready on next login":" · Saving"):"";
   $("apprenticeLegacy").hidden = used <= progress.slots;
   $("queueUnlockHint").textContent = progress.nextSlotAt === null
@@ -916,10 +924,11 @@ function renderApprentice() {
 }
 
 function render() {
+  $("alphaSecondFamilyLabel").hidden=!state.teamSecond;
   renderApprentice();
   const current = state.activity ? ACTIVITIES[state.activity] : null;
   ui.alphaSpeed.checked = alphaClock?.speed === 10;
-  const chosen = COMBAT_LOADOUTS[state.combatLoadout];
+  const chosen = COMBAT_LOADOUTS[equipmentState().combatLoadout];
   ui.combatSkillsText.textContent = "Attack: " +
     COMBAT_SKILLS[chosen.attackSkill].name + " · Defense: " +
     COMBAT_SKILLS[chosen.defenseSkill].name;
@@ -1058,10 +1067,12 @@ function render() {
   $("autoFightFill").style.width=(required===null?0:100*policy.streak/required)+"%";
   $("autoFightStatus").textContent=state.activity==="fighting"&&capped?"Rewards paused · Visit the Skill Master":
     transition?"Activity changing":"Difficulty adjusts automatically while playing.";
-  const combat = current?.category === "combat" && !transition && !capped
+  const teamMode=Boolean(state.teamSecond);
+  const teamCombat=teamMode&&current?.category==="combat"&&!transition&&!capped&&state.combatSession?teamCombatAtTime(state.combatSession):null;
+  const combat = !teamMode&&current?.category === "combat" && !transition && !capped
     ? combatAtTime(state.combatSession) : null;
   ui.activityProgress.hidden = Boolean(transition || capped || current?.category === "combat");
-  ui.combatPanel.hidden = !combat;
+  ui.combatPanel.hidden = !(combat||teamCombat);
   const flow=combat ? combatFlowState(combat,state.combatSession) : null;
   showCombatFlow(flow);
   let imageEvent = null;
@@ -1104,6 +1115,18 @@ function render() {
     ui.combatTurns.textContent = "";
   }
   renderResults(combat, combatRevealed, false);
+  $("teamworkStatus").hidden=!teamMode;
+  if(teamMode)$("teamworkStatus").textContent=teamworkText(state.teamwork);
+  if(teamCombat){
+    const view=teamBattleView(teamCombat,state.combatSession);
+    ui.combatEventTitle.textContent=view.title;
+    ui.combatTurns.textContent="Round "+teamCombat.event.round;
+    $("combatGround").textContent=difficultyGrades[state.combatSession.players.first.difficulty]+" · "+teamCombat.terrain.name;
+    $("arenaPositioning").hidden=true;
+    ui.combatPanel.classList.toggle("finisher",false);
+    ui.resultWork.hidden=true;
+  }
+  renderTeamBattle($("teamBattleReadout"),teamCombat,state.combatSession);
   const sceneActivity = transition ? ACTIVITIES[transition.targetActivity] : current;
   if (!sceneActivity) {
     ui.sceneTag.textContent = "WAITING FOR ORDERS";
@@ -1120,8 +1143,8 @@ function render() {
     ui.heading.textContent = transition ? "Changing to " + sceneActivity.title : sceneActivity.title;
     // The arena picture and its short status stay; only factual color-coded
     // results appear in the compact panel below, with no narrative history.
-    ui.description.hidden = Boolean(combat);
-    ui.description.textContent = combat ? "" : transition
+    ui.description.hidden = Boolean(combat||teamCombat);
+    ui.description.textContent = combat||teamCombat ? "" : transition
       ? "Your character finishes their work, travels and prepares before the new task begins."
       : capped ? "All rewards paused: this skill has a full XP bar. Visit the Skill Master to resume, or choose another activity." : sceneActivity.description;
     // Every live turn selects its actual combat event / attacker weapon /
@@ -1185,7 +1208,7 @@ function returnToGame() {
 
 // Only genuinely new or explicitly reset characters start in the arena.
 function newStartingCharacter(now) {
-  return chooseActivity(newGame(now), "fighting", now).state;
+  return chooseActivity(newTeamGame(now), "fighting", now).state;
 }
 
 function startActivityNow(kind) {
@@ -1233,8 +1256,8 @@ function showApprenticeEquipmentReport(result){
   const report=result.autoEquipment,target=$("apprenticeEquipmentReport");
   if(!report?.upgrades.length){target.hidden=true;return;}
   const final=new Map();
-  for(const step of report.upgrades)final.set(step.id,step.to);
-  target.textContent="Apprentice purchased "+number(report.upgrades.length)+" upgrades for "+number(report.spent)+" coins. "+Array.from(final,([id,item])=>equipmentLabel(id)+": "+ITEM_GRADES[item.grade]+" "+titleCase(item.quality)).join("; ")+ ".";
+  for(const step of report.upgrades)final.set((step.fighterId??"")+":"+step.id,step);
+  target.textContent="Apprentice purchased "+number(report.upgrades.length)+" upgrades for "+number(report.spent)+" coins. "+Array.from(final.values(),step=>(step.fighterId?"Gladiator "+(step.fighterId==="first"?"1":"2")+" · ":"")+equipmentLabel(step.id)+": "+ITEM_GRADES[step.to.grade]+" "+titleCase(step.to.quality)).join("; ")+ ".";
   target.hidden=false;
   message(target.textContent);
 }
@@ -1266,6 +1289,7 @@ function start(coordinatedLogin = false) {
   if(!ALPHA_TOOLS_ENABLED&&alphaClock)alphaClock=setAlphaSpeed(alphaClock,Date.now(),1);
   ui.alphaTools.hidden=!ALPHA_TOOLS_ENABLED;
   ui.alphaFamily.value="plate";
+  $("alphaSecondFamily").value="leather";
   if (!state) {
     // Invalid/new character saves must not inherit an old acceleration clock.
     if (storageWorks) {
@@ -1281,7 +1305,7 @@ function start(coordinatedLogin = false) {
     const result = autoLoginSupported && storageWorks
       ? enterGameWithApprentice(state, now)
       : enterGame(state, now);
-    if (result.mastery || result.autoEquipment?.upgrades.length) {
+    if (result.mastery || result.autoEquipment?.upgrades.length || result.teamworkLevelGained) {
       // No success notification or applied sacrifice until the new save is committed.
       if (persistState(result.state)) {
         state = result.state;
@@ -1347,8 +1371,10 @@ function start(coordinatedLogin = false) {
   ui.alphaMax.addEventListener("click",()=>{
     const weapon=COMBAT_LOADOUTS[state.combatLoadout].name;
     const family=ui.alphaFamily.value;
-    applyTest(()=>alphaMaxStats(state,family,gameNow()),
-      "TEST ONLY · Six-month benchmark applied: "+weapon+" + "+family+". Fighting Lv 52 minimum; no free gear or coins.");
+    const secondFamily=$("alphaSecondFamily").value;
+    const second=state.teamSecond?" · "+COMBAT_LOADOUTS[state.teamSecond.combatLoadout].name+" + "+secondFamily:"";
+    applyTest(()=>alphaMaxStats(state,family,gameNow(),Math.random,secondFamily),
+      "TEST ONLY · Six-month benchmark applied: "+weapon+" + "+family+second+". Fighting Lv 52 minimum; no free gear or coins.");
   });
   ui.alphaCoins.addEventListener("click",()=>applyTest(()=>alphaGrantCoins(state,gameNow()),
     "TEST ONLY · Added 100,000 arena coins."));
@@ -1372,6 +1398,7 @@ function start(coordinatedLogin = false) {
       latestWorkResult=null;
       lastCombatEventKey=null;
       lastWagonSignature=null;
+      selectedFighter = "first";
       selectedEquipmentSlot = "head";
       selectedFamily = "padded";
       resetSmithSelection();
@@ -1426,6 +1453,11 @@ function start(coordinatedLogin = false) {
   });
   }
   resetSmithSelection();
+  $("teamFighterChoice").addEventListener("change",()=>{
+    selectedFighter=$("teamFighterChoice").value==="second"?"second":"first";
+    if(ARMOUR_SLOT_BY_ID[selectedEquipmentSlot])selectedFamily=equipmentState().armour[selectedEquipmentSlot];
+    resetSmithSelection();render();
+  });
   ui.armourChoice.addEventListener("change", () => {
     if (!armourOption(selectedEquipmentSlot, ui.armourChoice.value)) return;
     selectedFamily = ui.armourChoice.value;
@@ -1436,7 +1468,7 @@ function start(coordinatedLogin = false) {
   ui.itemQuality.addEventListener("change", renderArmour);
   ui.smithEquip.addEventListener("click", () => {
     if (ui.smithEquip.disabled) return;
-    const result = foregroundAction((s,now)=>setArmourChoice(s,selectedEquipmentSlot,selectedFamily,now));
+    const result = foregroundAction((s,now)=>s.teamSecond?setTeamArmour(s,selectedFighter,selectedEquipmentSlot,selectedFamily,now):setArmourChoice(s,selectedEquipmentSlot,selectedFamily,now));
     state = result.state;
     reportProgress(result);
     writeSave();
@@ -1444,7 +1476,7 @@ function start(coordinatedLogin = false) {
   });
   ui.smithBuy.addEventListener("click", () => {
     if (ui.smithBuy.disabled) return;
-    const result = foregroundAction((s,now)=>buyEquipment(s,shopTarget(),selectedSpec(),now));
+    const result = foregroundAction((s,now)=>s.teamSecond?buyTeamEquipment(s,selectedFighter,shopTarget(),selectedSpec(),now):buyEquipment(s,shopTarget(),selectedSpec(),now));
     state = result.state;
     reportProgress(result);
     ui.smithStatus.textContent = result.purchased ? "Equipment ready." : "Purchase unavailable.";
