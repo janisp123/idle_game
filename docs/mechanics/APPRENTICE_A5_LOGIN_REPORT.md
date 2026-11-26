@@ -1,0 +1,17 @@
+# APPRENTICE-A5 — analytical login report
+2026-11-26. Owner requested full-screen return report, dismiss manually or automatically after 10 seconds; actual progress and automation details. Baseline main 9cdc3364b124a7502dbb0cd6ce5f9bca4fdd8572 (A4 deployed). Draft PR #185.
+
+## Implementation
+- `site/play/login-report.mjs` is a pure read-only projection of the previously saved character and the adopted engine outcome. Aggregate individual settled reports exactly once (not both the last report and the reports array). Show encounter count, victories, losses = defeats + double deaths, win rate (undefined for no encounters), recovery, frozen arena difficulty, opening/closing wallet, actual gross arena rewards and assistant debits. No new reward generation, RNG, progression or balance changes.
+- Group committed upgrade steps by equipped ID with actual prior/final grade and quality, step count and summed debit. Show work cycles and gross XP by activity, activated levels, resources earned/used/tribute separately, effective attribute changes and training XP, expertise earned, current/next activity, remaining route and ready XP caps. Absence label is time since last settlement, not invented exact logout duration. Arena totals reflect the existing bounded offline schedule.
+- Native full-viewport modal, analytical KPI cards and tables, scrollable body, fixed header/footer, manual Continue or Escape, monotonic real-time ten-second deadline. Game continues underneath. The same report can be reopened for untimed review during the current session; no new persistence or migration. New/reset characters do not show a fabricated offline report. Ordinary visibility catch-up does not open a new login report.
+- Only show committed automation after successful save. On failed storage/coordination use ordinary settlement and honest unavailable/unsaved notice, no uncommitted upgrades or tribute. No new clan implementation.
+- CSS in dedicated `login-report.css`; JS in `login-report-ui.mjs`; app cache key apprentice-a5. Text nodes rather than HTML injection.
+
+## Verification
+- Native `node tools/test_login_report.mjs` PASS at system-lab run 45812490224, including actual production Fighting + upgrade outcome, wallet conservation, Master tribute, multiple activity reports, resource consumption, attribute XP, zero encounters and failed-save suppression. Existing A4 planner 7,115 and integration 27 checks PASS; native mandatory economy pilot remains exact.
+- First complete browser run 45812525144 at 2f075a0d: 117 regressions PASS, mobile Chromium 390px full-screen report, manual dismiss/reopen, ten-second timer observed 10063 ms; desktop failed exact viewport width (1425 vs 1440 due to root scrollbar). Fixed at ac008aaf using root scroll lock and viewport sizing. Added failed-save modal assertions at f1c2c2cf. Latest native browser/CI verification pending at report creation.
+- Initial intermediate website runs failed while modal markup/stylesheet/cache assertions and FakeElement methods were being wired; existing non-browser tests corrected to include modal close and the updated cache version. No engine mutation. No independent human usability study; same-session reopen only.
+
+## Next
+Confirm final browser run at both viewport widths (manual close, automatic 10s, reopen and failure path), all four final CI checks, review PR scope, protected merge and Pages deployment. No live release claimed until verified.
