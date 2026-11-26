@@ -1,5 +1,10 @@
 # Current working checkpoint
 
+## TEAM-006 — second behaviour candidate verified (2026-11-26, chat)
+
+[Report](mechanics/TEAM_006_REFINED.md), [results](mechanics/TEAM_006_REFINED.json), PR #190, 45848442829 all nine jobs PASS. 3,290,112 battles, 1080 baseline parity fixtures. Focus2 broad gains +2.4–3.2 pp at max mastery; Range2 small improvement vs normal but not superior to Range1; Protect2 reduces losses but still fails overall. Own-team refined policy +2.5–3.5 pp vs normal, no need for pets. Recommend further targeted differentiation/protection work or owner-approved Focus2 integration, not wholesale deployment. No gameplay changes; progression/economy/offline untested.
+
+
 ## TEAM-006 — refined candidate audit underway
 
 Owner requested refinements of all three behaviours, research only. Harness `tools/team-behaviour-refine.mjs` at 727a5df8, workflow 57409517. Protect2 uses recovery or no reachable attack to escort a threatened non-shield ally against melee; Focus2 limits added shared-target preference to reachable targets if any are reachable; Range2 prioritizes recovery repositioning, requires shorter-reach immediate threats and retains attack distance, ready-action retreat reserved for ranged weapons. Same production strikes and no raw stat buffs. Original and refined modes and Normal tested with fresh seed 20261201, identical matchup matrix, 32 search/64 holdout seeds, 512 NPC seeds, three grades and mastery levels. 3,290,112 planned bouts plus trace parity. No playable changes. Collect native results and report before recommending implementation.
