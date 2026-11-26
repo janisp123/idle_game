@@ -1,5 +1,10 @@
 # Changelog and task handoffs
 
+## TEAM-010 — complete broad wear audit (2026-11-26)
+
+[Report](mechanics/TEAM_010_WEAR.md), nine compact result files, PR #190, run 45873421935 all PASS. 32,962,800 scored battles +675 parity. S Common selected dual spear 68.7/64.4/66.2% A/B/C; any armour breaks 0/77.9/61.1%. S C Masterwork dual spear/greatsword/bow/hammer/shield 69.3/62.1/53.9/42.4/38.8%. Benchmark stats and Teamwork25, not fully max endgame. Owner ENDGAME-BALANCE-001: next prioritize realistic max/near-max stats, S Masterwork, Teamwork50 and mastery50, independent weapon tuning and competitive offline. No production changes or merge.
+
+
 ## TEAM-009 — complete durability and diversity audit (2026-11-26)
 
 [Report](mechanics/TEAM_009_ARMOUR.md), compact results G0/G3/G7, PR #190, native run 45872049505 all nine PASS. 3,563,880 scored battles plus 900 parity. Moderate/strong material HP changes armour breakage but almost no win-rate effect; S dual aggressive plate hammers 37.4% held across all three models. Preliminary S counters 61.3/78.8/31.3%. Restricted screening pool and four seeds generalize poorly; no proof of universal weapon viability or meta-free balance. Moderate candidate only; next broaden opponents and seeds, test wear/grade interactions, mixed armour and competitive offline frontier. No gameplay changes or merge.
