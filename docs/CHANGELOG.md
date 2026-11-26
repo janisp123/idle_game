@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## MANAGER-UI-001 · Phase 6 UI candidate (2026-11-26, chat)
+
+Phase 6 candidate: actual /play/ now manager-app.mjs + manager-ui.css, per-fighter weapon/whole-set/tactic buttons, permanent live battle, read-only work/next/progress/resources, optional stats and alpha tools. Legacy UI regression retained as tools/fixtures/legacy-play.html and browser server-only route. New manager save key; valid V17 team saves settle old elapsed timeline then migrate, retain old original key, preserve frozen active combat and partial selected work where possible; obsolete queue discarded. Invalid legacy starts separate manager save with notice; unreadable manager save not overwritten. Browser local lock and optimistic guard, no server authority. Phase 5 all six CI PASS; max-only screening 64,125 battles, 2,025 configs, 5 terrains, strongest anchor dual plate spear 65% (300), shield/bow best 47.5%; prior #192 comment contains full evidence. Tactics/tribute/pacing provisional. Phase 6 CI not run at commit; no merge/deployment. Next validate migration, actual manager browser and existing regression.
+
 ## TACTIC-UI-001 · Phase 5 candidate (2026-11-26, chat)
 
 Phase 5 first run 45891051417 at 9a8cb322: 4/5 new tactic tests PASS; actual offline practice test failed because fresh alpha Fighting cap (40 XP) occurred before the first completed 200s bout, legitimately leaving tactic XP unchanged. Screening skipped. Increase Fighting level only in that functional fixture so it contains completed bouts; retain exact cap and activation assertions. No production change.
