@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## AUTO-FIGHT-02 — policy foundation implemented on draft PR #183
+
+Pure `site/play/auto-fight.mjs` and `tools/test_auto_fight.mjs` pushed; 10,782 assertions, 654 reachable states passed in connector JavaScript execution. Native CI test wired into combat workflow, not yet verified. 3/1/10 policy, offline no-op by default, history and bounded stages. [Implementation record and integration contract](mechanics/AUTO_FIGHT_POLICY_IMPLEMENTATION.md). **Not yet connected to engine/app**; no deployed gameplay changes. Next AUTO-FIGHT-03: persisted policy state, explicit bounded live settlement at actual completed bout boundary, offline fixed stage, cap/queue/reload tests and UI; then economy and release gates. Branch `research/auto-fight-policy-001`, PR #183.
+
 ## AUTO-FIGHT-01 — production research complete, implementation pending (draft PR #183)
 
 Owner approved automatic fighting progression with **difficulty frozen offline** (no advance or retreat). [Initial empirical screen](mechanics/AUTO_FIGHT_POLICY_SCREEN.md), [production-linked validation](mechanics/AUTO_FIGHT_PRODUCTION_VALIDATION.md), [raw results](mechanics/AUTO_FIGHT_PRODUCTION_VALIDATION.json), `node tools/auto-fight-production-validation.mjs`. Baseline de5853ae; 16,588,800 synthetic policy draws followed by 90,720 actual unpatched production duel outcomes and 1,680 fixed-stage wallet checks. 3/1/10 preferred candidate: trajectory 84.23% online and 90.19% offline income relative to hindsight fixed-tier benchmark, 17.48% losses, 3.14 changes/h. Native CI not verified. No gameplay changes/deployment. Pending branch `research/auto-fight-policy-001`, [draft PR #183](https://github.com/janisp123/idle_game/pull/183). Next AUTO-FIGHT-02/03: pure policy and online/offline settlement integration, then UI, six-month economy, tests and deploy; preserve A3, CAP-001 and OFF-001. Early retry on gear change remains unvalidated.
