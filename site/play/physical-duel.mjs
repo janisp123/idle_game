@@ -1,5 +1,5 @@
 import { dodgeChance } from "./armour.mjs?v=bal-002";
-import { PHYSICAL_RULES,WEAPONS,BASH,TACTICS,AIM,GUARD,handlingScale,attackComponents,seededRandom,fighter,wound,protection,flatGuard,vitals,healthParts,intactArmourSum,mobility,timeoutVerdict,resolveStrike } from "./physical-actions.mjs?v=team-002";
+import { PHYSICAL_RULES,WEAPONS,BASH,TACTICS,AIM,GUARD,ARMOUR_FACTOR,handlingScale,attackComponents,seededRandom,fighter,wound,protection,flatGuard,vitals,healthParts,intactArmourSum,mobility,timeoutVerdict,resolveStrike } from "./physical-actions.mjs?v=team-002";
 export { PHYSICAL_RULES,timeoutVerdict } from "./physical-actions.mjs?v=team-002";
 const BANDS=Object.freeze(["Close","Reach","Far"]);
 export function resolvePhysicalDuel(player, enemy, seed, terrain = {}) {
