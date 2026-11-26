@@ -56,17 +56,15 @@ for(const w of styles)for(const f of families)for(const item of stages){
 }
 let state=engine.newGame(0);
 state={...state,coins:10000000,skills:{...state.skills,fighting:{...state.skills.fighting,level:50}}};
-for(const id of ["greatsword","head:plate"]){
- let current=state.equipment[id]??null;
- while(true){
- const target=smith.nextEquipmentUpgrade(current);if(!target)break;
- const quote=smith.smithQuote(state,id,target),before=state.coins;
- const r=engine.buyEquipment(state,id,target,0,()=>.5);
- check(r.purchased&&before-r.state.coins===quote.cost,"engine purchase debit");
- state=r.state;current=state.equipment[id];transactions++;
- }
- check(current.grade===7&&current.quality==="masterwork","terminal stage");
-}
+const initial=engine.buyEquipment(state,"head:plate",{grade:0,quality:"poor"},0,()=>.5);
+check(initial.purchased,"initial chosen armour");
+state=initial.state;const before=state.coins;
+const result=engine.enterGameWithApprentice(state,0,()=>.5);
+check(result.autoEquipment.upgrades.length===62,"two owned items complete");
+check(before-result.state.coins===result.autoEquipment.spent,"engine automatic debit");
+for(const step of result.autoEquipment.upgrades){check(step.cost===smith.equipmentPrice(step.to)-smith.equipmentPrice(step.from),"exact legal debit");transactions++;}
+state=result.state;
+for(const id of ["greatsword","head:plate"])check(state.equipment[id].grade===7&&state.equipment[id].quality==="masterwork","terminal stage");transactions++;
 const view=sheet.characterStats(state);
 for(const title of ["Recovery skip chance","Critical chance modifier","Critical damage modifier","Critical avoidance","Critical damage reduction"])check(view.sections.some(x=>x.title===title),"missing stat "+title);
 check(!JSON.stringify(view).includes("NaN"),"finite stat display");
