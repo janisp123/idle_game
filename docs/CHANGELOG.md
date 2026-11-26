@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## AUTO-FIGHT-03 · STARTED (2026-11-26, chat)
+
+Owner requested continuation on draft PR #183, branch `research/auto-fight-policy-001`; policy foundation tested. Integrate saved stage and streak, actual committed live bout results, conservative foreground detection, frozen offline rewards, cap/queue and save tests. No release until UI, economy and CI gates. Next: engine integration and regression tests.
+
 ## AUTO-FIGHT-02 · STARTED (2026-11-26, chat)
 
 Owner approved continuing after production policy research; draft PR #183, branch `research/auto-fight-policy-001`, baseline de5853ae. Implement 3 wins / 1 loss / 10 retry wins, pure deterministic state, online-only stage updates. Previous 90,720 real duels and 1,680 offline wallet checks saved. Policy foundation implemented: `site/play/auto-fight.mjs`, `tools/test_auto_fight.mjs`, [verification and integration record](mechanics/AUTO_FIGHT_POLICY_IMPLEMENTATION.md). 10,782 assertions / 654 reachable states PASS in connector JavaScript; native workflow added, CI unverified. Next AUTO-FIGHT-03: actual persisted state and committed foreground-only settlement, frozen offline mode, cap/queue/reload tests, UI and economy. No live gameplay change or deployment.
