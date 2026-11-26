@@ -247,6 +247,14 @@ try{
     assert.equal(initial.hidden,false);assert.equal(initial.stage,"Non-grade");assert.equal(initial.highest,"Non-grade");
     assert.match(initial.next,/Retry F.*9 \/ 10/);assert.equal(initial.meter,"90");assert.equal(initial.controls,0);assert.ok(initial.overflow<=2);
     await shot("auto-fight-retry-"+width);
+    // No player input: a normal visible tick completes the tenth retry win.
+    await evaluate("new Promise(resolve=>setTimeout(resolve,550))");
+    await evaluate(`Date.now=()=>${fixedNow+500}`);
+    await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)})).autoFight.stage===1`),"automatic live advance "+width);
+    const passive=await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(saveKey)}))`);
+    assert.equal(passive.coins,12);assert.equal(passive.autoFight.highest,0);
+    assert.equal(passive.combatLoadout,"greatsword");assert.equal(passive.autoFight.streak,0);
+    await navigate("auto-fight-gear-"+width,{[saveKey]:autoFixture,[clockKey]:null});
     // Wait for the ordinary real foreground heartbeat, then make the next
     // gear action cross the bout boundary synchronously in the same task.
     await evaluate("new Promise(resolve=>setTimeout(resolve,550))");
