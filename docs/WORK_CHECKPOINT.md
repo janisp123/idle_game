@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## AUTO-FIGHT-03 — engine and foreground integration implemented (draft PR #183)
+
+[Integration report](mechanics/AUTO_FIGHT_INTEGRATION.md), `tools/test_auto_fight_integration.mjs`. Persisted stage/streak/history; live committed bout changes only, fixed offline settlement, manual Fighting selector replaced with current-stage text. 29 integration + 10,782 policy assertions PASS in native Node on combat run 45786044755 at 673fa82a; systems and protocol PASS on that head. Legacy fixture failures in combat and website identified/corrected at 0000c898/b753ee10; final-head full CI still pending. No merge/deploy. Next AUTO-FIGHT-04: full progression UI and browser/action/visibility boundary tests; then AUTO-FIGHT-05 six-month automatic economy validation and final CI/Pages. Read integration report for explicit limitations (foreground manual action may consume boundary without progression, conservative catch-up; existing optimistic multi-tab save model). Branch `research/auto-fight-policy-001`, PR #183.
+
 ## AUTO-FIGHT-02 — policy foundation implemented on draft PR #183
 
 Pure `site/play/auto-fight.mjs` and `tools/test_auto_fight.mjs` pushed; 10,782 assertions, 654 reachable states passed in connector JavaScript execution. Native CI test wired into combat workflow, not yet verified. 3/1/10 policy, offline no-op by default, history and bounded stages. [Implementation record and integration contract](mechanics/AUTO_FIGHT_POLICY_IMPLEMENTATION.md). **Not yet connected to engine/app**; no deployed gameplay changes. Next AUTO-FIGHT-03: persisted policy state, explicit bounded live settlement at actual completed bout boundary, offline fixed stage, cap/queue/reload tests and UI; then economy and release gates. Branch `research/auto-fight-policy-001`, PR #183.
