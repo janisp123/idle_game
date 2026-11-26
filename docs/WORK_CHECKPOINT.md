@@ -1,5 +1,10 @@
 # Current working checkpoint
 
+## TEAM-009 — material durability and build diversity research underway
+
+Owner approved testing distinct padded/leather/plate durability before gameplay changes. `tools/armour-durability-audit.mjs` bbac6fdd, workflow 9dd3986e. Temporary TEAM-007 behaviour resolver, symmetric snapshot-only armour condition multiplier on existing per-piece maxHP, rounded; compare baseline 1/1/1, moderate .8/1/1.25, strong .65/1/1.5. Preserve material reduction, grade resistance, weight/dodge, wear, weapon/shield condition and Masterwork unbreakability. NG/D/S, Common trained benchmark gear, Teamwork25, behaviour50. All 120 unordered uniform gear pairs vs all 15 homogeneous weapon/family opponent teams, 5 arenas ×8 held seeds. All 2,850 unordered full-set/role pairs (including mixed Normal) vs five representative normal-policy opponent teams ×5 arenas ×4 screening seeds; three finalists per weapon/armour/role/environment/global selected on screening and re-evaluated vs 15 archetypes ×5 arenas ×16 separate seeds. Selected leaders cross-play with roles on both teams, limited not exhaustive PvP equilibrium. Record wins, loss/draw, armour breakage and lost condition. Masterwork trace parity ignoring display-only armour maxHP; baseline normal exact parity. Seed20261205. No mixed-slot armour in this screening, no progression/offline settlement here; no production code change. Later validate competitive NPC frontier and actual offline earnings, and repeat quality/novice cases. PR #190, collect results before choosing balance.
+
+
 ## TEAM-008 — complete offline login audit
 
 [Report](mechanics/TEAM_008_OFFLINE.md), [results](mechanics/TEAM_008_OFFLINE.json), PR #190, run 45865654833 all nine PASS. 128,538 settlements / 16,184,349 counted bouts (overlap/repetition), 108 parity. Max mastery daily good vs poor NG +0.03%, D +0.56%, S +6.09%; S separate-session good earns more 87.7%, >=15% advantage 11.6%. Normal wins ~100/99.5/90.2%; overmatched opponents, competitive-frontier audit needed. Full XP bars zero rewards. activeHours erroneous; use practice/bouts. Behaviour XP not implemented. Research only, no merge.
