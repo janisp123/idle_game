@@ -696,7 +696,9 @@ export function settle(state, now = Date.now(), random = Math.random) {
 export const LIVE_FIGHT_MAX_MS=10_000;
 export function settleLive(state,now=Date.now(),random=Math.random){
   if(!validTime(now))throw new RangeError("Invalid clock");
-  return settleInternal(state,now,random,now>=state.settledAtMs&&now-state.settledAtMs<=LIVE_FIGHT_MAX_MS);
+  const session=state.combatSession;
+  const cursorCurrent=!session||(session.prizeCursor??0)===Math.floor(session.elapsedMs/BOUT_MS);
+  return settleInternal(state,now,random,cursorCurrent&&now>=state.settledAtMs&&now-state.settledAtMs<=LIVE_FIGHT_MAX_MS);
 }
 function settleInternal(state, now, random, online) {
   if (!validTime(now)) throw new RangeError("Invalid clock");
