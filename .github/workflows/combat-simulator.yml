@@ -18,6 +18,7 @@ on:
       - "tools/combat-simulator.mjs"
       - "tools/test_combat_simulator.mjs"
       - "tools/test_auto_fight.mjs"
+      - "tools/test_auto_fight_integration.mjs"
       - "tools/gladiator-benchmark.mjs"
       - ".github/workflows/combat-simulator.yml"
 
@@ -35,7 +36,7 @@ jobs:
         with:
           node-version: "22"
       - name: Verify automatic Fighting policy
-        run: node tools/test_auto_fight.mjs
+        run: node tools/test_auto_fight.mjs && node tools/test_auto_fight_integration.mjs
       - name: Verify combat snapshot and payout parity
         run: node --test tools/test_combat_simulator.mjs
       - name: Validate public scenario and create local config
