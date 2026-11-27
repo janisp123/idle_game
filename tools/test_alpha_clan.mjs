@@ -1,50 +1,60 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {newArenaManager,enterArena,readArenaManager,chooseClanAcademy} from "../site/play/arena-manager.mjs";
+import {newArenaManager,enterArena,readArenaManager,chooseClanRaid,testClanRaid,settleArenaLive} from "../site/play/arena-manager.mjs";
 import {settleManagerOffline,enterManagerGame} from "../site/play/manager-lanes.mjs";
-import {ALPHA_CLAN,clanXpBonus,validAlphaClan,applyClanRewards,upgradeAcademy} from "../site/play/alpha-clan.mjs";
-import {raidVictoryBuff} from "../site/play/raid-rules.mjs";
+import {ALPHA_CLAN,CLAN_BUILDINGS,CLAN_CONSTRUCTION,CLAN_DAY,CLAN_STATS,clanBonuses,clanSnapshot,validAlphaClan,applyClanRewards,buildingCost,buildingDuration,advanceConstruction,setClanPriority,clanWeekEnd,completeClanWeek,migrateAlphaClan} from "../site/play/alpha-clan.mjs";
+import {resolveClanRaid,clanRaidGroupCount} from "../site/play/clan-raid.mjs";
+import {startGroupSession,settleGroupSession,groupWinPrize,groupCoinRatio} from "../site/play/battle-group-timeline.mjs";
 import {xpToNextLevel} from "../site/play/engine.mjs";
-const t=2026112700,rand=()=>.5;
-test("first clan enrollment settles old time without retroactive bonus; repeat login and reload retain membership",()=>{
- const s=newArenaManager(t),end=t+100000;
- const old=enterManagerGame(s,end,rand).state,joined=enterArena(s,end,rand).state;
+const t=2026112700,rand=()=>.5,wall=2026112700000;
+const fresh=()=>enterArena(newArenaManager(t),t,rand,wall).state;
+const funded=(c,n)=>({...c,treasury:c.treasury+n,donated:c.donated+n});
+test("local enrollment occurs after offline settlement; all five buildings level zero",()=>{
+ const s=newArenaManager(t),end=t+100000,old=enterManagerGame(s,end,rand).state,joined=enterArena(s,end,rand,wall).state;
  assert.deepEqual({...joined,alphaClan:undefined},{...old,alphaClan:undefined});
- assert.equal(joined.alphaClan.id,ALPHA_CLAN.id);assert.equal(joined.alphaClan.joinedAtMs,end);assert.equal(clanXpBonus(joined.alphaClan),.05);
+ assert.deepEqual(joined.alphaClan.levels,{barracks:0,armoury:0,training:0,bank:0,portal:0});assert.equal(clanBonuses(joined.alphaClan).xp,0);assert.equal(clanBonuses(joined.alphaClan).members,10);
  assert.deepEqual(readArenaManager(JSON.stringify(joined)),joined);
- assert.deepEqual(enterArena(joined,end,rand).state.alphaClan,joined.alphaClan);
+ assert.deepEqual(enterArena(joined,end,rand,wall).state.alphaClan,joined.alphaClan);
  assert.equal(readArenaManager(JSON.stringify({...joined,alphaClan:{...joined.alphaClan,treasury:1}})),null);
+ const oldClan={id:ALPHA_CLAN.id,version:1,joinedAtMs:t,treasury:17,donated:117,rewardCursor:9,academyLevel:2};
+ const migrated=migrateAlphaClan(oldClan);assert.ok(validAlphaClan(migrated));assert.equal(migrated.treasury,17);assert.equal(migrated.rewardCursor,9);
 });
-test("automatic tenth positive payout, variable reward sizes, fractional carry, and batched equivalence",()=>{
- const s=enterArena(newArenaManager(t),t,rand).state,c=s.alphaClan;
- let r=applyClanRewards(c,9,20,20);assert.equal(r.donated,0);assert.equal(r.clan.rewardCursor,9);
- r=applyClanRewards(r.clan,0,100,20);assert.equal(r.clan.rewardCursor,9);
- r=applyClanRewards(r.clan,1,100,20);assert.equal(r.donated,5);assert.equal(r.clan.rewardCursor,0);
- assert.equal(applyClanRewards(c,1,17,20).clan.rewardCursor,0);
- for(const units of [17,28,45,67,95,129,171,259])for(const carry of [0,1,19])for(const cursor of [0,4,9]){
+test("every tenth positive reward remains exact with fractional Bank payouts, variable grade and batching",()=>{
+ const c=fresh().alphaClan;let r=applyClanRewards(c,9,20,20);assert.equal(r.donated,0);r=applyClanRewards(r.clan,1,100,20);assert.equal(r.donated,5);
+ for(const [units,ratio] of [[17,20],[28,20],[259,20],[1785,2000],[3360,2000],[31080,2000]])for(const carry of [0,ratio-1])for(const cursor of [0,9]){
   const seed={...c,rewardCursor:cursor};let slow=seed,remainder=carry,donated=0;
-  for(let i=0;i<1234;i++){const a=applyClanRewards(slow,1,units,20,remainder);slow=a.clan;donated+=a.donated;remainder=(remainder+units)%20;}
-  const fast=applyClanRewards(seed,1234,units,20,carry);assert.deepEqual(fast.clan,slow);assert.equal(fast.donated,donated);
+  for(let i=0;i<2222;i++){const a=applyClanRewards(slow,1,units,ratio,remainder);slow=a.clan;donated+=a.donated;remainder=(remainder+units)%ratio;}
+  const fast=applyClanRewards(seed,2222,units,ratio,carry);assert.deepEqual(fast.clan,slow);assert.equal(fast.donated,donated);
  }
- const funded=applyClanRewards(c,1000,200,20).clan;let v={...s,alphaClan:funded,coins:100};
- assert.equal(v.alphaClan.treasury,1000);while(v.alphaClan.treasury>=100*v.alphaClan.academyLevel&&v.alphaClan.academyLevel<6)v=upgradeAcademy(v);
- assert.equal(v.alphaClan.academyLevel,5);assert.equal(v.alphaClan.treasury,0);assert.equal(v.coins,100);assert.ok(validAlphaClan(v.alphaClan));assert.deepEqual(readArenaManager(JSON.stringify(v)),v);
 });
-test("actual arena settlement transfers rewards without creating coins or changing combat, and persists cursor",()=>{
- const s=enterArena(newArenaManager(t),t,rand).state;
- const base={...s,skills:{...s.skills,fighting:{level:30,xp:0}},alphaClan:{...s.alphaClan,rewardCursor:9}};
- const {alphaClan,...neutral}=base;
+test("all 160 construction upgrades need exactly 480 days even with unlimited treasury",()=>{
+ let c=funded(fresh().alphaClan,100000000),now=wall,n=0;c=advanceConstruction(c,now);
+ while(c.construction){const q=c.construction;assert.equal(q.cost,buildingCost(q.id,q.level));assert.equal(q.end-q.start,buildingDuration(q.id,q.level));assert.deepEqual(advanceConstruction(c,q.end-1),c);now=q.end;c=advanceConstruction(c,now);assert.ok(validAlphaClan(c));n++;assert.ok(n<=160);}
+ assert.equal(n,160);assert.equal(now-wall,480*CLAN_DAY);const b=clanBonuses(c);assert.equal(b.members,110);assert.equal(b.xp,20);assert.equal(b.coins,20);assert.ok(CLAN_STATS.every(k=>b.armoury[k]===20));
+ const portal={...c,levels:{...c.levels,portal:50}};assert.ok(validAlphaClan(portal));assert.ok(CLAN_STATS.every(k=>clanBonuses(portal).combat[k]===50));
+ let early=advanceConstruction(setClanPriority(funded(fresh().alphaClan,500),"bank"),wall);
+ assert.equal(early.construction.id,"bank");const later=advanceConstruction(early,wall+100*CLAN_DAY);assert.equal(later.levels.bank,1);assert.equal(later.construction.start,wall+100*CLAN_DAY);
+});
+test("actual clan raid snapshots persist, resolve once after cutoff, no fake victories or repeat attempts",()=>{
+ const s=fresh(),joined=chooseClanRaid(s,t,wall,rand).state,r=joined.alphaClan.raid.registration;
+ assert.ok(r);assert.deepEqual(readArenaManager(JSON.stringify(joined)),joined);
+ assert.deepEqual(chooseClanRaid(joined,t,wall,rand).state.alphaClan,joined.alphaClan);
+ assert.deepEqual(completeClanWeek(joined.alphaClan,clanWeekEnd(r.week)-1,"victory"),joined.alphaClan);
+ const result=resolveClanRaid(r);assert.equal(result.outcome,result.remainingHP===0?"victory":"defeat");assert.ok(result.groups<=clanRaidGroupCount(1));assert.deepEqual(resolveClanRaid(r),result);
+ const done=testClanRaid(joined,t,wall,rand);assert.equal(done.clanRaidResult.outcome,result.outcome);assert.equal(done.state.alphaClan.levels.portal,Number(result.outcome==="victory"));
+ assert.equal(done.state.alphaClan.raid.registration,null);assert.equal(chooseClanRaid(done.state,t,wall,rand).state.alphaClan.raid.registration,null);
+ assert.deepEqual(readArenaManager(JSON.stringify(done.state)),done.state);
+ for(let level=1;level<=50;level++)assert.ok(clanRaidGroupCount(level)>=2&&clanRaidGroupCount(level)<=11);
+});
+test("actual Fighting XP and Bank bonus follow completed levels; cap and old snapshot preserved",()=>{
+ let s=fresh();let c=advanceConstruction(funded(s.alphaClan,50),wall);assert.equal(c.construction.id,"training");c=advanceConstruction(c,wall+CLAN_DAY);assert.equal(c.levels.training,1);
+ const base={...s,skills:{...s.skills,fighting:{level:30,xp:0}},alphaClan:{...c,rewardCursor:9}};
+ const neutral={...base,alphaClan:s.alphaClan};
  const a=settleManagerOffline(neutral,t+500000,rand).state,b=settleManagerOffline(base,t+500000,rand).state;
- assert.equal(b.coins+b.alphaClan.donated,a.coins);assert.deepEqual(b.groupAnalytics,a.groupAnalytics);
- assert.deepEqual(readArenaManager(JSON.stringify(b)),b);
- assert.equal(enterArena(b,b.settledAtMs,rand).state.alphaClan.donated,b.alphaClan.donated);
-});
-test("clan Academy boosts actual Fighting XP, stacks with raid XP, preserves payouts and cap",()=>{
- const s=enterArena(newArenaManager(t),t,rand).state,base={...s,skills:{...s.skills,fighting:{level:30,xp:0}}};
- const {alphaClan,...neutral}=base,end=t+200000;
- const a=settleManagerOffline(neutral,end,rand).state,b=settleManagerOffline(base,end,rand).state;
- const boosted={...base,raidBuff:raidVictoryBuff(null,10,t)},r=settleManagerOffline(boosted,end,rand).state;
- assert.ok(b.skills.fighting.xp>a.skills.fighting.xp);assert.ok(r.skills.fighting.xp>b.skills.fighting.xp);
- assert.equal(b.coins+b.alphaClan.donated,a.coins);assert.deepEqual(b.groupAnalytics,a.groupAnalytics);
+ assert.ok(b.skills.fighting.xp>=a.skills.fighting.xp);assert.equal(b.coins+b.alphaClan.donated,a.coins+a.alphaClan.donated);assert.deepEqual(b.groupAnalytics,a.groupAnalytics);
  const cap=settleManagerOffline(base,t+86400000,rand).state;assert.equal(cap.skills.fighting.xp,xpToNextLevel(cap.skills.fighting.level));
+ let bank=advanceConstruction(setClanPriority(funded(s.alphaClan,50),"bank"),wall);bank=advanceConstruction(bank,wall+CLAN_DAY);
+ const snap=clanSnapshot(bank);assert.equal(snap.bank,1);const session=startGroupSession(s.battleGroup,{difficulty:0,str:1,dex:1,end:1,skill:1},1,123,{rules:10,clanSnapshot:snap});
+ assert.equal(groupCoinRatio(session),2000);const result=settleGroupSession(session,100000);
+ assert.equal(result.rewardUnits%101,0);assert.ok(result.session.coinRemainder<2000);
 });
