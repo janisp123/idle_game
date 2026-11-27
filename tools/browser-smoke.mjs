@@ -344,14 +344,16 @@ try{
     await send("Page.navigate",{url});
     await until(async()=>{const status=await evaluate(`({ready:document.getElementById("saveStatus")?.getAttribute("data-game-ready"),notice:document.getElementById("migrationNotice")?.textContent,status:document.getElementById("saveStatus")?.textContent})`);if(status?.status==="Progress not saved")throw Error(status.notice);if(runtimeErrors.length)throw Error(runtimeErrors.at(-1));return status?.ready==="true";},"manager loaded "+width);
     await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:script.identifier});
-    const check=await evaluate(`(()=>({selects:document.querySelectorAll("select").length,counts:["fighterButtons","tacticButtons"].map(id=>document.getElementById(id).querySelectorAll("button").length),manual:!!document.getElementById("weaponButtons")||!!document.getElementById("armourButtons"),overflow:document.documentElement.scrollWidth-innerWidth,activity:JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).activity,work:document.getElementById("currentWork").textContent}))()`);
-    assert.equal(check.selects,3);assert.deepEqual(check.counts,[7,3]);assert.equal(check.manual,false);assert.ok(check.overflow<=2);assert.equal(check.activity,"fighting");assert.equal(check.work,"Hunting");
+    const check=await evaluate(`(()=>({selects:document.querySelectorAll("select").length,counts:["fighterButtons","tacticButtons","raceChoice","mainClassChoice","specialClassChoice"].map(id=>document.getElementById(id).querySelectorAll("button").length),manual:!!document.getElementById("weaponButtons")||!!document.getElementById("armourButtons"),overflow:document.documentElement.scrollWidth-innerWidth,activity:JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).activity,work:document.getElementById("currentWork").textContent}))()`);
+    assert.equal(check.selects,0);assert.deepEqual(check.counts,[7,3,5,5,2]);assert.equal(check.manual,false);assert.ok(check.overflow<=2);assert.equal(check.activity,"fighting");assert.equal(check.work,"Hunting");
     const placement=await evaluate(`(()=>{const grid=document.querySelector(".manager-grid"),arena=grid.querySelector(".arena-card"),rect=arena.getBoundingClientRect();return {first:grid.firstElementChild===arena,full:Math.abs(rect.width-grid.getBoundingClientRect().width)<=2,above:rect.bottom<=document.getElementById("battleGroupPanel").getBoundingClientRect().top};})()`);
     assert.deepEqual(placement,{first:true,full:true,above:true},"arena first and full-width");
     assert.equal(await evaluate('!document.getElementById("battleGroupPanel").open && !document.getElementById("specialClassChoice").checkVisibility()'),true);
     await evaluate('document.querySelector("#battleGroupPanel > summary").click()');
     assert.equal(await evaluate('document.getElementById("battleGroupPanel").open && document.getElementById("specialClassChoice").checkVisibility()'),true);
-    await evaluate('document.querySelector("#fighterButtons [data-choice=member2]").click();const r=document.getElementById("raceChoice");r.value="orc";r.dispatchEvent(new Event("change"));const c=document.getElementById("specialClassChoice");c.value="ragebreaker";c.dispatchEvent(new Event("change"))');
+    await evaluate('document.querySelector("#fighterButtons [data-choice=member2]").click();document.querySelector("#raceChoice [data-choice=orc]").click();document.querySelector("#mainClassChoice [data-choice=Raider]").click()');
+    assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).battleGroup.member2.selected`),"blademaster","race and main class browsing must not change the active class");
+    await evaluate('document.querySelector("#specialClassChoice [data-choice=ragebreaker]").click()');
     await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).battleGroup.member2.selected==="ragebreaker"`),"manager class");
     await evaluate('document.querySelector("#tacticButtons [data-choice=defensive]").click()');
     await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return s.battleGroup.member2.selected==="ragebreaker"&&s.battleGroup.member2.stance==="defensive"&&s.battleGroup.member1.stance==="balanced";})()`),"manager independent choices");
@@ -366,7 +368,7 @@ try{
     await until(()=>evaluate('document.getElementById("alphaStatus").textContent==="Test credit added."'),"manager test coins");
     await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return Object.keys(s.battleGroup.member2.classes.ragebreaker.equipment).length===5;})()`),"manager automatic class armour acquisition");
     await evaluate('document.querySelector("#battleGroupPanel > summary").click()');
-    const retained=await evaluate('document.getElementById("specialClassChoice").value==="ragebreaker" && document.getElementById("raceChoice").value==="orc" && document.querySelector("#tacticButtons [data-choice=defensive]").getAttribute("aria-pressed")==="true"');
+    const retained=await evaluate('document.querySelector("#specialClassChoice [data-choice=ragebreaker]").getAttribute("aria-pressed")==="true" && document.querySelector("#raceChoice [data-choice=orc]").getAttribute("aria-pressed")==="true" && document.querySelector("#tacticButtons [data-choice=defensive]").getAttribute("aria-pressed")==="true"');
     assert.equal(retained,true,"selected loadout survives collapse and automation");
     await evaluate('document.querySelector("#battleGroupPanel > summary").click()');
     // Progress remains available and updates while its native disclosure is closed.

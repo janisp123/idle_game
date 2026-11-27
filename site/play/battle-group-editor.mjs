@@ -1,25 +1,31 @@
-// Three-step selection. Race/main-class changes are drafts until a specialization
-// is explicitly selected. No equipment controls, no accidental paid purchases.
+// Button-only three-step selection. A race/main-class draft never spends
+// coins or changes the active class until the player chooses a specialization.
 import {GROUP_IDS} from "./battle-group.mjs?v=group-001";
 import {GROUP_CLASSES,GROUP_RACES,RACE_LABELS,groupMainClasses,groupSpecializations} from "./battle-group-classes.mjs?v=group-001";
-import {groupProgressRows,ROLE_ICONS,renderGroupProgress} from "./battle-group-progress-view.mjs?v=group-006";
+import {ROLE_ICONS,renderGroupProgress} from "./battle-group-progress-view.mjs?v=group-006";
+const RACE_ICONS=Object.freeze({"human":"●","elf":"❋","dark_elf":"☾","orc":"◆","dwarf":"⬢"});
 const $=id=>document.getElementById(id),node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
-function options(select,entries,value){
+function choices(host,entries,value,onChoice){
  const key=JSON.stringify(entries);
- if(select.dataset.options!==key){select.replaceChildren(...entries.map(([id,name])=>{const o=node("option",name);o.value=id;return o;}));select.dataset.options=key;}
- select.value=value;
+ if(host.dataset.options!==key){
+  const focused=document.activeElement?.dataset?.choice;
+  const restore=host.contains(document.activeElement);
+  host.replaceChildren(...entries.map(([id,label])=>{
+   const b=node("button",label);b.type="button";b.dataset.choice=id;b.addEventListener("click",()=>onChoice(id));return b;
+  }));
+  host.dataset.options=key;
+  if(restore){[...host.children].find(b=>b.dataset.choice===focused)?.focus();}
+ }
+ for(const b of host.children)b.setAttribute("aria-pressed",String(b.dataset.choice===value));
 }
 export function createGroupEditor(onClass,onStance){
  let current=null,selected=GROUP_IDS[0],draft=null,lastProgress="";
  const host=$("fighterButtons");
- for(const [i,id] of GROUP_IDS.entries()){
+ for(const id of GROUP_IDS){
   const b=node("button");b.type="button";b.dataset.choice=id;
   b.addEventListener("click",()=>{selected=id;draft=null;render(current);});host.append(b);
  }
  const race=$("raceChoice"),main=$("mainClassChoice"),special=$("specialClassChoice");
- race.addEventListener("change",()=>{draft={race:race.value,main:groupMainClasses(race.value)[0]};render(current);});
- main.addEventListener("change",()=>{draft={race:race.value,main:main.value};render(current);});
- special.addEventListener("change",()=>{if(!special.value)return;const c=GROUP_CLASSES[special.value];draft=null;onClass(selected,c);});
  for(const stance of ["aggressive","balanced","defensive"]){
   const b=node("button",stance[0].toUpperCase()+stance.slice(1));b.type="button";b.dataset.choice=stance;b.addEventListener("click",()=>onStance(selected,stance));$("tacticButtons").append(b);
  }
@@ -30,9 +36,15 @@ export function createGroupEditor(onClass,onStance){
    if(b.textContent!==label)b.textContent=label;b.setAttribute("aria-pressed",String(id===selected));b.title=label;
   }
   const m=group[selected],c=GROUP_CLASSES[m.selected],r=draft?.race??c.race,k=draft?.main??c.mainClass;
-  options(race,GROUP_RACES.map(id=>[id,RACE_LABELS[id]]),r);
-  options(main,groupMainClasses(r).map(id=>[id,id]),k);
-  options(special,[["","Choose specialization…"],...groupSpecializations(r,k).map(x=>[x.id,x.name+" · "+(m.classes[x.id]?.mastery.level??1)])],c.race===r&&c.mainClass===k?c.id:"");
+  choices(race,GROUP_RACES.map(id=>[id,RACE_ICONS[id]+" "+RACE_LABELS[id]]),r,id=>{
+   if(id!==r){draft={race:id,main:groupMainClasses(id)[0]};render(current);}
+  });
+  choices(main,groupMainClasses(r).map(id=>[id,id]),k,id=>{draft={race:r,main:id};render(current);});
+  choices(special,groupSpecializations(r,k).map(x=>[x.id,ROLE_ICONS[x.role]+" "+x.name+" · Lv "+(m.classes[x.id]?.mastery.level??1)]),c.race===r&&c.mainClass===k?c.id:null,id=>{
+   const next=GROUP_CLASSES[id];draft=null;if(id===m.selected){render(current);return;}onClass(selected,next);
+  });
+  const status=draft&&(c.race!==r||c.mainClass!==k)?"Choose a specialization to change class. Active: "+c.name:"Active: "+c.name;
+  if($("classChoiceStatus").textContent!==status)$("classChoiceStatus").textContent=status;
   for(const b of $("tacticButtons").children)b.setAttribute("aria-pressed",String(b.dataset.choice===m.stance));
   const key=JSON.stringify([selected,m]);if(key!==lastProgress){renderGroupProgress($("selectedClassProgress"),group,selected);lastProgress=key;}
  }

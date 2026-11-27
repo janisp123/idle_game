@@ -7,8 +7,8 @@
 <title>The Long Vigil — Play</title>
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./game.css">
-<link rel="stylesheet" href="./manager-ui.css?v=group-006">
-<script type="module" src="./manager-app.mjs?v=group-006"></script>
+<link rel="stylesheet" href="./manager-ui.css?v=group-007">
+<script type="module" src="./manager-app.mjs?v=group-007"></script>
 </head>
 <body>
 <a class="skip-link" href="#game">Skip to game</a>
@@ -44,9 +44,10 @@
 <summary id="battleGroupHeading">Battle Group</summary>
 <div id="fighterButtons" class="group-slots" role="group" aria-label="Choose character"></div>
 <div class="group-selectors">
-<label for="raceChoice">Race</label><select id="raceChoice"></select>
-<label for="mainClassChoice">Main class</label><select id="mainClassChoice"></select>
-<label for="specialClassChoice">Specialization</label><select id="specialClassChoice"></select>
+<h3 id="raceHeading">Race</h3><div id="raceChoice" class="choice-grid three" role="group" aria-labelledby="raceHeading"></div>
+<h3 id="mainClassHeading">Main class</h3><div id="mainClassChoice" class="choice-grid three" role="group" aria-labelledby="mainClassHeading"></div>
+<h3 id="specialClassHeading">Specialization</h3><div id="specialClassChoice" class="choice-grid two" role="group" aria-labelledby="specialClassHeading"></div>
+<p id="classChoiceStatus" class="quiet" aria-live="polite"></p>
 </div>
 <h3>Combat stance</h3><div id="tacticButtons" class="choice-grid three" role="group" aria-label="Choose combat stance"></div>
 <div id="selectedClassProgress"></div>

@@ -49,3 +49,6 @@ Stage 3c verified all seven workflows at e5b5158. Stage 4 candidate: public mana
 Stage 4 first website run 45970213175 failed before engine/browser tests at obsolete static check `Missing manager UI` (still required removed manual controls). Updated required IDs and explicit absence assertion; strengthened exact fixture analytics assertion; preserve open analytics subsections on refresh. New CI required.
 
 Stage 4 second website run 45970307825 failed at superseded button-only static check. Replace with exact three approved class dropdown IDs and count; all six other workflows passed. Browser validation still required; no merge.
+
+
+Owner clarification: no dropdowns on mobile; public manager uses buttons for all race, main class, specialization and stance selections. All have 44px minimum tap targets, selected-state aria-pressed, role/race icons where useful. Race/main class browsing remains a draft; only specialization click commits. Static check restores button-only constraint; Chromium asserts zero dropdowns and no class change until specialization chosen. Unreleased branch only; tests pending.
