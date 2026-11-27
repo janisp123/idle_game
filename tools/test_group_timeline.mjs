@@ -92,3 +92,26 @@ test("legacy individual effort migration is idempotent and recovers actual per-c
  const invalid=structuredClone(migrated);invalid.member1.classes[c.id].attributeEffortActive.STR=n.attributeEffort.STR+1;
  assert.equal(validBattleGroup(invalid),false);
 });
+
+import {statAttack,statSpeed,statCrit,statMagicDamageFactor,statStatusResistance,statHealing,statEvasion,statMobility,statInitiative} from "../site/play/stat-combat.mjs";
+test("v4 snapshots ignore account stats, use individual mastery and match clone semantics",()=>{
+ const g=initialBattleGroup(),s=startGroupSession(g,max,50,seed,{rules:4});
+ assert.ok(validGroupSession(s));assert.equal(s.groupCombatRules,4);
+ assert.deepEqual(s.players,groupSnapshots(g,{...max,str:1,dex:999,end:1,skill:1},4));
+ const p=s.players.member1,q=s.players.member3;
+ assert.notDeepEqual(p.attributes,q.attributes);assert.equal(p.skill,1);
+ const broken=structuredClone(s);broken.players.member1.attributes.STR++;assert.equal(validGroupSession(broken),false);
+ const r=groupCombatAtTime(s);assert.ok(r.enemies.every(x=>x.attributes&&x.skill===x.classLevel));assert.ok(r.events.length>1);
+ const a=settleGroupSession(s,12345),b=settleGroupSession(a.session,87655),all=settleGroupSession(s,100000);
+ assert.deepEqual(b.session,all.session);for(const k of ["coins","bouts","victories","defeats","doubleDeaths"])assert.equal(a[k]+b[k],all[k]);
+});
+test("six attributes affect distinct v4 combat functions and never legacy combat",()=>{
+ const base={STR:20,DEX:20,CON:20,INT:20,WIT:20,MEN:20},a={attributes:base,groupCombatRules:4,str:20,dex:20,end:20};
+ const plus=k=>({...a,attributes:{...base,[k]:100}});
+ assert.ok(statAttack(plus("STR"),"piercing")>statAttack(a,"piercing"));assert.equal(statAttack(plus("STR"),"magic"),statAttack(a,"magic"));
+ assert.ok(statAttack(plus("INT"),"magic")>statAttack(a,"magic"));assert.ok(statHealing(plus("INT"))>statHealing(a));
+ assert.ok(statSpeed(plus("DEX"),"piercing")>statSpeed(a,"piercing"));assert.equal(statSpeed(plus("DEX"),"magic"),statSpeed(a,"magic"));
+ assert.ok(statCrit(plus("WIT"),"magic")>statCrit(a,"magic"));assert.ok(statInitiative(plus("WIT"),"magic")>statInitiative(a,"magic"));assert.ok(statEvasion(plus("DEX"))>statEvasion(a));assert.ok(statMobility(plus("DEX"))>statMobility(a));
+ assert.ok(statStatusResistance(plus("CON"),"physical")>statStatusResistance(a,"physical"));assert.ok(statMagicDamageFactor(plus("MEN"),"magic")<statMagicDamageFactor(a,"magic"));assert.ok(statStatusResistance(plus("MEN"),"magic")>statStatusResistance(a,"magic"));
+ assert.equal(statAttack({...plus("INT"),groupCombatRules:3},"magic"),6);assert.equal(statSpeed({...a,groupCombatRules:3},"magic"),0);
+});

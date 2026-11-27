@@ -21,3 +21,5 @@ dialog::backdrop{background:#050b13d9}
 .class-kit-entry h3{margin:4px 0;font:600 17px Georgia,serif;color:#f1dbad}
 .class-kit-entry p{margin:3px 0;font-size:13px;line-height:1.5;color:#e1e7ed;overflow-wrap:anywhere}
 .class-info-details dt{color:#d9c497}.class-info-details dd{color:#d2dde7}
+
+.individual-attributes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:10px 0}.individual-attributes>div{min-width:0;border:1px solid #65768a;padding:6px;background:#152334}.individual-attributes strong{font-size:11px;color:#d6c397;display:block}.individual-attributes span{font-size:18px;font-variant-numeric:tabular-nums;color:#e9e6d8}.individual-attributes progress{margin:4px 0 0;height:5px}

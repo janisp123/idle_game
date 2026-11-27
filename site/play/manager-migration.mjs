@@ -1,8 +1,8 @@
 // Manager-only migration. Preserve all owned progress; discard obsolete manual route.
 // Legacy source remains untouched in its original key. Settle its elapsed interval
 // using the old engine before starting the two-lane clock.
-import {readSave,settle,activateExpertise,ACTIVITIES,TIMING_PROFILE} from "./engine.mjs?v=npc-parity-001";
-import {newManagerGame,readManagerGame,MANAGER_LANES_VERSION} from "./manager-lanes.mjs?v=npc-parity-001";
+import {readSave,settle,activateExpertise,ACTIVITIES,TIMING_PROFILE} from "./engine.mjs?v=individual-stats-001";
+import {newManagerGame,readManagerGame,MANAGER_LANES_VERSION} from "./manager-lanes.mjs?v=individual-stats-001";
 import {blankArmourRequests} from "./manager-equipment.mjs?v=npc-parity-001";
 import {blankTactics} from "./manager-tactics.mjs?v=manager-tactics-001";
 import {WORK_ROTATION} from "./activity-rotation.mjs?v=npc-parity-001";

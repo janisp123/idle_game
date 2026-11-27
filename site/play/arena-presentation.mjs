@@ -1,6 +1,6 @@
 // Read-only adapter. Real frozen team timeline remains the sole combat authority.
 import {teamCombatAtTime,teamWinPrize,teamBoutMs} from "./team-timeline.mjs?v=group-004";
-import {groupCombatAtTime,groupWinPrize,GROUP_TIMELINE_VERSION} from "./battle-group-timeline.mjs?v=kits-001";
+import {groupCombatAtTime,groupWinPrize,GROUP_TIMELINE_VERSION} from "./battle-group-timeline.mjs?v=individual-stats-001";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=gear-a3";
 const title=s=>s[0].toUpperCase()+s.slice(1);
