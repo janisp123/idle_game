@@ -158,7 +158,8 @@ def check():
         assert {"game","battleGroupPanel","battleGroupHeading","fighterButtons","raceChoice","mainClassChoice","specialClassChoice","tacticButtons","selectedClassProgress","currentWork","workXP","nextWork","battleFighters","arenaPlayers","arenaEnemies","arenaEnvironment","battleCalculation","battlePercent","progressPanel","progressHeading","progressFeed","resourceList","characterStatsPanel","loginReport"}.issubset(game_parser.ids), "Missing manager UI"
         assert not {"weaponButtons","armourButtons"} & game_parser.ids, "Manual equipment controls must not return"
         assert not ({"activityChoices","queuePlanner","wagonQueue","smithBuy","itemGrade","itemQuality","armourChoice","teamFighterChoice"} & game_parser.ids), "Obsolete player controls"
-        assert "<select" not in game_html, "Manager uses buttons, not dropdowns"
+        assert sorted(re.findall(r'<select\s+id="([^"]+)"', game_html)) == ["mainClassChoice", "raceChoice", "specialClassChoice"], "Only the three class selection dropdowns are allowed"
+        assert len(re.findall(r"<select\b", game_html)) == 3, "No additional dropdowns"
         assert "arena-art" not in game_html, "No unrelated generic arena painting"
         assert "battleCalculation" in game_html and "max=\"100\"" in game_html
         assert "manager-app.mjs" in game_html and "manager-ui.css" in game_html
