@@ -8,10 +8,19 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## RANGE-GEOMETRY-001 — Ranged engagement geometry
+
+- **Goal / acceptance:** Give ranged compositions real distance-based advantages in open terrain while retaining melee strengths in close quarters, tank aggro and healer priority. No damage inflation or scripted winners.
+- **Status:** IN_REVIEW — v6 candidate; functional CI and balance evidence pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+- **Dependencies:** [Geometry investigation](mechanics/RANGE_GEOMETRY_20261127.md), TANK-AGGRO-001.
+
 ## TANK-AGGRO-001 — Tank aggro and healer priority
 
 - **Goal / acceptance:** Living tanks are the primary enemy target; healers prioritize injured tanks in all new group encounters, including raids. Preserve actual movement, range, cooldowns and prior frozen outcomes. Both sides use the same rules.
-- **Status:** IN_REVIEW — v5 candidate; functional CI and balance pending.
+- **Status:** PARTIAL — v5 merged #209 (87d949f), 191 tests, all seven workflows passed. Balance and live deployment verification pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
