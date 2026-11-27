@@ -18,3 +18,7 @@ One pure character-attributes module owns six-stat metadata, 31 base/growth prof
 5. Save and compare max-only class matrix, terrain and mixed-team simulations under new stats; tune through centralized configuration. Do not claim balance until independent holdouts. Alpha merge completed functional increments after CI; unfinished numerical balance not a release blocker.
 
 Foundation numbers are design candidates, not final balancing. No new live formula enabled in stage 1.
+
+## Stage 2 candidate
+
+INDIVIDUAL-STATS-001 stage 2 — stage 1 merged #204 (447a0288), 177 tests and seven workflows passed. Added six-stat earned/active effort to each slot/specialization; award only frozen productive member time; old records migrate once using exact class weapon practice quarter-ms, not shared account ledger. Preserve inactive pending effort, activate selected builds only; alpha floor applies selected profiles. No v4 combat changes yet. Migration retains historical account ledger; no arbitrary duplication of shared stats. Pending CI. Next: v4 derived effects, clone parity and frozen snapshot dispatch, individual UI. Candidate 3700h alpha floor inherited from prior team benchmark; recalculate later.

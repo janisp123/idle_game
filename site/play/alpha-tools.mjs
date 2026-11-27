@@ -5,6 +5,8 @@ import { awardAttributeTime,blankAttributeEffort } from "./attributes.mjs?v=glad
 import { EXPERTISE_BALANCE } from "./expertise.mjs?v=alpha-gear-a3";
 import { ARMOUR_TIERS } from "./armour.mjs?v=bal-002";
 
+import {blankCharacterEffort,awardCharacterEffort,CHARACTER_ATTRIBUTE_IDS} from "./character-attributes.mjs";
+import {migrateGroupAttributes} from "./battle-group.mjs?v=group-001";
 export const ALPHA_TOOLS_ENABLED=TIMING_PROFILE==="alpha";
 // Rounded-down productive hours of the verified A8 normal daily trajectory
 // (265c7a8, seed 20261125); use the real attribute formula, not fake stat fields.
@@ -50,7 +52,7 @@ export function alphaMaxStats(state,family,now,random=Math.random,secondFamily=f
   const changed=fighting!==old.skills.fighting||JSON.stringify(teamSecond)!==JSON.stringify(old.teamSecond)||
     Object.keys(attributeEffort).some(id=>attributeEffort[id]!==old.attributeEffort[id])||
     Object.keys(expertise).some(id=>expertise[id]!==old.expertise[id]);
-  if(old.battleGroup){const battleGroup=structuredClone(old.battleGroup);for(const m of Object.values(battleGroup)){const c=GROUP_CLASSES[m.selected],p=m.classes[c.id];p.mastery={level:50,xp:0};p.expertise[c.loadout]=Math.max(p.expertise[c.loadout],expertiseThreshold(7));p.expertise[c.armour]=Math.max(p.expertise[c.armour],expertiseThreshold(7));p.expertiseActive={...p.expertise};m.stances[m.stance]={level:50,xp:0};}return {...result,state:{...old,battleGroup,attributeEffort,attributeEffortActive:{...attributeEffort},skills:{...old.skills,fighting},teamwork:{level:50,xp:0}}};}
+  if(old.battleGroup){const battleGroup=structuredClone(migrateGroupAttributes(old.battleGroup));for(const m of Object.values(battleGroup)){const c=GROUP_CLASSES[m.selected],p=m.classes[c.id];p.mastery={level:50,xp:0};p.expertise[c.loadout]=Math.max(p.expertise[c.loadout],expertiseThreshold(7));p.expertise[c.armour]=Math.max(p.expertise[c.armour],expertiseThreshold(7));p.expertiseActive={...p.expertise};const floor=awardCharacterEffort(blankCharacterEffort(),c.id,TEAM_SIX_MONTH_BUILD.productiveHours*3600000);p.attributeEffort=Object.fromEntries(CHARACTER_ATTRIBUTE_IDS.map(id=>[id,Math.max(p.attributeEffort[id],floor[id])]));p.attributeEffortActive={...p.attributeEffort};m.stances[m.stance]={level:50,xp:0};}return {...result,state:{...old,battleGroup,attributeEffort,attributeEffortActive:{...attributeEffort},skills:{...old.skills,fighting},teamwork:{level:50,xp:0}}};}
   if(!changed)return result;
   return {...result,state:{...old,attributeEffort,skills:{...old.skills,fighting},
     expertise,expertiseActive:{...expertise},attributeEffortActive:{...attributeEffort},...(teamSecond?{teamSecond}:{})}};

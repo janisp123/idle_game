@@ -8,7 +8,7 @@ import {
 } from "./engine.mjs?v=kits-001";
 import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=group-004";
 import {GROUP_TIMELINE_VERSION} from "./battle-group-timing.mjs";
-import {initialBattleGroup,validBattleGroup,selectGroupClass,selectGroupStance,upgradeBattleGroup,previewGroupUpgrade} from "./battle-group.mjs?v=group-001";
+import {initialBattleGroup,validBattleGroup,migrateGroupAttributes,selectGroupClass,selectGroupStance,upgradeBattleGroup,previewGroupUpgrade} from "./battle-group.mjs?v=group-001";
 import {blankGroupAnalytics,validGroupAnalytics,accumulateGroupAnalytics} from "./battle-group-analytics.mjs?v=group-004";
 import {blankBattleAnalytics,validBattleAnalytics,accumulateBattleAnalytics} from "./battle-analytics.mjs?v=npc-parity-001";
 import {WORK_ROTATION,ingredientReserve,rotateManagerWork,rotationTravelMs} from "./activity-rotation.mjs?v=npc-parity-001";
@@ -45,7 +45,7 @@ export function readManagerGame(value){
     const s=readSave(raw);
     if(!s||!s.teamSecond||raw.battleAnalytics!==undefined&&!validBattleAnalytics(raw.battleAnalytics))return null;
     return {...s,combatSession:s.combatSession?.timelineVersion===GROUP_TIMELINE_VERSION?s.combatSession:fasterTeamSession(s.combatSession),managerVersion:MANAGER_LANES_VERSION,
-      battleAnalytics:raw.battleAnalytics??blankBattleAnalytics(),...(raw.battleGroup?{groupAnalytics:structuredClone(raw.groupAnalytics)}:{}),...(raw.arenaOnly?{arenaOnly:true}:{managerWork:{...raw.managerWork},overlapParity:raw.overlapParity}),armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
+      battleAnalytics:raw.battleAnalytics??blankBattleAnalytics(),...(raw.battleGroup?{battleGroup:raw.arenaOnly?migrateGroupAttributes(s.battleGroup):s.battleGroup,groupAnalytics:structuredClone(raw.groupAnalytics)}:{}),...(raw.arenaOnly?{arenaOnly:true}:{managerWork:{...raw.managerWork},overlapParity:raw.overlapParity}),armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
   }catch{return null;}
 }
 // Internal coordinator hook for Phase 3, never a player-facing action.
@@ -65,9 +65,9 @@ export function newBattleGroupManager(now=Date.now(),firstWork="hunting"){return
 // Existing manager saves keep paid gear, battle cursor, skill bonuses and
 // accumulated attribute effort. No material conversion or additional work.
 export function enableArenaOnly(s){
- requireManager(s);if(s.arenaOnly)return s;
+ requireManager(s);if(s.arenaOnly){const battleGroup=migrateGroupAttributes(s.battleGroup);return battleGroup===s.battleGroup?s:{...s,battleGroup};}
  const {managerWork,overlapParity,...next}=enableBattleGroupManager(s);
- return {...next,arenaOnly:true,items:Object.fromEntries(Object.keys(s.items).map(id=>[id,0]))};
+ return {...next,battleGroup:migrateGroupAttributes(next.battleGroup),arenaOnly:true,items:Object.fromEntries(Object.keys(s.items).map(id=>[id,0]))};
 }
 export function newArenaManager(now=Date.now()){return enableArenaOnly(newBattleGroupManager(now));}
 function managerUpgradePreview(s){
