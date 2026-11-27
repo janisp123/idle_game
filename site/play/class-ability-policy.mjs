@@ -11,7 +11,7 @@ function eligible(a,b,actors,round,ability,weapon,terrain){
  case "strike":return !a.counter&&d<=(ability.range??weapon.range)&&d>=(ability.minRange??0)&&(!ability.maxHP||ratio(a)<=ability.maxHP)&&
   (ability.effect!=="control"||round>=(b.classControlUntil??0))&&(ability.effect!=="bleed"||!b.bleed);
  case "disrupt":return d===0&&!b.kitDisruptUntil&&!b.stagger;
- case "dash":return d>weapon.range;
+ case "dash":return d>weapon.range&&!a.kitSlowUntil;
  case "retreat":return d<2&&a.retreats>0&&terrain.retreatSpace>0;
  case "focus":return d>=1&&d<=weapon.range&&a.kitStationary>=2&&!a.kitFocusUntil&&terrain.lineOfSight>0;
  case "ward":return ratio(a)<ability.threshold&&!a.classGuard;

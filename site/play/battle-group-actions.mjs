@@ -1,7 +1,7 @@
 // Shared cooldown-only class action policy. Same actions for both sides.
 // Candidate coefficients: deliberately central, awaiting max-only balance.
 import {GROUP_CLASSES,isGroupClass} from "./battle-group-classes.mjs?v=group-001";
-import {WEAPONS,resolveStrike,wound,attackComponents,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=terrain-003";
+import {WEAPONS,resolveStrike,wound,attackComponents,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=kits-001";
 import {COUNTERS,tacticalActor} from "./group-counter-rules.mjs";
 export const GROUP_ACTION_BALANCE=Object.freeze({supportRange:3,maxTargets:3,healFraction:.16,healGradeFactor:.018,
  buff:.18,guard:.24,weaken:.16,duration:3,controlImmunity:3,masteryMin:.75,masteryMax:1});

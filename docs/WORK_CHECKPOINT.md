@@ -31,3 +31,6 @@ Owner requested research of all original Interlude classes. [31-class identity r
 
 
 CLASS-KITS-001 pilot candidate: ten immutable class kits, distinct conditional traits, two independent cooldowns, real action budget and shared strike/target/movement/heal/status policy. V3 only; explicit v1 and v2 historical golden payouts retained. Other 21 classes still use old one-signature action. Candidate dagger correction uses intact plate and shield mitigation rather than changing old rule values; actual pilot coefficients provisional. Added max-only real trace cooldown/action/HP/determinism checks; further family screen and UI update pending. No merge/deploy.
+
+
+Cache-path and module identity correction: public manager, alpha, preview, timeline, team resolver and class actions share kits-001 query tags for updated code. Prevent cached old rules or duplicate weapon identity breaking bow detection. Slowed Swiftblade cannot dash. Pending final head CI.
