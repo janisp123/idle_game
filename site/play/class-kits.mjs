@@ -1,9 +1,14 @@
-// CLASS-KITS-001 pilot: immutable class-specific data, no persistence or UI.
+// CLASS-KITS-001 pilot and melee batch: immutable class-specific data, no persistence or UI.
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 export const KIT_RULES_VERSION=3;
 const strike=(id,name,cooldown,scale,extra={})=>({id,name,type:"strike",cooldown,scale,...extra});
 const utility=(id,name,type,cooldown,extra={})=>({id,name,type,cooldown,...extra});
 const rows=[
+ ["blademaster","Disciplined Edge",strike("sonic_cleave","Sonic Cleave",4,1.48,{recovery:3,guardPierce:true}),utility("brace","Brace","brace",5,{duration:3})],
+ ["linebreaker","Long Reach",strike("sweeping_thrust","Sweeping Thrust",5,1.12,{splash:.42}),strike("pinning_sweep","Pinning Sweep",5,.88,{effect:"slow",spreadSlow:true,utility:true})],
+ ["ragebreaker","Fury",strike("rage_strike","Rage Strike",5,1.50,{recovery:3}),utility("last_stand","Last Stand","ward",6,{threshold:.40,amount:.32})],
+ ["ironfist","Totem Discipline",strike("disrupting_fist","Disrupting Fist",4,1.12,{effect:"control"}),utility("totem_surge","Totem Surge","totem",6,{duration:3})],
+ ["scrapbreaker","Blunt Expertise",strike("guard_break","Guard Break",4,1.22,{effect:"open"}),strike("staggering_blow","Staggering Blow",5,1.05,{effect:"control",utility:true})],
  ["trickblade","Opportunist",strike("feint","Feint",4,1.25,{effect:"open"}),utility("misdirection","Misdirection","disrupt",5)],
  ["swiftblade","Agility",strike("hamstring","Hamstring",4,1.05,{effect:"slow"}),utility("dash","Dash","dash",5)],
  ["nightblade","Lethality",strike("execution_strike","Execution Strike",5,1.55,{recovery:3}),strike("deep_wound","Deep Wound",4,1.10,{effect:"bleed",utility:true})],
@@ -23,7 +28,9 @@ export const KIT_BALANCE=Object.freeze({daggerShieldImpact:.38,daggerShieldBlock
  opportunist:1.12,swiftEvasion:.07,swiftPursuit:1.22,nightCritical:.22,nightDamage:.94,
  marksmanAim:.10,marksmanImpact:1.10,windImpact:.87,blackImpact:1.16,
  guardianBlock:.10,grimLowHPGuard:.13,groveMagicGuard:.30,dreadBlockWeaken:.10,
- focusAim:.16,focusDuration:3,slowDuration:2,disruptDuration:2});
+ focusAim:.16,focusDuration:3,slowDuration:2,disruptDuration:2,
+ bladeBlockImpact:.62,bladeParryImpact:.53,lineReachImpact:1.15,lineContactImpact:.85,
+ rageThreshold:.45,rageImpact:1.23,ragePursuit:.85,totemApproach:1.35,totemImpact:1.18,totemGuard:.18,scrapPlateImpact:1.18});
 for(const [id,k] of Object.entries(CLASS_KITS)){
  if(!GROUP_CLASSES[id]||k.primary.id===k.secondary.id||[k.primary,k.secondary].some(b=>!Number.isInteger(b.cooldown)||b.cooldown<2))throw Error("Invalid class kit "+id);
 }

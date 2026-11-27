@@ -4,7 +4,7 @@
 
 ## CLASS-KITS-001 planned extension
 
-[Automatic class kits implementation plan](CLASS_KITS_IMPLEMENTATION_PLAN.md) · [Interlude identity research](INTERLUDE_CLASS_IDENTITIES_20261127.md). Owner approved direction, proposed abilities not yet implemented; current one-signature resolver remains authoritative.
+[Automatic class kits implementation plan](CLASS_KITS_IMPLEMENTATION_PLAN.md) · [Interlude identity research](INTERLUDE_CLASS_IDENTITIES_20261127.md). Owner approved direction. Draft PR #200 contains 15/31 candidate kits (10 verified pilot plus five melee candidates); the remaining 16 use one legacy signature. Live main unchanged. [Pilot evidence](CLASS_KITS_PILOT_SCREEN_20261127.md).
 
 ## ARENA-ONLY-001 candidate (PR #199)
 

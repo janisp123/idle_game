@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — CLASS-KITS-001 batch A
+
+CLASS-KITS-001 batch A candidate — Owner authorized continuation 2026-11-27. Five other melee kits plus shared bounded splash, stance-exclusive totem, brace and control handling, tests. Baseline 8fdef4f (pilot 3cde1be, 165 tests, seven workflows). 15/31 kits; no balance/release approval. Next verify final CI, save raw max-only screen, investigate failures and complete mage family.
+
 ## 2026-11-27 — CLASS-KITS-001 STARTED
 
 CLASS-KITS-001 STARTED — 2026-11-27, Owner instructed implementation. First shared scheduler, status lifecycle and explicit v3 pilot (three daggers, three archers, four tanks), preserve v1 and v2 behavior and frozen settlement. Source baseline 2d5df13, terrain validation 04f3acf all seven checks/163 tests. No balance release before max-only tests and completion of all families. Next: implement and validate pilot; branch feature/group-tactical-counters, PR #200.

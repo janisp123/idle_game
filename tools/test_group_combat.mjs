@@ -57,7 +57,7 @@ test("max-only archers cannot heal; tank shield intercepts arrows, magic bypasse
 
 import {CLASS_KITS} from "../site/play/class-kits.mjs";
 test("pilot kits use independent cooldowns, a single action and deterministic legal combat",()=>{
- const ids=Object.keys(CLASS_KITS),seen=new Set(),p=roster(["trickblade","swiftblade","nightblade","longshot","windbow","blackbow","oathkeeper"]),q=roster(["grimwarden","grovewarden","dreadguard","flameweaver","lifekeeper","longshot","nightblade"]);
+ const ids=["trickblade","swiftblade","nightblade","longshot","windbow","blackbow","oathkeeper","grimwarden","grovewarden","dreadguard"],seen=new Set(),p=roster(["trickblade","swiftblade","nightblade","longshot","windbow","blackbow","oathkeeper"]),q=roster(["grimwarden","grovewarden","dreadguard","flameweaver","lifekeeper","longshot","nightblade"]);
  for(const arena of ARENAS)for(let i=0;i<5;i++){
   const seed=20261201+i*1009,r=resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3});
   assert.deepEqual(r,resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3}));
@@ -72,4 +72,46 @@ test("pilot kits use independent cooldowns, a single action and deterministic le
   }
  }
  assert.deepEqual([...seen].sort(),ids.sort());
+});
+
+import {fighter} from "../site/play/physical-actions.mjs";
+import {prepareClassActor,classWeapon} from "../site/play/battle-group-actions.mjs";
+import {prepareKitActor,expireKitEffects,kitStrikeModifiers,kitControlAllowed,kitApproach} from "../site/play/class-effects.mjs";
+import {tryKitAction} from "../site/play/class-ability-policy.mjs";
+const meleeBatch=["blademaster","linebreaker","ragebreaker","ironfist","scrapbreaker"];
+test("five melee kits have distinct effects, bounded cooldowns and real actions at maximum build",()=>{
+ const seen=new Set(),p=roster([...meleeBatch,"oathkeeper","lifekeeper"]),q=roster(["scrapbreaker","ironfist","blademaster","linebreaker","ragebreaker","longshot","flameweaver"]);
+ for(const arena of ARENAS)for(let i=0;i<8;i++){
+  const seed=20261201+i*1009,r=resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3});
+  assert.deepEqual(r,resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3}));
+  const last={},acted=new Set();
+  for(const ev of r.events){
+   for(const v of Object.values(ev.vitals))assert.ok(Number.isInteger(v.hp)&&v.hp>=0&&v.hp<=v.maxHP);
+   if(ev.type!=="class_ability"||!ev.slot)continue;
+   const [side,j]=ev.actor.split(":"),id=(side==="player"?p:q)[Number(j)].classId;
+   const ability=CLASS_KITS[id][ev.slot],key=ev.actor+":"+ev.slot;
+   assert.equal(ev.ability,ability.id);assert.ok(last[key]===undefined||ev.round-last[key]>=ability.cooldown);
+   assert.ok(!acted.has(ev.actor+":"+ev.round));last[key]=ev.round;acted.add(ev.actor+":"+ev.round);seen.add(id);
+  }
+ }
+ for(const id of meleeBatch)assert.ok(seen.has(id),"no real ability "+id);
+});
+test("melee passive and utility conditions, expiry, no free action and bounded splash",()=>{
+ const ids=[...meleeBatch,"oathkeeper","flameweaver"],snap=roster(ids);
+ const mk=(id,side,x,y)=>prepareKitActor(prepareClassActor({...fighter(snap[ids.indexOf(id)],side),classId:id,groupCombatRules:3,id:side+":"+id,x,y,kitRound:1,activeTactic:"balanced",retreats:2,approach:0}));
+ const blade=mk("blademaster","player",0,0),fist=mk("ironfist","enemy",1,0),tank=mk("oathkeeper","enemy",1,1),mage=mk("flameweaver","enemy",2,0);
+ const events=[],ctx={terrain:ARENAS[0],roll:()=>.5,speedRoll:()=>1,record:(x,y,type,extra={})=>events.push({x,y,type,...extra}),intercept:(x,y)=>y,move:()=>false};
+ const use=(x,y,actors,round)=>tryKitAction(x,y,actors,round,classWeapon(x),ctx);
+ assert.ok(use(blade,fist,[blade,fist],1));assert.ok(events.some(x=>x.type==="brace"));assert.equal(kitControlAllowed(blade,2),false);expireKitEffects(blade,5);assert.equal(kitControlAllowed(blade,5),true);
+ assert.ok(kitStrikeModifiers(blade,tank,{...classWeapon(blade),guardPierce:true},0).blockImpact>0);
+ const line=mk("linebreaker","player",0,0);
+ assert.ok(kitStrikeModifiers(line,tank,classWeapon(line),1).impact>kitStrikeModifiers(line,tank,classWeapon(line),0).impact);
+ line.activeTactic="aggressive";assert.ok(use(line,fist,[line,fist,tank,mage],1));assert.ok(events.filter(x=>x.type==="splash").length<=2);
+ const rage=mk("ragebreaker","player",0,0),rageWeapon=classWeapon(rage);
+ const normal=kitStrikeModifiers(rage,tank,rageWeapon,0).impact;rage.hp=Math.floor(rage.maxHP*.3);
+ assert.ok(kitStrikeModifiers(rage,tank,rageWeapon,0).impact>normal);assert.ok(use(rage,fist,[rage,fist],1));assert.ok(rage.classGuard>0);
+ const monk=mk("ironfist","player",0,0),far=mk("flameweaver","enemy",4,0);
+ assert.ok(use(monk,far,[monk,far],1));assert.equal(monk.kitTotemMode,"balanced");assert.ok(kitApproach(monk)>1);expireKitEffects(monk,5);assert.equal(kitApproach(monk),1);
+ const scrap=mk("scrapbreaker","player",0,0);
+ assert.ok(kitStrikeModifiers(scrap,tank,classWeapon(scrap),0).impact>kitStrikeModifiers(scrap,mage,classWeapon(scrap),0).impact);
 });

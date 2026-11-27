@@ -1,6 +1,6 @@
 import { dodgeChance } from "./armour.mjs?v=bal-002";
 import {COUNTERS,tacticalActor,isArrow,intactTank} from "./group-counter-rules.mjs";
-import {kitStrikeModifiers,kitStatus} from "./class-effects.mjs";
+import {kitStrikeModifiers,kitStatus,kitControlAllowed} from "./class-effects.mjs";
 import {kitActor,KIT_BALANCE} from "./class-kits.mjs";
 // Pure provisional arena rules. Distances, injuries and wear are game abstractions.
 export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 5 });
@@ -186,7 +186,7 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   }
   const classScale=(attack.damageScale??1)*matchup*kit.impact*(1+(actor.classBuff??0))*(1-(actor.classWeaken??0))*(1-(target.classGuard??0));
   const impact = Math.max(1, Math.round(base * classScale * shotImpact * (vital ? 1+Math.max(0,.65+kit.crit+(equipped?activePiece.critDamage:0)-intactArmourSum(target,"critReduction")) : 1) *
-    (block ? blockImpact : parry ? 0.35 : 1) *
+    (block ? blockImpact : parry ? (kit.parryImpact??0.35) : 1) *
     (1 - Math.min(80, materialProtection) / 100) /
     (1+resistance*(1-penetration)) - flatGuard(target) * GUARD.flatReduction));
   const damage = wound(actor, target, impact);
@@ -202,7 +202,12 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   if (block && target.shield.hp > 0) target.counter = !(tactical&&attack.ranged) && attack.type !== "blunt" && guardRoll < GUARD.counterChance;
   if (!block && !parry && damage >= 8 && attack.type !== "blunt" && attack.type !== "magic") { target.bleed = Math.max(target.bleed, 2); onBleed(actor,target); }
   if (attack.type === "blunt" && (damage >= 8 || attack === BASH)) {
-    target.stagger=1;
+    // The new melee control kits cannot repeatedly stun through immunity or Brace.
+    const newControl=kitActor(actor)&&["ironfist","scrapbreaker"].includes(actor.classId);
+    if(!kitActor(target)||(!target.kitBraceUntil&&!newControl)||kitControlAllowed(target,actor.kitRound??1)){
+      target.stagger=1;
+      if(newControl&&kitActor(target))target.classControlUntil=(actor.kitRound??1)+3;
+    }
     // A heavy impact opens a guard without permanently breaking Masterwork.
     if(attack.move==="hammer")target.guardOpen=TACTICS.guardOpenTurns;
   }

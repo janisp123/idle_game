@@ -34,3 +34,6 @@ CLASS-KITS-001 pilot candidate: ten immutable class kits, distinct conditional t
 
 
 Cache-path and module identity correction: public manager, alpha, preview, timeline, team resolver and class actions share kits-001 query tags for updated code. Prevent cached old rules or duplicate weapon identity breaking bow detection. Slowed Swiftblade cannot dash. Final candidate 3cde1be: all seven workflows passed, 165 tests and real Chromium mobile/desktop. [Pilot screen](mechanics/CLASS_KITS_PILOT_SCREEN_20261127.md) records all 6960 max-only results, historical goldens restored; dagger vs Oathkeeper 0/360, mage stack 84/120, ranged stack 14/120. Counter direction improved; extreme shield counter and mage stack require follow-up after full kit coverage. Next batch A other melee; no release.
+
+
+CLASS-KITS-001 batch A candidate — Owner authorized continuation 2026-11-27. Five other melee kits plus shared bounded splash, stance-exclusive totem, brace and control handling, tests. Baseline 8fdef4f (pilot 3cde1be, 165 tests, seven workflows). 15/31 kits; no balance/release approval. Next verify final CI, save raw max-only screen, investigate failures and complete mage family.
