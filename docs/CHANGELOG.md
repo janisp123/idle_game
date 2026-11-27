@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — V10-META-CLASS-001 STARTED
+
+Owner approved V10 competitive meta and all-class diagnostics. Baseline merged V10 3a3b8bf, 204 tests and 3840 mirrored fights per version. Preference PR #219 is being integrated separately. Reuse v9 competitive/ablation screen (16 teams; 7680 plus 1152 independent battles), now V10 elimination; add within-role class substitution trials across all eight zones and three reference opponents. No gameplay changes or balance acceptance. Branch `test/v10-competitive-class-screen`; next run CI and save raw results.
+
 ## 2026-11-27 — TANK-AGGRO-001 candidate
 
 TANK-AGGRO-001 owner approved 2026-11-27: new public arena/raid group rule v5 strictly selects living opposing tanks as primary targets, both sides; multiple tanks chosen by existing distance/focus scoring, no tank means normal selection. Movement/range still apply, no redirect to non-tank via interception of an already-targeted tank. Incidental splash and existing periodic damage remain possible. Tank healing priority within legal range/recipient cooldown, injured tanks eligible regardless stance threshold; healing actions ready for a tank precede offensive/utility actions. Group heal remains multi-target; full/dead/unavailable tanks do not block other healing. Preserve previous frozen v1-v4 arena and in-progress v4 raid resolution, existing shared resolver import graph, no gear/reward changes. Functional and replay tests added; CI and numerical balance pending.
