@@ -1,5 +1,10 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — ARENA-PREFERENCES-001 STARTED
+
+Owner approved three starred environments, +10 percentage points each, other five equally reduced, 24-hour lock, symmetric average for future PvP. Branch `feature/arena-preferences`; baseline main 5487e23 (v9, 202 tests). V10 #218 separately verified, not yet merged. Implement deterministic weighted selection, frozen current bout, persistent local settings and star UI; server enforcement awaits multiplayer. Tests pending; next implement candidate.
+
+
 ## 2026-11-27 — TANK-AGGRO-001 candidate
 
 TANK-AGGRO-001 owner approved 2026-11-27: new public arena/raid group rule v5 strictly selects living opposing tanks as primary targets, both sides; multiple tanks chosen by existing distance/focus scoring, no tank means normal selection. Movement/range still apply, no redirect to non-tank via interception of an already-targeted tank. Incidental splash and existing periodic damage remain possible. Tank healing priority within legal range/recipient cooldown, injured tanks eligible regardless stance threshold; healing actions ready for a tank precede offensive/utility actions. Group heal remains multi-target; full/dead/unavailable tanks do not block other healing. Preserve previous frozen v1-v4 arena and in-progress v4 raid resolution, existing shared resolver import graph, no gear/reward changes. Functional and replay tests added; CI and numerical balance pending.

@@ -1,5 +1,5 @@
 import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=raid-001";
-import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid} from "./arena-manager.mjs?v=raid-001";
+import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,chooseArenaPreferences} from "./arena-manager.mjs?v=raid-001";
 import {createGroupEditor} from "./battle-group-editor.mjs?v=individual-stats-001";
 import {renderGroupAnalytics} from "./battle-group-analytics-view.mjs?v=group-006";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
@@ -11,6 +11,8 @@ import {cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
 import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=individual-stats-001";
 
 import {renderGroupProgress} from "./battle-group-progress-view.mjs?v=individual-stats-001";
+import {GROUP_ARENAS} from "./arenas.mjs?v=bal-002";
+import {preferenceUnlockAt} from "./arena-preferences.mjs";
 let analyticsScope="all",lastAnalytics=null,lastAnalyticsScope=null;
 const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString("en-GB"),title=s=>s[0].toUpperCase()+s.slice(1);
 let state,stored=null,clock=null,lastVisible=false,chain=Promise.resolve(),feed=[],loginLines=[],loginSummary="No return rewards yet.",blocked=false;
@@ -41,11 +43,22 @@ function publish(out,entry=false,opening=state?.coins??0){
  if(lines.length){feed=[...lines.reverse(),...feed].slice(0,30);text("latestProgress",feed[0]);$("progressFeed").replaceChildren(...feed.map(x=>node("li",x)));}
  if(entry){loginLines=reportLines(out);loginSummary="Coins: "+fmt(opening)+" → "+fmt(out.state.coins)+". "+(loginLines.length?"Committed progress since last save.":"No new completed rewards.");}
 }
+let preferenceDraft=null,preferenceSavedKey=null;
+function renderPreferences(){
+ const saved=state.arenaPreferences, key=JSON.stringify(saved??null);
+ if(key!==preferenceSavedKey){preferenceDraft=[...(saved?.favorites??[])];preferenceSavedKey=key;}
+ const left=Math.max(0,preferenceUnlockAt(saved)-Date.now()),locked=left>0;
+ for(const b of $("arenaPreferenceChoices").querySelectorAll("button")){const chosen=preferenceDraft.includes(b.dataset.zone);b.setAttribute("aria-pressed",String(chosen));b.textContent=(chosen?"★ ":"☆ ")+GROUP_ARENAS.find(a=>a.id===b.dataset.zone).name;b.disabled=locked||(!chosen&&preferenceDraft.length===3);}
+ $("arenaPreferenceSave").disabled=locked||preferenceDraft.length!==3||JSON.stringify([...preferenceDraft].sort())===JSON.stringify([...(saved?.favorites??[])].sort());
+ text("arenaPreferenceStatus",locked?"Locked for "+Math.ceil(left/60000)+" min · 3 saved":preferenceDraft.length+"/3 selected"+(saved?" · change and save":""));
+}
+for(const arena of GROUP_ARENAS){const b=node("button");b.type="button";b.dataset.zone=arena.id;b.style.minHeight="44px";b.addEventListener("click",()=>{if(!state||Date.now()<preferenceUnlockAt(state.arenaPreferences))return;const i=preferenceDraft.indexOf(arena.id);if(i>=0)preferenceDraft.splice(i,1);else if(preferenceDraft.length<3)preferenceDraft.push(arena.id);renderPreferences();});$("arenaPreferenceChoices").append(b);}
+$("arenaPreferenceSave").addEventListener("click",()=>{const selected=[...preferenceDraft];choose((s,t)=>Date.now()<preferenceUnlockAt(s.arenaPreferences)?{state:s,reports:[]}:chooseArenaPreferences(s,selected,t));});
 function render(){
  if(!state)return;
  text("character-heading",state.name==="Wanderer"?"Your Battle Group":state.name);
  text("coinWallet",fmt(state.coins)+" coins");
- editor.render(state.battleGroup);
+ editor.render(state.battleGroup);renderPreferences();
  text("arenaStage","Arena difficulty: "+ITEM_GRADES[state.combatSession?.rank?.grade??cloneRewardGrade(state.skills.fighting.level)]);text("fightingLevel","Fighting Lv "+state.skills.fighting.level);meter("fightingXP",state.skills.fighting);
  text("arenaNext", "Automatic matchmaking · Teamwork Lv "+state.teamwork.level);
  $("groupProgressOverview").hidden=false;if($("progressPanel").open)renderGroupProgress($("groupProgressOverview"),state.battleGroup);

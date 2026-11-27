@@ -123,3 +123,8 @@ CLASS-MASTERY-002 — Owner approved 50% novice to 100% level-50 class skill pow
 
 
 ARENA-ELIMINATION-001 — Owner approved remove HP-fraction decisions, continue internal rounds until one team is eliminated while keeping the ten-second arena cadence. V10 keeps v9 skills, stances, eight environments, damage, healing, economy and saved historical v1–v9 rules unchanged. A deterministic 1024-round computational safety ceiling returns an unresolved draw (reason simulation_limit), never HP-based victory; it is not proof of a true stalemate. Raids retain their existing v5 timing/timeout. First 32 rounds must match v9 exactly, 3840 mirrored max-only matchup samples per version across all eight zones/16 previous compositions; track outcome changes, unresolved, median/p95/max rounds and actual knockouts. Runtime performance, browser and offline settlement require validation. No sudden-death damage/healing changes. Pending tests.
+
+
+ARENA-PREFERENCES-001 #219 — Owner approved three stars, 24h lock and equal PvP averaging. Local NPC arena uses one player distribution (22.5% starred, 6.5% others, 12.5% neutral). Future PvP pure helper averages both distributions (22.5/14.5/6.5 when both choose three). Existing frozen battles retain old selection until live boundary; offline settlement uses frozen favorites. Local real-clock lock is not tamper-resistant; no multiplayer backend exists. Candidate code, tests and UI saved; CI pending, reconcile overlapping V10 #218 before merge.
+
+V10 #218 merged 3a3b8bf after all seven CI checks passed; 204 tests, 3840 battles per version. Preferences reconciled with v10 in #219; final combined checks required.
