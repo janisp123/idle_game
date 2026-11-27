@@ -1,6 +1,6 @@
 // Team geometry and decisions; all damage and durability use physical-actions.
 import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=kits-001";
-import {COUNTERS,GROUP_COMBAT_RULES_VERSION,SUPPORTED_GROUP_COMBAT_RULES,tacticalActor,intactTank} from "./group-counter-rules.mjs";
+import {COUNTERS,GROUP_COMBAT_RULES_VERSION,SUPPORTED_GROUP_COMBAT_RULES,tacticalActor,intactTank,tankPriorityActor,tankFirstTargets} from "./group-counter-rules.mjs";
 import {kitActor,pilotKit} from "./class-kits.mjs";
 import {prepareKitActor,expireKitEffects,markKitMovement,kitApproach,kitTargetDisrupted} from "./class-effects.mjs";
 import {tryKitAction} from "./class-ability-policy.mjs";
@@ -23,7 +23,7 @@ export const teamArenaWidth=terrain=>2*TEAM_COMBAT_BALANCE.rearSpace+clamp(terra
 const validRoster=r=>Array.isArray(r)&&r.length>0&&r.length<=TEAM_COMBAT_BALANCE.maxRoster&&r.every(a=>a&&Object.hasOwn(WEAPONS,a.loadout)&&a.loadout!=="dagger"&&(!a.classId||validGroupSnapshot(a))&&validTacticSnapshot(a)&&["str","dex","end","skill"].every(k=>Number.isFinite(a[k])&&a[k]>=0&&a[k]<=1e6));
 function makeActors(roster,side,terrain,rules){
   const start=clamp(terrain.startDistance??2,0,2)+1;
-  const tactical=[2,3,4].includes(rules)&&roster.every(x=>x.classId);
+  const tactical=[2,3,4,5].includes(rules)&&roster.every(x=>x.classId);
   const frontline=roster.map((s,i)=>({s,i})).filter(({s})=>!classWeapon(s)?.ranged).sort((a,b)=>Number(b.s.role==="tank")-Number(a.s.role==="tank"));
   const backline=roster.map((s,i)=>({s,i})).filter(({i})=>!frontline.some(x=>x.i===i));
   const lanes=Array.from({length:roster.length},(_,i)=>i).sort((a,b)=>Math.abs(a-(roster.length-1)/2)-Math.abs(b-(roster.length-1)/2)||a-b);
@@ -45,7 +45,7 @@ function adjacent(a,actors,height,width,side,terrain={}){
       !(tacticalActor(a)&&terrain.id==="narrow_bridge"&&x>TEAM_COMBAT_BALANCE.rearSpace&&x<TEAM_COMBAT_BALANCE.rearSpace+3&&Math.abs(y-(height-1)/2)>(COUNTERS.bridgeWidth-1)/2)).map(([x,y])=>({x,y}));
 }
 function chooseTarget(a,actors,coordinated,roll){
-  const enemies=other(actors,a),range=activeWeapon(a).range;
+  const enemies=tankFirstTargets(a,other(actors,a)),range=activeWeapon(a).range;
   const disrupted=kitTargetDisrupted(a);if(disrupted)coordinated=false;
   const peers=allies(actors,a),tactical=tacticalActor(a),anyReachable=enemies.some(e=>distance(a,e)<=range);
   return enemies.map(b=>{
@@ -89,6 +89,7 @@ function move(a,target,actors,height,width,retreat,roll,terrain){
   return false;
 }
 function intercept(a,target,actors,round,chance,roll,range=activeWeapon(a).range){
+  if(tankPriorityActor(a)&&target.role==="tank")return target;
   if(tacticalActor(a)&&tacticalActor(target)&&activeWeapon(a).move==="shot"){
     if(intactTank(target))return target;
     const d=a.side==="player"?1:-1;
@@ -117,11 +118,11 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   const chance={player:coordinationChance(levels.player),enemy:coordinationChance(levels.enemy)};
   const rules=levels.groupCombatRules??GROUP_COMBAT_RULES_VERSION;
   if(!SUPPORTED_GROUP_COMBAT_RULES.includes(rules))throw new RangeError("Unknown group combat rules");
-  if(rules===4&&![...players,...enemies].every(a=>a.classId&&validCombatAttributes(a.attributes)&&a.str===a.attributes.STR&&a.dex===a.attributes.DEX&&a.end===a.attributes.CON&&a.skill===a.classLevel))throw new RangeError("Invalid individual combat attributes");
+  if([4,5].includes(rules)&&![...players,...enemies].every(a=>a.classId&&validCombatAttributes(a.attributes)&&a.str===a.attributes.STR&&a.dex===a.attributes.DEX&&a.end===a.attributes.CON&&a.skill===a.classLevel))throw new RangeError("Invalid individual combat attributes");
   const actors=[...makeActors(players,"player",terrain,rules),...makeActors(enemies,"enemy",terrain,rules)];
   const raid=levels.raid,bonus=levels.playerBonus;
   if(raid){
-    if(rules!==4||raid.version!==RAID_RULES_VERSION||enemies.length!==7)throw new RangeError("Invalid raid rules");
+    if(![4,5].includes(rules)||raid.version!==RAID_RULES_VERSION||enemies.length!==7)throw new RangeError("Invalid raid rules");
     const d=raidDefinition(raid.level);
     for(const [i,a] of actors.filter(x=>x.side==="enemy").entries()){
       if(!i)a.encounterHealMaxHP=a.maxHP; // Boss health inflation must not inflate percentage healing.
@@ -131,7 +132,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
     }
   }
   if(bonus){
-    if(rules!==4||![bonus.damage,bonus.defence].every(v=>Number.isFinite(v)&&v>=0&&v<=.10))throw new RangeError("Invalid raid combat bonus");
+    if(![4,5].includes(rules)||![bonus.damage,bonus.defence].every(v=>Number.isFinite(v)&&v>=0&&v<=.10))throw new RangeError("Invalid raid combat bonus");
     for(const a of actors.filter(x=>x.side==="player")){a.raidBonusDamage=bonus.damage;a.raidBonusDefence=bonus.defence;}
   }
   const maxRounds=raid?RAID_MAX_ROUNDS:TEAM_COMBAT_BALANCE.maxRounds;

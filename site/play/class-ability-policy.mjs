@@ -4,15 +4,16 @@ import {kitStatus,kitHeal,kitControlAllowed,kitControlDuration} from "./class-ef
 import {resolveStrike,wound,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=kits-001";
 import {statHealing,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
 import {combatDamageFactor} from "./raid-rules.mjs";
+import {tankPriorityActor,tankHealOrder} from "./group-counter-rules.mjs";
 const dist=(a,b)=>Math.max(0,Math.abs(a.x-b.x)+Math.abs(a.y-b.y)-1);
 const ratio=a=>a.hp/a.maxHP;
 const alive=a=>a.hp>0;
 const harmful=x=>Boolean(x.bleed||x.stagger||x.classWeaken||x.kitSlowUntil||x.kitDisruptUntil);
 const alliesIn=(a,actors,range)=>actors.filter(x=>x.side===a.side&&alive(x)&&dist(a,x)<=range).sort((x,y)=>ratio(x)-ratio(y)||x.hp-y.hp);
 const healThreshold=a=>a.activeTactic==="defensive"?.90:a.activeTactic==="aggressive"?.58:.78;
-const healChoices=(a,actors,round,ability)=>alliesIn(a,actors,ability.range).filter(x=>ratio(x)<healThreshold(a)&&round>=(x.nextHealRound??0)).sort((x,y)=>ratio(x)-ratio(y));
+const healChoices=(a,actors,round,ability)=>alliesIn(a,actors,ability.range).filter(x=>ratio(x)<(tankPriorityActor(a)&&x.role==="tank"?1:healThreshold(a))&&round>=(x.nextHealRound??0)).sort((x,y)=>tankHealOrder(a,x,y)||ratio(x)-ratio(y));
 const threatened=(x,actors)=>actors.some(y=>y.side!==x.side&&alive(y)&&dist(x,y)<=1);
-const sanctuaryChoices=(a,actors,round,ability)=>alliesIn(a,actors,ability.range).filter(x=>!x.kitBraceUntil&&(harmful(x)||threatened(x,actors))&&ratio(x)<.85);
+const sanctuaryChoices=(a,actors,round,ability)=>alliesIn(a,actors,ability.range).filter(x=>!x.kitBraceUntil&&(harmful(x)||threatened(x,actors))&&ratio(x)<.85).sort((x,y)=>tankHealOrder(a,x,y));
 const damageRole=x=>["melee","ranged","mage","summoner"].includes(x.role);
 const supportMode=(a,actors,ability)=>{
  if(ability.mode!=="stance")return ability.mode;
@@ -42,7 +43,7 @@ function eligible(a,b,actors,round,ability,weapon,terrain){
  case "support_buff":return supportChoices(a,actors,ability,supportMode(a,actors,ability)).length>0;
  case "seal":return sealChoices(a,b,actors,round,ability).length>=2;
  case "ally_heal":return healChoices(a,actors,round,ability).length>0;
- case "group_heal":{const choices=healChoices(a,actors,round,ability);return choices.length>=2&&ratio(choices[0])>=B.healEmergency;}
+ case "group_heal":{const choices=healChoices(a,actors,round,ability);return choices.length>=2&&(tankPriorityActor(a)&&choices[0].role==="tank"||ratio(choices[0])>=B.healEmergency);}
  case "sanctuary":return sanctuaryChoices(a,actors,round,ability).length>0;
  case "blood_pact":return pactChoices(a,actors,ability).length>0;
  case "brace":return !a.kitBraceUntil&&actors.some(x=>x.side!==a.side&&alive(x)&&dist(a,x)<=1&&["ironfist","scrapbreaker","dreadguard","linebreaker","frostweaver"].includes(x.classId));
@@ -153,7 +154,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
  case "self_heal":{const amount=kitHeal(a,a,ability.amount,round);if(!amount)return false;record(a,"heal",{healing:amount});return true;}
  case "sacrifice":{
   const stance=a.activeTactic??"balanced",threshold=stance==="defensive"?.85:stance==="aggressive"?.50:.70;
-  const ally=actors.filter(x=>x!==a&&x.side===a.side&&alive(x)&&dist(a,x)<=2&&ratio(x)<threshold&&round>=(x.nextHealRound??0)).sort((x,y)=>ratio(x)-ratio(y))[0];
+  const ally=actors.filter(x=>x!==a&&x.side===a.side&&alive(x)&&dist(a,x)<=2&&ratio(x)<threshold&&round>=(x.nextHealRound??0)).sort((x,y)=>tankHealOrder(a,x,y)||ratio(x)-ratio(y))[0];
   if(!ally)return false;const amount=kitHeal(a,ally,Math.min(.18,(a.hp-1)/ally.maxHP),round);if(!amount)return false;
   const cost=Math.min(a.hp-1,Math.ceil(amount*.65));a.hp-=cost;record(ally,"heal",{healing:amount,selfCost:cost});return true;
  }
@@ -178,7 +179,9 @@ export function tryKitAction(a,b,actors,round,weapon,ctx){
  // Secondary utility first when defensive or clearly needed. Aggressive
  // prioritizes actual attacks, except when a pursuit ability is the legal action.
  const urgent=kit.primary.type==="ally_heal"&&healChoices(a,actors,round,kit.primary).some(x=>ratio(x)<B.healEmergency);
- const secondaryFirst=!urgent&&(stance==="defensive"||stance==="balanced"&&(kit.secondary.type!=="strike"||kit.secondary.utility));
+ const priorityHeal=tankPriorityActor(a)&&[kit.primary,kit.secondary].some((ability,i)=>["ally_heal","group_heal"].includes(ability.type)&&round>=a.kitReady[i?"secondary":"primary"]&&eligible(a,b,actors,round,ability,weapon,ctx.terrain)&&healChoices(a,actors,round,ability)[0]?.role==="tank");
+ const primaryTankHeal=priorityHeal&&["ally_heal","group_heal"].includes(kit.primary.type)&&round>=a.kitReady.primary&&eligible(a,b,actors,round,kit.primary,weapon,ctx.terrain)&&healChoices(a,actors,round,kit.primary)[0]?.role==="tank";
+ const secondaryFirst=priorityHeal?!primaryTankHeal:!urgent&&(stance==="defensive"||stance==="balanced"&&(kit.secondary.type!=="strike"||kit.secondary.utility));
  for(const slot of secondaryFirst?["secondary","primary"]:["primary","secondary"]){
   const ability=kit[slot];if(round<a.kitReady[slot]||!eligible(a,b,actors,round,ability,weapon,ctx.terrain))continue;
   if(!perform(a,b,actors,round,ability,weapon,ctx))continue;
