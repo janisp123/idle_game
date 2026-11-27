@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — TANK-AGGRO-001 candidate
+
+TANK-AGGRO-001 owner approved 2026-11-27: new public arena/raid group rule v5 strictly selects living opposing tanks as primary targets, both sides; multiple tanks chosen by existing distance/focus scoring, no tank means normal selection. Movement/range still apply, no redirect to non-tank via interception of an already-targeted tank. Incidental splash and existing periodic damage remain possible. Tank healing priority within legal range/recipient cooldown, injured tanks eligible regardless stance threshold; healing actions ready for a tank precede offensive/utility actions. Group heal remains multi-target; full/dead/unavailable tanks do not block other healing. Preserve previous frozen v1-v4 arena and in-progress v4 raid resolution, existing shared resolver import graph, no gear/reward changes. Functional and replay tests added; CI and numerical balance pending.
+
 ## 2026-11-27 — RAID-001 playable candidate
 
 RAID-001 stage 3 candidate — launch buttons for all five raids, saved deterministic encounter, automatic arena pause/resume, strict knockout and one-time coins/blessing, 24h XP and combat bonus, expiry split, larger boss and six minion cards with actual health and weapon icons; mobile smoke and reward/reload tests. Candidate 2.5-second rounds, 120-round limit. Initial balance screen pending; approximate five-minute appropriate-level wins unverified. CI pending; do not claim deployed.

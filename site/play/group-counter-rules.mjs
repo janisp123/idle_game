@@ -24,7 +24,7 @@ export const TANK_PRIORITY_RULES_VERSION=5;
 export const tankPriorityActor=a=>a?.groupCombatRules===TANK_PRIORITY_RULES_VERSION;
 export const tankFirstTargets=(a,targets)=>{
  if(!tankPriorityActor(a))return targets;
- const tanks=targets.filter(b=>b.role==="tank"&&b.hp>0);
- return tanks.length?tanks:targets;
+ const living=targets.filter(b=>b.hp>0),tanks=living.filter(b=>b.role==="tank");
+ return tanks.length?tanks:living;
 };
 export const tankHealOrder=(a,x,y)=>tankPriorityActor(a)?Number(y.role==="tank")-Number(x.role==="tank"):0;
