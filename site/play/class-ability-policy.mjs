@@ -1,9 +1,9 @@
 // Independent cooldowns and a single action budget for class kits.
 import {pilotKit,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
-import {kitStatus,kitHeal,kitControlAllowed,kitControlDuration} from "./class-effects.mjs?v=raid-002";
-import {resolveStrike,wound,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=raid-002";
+import {kitStatus,kitHeal,kitControlAllowed,kitControlDuration} from "./class-effects.mjs";
+import {resolveStrike,wound,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=kits-001";
 import {statHealing,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
-import {combatDamageFactor} from "./raid-rules.mjs?v=raid-002";
+import {combatDamageFactor} from "./raid-rules.mjs";
 const dist=(a,b)=>Math.max(0,Math.abs(a.x-b.x)+Math.abs(a.y-b.y)-1);
 const ratio=a=>a.hp/a.maxHP;
 const alive=a=>a.hp>0;

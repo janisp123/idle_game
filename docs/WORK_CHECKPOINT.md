@@ -91,3 +91,6 @@ RAID-001 matched-grade screen [RAID_MATCHED_SCREEN_20261127.md](mechanics/RAID_M
 
 
 RAID-001 c5 test status: head 5a3beb7 website run 46003947892 passed all 186 Node tests, but Chromium smoke failed at line 425 because the injected JS string contained unescaped quotation marks in a numeric CSS attribute selector. Corrected to query the first button in the five-choice raid list (level 10). No gameplay changes. Full current-head CI pending; no merge.
+
+
+RAID-001 verification: latest head 2cdb205 website run 46004209912 failed two exact historical v1/v2 513-bout goldens (184/186); six other workflows passed. Only import URL changes in shared resolver modules since 5a3beb7 (186/186 Node) and raid-only catalog tuning. Restore previously verified shared resolver import specifiers exactly, retain raid tuning and corrected browser test. Do not change golden expectations. Fresh CI required before merge.

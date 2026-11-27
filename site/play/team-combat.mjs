@@ -1,16 +1,16 @@
 // Team geometry and decisions; all damage and durability use physical-actions.
-import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=raid-002";
+import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=kits-001";
 import {COUNTERS,GROUP_COMBAT_RULES_VERSION,SUPPORTED_GROUP_COMBAT_RULES,tacticalActor,intactTank} from "./group-counter-rules.mjs";
 import {kitActor,pilotKit} from "./class-kits.mjs";
-import {prepareKitActor,expireKitEffects,markKitMovement,kitApproach,kitTargetDisrupted} from "./class-effects.mjs?v=raid-002";
-import {tryKitAction} from "./class-ability-policy.mjs?v=raid-002";
+import {prepareKitActor,expireKitEffects,markKitMovement,kitApproach,kitTargetDisrupted} from "./class-effects.mjs";
+import {tryKitAction} from "./class-ability-policy.mjs";
 import { coordinationChance } from "./teamwork.mjs?v=team-002";
 import {TACTIC_BALANCE,tacticActivation,validTacticSnapshot} from "./manager-tactics.mjs?v=manager-tactics-001";
 import {validGroupSnapshot,classWeapon,prepareClassActor,expireClassEffects,tryClassAction} from "./battle-group-actions.mjs?v=kits-001";
 export const TEAM_COMBAT_BALANCE=Object.freeze({maxRoster:7,maxRounds:PHYSICAL_RULES.turnLimit,
   rearSpace:3,interceptRecovery:1,focusWeight:2,healthWeight:1.5});
 import {validCombatAttributes,statInitiative} from "./stat-combat.mjs";
-import {RAID_RULES_VERSION,RAID_MAX_ROUNDS,RAID_MONSTER_BALANCE,raidDefinition} from "./raid-rules.mjs?v=raid-002";
+import {RAID_RULES_VERSION,RAID_MAX_ROUNDS,RAID_MONSTER_BALANCE,raidDefinition} from "./raid-rules.mjs";
 const alive=a=>a.hp>0;
 const gap=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
 const distance=(a,b)=>Math.max(0,gap(a,b)-1);
