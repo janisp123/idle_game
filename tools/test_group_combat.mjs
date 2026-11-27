@@ -10,6 +10,7 @@ const max={str:141,dex:141,end:129,skill:52,difficulty:7};
 const budget=7*(5*equipmentPrice({grade:7,quality:"masterwork"})+4*SMITH_BALANCE.firstArmourCost);
 const roster=ids=>{
  let g=initialBattleGroup();for(const [i,id] of GROUP_IDS.entries()){const c=GROUP_CLASSES[ids[i]];g=selectGroupClass(g,id,c.race,c.mainClass,c.id);}
+ for(const m of Object.values(g))m.classes[m.selected].mastery.level=50;
  g=upgradeBattleGroup(g,budget,52).group;
  for(const m of Object.values(g)){const p=m.classes[m.selected],c=GROUP_CLASSES[m.selected];p.mastery.level=50;m.stances.balanced.level=50;p.expertise[c.loadout]=expertiseThreshold(7);p.expertise[c.armour]=expertiseThreshold(7);p.expertiseActive={...p.expertise};}
  return Object.values(groupSnapshots(g,max));

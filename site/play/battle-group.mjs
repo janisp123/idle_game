@@ -83,7 +83,7 @@ export function previewGroupUpgrade(group,coins,fightingLevel){
   return [c.loadout,...armourIds(c)].flatMap((itemId,j)=>{
    const current=p.equipment[itemId]??null,target=nextEquipmentUpgrade(current);
    if(!target)return [];
-   const quote=smithQuote({equipment:p.equipment,coins,skills:{fighting:{level:fightingLevel}}},itemId,target);
+   const quote=smithQuote({equipment:p.equipment,coins,skills:{fighting:{level:Math.min(fightingLevel,p.mastery.level)}}},itemId,target);
    if(!quote.improves||!count(quote.cost)||!quote.cost)throw new Error("Invalid group smith quote");
    return [{member:id,classId:c.id,itemId,from:current,to:target,rank:current?itemPower(current):-1,order:i*5+j,quote}];
   });

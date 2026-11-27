@@ -32,6 +32,7 @@ test("switches retain independent progress; credit frozen old class and stance o
 });
 test("max-grade automatic class equipment uses existing prices, no inactive upgrades",()=>{
  let g=change(initialBattleGroup(),"member1","blademaster");const treasury=7*(5*equipmentPrice({grade:7,quality:"masterwork"})+4*SMITH_BALANCE.firstArmourCost);
+ for(const m of Object.values(g))m.classes[m.selected].mastery.level=50;
  const u=upgradeBattleGroup(g,treasury,52);assert.equal(u.coins,0);assert.equal(u.spent,treasury);
  assert.equal(u.upgrades.reduce((n,p)=>n+p.cost,0),treasury);assert.equal(u.pending,null);assert.ok(validBattleGroup(u.group));
  const s=groupSnapshots(u.group,max);

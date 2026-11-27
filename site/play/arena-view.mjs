@@ -1,5 +1,5 @@
 // Compact arena view; no strike log, HP bar, reward mutation or scheduler.
-import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels} from "./arena-presentation.mjs?v=npc-parity-001";
+import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels} from "./arena-presentation.mjs?v=group-005";
 const NS="http://www.w3.org/2000/svg";
 const icons={
  heart:"M20.8 4.6a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z",
@@ -37,7 +37,8 @@ function token(id,label,value){
 }
 function fighter(f){
  const card=node("div");card.className="battle-fighter";
- const head=node("div");head.className="arena-fighter-icons";head.append(token(f.weapon,f.weaponName));
+ const head=node("div");head.className="arena-fighter-icons";head.append(token(f.weapon,f.className??f.weaponName));
+ if(f.className){if(f.tactic)head.append(token(f.tactic,f.tactic));card.append(node("strong",String(f.number)),head,node("span",f.className+" · Lv "+f.classLevel));return card;}
  if(f.family)head.append(token(f.family,f.armourName+" armour"));
  if(f.tactic)head.append(token(f.tactic,f.tactic[0].toUpperCase()+f.tactic.slice(1)+" tactic"));
  const row=node("div");row.className="arena-fighter-stats";

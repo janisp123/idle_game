@@ -11,6 +11,7 @@ import {cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
 import {characterStats} from "./character-stats.mjs?v=npc-parity-001";
 import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=npc-parity-001";
 
+import {renderGroupProgress} from "./battle-group-progress-view.mjs?v=group-005";
 import {renderBattleAnalytics} from "./analytics-view.mjs?v=npc-parity-001";
 let analyticsScope="all",lastAnalytics=null,lastAnalyticsScope=null;
 const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString("en-GB"),title=s=>s[0].toUpperCase()+s.slice(1),label=id=>ITEM_LABELS[id]??id;
@@ -38,8 +39,8 @@ function reportLines(out){
  if(Object.keys(out.mastery?.tribute??{}).length)lines.push("Master tribute: "+Object.entries(out.mastery.tribute).map(([k,n])=>label(k)+" −"+fmt(n)).join(", "));
  for(const a of out.autoEquipment?.equipped??[])lines.push("Gladiator "+(a.fighterId==="first"?1:2)+" equipped "+title(a.family)+" set · "+fmt(a.cost)+" coins");
  const upgrades=out.autoEquipment?.upgrades??[];
- if(upgrades.length){const grouped=new Map();for(const u of upgrades)grouped.set(u.fighterId+":"+u.id,u);
-  for(const u of grouped.values())lines.push("Gladiator "+(u.fighterId==="first"?1:2)+" · "+(COMBAT_LOADOUTS[u.id]?.name??u.id.replace(":"," "))+" → "+ITEM_GRADES[u.to.grade]+" "+title(u.to.quality));}
+ if(upgrades.length){const grouped=new Map();for(const u of upgrades)grouped.set(u.member?u.member+":"+u.classId+":"+u.itemId:u.fighterId+":"+u.id,u);
+  for(const u of grouped.values())lines.push(u.member?u.member+" · "+u.classId+" · "+u.itemId.replace(":"," ")+" → "+ITEM_GRADES[u.to.grade]+" "+title(u.to.quality):"Gladiator "+(u.fighterId==="first"?1:2)+" · "+(COMBAT_LOADOUTS[u.id]?.name??u.id.replace(":"," "))+" → "+ITEM_GRADES[u.to.grade]+" "+title(u.to.quality));}
  if(out.autoEquipment?.spent)lines.push("Equipment spent "+fmt(out.autoEquipment.spent)+" coins");
  return lines;
 }
@@ -58,8 +59,9 @@ function render(){
  const q=pending?quoteArmourSet(state,selected,pending):null;
  text("armourStatus",q?"Saving for "+title(pending)+" · "+fmt(q.cost)+" coins needed in total. Current: "+title(family??"mixed")+".":family==="none"?"No armour equipped. Choose a set.":family===null?"Legacy mixed armour retained until you choose a complete set.":title(family)+" set equipped.");
  const sk=t.skills[t.selected];text("tacticStatus",descriptions[t.selected]+" · Lv "+sk.level+(sk.level===50?" · Mastered":" · "+fmt(Math.floor(sk.xp/tacticRequiredXP(sk.level)*100))+"%"));
- text("arenaStage","Reward tier: "+ITEM_GRADES[cloneRewardGrade(state.skills.fighting.level)]);text("fightingLevel","Fighting Lv "+state.skills.fighting.level);meter("fightingXP",state.skills.fighting);
- text("arenaNext","Matched progression · Teamwork Lv "+state.teamwork.level);
+ text("arenaStage",state.battleGroup?"Arena difficulty: "+ITEM_GRADES[state.combatSession?.rank?.grade??cloneRewardGrade(state.skills.fighting.level)]:"Reward tier: "+ITEM_GRADES[cloneRewardGrade(state.skills.fighting.level)]);text("fightingLevel","Fighting Lv "+state.skills.fighting.level);meter("fightingXP",state.skills.fighting);
+ text("arenaNext",(state.battleGroup?"Automatic matchmaking":"Matched progression")+" · Teamwork Lv "+state.teamwork.level);
+ $("groupProgressOverview").hidden=!state.battleGroup;if(state.battleGroup&&$("progressPanel").open)renderGroupProgress($("groupProgressOverview"),state.battleGroup);
  arenaView.render(state);
  if($("battleAnalyticsPanel").open&&(lastAnalytics!==state.battleAnalytics||lastAnalyticsScope!==analyticsScope)){
   renderBattleAnalytics($("battleAnalyticsBody"),state.battleAnalytics,analyticsScope);lastAnalytics=state.battleAnalytics;lastAnalyticsScope=analyticsScope;
@@ -94,6 +96,7 @@ choice($("weaponButtons"),Object.entries(COMBAT_LOADOUTS).map(([id,w])=>[id,w.na
 choice($("armourButtons"),MANAGER_ARMOUR_FAMILIES.map(id=>[id,title(id)]),null,id=>choose((s,t,fighter)=>chooseManagerArmour(s,fighter,id,t)));
 choice($("tacticButtons"),TACTIC_IDS.map(id=>[id,title(id)]),"balanced",id=>choose((s,t,fighter)=>chooseManagerTactic(s,fighter,id,t)));
 $("characterStatsPanel").addEventListener("toggle",render);
+$("progressPanel").addEventListener("toggle",render);
 $("battleAnalyticsPanel").addEventListener("toggle",render);
 choice($("battleAnalyticsScope"),[["all","All recorded"],["latest","Latest setup"]],"all",id=>{analyticsScope=id;pressed($("battleAnalyticsScope"),id);render();});
 $("loginReportReopen").addEventListener("click",()=>{text("loginReportSummary",loginSummary);$("loginReportBody").replaceChildren(...loginLines.map(x=>node("li",x)));$("loginReport").showModal();});

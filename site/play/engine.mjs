@@ -7,8 +7,8 @@ import { initialTeamwork,validTeamwork,awardTeamwork,activateTeamworkOnLogin } f
 import { validTeamSession,startTeamSession,settleTeamSession,teamBoutMs,isCloneTeamSession,CLONE_TEAM_TIMELINE_VERSION } from "./team-timeline.mjs?v=group-004";
 import {captureCloneEnvelope} from "./clone-opponents.mjs?v=npc-parity-001";
 import {GROUP_IDS,validBattleGroup,groupSnapshots,awardGroupPractice,activateGroupPractice} from "./battle-group.mjs?v=group-001";
-import {captureGroupCloneEnvelope} from "./battle-group-clones.mjs?v=group-003";
-import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession} from "./battle-group-timeline.mjs?v=group-004";
+import {advanceGroupRank} from "./battle-group-rank.mjs?v=group-005";
+import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession} from "./battle-group-timeline.mjs?v=group-005";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
 import {
@@ -474,7 +474,7 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
 function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
  let group=state.battleGroup,teamwork=state.teamwork,session=state.combatSession,old=null;
  const totals=Object.fromEntries(arenaFields.map(k=>[k,0])),practiceMs=Object.fromEntries(GROUP_IDS.map(id=>[id,0])),groupAnalytics=[];
- const shared=desiredArenaPlayer(state),desired=groupSnapshots(group,shared),envelope=captureGroupCloneEnvelope(group);
+ const shared=desiredArenaPlayer(state),desired=groupSnapshots(group,shared);
  if(session&&session.timelineVersion!==GROUP_TIMELINE_VERSION){
   const duration=teamBoutMs(session),remaining=(duration-session.elapsedMs%duration)%duration;
   if(elapsedMs<remaining)return {...settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online),battleGroup:group};
@@ -488,21 +488,21 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
  }
  if(!session)session=startGroupSession(group,shared,teamwork.level,state.settledAtMs>>>0);
  const run=ms=>{
-  const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.cloneEnvelope]);
+  const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.rank.grade]);
   if(outcomeCaches&&!outcomeCaches.has(key))outcomeCaches.set(key,new Map());
   const r=settleGroupSession(session,ms,outcomeCaches?.get(key));
   group=awardGroupPractice(group,session.players,r.practiceMs);teamwork=awardTeamwork(teamwork,r.teamworkXP);session=r.session;
   for(const k of arenaFields)totals[k]+=r[k];
   for(const id of GROUP_IDS)practiceMs[id]+=r.practiceMs[id];
-  if(r.bouts)groupAnalytics.push(r.analytics);
+  if(r.bouts){groupAnalytics.push(r.analytics);if(online){if(r.bouts!==1)throw new Error("Rank advances only at a completed live bout");session={...session,rank:advanceGroupRank(session.rank,r.victories?"victory":r.defeats?"defeat":"double_death")};}}
  };
  const result=()=>({...totals,session,battleGroup:group,teamwork,practiceMs,expertise:old?.expertise??state.expertise,autoFight:state.autoFight,
   ...(old?.team?{team:old.team,managerTactics:old.managerTactics}:{}),...(old?.analytics?{analytics:old.analytics}:{}),...(groupAnalytics.length?{groupAnalytics}:{})});
- if(online||JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level||JSON.stringify(session.cloneEnvelope)!==JSON.stringify(envelope)){
+ if(online||JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level){
   const remaining=(GROUP_BOUT_MS-session.elapsedMs%GROUP_BOUT_MS)%GROUP_BOUT_MS;
   if(elapsedMs<remaining){run(elapsedMs);return result();}
   if(remaining)run(remaining);
-  session={...session,players:desired,teamworkLevel:teamwork.level,cloneEnvelope:envelope};elapsedMs-=remaining;
+  session={...session,players:desired,teamworkLevel:teamwork.level};elapsedMs-=remaining;
  }
  if(elapsedMs)run(elapsedMs);
  return result();
