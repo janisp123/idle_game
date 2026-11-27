@@ -13,8 +13,8 @@ export function groupProgressRows(group){
 }
 const n=(tag,text)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;return el;};
 const gear=i=>i?ITEM_GRADES[i.grade]+" "+title(i.quality):"Not owned";
-export function renderGroupProgress(host,group){
- host.replaceChildren(...groupProgressRows(group).map(r=>{
+export function renderGroupProgress(host,group,selected=null){
+ host.replaceChildren(...groupProgressRows(group).filter(r=>selected===null||r.id===selected).map(r=>{
   const d=n("div");d.className="stat-section";const head=n("div");head.className="line";
   head.append(n("strong",r.icon+" "+r.number+" · "+r.name),n("span","Lv "+r.level));const bar=n("progress");bar.max=r.maxXP||1;bar.value=r.maxXP?r.xp:1;bar.setAttribute("aria-label",r.name+" class experience");
   d.append(head,bar,n("p",r.race+" · "+title(r.stance)+" · "+(r.maxXP?Math.floor(100*r.xp/r.maxXP)+"% XP":"Mastered")),n("p",r.weapon+" · "+gear(r.weaponItem)),n("p",title(r.armour)+" · "+r.pieces.map(p=>p.name+": "+gear(p.item)).join(" · ")));

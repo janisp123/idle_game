@@ -2,6 +2,7 @@
 import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels} from "./arena-presentation.mjs?v=group-005";
 const NS="http://www.w3.org/2000/svg";
 const icons={
+ tank:"M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5Z",melee:"M3 21 21 3M3 3 21 21M3 15l6 6M15 3l6 6",ranged:"M4 3c15 0 17 16 1 18L4 3ZM2 13l19-5",mage:"M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z",healer:"M9 3h6v6h6v6h-6v6H9v-6H3V9h6Z",support:"M9 18V5l12-2v13M9 18c0 4-7 4-7 0s7-4 7 0M21 16c0 4-7 4-7 0s7-4 7 0",summoner:"M12 2l9 10-9 10L3 12Z M12 7v10M7 12h10",
  heart:"M20.8 4.6a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z",
  armour:"M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5L12 2Z",
  padded:"M8 3 4 5 2 10l4 2 1-2v11h10V10l1 2 4-2-2-5-4-2-4 3-4-3Zm0 5 8 9M16 8l-8 9",
@@ -37,8 +38,8 @@ function token(id,label,value){
 }
 function fighter(f){
  const card=node("div");card.className="battle-fighter";
- const head=node("div");head.className="arena-fighter-icons";head.append(token(f.weapon,f.className??f.weaponName));
- if(f.className){if(f.tactic)head.append(token(f.tactic,f.tactic));card.append(node("strong",String(f.number)),head,node("span",f.className+" · Lv "+f.classLevel));return card;}
+ const head=node("div");head.className="arena-fighter-icons";head.append(token(f.className?f.role:f.weapon,f.className??f.weaponName));
+ if(f.className){card.classList.add("group-fighter");if(f.tactic)head.append(token(f.tactic,f.tactic));const label=node("span",f.className+" · "+f.classLevel);label.className="group-class-label";card.append(node("strong",String(f.number)),head,label);return card;}
  if(f.family)head.append(token(f.family,f.armourName+" armour"));
  if(f.tactic)head.append(token(f.tactic,f.tactic[0].toUpperCase()+f.tactic.slice(1)+" tactic"));
  const row=node("div");row.className="arena-fighter-stats";
@@ -62,7 +63,7 @@ export function createArenaView(){
    const r=committedBattleResult(before,out,prior);
    if(!r)return;
    last=r;
-   reveal=!entry&&r.preview?{r,until:performance.now()+2000}:null;
+   reveal=!entry&&r.preview?{r,until:performance.now()+(old?.timelineVersion===5?1000:2000)}:null;
    const label=r.outcome?battleLabels[r.outcome]:r.victories+" W · "+r.defeats+" L · "+r.doubleDeaths+" D";
    $("battleResult").textContent="Last: "+label+(r.coins?" · +"+r.coins+" coins":"");
   },

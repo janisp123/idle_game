@@ -5,7 +5,7 @@ import {
   newTeamGame, readSave, chooseActivity, settleManagerLane, managerCombatProductivePrefix,
   automateSettledProgress, activateExpertise, activityRewardCapped,
   recipeOptions, PRODUCTION_RECIPES, LIVE_FIGHT_MAX_MS, autoEquipmentPreview
-} from "./engine.mjs?v=group-004";
+} from "./engine.mjs?v=group-005";
 import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=group-004";
 import {GROUP_TIMELINE_VERSION} from "./battle-group-timing.mjs";
 import {initialBattleGroup,validBattleGroup,selectGroupClass,selectGroupStance,upgradeBattleGroup,previewGroupUpgrade} from "./battle-group.mjs?v=group-001";

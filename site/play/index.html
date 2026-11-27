@@ -7,14 +7,14 @@
 <title>The Long Vigil — Play</title>
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./game.css">
-<link rel="stylesheet" href="./manager-ui.css?v=analytics-001">
-<script type="module" src="./manager-app.mjs?v=npc-parity-001"></script>
+<link rel="stylesheet" href="./manager-ui.css?v=group-006">
+<script type="module" src="./manager-app.mjs?v=group-006"></script>
 </head>
 <body>
 <a class="skip-link" href="#game">Skip to game</a>
 <header class="manager-top"><a href="../">✣ THE LONG VIGIL</a><span id="saveStatus" role="status">Loading…</span></header>
 <main id="game" class="manager-shell">
-<header class="manager-heading"><div><p class="eyebrow">THE ARENA · ALPHA</p><h1 id="character-heading">Your gladiators</h1></div><strong id="coinWallet">0 coins</strong></header>
+<header class="manager-heading"><div><p class="eyebrow">THE ARENA · ALPHA</p><h1 id="character-heading">Your Battle Group</h1></div><strong id="coinWallet">0 coins</strong></header>
 <p id="migrationNotice" role="status" hidden></p>
 <div class="manager-grid">
 <section class="manager-card arena-card" aria-labelledby="arenaHeading">
@@ -40,16 +40,17 @@
 <summary id="battleAnalyticsHeading">Battle Analytics</summary>
 <div class="choice-grid two" id="battleAnalyticsScope"></div><div id="battleAnalyticsBody"></div>
 </details>
-<details id="gladiatorsPanel" class="manager-card" aria-labelledby="gladiatorsHeading">
-<summary id="gladiatorsHeading">Gladiators</summary>
-<div id="fighterButtons" class="choice-grid two" role="group" aria-label="Choose gladiator"></div>
-<p id="teamLoadouts" class="quiet"></p>
-<h3>Weapon</h3><div id="weaponButtons" class="choice-grid two" role="group" aria-label="Choose weapon"></div>
-<h3>Armour set</h3><div id="armourButtons" class="choice-grid three" role="group" aria-label="Choose armour set"></div>
-<p id="armourStatus" class="quiet"></p>
-<h3>Fighting tactic</h3><div id="tacticButtons" class="choice-grid three" role="group" aria-label="Choose fighting tactic"></div>
-<p id="tacticStatus" class="quiet"></p>
-<p class="quiet">Equipment upgrades automatically. Changes take effect in the next battle.</p>
+<details id="battleGroupPanel" class="manager-card" aria-labelledby="battleGroupHeading">
+<summary id="battleGroupHeading">Battle Group</summary>
+<div id="fighterButtons" class="group-slots" role="group" aria-label="Choose character"></div>
+<div class="group-selectors">
+<label for="raceChoice">Race</label><select id="raceChoice"></select>
+<label for="mainClassChoice">Main class</label><select id="mainClassChoice"></select>
+<label for="specialClassChoice">Specialization</label><select id="specialClassChoice"></select>
+</div>
+<h3>Combat stance</h3><div id="tacticButtons" class="choice-grid three" role="group" aria-label="Choose combat stance"></div>
+<div id="selectedClassProgress"></div>
+<p class="quiet">Only active classes train and upgrade. Changes take effect in the next battle.</p>
 </details>
 <section class="manager-card" aria-labelledby="workHeading">
 <h2 id="workHeading">Activities <span class="live-label">Automatic</span></h2>
