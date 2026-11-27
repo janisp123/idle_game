@@ -46,7 +46,7 @@ export const kitActor=a=>[KIT_RULES_VERSION,4,5,6,7].includes(a?.groupCombatRule
   linebreaker:{secondary:strike("shock_sweep","Shock Sweep",6,.88,{effect:"control",spreadControl:true,utility:true})},
   oathkeeper:{primary:strike("shield_stun","Shield Stun",5,1.06,{effect:"control"})},
   grimwarden:{secondary:hex("hamstring","Hamstring","slow",5,{range:2,physical:true})},
-  trickblade:{secondary:hex("dash","Dash","dash",5,{})}, // use original movement/disruption kit below
+  trickblade:{}, // retain target disruption
   longshot:{secondary:hex("stunning_shot","Stunning Shot","stun",6,{physical:true})},
   windbow:{primary:hex("stunning_shot","Stunning Shot","stun",6,{physical:true})},
   blackbow:{primary:hex("stunning_shot","Stunning Shot","stun",7,{physical:true})},
@@ -71,7 +71,6 @@ export const kitActor=a=>[KIT_RULES_VERSION,4,5,6,7].includes(a?.groupCombatRule
   warcaller:{primary:hex("madness","Madness","sleep",7,{range:3})},
   beastcaller:{},ragebreaker:{},scrapbreaker:{},forgecaller:{}
  };
- delete variants.trickblade.secondary; // retain the distinct misdirection identity
  export const CONTROL_CLASS_KITS=Object.freeze(Object.fromEntries(Object.entries(CLASS_KITS).map(([id,k])=>[id,Object.freeze({...k,...Object.fromEntries(Object.entries(variants[id]??{}).map(([slot,v])=>[slot,Object.freeze(v)]))})])));
 
 export const pilotKit=a=>kitActor(a)?(a.groupCombatRules===7?CONTROL_CLASS_KITS:CLASS_KITS)[a.classId]??null:null;

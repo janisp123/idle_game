@@ -1,6 +1,6 @@
 // Tactical intentions, not guaranteed results. Equipment and cooldowns come from registry.
 import {GROUP_CLASSES,GROUP_CLASS_IDS,RACE_LABELS} from "./battle-group-classes.mjs?v=group-001";
-import {CLASS_KITS,KIT_BALANCE as B} from "./class-kits.mjs";
+import {CLASS_KITS,CONTROL_CLASS_KITS,KIT_BALANCE as B} from "./class-kits.mjs";
 const rows=[
   [
     "blademaster",
@@ -288,12 +288,13 @@ const passives=Object.freeze({
  forgecaller:"Slower pursuit and lower personal impact; intact plate reduces physical impact."
 });
 const pct=n=>Math.round(n*100)+"%";
-const effects=Object.freeze({open:"Opens the target's guard on a clean hit.",slow:"Slows movement on a clean hit.",bleed:"Inflicts bleeding on a clean hit.",weaken:"Weakens the target on a clean hit.",control:"Briefly disrupts the target on a clean hit, subject to immunity.",shadow_hex:"Weakens and disrupts enemy targeting on a clean hit."});
+const effects=Object.freeze({open:"Opens the target's guard on a clean hit.",slow:"Slows movement on a clean hit.",bleed:"Inflicts bleeding on a clean hit.",weaken:"Weakens the target on a clean hit.",control:"Briefly disrupts the target on a clean hit, subject to immunity.",shadow_hex:"Weakens and disrupts enemy targeting on a clean hit.",physical_vulnerability:"Increases physical damage received on a clean hit."});
 function abilityEffect(a){
  const range=a.range===undefined?"":a.range===0?" At close contact.":" Within "+a.range+" range units.";
  switch(a.type){
- case "strike":return ["Attacks for "+pct(a.scale)+" of normal base impact before mastery, passives and defenses.",range.trim(),a.minRange?"Requires separation from the target.":"",a.guardPierce?"Penetrates blocks and parries.":"",effects[a.effect]??"",a.splash?"On a clean hit, damages up to two additional nearby enemies.":"",a.spreadSlow?"Can slow up to two additional nearby enemies.":"",a.maxHP?"Available at "+pct(a.maxHP)+" health or lower.":"",a.siphon?"Recovers up to "+pct(B.siphonMaxHP)+" maximum HP from actual damage, subject to the shared healing window.":""].filter(Boolean).join(" ");
- case "ally_heal":return "Heals one wounded living ally (base "+pct(a.amount)+" maximum HP)."+range+(a.cleanse?" Removes bleed, stagger, weaken, slow and targeting disruption after a successful heal.":"")+(a.boon?" Also grants a temporary offensive buff.":"");
+ case "tactical_control":return ({root:"Prevents movement, not attacks.",slow:"Reduces approach progress.",stun:"Briefly prevents actions.",paralysis:"Prevents movement and actions longer than stun.",sleep:"Prevents actions until damage wakes the target.",silence:"Prevents magic attacks and spell abilities.",gloom:"Increases incoming magic impact and also reduces healing for Gravebinder.",antiheal:"Reduces incoming healing.",dispel:"Removes temporary beneficial combat effects.",cleanse:"Removes harmful combat effects from a living ally."}[a.effect]??"Tactical utility.")+range+(a.area?" Affects up to three clustered targets.":"")+" Consumes an action; hostile effects can be resisted and control has immunity windows.";
+ case "strike":return ["Attacks for "+pct(a.scale)+" of normal base impact before mastery, passives and defenses.",range.trim(),a.minRange?"Requires separation from the target.":"",a.guardPierce?"Penetrates blocks and parries.":"",effects[a.effect]??"",a.splash?"On a clean hit, damages up to two additional nearby enemies.":"",a.spreadSlow?"Can slow up to two additional nearby enemies.":"",a.spreadControl?"Can stun up to two additional nearby enemies.":"",a.maxHP?"Available at "+pct(a.maxHP)+" health or lower.":"",a.siphon?"Recovers up to "+pct(B.siphonMaxHP)+" maximum HP from actual damage, subject to the shared healing window.":""].filter(Boolean).join(" ");
+ case "ally_heal":return "Heals one wounded living ally (base "+pct(a.amount)+" maximum HP)."+range+(a.cleanse?" Removes bleed, stagger, weaken, slow and targeting disruption after a successful heal.":"")+(a.boon?" Also grants a temporary offensive buff.":"")+(a.pact?" Grants temporary life-steal if the healed ally is melee.":"");
  case "group_heal":return "Heals up to three wounded living allies (base "+pct(a.amount)+" maximum HP each); prioritizes direct rescue when an eligible ally is critical."+range;
  case "ward":return "Grants temporary personal mitigation at below "+pct(a.threshold)+" health.";
  case "self_heal":return "Recovers base "+pct(a.amount)+" maximum HP at below "+pct(a.threshold)+" health.";
@@ -306,17 +307,17 @@ function abilityEffect(a){
  case "focus":return "Improves ranged aim temporarily after standing still with clear sightlines.";
  case "sanctuary":return "Temporarily protects one threatened or impaired wounded ally from control."+range;
  case "blood_pact":return "Grants a threatened wounded melee ally temporary healing from clean direct melee damage, capped at "+pct(B.pactMaxHP)+" maximum HP per eligible heal."+range;
- case "support_buff":return "Temporarily "+(a.mode==="guard"?"wards":a.mode==="tempo"?"boosts attack and slow-attack recovery for":"wards or boosts attack (depending on stance) for")+" up to "+a.maxTargets+" nearby "+(a.maxTargets===1?"ally":"allies")+"; stronger existing effects take priority."+range;
+ case "support_buff":return "Temporarily "+(a.mode==="guard"?"wards":a.mode==="tempo"?"boosts attack and slow-attack recovery for":a.mode==="magic_tempo"?"boosts magical damage dealers and slow spell recovery for":"wards or boosts attack (depending on stance) for")+" up to "+a.maxTargets+" nearby "+(a.maxTargets===1?"ally":"allies")+"; stronger existing effects take priority."+range;
  case "seal":return "Delays one ready or nearly ready ability per enemy in a cluster of two or three; recipient immunity limits repeated delays."+range;
  case "self_boon":return "Temporarily grants personal offensive power or protection, depending on stance and threat.";
  case "siege_charge":return "Charges against a close clustered target; releases a bounded area strike on a later action if that target remains alive and in reach, otherwise fizzles.";
  default:throw Error("Unknown class ability type "+a.type);
  }
 }
-export function classTacticalInfo(id){
- const c=GROUP_CLASSES[id],info=CLASS_TACTICAL_INFO[id],kit=CLASS_KITS[id];
+export function classTacticalInfo(id,rules=3){
+ const c=GROUP_CLASSES[id],info=CLASS_TACTICAL_INFO[id],kit=(rules===7?CONTROL_CLASS_KITS:CLASS_KITS)[id];
  if(!c||!info||!kit||!passives[id])throw RangeError("Unknown class");
  const abilities=[kit.primary,kit.secondary].map(a=>({id:a.id,name:a.name,cooldown:a.cooldown,effect:abilityEffect(a)}));
  return {...info,name:c.name,race:RACE_LABELS[c.race],role:c.role,weapon:c.weaponLabel,armour:c.armour,passive:{name:kit.passive,effect:passives[id]},abilities};
 }
-for(const id of GROUP_CLASS_IDS)classTacticalInfo(id);
+for(const id of GROUP_CLASS_IDS){classTacticalInfo(id);classTacticalInfo(id,7);}
