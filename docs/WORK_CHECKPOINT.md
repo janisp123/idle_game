@@ -46,3 +46,5 @@ CLASS-KITS-001 batch C candidate — Owner authorized continuation 2026-11-27. T
 
 
 CLASS-KITS-001 batch D candidate — Owner authorized continuation 2026-11-27. Five support kits: focused blessing, protective song, offensive tempo, bounded cluster cooldown delay, longer stance chant. Prior healer head 9e63ccc Node suite passed (website reached Chromium); final results not yet available at authoring. 27/31 kits; four summoners remain. Next verify both CI heads, save raw screens, implement summoners. No merge or deployment.
+
+Healer candidate 9e63ccc: website 45991891403 passed 171/171 and Chromium mobile/desktop; mage pilot assertion restored. [Healer screen](mechanics/CLASS_KITS_HEALER_SCREEN_20261127.md) saves all 6960 max-only bouts: mage stack 88/120, healer stack 25/120, ranged 17/120. Final support CI remains pending; no release.
