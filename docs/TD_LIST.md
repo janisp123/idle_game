@@ -11,7 +11,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## CLASS-KITS-001 — Automatic class kits
 
 - **Goal / acceptance:** CLASS-KITS-001 — owner approved direction: one passive and two automatic abilities per specialization, no mana or manual skills. [Implementation plan](mechanics/CLASS_KITS_IMPLEMENTATION_PLAN.md) defines all 31 proposed kits, shared scheduler/effects, explicit versioned save compatibility, pilot 10-class family, max-only validation and UI/release gates. Plan only; no runtime changes or new tests run. Existing #200 terrain candidate 04f3acf all seven checks/163 tests passed; dagger/tank counter defect still open. Next: shared registry and scheduler plus old-rule dispatch. Exact candidate effects and numbers require validation, no release approval inferred.
-- **Status:** IN_REVIEW — 15/31 candidate kits; pilot 165 tests and seven CI workflows passed, batch A pending CI.
+- **Status:** IN_REVIEW — 19/31 candidate kits; pilot 165 tests, melee website 167 tests passed, batch B pending CI.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

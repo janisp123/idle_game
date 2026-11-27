@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — CLASS-KITS-001 batch B
+
+CLASS-KITS-001 batch B candidate — Owner authorized continuation 2026-11-27. Four mage kits with bounded fire splash, curse conditional impact, casting recovery tradeoffs, control immunity and actual-damage-linked healing. Melee candidate ea3d509 website passed 167 tests and mobile/desktop browser; [saved 6960-bout screen](mechanics/CLASS_KITS_MELEE_SCREEN_20261127.md): mage stack 83/120, ranged 14/120, melee 35/120. Six prior workflows passed when recorded; endgame workflow still running at observation. 19/31 kits; 12 remaining. Next validate batch B, preserve raw CI screen, then dedicated healers. No merge or deployment.
+
 ## 2026-11-27 — CLASS-KITS-001 batch A
 
 CLASS-KITS-001 batch A candidate — Owner authorized continuation 2026-11-27. Five other melee kits plus shared bounded splash, stance-exclusive totem, brace and control handling, tests. Baseline 8fdef4f (pilot 3cde1be, 165 tests, seven workflows). 15/31 kits; no balance/release approval. Next verify final CI, save raw max-only screen, investigate failures and complete mage family.

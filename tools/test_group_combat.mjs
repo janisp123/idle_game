@@ -115,3 +115,43 @@ test("melee passive and utility conditions, expiry, no free action and bounded s
  const scrap=mk("scrapbreaker","player",0,0);
  assert.ok(kitStrikeModifiers(scrap,tank,classWeapon(scrap),0).impact>kitStrikeModifiers(scrap,mage,classWeapon(scrap),0).impact);
 });
+
+const mageBatch=["flameweaver","gravebinder","frostweaver","galescourge"];
+test("four mage kits act in actual endgame combat with bounded cooldowns and deterministic replay",()=>{
+ const p=roster([...mageBatch,"oathkeeper","lifekeeper","linebreaker"]),q=roster(["frostweaver","galescourge","trickblade","swiftblade","grovewarden","longshot","gravebinder"]);
+ const seen=new Set();
+ for(const arena of ARENAS)for(let i=0;i<8;i++){
+  const seed=20261231+i*1009,r=resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3});
+  assert.deepEqual(r,resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3}));
+  const last={},acted=new Set();
+  for(const ev of r.events){
+   for(const v of Object.values(ev.vitals))assert.ok(Number.isInteger(v.hp)&&v.hp>=0&&v.hp<=v.maxHP);
+   if(ev.type!=="class_ability"||!ev.slot)continue;
+   const [side,j]=ev.actor.split(":"),id=(side==="player"?p:q)[Number(j)].classId,ability=CLASS_KITS[id][ev.slot],key=ev.actor+":"+ev.slot;
+   assert.equal(ev.ability,ability.id);assert.ok(last[key]===undefined||ev.round-last[key]>=ability.cooldown);
+   assert.ok(!acted.has(ev.actor+":"+ev.round));last[key]=ev.round;acted.add(ev.actor+":"+ev.round);seen.add(id);
+  }
+ }
+ for(const id of mageBatch)assert.ok(seen.has(id),"no real ability "+id);
+});
+test("mage passives and abilities enforce splash geometry, ward expiry, control immunity and actual damage-linked healing",()=>{
+ const ids=[...mageBatch,"oathkeeper","longshot","trickblade"],snap=roster(ids);
+ const mk=(id,side,x,y)=>prepareKitActor(prepareClassActor({...fighter(snap[ids.indexOf(id)],side),groupCombatRules:3,id:side+":"+id,x,y,kitRound:1,activeTactic:"balanced",retreats:2,approach:0}));
+ const flame=mk("flameweaver","player",0,0),grave=mk("gravebinder","player",0,0),frost=mk("frostweaver","player",0,0),gale=mk("galescourge","player",0,0);
+ const bow=mk("longshot","enemy",1,0),dagger=mk("trickblade","enemy",1,1),tank=mk("oathkeeper","enemy",2,0),far=mk("longshot","enemy",3,0);
+ const events=[];let index=0;
+ const ctx={terrain:ARENAS[0],roll:()=>[0,.99,.5][index++%3],speedRoll:()=>1,record:(x,y,type,extra={})=>events.push({x,y,type,...extra}),intercept:(x,y)=>y,move:()=>false};
+ const use=(x,y,actors,round)=>{index=0;events.length=0;x.kitRound=round;return tryKitAction(x,y,actors,round,classWeapon(x),ctx);};
+ const mods=(x,y)=>kitStrikeModifiers(x,y,classWeapon(x),0);
+ assert.ok(mods(frost,tank).recovery<mods(gale,tank).recovery);assert.ok(mods(frost,tank).impact<mods(gale,tank).impact);
+ assert.ok(use(flame,bow,[flame,bow,dagger,tank,far],1));
+ assert.ok(events.some(x=>x.type==="class_ability"&&x.ability==="fire_ring"));
+ assert.ok(events.some(x=>x.type==="splash"));assert.ok(events.filter(x=>x.type==="splash").length<=2);
+ assert.ok(!events.some(x=>x.type==="splash"&&x.y===far));
+ const normal=mods(grave,tank).impact;assert.ok(use(grave,tank,[grave,tank],1));assert.ok(tank.classWeaken>0);assert.ok(mods(grave,tank).impact>normal);
+ grave.hp=Math.floor(grave.maxHP*.4);grave.recovery=0;assert.ok(use(grave,tank,[grave,tank],2));assert.ok(grave.classGuard>0);
+ assert.ok(use(frost,dagger,[frost,dagger],1));assert.ok(events.some(x=>x.type==="control"));assert.equal(kitControlAllowed(dagger,2),false);
+ frost.recovery=0;frost.kitReady.secondary=1;assert.ok(use(frost,dagger,[frost,dagger],2));assert.ok(!events.some(x=>x.type==="control"));
+ gale.hp=Math.floor(gale.maxHP*.4);const before=gale.hp;assert.ok(use(gale,tank,[gale,tank],1));const heal=events.find(x=>x.type==="heal");
+ assert.ok(heal&&heal.healing>0);assert.equal(gale.hp-before,heal.healing);assert.ok(heal.healing<=Math.max(1,Math.round(heal.fromDamage*.35)));assert.ok(heal.healing<=Math.round(gale.maxHP*.12));
+});

@@ -1,9 +1,13 @@
-// CLASS-KITS-001 pilot and melee batch: immutable class-specific data, no persistence or UI.
+// CLASS-KITS-001 pilot, melee and mage batches: immutable class-specific data, no persistence or UI.
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 export const KIT_RULES_VERSION=3;
 const strike=(id,name,cooldown,scale,extra={})=>({id,name,type:"strike",cooldown,scale,...extra});
 const utility=(id,name,type,cooldown,extra={})=>({id,name,type,cooldown,...extra});
 const rows=[
+ ["flameweaver","Fire Spread",strike("flame_burst","Flame Burst",4,1.10,{splash:.50}),strike("fire_ring","Fire Ring",5,.95,{range:0,splash:.60,utility:true})],
+ ["gravebinder","Curse Affinity",strike("withering_curse","Withering Curse",4,1.05,{effect:"weaken"}),utility("grave_ward","Grave Ward","ward",6,{threshold:.65,amount:.26})],
+ ["frostweaver","Quick Casting",strike("frost_bolt","Frost Bolt",4,1.04,{effect:"slow"}),strike("ice_bind","Ice Bind",6,.82,{effect:"control",utility:true})],
+ ["galescourge","Heavy Casting",strike("gale_strike","Gale Strike",5,1.38),strike("life_siphon","Life Siphon",6,.95,{maxHP:.70,siphon:.35,utility:true})],
  ["blademaster","Disciplined Edge",strike("sonic_cleave","Sonic Cleave",4,1.48,{recovery:3,guardPierce:true}),utility("brace","Brace","brace",5,{duration:3})],
  ["linebreaker","Long Reach",strike("sweeping_thrust","Sweeping Thrust",5,1.12,{splash:.42}),strike("pinning_sweep","Pinning Sweep",5,.88,{effect:"slow",spreadSlow:true,utility:true})],
  ["ragebreaker","Fury",strike("rage_strike","Rage Strike",5,1.50,{recovery:3}),utility("last_stand","Last Stand","ward",6,{threshold:.40,amount:.32})],
@@ -30,7 +34,8 @@ export const KIT_BALANCE=Object.freeze({daggerShieldImpact:.38,daggerShieldBlock
  guardianBlock:.10,grimLowHPGuard:.13,groveMagicGuard:.30,dreadBlockWeaken:.10,
  focusAim:.16,focusDuration:3,slowDuration:2,disruptDuration:2,
  bladeBlockImpact:.62,bladeParryImpact:.53,lineReachImpact:1.15,lineContactImpact:.85,
- rageThreshold:.45,rageImpact:1.23,ragePursuit:.85,totemApproach:1.35,totemImpact:1.18,totemGuard:.18,scrapPlateImpact:1.18});
+ rageThreshold:.45,rageImpact:1.23,ragePursuit:.85,totemApproach:1.35,totemImpact:1.18,totemGuard:.18,scrapPlateImpact:1.18,
+ flameImpact:.90,flameSplash:1.15,graveCurseImpact:1.18,frostImpact:.83,frostRecovery:-1,galeImpact:1.17,galeRecovery:1,siphonMaxHP:.12});
 for(const [id,k] of Object.entries(CLASS_KITS)){
  if(!GROUP_CLASSES[id]||k.primary.id===k.secondary.id||[k.primary,k.secondary].some(b=>!Number.isInteger(b.cooldown)||b.cooldown<2))throw Error("Invalid class kit "+id);
 }

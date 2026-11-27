@@ -9,8 +9,8 @@ function eligible(a,b,actors,round,ability,weapon,terrain){
  const d=dist(a,b),stance=a.activeTactic??"balanced",threshold=stance==="defensive"?.85:stance==="aggressive"?.50:.70;
  switch(ability.type){
  case "strike":return !a.counter&&d<=(ability.range??weapon.range)&&d>=(ability.minRange??0)&&(!ability.maxHP||ratio(a)<=ability.maxHP)&&
-  (ability.effect!=="control"||kitControlAllowed(b,round))&&(ability.effect!=="bleed"||!b.bleed);
- case "brace":return !a.kitBraceUntil&&actors.some(x=>x.side!==a.side&&alive(x)&&dist(a,x)<=1&&["ironfist","scrapbreaker","dreadguard","linebreaker"].includes(x.classId));
+  (ability.effect!=="control"||kitControlAllowed(b,round))&&(ability.effect!=="bleed"||!b.bleed)&&(!ability.siphon||round>=(a.nextHealRound??0));
+ case "brace":return !a.kitBraceUntil&&actors.some(x=>x.side!==a.side&&alive(x)&&dist(a,x)<=1&&["ironfist","scrapbreaker","dreadguard","linebreaker","frostweaver"].includes(x.classId));
  case "totem":return !a.kitTotemUntil&&(stance==="balanced"?d>weapon.range&&!a.kitSlowUntil:d<=weapon.range+1);
  case "disrupt":return d===0&&!b.kitDisruptUntil&&!b.stagger;
  case "dash":return d>weapon.range&&!a.kitSlowUntil;
@@ -37,11 +37,15 @@ function perform(a,b,actors,round,ability,weapon,ctx){
    if(ability.effect==="weaken"){kitStatus(actual,"classWeaken","weakenUntil",.18*s,round);record(actual,"weaken");}
    if(ability.effect==="control"&&kitControlAllowed(actual,round)){actual.stagger=Math.max(actual.stagger,1);actual.classControlUntil=round+3;record(actual,"control");}
   }
+  if(clean&&ability.siphon){
+   const fraction=Math.min(B.siphonMaxHP,hit*ability.siphon/a.maxHP);
+   const amount=kitHeal(a,a,fraction,round);if(amount)record(a,"heal",{healing:amount,fromDamage:hit});
+  }
   if(clean&&(ability.splash||ability.spreadSlow)){
-   const nearby=actors.filter(x=>x!==actual&&alive(x)&&x.side!==a.side&&dist(actual,x)<=1&&dist(a,x)<=weapon.range+1).slice(0,2);
+   const nearby=actors.filter(x=>x!==actual&&alive(x)&&x.side!==a.side&&dist(actual,x)<=1&&dist(a,x)<=(ability.range??weapon.range)+1).slice(0,2);
    for(const x of nearby){
     if(ability.splash){
-     const raw=hit*ability.splash*(1-Math.min(80,protection(x,weapon.type))/100)/(1+intactArmourSum(x,"resistance")*.15)-flatGuard(x)*.1;
+     const raw=hit*ability.splash*(a.classId==="flameweaver"?1+(B.flameSplash-1)*s:1)*(1-Math.min(80,protection(x,weapon.type))/100)/(1+intactArmourSum(x,"resistance")*.15)-flatGuard(x)*.1;
      const damage=wound(a,x,Math.max(1,Math.round(raw)));record(x,"splash",{damage});
     }
     if(ability.spreadSlow&&alive(x)){x.kitSlowUntil=Math.max(x.kitSlowUntil??0,round+B.slowDuration+1);record(x,"slow");}

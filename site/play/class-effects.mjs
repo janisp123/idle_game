@@ -46,5 +46,11 @@ export function kitStrikeModifiers(a,b,attack,distance){
  if(a.classId==="ironfist"&&a.kitTotemUntil>0&&a.kitTotemMode==="aggressive")m.impact*=1+(B.totemImpact-1)*s;
  if(b.classId==="ironfist"&&b.kitTotemUntil>0&&b.kitTotemMode==="defensive")m.impact*=1-B.totemGuard*t;
  if(a.classId==="scrapbreaker"&&attack.type==="blunt"&&plate&&a.weapon.hp>0)m.impact*=1+(B.scrapPlateImpact-1)*s;
+ if(attack.type==="magic"){
+  if(a.classId==="flameweaver")m.impact*=B.flameImpact;
+  if(a.classId==="gravebinder"&&b.classWeaken>0)m.impact*=1+(B.graveCurseImpact-1)*s;
+  if(a.classId==="frostweaver"){m.impact*=B.frostImpact;m.recovery+=B.frostRecovery;}
+  if(a.classId==="galescourge"){m.impact*=1+(B.galeImpact-1)*s;m.recovery+=B.galeRecovery;}
+ }
  return m;
 }
