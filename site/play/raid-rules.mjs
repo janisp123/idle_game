@@ -1,18 +1,18 @@
 // RAID-001: provisional encounter and reward tuning. No dependencies on saves.
 export const RAID_RULES_VERSION=1;
 export const RAID_BUFF_MS=24*60*60*1000;
-export const RAID_ROUND_MS=2500;
+export const RAID_ROUND_MS=5000;
 export const RAID_MAX_ROUNDS=120;
 const member=(name,classId)=>Object.freeze({name,classId});
 const boss=(name,classId)=>member(name,classId);
 const rows=[
- [10,2,"walled_courtyard","physical",.35,5,200,0,0,boss("Ironjaw the Exiled","scrapbreaker"),[
+ [10,2,"walled_courtyard","physical",.35,9,200,0,0,boss("Ironjaw the Exiled","scrapbreaker"),[
  member("Rustplate Bulwark","oathkeeper"),member("Ashfang Marauder","ragebreaker"),member("Chainbreaker","linebreaker"),member("Soot Hexer","hexchief"),member("Cinder Mendicant","lifekeeper"),member("Ironhide Hound","beastcaller")]],
- [20,3,"ruined_streets","magic",.40,6,500,.02,0,boss("Varkhul the Defiler","gravebinder"),[
+ [20,3,"ruined_streets","magic",.40,15,500,.02,0,boss("Varkhul the Defiler","gravebinder"),[
  member("Void Warden","dreadguard"),member("Gloom Stalker","nightblade"),member("Dusk Archer","blackbow"),member("Rot Priest","bloodsage"),member("Hollow Familiar","shadebinder"),member("Ashen Chanter","warcaller")]],
- [30,4,"open_field","ranged",.40,7,1000,.04,.02,boss("The Crimson Queen","flameweaver"),[
+ [30,4,"open_field","ranged",.40,16,1000,.04,.02,boss("The Crimson Queen","flameweaver"),[
  member("Ruby Guard","grimwarden"),member("Silkblade","trickblade"),member("Scarlet Huntress","windbow"),member("Crimson Oracle","wellspring"),member("Roseblade Dancer","war_dancer"),member("Ember Hound","beastcaller")]],
- [40,6,"gatehouse_chamber","melee",.40,8,2000,.06,.05,boss("Malakar the Hollow","dreadguard"),[
+ [40,6,"gatehouse_chamber","melee",.40,15,2000,.06,.05,boss("Malakar the Hollow","dreadguard"),[
  member("Crypt Sentinel","grovewarden"),member("Tomb Reaver","blademaster"),member("Wraith Archer","longshot"),member("Frost Revenant","frostweaver"),member("Bone Mender","spiritcaller"),member("Sepulchral Smith","forgecaller")]],
  [50,7,"narrow_bridge","mixed",.20,9,4000,.10,.10,boss("Tharagon the Eternal","blademaster"),[
  member("Grave Sentinel","oathkeeper"),member("Soul Binder","galescourge"),member("Bone Archer","blackbow"),member("Dread Knight","grimwarden"),member("Blood Priest","bloodsage"),member("Crypt Stalker","swiftblade")]]

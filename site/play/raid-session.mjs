@@ -1,6 +1,6 @@
 // One saved, deterministic raid attempt; no separate save key or clock.
-import {RAID_LEVELS,RAID_RULES_VERSION,RAID_ROUND_MS,RAID_MAX_ROUNDS,validRaidBuff,raidDefinition,raidVictoryBuff} from "./raid-rules.mjs";
-import {resolveRaid} from "./raid-encounters.mjs";
+import {RAID_LEVELS,RAID_RULES_VERSION,RAID_ROUND_MS,RAID_MAX_ROUNDS,validRaidBuff,raidDefinition,raidVictoryBuff} from "./raid-rules.mjs?v=raid-002";
+import {resolveRaid} from "./raid-encounters.mjs?v=raid-002";
 import {startGroupSession,validGroupSession} from "./battle-group-timeline.mjs?v=raid-001";
 import {GROUP_IDS} from "./battle-group.mjs?v=group-001";
 const count=n=>Number.isSafeInteger(n)&&n>=0;

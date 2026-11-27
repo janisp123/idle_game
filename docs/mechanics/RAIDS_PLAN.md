@@ -21,3 +21,5 @@ RAID-001 stage 3 candidate — launch buttons for all five raids, saved determin
 [Initial max-only raw screen](RAID_INITIAL_SCREEN_20261127.md) — lower raids fast as overlevelled, level 50 timeout. Candidate fix limits incoming boss healing base to unscaled HP, same-grade mixed/counter screen added.
 
 RAID-001 test repair: playable candidate c1afe459 website workflow 46003683324 failed the ten-second XP comparison (rounding/reward-cycle boundary); no merge. Revised test isolates XP-only level 10 blessing across 100s, confirms same coins/analytics, tests level 50 combat bonus separately and save roundtrip/expiry. Corrected numeric CSS selector in browser raid smoke. Buff timer shows hours/minutes. New CI pending.
+
+[Matched-grade raw results](RAID_MATCHED_SCREEN_20261127.md). Candidate 5-second rounds with 120-round/10-minute limit, boss HP factors 9/15/16/15/9; numerical calibration pending.

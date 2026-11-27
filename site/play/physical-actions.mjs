@@ -1,9 +1,9 @@
 import { dodgeChance } from "./armour.mjs?v=bal-002";
 import {COUNTERS,tacticalActor,isArrow,intactTank} from "./group-counter-rules.mjs";
-import {kitStrikeModifiers,kitStatus,kitControlAllowed,kitControlDuration,kitPactHeal} from "./class-effects.mjs";
+import {kitStrikeModifiers,kitStatus,kitControlAllowed,kitControlDuration,kitPactHeal} from "./class-effects.mjs?v=raid-002";
 import {kitActor,KIT_BALANCE} from "./class-kits.mjs";
 import {individualActor,statAttack,statAim,statSpeed,statCrit,statEvasion,statMobility,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
-import {combatDamageFactor} from "./raid-rules.mjs";
+import {combatDamageFactor} from "./raid-rules.mjs?v=raid-002";
 // Pure provisional arena rules. Distances, injuries and wear are game abstractions.
 export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 5 });
 export const WEAPONS = Object.freeze({

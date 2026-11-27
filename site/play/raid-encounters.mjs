@@ -1,12 +1,12 @@
 // RAID-001: deterministic encounters use the real group resolver and class kits.
-import {RAID_RULES_VERSION,RAID_ROUND_MS,RAID_MAX_ROUNDS,RAID_MONSTER_BALANCE as B,raidDefinition,raidBonus} from "./raid-rules.mjs";
+import {RAID_RULES_VERSION,RAID_ROUND_MS,RAID_MAX_ROUNDS,RAID_MONSTER_BALANCE as B,raidDefinition,raidBonus} from "./raid-rules.mjs?v=raid-002";
 import {GROUP_IDS,initialBattleGroup,selectGroupClass,groupSnapshots} from "./battle-group.mjs?v=group-001";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 import {ARMOUR_SLOTS} from "./armour.mjs?v=bal-002";
 import {expertiseThreshold} from "./expertise.mjs?v=alpha-gear-a3";
 import {blankCharacterEffort,awardCharacterEffort} from "./character-attributes.mjs";
 import {ARENAS} from "./arenas.mjs?v=bal-002";
-import {resolveTeamBattle} from "./team-combat.mjs?v=raid-001";
+import {resolveTeamBattle} from "./team-combat.mjs?v=raid-002";
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 export function raidMonsters(level){
  const d=raidDefinition(level),roster=[d.boss,...d.crew];

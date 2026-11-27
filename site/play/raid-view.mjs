@@ -1,9 +1,9 @@
 // Read-only raid display; all outcomes come from the persisted combat attempt.
-import {RAID_LEVELS,RAID_CATALOG,RAID_ROUND_MS,RAID_MAX_ROUNDS,activeRaidBuff} from "./raid-rules.mjs";
-import {raidResult} from "./raid-session.mjs";
+import {RAID_LEVELS,RAID_CATALOG,RAID_ROUND_MS,RAID_MAX_ROUNDS,activeRaidBuff} from "./raid-rules.mjs?v=raid-002";
+import {raidResult} from "./raid-session.mjs?v=raid-002";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 import {GROUP_IDS} from "./battle-group.mjs?v=group-001";
-import {weaponIcon} from "./arena-view.mjs?v=raid-001";
+import {weaponIcon} from "./arena-view.mjs?v=raid-002";
 const $=id=>document.getElementById(id),node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const pct=n=>Math.round(n*100)+"%";
 const time=ms=>{const sec=Math.max(0,Math.ceil(ms/1000));return Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");};
