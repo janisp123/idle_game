@@ -22,7 +22,7 @@ function choices(host,entries,value,onChoice){
  for(const b of host.children){b.setAttribute("aria-pressed",String(b.dataset.choice===value));b.onclick=()=>onChoice(b.dataset.choice);}
 }
 function openClassInfo(id){
- const c=classTacticalInfo(id,7),dialog=$("classInfoDialog");
+ const c=classTacticalInfo(id,8),dialog=$("classInfoDialog");
  $("classInfoHeading").textContent=c.name;
  $("classInfoEquipment").textContent=c.race+" · "+c.role+" · "+c.weapon+" · "+c.armour+" armour";
  $("classInfoAction").textContent="Abilities activate automatically when conditions and cooldowns permit.";

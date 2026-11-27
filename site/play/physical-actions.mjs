@@ -207,9 +207,9 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   if (attack.type === "blunt" && (damage >= 8 || attack === BASH)) {
     // The new melee control kits cannot repeatedly stun through immunity or Brace.
     const newControl=kitActor(actor)&&["ironfist","scrapbreaker"].includes(actor.classId);
-    if((target.groupCombatRules===7?kitControlAllowed(target,actor.kitRound??1):(!kitActor(target)||(!target.kitBraceUntil&&!newControl)||kitControlAllowed(target,actor.kitRound??1)))&&statStatusLands(target,"physical",roll)){
+    if(([7,8].includes(target.groupCombatRules)?kitControlAllowed(target,actor.kitRound??1):(!kitActor(target)||(!target.kitBraceUntil&&!newControl)||kitControlAllowed(target,actor.kitRound??1)))&&statStatusLands(target,"physical",roll)){
       target.stagger=1;
-      if((newControl||target.groupCombatRules===7)&&kitActor(target))target.classControlUntil=(actor.kitRound??1)+kitControlDuration(target);
+      if((newControl||[7,8].includes(target.groupCombatRules))&&kitActor(target))target.classControlUntil=(actor.kitRound??1)+kitControlDuration(target);
     }
     // A heavy impact opens a guard without permanently breaking Masterwork.
     if(attack.move==="hammer")target.guardOpen=TACTICS.guardOpenTurns;

@@ -1,7 +1,7 @@
 import {GROUP_CLASS_IDS,GROUP_RACES,GROUP_ROLES} from "./battle-group-classes.mjs?v=group-001";
 import {TACTIC_IDS} from "./manager-tactics.mjs?v=manager-tactics-001";
-import {ARENAS} from "./arenas.mjs?v=bal-002";
-const dims={zones:ARENAS.map(a=>a.id),classes:GROUP_CLASS_IDS,races:GROUP_RACES,roles:GROUP_ROLES,stances:TACTIC_IDS};
+import {GROUP_ARENAS} from "./arenas.mjs?v=bal-002";
+const dims={zones:GROUP_ARENAS.map(a=>a.id),classes:GROUP_CLASS_IDS,races:GROUP_RACES,roles:GROUP_ROLES,stances:TACTIC_IDS};
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 const plus=(a,b)=>{const n=a+b;if(!count(n))throw new RangeError("Group analytics overflow");return n;};
 const row=r=>Array.isArray(r)&&r.length===3&&r.every(count)&&count(r[0]+r[1]+r[2]);

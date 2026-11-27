@@ -1,9 +1,9 @@
 import {GROUP_CLASSES,RACE_LABELS} from "./battle-group-classes.mjs?v=group-001";
-import {ARENAS} from "./arenas.mjs?v=bal-002";
+import {GROUP_ARENAS} from "./arenas.mjs?v=bal-002";
 import {renderBattleAnalytics} from "./analytics-view.mjs?v=npc-parity-001";
 const n=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
 const total=r=>r.reduce((a,b)=>a+b,0),num=x=>x.toLocaleString("en-GB"),title=s=>s[0].toUpperCase()+s.slice(1);
-const label=(dim,k)=>dim==="classes"?GROUP_CLASSES[k].name:dim==="races"?RACE_LABELS[k]:dim==="zones"?ARENAS.find(a=>a.id===k).name:title(k);
+const label=(dim,k)=>dim==="classes"?GROUP_CLASSES[k].name:dim==="races"?RACE_LABELS[k]:dim==="zones"?GROUP_ARENAS.find(a=>a.id===k).name:title(k);
 export function renderGroupAnalytics(host,data,scope,legacy){
  const open=new Map([...host.querySelectorAll("details[data-dimension]")].map(d=>[d.dataset.dimension,d.open]));
  host.replaceChildren();
