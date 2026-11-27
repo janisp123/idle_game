@@ -6,9 +6,9 @@ export function prepareKitActor(a){
 }
 export function expireKitEffects(a,round){
  if(!kitActor(a))return;
- if(a.groupCombatRules===7)for(const key of Object.keys(a.controlEffects??{}))if(round>=a.controlEffects[key])delete a.controlEffects[key];
+ if([7,8].includes(a.groupCombatRules))for(const key of Object.keys(a.controlEffects??{}))if(round>=a.controlEffects[key])delete a.controlEffects[key];
  for(const key of ["kitFocusUntil","kitSlowUntil","kitDisruptUntil","kitBraceUntil","kitTotemUntil","kitPactUntil","kitTempoUntil","kitSealUntil"])if(round>=a[key])a[key]=0;
- if(a.groupCombatRules===7&&!a.kitTempoUntil)a.kitMagicTempo=false;
+ if([7,8].includes(a.groupCombatRules)&&!a.kitTempoUntil)a.kitMagicTempo=false;
 }
 export function markKitMovement(a){if(kitActor(a)){a.kitStationary=0;a.kitFocusUntil=0;}}
 export const kitApproach=a=>!kitActor(a)?1:(a.classId==="swiftblade"?B.swiftPursuit:a.classId==="ragebreaker"?B.ragePursuit:a.classId==="forgecaller"?B.forgeApproach:1)*((a.kitSlowUntil>0||controlActive(a,"slow"))?(a.classId==="wellspring"?B.resilienceSlow:.5):1)*(a.kitTotemUntil>0&&a.kitTotemMode==="balanced"?B.totemApproach:1);
@@ -77,13 +77,13 @@ export function kitStrikeModifiers(a,b,attack,distance){
 
  // V7 statuses are transient, nonstacking and cannot refresh while active.
  export const CONTROL_BALANCE=Object.freeze({root:2,slow:2,stun:1,paralysis:2,silence:2,sleep:2,gloom:3,antiheal:3,physical_vulnerability:3,immunity:3,antihealFraction:.35,vulnerability:.20});
- export const controlActive=(a,key)=>a.groupCombatRules===7&&Boolean(a.controlEffects?.[key]);
+ export const controlActive=(a,key)=>[7,8].includes(a.groupCombatRules)&&Boolean(a.controlEffects?.[key]);
  export const rooted=a=>controlActive(a,"root");
  export const silenced=a=>controlActive(a,"silence");
  export const incapacitated=a=>["stun","paralysis","sleep"].find(k=>controlActive(a,k));
  export const healingFactor=a=>controlActive(a,"antiheal")?1-CONTROL_BALANCE.antihealFraction:1;
  const hardOrMove=new Set(["root","stun","paralysis","sleep"]);
- export const controlEligible=(a,key,round)=>a.groupCombatRules===7&&a.hp>0&&!controlActive(a,key)&&(!hardOrMove.has(key)||kitControlAllowed(a,round))&&(key!=="silence"||round>=(a.silenceImmuneUntil??0));
+ export const controlEligible=(a,key,round)=>[7,8].includes(a.groupCombatRules)&&a.hp>0&&!controlActive(a,key)&&(!hardOrMove.has(key)||kitControlAllowed(a,round))&&(key!=="silence"||round>=(a.silenceImmuneUntil??0));
  export function applyControl(a,key,round){
   if(!controlEligible(a,key,round)||!CONTROL_BALANCE[key])return false;
   a.controlEffects??={};a.controlEffects[key]=round+CONTROL_BALANCE[key]+1;
@@ -92,6 +92,6 @@ export function kitStrikeModifiers(a,b,attack,distance){
   if(key==="root")a.approach=0;
   return true;
  }
- export function clearControl(a){if(a.groupCombatRules===7)a.controlEffects={};}
- export const hasControl=a=>a.groupCombatRules===7&&Object.keys(a.controlEffects??{}).length>0;
+ export function clearControl(a){if([7,8].includes(a.groupCombatRules))a.controlEffects={};}
+ export const hasControl=a=>[7,8].includes(a.groupCombatRules)&&Object.keys(a.controlEffects??{}).length>0;
  export function wakeOnDamage(a){if(controlActive(a,"sleep"))delete a.controlEffects.sleep;}

@@ -1,7 +1,7 @@
 // GROUP-COUNTERS-001: symmetric, versioned, candidate endgame coefficients.
 // v1 = deployed initial Battle Group. v2 = tactical counters; no legacy duel changes.
 export const GROUP_COMBAT_RULES_VERSION=3;
-export const SUPPORTED_GROUP_COMBAT_RULES=Object.freeze([1,2,3,4,5,6,7]);
+export const SUPPORTED_GROUP_COMBAT_RULES=Object.freeze([1,2,3,4,5,6,7,8]);
 export const COUNTERS=Object.freeze({
  arrowBlock:.76,arrowBlockImpact:.16,shieldedArrowImpact:.60,
  plateArrowImpact:.76,closeArrowImpact:.42,farArrowImpact:1.20,reachArrowImpact:1.12,
@@ -15,13 +15,13 @@ export const COUNTERS=Object.freeze({
  arrowTerrain:Object.freeze({open_field:1,narrow_bridge:.94,ruined_streets:.66,walled_courtyard:.85,gatehouse_chamber:.40}),
  arrowTerrainAim:Object.freeze({open_field:0,narrow_bridge:0,ruined_streets:.10,walled_courtyard:.04,gatehouse_chamber:.22})
 });
-export const tacticalActor=a=>Boolean(a.classId&&[2,3,4,5,6,7].includes(a.groupCombatRules));
+export const tacticalActor=a=>Boolean(a.classId&&[2,3,4,5,6,7,8].includes(a.groupCombatRules));
 export const isArrow=attack=>attack.move==="shot";
 export const intactTank=a=>a.role==="tank"&&a.shield.hp>0;
 
 // Version 5: role-based primary targeting, not a stat or taunt cooldown.
 export const TANK_PRIORITY_RULES_VERSION=5;
-export const tankPriorityActor=a=>[TANK_PRIORITY_RULES_VERSION,6,7].includes(a?.groupCombatRules);
+export const tankPriorityActor=a=>[TANK_PRIORITY_RULES_VERSION,6,7,8].includes(a?.groupCombatRules);
 export const tankFirstTargets=(a,targets)=>{
  if(!tankPriorityActor(a))return targets;
  const living=targets.filter(b=>b.hp>0),tanks=living.filter(b=>b.role==="tank");
@@ -31,11 +31,32 @@ export const tankHealOrder=(a,x,y)=>tankPriorityActor(a)?Number(y.role==="tank")
 
 // V6 arena geometry candidate: actual distance, not damage bonuses.
 export const RANGED_GEOMETRY_RULES_VERSION=6;
-export const geometryActor=a=>[RANGED_GEOMETRY_RULES_VERSION,7].includes(a?.groupCombatRules);
+export const geometryActor=a=>[RANGED_GEOMETRY_RULES_VERSION,7,8].includes(a?.groupCombatRules);
 export const ENGAGEMENT_GEOMETRY=Object.freeze({
  open_field:Object.freeze({startDistance:4,bowRange:6,spellRange:5}),
  narrow_bridge:Object.freeze({startDistance:3,bowRange:5,spellRange:4})
 });
 
 export const CONTROL_RULES_VERSION=7;
-export const controlActor=a=>a?.groupCombatRules===CONTROL_RULES_VERSION;
+export const controlActor=a=>[CONTROL_RULES_VERSION,8].includes(a?.groupCombatRules);
+
+export const EIGHT_ARENA_RULES_VERSION=8;
+export const extendedArenaActor=a=>a?.groupCombatRules===EIGHT_ARENA_RULES_VERSION;
+// Terrain only: no class-specific damage, resistance or healing multiplier.
+export const EXTRA_ENGAGEMENT_GEOMETRY=Object.freeze({
+ dense_forest:Object.freeze({startDistance:2,bowRange:2,spellRange:3}),
+ grand_hall:Object.freeze({startDistance:1,bowRange:2,spellRange:2}),
+ marshland:Object.freeze({startDistance:3,bowRange:4,spellRange:4})
+});
+export const engagementGeometry=(terrain,rules)=>rules===8?EXTRA_ENGAGEMENT_GEOMETRY[terrain.id]??ENGAGEMENT_GEOMETRY[terrain.id]:ENGAGEMENT_GEOMETRY[terrain.id];
+export function terrainTileBlocked(terrain,x,y,height,rules){
+ if(rules!==8||terrain.id!=="dense_forest")return false;
+ // Symmetric trees in the central two columns; middle and outer lanes remain passable.
+ const centre=(height-1)/2;
+ return (x===4||x===5)&&Math.abs(y-centre)===2;
+}
+export function terrainApproachFactor(terrain,a){
+ if(!extendedArenaActor(a)||terrain.id!=="marshland")return 1;
+ const armour=a.trainingKit?.armour?.torso;
+ return armour==="plate"?.60:armour==="leather"?.85:1;
+}

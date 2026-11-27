@@ -315,9 +315,9 @@ function abilityEffect(a){
  }
 }
 export function classTacticalInfo(id,rules=3){
- const c=GROUP_CLASSES[id],info=CLASS_TACTICAL_INFO[id],kit=(rules===7?CONTROL_CLASS_KITS:CLASS_KITS)[id];
+ const c=GROUP_CLASSES[id],info=CLASS_TACTICAL_INFO[id],kit=([7,8].includes(rules)?CONTROL_CLASS_KITS:CLASS_KITS)[id];
  if(!c||!info||!kit||!passives[id])throw RangeError("Unknown class");
  const abilities=[kit.primary,kit.secondary].map(a=>({id:a.id,name:a.name,cooldown:a.cooldown,effect:abilityEffect(a)}));
  return {...info,name:c.name,race:RACE_LABELS[c.race],role:c.role,weapon:c.weaponLabel,armour:c.armour,passive:{name:kit.passive,effect:passives[id]},abilities};
 }
-for(const id of GROUP_CLASS_IDS){classTacticalInfo(id);classTacticalInfo(id,7);}
+for(const id of GROUP_CLASS_IDS){classTacticalInfo(id);classTacticalInfo(id,7);classTacticalInfo(id,8);}
