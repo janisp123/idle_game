@@ -67,7 +67,7 @@ export function buildGroupCloneTeam(envelope,shared,seed,rules=3){
   const m=group[id],p=m.classes[c.id];
   p.equipment=allocate(c,b.budget,shared.skill);p.mastery={level:b.classLevel,xp:0};
   p.expertise=blankExpertise();p.expertise[c.loadout]=b.weaponXP;p.expertise[c.armour]=b.armourXP;p.expertiseActive={...p.expertise};
-  if([4,5,6,7,8,9].includes(rules)){p.attributeEffort=awardCharacterEffort(blankCharacterEffort(),c.id,Math.floor(b.weaponXP/4));p.attributeEffortActive={...p.attributeEffort};}
+  if([4,5,6,7,8,9,10].includes(rules)){p.attributeEffort=awardCharacterEffort(blankCharacterEffort(),c.id,Math.floor(b.weaponXP/4));p.attributeEffortActive={...p.attributeEffort};}
   m.stances[choice.stance]={level:b.tacticLevel,xp:0};
  }
  const snapshots=groupSnapshots(group,shared,rules);

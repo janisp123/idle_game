@@ -1,6 +1,6 @@
 // Team geometry and decisions; all damage and durability use physical-actions.
 import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=kits-001";
-import {COUNTERS,GROUP_COMBAT_RULES_VERSION,SUPPORTED_GROUP_COMBAT_RULES,tacticalActor,intactTank,tankPriorityActor,tankFirstTargets,geometryActor,engagementGeometry,RANGED_GEOMETRY_RULES_VERSION,terrainTileBlocked,terrainApproachFactor} from "./group-counter-rules.mjs";
+import {COUNTERS,GROUP_COMBAT_RULES_VERSION,SUPPORTED_GROUP_COMBAT_RULES,tacticalActor,intactTank,tankPriorityActor,tankFirstTargets,geometryActor,engagementGeometry,RANGED_GEOMETRY_RULES_VERSION,terrainTileBlocked,terrainApproachFactor,ELIMINATION_RULES_VERSION,ELIMINATION_MAX_ROUNDS} from "./group-counter-rules.mjs";
 import {kitActor,pilotKit} from "./class-kits.mjs";
 import {prepareKitActor,expireKitEffects,markKitMovement,kitApproach,kitTargetDisrupted,rooted,silenced,incapacitated} from "./class-effects.mjs";
 import {tryKitAction} from "./class-ability-policy.mjs";
@@ -19,12 +19,12 @@ const bowActive=a=>geometryActor(a)?activeWeapon(a).move==="shot":activeWeapon(a
 const other=(actors,a)=>actors.filter(b=>b.side!==a.side&&alive(b));
 const allies=(actors,a)=>actors.filter(b=>b.side===a.side&&b!==a&&alive(b));
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
-const startDistance=(terrain,rules)=>[RANGED_GEOMETRY_RULES_VERSION,7,8,9].includes(rules)?(engagementGeometry(terrain,rules)?.startDistance??clamp(terrain.startDistance??2,0,2)):clamp(terrain.startDistance??2,0,2);
+const startDistance=(terrain,rules)=>[RANGED_GEOMETRY_RULES_VERSION,7,8,9,10].includes(rules)?(engagementGeometry(terrain,rules)?.startDistance??clamp(terrain.startDistance??2,0,2)):clamp(terrain.startDistance??2,0,2);
 export const teamArenaWidth=(terrain,rules=GROUP_COMBAT_RULES_VERSION)=>2*TEAM_COMBAT_BALANCE.rearSpace+startDistance(terrain,rules)+2;
 const validRoster=r=>Array.isArray(r)&&r.length>0&&r.length<=TEAM_COMBAT_BALANCE.maxRoster&&r.every(a=>a&&Object.hasOwn(WEAPONS,a.loadout)&&a.loadout!=="dagger"&&(!a.classId||validGroupSnapshot(a))&&validTacticSnapshot(a)&&["str","dex","end","skill"].every(k=>Number.isFinite(a[k])&&a[k]>=0&&a[k]<=1e6));
 function makeActors(roster,side,terrain,rules){
   const start=startDistance(terrain,rules)+1;
-  const tactical=[2,3,4,5,6,7,8,9].includes(rules)&&roster.every(x=>x.classId);
+  const tactical=[2,3,4,5,6,7,8,9,10].includes(rules)&&roster.every(x=>x.classId);
   const frontline=roster.map((s,i)=>({s,i})).filter(({s})=>!classWeapon(s)?.ranged).sort((a,b)=>Number(b.s.role==="tank")-Number(a.s.role==="tank"));
   const backline=roster.map((s,i)=>({s,i})).filter(({i})=>!frontline.some(x=>x.i===i));
   const lanes=Array.from({length:roster.length},(_,i)=>i).sort((a,b)=>Math.abs(a-(roster.length-1)/2)-Math.abs(b-(roster.length-1)/2)||a-b);
@@ -34,11 +34,11 @@ function makeActors(roster,side,terrain,rules){
     const front=TEAM_COMBAT_BALANCE.rearSpace;
     let x=side==="player"?front-rear:front+start+rear;
     let y=tactical?lanes[(rear?backline:frontline.length?frontline:backline).findIndex(x=>x.i===i)]:i;
-    if([8,9].includes(rules)&&terrain.id==="grand_hall"&&tactical){
+    if([8,9,10].includes(rules)&&terrain.id==="grand_hall"&&tactical){
       const rank=rear?backline:frontline.length?frontline:backline,index=rank.findIndex(x=>x.i===i),depth=Math.floor(index/3)+(rear?Math.ceil(frontline.length/3):0);
       x=side==="player"?front-depth:front+start+depth;y=lanes[index%3];
     }
-    const geometry=[RANGED_GEOMETRY_RULES_VERSION,7,8,9].includes(rules)?engagementGeometry(terrain,rules):null;
+    const geometry=[RANGED_GEOMETRY_RULES_VERSION,7,8,9,10].includes(rules)?engagementGeometry(terrain,rules):null;
     const engagementRange=geometry&&["ranged","mage","summoner"].includes(snapshot.role)&&classWeapon(snapshot)?.ranged?(classWeapon(snapshot).move==="shot"?geometry.bowRange:geometry.spellRange):undefined;
     return prepareKitActor(prepareClassActor({...fighter(snapshot,side),...(tactical?{groupCombatRules:rules}:{}),...(engagementRange?{engagementRange}:{}),id:side+":"+i,x,y,approach:0,
       retreats:terrain.retreatSpace??(terrain.retreat===false?0:3),intercepted:-1,targetId:null,bleedSource:null,actions:0}));
@@ -128,7 +128,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   const chance={player:coordinationChance(levels.player),enemy:coordinationChance(levels.enemy)};
   const rules=levels.groupCombatRules??GROUP_COMBAT_RULES_VERSION;
   if(!SUPPORTED_GROUP_COMBAT_RULES.includes(rules))throw new RangeError("Unknown group combat rules");
-  if([4,5,6,7,8,9].includes(rules)&&![...players,...enemies].every(a=>a.classId&&validCombatAttributes(a.attributes)&&a.str===a.attributes.STR&&a.dex===a.attributes.DEX&&a.end===a.attributes.CON&&a.skill===a.classLevel))throw new RangeError("Invalid individual combat attributes");
+  if([4,5,6,7,8,9,10].includes(rules)&&![...players,...enemies].every(a=>a.classId&&validCombatAttributes(a.attributes)&&a.str===a.attributes.STR&&a.dex===a.attributes.DEX&&a.end===a.attributes.CON&&a.skill===a.classLevel))throw new RangeError("Invalid individual combat attributes");
   const actors=[...makeActors(players,"player",terrain,rules),...makeActors(enemies,"enemy",terrain,rules)];
   const raid=levels.raid,bonus=levels.playerBonus;
   if(raid){
@@ -142,17 +142,18 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
     }
   }
   if(bonus){
-    if(![4,5,6,7,8,9].includes(rules)||![bonus.damage,bonus.defence].every(v=>Number.isFinite(v)&&v>=0&&v<=.10))throw new RangeError("Invalid raid combat bonus");
+    if(![4,5,6,7,8,9,10].includes(rules)||![bonus.damage,bonus.defence].every(v=>Number.isFinite(v)&&v>=0&&v<=.10))throw new RangeError("Invalid raid combat bonus");
     for(const a of actors.filter(x=>x.side==="player")){a.raidBonusDamage=bonus.damage;a.raidBonusDefence=bonus.defence;}
   }
-  const maxRounds=raid?RAID_MAX_ROUNDS:TEAM_COMBAT_BALANCE.maxRounds;
+  const elimination=rules===ELIMINATION_RULES_VERSION;
+  const maxRounds=raid?RAID_MAX_ROUNDS:elimination?ELIMINATION_MAX_ROUNDS:TEAM_COMBAT_BALANCE.maxRounds;
   const height=Math.max(players.length,enemies.length),width=teamArenaWidth(terrain,rules),roll=seededRandom(seed),speedRoll=seededRandom((seed^0x85ebca6b)>>>0),
     initiative=seededRandom((seed^0x9e3779b9)>>>0),decision=seededRandom((seed^0x517cc1b7)>>>0);
   const tactical=seededRandom((seed^0x4f7b3241)>>>0);
   const events=[];let round=0;
   const record=(a,b,type,extra={})=>{
     events.push({type,round,actor:a?.id??null,target:b?.id??null,damage:0,...extra,
-      vitals:Object.fromEntries(actors.map(c=>[c.id,{...vitals(c),x:c.x,y:c.y,...([7,8,9].includes(c.groupCombatRules)?{control:{...c.controlEffects}}:{})}]))});
+      vitals:Object.fromEntries(actors.map(c=>[c.id,{...vitals(c),x:c.x,y:c.y,...([7,8,9,10].includes(c.groupCombatRules)?{control:{...c.controlEffects}}:{})}]))});
   };
   const has=side=>actors.some(a=>a.side===side&&alive(a));
   record(null,null,"engage");
@@ -227,10 +228,11 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   const totals=side=>actors.filter(a=>a.side===side).reduce((r,a)=>({hp:r.hp+a.hp,maxHP:r.maxHP+a.maxHP,inflicted:r.inflicted+a.inflicted}),{hp:0,maxHP:0,inflicted:0});
   const p=totals("player"),e=totals("enemy"),timeout=p.hp>0&&e.hp>0;
   const outcome=!e.hp&&p.hp?"victory":!p.hp&&e.hp?"defeat":
-    timeout&&raid?"defeat":timeout&&p.hp/p.maxHP>e.hp/e.maxHP&&p.inflicted>0?"victory":
+    timeout&&raid?"defeat":timeout&&elimination?"double_death":timeout&&p.hp/p.maxHP>e.hp/e.maxHP&&p.inflicted>0?"victory":
     timeout&&e.hp/e.maxHP>p.hp/p.maxHP&&e.inflicted>0?"defeat":"double_death";
   const survivors=Object.fromEntries(actors.map(a=>[a.id,a.hp]));
-  record(null,null,outcome,{reason:timeout?"timeout":"knockout"});
-  return {outcome,reason:timeout?"timeout":"knockout",rounds:Math.min(round-1,maxRounds),
+  const reason=timeout?(elimination?"simulation_limit":"timeout"):"knockout";
+  record(null,null,outcome,{reason});
+  return {outcome,reason,rounds:Math.min(round-1,maxRounds),
     events,survivors,participation:Object.fromEntries(actors.map(a=>[a.id,a.actions]))};
 }
