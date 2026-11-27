@@ -63,9 +63,14 @@ test("raid pause, persisted frozen attempt, completion once, and resumed arena",
 });
 test("active raid blessing multiplies actual fighting XP and frozen combat bonus expires",()=>{
  const s=newArenaManager(now),base={...s,skills:{...s.skills,fighting:{level:30,xp:0}}};
- const boosted={...base,raidBuff:raidVictoryBuff(null,50,now)},end=now+10000;
- const a=settleManagerOffline(base,end,rand).state,b=settleManagerOffline(boosted,end,rand).state;
- assert.ok(b.skills.fighting.xp>a.skills.fighting.xp);assert.deepEqual(b.combatSession.raidBonus,{damage:.1,defence:.1});
+ // Isolate XP from any change in combat downtime and use multiple reward cycles.
+ const xpOnly={...base,raidBuff:raidVictoryBuff(null,10,now)},end=now+100000;
+ const a=settleManagerOffline(base,end,rand).state,x=settleManagerOffline(xpOnly,end,rand).state;
+ assert.ok(a.skills.fighting.xp>0);assert.ok(x.skills.fighting.xp>a.skills.fighting.xp);
+ assert.equal(x.coins,a.coins);assert.deepEqual(x.groupAnalytics,a.groupAnalytics);
+ const boosted={...base,raidBuff:raidVictoryBuff(null,50,now)},b=settleManagerOffline(boosted,end,rand).state;
+ assert.deepEqual(b.combatSession.raidBonus,{damage:.1,defence:.1});
+ assert.deepEqual(readArenaManager(JSON.stringify(b)).raidBuff,b.raidBuff);
  const expired={...b,raidBuff:{level:50,expiresAtMs:end+1000}};
  const c=settleManagerOffline(expired,end+20000,rand).state;assert.equal(c.combatSession.raidBonus,undefined);
  assert.equal(raidBonus(c.raidBuff,c.settledAtMs).xp,0);

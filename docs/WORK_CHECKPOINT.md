@@ -82,3 +82,6 @@ RAID-001 stage 3 candidate — launch buttons for all five raids, saved determin
 
 
 RAID-001 initial foundation screen saved in [RAID_INITIAL_SCREEN_20261127.md](mechanics/RAID_INITIAL_SCREEN_20261127.md): 183 tests and Chromium passed, max team won 12/12 lower raids, timed out 3/3 at level 50. Follow-up limits oversized boss healing base and adds 30 same-grade diagnostics; exact actual timing still unverified. Weapon icons use actual class weapons rather than adapters. Full candidate CI pending.
+
+
+RAID-001 test repair: playable candidate c1afe459 website workflow 46003683324 failed the ten-second XP comparison (rounding/reward-cycle boundary); no merge. Revised test isolates XP-only level 10 blessing across 100s, confirms same coins/analytics, tests level 50 combat bonus separately and save roundtrip/expiry. Corrected numeric CSS selector in browser raid smoke. Buff timer shows hours/minutes. New CI pending.
