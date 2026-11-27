@@ -16,10 +16,11 @@ export const GUARD = Object.freeze({block:.29,bluntBlock:.40,parry:.36,recoverin
 // BAL-002: material absorbs each impact type differently. Multipliers act on
 // coverage-weighted intact piece protection, not on armour grade resistance.
 const MATERIAL_FACTORS=Object.freeze({
-  padded:Object.freeze({piercing:.90,slashing:1.15,blunt:3.0,magic:1.25}),
-  leather:Object.freeze({piercing:1.20,slashing:1.35,blunt:1.0,magic:1.0}),
-  plate:Object.freeze({piercing:.80,slashing:1.0,blunt:.18,magic:.75})
+  padded:Object.freeze({piercing:.90,slashing:1.15,blunt:3.0}),
+  leather:Object.freeze({piercing:1.20,slashing:1.35,blunt:1.0}),
+  plate:Object.freeze({piercing:.80,slashing:1.0,blunt:.18})
 });
+const MAGIC_MATERIAL_FACTORS=Object.freeze({padded:1.25,leather:1.0,plate:.75});
 export const TACTICS=Object.freeze({slowApproach:.75,quickMobility:85,retreatLead:-3,shortSpearImpact:.80,constrainedSwing:.85,openSwing:1.08,guardOpenTurns:3,reachInterruptTurns:2,reachSpearImpact:1.18,daggerHandling:.75,farShotImpact:1.68,reachShotImpact:1.48,closeShotImpact:.60});
 // Grade handling is shared by combat and the intact-stat breakdown.
 export function handlingScale(piece) {
@@ -86,7 +87,7 @@ export function protection(target,type=null) {
   if (!target.armour.length) return (target.gear?.physicalReductionPct ?? 0)*(type?ARMOUR_FACTOR[type]:1);
   return target.armour.reduce((sum,item)=>{
     const family=item.itemId?.split(":")[1];
-    const factor=type?(MATERIAL_FACTORS[family]?.[type]??ARMOUR_FACTOR[type]):1;
+    const factor=type==="magic"?(MAGIC_MATERIAL_FACTORS[family]??ARMOUR_FACTOR.magic):type?(MATERIAL_FACTORS[family]?.[type]??ARMOUR_FACTOR[type]):1;
     return sum+(item.hp>0?item.protection*factor:0);
   },0);
 }
