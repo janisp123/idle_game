@@ -1,6 +1,6 @@
 // BATTLE-GROUP-001: original class data, candidate initial physical adapters.
 // The only selection inputs are race, main class, specialization and stance.
-// Cooldown descriptors are not yet executed by the public combat resolver.
+// Cooldown descriptors are executed in the candidate shared team resolver; not public yet.
 export const GROUP_RACES=Object.freeze(["human","elf","dark_elf","orc","dwarf"]);
 export const GROUP_ROLES=Object.freeze(["tank","melee","ranged","mage","healer","support","summoner"]);
 const raceNames=["Human","Elf","Dark Elf","Orc","Dwarf"];
