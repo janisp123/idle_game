@@ -90,7 +90,7 @@ try{
   await send("Page.enable");await send("Runtime.enable");
   await send("Page.addScriptToEvaluateOnNewDocument",{source:"Date.now=()=>"+fixedNow+";"});
   // Additional landing-only sizes cover narrow phones and the tablet breakpoint.
-  for(const width of [320,360,560,768,850,1024]){
+  for(const width of [320,360,560,768,850,1024,1440,1920]){
     await send("Emulation.setDeviceMetricsOverride",{width,height:900,deviceScaleFactor:1,mobile:width<=560});
     const url=origin+"/?layout="+width;
     await send("Page.navigate",{url});
@@ -98,7 +98,7 @@ try{
     const layout=await evaluate(`(()=>{const q=s=>document.querySelector(s),r=s=>q(s).getBoundingClientRect(),inside=(a,b)=>a.left>=b.left-1&&a.right<=b.right+1,near=(a,b)=>Math.abs(a-b)<=2;
       const container=r(".hero-grid"),nav=r(".nav-wrap"),note=r(".hero-note"),strip=r(".status-strip");
       const cards=[...document.querySelectorAll(".principle-card")].map(n=>n.getBoundingClientRect());
-      return {overflow:document.documentElement.scrollWidth-innerWidth,nav:[...document.querySelectorAll(".navigation a")].every(n=>inside(n.getBoundingClientRect(),nav)&&n.getBoundingClientRect().height>=44),hero:inside(r(".hero-copy"),container)&&inside(r(".hero-art"),container),notice:inside(r(".hero-note p"),note)&&q(".hero-note p").contains(q(".hero-note a")),gutters:near(container.left,r(".principles .container").left)&&near(container.left,r(".hobby-copy").left)&&near(container.left,r(".library-grid").left),status:inside(r(".status-indicator"),strip)&&inside(r(".status-strip a"),strip)&&r(".status-indicator").left-strip.left>=12,cards:cards.every((a,i)=>!i||a.top>=cards[i-1].bottom-1||a.left>=cards[i-1].right-1)};})()`);
+      return {overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,nav:[...document.querySelectorAll(".navigation a")].every(n=>inside(n.getBoundingClientRect(),nav)&&n.getBoundingClientRect().height>=44),hero:inside(r(".hero-copy"),container)&&inside(r(".hero-art"),container),notice:inside(r(".hero-note p"),note)&&q(".hero-note p").contains(q(".hero-note a")),gutters:near(container.left,r(".principles .container").left)&&near(container.left,r(".hobby-copy").left)&&near(container.left,r(".library-grid").left),status:inside(r(".status-indicator"),strip)&&inside(r(".status-strip a"),strip)&&r(".status-indicator").left-strip.left>=12,cards:cards.every((a,i)=>!i||a.top>=cards[i-1].bottom-1||a.left>=cards[i-1].right-1)};})()`);
     assert.deepEqual(layout,{overflow:0,nav:true,hero:true,notice:true,gutters:true,status:true,cards:true},"landing alignment "+width+"px");
     await shot("landing-layout-"+width);
     console.log("Landing alignment passed "+width+"px");

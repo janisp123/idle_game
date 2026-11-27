@@ -123,3 +123,6 @@ CLASS-MASTERY-002 — Owner approved 50% novice to 100% level-50 class skill pow
 
 
 LANDING-ALIGNMENT-001 #220 — Owner approved landing-only responsive cleanup. Notice uses a single flowing paragraph, nav links have 44px targets, hero no longer has a forced 702px height, cards and archive rows have consistent borders/padding, hobby uses shared gutters, status strip padded and aligned. Preserved copy, artwork, links and gameplay. Added Chromium assertions at 320/360/560/768/850/1024 plus existing 390/1440. Candidate pushed; CI and deployment pending.
+
+
+LANDING-ALIGNMENT-001 first CI: 320/360/560px alignment passed; at 768px all geometry assertions passed, but test compared scrollWidth to innerWidth (15px scrollbar difference). Correct measurement against clientWidth, preserving zero-overflow requirement; add dedicated 1440/1920px checks. Full rerun pending.
