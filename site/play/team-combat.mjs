@@ -32,32 +32,35 @@ function makeActors(roster,side,terrain,rules){
       retreats:terrain.retreatSpace??(terrain.retreat===false?0:3),intercepted:-1,targetId:null,bleedSource:null,actions:0});
   });
 }
-function adjacent(a,actors,height,width,side){
+function adjacent(a,actors,height,width,side,terrain={}){
   const d=side==="player"?1:-1;
   return [[a.x-d,a.y],[a.x+d,a.y],[a.x,a.y-1],[a.x,a.y+1]]
     .filter(([x,y])=>x>=0&&x<width&&y>=0&&y<height&&
-      !actors.some(b=>alive(b)&&b!==a&&b.x===x&&b.y===y)).map(([x,y])=>({x,y}));
+      !actors.some(b=>alive(b)&&b!==a&&b.x===x&&b.y===y)&&
+      !(tacticalActor(a)&&terrain.id==="narrow_bridge"&&x>TEAM_COMBAT_BALANCE.rearSpace&&x<TEAM_COMBAT_BALANCE.rearSpace+3&&Math.abs(y-(height-1)/2)>(COUNTERS.bridgeWidth-1)/2)).map(([x,y])=>({x,y}));
 }
 function chooseTarget(a,actors,coordinated,roll){
   const enemies=other(actors,a),range=activeWeapon(a).range;
-  const peers=allies(actors,a);
+  const peers=allies(actors,a),tactical=tacticalActor(a),anyReachable=enemies.some(e=>distance(a,e)<=range);
   return enemies.map(b=>{
     const d=distance(a,b),reachable=d<=range;
     const focus=peers.filter(c=>c.targetId===b.id).length;
-    const score=-(Math.max(0,d-range)*3+d*.25)+(coordinated?
+    const eligible=reachable||!anyReachable;
+    const score=-(Math.max(0,d-range)*3+d*.25)+(coordinated&&(!tactical||eligible)?
       (1-b.hp/b.maxHP)*TEAM_COMBAT_BALANCE.healthWeight+focus*TEAM_COMBAT_BALANCE.focusWeight:0);
     // Only take extra focus opportunities if already reachable or no foe is.
-    const eligible=reachable||!enemies.some(e=>distance(a,e)<=range);
+    // Actual reachability prevents coordinated fighters chasing unreachable focus while another foe is in range.
     const role=a.activeTactic,bonus=eligible?(role==="aggressive"?
       (1-b.hp/b.maxHP)*TACTIC_BALANCE.aggressiveHealth+focus*TACTIC_BALANCE.aggressiveFocus:
       role==="balanced"&&!coordinated?(1-b.hp/b.maxHP)*TACTIC_BALANCE.balancedHealth+focus*TACTIC_BALANCE.balancedFocus:0):0;
-    return {b,score:score+bonus+(reachable?1:0),tie:roll()};
+    const counter=tactical&&eligible?COUNTERS.targetCounterPriority*(a.role==="ranged"?(intactTank(b)?-1:["mage","healer","summoner"].includes(b.role)?1:0):a.role==="mage"&&b.role==="tank"?1:a.role==="melee"&&["ranged","mage","healer"].includes(b.role)?1:0):0;
+    return {b,score:score+bonus+counter+(reachable?1:0),tie:roll()};
   }).sort((a,b)=>b.score-a.score||a.tie-b.tie)[0]?.b;
 }
-function move(a,target,actors,height,width,retreat,roll){
+function move(a,target,actors,height,width,retreat,roll,terrain){
   const opponents=other(actors,a);
   const nearest=p=>Math.min(...opponents.map(e=>gap(p,e)));
-  const steps=adjacent(a,actors,height,width,a.side);
+  const steps=adjacent(a,actors,height,width,a.side,terrain);
   if(retreat){
     const before=nearest(a);
     const best=steps.map(p=>({p,score:nearest(p)-before,tie:roll()}))
@@ -73,7 +76,7 @@ function move(a,target,actors,height,width,retreat,roll){
   for(let i=0;i<queue.length;i++){
     const {p,first}=queue[i];
     if(distance(p,target)<=range){Object.assign(a,first);return true;}
-    for(const next of adjacent(p,actors,height,width,a.side)){
+    for(const next of adjacent({...p,classId:a.classId,groupCombatRules:a.groupCombatRules},actors,height,width,a.side,terrain)){
       const k=key(next);if(seen.has(k))continue;seen.add(k);queue.push({p:next,first});
     }
   }
@@ -147,19 +150,19 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
         const ward=allies(actors,a).filter(b=>b.shield.hp===0).sort((b,c)=>b.hp/b.maxHP-c.hp/c.maxHP)[0];
         const threats=ward?other(actors,a).filter(e=>!activeWeapon(e).ranged&&distance(e,ward)<=activeWeapon(e).range+1):[];
         if(ward&&gap(a,ward)>1&&threats.length&&(a.recovery>0||!other(actors,a).some(e=>distance(a,e)<=active.range))){
-          const candidates=adjacent(a,actors,height,width,a.side).filter(p=>gap(p,ward)<gap(a,ward))
+          const candidates=adjacent(a,actors,height,width,a.side,terrain).filter(p=>gap(p,ward)<gap(a,ward))
             .map(p=>({p,d:gap(p,ward),threat:Math.min(...threats.map(e=>gap(p,e))),tie:tactical()})).sort((b,c)=>b.d-c.d||b.threat-c.threat||b.tie-c.tie);
           if(candidates.length){Object.assign(a,candidates[0].p);a.approach=0;a.recovery=Math.max(0,a.recovery-1);record(a,ward,"approach",{tactic:"escort"});continue;}
         }
       }
       // Defensive reach weapons preserve space at the cost of a ready turn.
       if(a.activeTactic==="defensive"&&a.recovery===0&&active.range>0&&a.retreats>0&&distance(a,target)<active.range&&
-        mobility(a)>=mobility(target)+TACTICS.retreatLead&&move(a,target,actors,height,width,true,tactical)){
+        mobility(a)>=mobility(target)+TACTICS.retreatLead&&move(a,target,actors,height,width,true,tactical,terrain)){
         a.retreats--;a.approach=0;record(a,target,"retreat",{tactic:"maintain_range"});continue;
       }
       if(a.recovery>0){
         a.recovery--;
-        if(bow&&!tacticalActor(a)&&a.activeTactic!=="aggressive"&&a.retreats>0&&distance(a,target)<2&&mobility(a)>=mobility(target)+TACTICS.retreatLead&&move(a,target,actors,height,width,true,decision)){
+        if(bow&&!tacticalActor(a)&&a.activeTactic!=="aggressive"&&a.retreats>0&&distance(a,target)<2&&mobility(a)>=mobility(target)+TACTICS.retreatLead&&move(a,target,actors,height,width,true,decision,terrain)){
           a.retreats--;a.approach=0;record(a,target,"retreat");
         }
         continue;
@@ -168,7 +171,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
         const pursuit=tacticalActor(a)&&a.role==="melee"?(a.trainingKit?.armour?.torso==="leather"?COUNTERS.lightMeleeApproach:COUNTERS.heavyMeleeApproach):1;
         a.approach+=(mobility(a)>=TACTICS.quickMobility?1:TACTICS.slowApproach)*pursuit*(a.activeTactic==="aggressive"?TACTIC_BALANCE.aggressiveApproach:1);
         if(a.approach>=(terrain.approachSteps??1)){
-          a.approach=0;move(a,target,actors,height,width,false,decision);
+          a.approach=0;move(a,target,actors,height,width,false,decision,terrain);
         }
         record(a,target,"approach");continue;
       }

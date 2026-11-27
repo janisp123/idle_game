@@ -46,3 +46,9 @@ test("legacy saved rules remain frozen and new sessions explicitly use tactical 
  const a=settleGroupSession(old,10000);assert.equal(a.session.groupCombatRules,undefined);
  assert.deepEqual(groupCombatAtTime(old),groupCombatAtTime({...old,groupCombatRules:1}));
 });
+
+test("deployed v1 maximum-build schedule preserves exact 513-bout reward history",()=>{
+ const s=startGroupSession(maxGroup(),max,50,seed);delete s.groupCombatRules;
+ const r=settleGroupSession(s,513*10000);
+ assert.deepEqual(r.analytics.outcomes,[272,239,2]);assert.equal(r.coins,3522);assert.equal(r.session.groupCombatRules,undefined);
+});

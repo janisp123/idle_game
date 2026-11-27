@@ -132,7 +132,8 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   const equipped=activePiece.hp>0;
   if(equipped && speedRoll()<activePiece.speed)actor.recovery=Math.max(0,actor.recovery-1);
   const handling=attack.move==="dagger"?TACTICS.daggerHandling:1;
-  const aim = AIM.base + (equipped?activePiece.accuracy*handling:0) + (actor.dex - target.dex) * AIM.dex + (actor.skill - target.skill) * AIM.skill +
+  const closeCasting=tacticalActor(actor)&&active.type==="magic"&&distance===0?COUNTERS.exposedCasterAimPenalty:0;
+  const aim = AIM.base - closeCasting + (equipped?activePiece.accuracy*handling:0) + (actor.dex - target.dex) * AIM.dex + (actor.skill - target.skill) * AIM.skill +
     (distance === 0 && bow ? AIM.closeBow : 0) + (distance===2&&bow?AIM.farBow:0) + (shortSpear ? AIM.closeSpear : attack.move==="thrust"&&distance===1?AIM.reachSpear:0) - obscuredShot - constriction * AIM.clearance * (actor.loadout==='greatsword'?1-.55*handlingScale(activePiece):1);
   if (roll() >= Math.max(AIM.minimum, Math.min(AIM.maximum, aim))) {
     record(actor, target, "miss", { move: attack.move });
@@ -172,6 +173,7 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
     if(actor.role==="melee"&&distance===0&&["mage","healer","summoner"].includes(target.role))matchup*=COUNTERS.exposedCasterMelee;
     if(actor.role==="healer")matchup*=COUNTERS.healerAttack;
     if(actor.role==="support")matchup*=COUNTERS.supportAttack;
+    if(actor.role==="summoner")matchup*=COUNTERS.summonerAttack;
   }
   const classScale=(attack.damageScale??1)*matchup*(1+(actor.classBuff??0))*(1-(actor.classWeaken??0))*(1-(target.classGuard??0));
   const impact = Math.max(1, Math.round(base * classScale * shotImpact * (vital ? 1+Math.max(0,.65+(equipped?activePiece.critDamage:0)-intactArmourSum(target,"critReduction")) : 1) *

@@ -3,6 +3,16 @@
 import {GROUP_IDS} from "./battle-group.mjs?v=group-001";
 import {GROUP_CLASSES,GROUP_RACES,RACE_LABELS,groupMainClasses,groupSpecializations} from "./battle-group-classes.mjs?v=group-001";
 import {ROLE_ICONS,renderGroupProgress} from "./battle-group-progress-view.mjs?v=group-006";
+// Concise role guidance, not promised win rates; exact class abilities differ.
+const ROLE_GUIDE=Object.freeze({
+ tank:"Protects nearby allies; resists arrows. Vulnerable to magic and armour breakers.",
+ ranged:"Pressures exposed casters and healers; weak against shields and close melee.",
+ melee:"Closes on exposed archers and casters; threatened by control and heavy armour.",
+ mage:"Bypasses physical shields; pressures tanks and clusters. Vulnerable at close range.",
+ healer:"Restores wounded allies; vulnerable to focus fire. Cannot revive.",
+ support:"Wards, buffs or weakens enemies; depends on allies to deal damage.",
+ summoner:"Hybrid attacks and signature utility; lower direct damage than a dedicated attacker."
+});
 const RACE_ICONS=Object.freeze({"human":"●","elf":"❋","dark_elf":"☾","orc":"◆","dwarf":"⬢"});
 const $=id=>document.getElementById(id),node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
 function choices(host,entries,value,onChoice){
@@ -45,6 +55,7 @@ export function createGroupEditor(onClass,onStance){
   });
   const status=draft&&(c.race!==r||c.mainClass!==k)?"Choose a specialization to change class. Active: "+c.name:"Active: "+c.name;
   if($("classChoiceStatus").textContent!==status)$("classChoiceStatus").textContent=status;
+  $("classRoleGuide").textContent=ROLE_GUIDE[c.role];
   for(const b of $("tacticButtons").children)b.setAttribute("aria-pressed",String(b.dataset.choice===m.stance));
   const key=JSON.stringify([selected,m]);if(key!==lastProgress){renderGroupProgress($("selectedClassProgress"),group,selected);lastProgress=key;}
  }

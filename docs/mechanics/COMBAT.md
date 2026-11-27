@@ -182,3 +182,6 @@ Testing: paired independent-seed counter matrix, all 15 armoured normal progress
 ## NPC-PARITY-001 candidate manager combat
 
 See [NPC parity plan](NPC_PARITY_PLAN.md): replace artificial difficulty with progression-matched rivals, use identical gear and mastery formulas, select builds before terrain, and separate the reward tier from combat difficulty. Exact candidate implementation and limitations are in the plan; not yet verified live.
+
+
+First candidate 0ff3206 verified website 45982905013 (161 tests, real Chromium 390/1440), raw PR comment 7216036032; reproducible [report](mechanics/GROUP_COUNTER_SCREEN_20261127.md). 5040 clone bouts + 840 direct role battles. Archer stack 35/120 vs old 115/120, tanks 40/40 vs archers, mages 40/40 vs tanks; summoner stack 86W/33L/1D, mage 78/120, default49/120. First pass not balanced/merged. Follow-up candidate: slight relief for shielded-arrow unblocked hits, summoner hybrid damage cost, close-range spell aim penalty, preference for reachable counter-targets instead of unreachable focus, central three-lane bridge movement choke (not forced composition), role help in class editor, preview key includes rule version, frozen v1 513-bout golden test. Re-run same max-only cohort/matrix; no lower-tier tuning. Candidate v2 still unreleased.
