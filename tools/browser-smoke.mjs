@@ -397,6 +397,17 @@ try{
     const verdict=await evaluate(`(()=>({outcome:document.getElementById("battleFighters").dataset.outcome,value:document.getElementById("battleCalculation").value,cursor:JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).combatSession.prizeCursor,reward:document.getElementById("arenaReward").textContent}))()`);
     assert.equal(verdict.outcome,setup.outcome);assert.equal(verdict.value,100);assert.equal(verdict.cursor,1);if(setup.coins)assert.match(verdict.reward,new RegExp("\\+"+setup.coins));
     await shot("arena-result-"+width);
+    // Analytics must count the committed result even while collapsed.
+    const analytics=await evaluate(`(()=>{const p=document.getElementById("battleAnalyticsPanel"),a=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).battleAnalytics;return {open:p.open,visible:document.getElementById("battleAnalyticsBody").checkVisibility(),outcomes:a.all.outcomes,coins:a.all.coins};})()`);
+    assert.equal(analytics.open,false);assert.equal(analytics.visible,false);assert.equal(analytics.outcomes.reduce((a,b)=>a+b,0),1);assert.equal(analytics.coins,setup.coins);
+    await evaluate('document.querySelector("#battleAnalyticsPanel > summary").click()');
+    await until(()=>evaluate('document.querySelectorAll("#battleAnalyticsBody .analytics-kpi").length===6'),"analytics metrics");
+    assert.ok(await evaluate('document.getElementById("battleAnalyticsBody").textContent.includes("Against enemy team combinations") && document.documentElement.scrollWidth-innerWidth<=2'));
+    await evaluate('document.querySelector("#battleAnalyticsScope [data-choice=latest]").click()');
+    assert.ok(await evaluate('document.getElementById("battleAnalyticsBody").textContent.includes("Last fought setup")'));
+    await shot("battle-analytics-"+width);
+    await evaluate('document.querySelector("#battleAnalyticsPanel > summary").click()');
+    assert.equal(await evaluate('!document.getElementById("battleAnalyticsPanel").open'),true);
     await until(()=>evaluate('document.getElementById("battleFighters").dataset.phase==="calculating"'),"arena next bout");
     assert.equal(await evaluate('document.getElementById("battleCalculation").value'),0);
     assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).combatSession.prizeCursor`),1);
