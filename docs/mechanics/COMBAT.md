@@ -1,5 +1,8 @@
 # Physical arena combat
 
+
+ARENA-PREFERENCES-001 #219 — Owner approved three stars, 24h lock and equal PvP averaging. Local NPC arena uses one player distribution (22.5% starred, 6.5% others, 12.5% neutral). Future PvP pure helper averages both distributions (22.5/14.5/6.5 when both choose three). Existing frozen battles retain old selection until live boundary; offline settlement uses frozen favorites. Local real-clock lock is not tamper-resistant; no multiplayer backend exists. Candidate code, tests and UI saved; CI pending, reconcile overlapping V10 #218 before merge.
+
 ## GROUP-COUNTERS-001 candidate (PR #200)
 
 GROUP-COUNTERS-001 candidate v2: centered frontline/backline formations, tank shield arrow interception within two tiles up to twice per round, stronger actual arrow blocks and guarded arrow damage reduction, magic bypasses shield/parry and pressures tanks, mobile melee closes faster/pressures casters, no free recovery kiting, healer/support attack tradeoff and 2-round recipient heal window. All candidate coefficients centralized in group-counter-rules.mjs. New group sessions v2; old sessions explicitly resolve v1, transition only at completed foreground boundary, no paid cursor loss. Legacy nonclass duels unchanged. 5040 comparable max-only screen plus 840 direct paired role/terrain battles; functional checks for arrow intercept, block, magic bypass and healer access. Pending CI; no claim of balance or release.

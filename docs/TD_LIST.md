@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## ARENA-PREFERENCES-001 — Preferred environments
+
+- **Goal / acceptance:** Exactly three starred zones; +10 percentage points per favorite, 24h lock, equal averaging for future PvP, deterministic frozen arena selection and local save/UI.
+- **Status:** IN_REVIEW — candidate PR #219; CI and V10 overlap reconciliation pending. Server anti-cheat is a future multiplayer requirement.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+- **Dependencies:** EIGHT-ARENAS-001.
+
 ## CLASS-MASTERY-002 — Meaningful class skill progression
 
 - **Goal / acceptance:** Level 1 ability effectiveness 50%, level 50 100%; mastery increases class effect reliability and scaled debuff magnitude without longer hard control, preserve max combat and frozen saves.

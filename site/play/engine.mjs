@@ -477,6 +477,7 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
  let group=state.battleGroup,teamwork=state.teamwork,session=state.combatSession,old=null;
  const totals=Object.fromEntries(arenaFields.map(k=>[k,0])),practiceMs=Object.fromEntries(GROUP_IDS.map(id=>[id,0])),groupAnalytics=[];
  const shared=desiredArenaPlayer(state),rules=state.arenaOnly?9:GROUP_COMBAT_RULES_VERSION;
+ const arenaFavorites=state.arenaOnly?(state.arenaPreferences?.favorites??[]):undefined;
  const desired=groupSnapshots(group,shared,rules),bonus=state.arenaOnly?raidCombatBonus(state.raidBuff,state.settledAtMs):null;
  if(session&&session.timelineVersion!==GROUP_TIMELINE_VERSION){
   const duration=teamBoutMs(session),remaining=(duration-session.elapsedMs%duration)%duration;
@@ -486,12 +487,12 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
    for(const k of arenaFields)totals[k]+=old[k];
   }
   const factor=teamBoutMs(session)/GROUP_BOUT_MS;
-  session=startGroupSession(group,shared,teamwork.level,(state.settledAtMs+remaining)>>>0,{coinRemainder:(session.coinRemainder??0)*factor,teamworkRemainder:(session.teamworkRemainder??0)*factor,rules:online?rules:GROUP_COMBAT_RULES_VERSION,bonus:online?bonus:null});
+  session=startGroupSession(group,shared,teamwork.level,(state.settledAtMs+remaining)>>>0,{coinRemainder:(session.coinRemainder??0)*factor,teamworkRemainder:(session.teamworkRemainder??0)*factor,rules:online?rules:GROUP_COMBAT_RULES_VERSION,bonus:online?bonus:null,...(online&&arenaFavorites!==undefined?{arenaFavorites}:{})});
   elapsedMs-=remaining;
  }
- if(!session)session=startGroupSession(group,shared,teamwork.level,state.settledAtMs>>>0,{rules,bonus});
+ if(!session)session=startGroupSession(group,shared,teamwork.level,state.settledAtMs>>>0,{rules,bonus,...(arenaFavorites!==undefined?{arenaFavorites}:{})});
  const run=ms=>{
-  const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.rank.grade,session.groupCombatRules??1,session.raidBonus??null]);
+  const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.rank.grade,session.groupCombatRules??1,session.raidBonus??null,session.arenaFavorites??null]);
   if(outcomeCaches&&!outcomeCaches.has(key))outcomeCaches.set(key,new Map());
   const r=settleGroupSession(session,ms,outcomeCaches?.get(key));
   group=awardGroupPractice(group,session.players,r.practiceMs);teamwork=awardTeamwork(teamwork,r.teamworkXP);session=r.session;
@@ -507,7 +508,7 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
   if(elapsedMs<remaining){run(elapsedMs);return result();}
   if(remaining)run(remaining);
   const {raidBonus:oldBonus,...rest}=session;
-  session={...rest,...(online||!state.arenaOnly?{players:desired,teamworkLevel:teamwork.level}:{}),...(online?{groupCombatRules:rules}:{}),...([4,5,6,7,8,9].includes(online?rules:session.groupCombatRules)&&bonus?{raidBonus:bonus}:{})};elapsedMs-=remaining;
+  session={...rest,...(online||!state.arenaOnly?{players:desired,teamworkLevel:teamwork.level}:{}),...(online?{groupCombatRules:rules,...(arenaFavorites!==undefined?{arenaFavorites:[...arenaFavorites]}:{})}:{}),...([4,5,6,7,8,9].includes(online?rules:session.groupCombatRules)&&bonus?{raidBonus:bonus}:{})};elapsedMs-=remaining;
  }
  if(elapsedMs)run(elapsedMs);
  return result();

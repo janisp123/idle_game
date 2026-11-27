@@ -2,6 +2,7 @@
 // Owner-approved 10-second cadence, 1-second recovery and fractional payout.
 import {ARENA_SCHEDULE_BOUTS,BOUT_MS,seededCombatRandom,validCombatSession} from "./combat.mjs?v=gear-a3";
 import {chooseArena,groupArenaPool} from "./arenas.mjs?v=bal-002";
+import {validArenaFavorites,choosePreferredGroupArena} from "./arena-preferences.mjs";
 import {GROUP_IDS,groupSnapshots,awardGroupPractice,validBattleGroup} from "./battle-group.mjs?v=group-001";
 import {validGroupSnapshot} from "./battle-group-actions.mjs?v=kits-001";
 import {captureGroupCloneEnvelope,validGroupCloneEnvelope,buildGroupCloneTeam} from "./battle-group-clones.mjs?v=group-003";
@@ -27,12 +28,12 @@ function validPlayers(p,rules){
 }
 export function validGroupSession(s){
  return Boolean(s?.timelineVersion===GROUP_TIMELINE_VERSION&&count(s.seed)&&s.seed<=0xffffffff&&count(s.elapsedMs)&&s.prizeCursor===Math.floor(s.elapsedMs/duration)&&
-  [s.coinRemainder,s.teamworkRemainder].every(n=>count(n)&&n<ratio)&&validTeamwork({level:s.teamworkLevel,xp:0})&&validPlayers(s.players,s.groupCombatRules??1)&&(s.raidBonus===undefined||[4,5,6,7,8,9].includes(s.groupCombatRules)&&validRaidCombatBonus(s.raidBonus))&&validGroupRank(s.rank)&&(s.groupCombatRules===undefined||SUPPORTED_GROUP_COMBAT_RULES.includes(s.groupCombatRules)));
+  (s.arenaFavorites===undefined||(groupArenaPool(s.groupCombatRules??1).length===8&&validArenaFavorites(s.arenaFavorites)))&&[s.coinRemainder,s.teamworkRemainder].every(n=>count(n)&&n<ratio)&&validTeamwork({level:s.teamworkLevel,xp:0})&&validPlayers(s.players,s.groupCombatRules??1)&&(s.raidBonus===undefined||[4,5,6,7,8,9].includes(s.groupCombatRules)&&validRaidCombatBonus(s.raidBonus))&&validGroupRank(s.rank)&&(s.groupCombatRules===undefined||SUPPORTED_GROUP_COMBAT_RULES.includes(s.groupCombatRules)));
 }
 export function startGroupSession(group,shared,teamworkLevel,seed,carry={}){
  const s={timelineVersion:GROUP_TIMELINE_VERSION,groupCombatRules:carry.rules??GROUP_COMBAT_RULES_VERSION,seed,elapsedMs:0,prizeCursor:0,teamworkLevel,
   coinRemainder:carry.coinRemainder??0,teamworkRemainder:carry.teamworkRemainder??0,
-  players:groupSnapshots(group,shared,carry.rules??GROUP_COMBAT_RULES_VERSION),...(carry.bonus?{raidBonus:carry.bonus}:{}),rank:carry.rank??initialGroupRank(cloneRewardGrade(shared.skill))};
+  players:groupSnapshots(group,shared,carry.rules??GROUP_COMBAT_RULES_VERSION),...(carry.arenaFavorites!==undefined?{arenaFavorites:[...carry.arenaFavorites]}:{}),...(carry.bonus?{raidBonus:carry.bonus}:{}),rank:carry.rank??initialGroupRank(cloneRewardGrade(shared.skill))};
  if(!validGroupSession(s))throw new RangeError("Invalid frozen group session");
  return structuredClone(s);
 }
@@ -42,7 +43,7 @@ function bout(s,index){
  const scheduled=index%ARENA_SCHEDULE_BOUTS,seed=Math.imul(s.seed^scheduled,2654435761)>>>0;
  const bracket=rankProfile(s.rank.grade),players=GROUP_IDS.map(id=>s.players[id]),enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,s.groupCombatRules??1);
  const roll=seededCombatRandom((seed^0x749ae237)>>>0);
- const positioning=chooseArena(players[Math.floor(roll()*players.length)],enemies[Math.floor(roll()*enemies.length)],roll,groupArenaPool(s.groupCombatRules??1));
+ const positioning=s.arenaFavorites===undefined?chooseArena(players[Math.floor(roll()*players.length)],enemies[Math.floor(roll()*enemies.length)],roll,groupArenaPool(s.groupCombatRules??1)):{arena:choosePreferredGroupArena(s.arenaFavorites,roll)};
  const terrain=positioning.arena;
  const result=resolveTeamBattle(players,enemies,seed,terrain,{player:s.teamworkLevel,enemy:bracket.teamworkLevel,groupCombatRules:s.groupCombatRules??1,...(s.raidBonus?{playerBonus:s.raidBonus}:{})});
  return {result,enemies,positioning,terrain};

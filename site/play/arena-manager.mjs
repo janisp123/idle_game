@@ -1,6 +1,7 @@
 // Public arena/raid coordinator. Legacy work remains isolated.
 import {newArenaManager,enableArenaOnly,readManagerGame,enterManagerGame,settleManagerLive,chooseManagerGroupClass,chooseManagerGroupStance} from "./manager-lanes.mjs?v=raid-001";
 import {validRaidRun,validRaidLast,beginRaid,advanceRaid} from "./raid-session.mjs";
+import {saveArenaPreferences} from "./arena-preferences.mjs";
 export {newArenaManager,enableArenaOnly};
 export function readArenaManager(value){
  try{
@@ -28,3 +29,11 @@ export function startArenaRaid(s,level,now=s.settledAtMs,random=Math.random){
 }
 export const chooseArenaClass=(s,...args)=>s.raidRun?{state:s,reports:[]}:chooseManagerGroupClass(requireArena(s),...args);
 export const chooseArenaStance=(s,...args)=>s.raidRun?{state:s,reports:[]}:chooseManagerGroupStance(requireArena(s),...args);
+
+// Real wall-clock lock is separate from the accelerated alpha game clock.
+export function chooseArenaPreferences(s,favorites,now=s.settledAtMs,wallNow=Date.now(),random=Math.random){
+ requireArena(s);
+ const preferences=saveArenaPreferences(s.arenaPreferences,favorites,wallNow);
+ const out=settleArenaLive(s,now,random);
+ return {...out,state:{...out.state,arenaPreferences:preferences}};
+}
