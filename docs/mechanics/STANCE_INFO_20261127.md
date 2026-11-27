@@ -1,0 +1,3 @@
+# Combat stance information
+
+Owner requested immediate explanations beside each stance, 2026-11-27. UI-only follow-up to TACTIC-UI-001. Three separate accessible 44px info buttons, read-only dialog with selected fighter's own mastery and actual activation chance from manager-tactics, class-dependent behaviour, benefits and costs, tank priority caveat. Existing selection callbacks and combat rules unchanged. Browser smoke checks all three dialogs, content, no selection/coin mutation and no horizontal overflow. Pending final-head checks; unrelated eight-zone PR #214 may complete independently. No overlapping shared task/checkpoint edits.

@@ -5,6 +5,7 @@ import {GROUP_CLASSES,GROUP_RACES,RACE_LABELS,groupMainClasses,groupSpecializati
 import {ROLE_ICONS,renderGroupProgress} from "./battle-group-progress-view.mjs?v=individual-stats-001";
 import {classTacticalInfo} from "./class-tactical-info.mjs?v=class-info-002";
 import {CHARACTER_CLASS_PROFILES,CHARACTER_ATTRIBUTE_IDS} from "./character-attributes.mjs";
+import {stanceInfo} from "./stance-info.mjs";
 const RACE_ICONS=Object.freeze({"human":"●","elf":"❋","dark_elf":"☾","orc":"◆","dwarf":"⬢"});
 const $=id=>document.getElementById(id),node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
 function choices(host,entries,value,onChoice){
@@ -54,6 +55,7 @@ function specializationChoices(host,entries,value,onChoice){
 }
 export function createGroupEditor(onClass,onStance){
  $("classInfoClose").addEventListener("click",()=>$("classInfoDialog").close());
+ $("stanceInfoClose").addEventListener("click",()=>$("stanceInfoDialog").close());
  let current=null,selected=GROUP_IDS[0],draft=null,lastProgress="";
  const host=$("fighterButtons");
  for(const id of GROUP_IDS){
@@ -62,7 +64,21 @@ export function createGroupEditor(onClass,onStance){
  }
  const race=$("raceChoice"),main=$("mainClassChoice"),special=$("specialClassChoice");
  for(const stance of ["aggressive","balanced","defensive"]){
-  const b=node("button",stance[0].toUpperCase()+stance.slice(1));b.type="button";b.dataset.choice=stance;b.addEventListener("click",()=>onStance(selected,stance));$("tacticButtons").append(b);
+  const label=stance[0].toUpperCase()+stance.slice(1),wrap=node("div");wrap.className="specialization-option stance-option";
+  const b=node("button",label);b.type="button";b.dataset.choice=stance;b.addEventListener("click",()=>onStance(selected,stance));
+  const info=node("button","ⓘ");info.type="button";info.dataset.stanceInfo=stance;info.className="class-info-button";info.setAttribute("aria-label","Information about "+label+" stance");
+  info.addEventListener("click",()=>{
+   const m=current?.[selected];if(!m)return;
+   const data=stanceInfo(stance,m.stances[stance].level),dialog=$("stanceInfoDialog");
+   $("stanceInfoHeading").textContent=data.name;
+   $("stanceInfoMastery").textContent=data.mastery;
+   $("stanceInfoBehaviour").textContent=data.behaviour;
+   $("stanceInfoStrengths").textContent=data.strengths;
+   $("stanceInfoTradeoffs").textContent=data.tradeoffs;
+   $("stanceInfoShared").textContent=data.shared;
+   if(!dialog.open)dialog.showModal();
+  });
+  wrap.append(b,info);$("tacticButtons").append(wrap);
  }
  function render(group){
   if(!group)return;current=group;
@@ -80,7 +96,7 @@ export function createGroupEditor(onClass,onStance){
   });
   const status=draft&&(c.race!==r||c.mainClass!==k)?"Choose a specialization to change class. Active: "+c.name:"Active: "+c.name;
   if($("classChoiceStatus").textContent!==status)$("classChoiceStatus").textContent=status;
-  for(const b of $("tacticButtons").children)b.setAttribute("aria-pressed",String(b.dataset.choice===m.stance));
+  for(const b of $("tacticButtons").querySelectorAll("button[data-choice]"))b.setAttribute("aria-pressed",String(b.dataset.choice===m.stance));
   const key=JSON.stringify([selected,m]);if(key!==lastProgress){renderGroupProgress($("selectedClassProgress"),group,selected);lastProgress=key;}
  }
  return {render,reset(){selected=GROUP_IDS[0];draft=null;lastProgress="";}};
