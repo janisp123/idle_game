@@ -11,7 +11,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## RAID-001 — Raid bosses and blessings
 
 - **Goal / acceptance:** Five raids (10/20/30/40/50), unique boss and six minions, tactical resistances, about five minutes for appropriate good team, coins and nonstacking 24-hour +10% Fighting XP, up to +10% damage/defence. Manual start, automatic fight/resume, persisted one-time rewards, mobile raid view.
-- **Status:** PARTIAL — catalog, real combat encounter and blessing rule foundation; CI and live integration pending.
+- **Status:** PARTIAL — full playable raid candidate with saved runs, buffs, coins and mobile UI; CI and duration/balance calibration pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

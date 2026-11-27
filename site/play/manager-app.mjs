@@ -1,11 +1,12 @@
-import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=individual-stats-001";
-import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance} from "./arena-manager.mjs?v=individual-stats-001";
+import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=raid-001";
+import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid} from "./arena-manager.mjs?v=raid-001";
 import {createGroupEditor} from "./battle-group-editor.mjs?v=individual-stats-001";
 import {renderGroupAnalytics} from "./battle-group-analytics-view.mjs?v=group-006";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,migrateLegacyManager} from "./manager-migration.mjs?v=individual-stats-001";
 import {ITEM_GRADES} from "./smith.mjs?v=gear-a3";
-import {createArenaView} from "./arena-view.mjs?v=individual-stats-001";
+import {createArenaView} from "./arena-view.mjs?v=raid-001";
+import {createRaidView} from "./raid-view.mjs";
 import {cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
 import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=individual-stats-001";
 
@@ -15,6 +16,7 @@ const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString("en-GB")
 let state,stored=null,clock=null,lastVisible=false,chain=Promise.resolve(),feed=[],loginLines=[],loginSummary="No return rewards yet.",blocked=false;
 const now=()=>alphaTime(clock,Date.now());
 const arenaView=createArenaView();
+const raidView=createRaidView(level=>choose((s,t)=>startArenaRaid(s,level,t)));
 const editor=createGroupEditor((id,c)=>choose((s,t)=>chooseArenaClass(s,id,c.race,c.mainClass,c.id,t)),(id,stance)=>choose((s,t)=>chooseArenaStance(s,id,stance,t)));
 const node=(tag,content)=>{const n=document.createElement(tag);if(content!==undefined)n.textContent=content;return n;};
 function text(id,value){$(id).textContent=value;}
@@ -23,7 +25,7 @@ function choice(host,entries,value,handler){for(const [id,label] of entries){con
 function pressed(host,id){for(const b of host.querySelectorAll("button"))b.setAttribute("aria-pressed",String(b.dataset.choice===id));}
 function renderList(host,rows){host.replaceChildren(...rows.flatMap(([a,b])=>[node("span",a),node("strong",String(b))]));}
 function reportLines(out){
- const lines=[],sum={bouts:0,victories:0,defeats:0,doubleDeaths:0,coins:0};
+ const lines=[];if(out.raidFinished){const r=out.raidFinished;lines.push("Raid Lv "+r.level+" · "+(r.outcome==="victory"?"Victory · +"+fmt(r.coins)+" coins · blessing awarded or refreshed if eligible":"Defeat"));}const sum={bouts:0,victories:0,defeats:0,doubleDeaths:0,coins:0};
  for(const r of out.reports??[])for(const k of Object.keys(sum))sum[k]+=r?.arena?.[k]??0;
  if(sum.bouts)lines.push(sum.bouts+" battles · "+sum.victories+" wins · "+sum.defeats+" losses · "+sum.doubleDeaths+" draws · +"+fmt(sum.coins)+" coins");
  if(out.levelsGained?.fighting)lines.push("Fighting +"+out.levelsGained.fighting+" level(s)");
@@ -47,7 +49,10 @@ function render(){
  text("arenaStage","Arena difficulty: "+ITEM_GRADES[state.combatSession?.rank?.grade??cloneRewardGrade(state.skills.fighting.level)]);text("fightingLevel","Fighting Lv "+state.skills.fighting.level);meter("fightingXP",state.skills.fighting);
  text("arenaNext", "Automatic matchmaking · Teamwork Lv "+state.teamwork.level);
  $("groupProgressOverview").hidden=false;if($("progressPanel").open)renderGroupProgress($("groupProgressOverview"),state.battleGroup);
- arenaView.render(state);
+ if(!state.raidRun)arenaView.render(state);
+ raidView.render(state);
+ $("alphaCoins").disabled=Boolean(state.raidRun);$("alphaMaxStats").disabled=Boolean(state.raidRun);
+ for(const b of document.querySelectorAll("#raceChoice button[data-choice],#mainClassChoice button[data-choice],#specialClassChoice button[data-choice],#tacticButtons button"))b.disabled=Boolean(state.raidRun);
  if($("battleAnalyticsPanel").open&&(lastAnalytics!==state.groupAnalytics||lastAnalyticsScope!==analyticsScope)){
   renderGroupAnalytics($("battleAnalyticsBody"),state.groupAnalytics,analyticsScope,state.battleAnalytics);lastAnalytics=state.groupAnalytics;lastAnalyticsScope=analyticsScope;
  }

@@ -420,7 +420,13 @@ try{
     await until(()=>evaluate('document.getElementById("battleFighters").dataset.phase==="calculating"'),"arena next bout");
     assert.equal(await evaluate('document.getElementById("battleCalculation").value'),0);
     assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).combatSession.prizeCursor`),1);
-    console.log("Manager public route and minimal arena verdict passed "+width+"px");
+    await evaluate('document.querySelector("#raidPanel > summary").click()');
+    assert.equal(await evaluate('document.querySelectorAll("#raidChoices button[data-raid-level]").length'),5);
+    await evaluate('document.querySelector("#raidChoices [data-raid-level=10]").click()');
+    await until(()=>evaluate('!document.getElementById("raidBattle").hidden && document.querySelectorAll("#raidMinions .raid-fighter").length===6'),"raid encounter rendered");
+    assert.ok(await evaluate('document.querySelectorAll("#raidPlayers .raid-fighter").length===7 && document.querySelector("#raidBoss .raid-boss").textContent.includes("Ironjaw") && document.getElementById("battleFighters").hidden && document.documentElement.scrollWidth-innerWidth<=2'));
+    await shot("raid-"+width);
+    console.log("Manager public route, arena and raid screen passed "+width+"px");
 
   }
   assert.deepEqual(runtimeErrors,[],"browser runtime errors");

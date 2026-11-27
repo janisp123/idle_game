@@ -76,3 +76,6 @@ RAID-001 STARTED (owner approval 2026-11-27). Individual stats #206 merged, 181 
 
 
 RAID-001 stage 2 candidate: persisted frozen attempt and single settlement through public arena coordinator, arena paused during raid; offline resume, nonstacking blessings integrated into actual fighting XP cap and v4 combat bonus snapshots, split at expiry. UI and CI pending. No numeric balance claims.
+
+
+RAID-001 stage 3 candidate — launch buttons for all five raids, saved deterministic encounter, automatic arena pause/resume, strict knockout and one-time coins/blessing, 24h XP and combat bonus, expiry split, larger boss and six minion cards with actual health and weapon icons; mobile smoke and reward/reload tests. Candidate 2.5-second rounds, 120-round limit. Initial balance screen pending; approximate five-minute appropriate-level wins unverified. CI pending; do not claim deployed.

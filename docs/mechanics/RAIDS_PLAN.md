@@ -13,3 +13,7 @@ Raids levels 10, 20, 30, 40, 50, named boss plus six fixed named minions using v
 5. Calibrate with appropriate-grade mixed and counter teams across fixed seeds; report actual durations and success rates, use independent holdouts. Alpha merge tested increments, no final balance promises.
 
 Candidate decisions: coins 200/500/1000/2000/4000; fixed 7 monsters; duration determined by actual rounds, not fake progress. Exact grades, encounter HP/damage/resistance and coin amounts are provisional. Raid rewards are coins and temporary blessing only; no extra attribute or class XP from raid itself in this first design. Keep one compact rules module and one encounter module, reusing existing combat and save architecture.
+
+## Playable candidate
+
+RAID-001 stage 3 candidate — launch buttons for all five raids, saved deterministic encounter, automatic arena pause/resume, strict knockout and one-time coins/blessing, 24h XP and combat bonus, expiry split, larger boss and six minion cards with actual health and weapon icons; mobile smoke and reward/reload tests. Candidate 2.5-second rounds, 120-round limit. Initial balance screen pending; approximate five-minute appropriate-level wins unverified. CI pending; do not claim deployed.

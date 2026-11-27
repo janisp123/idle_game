@@ -59,4 +59,4 @@ Individual training ledger candidate: existing per-slot class records store six 
 
 ## Raid bosses
 
-[RAID-001 plan](RAIDS_PLAN.md) — encounter and reward rules foundation; public launch and reward application not yet integrated.
+[RAID-001 plan](RAIDS_PLAN.md) — playable candidate including public launch and reward application; CI and calibration pending.

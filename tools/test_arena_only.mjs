@@ -39,3 +39,34 @@ test("offline cap freezes earned rewards, no noncombat catch-up and automatic fi
 
 import {readArenaManager,settleArenaLive,enterArena} from "../site/play/arena-manager.mjs";
 test("public arena adapter migrates old saves and refuses legacy work settlement",()=>{const old=newBattleGroupManager(now);assert.throws(()=>settleArenaLive(old,now+10000,rand),/arena-only/);const s=readArenaManager(JSON.stringify(old));noWork(s);const n=enterArena(s,now+20000,rand).state;noWork(n);assert.equal(n.skills.hunting.xp,0);assert.equal(n.groupAnalytics.all.ms,20000);});
+
+import {startArenaRaid} from "../site/play/arena-manager.mjs";
+import {RAID_BUFF_MS,raidBonus,raidVictoryBuff} from "../site/play/raid-rules.mjs";
+import {raidResult} from "../site/play/raid-session.mjs";
+import {alphaMaxStats} from "../site/play/alpha-tools.mjs";
+import {upgradeBattleGroup} from "../site/play/battle-group.mjs";
+import {RAID_CATALOG} from "../site/play/raid-rules.mjs";
+test("raid pause, persisted frozen attempt, completion once, and resumed arena",()=>{
+ let s=newArenaManager(now);s=alphaMaxStats(s,"none",now,rand).state;s={...s,battleGroup:upgradeBattleGroup(s.battleGroup,100000000,52).group};
+ const out=startArenaRaid(s,10,now,rand),run=out.state.raidRun,end=run.startedAtMs+run.durationMs,r=raidResult(run);
+ assert.ok(run);assert.deepEqual(startArenaRaid(out.state,20,now,rand).state,out.state);
+ const mid=settleArenaLive(out.state,now+Math.floor(run.durationMs/2),rand).state;
+ assert.deepEqual(mid.combatSession,out.state.combatSession);assert.equal(mid.coins,out.state.coins);
+ assert.deepEqual(mid.battleGroup,out.state.battleGroup);
+ const restored=readArenaManager(JSON.stringify(mid));assert.deepEqual(restored,mid);
+ const finish=enterArena(restored,end,rand);assert.equal(finish.state.raidRun,null);assert.equal(finish.raidFinished.outcome,r.outcome);
+ assert.equal(finish.raidFinished.coins,r.outcome==="victory"?RAID_CATALOG[10].coins:0);
+ assert.equal(finish.state.coins,mid.coins+finish.raidFinished.coins);
+ if(r.outcome==="victory")assert.equal(finish.state.raidBuff.expiresAtMs,end+RAID_BUFF_MS);
+ const replay=enterArena(readArenaManager(JSON.stringify(finish.state)),end,rand);assert.equal(replay.raidFinished,undefined);assert.equal(replay.state.coins,finish.state.coins);
+ const later=enterArena(replay.state,end+20000,rand).state;assert.ok(later.groupAnalytics.all.ms>finish.state.groupAnalytics.all.ms);
+});
+test("active raid blessing multiplies actual fighting XP and frozen combat bonus expires",()=>{
+ const s=newArenaManager(now),base={...s,skills:{...s.skills,fighting:{level:30,xp:0}}};
+ const boosted={...base,raidBuff:raidVictoryBuff(null,50,now)},end=now+10000;
+ const a=settleManagerOffline(base,end,rand).state,b=settleManagerOffline(boosted,end,rand).state;
+ assert.ok(b.skills.fighting.xp>a.skills.fighting.xp);assert.deepEqual(b.combatSession.raidBonus,{damage:.1,defence:.1});
+ const expired={...b,raidBuff:{level:50,expiresAtMs:end+1000}};
+ const c=settleManagerOffline(expired,end+20000,rand).state;assert.equal(c.combatSession.raidBonus,undefined);
+ assert.equal(raidBonus(c.raidBuff,c.settledAtMs).xp,0);
+});

@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — RAID-001 playable candidate
+
+RAID-001 stage 3 candidate — launch buttons for all five raids, saved deterministic encounter, automatic arena pause/resume, strict knockout and one-time coins/blessing, 24h XP and combat bonus, expiry split, larger boss and six minion cards with actual health and weapon icons; mobile smoke and reward/reload tests. Candidate 2.5-second rounds, 120-round limit. Initial balance screen pending; approximate five-minute appropriate-level wins unverified. CI pending; do not claim deployed.
+
 ## 2026-11-27 — RAID-001 STARTED
 
 RAID-001 STARTED (owner approval 2026-11-27). Individual stats #206 merged, 181 tests and all seven workflows passed. Five named raids and fixed crews, explicit raid-only knockout combat and nonstacking 24h blessing functions implemented as stage 1 foundation. No public raid launch or applied rewards yet; CI, raw initial screen, save/expiry integration and UI pending. See docs/mechanics/RAIDS_PLAN.md.
