@@ -8,10 +8,11 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
-## PROGRESS-UI-001 — Collapsible progress
+## PROGRESS-UI-001 — Collapsible progress and gladiators
 
 - **Goal / acceptance:** PROGRESS-UI-001 — Owner requested collapsible Progress section, closed by default, with existing last login report, live feed and resources available when expanded. No gameplay, save, or report changes. STARTED by chat; baseline b21e7caa (#193 deployed, Pages 45938381622 success).
-- **Status:** IN_REVIEW — implementation started.
+- **Extension / acceptance:** Owner extended scope 2026-11-27: Gladiators also collapsible, closed on initial page load; native details/summary; all choices remain intact when folded. Browser checks open, select independent loadout, close during automatic play and upgrades, reopen and verify selected weapon/armour/tactic; Progress also checked for live hidden entries and report. No JS or save schema changes; disclosure state is page-local and not persisted on reload. Final CI pending.
+- **Status:** IN_REVIEW — candidate implemented.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

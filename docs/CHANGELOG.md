@@ -2,6 +2,8 @@
 
 ## PROGRESS-UI-001 · STARTED (2026-11-27, chat)
 
+Owner extended scope 2026-11-27: Gladiators also collapsible, closed on initial page load; native details/summary; all choices remain intact when folded. Browser checks open, select independent loadout, close during automatic play and upgrades, reopen and verify selected weapon/armour/tactic; Progress also checked for live hidden entries and report. No JS or save schema changes; disclosure state is page-local and not persisted on reload. Final CI pending.
+
 Candidate: use native details/summary for the entire Progress card (closed by default); preserve all existing content IDs and JS, no engine or save changes. Browser smoke verifies default hidden feed continues receiving entries, expand and reopen report, collapse again and no overflow at both tested widths. Tests pending.
 
 PROGRESS-UI-001 — Owner requested collapsible Progress section, closed by default, with existing last login report, live feed and resources available when expanded. No gameplay, save, or report changes. STARTED by chat; baseline b21e7caa (#193 deployed, Pages 45938381622 success).

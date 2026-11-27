@@ -17,8 +17,8 @@
 <header class="manager-heading"><div><p class="eyebrow">THE ARENA · ALPHA</p><h1 id="character-heading">Your gladiators</h1></div><strong id="coinWallet">0 coins</strong></header>
 <p id="migrationNotice" role="status" hidden></p>
 <div class="manager-grid">
-<section class="manager-card" aria-labelledby="gladiatorsHeading">
-<h2 id="gladiatorsHeading">Gladiators</h2>
+<details id="gladiatorsPanel" class="manager-card" aria-labelledby="gladiatorsHeading">
+<summary id="gladiatorsHeading">Gladiators</summary>
 <div id="fighterButtons" class="choice-grid two" role="group" aria-label="Choose gladiator"></div>
 <p id="teamLoadouts" class="quiet"></p>
 <h3>Weapon</h3><div id="weaponButtons" class="choice-grid two" role="group" aria-label="Choose weapon"></div>
@@ -27,7 +27,7 @@
 <h3>Fighting tactic</h3><div id="tacticButtons" class="choice-grid three" role="group" aria-label="Choose fighting tactic"></div>
 <p id="tacticStatus" class="quiet"></p>
 <p class="quiet">Equipment upgrades automatically. Changes take effect in the next battle.</p>
-</section>
+</details>
 <section class="manager-card arena-card" aria-labelledby="arenaHeading">
 <h2 id="arenaHeading">Arena <span class="live-label">Automatic</span></h2>
 <div class="line"><strong id="arenaStage">Non-grade</strong><span id="fightingLevel">Fighting Lv 1</span></div>
