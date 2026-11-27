@@ -8,6 +8,14 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## BATTLE-ANALYTICS-001 — Foldable battle analytics
+
+- **Goal / acceptance:** BATTLE-ANALYTICS-001 — Owner requested 2026-11-27: collapsible Battle Analytics, lifetime recorded battle totals, wins, defeats, draws, win/loss by actual arena and opposing weapon/team composition, average gross arena coins per arena hour. Use committed results only, including bounded frozen offline settlement; no guessed historical breakdown, no per-bout history, no changes to outcome/reward mechanics. Show win rate and sample count, meaningful empty state. Proposed distinction between all recorded battles and recent/current loadout to aid strategy; first implement bounded aggregate foundations and test exact counts, save/reload, offline splits, alpha credit exclusion and mobile display. Baseline a1ff98d (#195 merged; website 45946558825 passed, live deployment not independently verified).
+- **Status:** IN_REVIEW — candidate implemented; tests and mobile verification pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## ARENA-SPEED-001 — Faster actual manager battles
 
 - **Goal / acceptance:** ARENA-SPEED-001 — Owner approved 2026-11-27: actual manager bout 20 seconds (was 200), committed result displayed about 2 seconds; preserve hourly rewards, recovery ratio, skill/mastery pacing as closely as possible. No combat formula retune or third fighter. Versioned manager timeline, retain legacy 200-second format, exact fractional prize and Teamwork carry, preserve already paid cursor and proportional partial bout on migration. Test old/new timing, partition invariance, offline, live, save, UI. STARTED by chat; baseline c8ca08f.

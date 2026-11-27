@@ -7,8 +7,8 @@
 <title>The Long Vigil — Play</title>
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./game.css">
-<link rel="stylesheet" href="./manager-ui.css?v=arena-first-001">
-<script type="module" src="./manager-app.mjs?v=arena-speed-001"></script>
+<link rel="stylesheet" href="./manager-ui.css?v=analytics-001">
+<script type="module" src="./manager-app.mjs?v=analytics-001"></script>
 </head>
 <body>
 <a class="skip-link" href="#game">Skip to game</a>
@@ -36,6 +36,10 @@
 </div>
 <p id="battleResult" class="quiet arena-last-result" aria-live="polite">No completed battles yet.</p>
 </section>
+<details id="battleAnalyticsPanel" class="manager-card stats-card" aria-labelledby="battleAnalyticsHeading">
+<summary id="battleAnalyticsHeading">Battle Analytics</summary>
+<div class="choice-grid two" id="battleAnalyticsScope"></div><div id="battleAnalyticsBody"></div>
+</details>
 <details id="gladiatorsPanel" class="manager-card" aria-labelledby="gladiatorsHeading">
 <summary id="gladiatorsHeading">Gladiators</summary>
 <div id="fighterButtons" class="choice-grid two" role="group" aria-label="Choose gladiator"></div>

@@ -34,3 +34,7 @@
 5. **Keep docs in the same PR as formula changes.** Update numerical examples, relevant tests, and `docs/CHANGELOG.md` when a new mechanic ships. No independent duplicate copies of “official” values in other documentation.
 
 **Latest audit:** 2026-11-24; baseline: deterministic physical solo Fighting alpha, three-wagon alpha schedule, skill XP capped until Skill Master, time-based three attributes, weighted loot/crafting, V11 local saves. This is a browser-local prototype; no server-authoritative multiplayer or clan battle settlement.
+
+### Battle analytics (candidate BATTLE-ANALYTICS-001)
+
+`battle-analytics.mjs` consumes the same resolved, weighted team schedule as arena settlement, not replayed UI previews. The manager persists totals with its existing save; old saves start with empty analytics. Gross coins per completed arena hour excludes wallet credits and paused time, includes scheduled recovery. Weapon rows overlap when enemies use different weapons; team-pair and terrain counts partition the total. Latest setup is the latest consecutive fought selection (weapon, armour family, tactic); automatic grade/mastery changes do not reset it. No per-bout history or combat tuning. Candidate validation pending.

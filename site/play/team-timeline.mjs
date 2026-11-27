@@ -7,6 +7,7 @@ import { arenaReward } from "./arena-wallet.mjs?v=gear-a3";
 import { TEAM_IDS,awardTeamPractice } from "./team.mjs?v=team-001";
 import { awardTeamwork,coordinationChance } from "./teamwork.mjs?v=team-002";
 import { resolveTeamBattle } from "./team-combat.mjs?v=manager-tactics-001";
+import {newBattleDelta,recordBattleGroup} from "./battle-analytics.mjs?v=analytics-001";
 import {validTacticSnapshot} from "./manager-tactics.mjs?v=manager-tactics-001";
 
 export const TEAM_TIMELINE_VERSION=2;
@@ -85,7 +86,7 @@ export function teamCombatAtTime(session,elapsedMs=session?.elapsedMs){
     recovering:inside>=duration-recovery};
 }
 function summaryAt(session,index){
-  const {result}=boutAt(session,index);
+  const {result,terrain,enemies}=boutAt(session,index);
   const downtime=result.outcome==="victory"?0:teamRecoveryMs(session);
   // Practice candidate: survivors train for the productive bout; a fallen
   // member trains only through its last living round. No inactive-kit credit.
@@ -96,7 +97,7 @@ function summaryAt(session,index){
     const death=result.events.find(ev=>ev.vitals[actor].hp===0);
     return [id,death?Math.floor(productive*Math.min(result.rounds,death.round)/Math.max(1,result.rounds)):productive];
   }));
-  return {outcome:result.outcome,downtime,practice};
+  return {outcome:result.outcome,downtime,practice,zone:terrain.id,weapons:enemies.map(e=>e.loadout)};
 }
 export function settleTeamSession(session,elapsedMs,cache=new Map()) {
   if(!validTeamSession(session)||!count(elapsedMs)||!count(session.elapsedMs+elapsedMs))
@@ -107,6 +108,7 @@ export function settleTeamSession(session,elapsedMs,cache=new Map()) {
   const sampled=new Set(),counts={victory:0,defeat:0,double_death:0};
   const practiceMs=Object.fromEntries(TEAM_IDS.map(id=>[id,0]));
   let downtimeMs=0;
+  const analytics=isFastTeamSession(session)?newBattleDelta(session.players):null;
   const at=i=>{
     const index=i%ARENA_SCHEDULE_BOUTS;
     sampled.add(index);
@@ -116,6 +118,7 @@ export function settleTeamSession(session,elapsedMs,cache=new Map()) {
   for(let offset=0;offset<Math.min(bouts,ARENA_SCHEDULE_BOUTS);offset++){
     const n=repeats+Number(offset<extra),s=at(cursor+offset);
     counts[s.outcome]+=n;downtimeMs+=n*s.downtime;
+    if(analytics)recordBattleGroup(analytics,s.outcome,s.zone,s.weapons,n);
     for(const id of TEAM_IDS)practiceMs[id]+=n*s.practice[id];
   }
   const partial=ms=>{
@@ -128,10 +131,11 @@ export function settleTeamSession(session,elapsedMs,cache=new Map()) {
   const fast=isFastTeamSession(session),coinUnits=gross+(session.coinRemainder??0),workUnits=bouts+(session.teamworkRemainder??0);
   const coins=fast?Math.floor(coinUnits/SPEED_RATIO):gross;
   const teamworkXP=fast?Math.floor(workUnits/SPEED_RATIO):bouts;
+  if(analytics){analytics.coins=coins;analytics.ms=bouts*duration;}
   return {session:{...session,elapsedMs:end,prizeCursor:complete,
     ...(fast?{coinRemainder:coinUnits%SPEED_RATIO,teamworkRemainder:workUnits%SPEED_RATIO}:{})},bouts,teamworkXP,
     victories:counts.victory,defeats:counts.defeat,doubleDeaths:counts.double_death,
-    coins,downtimeMs,practiceMs,sampledBouts:sampled.size};
+    coins,downtimeMs,practiceMs,sampledBouts:sampled.size,...(analytics?{analytics}: {})};
 }
 // Apply to current owned choices using the OLD frozen snapshots. Login
 // activation and the activity XP cap remain the future engine's responsibility.

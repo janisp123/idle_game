@@ -1,16 +1,18 @@
-import {ACTIVITIES,ITEM_LABELS,ITEM_KEYS,SAVE_KEY,xpToNextLevel,desiredArenaTeam,teamFromState,enterGame} from "./engine.mjs?v=arena-speed-001";
-import {newManagerGame,readManagerGame,enterManagerGame,settleManagerLive,chooseManagerArmour,chooseManagerWeapon,chooseManagerTactic} from "./manager-lanes.mjs?v=arena-speed-001";
-import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,migrateLegacyManager} from "./manager-migration.mjs?v=arena-speed-001";
+import {ACTIVITIES,ITEM_LABELS,ITEM_KEYS,SAVE_KEY,xpToNextLevel,desiredArenaTeam,teamFromState,enterGame} from "./engine.mjs?v=analytics-001";
+import {newManagerGame,readManagerGame,enterManagerGame,settleManagerLive,chooseManagerArmour,chooseManagerWeapon,chooseManagerTactic} from "./manager-lanes.mjs?v=analytics-001";
+import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,migrateLegacyManager} from "./manager-migration.mjs?v=analytics-001";
 import {MANAGER_ARMOUR_FAMILIES,equippedArmourFamily,quoteArmourSet,managerEquipmentPreview} from "./manager-equipment.mjs?v=manager-gear-001";
 import {TACTIC_IDS,tacticRequiredXP} from "./manager-tactics.mjs?v=manager-tactics-001";
 import {WORK_ROTATION,nextRotationActivity,ingredientReserve} from "./activity-rotation.mjs?v=manager-rotation-001";
 import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=gear-a3";
 import {ITEM_GRADES} from "./smith.mjs?v=gear-a3";
-import {createArenaView} from "./arena-view.mjs?v=arena-speed-001";
+import {createArenaView} from "./arena-view.mjs?v=analytics-001";
 import {requiredAutoFightWins} from "./auto-fight.mjs?v=auto-fight-03";
 import {characterStats} from "./character-stats.mjs?v=apprentice-a4";
 import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=team-004";
 
+import {renderBattleAnalytics} from "./analytics-view.mjs?v=analytics-001";
+let analyticsScope="all",lastAnalytics=null,lastAnalyticsScope=null;
 const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString("en-GB"),title=s=>s[0].toUpperCase()+s.slice(1),label=id=>ITEM_LABELS[id]??id;
 const descriptions={aggressive:"Presses forward and focuses vulnerable enemies.",balanced:"Uses opportunities and normal protection.",defensive:"Protects allies and keeps distance where possible."};
 let state,stored=null,clock=null,selected="first",lastVisible=false,chain=Promise.resolve(),feed=[],loginLines=[],loginSummary="No return rewards yet.",blocked=false;
@@ -59,6 +61,9 @@ function render(){
  text("arenaStage",ITEM_GRADES[state.difficulties.fighting??0]);text("fightingLevel","Fighting Lv "+state.skills.fighting.level);meter("fightingXP",state.skills.fighting);
  const af=state.autoFight;let required=requiredAutoFightWins(af);text("arenaNext",required?"Next difficulty: "+af.streak+" / "+required+" wins · Teamwork Lv "+state.teamwork.level:"Teamwork Lv "+state.teamwork.level);
  arenaView.render(state);
+ if($("battleAnalyticsPanel").open&&(lastAnalytics!==state.battleAnalytics||lastAnalyticsScope!==analyticsScope)){
+  renderBattleAnalytics($("battleAnalyticsBody"),state.battleAnalytics,analyticsScope);lastAnalytics=state.battleAnalytics;lastAnalyticsScope=analyticsScope;
+ }
  const w=state.managerWork,id=w.activity,skill=state.skills[id];text("currentWork",ACTIVITIES[id].title);text("workLevel","Lv "+skill.level);meter("workXP",skill);
  text("workStatus",w.travelMs?"Travelling and preparing · Fighting continues.":"Working automatically until the next level.");
  const after=nextRotationActivity(state,id);text("nextWork","Next: "+(after?ACTIVITIES[after].title:"Waiting for materials"));
@@ -89,6 +94,8 @@ choice($("weaponButtons"),Object.entries(COMBAT_LOADOUTS).map(([id,w])=>[id,w.na
 choice($("armourButtons"),MANAGER_ARMOUR_FAMILIES.map(id=>[id,title(id)]),null,id=>choose((s,t,fighter)=>chooseManagerArmour(s,fighter,id,t)));
 choice($("tacticButtons"),TACTIC_IDS.map(id=>[id,title(id)]),"balanced",id=>choose((s,t,fighter)=>chooseManagerTactic(s,fighter,id,t)));
 $("characterStatsPanel").addEventListener("toggle",render);
+$("battleAnalyticsPanel").addEventListener("toggle",render);
+choice($("battleAnalyticsScope"),[["all","All recorded"],["latest","Latest setup"]],"all",id=>{analyticsScope=id;pressed($("battleAnalyticsScope"),id);render();});
 $("loginReportReopen").addEventListener("click",()=>{text("loginReportSummary",loginSummary);$("loginReportBody").replaceChildren(...loginLines.map(x=>node("li",x)));$("loginReport").showModal();});
 $("loginReportDismiss").addEventListener("click",()=>$("loginReport").close());
 $("alphaTools").hidden=!ALPHA_TOOLS_ENABLED;
