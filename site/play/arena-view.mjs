@@ -1,5 +1,5 @@
 // Compact arena view; no strike log, HP bar, reward mutation or scheduler.
-import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels} from "./arena-presentation.mjs?v=arena-minimal-001";
+import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels} from "./arena-presentation.mjs?v=arena-speed-001";
 const NS="http://www.w3.org/2000/svg";
 const icons={
  heart:"M20.8 4.6a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z",
@@ -61,7 +61,7 @@ export function createArenaView(){
    const r=committedBattleResult(before,out,prior);
    if(!r)return;
    last=r;
-   reveal=!entry&&r.preview?{r,until:performance.now()+1800}:null;
+   reveal=!entry&&r.preview?{r,until:performance.now()+2000}:null;
    const label=r.outcome?battleLabels[r.outcome]:r.victories+" W · "+r.defeats+" L · "+r.doubleDeaths+" D";
    $("battleResult").textContent="Last: "+label+(r.coins?" · +"+r.coins+" coins":"");
   },

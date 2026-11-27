@@ -1,5 +1,11 @@
 # Changelog and task handoffs
 
+## ARENA-SPEED-001 · STARTED (2026-11-27, chat)
+
+Candidate: manager-only v3 timeline with 20,000ms actual bouts, 2,000ms loss recovery (same 10% fraction), carry exact tenths of old integer prize and Teamwork per completed bout; tactics/weapon/armour mastery and Fighting XP continue real time-based pacing. v2 legacy remains 200s; old manager saves preserve paid bout index, seed, frozen roster and proportional unfinished fraction on load. No retroactive old rewards, but unfinished old-bout practice is proportionally shortened and old offline gap runs new cadence after migration. Same per-bout auto-difficulty rules (changes can occur faster); new verdict display lasts two real seconds over the next running bout, not an added gameplay pause. No combat outcome formula changes. Functional tests and CI pending.
+
+ARENA-SPEED-001 — Owner approved 2026-11-27: actual manager bout 20 seconds (was 200), committed result displayed about 2 seconds; preserve hourly rewards, recovery ratio, skill/mastery pacing as closely as possible. No combat formula retune or third fighter. Versioned manager timeline, retain legacy 200-second format, exact fractional prize and Teamwork carry, preserve already paid cursor and proportional partial bout on migration. Test old/new timing, partition invariance, offline, live, save, UI. STARTED by chat; baseline c8ca08f.
+
 ## PROGRESS-UI-001 · STARTED (2026-11-27, chat)
 
 Owner extended scope: Arena is the primary screen; move it to first card in actual DOM order, above Gladiators, and span full grid width on desktop and mobile. CSS cache version bumped; no game mechanics or saved-data changes. Browser checks first-card order, full width and above Gladiators at both widths. New final-head tests pending.
