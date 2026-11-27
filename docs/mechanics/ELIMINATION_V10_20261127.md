@@ -1,0 +1,5 @@
+# Arena elimination
+
+ARENA-ELIMINATION-001 — Owner approved remove HP-fraction decisions, continue internal rounds until one team is eliminated while keeping the ten-second arena cadence. V10 keeps v9 skills, stances, eight environments, damage, healing, economy and saved historical v1–v9 rules unchanged. A deterministic 1024-round computational safety ceiling returns an unresolved draw (reason simulation_limit), never HP-based victory; it is not proof of a true stalemate. Raids retain their existing v5 timing/timeout. First 32 rounds must match v9 exactly, 3840 mirrored max-only matchup samples per version across all eight zones/16 previous compositions; track outcome changes, unresolved, median/p95/max rounds and actual knockouts. Runtime performance, browser and offline settlement require validation. No sudden-death damage/healing changes. Pending tests.
+
+Log markers ELIMINATION_V10_ZONE and ELIMINATION_V10_SUMMARY. No new balance coefficients. Safety ceiling 1024 is provisional and should be evaluated against observed unresolved rate and performance.

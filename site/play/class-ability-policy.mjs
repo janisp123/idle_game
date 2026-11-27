@@ -131,7 +131,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   for(const x of targets){
    const guard=mode==="guard",key=guard?"classGuard":"classBuff",until=guard?"guardUntil":"buffUntil";
    kitStatus(x,key,until,amount,round,duration);
-   if(mode==="tempo"||mode==="magic_tempo"){x.kitTempoUntil=round+duration;if([7,8,9].includes(a.groupCombatRules))x.kitMagicTempo=mode==="magic_tempo";record(x,"tempo",{until:x.kitTempoUntil});}
+   if(mode==="tempo"||mode==="magic_tempo"){x.kitTempoUntil=round+duration;if([7,8,9,10].includes(a.groupCombatRules))x.kitMagicTempo=mode==="magic_tempo";record(x,"tempo",{until:x.kitTempoUntil});}
    record(x,guard?"ward":"buff",{magnitude:x[key],until:x[until]});
   }
   return true;
