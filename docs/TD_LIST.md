@@ -107,10 +107,26 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Requested by:** Owner.
 - **Implemented by:** chat (runtime PR #198; balance not complete).
 
+## CLAN-BUILDINGS-001 — Five buildings and weekly local clan raids
+
+- **Goal / acceptance:** Plan #224 approved; all buildings start zero, weekly raids, 480-day minimum construction, actual bonuses and automatic donations.
+- **Status:** IN_REVIEW — expanded PR #223 candidate; balance and CI pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## ALPHA-CLAN-001 — Local Ashen Covenant prototype
+
+- **Goal / acceptance:** Automatic login membership, local treasury, automatic every-tenth positive arena reward contribution, Academy XP bonus and upgrade, no retroactive reward or shared authority; save and mobile tests.
+- **Status:** IN_REVIEW — PR #223 candidate; tests pending; reconcile #222 first.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## CLAN-001 — Future coin-only clan development
 
 - **Goal / acceptance:** Future shared clans use coin donations and coin-only improvements; no resource warehouse or material prerequisites. Existing membership/leadership/security research retained; obsolete material-economy sections superseded. Update design before implementation; no live shared clans without approved accounts/server architecture.
-- **Status:** BLOCKED — server/account architecture and revised coin-only plan; no clan runtime approved in current change.
+- **Status:** BLOCKED — server/account architecture and revised coin-only plan; shared clan runtime blocked; local alpha prototype separately approved in ALPHA-CLAN-001.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -122,3 +138,9 @@ CLASS-TERRAIN-001 approved extension of BATTLE-GROUP-001: Terrain candidate: exp
 
 
 Interlude identity research completed: [31-class source-backed proposal](mechanics/INTERLUDE_CLASS_IDENTITIES_20261127.md); review/approve specific combat changes before implementation.
+
+
+ALPHA-CLAN-001 update (owner 2026-11-27): automatic donation of every tenth positive whole-coin arena reward after enrollment. No manual donation or daily cap; replaces the candidate 100-coin donation. Zero payouts, defeats, raid prizes, prior wallet and developer grants excluded. Persist reward cursor; apply before equipment spending and keep gross combat analytics, net wallet, and contribution report. Academy costs/bonus remain provisional. Offline settlement uses the same bounded exact fractional payout calculation. First candidate passed 210 unit tests but browser script had duplicate clan variable; corrected. New CI pending.
+
+
+CLAN-BUILDINGS-001 (owner approved plan #224): candidate replaces temporary Academy with five level-zero buildings, automatic 480-day minimum construction, member capacity, rotating Armoury/Portal bonuses, Bank and Fighting XP, weekly local signup and sequential actual simulated sorties carrying enemy HP across groups. Alpha uses snapshot at registration (server cutoff snapshot later); synthetic allies are based on player progression, no shared data. Personal raid integration, cost/difficulty calibration and independent full 50-tier balance simulation remain pending. Candidate cost = base × target level² (50 Barracks/Bank/Training, 20 Armoury); no measured affordability yet. Cache repair import map incorporated with additional aliases. Tests pending.

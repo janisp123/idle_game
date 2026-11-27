@@ -348,6 +348,16 @@ try{
     assert.equal(check.selects,0);assert.deepEqual(check.counts,[7,3,5,5,2]);assert.equal(check.manual,false);assert.ok(check.overflow<=2);assert.equal(check.activity,"fighting");assert.equal(check.arenaOnly,true);assert.equal(check.removed,true);
     const placement=await evaluate(`(()=>{const grid=document.querySelector(".manager-grid"),arena=grid.querySelector(".arena-card"),rect=arena.getBoundingClientRect();return {first:grid.firstElementChild===arena,full:Math.abs(rect.width-grid.getBoundingClientRect().width)<=2,above:rect.bottom<=document.getElementById("battleGroupPanel").getBoundingClientRect().top};})()`);
     assert.deepEqual(placement,{first:true,full:true,above:true},"arena first and full-width");
+    const alphaClan=await evaluate(`(()=>{const p=document.getElementById("alphaClanPanel");p.open=true;const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})),u=document.getElementById("clanJoinRaid");return {id:s.alphaClan.id,levels:s.alphaClan.levels,cards:document.querySelectorAll(".clan-building").length,visible:u.checkVisibility(),touch:u.getBoundingClientRect().height>=44,disabled:u.disabled,manual:!!document.getElementById("clanDonate"),status:document.getElementById("clanDonationStatus").textContent,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};})()`);
+    assert.equal(alphaClan.id,"ashen_covenant");assert.deepEqual(alphaClan.levels,{barracks:0,armoury:0,training:0,bank:0,portal:0});assert.equal(alphaClan.cards,5);assert.ok(alphaClan.visible&&alphaClan.touch&&!alphaClan.disabled&&!alphaClan.manual&&alphaClan.overflow===0);assert.match(alphaClan.status,/0\/10 rewards/);
+    await evaluate('document.getElementById("clanJoinRaid").click()');
+    await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).alphaClan.raid.joinedWeek!==null&&document.getElementById("clanJoinRaid").disabled`),"clan registration saved");
+    const pref=await evaluate(`(()=>{const p=document.getElementById("arenaPreferencePanel");p.open=true;const buttons=[...p.querySelectorAll("[data-zone]")],save=document.getElementById("arenaPreferenceSave");return {count:buttons.length,visible:buttons.every(b=>b.checkVisibility()&&b.getBoundingClientRect().height>=44),disabled:save.disabled};})()`);
+    assert.deepEqual(pref,{count:8,visible:true,disabled:true});
+    await evaluate('(()=>{const b=[...document.querySelectorAll("#arenaPreferenceChoices button")];b.slice(0,3).forEach(x=>x.click());document.getElementById("arenaPreferenceSave").click();})()');
+    await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).arenaPreferences?.favorites?.length===3`),"arena preference saved");
+    await evaluate('document.getElementById("arenaPreferencePanel").open=false');
+    await shot("alpha-clan-"+width);await evaluate('document.getElementById("alphaClanPanel").open=false');
     assert.equal(await evaluate('!document.getElementById("battleGroupPanel").open && !document.getElementById("specialClassChoice").checkVisibility()'),true);
     await evaluate('document.querySelector("#battleGroupPanel > summary").click()');
     assert.equal(await evaluate('document.getElementById("battleGroupPanel").open && document.getElementById("specialClassChoice").checkVisibility()'),true);

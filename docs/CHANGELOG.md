@@ -1,5 +1,13 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — CLAN-BUILDINGS-001 STARTED
+
+Owner approved plan #224. Extend unmerged #223 rather than release temporary Academy. Last verified eb6be9e all seven checks. Implement level-zero buildings, construction and weekly raid foundations; provisional prices and combat bonuses require measured validation. Preserve donation cursor and local-only membership. Branch feature/alpha-clan, PR #223; next implement staged changes; reconcile cache #222.
+
+## 2026-11-27 — ALPHA-CLAN-001 STARTED
+
+Owner approved one local alpha clan, automatic enrollment on login and working bonuses before server. Candidate Ashen Covenant, Academy starting Fighting XP bonus, explicit coin donations and local Academy upgrades. No shared accounts, roster, treasury, forced spending or retroactive rewards. Exact numbers are provisional test parameters. Branch `feature/alpha-clan`; baseline b4624c1. Candidate runtime, save, UI and test harness pushed; tests pending; reconcile overlapping cache repair #222 before merge.
+
 ## 2026-11-27 — ARENA-PREFERENCES-001 STARTED
 
 Owner approved three starred environments, +10 percentage points each, other five equally reduced, 24-hour lock, symmetric average for future PvP. Branch `feature/arena-preferences`; baseline main 5487e23 (v9, 202 tests). V10 #218 separately verified, not yet merged. Implement deterministic weighted selection, frozen current bout, persistent local settings and star UI; server enforcement awaits multiplayer. Tests pending; next implement candidate.
@@ -1021,3 +1029,11 @@ CLASS-MASTERY-002 — Owner approved 50% novice to 100% level-50 class skill pow
 ## 2026-11-27 — ARENA-ELIMINATION-001 candidate
 
 ARENA-ELIMINATION-001 — Owner approved remove HP-fraction decisions, continue internal rounds until one team is eliminated while keeping the ten-second arena cadence. V10 keeps v9 skills, stances, eight environments, damage, healing, economy and saved historical v1–v9 rules unchanged. A deterministic 1024-round computational safety ceiling returns an unresolved draw (reason simulation_limit), never HP-based victory; it is not proof of a true stalemate. Raids retain their existing v5 timing/timeout. First 32 rounds must match v9 exactly, 3840 mirrored max-only matchup samples per version across all eight zones/16 previous compositions; track outcome changes, unresolved, median/p95/max rounds and actual knockouts. Runtime performance, browser and offline settlement require validation. No sudden-death damage/healing changes. Pending tests.
+
+
+ALPHA-CLAN-001 update (owner 2026-11-27): automatic donation of every tenth positive whole-coin arena reward after enrollment. No manual donation or daily cap; replaces the candidate 100-coin donation. Zero payouts, defeats, raid prizes, prior wallet and developer grants excluded. Persist reward cursor; apply before equipment spending and keep gross combat analytics, net wallet, and contribution report. Academy costs/bonus remain provisional. Offline settlement uses the same bounded exact fractional payout calculation. First candidate passed 210 unit tests but browser script had duplicate clan variable; corrected. New CI pending.
+
+
+CLAN-BUILDINGS-001 (owner approved plan #224): candidate replaces temporary Academy with five level-zero buildings, automatic 480-day minimum construction, member capacity, rotating Armoury/Portal bonuses, Bank and Fighting XP, weekly local signup and sequential actual simulated sorties carrying enemy HP across groups. Alpha uses snapshot at registration (server cutoff snapshot later); synthetic allies are based on player progression, no shared data. Personal raid integration, cost/difficulty calibration and independent full 50-tier balance simulation remain pending. Candidate cost = base × target level² (50 Barracks/Bank/Training, 20 Armoury); no measured affordability yet. Cache repair import map incorporated with additional aliases. Tests pending.
+
+CLAN-BUILDINGS-001: added 730-day economy and 50-tier raid diagnostic harness; final candidate CI and calibration pending.

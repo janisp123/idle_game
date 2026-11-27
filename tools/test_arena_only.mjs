@@ -87,3 +87,7 @@ import "./test_class_mastery_v9.mjs";
 import "./test_elimination_v10.mjs";
 
 import "./test_arena_preferences.mjs";
+
+import "./test_alpha_clan.mjs";
+
+import "./test_clan_progression.mjs";

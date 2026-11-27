@@ -10,6 +10,7 @@ import {validGroupSnapshot,classWeapon,prepareClassActor,expireClassEffects,tryC
 export const TEAM_COMBAT_BALANCE=Object.freeze({maxRoster:7,maxRounds:PHYSICAL_RULES.turnLimit,
   rearSpace:3,interceptRecovery:1,focusWeight:2,healthWeight:1.5});
 import {validCombatAttributes,statInitiative} from "./stat-combat.mjs";
+import {validClanCombat} from "./alpha-clan.mjs";
 import {RAID_RULES_VERSION,RAID_MAX_ROUNDS,RAID_MONSTER_BALANCE,raidDefinition} from "./raid-rules.mjs";
 const alive=a=>a.hp>0;
 const gap=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
@@ -145,8 +146,21 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
     if(![4,5,6,7,8,9,10].includes(rules)||![bonus.damage,bonus.defence].every(v=>Number.isFinite(v)&&v>=0&&v<=.10))throw new RangeError("Invalid raid combat bonus");
     for(const a of actors.filter(x=>x.side==="player")){a.raidBonusDamage=bonus.damage;a.raidBonusDefence=bonus.defence;}
   }
+  for(const [side,b] of [["player",levels.playerClanBonus],["enemy",levels.enemyClanBonus]])if(b){
+    if(!(rules===10||raid&&[4,5].includes(rules))||!validClanCombat(b))throw new RangeError("Invalid clan combat bonus");
+    for(const a of actors.filter(x=>x.side===side)){a.clanBonus=b;a.maxHP=Math.round(a.maxHP*(1+b.hp/100));a.hp=a.maxHP;}
+  }
+  const encounter=levels.clanEncounter;
+  if(encounter){
+    if(rules!==10||raid||enemies.length!==7||!Number.isInteger(encounter.level)||encounter.level<1||encounter.level>50||encounter.hp!==null&&(!Array.isArray(encounter.hp)||encounter.hp.length!==7||!encounter.hp.every(n=>Number.isSafeInteger(n)&&n>=0)))throw new RangeError("Invalid clan raid encounter");
+    for(const [i,a] of actors.filter(x=>x.side==="enemy").entries()){
+      a.encounterHealMaxHP=a.maxHP;a.maxHP=Math.max(1,Math.round(a.maxHP*(i?1+encounter.level/25:2+encounter.level*.6)));
+      a.hp=encounter.hp===null?a.maxHP:Math.min(a.maxHP,encounter.hp[i]);
+      a.encounterDamage=.65+encounter.level*.01;
+    }
+  }
   const elimination=rules===ELIMINATION_RULES_VERSION;
-  const maxRounds=raid?RAID_MAX_ROUNDS:elimination?ELIMINATION_MAX_ROUNDS:TEAM_COMBAT_BALANCE.maxRounds;
+  const maxRounds=raid||encounter?RAID_MAX_ROUNDS:elimination?ELIMINATION_MAX_ROUNDS:TEAM_COMBAT_BALANCE.maxRounds;
   const height=Math.max(players.length,enemies.length),width=teamArenaWidth(terrain,rules),roll=seededRandom(seed),speedRoll=seededRandom((seed^0x85ebca6b)>>>0),
     initiative=seededRandom((seed^0x9e3779b9)>>>0),decision=seededRandom((seed^0x517cc1b7)>>>0);
   const tactical=seededRandom((seed^0x4f7b3241)>>>0);

@@ -17,12 +17,13 @@ import {blankArmourRequests,validArmourRequests,requestArmourSet,selectManagerWe
 import {blankTactics,validTactics,chooseTactic,validTacticSnapshot,activateTactics} from "./manager-tactics.mjs?v=manager-tactics-001";
 import {validRaidBuff} from "./raid-rules.mjs";
 import {validArenaPreferences} from "./arena-preferences.mjs";
+import {validAlphaClan,migrateAlphaClan} from "./alpha-clan.mjs";
 export const MANAGER_LANES_VERSION=4;
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 const validWork=id=>WORK_ROTATION.includes(id);
 const blankWork=id=>({activity:id,progressMs:0,travelMs:0});
 function validManagerShape(s){
-  return (s?.arenaPreferences===undefined||s.arenaOnly===true&&validArenaPreferences(s.arenaPreferences))&&(s?.raidBuff===undefined||s.arenaOnly===true&&validRaidBuff(s.raidBuff))&&s?.managerVersion===MANAGER_LANES_VERSION&&s.activity==="fighting"&&
+  return (s?.alphaClan===undefined||s.arenaOnly===true&&validAlphaClan(s.alphaClan))&&(s?.arenaPreferences===undefined||s.arenaOnly===true&&validArenaPreferences(s.arenaPreferences))&&(s?.raidBuff===undefined||s.arenaOnly===true&&validRaidBuff(s.raidBuff))&&s?.managerVersion===MANAGER_LANES_VERSION&&s.activity==="fighting"&&
     s.transition===null&&s.wagons?.length===1&&s.wagons[0].activity==="fighting"&&
     s.wagons[0].plannedMs===null&&s.fightingRemainderMs===0&&s.productiveElapsedMs===0&&
     (s.arenaOnly===true?Boolean(s.battleGroup&&s.managerWork===undefined&&s.overlapParity===undefined&&Object.values(s.items??{}).every(v=>v===0)):s.arenaOnly===undefined&&validWork(s.managerWork?.activity)&&count(s.managerWork.progressMs)&&
@@ -40,14 +41,15 @@ export function newManagerGame(now=Date.now(),firstWork="hunting"){
 }
 export function readManagerGame(value){
   try{
-    const raw=typeof value==="string"?JSON.parse(value):value;
+    let raw=typeof value==="string"?JSON.parse(value):value;
+    if(raw?.alphaClan?.version===1)raw={...raw,alphaClan:migrateAlphaClan(raw.alphaClan)};
     // Phase 2 prototype only accepts its own current timing profile; never
     // silently convert a legacy route or discard a paid combat cursor.
     if(!validManagerShape(raw)||raw.timingProfile!==TIMING_PROFILE)return null;
     const s=readSave(raw);
     if(!s||!s.teamSecond||raw.battleAnalytics!==undefined&&!validBattleAnalytics(raw.battleAnalytics))return null;
     return {...s,combatSession:s.combatSession?.timelineVersion===GROUP_TIMELINE_VERSION?s.combatSession:fasterTeamSession(s.combatSession),managerVersion:MANAGER_LANES_VERSION,
-      ...(raw.arenaPreferences!==undefined?{arenaPreferences:structuredClone(raw.arenaPreferences)}:{}),...(raw.raidBuff!==undefined?{raidBuff:raw.raidBuff}:{}),battleAnalytics:raw.battleAnalytics??blankBattleAnalytics(),...(raw.battleGroup?{battleGroup:raw.arenaOnly?migrateGroupAttributes(s.battleGroup):s.battleGroup,groupAnalytics:structuredClone(raw.groupAnalytics)}:{}),...(raw.arenaOnly?{arenaOnly:true}:{managerWork:{...raw.managerWork},overlapParity:raw.overlapParity}),armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
+      ...(raw.alphaClan!==undefined?{alphaClan:structuredClone(raw.alphaClan)}:{}),...(raw.arenaPreferences!==undefined?{arenaPreferences:structuredClone(raw.arenaPreferences)}:{}),...(raw.raidBuff!==undefined?{raidBuff:raw.raidBuff}:{}),battleAnalytics:raw.battleAnalytics??blankBattleAnalytics(),...(raw.battleGroup?{battleGroup:raw.arenaOnly?migrateGroupAttributes(s.battleGroup):s.battleGroup,groupAnalytics:structuredClone(raw.groupAnalytics)}:{}),...(raw.arenaOnly?{arenaOnly:true}:{managerWork:{...raw.managerWork},overlapParity:raw.overlapParity}),armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
   }catch{return null;}
 }
 // Internal coordinator hook for Phase 3, never a player-facing action.

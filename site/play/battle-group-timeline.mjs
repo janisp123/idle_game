@@ -3,6 +3,7 @@
 import {ARENA_SCHEDULE_BOUTS,BOUT_MS,seededCombatRandom,validCombatSession} from "./combat.mjs?v=gear-a3";
 import {chooseArena,groupArenaPool} from "./arenas.mjs?v=bal-002";
 import {validArenaFavorites,choosePreferredGroupArena} from "./arena-preferences.mjs";
+import {validClanSnapshot} from "./alpha-clan.mjs";
 import {GROUP_IDS,groupSnapshots,awardGroupPractice,validBattleGroup} from "./battle-group.mjs?v=group-001";
 import {validGroupSnapshot} from "./battle-group-actions.mjs?v=kits-001";
 import {captureGroupCloneEnvelope,validGroupCloneEnvelope,buildGroupCloneTeam} from "./battle-group-clones.mjs?v=group-003";
@@ -17,6 +18,8 @@ import {GROUP_COMBAT_RULES_VERSION,SUPPORTED_GROUP_COMBAT_RULES} from "./group-c
 export {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,GROUP_RECOVERY_MS};
 import {validRaidCombatBonus} from "./raid-rules.mjs";
 const duration=GROUP_BOUT_MS,recovery=GROUP_RECOVERY_MS,ratio=BOUT_MS/duration;
+export const groupCoinRatio=s=>s.clanSnapshot?ratio*100:ratio;
+const groupRewardUnits=s=>teamArenaReward(s.rank.grade)*(s.clanSnapshot?100+s.clanSnapshot.bank:1);
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 const exact=(o,keys)=>o&&typeof o==="object"&&!Array.isArray(o)&&Object.keys(o).length===keys.length&&keys.every(k=>Object.hasOwn(o,k));
 import {validCombatAttributes} from "./stat-combat.mjs";
@@ -28,24 +31,24 @@ function validPlayers(p,rules){
 }
 export function validGroupSession(s){
  return Boolean(s?.timelineVersion===GROUP_TIMELINE_VERSION&&count(s.seed)&&s.seed<=0xffffffff&&count(s.elapsedMs)&&s.prizeCursor===Math.floor(s.elapsedMs/duration)&&
-  (s.arenaFavorites===undefined||(groupArenaPool(s.groupCombatRules??1).length===8&&validArenaFavorites(s.arenaFavorites)))&&[s.coinRemainder,s.teamworkRemainder].every(n=>count(n)&&n<ratio)&&validTeamwork({level:s.teamworkLevel,xp:0})&&validPlayers(s.players,s.groupCombatRules??1)&&(s.raidBonus===undefined||[4,5,6,7,8,9,10].includes(s.groupCombatRules)&&validRaidCombatBonus(s.raidBonus))&&validGroupRank(s.rank)&&(s.groupCombatRules===undefined||SUPPORTED_GROUP_COMBAT_RULES.includes(s.groupCombatRules)));
+  (s.arenaFavorites===undefined||(groupArenaPool(s.groupCombatRules??1).length===8&&validArenaFavorites(s.arenaFavorites)))&&(s.clanSnapshot===undefined||s.groupCombatRules===10&&validClanSnapshot(s.clanSnapshot))&&count(s.coinRemainder)&&s.coinRemainder<groupCoinRatio(s)&&count(s.teamworkRemainder)&&s.teamworkRemainder<ratio&&validTeamwork({level:s.teamworkLevel,xp:0})&&validPlayers(s.players,s.groupCombatRules??1)&&(s.raidBonus===undefined||[4,5,6,7,8,9,10].includes(s.groupCombatRules)&&validRaidCombatBonus(s.raidBonus))&&validGroupRank(s.rank)&&(s.groupCombatRules===undefined||SUPPORTED_GROUP_COMBAT_RULES.includes(s.groupCombatRules)));
 }
 export function startGroupSession(group,shared,teamworkLevel,seed,carry={}){
  const s={timelineVersion:GROUP_TIMELINE_VERSION,groupCombatRules:carry.rules??GROUP_COMBAT_RULES_VERSION,seed,elapsedMs:0,prizeCursor:0,teamworkLevel,
   coinRemainder:carry.coinRemainder??0,teamworkRemainder:carry.teamworkRemainder??0,
-  players:groupSnapshots(group,shared,carry.rules??GROUP_COMBAT_RULES_VERSION),...(carry.arenaFavorites!==undefined?{arenaFavorites:[...carry.arenaFavorites]}:{}),...(carry.bonus?{raidBonus:carry.bonus}:{}),rank:carry.rank??initialGroupRank(cloneRewardGrade(shared.skill))};
+  players:groupSnapshots(group,shared,carry.rules??GROUP_COMBAT_RULES_VERSION),...(carry.arenaFavorites!==undefined?{arenaFavorites:[...carry.arenaFavorites]}:{}),...(carry.bonus?{raidBonus:carry.bonus}:{}),...(carry.clanSnapshot?{clanSnapshot:carry.clanSnapshot}:{}),rank:carry.rank??initialGroupRank(cloneRewardGrade(shared.skill))};
  if(!validGroupSession(s))throw new RangeError("Invalid frozen group session");
  return structuredClone(s);
 }
 export const groupPrizeGrade=s=>s.rank.grade;
-export const groupWinPrize=s=>Math.floor((teamArenaReward(groupPrizeGrade(s))+s.coinRemainder)/ratio);
+export const groupWinPrize=s=>Math.floor((groupRewardUnits(s)+s.coinRemainder)/groupCoinRatio(s));
 function bout(s,index){
  const scheduled=index%ARENA_SCHEDULE_BOUTS,seed=Math.imul(s.seed^scheduled,2654435761)>>>0;
  const bracket=rankProfile(s.rank.grade),players=GROUP_IDS.map(id=>s.players[id]),enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,s.groupCombatRules??1);
  const roll=seededCombatRandom((seed^0x749ae237)>>>0);
  const positioning=s.arenaFavorites===undefined?chooseArena(players[Math.floor(roll()*players.length)],enemies[Math.floor(roll()*enemies.length)],roll,groupArenaPool(s.groupCombatRules??1)):{arena:choosePreferredGroupArena(s.arenaFavorites,roll)};
  const terrain=positioning.arena;
- const result=resolveTeamBattle(players,enemies,seed,terrain,{player:s.teamworkLevel,enemy:bracket.teamworkLevel,groupCombatRules:s.groupCombatRules??1,...(s.raidBonus?{playerBonus:s.raidBonus}:{})});
+ const result=resolveTeamBattle(players,enemies,seed,terrain,{player:s.teamworkLevel,enemy:bracket.teamworkLevel,groupCombatRules:s.groupCombatRules??1,...(s.raidBonus?{playerBonus:s.raidBonus}:{}),...(s.clanSnapshot?{playerClanBonus:s.clanSnapshot.combat}:{})});
  return {result,enemies,positioning,terrain};
 }
 export function groupCombatAtTime(s,elapsedMs=s?.elapsedMs){
@@ -87,11 +90,11 @@ export function settleGroupSession(s,ms,cache=new Map()){
  downtimeMs+=partial(end)-partial(s.elapsedMs);
  // Initially retain existing team reward; seven-member economic pacing
  // remains a release gate, not a claim of balanced rewards.
- const coinUnits=add(analytics.outcomes[0]*teamArenaReward(groupPrizeGrade(s)),s.coinRemainder),workUnits=add(bouts,s.teamworkRemainder);
- const coins=Math.floor(coinUnits/ratio),teamworkXP=Math.floor(workUnits/ratio);
+ const coinUnits=add(analytics.outcomes[0]*groupRewardUnits(s),s.coinRemainder),workUnits=add(bouts,s.teamworkRemainder);
+ const coins=Math.floor(coinUnits/groupCoinRatio(s)),teamworkXP=Math.floor(workUnits/ratio);
  analytics.coins=coins;analytics.ms=bouts*duration;
- return {session:{...s,elapsedMs:end,prizeCursor:complete,coinRemainder:coinUnits%ratio,teamworkRemainder:workUnits%ratio},
-  bouts,victories:analytics.outcomes[0],defeats:analytics.outcomes[1],doubleDeaths:analytics.outcomes[2],coins,teamworkXP,downtimeMs,practiceMs,sampledBouts:sampled.size,analytics};
+ return {session:{...s,elapsedMs:end,prizeCursor:complete,coinRemainder:coinUnits%groupCoinRatio(s),teamworkRemainder:workUnits%ratio},
+  rewardUnits:groupRewardUnits(s),rewardRatio:groupCoinRatio(s),bouts,victories:analytics.outcomes[0],defeats:analytics.outcomes[1],doubleDeaths:analytics.outcomes[2],coins,teamworkXP,downtimeMs,practiceMs,sampledBouts:sampled.size,analytics};
 }
 export function applyGroupSettlement(group,teamwork,s,ms,cache){
  if(!validBattleGroup(group)||!validTeamwork(teamwork)||teamwork.level<s.teamworkLevel)throw new RangeError("Invalid group progression");
