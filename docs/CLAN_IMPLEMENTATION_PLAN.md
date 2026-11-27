@@ -1,5 +1,7 @@
 # Clan development — pre-server work and server handoff
 
+**Superseding owner decision (ARENA-ONLY-001, 2026-11-27):** future clans receive coin donations and spend coins exclusively on all upgrades. Material warehouse, resource donations, material prerequisites, and Activities navigation in this historical design are retired. No clan runtime or new prices are authorized here. Rework the historical plan against the coin-only game before implementation.
+
 **2026-11-25 · CLAN-PLAN-001.** The Owner intends to rent a server later and wants everything useful prepared beforehand. This is the function map and staged implementation specification. [CLAN_DESIGN.md](CLAN_DESIGN.md) is authoritative for the approved gameplay direction; [DECISIONS.md](DECISIONS.md) records binding decisions; [TD_LIST.md](TD_LIST.md) tracks authorization and implementation status. Proposed names, permissions, costs and schemas below are recommendations, not deployed features or new owner decisions. Do not start renting, selecting a paid provider, or importing alpha player data on the strength of this file.
 
 ## 1. Current state and development boundary

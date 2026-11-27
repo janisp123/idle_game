@@ -17,8 +17,8 @@ The playable alpha is an experimental test build. Expect changes, rough edges an
 
 ## The game
 
-- **Fight and specialize.** Choose your equipment and develop a fighting style. Weapons, armour and terrain shape the outcome of automatic arena battles.
-- **Build your character.** Train skills, grow attributes, earn rewards and improve your equipment. Specialization brings strengths as well as weaknesses.
+- **Fight and specialize.** Choose seven classes and combat stances. Class abilities, automatic equipment and terrain shape the outcome.
+- **Build your Battle Group.** Train active classes, grow attributes, earn rewards and improve class-assigned equipment. Specialization brings strengths as well as weaknesses.
 - **Coins and combat experience.** Victories earn coins; fighting trains active classes and shared stats. Equipment upgrades use coins.
 - **Play at your own pace.** Your Battle Group fights while you are away. Rewards follow the frozen combat build and current XP cap; return to activate earned levels.
 

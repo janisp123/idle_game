@@ -35,3 +35,6 @@ test("offline cap freezes earned rewards, no noncombat catch-up and automatic fi
  assert.equal(b.groupAnalytics.all.ms,a.groupAnalytics.all.ms);
  const c=chooseManagerGroupClass(b,"member1","human","Rogue","trickblade",b.settledAtMs,rand).state;noWork(c);assert.ok(readManagerGame(JSON.stringify(c)));
 });
+
+import {readArenaManager,settleArenaLive,enterArena} from "../site/play/arena-manager.mjs";
+test("public arena adapter migrates old saves and refuses legacy work settlement",()=>{const old=newBattleGroupManager(now);assert.throws(()=>settleArenaLive(old,now+10000,rand),/arena-only/);const s=readArenaManager(JSON.stringify(old));noWork(s);const n=enterArena(s,now+20000,rand).state;noWork(n);assert.equal(n.skills.hunting.xp,0);assert.equal(n.groupAnalytics.all.ms,20000);});

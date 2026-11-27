@@ -1,5 +1,11 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — ARENA-ONLY-001 cleanup
+
+ARENA-ONLY-001 cleanup: verified prior head 42b87e8 all seven checks, website 45979606326 157 tests and Chromium 390/1440. Coins sole spendable currency; XP unlocks earned levels. Isolated retired two-lane calculation in legacy-work-lane.mjs, added strict public arena-manager entry points, removed dead legacy presentation branches, fixed README/landing class descriptions. Old engine/fixtures retained for migration and regression; old material counts zero, legacy skills frozen. Backlog reconciled to current economy, balance and blocked clans; previous task text archived in docs/TD_ARCHIVE_20261127.md; historical clan plans marked superseded for materials. No history rewriting or source deletion. Final CI pending; no merge yet.
+
+Historical backlog archived; verified #198 deployment and outstanding balance noted above.
+
 ## 2026-11-27 — ARENA-ONLY-001 STARTED
 
 ARENA-ONLY-001 — Owner approved 2026-11-27: remove noncombat progression, gathering, crafting, materials, inventories and tributes from public gameplay. Coins earned in combat and XP/stat progression from fighting only; equipment and future clan donations use coins. XP continues on defeats (existing productive combat/recovery rules). No clan implementation. Preserve coins, class builds, frozen combat, analytics, already earned attributes and historical skill bonuses; archive legacy resource mechanics for regression only. Existing material balances removed with no conversion; old noncombat levels frozen, not displayed or claimed. No changes to combat balance or gear prices. Baseline 9fc6579 / PR #198 deployed via 45976758295; ranged stack imbalance 115/120 in max screen remains separate. Branch feature/arena-only; STARTED, not tested.

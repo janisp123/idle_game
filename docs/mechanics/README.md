@@ -4,7 +4,7 @@
 
 ## ARENA-ONLY-001 candidate (PR #199)
 
-Public manager will settle Fighting only, allocate 100% productive combat effort using existing Fighting weights, and auto-claim Fighting XP only. Coins buy automatic equipment. Noncombat work/loot/crafting are retired from public play; historical descriptions and developer fixtures below remain for regression. Old material counts clear without conversion, historical noncombat skill levels and already earned stats stay frozen. Offline XP cap, 10-second arena, class progression and analytics remain. No new clan feature. Pending CI and release.
+Public arena entry points in `arena-manager.mjs` settle Fighting only; allocate 100% productive combat effort using existing Fighting weights, and auto-claim Fighting XP only. Coins buy automatic equipment. Noncombat work/loot/crafting are retired from public play; historical descriptions and developer fixtures below remain for regression. Old material counts clear without conversion, historical noncombat skill levels and already earned stats stay frozen. Offline XP cap, 10-second arena, class progression and analytics remain. No new clan feature. Pending CI and release.
 
 ## Manager-only redesign (draft PR #192)
 

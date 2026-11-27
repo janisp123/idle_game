@@ -2,7 +2,7 @@
 
 ## Arena-only economy — ARENA-ONLY-001 (2026-11-27)
 
-**Owner-approved; supersedes AUTO-ACTIVITY-001 and all survival/resource progression directions.** Public manager has only coins and combat-earned experience/stat growth. No gathering, crafting, material inventory, tributes, noncombat work lanes or noncombat skill advancement. Fighting remains automatic, including productive defeat practice. Equipment uses coins; future clan donations use coins, not materials. Do not implement clans without separate approval. Keep historical test fixtures isolated from the public manager. Existing earned attributes and old skill bonuses retained, but noncombat skills frozen. No material-to-coin conversion. Keep frozen offline cap and class/gear progression.
+**Owner-approved; supersedes AUTO-ACTIVITY-001 and all survival/resource progression directions.** Public manager has only coins and combat-earned experience/stat growth. No gathering, crafting, material inventory, tributes, noncombat work lanes or noncombat skill advancement. Fighting remains automatic, including productive defeat practice. Coins are the sole spendable currency for every purchasable upgrade, including future clan development. XP is earned, never spent. No alternate currencies or material requirements. Do not implement clans without separate approval. Keep historical test fixtures isolated from the public manager. Existing earned attributes and old skill bonuses retained, but noncombat skills frozen. No material-to-coin conversion. Keep frozen offline cap and class/gear progression.
 
 ## Mobile-first selection rule — BUTTONS-001 (2026-11-27)
 
