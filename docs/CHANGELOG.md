@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — ARENA-PREFERENCES-CACHE-001 STARTED
+
+Owner reported mobile panel opens but choices are absent (old battle UI still running). Merged #219 b4624c1 deployed; fresh mobile session has eight choices, existing browser has none. Likely mixed HTML/JS cache because entry URL and dependency versions were unchanged. Approved preference feature repair only: version browser module paths consistently, disable save until initialized, add explicit browser interaction and module URL checks. Preserve all saves and combat mechanics. Branch `fix/arena-preference-cache`; next implement and validate.
+
 ## 2026-11-27 — ARENA-PREFERENCES-001 STARTED
 
 Owner approved three starred environments, +10 percentage points each, other five equally reduced, 24-hour lock, symmetric average for future PvP. Branch `feature/arena-preferences`; baseline main 5487e23 (v9, 202 tests). V10 #218 separately verified, not yet merged. Implement deterministic weighted selection, frozen current bout, persistent local settings and star UI; server enforcement awaits multiplayer. Tests pending; next implement candidate.
