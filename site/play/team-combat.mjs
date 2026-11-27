@@ -2,7 +2,7 @@
 import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=kits-001";
 import {COUNTERS,GROUP_COMBAT_RULES_VERSION,SUPPORTED_GROUP_COMBAT_RULES,tacticalActor,intactTank,tankPriorityActor,tankFirstTargets,geometryActor,ENGAGEMENT_GEOMETRY,RANGED_GEOMETRY_RULES_VERSION} from "./group-counter-rules.mjs";
 import {kitActor,pilotKit} from "./class-kits.mjs";
-import {prepareKitActor,expireKitEffects,markKitMovement,kitApproach,kitTargetDisrupted} from "./class-effects.mjs";
+import {prepareKitActor,expireKitEffects,markKitMovement,kitApproach,kitTargetDisrupted,rooted,silenced,incapacitated} from "./class-effects.mjs";
 import {tryKitAction} from "./class-ability-policy.mjs";
 import { coordinationChance } from "./teamwork.mjs?v=team-002";
 import {TACTIC_BALANCE,tacticActivation,validTacticSnapshot} from "./manager-tactics.mjs?v=manager-tactics-001";
@@ -19,12 +19,12 @@ const bowActive=a=>geometryActor(a)?activeWeapon(a).move==="shot":activeWeapon(a
 const other=(actors,a)=>actors.filter(b=>b.side!==a.side&&alive(b));
 const allies=(actors,a)=>actors.filter(b=>b.side===a.side&&b!==a&&alive(b));
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
-const startDistance=(terrain,rules)=>rules===RANGED_GEOMETRY_RULES_VERSION?(ENGAGEMENT_GEOMETRY[terrain.id]?.startDistance??clamp(terrain.startDistance??2,0,2)):clamp(terrain.startDistance??2,0,2);
+const startDistance=(terrain,rules)=>[RANGED_GEOMETRY_RULES_VERSION,7].includes(rules)?(ENGAGEMENT_GEOMETRY[terrain.id]?.startDistance??clamp(terrain.startDistance??2,0,2)):clamp(terrain.startDistance??2,0,2);
 export const teamArenaWidth=(terrain,rules=GROUP_COMBAT_RULES_VERSION)=>2*TEAM_COMBAT_BALANCE.rearSpace+startDistance(terrain,rules)+2;
 const validRoster=r=>Array.isArray(r)&&r.length>0&&r.length<=TEAM_COMBAT_BALANCE.maxRoster&&r.every(a=>a&&Object.hasOwn(WEAPONS,a.loadout)&&a.loadout!=="dagger"&&(!a.classId||validGroupSnapshot(a))&&validTacticSnapshot(a)&&["str","dex","end","skill"].every(k=>Number.isFinite(a[k])&&a[k]>=0&&a[k]<=1e6));
 function makeActors(roster,side,terrain,rules){
   const start=startDistance(terrain,rules)+1;
-  const tactical=[2,3,4,5,6].includes(rules)&&roster.every(x=>x.classId);
+  const tactical=[2,3,4,5,6,7].includes(rules)&&roster.every(x=>x.classId);
   const frontline=roster.map((s,i)=>({s,i})).filter(({s})=>!classWeapon(s)?.ranged).sort((a,b)=>Number(b.s.role==="tank")-Number(a.s.role==="tank"));
   const backline=roster.map((s,i)=>({s,i})).filter(({i})=>!frontline.some(x=>x.i===i));
   const lanes=Array.from({length:roster.length},(_,i)=>i).sort((a,b)=>Math.abs(a-(roster.length-1)/2)-Math.abs(b-(roster.length-1)/2)||a-b);
@@ -34,13 +34,14 @@ function makeActors(roster,side,terrain,rules){
     const front=TEAM_COMBAT_BALANCE.rearSpace;
     const x=side==="player"?front-rear:front+start+rear;
     const y=tactical?lanes[(rear?backline:frontline.length?frontline:backline).findIndex(x=>x.i===i)]:i;
-    const geometry=rules===RANGED_GEOMETRY_RULES_VERSION?ENGAGEMENT_GEOMETRY[terrain.id]:null;
+    const geometry=[RANGED_GEOMETRY_RULES_VERSION,7].includes(rules)?ENGAGEMENT_GEOMETRY[terrain.id]:null;
     const engagementRange=geometry&&["ranged","mage","summoner"].includes(snapshot.role)&&classWeapon(snapshot)?.ranged?(classWeapon(snapshot).move==="shot"?geometry.bowRange:geometry.spellRange):undefined;
     return prepareKitActor(prepareClassActor({...fighter(snapshot,side),...(tactical?{groupCombatRules:rules}:{}),...(engagementRange?{engagementRange}:{}),id:side+":"+i,x,y,approach:0,
       retreats:terrain.retreatSpace??(terrain.retreat===false?0:3),intercepted:-1,targetId:null,bleedSource:null,actions:0}));
   });
 }
 function adjacent(a,actors,height,width,side,terrain={}){
+  if(rooted(a))return [];
   const d=side==="player"?1:-1;
   return [[a.x-d,a.y],[a.x+d,a.y],[a.x,a.y-1],[a.x,a.y+1]]
     .filter(([x,y])=>x>=0&&x<width&&y>=0&&y<height&&
@@ -67,6 +68,7 @@ function chooseTarget(a,actors,coordinated,roll){
   }).sort((a,b)=>b.score-a.score||a.tie-b.tie)[0]?.b;
 }
 function move(a,target,actors,height,width,retreat,roll,terrain){
+  if(rooted(a))return false;
   const opponents=other(actors,a);
   const nearest=p=>Math.min(...opponents.map(e=>gap(p,e)));
   const steps=adjacent(a,actors,height,width,a.side,terrain);
@@ -106,7 +108,7 @@ function intercept(a,target,actors,round,chance,roll,range=activeWeapon(a).range
   // At most once per round, costs recovery, and cannot protect when staggered,
   // guard-open, broken or in worse health than the ally.
   if(activeWeapon(a).ranged)return target;
-  const guard=allies(actors,target).filter(g=>g.shield.hp>0&&!g.stagger&&!g.guardOpen&&g.intercepted!==round&&
+  const guard=allies(actors,target).filter(g=>g.shield.hp>0&&!g.stagger&&!g.guardOpen&&!rooted(g)&&!rooted(target)&&g.intercepted!==round&&
     gap(g,target)===1&&(tacticalActor(g)||g.hp/g.maxHP>=target.hp/target.maxHP)&&g.activeTactic!=="aggressive")
     .sort((a,b)=>b.hp/b.maxHP-a.hp/a.maxHP)[0];
   if(!guard||roll()>=(guard.activeTactic==="defensive"?Math.max(chance,tacticActivation(guard.tacticLevel)):chance))return target;
@@ -121,7 +123,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   const chance={player:coordinationChance(levels.player),enemy:coordinationChance(levels.enemy)};
   const rules=levels.groupCombatRules??GROUP_COMBAT_RULES_VERSION;
   if(!SUPPORTED_GROUP_COMBAT_RULES.includes(rules))throw new RangeError("Unknown group combat rules");
-  if([4,5,6].includes(rules)&&![...players,...enemies].every(a=>a.classId&&validCombatAttributes(a.attributes)&&a.str===a.attributes.STR&&a.dex===a.attributes.DEX&&a.end===a.attributes.CON&&a.skill===a.classLevel))throw new RangeError("Invalid individual combat attributes");
+  if([4,5,6,7].includes(rules)&&![...players,...enemies].every(a=>a.classId&&validCombatAttributes(a.attributes)&&a.str===a.attributes.STR&&a.dex===a.attributes.DEX&&a.end===a.attributes.CON&&a.skill===a.classLevel))throw new RangeError("Invalid individual combat attributes");
   const actors=[...makeActors(players,"player",terrain,rules),...makeActors(enemies,"enemy",terrain,rules)];
   const raid=levels.raid,bonus=levels.playerBonus;
   if(raid){
@@ -135,7 +137,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
     }
   }
   if(bonus){
-    if(![4,5,6].includes(rules)||![bonus.damage,bonus.defence].every(v=>Number.isFinite(v)&&v>=0&&v<=.10))throw new RangeError("Invalid raid combat bonus");
+    if(![4,5,6,7].includes(rules)||![bonus.damage,bonus.defence].every(v=>Number.isFinite(v)&&v>=0&&v<=.10))throw new RangeError("Invalid raid combat bonus");
     for(const a of actors.filter(x=>x.side==="player")){a.raidBonusDamage=bonus.damage;a.raidBonusDefence=bonus.defence;}
   }
   const maxRounds=raid?RAID_MAX_ROUNDS:TEAM_COMBAT_BALANCE.maxRounds;
@@ -145,7 +147,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   const events=[];let round=0;
   const record=(a,b,type,extra={})=>{
     events.push({type,round,actor:a?.id??null,target:b?.id??null,damage:0,...extra,
-      vitals:Object.fromEntries(actors.map(c=>[c.id,{...vitals(c),x:c.x,y:c.y}]))});
+      vitals:Object.fromEntries(actors.map(c=>[c.id,{...vitals(c),x:c.x,y:c.y,...(c.groupCombatRules===7?{control:{...c.controlEffects}}:{})}]))});
   };
   const has=side=>actors.some(a=>a.side===side&&alive(a));
   record(null,null,"engage");
@@ -165,6 +167,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
         if(!alive(a))continue;
       }
       a.activeTactic=null;
+      const disabled=incapacitated(a);if(disabled){record(a,null,"disabled",{effect:disabled});continue;}
       if(a.stagger>0){a.stagger--;record(a,null,"stagger");continue;}
       if(a.tactic!==undefined&&tactical()<tacticActivation(a.tacticLevel))a.activeTactic=a.tactic;
       const coordinated=decision()<chance[a.side],target=chooseTarget(a,actors,coordinated,decision);
@@ -177,7 +180,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
         const threat=other(actors,a).find(e=>!activeWeapon(e).ranged&&distance(a,e)===0&&mobility(a)>=mobility(e)+TACTICS.retreatLead);
         if(threat&&move(a,threat,actors,height,width,true,tactical,terrain)){a.retreats--;a.approach=0;record(a,threat,"retreat",{tactic:"maintain_range"});continue;}
       }
-      if(pilotKit(a)?tryKitAction(a,target,actors,round,active,ctx):a.classId&&tryClassAction(a,target,actors,round,ctx))continue;
+      if(!(silenced(a)&&active.type==="magic")&&(pilotKit(a)?tryKitAction(a,target,actors,round,active,ctx):a.classId&&tryClassAction(a,target,actors,round,ctx)))continue;
       // Defensive fighters may escort threatened allies only when they
       // cannot take a ready attack. Real tile movement and turn cost.
       if(a.activeTactic==="defensive"&&a.shield.hp>0&&!a.guardOpen){
@@ -209,6 +212,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
         }
         record(a,target,"approach");continue;
       }
+      if(silenced(a)&&active.type==="magic"){record(a,null,"silenced");continue;}
       const actual=intercept(a,target,actors,round,chance[target.side],decision);
       if(actual!==target)record(actual,a,"intercept",{protected:target.id});
       resolveStrike(a,actual,{active,bow,distance:Math.min(2,distance(a,actual)),terrain,roll,speedRoll,record,

@@ -8,10 +8,19 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## INTERLUDE-CONTROL-001 — Class control and utility
+
+- **Goal / acceptance:** Distinct bounded control and debuffs, revised class identity kits, max-only paired arena tests, frozen-rule compatibility.
+- **Status:** IN_REVIEW — v7 candidate; CI and numerical balance pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+- **Dependencies:** CLASS-KITS-001, RANGE-GEOMETRY-001; [research #212](https://github.com/janisp123/idle_game/pull/212).
+
 ## RANGE-GEOMETRY-001 — Ranged engagement geometry
 
 - **Goal / acceptance:** Give ranged compositions real distance-based advantages in open terrain while retaining melee strengths in close quarters, tank aggro and healer priority. No damage inflation or scripted winners.
-- **Status:** IN_REVIEW — v6 candidate; functional CI and balance evidence pending.
+- **Status:** PARTIAL — v6 merged #211 (938ffc8), 194 tests, seven workflows. Deployment verification and broader balance pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

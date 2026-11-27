@@ -37,8 +37,43 @@ const rows=[
  ["dreadguard","Disruptive Shield",strike("dread_strike","Dread Strike",4,1.18,{effect:"weaken"}),strike("dark_bind","Dark Bind",6,.90,{effect:"control",utility:true})]
 ];
 export const CLASS_KITS=Object.freeze(Object.fromEntries(rows.map(([id,passive,primary,secondary])=>[id,Object.freeze({passive,primary:Object.freeze(primary),secondary:Object.freeze(secondary)})])));
-export const kitActor=a=>[KIT_RULES_VERSION,4,5,6].includes(a?.groupCombatRules)&&Boolean(a.classId);
-export const pilotKit=a=>kitActor(a)?CLASS_KITS[a.classId]??null:null;
+export const kitActor=a=>[KIT_RULES_VERSION,4,5,6,7].includes(a?.groupCombatRules)&&Boolean(a.classId);
+
+ // V7 source-inspired variants. Legacy CLASS_KITS remains immutable for frozen v1–v6.
+ const hex=(id,name,effect,cooldown,extra={})=>utility(id,name,"tactical_control",cooldown,{effect,...extra});
+ const variants={
+  blademaster:{primary:strike("sonic_cleave","Sonic Cleave",4,1.48,{range:1,recovery:3,guardPierce:true})},
+  linebreaker:{secondary:strike("shock_sweep","Shock Sweep",6,.88,{effect:"control",spreadControl:true,utility:true})},
+  oathkeeper:{primary:strike("shield_stun","Shield Stun",5,1.06,{effect:"control"})},
+  grimwarden:{secondary:hex("hamstring","Hamstring","slow",5,{range:2,physical:true})},
+  trickblade:{}, // retain target disruption
+  longshot:{secondary:hex("stunning_shot","Stunning Shot","stun",6,{physical:true})},
+  windbow:{primary:hex("stunning_shot","Stunning Shot","stun",6,{physical:true})},
+  blackbow:{primary:hex("stunning_shot","Stunning Shot","stun",7,{physical:true})},
+  flameweaver:{secondary:hex("cancellation","Cancellation","dispel",6)},
+  gravebinder:{primary:hex("curse_gloom","Curse Gloom","gloom",5),secondary:hex("anchor","Anchor","paralysis",8)},
+  lifekeeper:{}, // preserve strongest dedicated healer
+  runesage:{primary:hex("dryad_root","Dryad Root","root",6,{range:4})},
+  grovewarden:{primary:hex("arrest","Arrest","root",6,{range:1})},
+  wardchanter:{}, // protective songs
+  swiftblade:{primary:hex("entangle","Entangle","slow",5,{range:3})},
+  frostweaver:{secondary:hex("ice_bind","Ice Bind","root",6)},
+  spiritcaller:{secondary:utility("seraphim_aid","Seraphim Aid","support_buff",5,{range:3,amount:.10,duration:3,maxTargets:2,mode:"magic_tempo"})},
+  wellspring:{secondary:hex("purifying_grace","Purifying Grace","cleanse",5,{range:3})},
+  dreadguard:{secondary:hex("lightning_strike","Lightning Strike","paralysis",8,{range:2})},
+  war_dancer:{}, // shared offensive tempo
+  nightblade:{secondary:strike("hex_blade","Hex Blade",5,1.10,{effect:"physical_vulnerability",utility:true})},
+  galescourge:{secondary:hex("silence","Silence","silence",7)},
+  shadebinder:{secondary:hex("nightshade_curse","Nightshade Curse","antiheal",6)},
+  bloodsage:{secondary:hex("dryad_root","Dryad Root","root",6,{range:4}),primary:utility("battle_mend","Battle Mend","ally_heal",4,{amount:.17,range:3,boon:.10,pact:true})},
+  ironfist:{primary:strike("force_blaster","Force Blaster",4,1.12,{range:2,effect:"slow"})},
+  hexchief:{secondary:hex("seal_of_silence","Seal of Silence","silence",8,{range:2,area:true})},
+  warcaller:{primary:hex("madness","Madness","sleep",7,{range:3})},
+  beastcaller:{},ragebreaker:{},scrapbreaker:{},forgecaller:{}
+ };
+ export const CONTROL_CLASS_KITS=Object.freeze(Object.fromEntries(Object.entries(CLASS_KITS).map(([id,k])=>[id,Object.freeze({...k,...Object.fromEntries(Object.entries(variants[id]??{}).map(([slot,v])=>[slot,Object.freeze(v)]))})])));
+
+export const pilotKit=a=>kitActor(a)?(a.groupCombatRules===7?CONTROL_CLASS_KITS:CLASS_KITS)[a.classId]??null:null;
 export const kitStrength=a=>.75+.25*(a.classLevel-1)/49;
 export const KIT_BALANCE=Object.freeze({daggerShieldImpact:.38,daggerShieldBlock:.65,daggerPlateImpact:.62,daggerBlockedImpact:.19,
  opportunist:1.12,swiftEvasion:.07,swiftPursuit:1.22,nightCritical:.22,nightDamage:.94,

@@ -1,6 +1,6 @@
 import { dodgeChance } from "./armour.mjs?v=bal-002";
 import {COUNTERS,tacticalActor,isArrow,intactTank} from "./group-counter-rules.mjs";
-import {kitStrikeModifiers,kitStatus,kitControlAllowed,kitControlDuration,kitPactHeal} from "./class-effects.mjs";
+import {kitStrikeModifiers,kitStatus,kitControlAllowed,kitControlDuration,kitPactHeal,wakeOnDamage} from "./class-effects.mjs";
 import {kitActor,KIT_BALANCE} from "./class-kits.mjs";
 import {individualActor,statAttack,statAim,statSpeed,statCrit,statEvasion,statMobility,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
 import {combatDamageFactor} from "./raid-rules.mjs";
@@ -77,7 +77,7 @@ export function timeoutVerdict(player, enemy) {
 
 export function wound(actor, target, amount) {
   const damage = Math.min(target.hp, amount);
-  target.hp -= damage;
+  target.hp -= damage;if(damage>0)wakeOnDamage(target);
   actor.inflicted += damage;
   return damage;
 }
@@ -207,9 +207,9 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   if (attack.type === "blunt" && (damage >= 8 || attack === BASH)) {
     // The new melee control kits cannot repeatedly stun through immunity or Brace.
     const newControl=kitActor(actor)&&["ironfist","scrapbreaker"].includes(actor.classId);
-    if((!kitActor(target)||(!target.kitBraceUntil&&!newControl)||kitControlAllowed(target,actor.kitRound??1))&&statStatusLands(target,"physical",roll)){
+    if((target.groupCombatRules===7?kitControlAllowed(target,actor.kitRound??1):(!kitActor(target)||(!target.kitBraceUntil&&!newControl)||kitControlAllowed(target,actor.kitRound??1)))&&statStatusLands(target,"physical",roll)){
       target.stagger=1;
-      if(newControl&&kitActor(target))target.classControlUntil=(actor.kitRound??1)+kitControlDuration(target);
+      if((newControl||target.groupCombatRules===7)&&kitActor(target))target.classControlUntil=(actor.kitRound??1)+kitControlDuration(target);
     }
     // A heavy impact opens a guard without permanently breaking Masterwork.
     if(attack.move==="hammer")target.guardOpen=TACTICS.guardOpenTurns;

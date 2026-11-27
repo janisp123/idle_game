@@ -4,6 +4,7 @@
 
 | ID | Date | Approved by | Decision | Status |
 | --- | --- | --- | --- | --- |
+| INTERLUDE-CONTROL-001 | 2026-11-27 | Owner | Try Interlude-inspired distinct crowd control and debuffs, retain two automatic abilities and max-only tests. Specific coefficients and utility threat target selection provisional. | Approved; v7 candidate |
 | RANGE-GEOMETRY-001 | 2026-11-27 | Owner | Correct ranged engagement geometry and movement before modifying damage, preserve tank/healer priority and environmental tradeoffs. | Approved; v6 arena candidate |
 | TANK-AGGRO-001 | 2026-11-27 | Owner | Living tanks naturally draw primary enemy aggro; healers prioritize wounded tanks in raids, 7v7 and other group encounters. | Approved; v5 candidate |
 | RAID-001 | 2026-11-27 | Owner | Five manually started automatically fought raids with unique crews and resistances; 24h nonstacking +10% Fighting XP and tiered damage/defence up to 10%, coins on victory. Higher replaces, same refreshes, lower does not refresh higher. Target five minutes. | Approved direction; staged implementation |
