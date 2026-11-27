@@ -58,3 +58,37 @@ test("v2 terrain candidate remains exact after pilot kit rule addition",()=>{
  const r=settleGroupSession(s,513*10000);
  assert.deepEqual(r.analytics.outcomes,[213,300,0]);assert.equal(r.coins,2758);assert.equal(r.session.groupCombatRules,2);
 });
+
+import {awardGroupPractice,activateGroupPractice,migrateGroupAttributes} from "../site/play/battle-group.mjs";
+import {blankCharacterEffort,awardCharacterEffort,characterAttributes} from "../site/play/character-attributes.mjs";
+test("individual stat training credits frozen member and class, not a switched or duplicate class",()=>{
+ const g=initialBattleGroup(),c=GROUP_CLASSES.longshot,zero=blankCharacterEffort();
+ const twin=selectGroupClass(g,"member2",c.race,c.mainClass,c.id),snap=groupSnapshots(twin,max);
+ const changed=selectGroupClass(twin,"member3",GROUP_CLASSES.galescourge.race,GROUP_CLASSES.galescourge.mainClass,"galescourge");
+ const ms=Object.fromEntries(GROUP_IDS.map(id=>[id,id==="member3"?9000:id==="member2"?3000:0]));
+ const earned=awardGroupPractice(changed,snap,ms);
+ assert.deepEqual(earned.member3.classes.longshot.attributeEffort,awardCharacterEffort(zero,"longshot",9000));
+ assert.deepEqual(earned.member2.classes.longshot.attributeEffort,awardCharacterEffort(zero,"longshot",3000));
+ assert.deepEqual(earned.member3.classes.galescourge.attributeEffort,zero);
+ assert.deepEqual(earned.member3.classes.longshot.attributeEffortActive,zero);
+ assert.deepEqual(twin.member2.classes.longshot.attributeEffort,zero);
+ const active=activateGroupPractice(earned);
+ assert.deepEqual(active.member2.classes.longshot.attributeEffortActive,active.member2.classes.longshot.attributeEffort);
+ assert.deepEqual(active.member3.classes.longshot.attributeEffortActive,zero);
+ const back=activateGroupPractice(selectGroupClass(active,"member3",c.race,c.mainClass,c.id));
+ assert.deepEqual(back.member3.classes.longshot.attributeEffortActive,back.member3.classes.longshot.attributeEffort);
+ assert.ok(validBattleGroup(back));
+});
+test("legacy individual effort migration is idempotent and recovers actual per-class weapon practice",()=>{
+ const g=initialBattleGroup(),c=GROUP_CLASSES[g.member1.selected],p=g.member1.classes[c.id],zero=blankCharacterEffort();
+ delete p.attributeEffort;delete p.attributeEffortActive;
+ p.expertise[c.loadout]=400000;p.expertiseActive[c.loadout]=200000;
+ assert.ok(validBattleGroup(g));const migrated=migrateGroupAttributes(g),n=migrated.member1.classes[c.id];
+ assert.deepEqual(n.attributeEffort,awardCharacterEffort(zero,c.id,100000));
+ assert.deepEqual(n.attributeEffortActive,awardCharacterEffort(zero,c.id,50000));
+ assert.equal(migrateGroupAttributes(migrated),migrated);
+ assert.deepEqual(migrated.member2.classes[g.member2.selected].attributeEffort,zero);
+ assert.deepEqual(n.equipment,p.equipment);assert.deepEqual(n.mastery,p.mastery);
+ const invalid=structuredClone(migrated);invalid.member1.classes[c.id].attributeEffortActive.STR=n.attributeEffort.STR+1;
+ assert.equal(validBattleGroup(invalid),false);
+});

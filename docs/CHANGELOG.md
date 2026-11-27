@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — INDIVIDUAL-STATS-001 stage 2
+
+INDIVIDUAL-STATS-001 stage 2 — stage 1 merged #204 (447a0288), 177 tests and seven workflows passed. Added six-stat earned/active effort to each slot/specialization; award only frozen productive member time; old records migrate once using exact class weapon practice quarter-ms, not shared account ledger. Preserve inactive pending effort, activate selected builds only; alpha floor applies selected profiles. No v4 combat changes yet. Migration retains historical account ledger; no arbitrary duplication of shared stats. Pending CI. Next: v4 derived effects, clone parity and frozen snapshot dispatch, individual UI. Candidate 3700h alpha floor inherited from prior team benchmark; recalculate later.
+
 ## 2026-11-27 — INDIVIDUAL-STATS-001 STARTED
 
 INDIVIDUAL-STATS-001 — owner approved individual combat attributes, six stats, specialization-specific starting values and growth, no mana, modular tuning without unnecessary abstractions. First increment: pure 31-profile registry, exact weighted productive-time effort, configurable diminishing per-point costs, tests. Legacy account attributes and live combat unchanged until explicit versioned integration. Proposed 100-point start, 100% weights, legacy 100 XP/h and cost curve are provisional. Next: per-slot/per-specialization earned and active effort, frozen combat snapshot v4, NPC parity, six-stat derived effects, migration, UI and alpha max tool; then fresh balance simulations. No claims of live individual growth yet.

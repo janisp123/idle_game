@@ -11,7 +11,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## INDIVIDUAL-STATS-001 — Six individual character attributes
 
 - **Goal / acceptance:** Individual active fighters train STR, DEX, CON, INT, WIT, MEN; each specialization has unique starting stats and growth weights, no mana or regeneration. No shared account combat stats. Keep tuning modular, no unnecessary abstractions, historical frozen settlement preserved. Specific coefficients provisional.
-- **Status:** PARTIAL — pure registry and progression foundation in progress; runtime integration, migration, UI and max-only balance pending.
+- **Status:** PARTIAL — stage 1 merged #204 (177 tests); stage 2 individual training ledger and migration candidate; v4 combat, UI and max-only balance pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
