@@ -1,7 +1,7 @@
 // AUTO-ACTIVITY-001 candidate. Deterministic, data-driven one-level rotation.
 // Reserve policy is provisional; legacy Master callers retain full tribute.
 import {ACTIVITIES,SKILL_BALANCE,PRODUCTION_RECIPES,recipeOptions,xpToNextLevel,
-  activityRewardCapped,SAME_ZONE_TRAVEL_MS,ZONE_TRAVEL_MS,PREPARATION_MS} from "./engine.mjs?v=manager-lanes-001";
+  activityRewardCapped,SAME_ZONE_TRAVEL_MS,ZONE_TRAVEL_MS,PREPARATION_MS} from "./engine.mjs?v=npc-parity-001";
 
 export const WORK_ROTATION=Object.freeze([
   "hunting","fishing","foraging","woodcutting","mining","farming",

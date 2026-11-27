@@ -3,7 +3,7 @@
 import {ARMOUR_SLOTS,ARMOUR_TIERS} from "./armour.mjs?v=bal-002";
 import {STARTER_ITEM,smithQuote} from "./smith.mjs?v=gear-a3";
 import {TEAM_IDS,validTeam,chooseTeamWeapon,upgradeTeam} from "./team.mjs?v=team-001";
-import {teamFromState,autoEquipmentPreview} from "./engine.mjs?v=manager-lanes-001";
+import {teamFromState,autoEquipmentPreview} from "./engine.mjs?v=npc-parity-001";
 
 export const MANAGER_ARMOUR_FAMILIES=Object.freeze(ARMOUR_TIERS.filter(id=>id!=="none"));
 const count=n=>Number.isSafeInteger(n)&&n>=0;

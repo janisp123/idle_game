@@ -1,10 +1,10 @@
 // Read-only adapter. Real frozen team timeline remains the sole combat authority.
-import {teamCombatAtTime,teamWinPrize,teamBoutMs} from "./team-timeline.mjs?v=analytics-001";
+import {teamCombatAtTime,teamWinPrize,teamBoutMs} from "./team-timeline.mjs?v=npc-parity-001";
 import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=gear-a3";
 const title=s=>s[0].toUpperCase()+s.slice(1);
 export const battleLabels=Object.freeze({victory:"Victory",defeat:"Defeat",double_death:"Draw"});
 export function battlePreviewKey(s){
-  return s?JSON.stringify([s.timelineVersion,s.seed,Math.floor(s.elapsedMs/teamBoutMs(s)),s.players,s.teamworkLevel,s.coinRemainder??0]):"";
+  return s?JSON.stringify([s.timelineVersion,s.seed,Math.floor(s.elapsedMs/teamBoutMs(s)),s.players,s.teamworkLevel,s.coinRemainder??0,s.cloneEnvelope??null]):"";
 }
 export function battlePercentage(s){
   return s?Math.min(99,Math.floor(100*(s.elapsedMs%teamBoutMs(s))/teamBoutMs(s))):0;

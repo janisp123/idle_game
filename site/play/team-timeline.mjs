@@ -7,21 +7,25 @@ import { arenaReward } from "./arena-wallet.mjs?v=gear-a3";
 import { TEAM_IDS,awardTeamPractice } from "./team.mjs?v=team-001";
 import { awardTeamwork,coordinationChance } from "./teamwork.mjs?v=team-002";
 import { resolveTeamBattle } from "./team-combat.mjs?v=manager-tactics-001";
-import {newBattleDelta,recordBattleGroup} from "./battle-analytics.mjs?v=analytics-001";
+import {newBattleDelta,recordBattleGroup} from "./battle-analytics.mjs?v=npc-parity-001";
+import {buildCloneTeam,validCloneEnvelope,cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
 import {validTacticSnapshot} from "./manager-tactics.mjs?v=manager-tactics-001";
 
 export const TEAM_TIMELINE_VERSION=2;
 export const FAST_TEAM_TIMELINE_VERSION=3;
+export const CLONE_TEAM_TIMELINE_VERSION=4;
+export const isCloneTeamSession=s=>s?.timelineVersion===CLONE_TEAM_TIMELINE_VERSION;
 export const MANAGER_BOUT_MS=20_000;
 export const MANAGER_RESURRECTION_MS=2_000;
 const SPEED_RATIO=BOUT_MS/MANAGER_BOUT_MS;
-export const isFastTeamSession=s=>s?.timelineVersion===FAST_TEAM_TIMELINE_VERSION;
+export const isFastTeamSession=s=>s?.timelineVersion===FAST_TEAM_TIMELINE_VERSION||isCloneTeamSession(s);
 export const teamBoutMs=(s,manager=false)=>isFastTeamSession(s)||(!s&&manager)?MANAGER_BOUT_MS:BOUT_MS;
 const teamRecoveryMs=s=>isFastTeamSession(s)?MANAGER_RESURRECTION_MS:RESURRECTION_MS;
 
 export const TEAM_REWARD_PERCENT=140;
 export const teamArenaReward=grade=>Math.round(arenaReward(grade)*TEAM_REWARD_PERCENT/100);
-export const teamWinPrize=s=>isFastTeamSession(s)?Math.floor((teamArenaReward(s.players.first.difficulty)+s.coinRemainder)/SPEED_RATIO):teamArenaReward(s.players.first.difficulty);
+export const teamPrizeGrade=s=>isCloneTeamSession(s)?cloneRewardGrade(s.players.first.skill):s.players.first.difficulty;
+export const teamWinPrize=s=>isFastTeamSession(s)?Math.floor((teamArenaReward(teamPrizeGrade(s))+s.coinRemainder)/SPEED_RATIO):teamArenaReward(s.players.first.difficulty);
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 const uint=n=>count(n)&&n<=0xffffffff;
 const own=(o,k)=>Object.hasOwn(o,k);
@@ -38,11 +42,11 @@ export function validTeamSession(s){
   return Boolean(s&&(s.timelineVersion===TEAM_TIMELINE_VERSION||isFastTeamSession(s))&&uint(s.seed)&&count(s.elapsedMs)&&
     count(s.prizeCursor)&&s.prizeCursor===Math.floor(s.elapsedMs/teamBoutMs(s))&&
     (!isFastTeamSession(s)||[s.coinRemainder,s.teamworkRemainder].every(n=>count(n)&&n<SPEED_RATIO))&&
-    validLevel(s.teamworkLevel)&&validSnapshots(s.players));
+    validLevel(s.teamworkLevel)&&validSnapshots(s.players)&&(!isCloneTeamSession(s)||validCloneEnvelope(s.cloneEnvelope)));
 }
-export function startTeamSession(players,teamworkLevel,seed,fast=false){
-  const s={timelineVersion:fast?FAST_TEAM_TIMELINE_VERSION:TEAM_TIMELINE_VERSION,elapsedMs:0,prizeCursor:0,seed,
-    players:structuredClone(players),teamworkLevel,...(fast?{coinRemainder:0,teamworkRemainder:0}:{})};
+export function startTeamSession(players,teamworkLevel,seed,fast=false,cloneEnvelope=null){
+  const s={timelineVersion:cloneEnvelope?CLONE_TEAM_TIMELINE_VERSION:fast?FAST_TEAM_TIMELINE_VERSION:TEAM_TIMELINE_VERSION,elapsedMs:0,prizeCursor:0,seed,
+    players:structuredClone(players),teamworkLevel,...(cloneEnvelope?{cloneEnvelope:structuredClone(cloneEnvelope)}:{}),...(fast||cloneEnvelope?{coinRemainder:0,teamworkRemainder:0}:{})};
   if(!validTeamSession(s))throw new RangeError("Invalid frozen team session");
   return s;
 }
@@ -62,7 +66,7 @@ function boutAt(session,index){
   const seed=Math.imul(session.seed^scheduled,2654435761)>>>0;
   const players=TEAM_IDS.map(id=>session.players[id]);
   const grade=players[0].difficulty;
-  const enemies=players.map((_,i)=>makeOpponent(scheduled*players.length+i,grade,
+  const enemies=isCloneTeamSession(session)?buildCloneTeam(session.cloneEnvelope,players[0],seed):players.map((_,i)=>makeOpponent(scheduled*players.length+i,grade,
     seededCombatRandom((seed^Math.imul(i+1,0x9e3779b9))>>>0)));
   // Provisional symmetric representative draw: keep the existing arena dice,
   // without privileging either roster slot. Does not alter damage formulas.
@@ -71,7 +75,7 @@ function boutAt(session,index){
   const e=enemies[Math.floor(arenaRoll()*enemies.length)];
   const positioning=chooseArena(p,e,arenaRoll);
   const result=resolveTeamBattle(players,enemies,seed,positioning.arena,
-    {player:session.teamworkLevel,enemy:1});
+    {player:session.teamworkLevel,enemy:isCloneTeamSession(session)?session.teamworkLevel:1});
   return {result,enemies,positioning,terrain:positioning.arena};
 }
 export function teamCombatAtTime(session,elapsedMs=session?.elapsedMs){
@@ -97,7 +101,7 @@ function summaryAt(session,index){
     const death=result.events.find(ev=>ev.vitals[actor].hp===0);
     return [id,death?Math.floor(productive*Math.min(result.rounds,death.round)/Math.max(1,result.rounds)):productive];
   }));
-  return {outcome:result.outcome,downtime,practice,zone:terrain.id,weapons:enemies.map(e=>e.loadout)};
+  return {outcome:result.outcome,downtime,practice,zone:terrain.id,weapons:enemies.map(e=>e.loadout),tactics:enemies.map(e=>e.tactic),armours:enemies.map(e=>e.trainingKit?e.trainingKit.armour.head:e.armour),clone:isCloneTeamSession(session)};
 }
 export function settleTeamSession(session,elapsedMs,cache=new Map()) {
   if(!validTeamSession(session)||!count(elapsedMs)||!count(session.elapsedMs+elapsedMs))
@@ -118,7 +122,7 @@ export function settleTeamSession(session,elapsedMs,cache=new Map()) {
   for(let offset=0;offset<Math.min(bouts,ARENA_SCHEDULE_BOUTS);offset++){
     const n=repeats+Number(offset<extra),s=at(cursor+offset);
     counts[s.outcome]+=n;downtimeMs+=n*s.downtime;
-    if(analytics)recordBattleGroup(analytics,s.outcome,s.zone,s.weapons,n);
+    if(analytics)recordBattleGroup(analytics,s.outcome,s.zone,s.weapons,n,s.clone?{tactics:s.tactics,armours:s.armours}:null);
     for(const id of TEAM_IDS)practiceMs[id]+=n*s.practice[id];
   }
   const partial=ms=>{
@@ -126,7 +130,7 @@ export function settleTeamSession(session,elapsedMs,cache=new Map()) {
     return overlap&&at(Math.floor(ms/duration)).downtime?overlap:0;
   };
   downtimeMs+=partial(end)-partial(session.elapsedMs);
-  const gross=counts.victory*teamArenaReward(session.players[TEAM_IDS[0]].difficulty);
+  const gross=counts.victory*teamArenaReward(teamPrizeGrade(session));
   // Old integer prize in tenths: exact carry survives reload and grade changes.
   const fast=isFastTeamSession(session),coinUnits=gross+(session.coinRemainder??0),workUnits=bouts+(session.teamworkRemainder??0);
   const coins=fast?Math.floor(coinUnits/SPEED_RATIO):gross;

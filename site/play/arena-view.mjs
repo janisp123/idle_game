@@ -1,5 +1,5 @@
 // Compact arena view; no strike log, HP bar, reward mutation or scheduler.
-import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels} from "./arena-presentation.mjs?v=analytics-001";
+import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels} from "./arena-presentation.mjs?v=npc-parity-001";
 const NS="http://www.w3.org/2000/svg";
 const icons={
  heart:"M20.8 4.6a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z",

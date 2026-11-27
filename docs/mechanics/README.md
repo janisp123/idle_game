@@ -38,3 +38,7 @@
 ### Battle analytics (candidate BATTLE-ANALYTICS-001)
 
 `battle-analytics.mjs` consumes the same resolved, weighted team schedule as arena settlement, not replayed UI previews. The manager persists totals with its existing save; old saves start with empty analytics. Gross coins per completed arena hour excludes wallet credits and paused time, includes scheduled recovery. Weapon rows overlap when enemies use different weapons; team-pair and terrain counts partition the total. Latest setup is the latest consecutive fought selection (weapon, armour family, tactic); automatic grade/mastery changes do not reset it. No per-bout history or combat tuning. Candidate validation pending.
+
+### Progression-matched rivals (NPC-PARITY-001 candidate)
+
+See [design and validation](NPC_PARITY_PLAN.md). V4 manager timeline uses real derived shared attributes, earned skill, per-fighter gear and practice budgets, identical player snapshot construction and Teamwork, independent seeded equipment/tactic decisions, and unchanged terrain/combat resolver. Win prize tier follows existing Fighting-level smith grade gates. Previous v3 in-flight bout is paid once before conversion. Legacy routes remain unchanged. Validation pending.
