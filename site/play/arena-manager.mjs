@@ -1,6 +1,6 @@
 // Public game entry points. Legacy two-lane functions remain accessible only
 // through the historical manager adapter for regression/migration.
-import {newArenaManager,enableArenaOnly,readManagerGame,enterManagerGame,settleManagerLive,chooseManagerGroupClass,chooseManagerGroupStance} from "./manager-lanes.mjs?v=arena-only-002";
+import {newArenaManager,enableArenaOnly,readManagerGame,enterManagerGame,settleManagerLive,chooseManagerGroupClass,chooseManagerGroupStance} from "./manager-lanes.mjs?v=counters-001";
 export {newArenaManager,enableArenaOnly};
 export function readArenaManager(value){const s=readManagerGame(value);return s?enableArenaOnly(s):null;}
 const requireArena=s=>{if(s?.arenaOnly!==true)throw new RangeError("Public game requires arena-only mode");return s;};

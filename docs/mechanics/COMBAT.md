@@ -1,5 +1,10 @@
 # Physical arena combat
 
+## GROUP-COUNTERS-001 candidate (PR #200)
+
+GROUP-COUNTERS-001 candidate v2: centered frontline/backline formations, tank shield arrow interception within two tiles up to twice per round, stronger actual arrow blocks and guarded arrow damage reduction, magic bypasses shield/parry and pressures tanks, mobile melee closes faster/pressures casters, no free recovery kiting, healer/support attack tradeoff and 2-round recipient heal window. All candidate coefficients centralized in group-counter-rules.mjs. New group sessions v2; old sessions explicitly resolve v1, transition only at completed foreground boundary, no paid cursor loss. Legacy nonclass duels unchanged. 5040 comparable max-only screen plus 840 direct paired role/terrain battles; functional checks for arrow intercept, block, magic bypass and healer access. Pending CI; no claim of balance or release.
+
+
 ## AUTO-FIGHT — automatic difficulty progression (pending PR #183)
 
 Eight existing enemy grades (Non-grade through S), no manual Fighting difficulty selection or active battle controls. New characters begin at Non-grade. On a committed, completed foreground bout: three consecutive victories advance one grade; a defeat/double death retreats one grade and resets the streak; ten consecutive wins are required to retry the most recently failed grade. The lowest and highest grades bound progression. Highest defeated records actual foreground victories, not merely attempts. Existing reward values, opponent variety, equipment purchase gates and physical combat remain unchanged. Noncombat difficulty selection remains manual and gated.

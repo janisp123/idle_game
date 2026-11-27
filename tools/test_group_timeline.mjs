@@ -39,3 +39,10 @@ test("long offline group settlement samples at most one fixed schedule",()=>{
  assert.ok(r.coins>=0);assert.ok(r.downtimeMs>=0);
  console.log("GROUP_TIMELINE_MAX_DIAGNOSTIC "+JSON.stringify({seed,bouts:r.bouts,sampled:r.sampledBouts,outcomes:r.analytics.outcomes,coins:r.coins,ms:r.analytics.ms,zones:r.analytics.zones,classes:r.analytics.classes}));
 });
+
+test("legacy saved rules remain frozen and new sessions explicitly use tactical rules",()=>{
+ const next=startGroupSession(maxGroup(),max,50,seed),old={...next};delete old.groupCombatRules;
+ assert.equal(next.groupCombatRules,2);assert.ok(validGroupSession(old));assert.ok(!validGroupSession({...next,groupCombatRules:999}));
+ const a=settleGroupSession(old,10000);assert.equal(a.session.groupCombatRules,undefined);
+ assert.deepEqual(groupCombatAtTime(old),groupCombatAtTime({...old,groupCombatRules:1}));
+});

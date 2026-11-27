@@ -5,7 +5,7 @@ import {
   ACTIVITIES, ATTRIBUTE_IDS, TIMING_PROFILE,
   newTeamGame, readSave, chooseActivity, settleManagerLane,
   automateSettledProgress, activateExpertise, LIVE_FIGHT_MAX_MS
-} from "./engine.mjs?v=arena-only-001";
+} from "./engine.mjs?v=counters-001";
 import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=group-004";
 import {GROUP_TIMELINE_VERSION} from "./battle-group-timing.mjs";
 import {initialBattleGroup,validBattleGroup,selectGroupClass,selectGroupStance,upgradeBattleGroup,previewGroupUpgrade} from "./battle-group.mjs?v=group-001";

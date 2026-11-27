@@ -1,8 +1,9 @@
 // Team geometry and decisions; all damage and durability use physical-actions.
-import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=group-002";
+import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=counters-001";
+import {COUNTERS,GROUP_COMBAT_RULES_VERSION,tacticalActor,intactTank} from "./group-counter-rules.mjs";
 import { coordinationChance } from "./teamwork.mjs?v=team-002";
 import {TACTIC_BALANCE,tacticActivation,validTacticSnapshot} from "./manager-tactics.mjs?v=manager-tactics-001";
-import {validGroupSnapshot,classWeapon,prepareClassActor,expireClassEffects,tryClassAction} from "./battle-group-actions.mjs?v=group-002";
+import {validGroupSnapshot,classWeapon,prepareClassActor,expireClassEffects,tryClassAction} from "./battle-group-actions.mjs?v=counters-001";
 export const TEAM_COMBAT_BALANCE=Object.freeze({maxRoster:7,maxRounds:PHYSICAL_RULES.turnLimit,
   rearSpace:3,interceptRecovery:1,focusWeight:2,healthWeight:1.5});
 const alive=a=>a.hp>0;
@@ -15,14 +16,19 @@ const allies=(actors,a)=>actors.filter(b=>b.side===a.side&&b!==a&&alive(b));
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
 export const teamArenaWidth=terrain=>2*TEAM_COMBAT_BALANCE.rearSpace+clamp(terrain.startDistance??2,0,2)+2;
 const validRoster=r=>Array.isArray(r)&&r.length>0&&r.length<=TEAM_COMBAT_BALANCE.maxRoster&&r.every(a=>a&&Object.hasOwn(WEAPONS,a.loadout)&&a.loadout!=="dagger"&&(!a.classId||validGroupSnapshot(a))&&validTacticSnapshot(a)&&["str","dex","end","skill"].every(k=>Number.isFinite(a[k])&&a[k]>=0&&a[k]<=1e6));
-function makeActors(roster,side,terrain){
+function makeActors(roster,side,terrain,rules){
   const start=clamp(terrain.startDistance??2,0,2)+1;
+  const tactical=rules===GROUP_COMBAT_RULES_VERSION&&roster.every(x=>x.classId);
+  const frontline=roster.map((s,i)=>({s,i})).filter(({s})=>!classWeapon(s)?.ranged).sort((a,b)=>Number(b.s.role==="tank")-Number(a.s.role==="tank"));
+  const backline=roster.map((s,i)=>({s,i})).filter(({i})=>!frontline.some(x=>x.i===i));
+  const lanes=Array.from({length:roster.length},(_,i)=>i).sort((a,b)=>Math.abs(a-(roster.length-1)/2)-Math.abs(b-(roster.length-1)/2)||a-b);
   return roster.map((snapshot,i)=>{
     // Front-line melee, rear-line ranged. Symmetric coordinates, no class lock.
-    const rear=snapshot.loadout==="bow"&&roster.some(x=>x.loadout!=="bow")?1:0;
+    const rear=tactical?Number(frontline.length>0&&backline.some(x=>x.i===i)):snapshot.loadout==="bow"&&roster.some(x=>x.loadout!=="bow")?1:0;
     const front=TEAM_COMBAT_BALANCE.rearSpace;
     const x=side==="player"?front-rear:front+start+rear;
-    return prepareClassActor({...fighter(snapshot,side),id:side+":"+i,x,y:i,approach:0,
+    const y=tactical?lanes[(rear?backline:frontline.length?frontline:backline).findIndex(x=>x.i===i)]:i;
+    return prepareClassActor({...fighter(snapshot,side),...(tactical?{groupCombatRules:rules}:{}),id:side+":"+i,x,y,approach:0,
       retreats:terrain.retreatSpace??(terrain.retreat===false?0:3),intercepted:-1,targetId:null,bleedSource:null,actions:0});
   });
 }
@@ -74,12 +80,21 @@ function move(a,target,actors,height,width,retreat,roll){
   return false;
 }
 function intercept(a,target,actors,round,chance,roll){
+  if(tacticalActor(a)&&tacticalActor(target)&&activeWeapon(a).move==="shot"){
+    if(intactTank(target))return target;
+    const d=a.side==="player"?1:-1;
+    const guard=allies(actors,target).filter(g=>intactTank(g)&&!g.stagger&&!g.guardOpen&&g.activeTactic!=="aggressive"&&gap(g,target)<=COUNTERS.interceptRange&&distance(a,g)<=activeWeapon(a).range&&(target.x-g.x)*d>=0&&(g.arrowInterceptRound!==round||(g.arrowInterceptCount??0)<COUNTERS.arrowInterceptions)).sort((x,y)=>gap(x,target)-gap(y,target)||y.hp/y.maxHP-x.hp/x.maxHP)[0];
+    if(!guard||roll()>=(guard.activeTactic==="defensive"?Math.max(chance,tacticActivation(guard.tacticLevel)):chance))return target;
+    guard.arrowInterceptCount=guard.arrowInterceptRound===round?(guard.arrowInterceptCount??0)+1:1;guard.arrowInterceptRound=round;
+    // Shield covers the adjacent lane without swapping into the arrow path or teleporting.
+    return guard;
+  }
   // A nearby shield bearer can step into a reachable attack, never teleport.
   // At most once per round, costs recovery, and cannot protect when staggered,
   // guard-open, broken or in worse health than the ally.
   if(activeWeapon(a).ranged)return target;
   const guard=allies(actors,target).filter(g=>g.shield.hp>0&&!g.stagger&&!g.guardOpen&&g.intercepted!==round&&
-    gap(g,target)===1&&g.hp/g.maxHP>=target.hp/target.maxHP&&g.activeTactic!=="aggressive")
+    gap(g,target)===1&&(tacticalActor(g)||g.hp/g.maxHP>=target.hp/target.maxHP)&&g.activeTactic!=="aggressive")
     .sort((a,b)=>b.hp/b.maxHP-a.hp/a.maxHP)[0];
   if(!guard||roll()>=(guard.activeTactic==="defensive"?Math.max(chance,tacticActivation(guard.tacticLevel)):chance))return target;
   // Swap adjacent allies: the protector occupies the originally reachable tile.
@@ -91,7 +106,8 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   if(!validRoster(players)||!validRoster(enemies)||!Number.isSafeInteger(seed)||seed<0||seed>0xffffffff)
     throw new RangeError("Invalid team combat input");
   const chance={player:coordinationChance(levels.player),enemy:coordinationChance(levels.enemy)};
-  const actors=[...makeActors(players,"player",terrain),...makeActors(enemies,"enemy",terrain)];
+  const rules=levels.groupCombatRules??GROUP_COMBAT_RULES_VERSION;
+  const actors=[...makeActors(players,"player",terrain,rules),...makeActors(enemies,"enemy",terrain,rules)];
   const height=Math.max(players.length,enemies.length),width=teamArenaWidth(terrain),roll=seededRandom(seed),speedRoll=seededRandom((seed^0x85ebca6b)>>>0),
     initiative=seededRandom((seed^0x9e3779b9)>>>0),decision=seededRandom((seed^0x517cc1b7)>>>0);
   const tactical=seededRandom((seed^0x4f7b3241)>>>0);
@@ -143,13 +159,14 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
       }
       if(a.recovery>0){
         a.recovery--;
-        if(bow&&a.activeTactic!=="aggressive"&&a.retreats>0&&distance(a,target)<2&&mobility(a)>=mobility(target)+TACTICS.retreatLead&&move(a,target,actors,height,width,true,decision)){
+        if(bow&&!tacticalActor(a)&&a.activeTactic!=="aggressive"&&a.retreats>0&&distance(a,target)<2&&mobility(a)>=mobility(target)+TACTICS.retreatLead&&move(a,target,actors,height,width,true,decision)){
           a.retreats--;a.approach=0;record(a,target,"retreat");
         }
         continue;
       }
       if(distance(a,target)>active.range){
-        a.approach+=(mobility(a)>=TACTICS.quickMobility?1:TACTICS.slowApproach)*(a.activeTactic==="aggressive"?TACTIC_BALANCE.aggressiveApproach:1);
+        const pursuit=tacticalActor(a)&&a.role==="melee"?(a.trainingKit?.armour?.torso==="leather"?COUNTERS.lightMeleeApproach:COUNTERS.heavyMeleeApproach):1;
+        a.approach+=(mobility(a)>=TACTICS.quickMobility?1:TACTICS.slowApproach)*pursuit*(a.activeTactic==="aggressive"?TACTIC_BALANCE.aggressiveApproach:1);
         if(a.approach>=(terrain.approachSteps??1)){
           a.approach=0;move(a,target,actors,height,width,false,decision);
         }

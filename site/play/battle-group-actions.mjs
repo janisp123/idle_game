@@ -1,7 +1,8 @@
 // Shared cooldown-only class action policy. Same actions for both sides.
 // Candidate coefficients: deliberately central, awaiting max-only balance.
 import {GROUP_CLASSES,isGroupClass} from "./battle-group-classes.mjs?v=group-001";
-import {WEAPONS,resolveStrike,wound,attackComponents,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=group-002";
+import {WEAPONS,resolveStrike,wound,attackComponents,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=counters-001";
+import {COUNTERS,tacticalActor} from "./group-counter-rules.mjs";
 export const GROUP_ACTION_BALANCE=Object.freeze({supportRange:3,maxTargets:3,healFraction:.16,healGradeFactor:.018,
  buff:.18,guard:.24,weaken:.16,duration:3,controlImmunity:3,masteryMin:.75,masteryMax:1});
 const B=GROUP_ACTION_BALANCE;
@@ -38,10 +39,11 @@ const distance=(a,b)=>Math.max(0,Math.abs(a.x-b.x)+Math.abs(a.y-b.y)-1);
 const order=(a,b)=>hpRatio(a)-hpRatio(b)||a.hp-b.hp;
 const strength=a=>B.masteryMin+(B.masteryMax-B.masteryMin)*(a.classLevel-1)/49;
 function status(a,key,until,value,round){a[key]=Math.max(a[key]??0,value);a[until]=Math.max(a[until]??0,round+B.duration);}
-function heal(a,b,factor,record){
+function heal(a,b,factor,record,round){
+ if(tacticalActor(a)&&tacticalActor(b)&&round<(b.nextHealRound??0))return false;
  // HP and graded weapon power both matter. Never overheal or revive.
  const amount=Math.min(b.maxHP-b.hp,Math.max(1,Math.round((b.maxHP*B.healFraction+attackComponents(a,classWeapon(a),a.weapon).base*B.healGradeFactor)*factor*strength(a))));
- if(amount<=0)return false;b.hp+=amount;record(a,b,"heal",{healing:amount});return true;
+ if(amount<=0)return false;b.hp+=amount;if(tacticalActor(b))b.nextHealRound=round+COUNTERS.healRepeatRounds;record(a,b,"heal",{healing:amount});return true;
 }
 const living=(actors,a,same)=>actors.filter(b=>b.hp>0&&(same?b.side===a.side:b.side!==a.side));
 function supportTargets(a,actors,threshold=1){return living(actors,a,true).filter(b=>distance(a,b)<=B.supportRange&&hpRatio(b)<threshold).sort(order);}
@@ -61,10 +63,10 @@ export function tryClassAction(a,target,actors,round,ctx){
  const record=(b,type,extra={})=>ctx.record(a,b,type,{ability:effect,...extra});
  const finish=()=>{a.readyRound=round+c.ability.cooldown;a.recovery=Math.max(1,a.recovery);record(null,"class_ability");return true;};
  const threshold=stance==="aggressive"?.55:stance==="defensive"?.91:.78;
- const wounded=supportTargets(a,actors,threshold);
+ const wounded=supportTargets(a,actors,threshold).filter(b=>!tacticalActor(a)||round>=(b.nextHealRound??0));
  if(["heal","cleanse_heal","battle_heal"].includes(effect)){
   const b=wounded[0];if(!b)return false;
-  heal(a,b,effect==="heal"?1.35:effect==="cleanse_heal"?1.10:1.0,(x,y,t,e)=>record(y,t,e));
+  heal(a,b,effect==="heal"?1.35:effect==="cleanse_heal"?1.10:1.0,(x,y,t,e)=>record(y,t,e),round);
   if(effect==="cleanse_heal"){b.bleed=0;b.stagger=0;b.classWeaken=0;b.weakenUntil=0;}
   if(effect==="battle_heal")status(b,"classBuff","buffUntil",B.buff*.65*s,round);
   return finish();
@@ -85,6 +87,7 @@ export function tryClassAction(a,target,actors,round,ctx){
  // Defensive tanks preserve their signature protection before committing.
  if(config.guard&&stance==="defensive")status(a,"classGuard","guardUntil",B.guard*s,round);
  const actual=ctx.intercept(a,target);
+ if(tacticalActor(a)&&actual!==target)ctx.record(actual,a,"intercept",{protected:target.id,ability:effect});
  let hit=0;
  const attack={...weapon,power:weapon.power,damageScale:config.scale*s};
  resolveStrike(a,actual,{active:attack,bow:weapon===WEAPONS.bow,distance:Math.min(2,distance(a,actual)),terrain:ctx.terrain,roll:ctx.roll,speedRoll:ctx.speedRoll,
@@ -95,7 +98,7 @@ export function tryClassAction(a,target,actors,round,ctx){
   if(config.control&&round>=(actual.classControlUntil??0)){actual.stagger=Math.max(actual.stagger,1);actual.classControlUntil=round+B.controlImmunity;}
   if(config.guard)status(a,"classGuard","guardUntil",B.guard*.65*s,round);
   if(config.buff)status(a,"classBuff","buffUntil",B.buff*s,round);
-  if(config.heal&&wounded.length)heal(a,wounded[0],.6,(x,y,t,e)=>record(y,t,e));
+  if(config.heal&&wounded.length)heal(a,wounded[0],.6,(x,y,t,e)=>record(y,t,e),round);
   if(config.splash)for(const b of living(actors,a,false).filter(b=>b!==actual&&distance(actual,b)<=1&&distance(a,b)<=weapon.range+1).slice(0,B.maxTargets-1)){
    // Splash derives from real primary strike, bounded by victim protection.
    const raw=hit*config.splash*(1-Math.min(80,protection(b,weapon.type))/100)/(1+intactArmourSum(b,"resistance")*.15)-flatGuard(b)*.1;

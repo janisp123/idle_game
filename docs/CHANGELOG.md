@@ -911,3 +911,6 @@ First candidate website run 45979500022 failed the landing-copy contract (missin
 ## 2026-11-27 — ARENA-ONLY-001 DONE
 
 PR #199 final head cffe1be all seven checks; website 45980441183 158 tests/mobile/desktop; merged 1c9e7f5 and Pages 45981143856 success. Combat-only economy and Git cleanup shipped.
+
+
+GROUP-COUNTERS-001 candidate v2: centered frontline/backline formations, tank shield arrow interception within two tiles up to twice per round, stronger actual arrow blocks and guarded arrow damage reduction, magic bypasses shield/parry and pressures tanks, mobile melee closes faster/pressures casters, no free recovery kiting, healer/support attack tradeoff and 2-round recipient heal window. All candidate coefficients centralized in group-counter-rules.mjs. New group sessions v2; old sessions explicitly resolve v1, transition only at completed foreground boundary, no paid cursor loss. Legacy nonclass duels unchanged. 5040 comparable max-only screen plus 840 direct paired role/terrain battles; functional checks for arrow intercept, block, magic bypass and healer access. Pending CI; no claim of balance or release.

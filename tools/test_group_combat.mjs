@@ -42,3 +42,15 @@ test("duplicate healers are legal; combat still terminates without mana or extra
  const p=roster(Array(7).fill("lifekeeper")),r=resolveTeamBattle(p,p,77,ARENAS[0],{player:50,enemy:50});
  assert.ok(r.rounds<=32);assert.equal(Object.keys(r.survivors).length,14);
 });
+
+test("max-only archers cannot heal; tank shield intercepts arrows, magic bypasses shield",()=>{
+ const p=roster(["oathkeeper","grimwarden","grovewarden","dreadguard","lifekeeper","flameweaver","swiftblade"]);
+ const e=roster(Array(7).fill("longshot"));let intercepts=0,blocks=0,heals=0;
+ for(const arena of ARENAS)for(let i=0;i<4;i++){
+  const r=resolveTeamBattle(p,e,20261129+i*1009,arena,{player:50,enemy:50});
+  for(const ev of r.events){if(ev.type==="intercept"&&ev.actor?.startsWith("player:")&&ev.target?.startsWith("enemy:"))intercepts++;if(ev.type==="block"&&ev.move==="shot")blocks++;if(ev.type==="heal"){assert.ok(!ev.actor.startsWith("enemy:"));heals++;}}
+ }
+ assert.ok(intercepts>0,"no actual arrow interception");assert.ok(blocks>0,"no arrow blocks");assert.ok(heals>0,"no healer action");
+ const tanks=roster(Array(7).fill("oathkeeper")),mages=roster(Array(7).fill("flameweaver"));
+ for(const arena of ARENAS){const r=resolveTeamBattle(tanks,mages,20261129,arena,{player:50,enemy:50});assert.ok(!r.events.some(x=>x.type==="block"&&x.move==="spell"));}
+});
