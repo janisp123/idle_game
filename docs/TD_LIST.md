@@ -8,6 +8,14 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## LANDING-ALIGNMENT-001 — Responsive landing cleanup
+
+- **Goal / acceptance:** Fix mobile navigation, hero and notice flow, content gutters, cards and status alignment; retain theme, artwork, links and copy; browser checks at narrow, tablet and desktop sizes.
+- **Status:** IN_REVIEW — PR #220 candidate, CI pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## CLASS-MASTERY-002 — Meaningful class skill progression
 
 - **Goal / acceptance:** Level 1 ability effectiveness 50%, level 50 100%; mastery increases class effect reliability and scaled debuff magnitude without longer hard control, preserve max combat and frozen saves.

@@ -16,7 +16,7 @@
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css?v=20261125-gladiator-hero">
   <link rel="stylesheet" href="./grimdark.css?v=20261125-gladiator-hero">
-  <link rel="stylesheet" href="./fantasy-theme.css?v=1">
+  <link rel="stylesheet" href="./fantasy-theme.css?v=2-landing-alignment">
   <!-- Keep the approved artwork contained even if a visitor has old CSS cached.
        Other page styles remain in the external stylesheets. -->
   <style>
@@ -42,7 +42,7 @@
     }
     .progression-note { max-width: 780px; margin: 28px 0 0; color: #d8c2a7; line-height: 1.65; }
     .hobby-section { padding-block: clamp(48px, 7vw, 96px); border-block: 1px solid rgba(169,100,69,.33); background: #15100e; }
-    .hobby-copy { max-width: 760px; }
+    .hobby-copy > h2, .hobby-copy > p, .hobby-copy > ul { max-width: 760px; }
     .hobby-copy h2 { font: 400 clamp(32px, 5vw, 54px)/1.15 Georgia, serif; color: #ead7be; margin: 0 0 24px; }
     .hobby-copy h2 span { color: #cba477; }
     .hobby-copy > p:not(.section-kicker) { font-size: 16px; line-height: 1.75; color: #d8c2a7; margin: 0 0 18px; }
@@ -83,7 +83,7 @@
             <a class="button button-outline" href="#vision">Read the Oath <span aria-hidden="true">↗</span></a>
             <a class="button button-outline" href="https://github.com/janisp123/idle_game" target="_blank" rel="noopener noreferrer">Explore the project <span aria-hidden="true">↗</span></a>
           </div>
-          <div class="hero-note" id="play-status"><span class="note-spark" aria-hidden="true"></span> <strong>Playable alpha:</strong> Early testing build. Saves stay in this browser and may be reset as the game evolves. <a href="#hobby">About this hobby project</a>.</div>
+          <div class="hero-note" id="play-status"><span class="note-spark" aria-hidden="true"></span><p><strong>Playable alpha:</strong> Early testing build. Saves stay in this browser and may be reset as the game evolves. <a href="#hobby">About this hobby project</a>.</p></div>
         </div>
 
         <div class="hero-art hero-art-painted">
@@ -136,7 +136,7 @@
         </div>
         <p class="progression-note">Your choices shape the journey. The world, its combat and its progression will evolve as the game is developed and tested.</p>
         <div class="status-strip">
-          <div class="status-indicator"><span aria-hidden="true"></span><strong>THE FORGE</strong> <span>Playable browser alpha · In active development</span></div>
+          <div class="status-indicator"><span aria-hidden="true"></span><div><strong>THE FORGE</strong><span class="status-description">Playable browser alpha · In active development</span></div></div>
           <a href="https://github.com/janisp123/idle_game/blob/main/docs/mechanics/README.md" target="_blank" rel="noopener noreferrer">Read the mechanics handbook <span aria-hidden="true">↗</span></a>
         </div>
       </div>

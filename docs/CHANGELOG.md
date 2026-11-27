@@ -2,7 +2,7 @@
 
 ## 2026-11-27 — LANDING-ALIGNMENT-001 STARTED
 
-Owner approved responsive landing layout fixes only: header, hero, alpha notice, section alignment and status strip. Preserve theme, artwork, content, links and gameplay. Branch `fix/landing-alignment-20261127`, baseline 5487e23 (v9, 202 tests). Next: implement layout and viewport assertions; CI pending.
+Owner approved responsive landing layout fixes only: header, hero, alpha notice, section alignment and status strip. Preserve theme, artwork, content, links and gameplay. Branch `fix/landing-alignment-20261127`, baseline 5487e23 (v9, 202 tests). Candidate: CSS and markup cleanup, browser tests added for six extra viewport widths. CI pending; next verify browser assertions and merge gate.
 
 ## 2026-11-27 — TANK-AGGRO-001 candidate
 
