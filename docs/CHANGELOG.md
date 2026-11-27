@@ -1,5 +1,15 @@
 # Changelog and task handoffs
 
+## PROGRESS-UI-001 · STARTED (2026-11-27, chat)
+
+Owner extended scope: Arena is the primary screen; move it to first card in actual DOM order, above Gladiators, and span full grid width on desktop and mobile. CSS cache version bumped; no game mechanics or saved-data changes. Browser checks first-card order, full width and above Gladiators at both widths. New final-head tests pending.
+
+Owner extended scope 2026-11-27: Gladiators also collapsible, closed on initial page load; native details/summary; all choices remain intact when folded. Browser checks open, select independent loadout, close during automatic play and upgrades, reopen and verify selected weapon/armour/tactic; Progress also checked for live hidden entries and report. No JS or save schema changes; disclosure state is page-local and not persisted on reload. Final CI pending.
+
+Candidate: use native details/summary for the entire Progress card (closed by default); preserve all existing content IDs and JS, no engine or save changes. Browser smoke verifies default hidden feed continues receiving entries, expand and reopen report, collapse again and no overflow at both tested widths. Tests pending.
+
+PROGRESS-UI-001 — Owner requested collapsible Progress section, closed by default, with existing last login report, live feed and resources available when expanded. No gameplay, save, or report changes. STARTED by chat; baseline b21e7caa (#193 deployed, Pages 45938381622 success).
+
 ## ARENA-UI-002 · STARTED (2026-11-26, chat)
 
 ARENA-UI-002 candidate: pure frozen bout presentation adapter and compact SVG icon view; real rolled terrain, static start HP/armour, distinct weapon/armour/tactic symbols; enemy stance omitted because NPC snapshots have none. Side-by-side 3-column match, no per-fighter progress or event narration; real committed bout progress 0–99, 100% on exact saved verdict, hold 1.8s presentation only, persistent last committed result, batch/offline summary not falsely attached to a roster. No engine, reward, duration, save schema or balance changes. Three unit tests and 390/1440 browser checks for layout, frozen 99%→committed 100%→next bout, prize cursor, icons, no tiny HP bars. Tests pending.

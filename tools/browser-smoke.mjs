@@ -346,10 +346,17 @@ try{
     await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:script.identifier});
     const check=await evaluate(`(()=>({selects:document.querySelectorAll("select").length,counts:["fighterButtons","weaponButtons","armourButtons","tacticButtons"].map(id=>document.getElementById(id).querySelectorAll("button").length),overflow:document.documentElement.scrollWidth-innerWidth,activity:JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).activity,work:document.getElementById("currentWork").textContent}))()`);
     assert.equal(check.selects,0);assert.deepEqual(check.counts,[2,5,3,3]);assert.ok(check.overflow<=2);assert.equal(check.activity,"fighting");assert.equal(check.work,"Hunting");
+    const placement=await evaluate(`(()=>{const grid=document.querySelector(".manager-grid"),arena=grid.querySelector(".arena-card"),rect=arena.getBoundingClientRect();return {first:grid.firstElementChild===arena,full:Math.abs(rect.width-grid.getBoundingClientRect().width)<=2,above:rect.bottom<=document.getElementById("gladiatorsPanel").getBoundingClientRect().top};})()`);
+    assert.deepEqual(placement,{first:true,full:true,above:true},"arena first and full-width");
+    assert.equal(await evaluate('!document.getElementById("gladiatorsPanel").open && !document.getElementById("weaponButtons").checkVisibility()'),true);
+    await evaluate('document.querySelector("#gladiatorsPanel > summary").click()');
+    assert.equal(await evaluate('document.getElementById("gladiatorsPanel").open && document.getElementById("weaponButtons").checkVisibility()'),true);
     await evaluate('document.querySelector("#fighterButtons [data-choice=second]").click();document.querySelector("#weaponButtons [data-choice=hammer]").click()');
     await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).teamSecond.combatLoadout==="hammer"`),"manager weapon");
     await evaluate('document.querySelector("#armourButtons [data-choice=plate]").click();document.querySelector("#tacticButtons [data-choice=defensive]").click()');
     await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return s.armourRequests.second==="plate"&&s.managerTactics.second.selected==="defensive"&&s.managerTactics.first.selected==="balanced";})()`),"manager independent choices");
+    await evaluate('document.querySelector("#gladiatorsPanel > summary").click()');
+    assert.equal(await evaluate('!document.getElementById("gladiatorsPanel").open && !document.getElementById("weaponButtons").checkVisibility()'),true);
     await evaluate(`Date.now=()=>${fixedNow+10000}`);
     await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return s.skills.hunting.xp>0&&s.skills.fighting.xp>0&&document.querySelectorAll(".battle-fighter").length===4;})()`),"manager simultaneous work and combat");
     const arena=await evaluate(`(()=>({phase:document.getElementById("battleFighters").dataset.phase,percent:document.getElementById("battleCalculation").value,environment:document.getElementById("arenaEnvironment").textContent,bars:document.querySelectorAll(".battle-fighter progress").length,players:document.getElementById("arenaPlayers").children.length,enemies:document.getElementById("arenaEnemies").children.length,icons:document.querySelectorAll(".arena-match svg").length,overflow:document.documentElement.scrollWidth-innerWidth}))()`);
@@ -358,9 +365,20 @@ try{
     await evaluate('document.getElementById("alphaTools").open=true;document.getElementById("alphaCoins").click()');
     await until(()=>evaluate('document.getElementById("alphaStatus").textContent==="Test credit added."'),"manager test coins");
     await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return Object.values(s.teamSecond.armour).every(x=>x==="plate")&&s.armourRequests.second===null;})()`),"manager atomic armour acquisition");
+    await evaluate('document.querySelector("#gladiatorsPanel > summary").click()');
+    const retained=await evaluate('document.querySelector("#weaponButtons [data-choice=hammer]").getAttribute("aria-pressed")==="true" && document.querySelector("#armourButtons [data-choice=plate]").getAttribute("aria-pressed")==="true" && document.querySelector("#tacticButtons [data-choice=defensive]").getAttribute("aria-pressed")==="true"');
+    assert.equal(retained,true,"selected loadout survives collapse and automation");
+    await evaluate('document.querySelector("#gladiatorsPanel > summary").click()');
+    // Progress remains available and updates while its native disclosure is closed.
+    const folded=await evaluate(`(()=>{const p=document.getElementById("progressPanel"),feed=document.getElementById("progressFeed");return {open:p.open,displayed:feed.checkVisibility(),entries:feed.children.length};})()`);
+    assert.equal(folded.open,false);assert.equal(folded.displayed,false);assert.ok(folded.entries>0);
+    await evaluate('document.querySelector("#progressPanel > summary").click()');
+    assert.equal(await evaluate('document.getElementById("progressPanel").open && document.getElementById("progressFeed").checkVisibility()'),true);
     await evaluate('document.getElementById("loginReportReopen").click()');
     assert.equal(await evaluate('document.getElementById("loginReport").open'),true);
     await evaluate('document.getElementById("loginReportDismiss").click()');
+    await evaluate('document.querySelector("#progressPanel > summary").click()');
+    assert.equal(await evaluate('!document.getElementById("progressPanel").open && !document.getElementById("progressFeed").checkVisibility()'),true);
     assert.ok(await evaluate("document.documentElement.scrollWidth-innerWidth<=2"));
     // Use a valid frozen real bout at 99%, then cross its prize boundary.
     const resultUrl=origin+"/play/?arena-result="+width;

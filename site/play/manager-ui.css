@@ -8,6 +8,7 @@ body{font-family:system-ui,sans-serif;min-width:280px;background:#100d0b;color:#
 .manager-heading{margin-bottom:16px}.manager-heading h1{font:normal clamp(24px,4vw,36px) Georgia,serif;margin:4px 0}
 #coinWallet{color:#e2bd7e;white-space:nowrap;font-size:15px}
 .manager-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+.arena-card{grid-column:1/-1}
 .manager-card{min-width:0;padding:16px;background:#1c1612;border:1px solid #584638;border-radius:8px}
 .manager-card h2{font:normal 23px Georgia,serif;margin:0 0 12px;color:#e6c99e;display:flex;align-items:center;justify-content:space-between;gap:6px}
 .manager-card h3{font-size:13px;color:#c8b29b;margin:14px 0 6px}
