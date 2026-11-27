@@ -1,17 +1,17 @@
-import {ACTIVITIES,ITEM_LABELS,ITEM_KEYS,SAVE_KEY,xpToNextLevel,desiredArenaTeam,teamFromState,enterGame} from "./engine.mjs?v=analytics-001";
-import {newManagerGame,readManagerGame,enterManagerGame,settleManagerLive,chooseManagerArmour,chooseManagerWeapon,chooseManagerTactic} from "./manager-lanes.mjs?v=analytics-001";
-import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,migrateLegacyManager} from "./manager-migration.mjs?v=analytics-001";
+import {ACTIVITIES,ITEM_LABELS,ITEM_KEYS,SAVE_KEY,xpToNextLevel,desiredArenaTeam,teamFromState,enterGame} from "./engine.mjs?v=npc-parity-001";
+import {newManagerGame,readManagerGame,enterManagerGame,settleManagerLive,chooseManagerArmour,chooseManagerWeapon,chooseManagerTactic} from "./manager-lanes.mjs?v=npc-parity-001";
+import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,migrateLegacyManager} from "./manager-migration.mjs?v=npc-parity-001";
 import {MANAGER_ARMOUR_FAMILIES,equippedArmourFamily,quoteArmourSet,managerEquipmentPreview} from "./manager-equipment.mjs?v=manager-gear-001";
 import {TACTIC_IDS,tacticRequiredXP} from "./manager-tactics.mjs?v=manager-tactics-001";
 import {WORK_ROTATION,nextRotationActivity,ingredientReserve} from "./activity-rotation.mjs?v=manager-rotation-001";
 import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=gear-a3";
 import {ITEM_GRADES} from "./smith.mjs?v=gear-a3";
-import {createArenaView} from "./arena-view.mjs?v=analytics-001";
-import {requiredAutoFightWins} from "./auto-fight.mjs?v=auto-fight-03";
+import {createArenaView} from "./arena-view.mjs?v=npc-parity-001";
+import {cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
 import {characterStats} from "./character-stats.mjs?v=apprentice-a4";
 import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=team-004";
 
-import {renderBattleAnalytics} from "./analytics-view.mjs?v=analytics-001";
+import {renderBattleAnalytics} from "./analytics-view.mjs?v=npc-parity-001";
 let analyticsScope="all",lastAnalytics=null,lastAnalyticsScope=null;
 const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString("en-GB"),title=s=>s[0].toUpperCase()+s.slice(1),label=id=>ITEM_LABELS[id]??id;
 const descriptions={aggressive:"Presses forward and focuses vulnerable enemies.",balanced:"Uses opportunities and normal protection.",defensive:"Protects allies and keeps distance where possible."};
@@ -58,8 +58,8 @@ function render(){
  const q=pending?quoteArmourSet(state,selected,pending):null;
  text("armourStatus",q?"Saving for "+title(pending)+" · "+fmt(q.cost)+" coins needed in total. Current: "+title(family??"mixed")+".":family==="none"?"No armour equipped. Choose a set.":family===null?"Legacy mixed armour retained until you choose a complete set.":title(family)+" set equipped.");
  const sk=t.skills[t.selected];text("tacticStatus",descriptions[t.selected]+" · Lv "+sk.level+(sk.level===50?" · Mastered":" · "+fmt(Math.floor(sk.xp/tacticRequiredXP(sk.level)*100))+"%"));
- text("arenaStage",ITEM_GRADES[state.difficulties.fighting??0]);text("fightingLevel","Fighting Lv "+state.skills.fighting.level);meter("fightingXP",state.skills.fighting);
- const af=state.autoFight;let required=requiredAutoFightWins(af);text("arenaNext",required?"Next difficulty: "+af.streak+" / "+required+" wins · Teamwork Lv "+state.teamwork.level:"Teamwork Lv "+state.teamwork.level);
+ text("arenaStage","Reward tier: "+ITEM_GRADES[cloneRewardGrade(state.skills.fighting.level)]);text("fightingLevel","Fighting Lv "+state.skills.fighting.level);meter("fightingXP",state.skills.fighting);
+ text("arenaNext","Matched progression · Teamwork Lv "+state.teamwork.level);
  arenaView.render(state);
  if($("battleAnalyticsPanel").open&&(lastAnalytics!==state.battleAnalytics||lastAnalyticsScope!==analyticsScope)){
   renderBattleAnalytics($("battleAnalyticsBody"),state.battleAnalytics,analyticsScope);lastAnalytics=state.battleAnalytics;lastAnalyticsScope=analyticsScope;

@@ -4,7 +4,8 @@ import { previewAutoEquipment, AUTO_EQUIPMENT_AT, MAX_AUTO_EQUIPMENT_PURCHASES }
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
 import { initialTeam,validGladiator,teamSnapshots,awardTeamPractice,activateTeamPractice,previewTeamUpgrade,upgradeTeam,chooseTeamWeapon,chooseTeamArmour } from "./team.mjs?v=team-001";
 import { initialTeamwork,validTeamwork,awardTeamwork,activateTeamworkOnLogin } from "./teamwork.mjs?v=team-002";
-import { validTeamSession,startTeamSession,settleTeamSession,teamBoutMs } from "./team-timeline.mjs?v=analytics-001";
+import { validTeamSession,startTeamSession,settleTeamSession,teamBoutMs,isCloneTeamSession,CLONE_TEAM_TIMELINE_VERSION } from "./team-timeline.mjs?v=npc-parity-001";
+import {captureCloneEnvelope} from "./clone-opponents.mjs?v=npc-parity-001";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
 import {
@@ -428,11 +429,12 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
   let team=teamFromState(state),teamwork=state.teamwork,desired=desiredArenaTeam(state),managerTactics=state.managerTactics;
   let autoFight=state.autoFight??initialAutoFight(desired.first.difficulty);
   if(online&&(!validAutoFight(autoFight)||autoFight.stage!==desired.first.difficulty))throw new RangeError("Invalid committed team stage");
-  let session=state.combatSession??startTeamSession(desired,teamwork.level,state.settledAtMs>>>0,Boolean(state.managerTactics));
+  const cloneEnvelope=managerTactics?captureCloneEnvelope(team,managerTactics,desired.first.skill):null;
+  let session=state.combatSession??startTeamSession(desired,teamwork.level,state.settledAtMs>>>0,Boolean(managerTactics),cloneEnvelope);
   const totals=Object.fromEntries(arenaFields.map(k=>[k,0]));
   const practiceMs={first:0,second:0},analytics=[];
   const run=duration=>{
-    const cacheKey=JSON.stringify(["team",session.timelineVersion,session.seed,session.players,session.teamworkLevel]);
+    const cacheKey=JSON.stringify(["team",session.timelineVersion,session.seed,session.players,session.teamworkLevel,session.cloneEnvelope??null]);
     if(outcomeCaches&&!outcomeCaches.has(cacheKey))outcomeCaches.set(cacheKey,new Map());
     const prize=settleTeamSession(session,duration,outcomeCaches?.get(cacheKey));
     team=awardTeamPractice(team,session.players,prize.practiceMs);
@@ -442,19 +444,19 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
     if(prize.analytics&&prize.bouts)analytics.push(prize.analytics);
     for(const key of arenaFields)totals[key]+=prize[key];
     for(const id of Object.keys(practiceMs))practiceMs[id]+=prize.practiceMs[id];
-    if(online&&prize.bouts){
+    if(online&&prize.bouts&&!cloneEnvelope){
       if(prize.bouts!==1||frozenGrade(session)!==autoFight.stage)throw new RangeError("Invalid live team boundary");
       autoFight=finishAutoFightBout(autoFight,prize.victories?"victory":prize.defeats?"defeat":"double_death",true);
       desired=Object.fromEntries(Object.entries(desired).map(([id,p])=>[id,{...p,difficulty:autoFight.stage}]));
     }
   };
   const result=()=>({...totals,session,team,teamwork,practiceMs,expertise:team.first.expertise,autoFight,...(analytics.length?{analytics}:{}),...(managerTactics?{managerTactics}:{})});
-  if(online||JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level){
+  if(online||JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level||cloneEnvelope&&(!isCloneTeamSession(session)||JSON.stringify(session.cloneEnvelope)!==JSON.stringify(cloneEnvelope))){
     const duration=teamBoutMs(session);
     const remaining=(duration-session.elapsedMs%duration)%duration;
     if(elapsedMs<remaining){run(elapsedMs);return result();}
     if(remaining)run(remaining);
-    session={...session,players:desired,teamworkLevel:teamwork.level};
+    session={...session,players:desired,teamworkLevel:teamwork.level,...(cloneEnvelope&&session.timelineVersion!==2?{timelineVersion:CLONE_TEAM_TIMELINE_VERSION,cloneEnvelope}: {})};
     elapsedMs-=remaining;
   }
   if(elapsedMs)run(elapsedMs);

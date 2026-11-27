@@ -1,0 +1,60 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {newManagerGame,settleManagerOffline,settleManagerLive,readManagerGame} from "../site/play/manager-lanes.mjs";
+import {desiredArenaTeam,teamFromState} from "../site/play/engine.mjs";
+import {captureCloneEnvelope,buildCloneTeam,cloneRewardGrade} from "../site/play/clone-opponents.mjs";
+import {startTeamSession,teamCombatAtTime,settleTeamSession,MANAGER_BOUT_MS,isCloneTeamSession} from "../site/play/team-timeline.mjs";
+import {ARMOUR_SLOTS} from "../site/play/armour.mjs";
+import {equipmentPrice,SMITH_BALANCE} from "../site/play/smith.mjs";
+import {expertiseThreshold} from "../site/play/expertise.mjs";
+import {resolveTeamBattle} from "../site/play/team-combat.mjs";
+import {ARENAS} from "../site/play/arenas.mjs";
+const rng=()=>.5;
+function max(){
+ const s=newManagerGame(0);s.skills.fighting.level=52;s.teamwork.level=50;
+ const team=teamFromState(s);
+ for(const [i,id] of ["first","second"].entries()){
+  const g=team[id],family=i?"leather":"plate";
+  g.armour=Object.fromEntries(ARMOUR_SLOTS.map(({id})=>[id,family]));
+  for(const key of [g.combatLoadout,...ARMOUR_SLOTS.map(({id})=>id+":"+family)])g.equipment[key]={grade:7,quality:"masterwork"};
+  g.expertise[g.combatLoadout]=expertiseThreshold(7);g.expertise[family]=expertiseThreshold(7);g.expertiseActive={...g.expertise};
+  s.managerTactics[id].skills.balanced.level=50;
+ }
+ return {...s,...team.first,teamSecond:team.second};
+}
+test("max-only clone uses identical real gear, mastery, stats, tactics and teamwork budgets independently of active selection",()=>{
+ const s=max(),p=desiredArenaTeam(s),team=teamFromState(s),e=captureCloneEnvelope(team,s.managerTactics,52);
+ const seen=new Set();
+ for(let seed=0;seed<100;seed++){
+  const rivals=buildCloneTeam(e,p.first,seed);assert.deepEqual(rivals,buildCloneTeam(e,p.first,seed));
+  for(const [i,r] of rivals.entries()){
+   assert.equal(r.skill,p.first.skill);assert.equal(r.str,p.first.str);assert.equal(r.dex,p.first.dex);assert.equal(r.end,p.first.end);assert.equal(r.tacticLevel,50);
+   assert.ok(Object.values(r.trainingKit.equipment).every(g=>g.grade===7&&g.quality==="masterwork"));
+   assert.equal(r.condition.weapon.proficiency,1);seen.add(r.loadout+":"+r.tactic);
+   assert.ok(Object.entries(r.trainingKit.equipment).reduce((n,[k,v])=>n+equipmentPrice(v)+(k.includes(":")?SMITH_BALANCE.firstArmourCost:0),0)<=e.roster[i].budget);
+  }
+ }
+ assert.ok(seen.size>=10);assert.equal(cloneRewardGrade(52),7);
+ const changed={...team,first:{...team.first,combatLoadout:"hammer"}};
+ assert.deepEqual(captureCloneEnvelope(changed,s.managerTactics,52),e);
+});
+test("clone timeline is frozen, exact and bounded; real tactic/armour analytics",()=>{
+ const s=max(),p=desiredArenaTeam(s),e=captureCloneEnvelope(teamFromState(s),s.managerTactics,52),session=startTeamSession(p,50,73,true,e);
+ assert.ok(isCloneTeamSession(session));
+ const a=settleTeamSession(session,321*MANAGER_BOUT_MS),x=settleTeamSession(session,101*MANAGER_BOUT_MS+23),y=settleTeamSession(x.session,220*MANAGER_BOUT_MS-23);
+ assert.equal(a.bouts,x.bouts+y.bouts);assert.equal(a.coins,x.coins+y.coins);assert.deepEqual(a.session,y.session);
+ assert.equal(a.analytics.cloneOutcomes.reduce((n,v)=>n+v,0),321);
+ assert.ok(Object.keys(a.analytics.tactics).length>=2);assert.ok(Object.keys(a.analytics.armours).length>=2);
+ assert.ok(a.sampledBouts<=256);assert.deepEqual(teamCombatAtTime(session),teamCombatAtTime(structuredClone(session)));
+});
+test("manager creates clone sessions, saves them, and never changes the legacy stage after new results",()=>{
+ const s=max(),out=settleManagerOffline(s,60000,rng);assert.ok(isCloneTeamSession(out.state.combatSession));
+ assert.equal(out.state.autoFight.stage,s.autoFight.stage);assert.ok(readManagerGame(JSON.stringify(out.state)));
+ const a=settleManagerLive(out.state,60000+2000,rng);assert.equal(a.state.autoFight.stage,s.autoFight.stage);
+});
+test("old in-flight v3 bout is settled unchanged before clone conversion",()=>{
+ const s=max(),old=startTeamSession(desiredArenaTeam(s),50,73,true);old.elapsedMs=MANAGER_BOUT_MS-200;s.combatSession=old;
+ const expected=settleTeamSession(old,200),actual=settleManagerLive(s,200,rng);
+ assert.equal(actual.reports.find(r=>r.arena).arena.coins,expected.coins);
+ assert.equal(actual.state.combatSession.prizeCursor,1);assert.ok(isCloneTeamSession(actual.state.combatSession));
+});

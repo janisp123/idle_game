@@ -1,4 +1,4 @@
-import {analyticsSummary,analyticsRows,analyticsLabel,strategyLabel} from "./battle-analytics.mjs?v=analytics-001";
+import {analyticsSummary,analyticsRows,analyticsLabel,strategyLabel} from "./battle-analytics.mjs?v=npc-parity-001";
 const node=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
 const num=n=>n.toLocaleString("en-GB"),pct=n=>n===null?"—":Math.round(n*100)+"%";
 export function renderBattleAnalytics(host,data,scope){
@@ -10,10 +10,12 @@ export function renderBattleAnalytics(host,data,scope){
  for(const [label,value] of [["Battles",num(s.battles)],["Win rate",pct(s.winRate)],["Wins",num(s.wins)],["Losses",num(s.losses)],["Draws",num(s.draws)],["Coins / arena hour",s.coinsPerHour===null?"—":num(Math.round(s.coinsPerHour))]]){
   const card=node("div",undefined,"analytics-kpi");card.append(node("span",label),node("strong",value));cards.append(card);
  }
- host.append(cards,node("p","Gross arena coins per completed arena hour, including recovery. All grades. Earlier unrecorded battles are excluded.","quiet"));
- for(const [dimension,title] of [["zones","By environment"],["weapons","Against enemy weapons"],["teams","Against enemy team combinations"]]){
+ host.append(cards,node("p","Gross arena coins per completed arena hour, including recovery. All reward tiers; includes earlier legacy opponents where recorded. Rival tactics and armour below cover clone-era battles only.","quiet"));
+ for(const [dimension,title] of [["zones","By environment"],["weapons","Against enemy weapons"],["teams","Against enemy team combinations"],["tactics","Against rival tactics"],["armours","Against rival armour"]]){
   host.append(node("h3",title));
   const rows=analyticsRows(stats,dimension);
+  if(["tactics","armours"].includes(dimension))host.append(node("p",num((stats.cloneOutcomes??[]).reduce((a,b)=>a+b,0))+" clone-era battles recorded; distinct categories may overlap.","quiet"));
+  if(!rows.length)host.append(node("p","No recorded matchups yet.","quiet"));
   for(const r of rows){
    const box=node("div",undefined,"analytics-row"),head=node("div",undefined,"line");
    head.append(node("strong",analyticsLabel(r.key,dimension)),node("span",pct(r.winRate)+" wins"));

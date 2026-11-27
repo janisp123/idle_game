@@ -173,3 +173,7 @@ Owner approved the physical-counter approach following BAL-AUDIT-001. No class d
 - V16 disposable alpha reset deliberately prevents old V15 frozen arena schedules being reinterpreted under changed damage/mobility formulas. Current save schema/keys, same-version save/load and offline settlement remain. Clear reset notice; no migration of old test progression, per ALPHA-FOCUS-001.
 
 Testing: paired independent-seed counter matrix, all 15 armoured normal progression strategies, existing full audit and protected workflow tests. See BAL-002 evidence in changelog/checkpoint and final candidate report. Provisional alpha tuning, not a claim of perfect balance.
+
+## NPC-PARITY-001 candidate manager combat
+
+See [NPC parity plan](NPC_PARITY_PLAN.md): replace artificial difficulty with progression-matched rivals, use identical gear and mastery formulas, select builds before terrain, and separate the reward tier from combat difficulty. Exact candidate implementation and limitations are in the plan; not yet verified live.

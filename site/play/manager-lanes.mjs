@@ -5,9 +5,9 @@ import {
   newTeamGame, readSave, chooseActivity, settleManagerLane, managerCombatProductivePrefix,
   automateSettledProgress, activateExpertise, activityRewardCapped,
   recipeOptions, PRODUCTION_RECIPES, LIVE_FIGHT_MAX_MS, autoEquipmentPreview
-} from "./engine.mjs?v=analytics-001";
-import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=analytics-001";
-import {blankBattleAnalytics,validBattleAnalytics,accumulateBattleAnalytics} from "./battle-analytics.mjs?v=analytics-001";
+} from "./engine.mjs?v=npc-parity-001";
+import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=npc-parity-001";
+import {blankBattleAnalytics,validBattleAnalytics,accumulateBattleAnalytics} from "./battle-analytics.mjs?v=npc-parity-001";
 import {WORK_ROTATION,ingredientReserve,rotateManagerWork,rotationTravelMs} from "./activity-rotation.mjs?v=manager-rotation-001";
 import {blankArmourRequests,validArmourRequests,requestArmourSet,selectManagerWeapon,automateManagerEquipment,managerEquipmentPreview} from "./manager-equipment.mjs?v=manager-gear-001";
 
