@@ -88,3 +88,6 @@ RAID-001 test repair: playable candidate c1afe459 website workflow 46003683324 f
 
 
 RAID-001 matched-grade screen [RAID_MATCHED_SCREEN_20261127.md](mechanics/RAID_MATCHED_SCREEN_20261127.md) preserved, 30 matched and 15 max-only actual bouts. Counter wins 15/15, mixed 13/15; level 50 counter median 160s. Candidate tuned common 5s rounds, lower boss HP multipliers 9/15/16/15; level 50 remains 9. 10-minute timeout, ~5-minute win goal. Latest full CI pending; previous XP test failure recorded and repaired separately.
+
+
+RAID-001 c5 test status: head 5a3beb7 website run 46003947892 passed all 186 Node tests, but Chromium smoke failed at line 425 because the injected JS string contained unescaped quotation marks in a numeric CSS attribute selector. Corrected to query the first button in the five-choice raid list (level 10). No gameplay changes. Full current-head CI pending; no merge.
