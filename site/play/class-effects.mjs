@@ -1,5 +1,5 @@
 // Pure bounded class effect state; all values belong to a single bout.
-import {kitActor,kitStrength,masteryBonus,KIT_BALANCE as B} from "./class-kits.mjs";
+import {kitActor,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
 export function prepareKitActor(a){
  if(!kitActor(a))return a;
  return {...a,kitReady:{primary:1,secondary:1},kitStationary:0,kitFocusUntil:0,kitSlowUntil:0,kitDisruptUntil:0,kitBraceUntil:0,kitTotemUntil:0,kitTotemMode:null,kitPactUntil:0,kitPactFraction:0,kitTempoUntil:0,kitSealUntil:0,kitSiege:null};

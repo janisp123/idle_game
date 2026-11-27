@@ -8,10 +8,19 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## CLASS-MASTERY-002 — Meaningful class skill progression
+
+- **Goal / acceptance:** Level 1 ability effectiveness 50%, level 50 100%; mastery increases class effect reliability and scaled debuff magnitude without longer hard control, preserve max combat and frozen saves.
+- **Status:** IN_REVIEW — v9 candidate; tests pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+- **Dependencies:** CLASS-KITS-001, INTERLUDE-CONTROL-001, EIGHT-ARENAS-001.
+
 ## EIGHT-ARENAS-001 — Eight tactical environments
 
 - **Goal / acceptance:** Add three meaningful geometry/terrain differences, preserve prior saves and raids, expose all eight through arena selection and analytics, test specialized max-only compositions.
-- **Status:** IN_REVIEW — v8 candidate; functional CI and balance evidence pending.
+- **Status:** PARTIAL — v8 merged #214 (3d404f1), 200 tests, all seven workflows, 5760 simulations. Broader balance and deployment verification pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
