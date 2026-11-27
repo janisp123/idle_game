@@ -58,3 +58,21 @@ test("v5 six-month maximum 7v7 paired terrain matrix (2700 real bouts)",()=>{
  const stats=Object.fromEntries(Object.values(teams).flat().map(x=>[x.classId,x.attributes]));
  console.log("MAX_7V7_V5_SCREEN "+JSON.stringify({rules:5,hours,grade:7,quality:"masterwork",classMastery:50,stance:"balanced",stanceMastery:50,teamwork:50,seeds,bouts,classes,stats,summary,rows}));
 });
+
+test("balanced long range versus balanced melee, matched core, every terrain (600 bouts)",()=>{
+ const range=["oathkeeper","lifekeeper","runesage","longshot","blackbow","flameweaver","galescourge"];
+ const melee=["oathkeeper","lifekeeper","runesage","blademaster","linebreaker","trickblade","nightblade"];
+ const ranged=roster(range),close=roster(melee),rows=[];
+ for(const zone of ARENAS){
+  const counts=[0,0,0],details=[];
+  for(let i=0;i<60;i++)for(const swapped of [false,true]){
+   const seed=(20261127+i*7919)>>>0;
+   const r=resolveTeamBattle(swapped?close:ranged,swapped?ranged:close,seed,zone,{player:50,enemy:50,groupCombatRules:5});
+   const index=r.outcome==="double_death"?2:(r.outcome==="victory")!==swapped?0:1;
+   counts[index]++;
+   details.push({seed,swapped,outcome:r.outcome});
+  }
+  assert.equal(counts.reduce((a,b)=>a+b,0),120);rows.push({zone:zone.id,rangeWins:counts[0],meleeWins:counts[1],draws:counts[2],details});
+ }
+ console.log("BALANCED_RANGE_MELEE_V5 "+JSON.stringify({range,melee,hours,rows}));
+});
