@@ -8,7 +8,7 @@
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./game.css">
 <link rel="stylesheet" href="./manager-ui.css?v=group-007">
-<script type="module" src="./manager-app.mjs?v=group-008"></script>
+<script type="module" src="./manager-app.mjs?v=arena-only-002"></script>
 </head>
 <body>
 <a class="skip-link" href="#game">Skip to game</a>
@@ -53,23 +53,15 @@
 <div id="selectedClassProgress"></div>
 <p class="quiet">Only active classes train and upgrade. Changes take effect in the next battle.</p>
 </details>
-<section class="manager-card" aria-labelledby="workHeading">
-<h2 id="workHeading">Activities <span class="live-label">Automatic</span></h2>
-<div class="line"><strong id="currentWork">Hunting</strong><span id="workLevel">Lv 1</span></div>
-<progress id="workXP" aria-label="Current activity skill experience" value="0" max="40"></progress>
-<p id="workStatus" class="quiet"></p><p id="nextWork"></p>
-<details><summary>All activity levels</summary><div id="activityLevels" class="skill-list"></div></details>
-</section>
 <details id="progressPanel" class="manager-card" aria-labelledby="progressHeading">
 <summary id="progressHeading">Progress</summary>
 <button id="loginReportReopen" type="button" class="secondary">Last login report</button>
 <div id="groupProgressOverview" hidden></div>
 <p id="latestProgress" class="quiet">No completed rewards yet.</p>
 <ul id="progressFeed" class="progress-feed" aria-label="Recent committed progress"></ul>
-<details><summary>Resources</summary><div id="resourceList" class="skill-list"></div></details>
 </details>
 <section class="manager-card stats-card">
-<details id="characterStatsPanel"><summary>Character stats</summary><div id="characterStats"></div></details>
+<details id="characterStatsPanel"><summary>Character stats</summary><div id="characterStats" class="skill-list"></div></details>
 </section>
 <details id="alphaTools" class="manager-card stats-card" hidden>
 <summary>Alpha testing tools</summary>

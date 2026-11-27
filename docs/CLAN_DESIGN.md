@@ -1,5 +1,7 @@
 # Clan system — approved direction and implementation boundaries
 
+**Superseding owner decision (ARENA-ONLY-001, 2026-11-27):** future clans receive coin donations and spend coins exclusively on all upgrades. Material warehouse, resource donations, material prerequisites, and Activities navigation in this historical design are retired. No clan runtime or new prices are authorized here. Rework the historical plan against the coin-only game before implementation.
+
 **Status:** Owner-approved design, 2026-11-25. Real shared clans are not implemented. The current browser-only alpha exposes a Clan entry with an explicit availability notice. This document governs subsequent account-backed implementation, not a promise that the current UI works online.
 
 **Implementation handoff:** [CLAN_IMPLEMENTATION_PLAN.md](CLAN_IMPLEMENTATION_PLAN.md) maps screens, functions, data boundaries, pre-server work and later server integration. Prepare and test independently of rented hosting; no live multiplayer claim until integration is verified.

@@ -1,5 +1,15 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — ARENA-ONLY-001 cleanup
+
+ARENA-ONLY-001 cleanup: verified prior head 42b87e8 all seven checks, website 45979606326 157 tests and Chromium 390/1440. Coins sole spendable currency; XP unlocks earned levels. Isolated retired two-lane calculation in legacy-work-lane.mjs, added strict public arena-manager entry points, removed dead legacy presentation branches, fixed README/landing class descriptions. Old engine/fixtures retained for migration and regression; old material counts zero, legacy skills frozen. Backlog reconciled to current economy, balance and blocked clans; previous task text archived in docs/TD_ARCHIVE_20261127.md; historical clan plans marked superseded for materials. No history rewriting or source deletion. Final CI pending; no merge yet.
+
+Historical backlog archived; verified #198 deployment and outstanding balance noted above.
+
+## 2026-11-27 — ARENA-ONLY-001 STARTED
+
+ARENA-ONLY-001 — Owner approved 2026-11-27: remove noncombat progression, gathering, crafting, materials, inventories and tributes from public gameplay. Coins earned in combat and XP/stat progression from fighting only; equipment and future clan donations use coins. XP continues on defeats (existing productive combat/recovery rules). No clan implementation. Preserve coins, class builds, frozen combat, analytics, already earned attributes and historical skill bonuses; archive legacy resource mechanics for regression only. Existing material balances removed with no conversion; old noncombat levels frozen, not displayed or claimed. No changes to combat balance or gear prices. Baseline 9fc6579 / PR #198 deployed via 45976758295; ranged stack imbalance 115/120 in max screen remains separate. Branch feature/arena-only; STARTED, not tested.
+
 ## 2026-11-27 — BATTLE-GROUP-001 STARTED
 
 Owner approved 2026-11-27: evolve current idle manager into seven-character Battle Group. Five races, three-level race/main class/specialization selection with 31 Interlude-inspired original specializations; replace manual weapon and armour choices with class-assigned automatic equipment. Keep three stances, shared progression, automatic activities/upgrades, clone enemies, unknown terrain, 10-second arena, minimal icons, foldable Battle Analytics. No mana or manual skills; shared cooldown-only abilities. Reversible active-only class/stance progression. Preserve old saves and frozen settlement. Use max stats/S Masterwork endgame-only balance until owner accepts. Stage on isolated branch; do not expose unfinished gameplay. Numerical class tuning, seven-member economy, and migration details are candidate design.
@@ -886,3 +896,9 @@ BUTTONS-001 approved by Owner; persistent AGENTS.md and DECISIONS.md rule added.
 
 
 Stage 4 and BUTTONS-001 verified at 33258d6: all seven workflows successful; website run 45975411685 static checks, 153 Node tests, 390px and 1440px Chromium passed (seven member route, class buttons, committed 10-second verdict, analytics). Max default-group diagnostic seed20261127 513 bouts, 272W/239L/2D, 3522 coins in 5130000ms, 256 repeated schedule indices. No merge: broader seven-class composition balance remains release gate. Stage 5 first max-only sweep: 31 single-class substitutions in role-matched default roster, plus default/role stacks and alternate stance compositions, independent max clone enemies; all five terrains, two independent seed sets, paired orientation, actual resolver and real S Masterwork full mastery. Save raw outcome tables from CI before interpreting; candidate test not a claim of balance. No lower-grade tuning.
+
+
+Candidate implementation: arenaOnly save mode uses single combat settlement lane and full productive Fighting attribute effort; no managerWork/overlap or materials, no material claims; only Fighting auto-levels, existing class/stance/Teamwork/gear rules unchanged. Old historical noncombat skill levels/effort retained to avoid erasing stats but frozen and hidden; materials retired without conversion. Prior manager save enters arena-only before new elapsed settlement, legacy source retained. Public Activities/Resources panels removed, shared attribute readout replaces obsolete individual weapon stats, landing/README copy updated. Legacy noncombat code remains only for old regression fixtures; no public access. New node and real browser tests validate no noncombat gains, frozen bout and cap. CI pending. No merge/deploy yet.
+
+
+First candidate website run 45979500022 failed the landing-copy contract (missing existing progression-cap explanation). Restored exact warning without bringing back noncombat activities. Fresh CI required.

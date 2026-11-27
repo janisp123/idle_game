@@ -1,11 +1,11 @@
-// PERMANENT-FIGHT-001: shared clock, permanent combat, one noncombat lane.
-// Reuses production reward and combat resolution; not yet wired to public UI.
+// Public arena-only manager and historical save/fixture compatibility.
+// The retired work lane is isolated in legacy-work-lane.mjs.
+import {settleLegacyWorkPair} from "./legacy-work-lane.mjs";
 import {
-  ACTIVITIES, ATTRIBUTE_IDS, ACTIVITY_STAT_WEIGHTS, TIMING_PROFILE,
-  newTeamGame, readSave, chooseActivity, settleManagerLane, managerCombatProductivePrefix,
-  automateSettledProgress, activateExpertise, activityRewardCapped,
-  recipeOptions, PRODUCTION_RECIPES, LIVE_FIGHT_MAX_MS, autoEquipmentPreview
-} from "./engine.mjs?v=group-005";
+  ACTIVITIES, ATTRIBUTE_IDS, TIMING_PROFILE,
+  newTeamGame, readSave, chooseActivity, settleManagerLane,
+  automateSettledProgress, activateExpertise, LIVE_FIGHT_MAX_MS
+} from "./engine.mjs?v=arena-only-001";
 import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=group-004";
 import {GROUP_TIMELINE_VERSION} from "./battle-group-timing.mjs";
 import {initialBattleGroup,validBattleGroup,selectGroupClass,selectGroupStance,upgradeBattleGroup,previewGroupUpgrade} from "./battle-group.mjs?v=group-001";
@@ -18,20 +18,15 @@ import {blankTactics,validTactics,chooseTactic,validTacticSnapshot,activateTacti
 export const MANAGER_LANES_VERSION=4;
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 const validWork=id=>WORK_ROTATION.includes(id);
-const route=id=>[{activity:id,plannedMs:null}];
 const blankWork=id=>({activity:id,progressMs:0,travelMs:0});
-const projection=(s,work=false)=>work?{
-  ...s,activity:s.managerWork.activity,progressMs:s.managerWork.progressMs,
-  transition:null,wagons:route(s.managerWork.activity),productiveElapsedMs:0,combatSession:null
-}:s;
 function validManagerShape(s){
   return s?.managerVersion===MANAGER_LANES_VERSION&&s.activity==="fighting"&&
     s.transition===null&&s.wagons?.length===1&&s.wagons[0].activity==="fighting"&&
     s.wagons[0].plannedMs===null&&s.fightingRemainderMs===0&&s.productiveElapsedMs===0&&
-    validWork(s.managerWork?.activity)&&count(s.managerWork.progressMs)&&
+    (s.arenaOnly===true?Boolean(s.battleGroup&&s.managerWork===undefined&&s.overlapParity===undefined&&Object.values(s.items??{}).every(v=>v===0)):s.arenaOnly===undefined&&validWork(s.managerWork?.activity)&&count(s.managerWork.progressMs)&&
     s.managerWork.progressMs<ACTIVITIES[s.managerWork.activity].durationMs&&
     count(s.managerWork.travelMs)&&s.managerWork.travelMs<=Math.max(...WORK_ROTATION.map(id=>rotationTravelMs(id,s.managerWork.activity)))&&
-    (!s.managerWork.travelMs||s.managerWork.progressMs===0)&&[0,1].includes(s.overlapParity)&&validArmourRequests(s.armourRequests)&&validTactics(s.managerTactics)&&
+    (!s.managerWork.travelMs||s.managerWork.progressMs===0)&&[0,1].includes(s.overlapParity))&&validArmourRequests(s.armourRequests)&&validTactics(s.managerTactics)&&
     (!s.combatSession||Object.values(s.combatSession.players??{}).every(validTacticSnapshot))&&
     (s.battleGroup===undefined?s.groupAnalytics===undefined:validBattleGroup(s.battleGroup)&&validGroupAnalytics(s.groupAnalytics));
 }
@@ -50,23 +45,31 @@ export function readManagerGame(value){
     const s=readSave(raw);
     if(!s||!s.teamSecond||raw.battleAnalytics!==undefined&&!validBattleAnalytics(raw.battleAnalytics))return null;
     return {...s,combatSession:s.combatSession?.timelineVersion===GROUP_TIMELINE_VERSION?s.combatSession:fasterTeamSession(s.combatSession),managerVersion:MANAGER_LANES_VERSION,
-      battleAnalytics:raw.battleAnalytics??blankBattleAnalytics(),...(raw.battleGroup?{groupAnalytics:structuredClone(raw.groupAnalytics)}:{}),managerWork:{...raw.managerWork},overlapParity:raw.overlapParity,armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
+      battleAnalytics:raw.battleAnalytics??blankBattleAnalytics(),...(raw.battleGroup?{groupAnalytics:structuredClone(raw.groupAnalytics)}:{}),...(raw.arenaOnly?{arenaOnly:true}:{managerWork:{...raw.managerWork},overlapParity:raw.overlapParity}),armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
   }catch{return null;}
 }
 // Internal coordinator hook for Phase 3, never a player-facing action.
 // Settle/claim first; switching discards only uncompleted partial cycle,
 // not earned XP or materials. Real transition handling remains Phase 3.
 export function assignManagerWork(s,id){
-  requireManager(s);
+  requireManager(s);if(s.arenaOnly)throw new RangeError("Noncombat work was retired");
   if(!validWork(id))throw new RangeError("Invalid noncombat work");
   if(s.managerWork.activity===id)return s;
   return {...s,managerWork:{...blankWork(id),travelMs:rotationTravelMs(s.managerWork.activity,id)}};
 }
-// Explicit candidate activation only; manager-app does not opt in yet.
+// Historical manager migration and group fixtures.
 export function enableBattleGroupManager(s){
  requireManager(s);return s.battleGroup?s:{...s,battleGroup:initialBattleGroup(),groupAnalytics:blankGroupAnalytics()};
 }
 export function newBattleGroupManager(now=Date.now(),firstWork="hunting"){return enableBattleGroupManager(newManagerGame(now,firstWork));}
+// Existing manager saves keep paid gear, battle cursor, skill bonuses and
+// accumulated attribute effort. No material conversion or additional work.
+export function enableArenaOnly(s){
+ requireManager(s);if(s.arenaOnly)return s;
+ const {managerWork,overlapParity,...next}=enableBattleGroupManager(s);
+ return {...next,arenaOnly:true,items:Object.fromEntries(Object.keys(s.items).map(id=>[id,0]))};
+}
+export function newArenaManager(now=Date.now()){return enableArenaOnly(newBattleGroupManager(now));}
 function managerUpgradePreview(s){
  return s.battleGroup?previewGroupUpgrade(s.battleGroup,s.coins,s.skills.fighting.level):managerEquipmentPreview(s);
 }
@@ -91,66 +94,14 @@ function laneTime(before,after){
   if(!count(total)||total%100)throw new Error("Nonconserving lane effort");
   return total/100;
 }
-function workEnd(s,end,start){
-  const id=s.managerWork.activity;
-  if(!PRODUCTION_RECIPES[id])return end;
-  const options=recipeOptions(id,s.skills[id].level);
-  // Current recipes have disjoint input sets within each activity.
-  // Reject future overlapping recipes rather than overcrediting capacity.
-  const seen=new Set();let capacity=0;
-  for(const recipe of options){
-    for(const item of recipe.inputs){
-      if(seen.has(item))throw new Error("Shared recipe inputs require a capacity allocator");
-      seen.add(item);
-    }
-    capacity+=Math.min(...recipe.inputs.map(item=>s.items[item]??0));
-  }
-  if(!capacity)return start;
-  return start+Math.min(end-start,Math.max(0,capacity*ACTIVITIES[id].durationMs-s.managerWork.progressMs));
-}
-function replay(random){
-  const values=[];
-  return ()=>{let i=0;return ()=>{if(i===values.length)values.push(random());return values[i++];};};
-}
 function pair(s,end,random,online){
-  const combat=projection(s),work=projection(s,true);
-  const combatRoll=replay(random),workRoll=replay(random);
-  const run=target=>({
-    combat:settleManagerLane(combat,target,combatRoll(),online),
-    work:(()=>{
-      const start=Math.min(target,s.settledAtMs+s.managerWork.travelMs);
-      return settleManagerLane({...work,settledAtMs:start},workEnd(s,target,start),workRoll(),online);
-    })()
-  });
-  let a=run(end);
-  if(online){
-    // An eligible cap in either lane is an automation boundary for BOTH.
-    const capEnd=Math.min(end,...[["combat",combat],["work",work]].flatMap(([k,start])=>
-      !activityRewardCapped(start)&&activityRewardCapped(a[k].state)?[a[k].state.settledAtMs]:[]));
-    if(capEnd<end){end=capEnd;a=run(end);}
+  if(s.arenaOnly){
+    const a=settleManagerLane(s,end,random,online),c=a.state,combatMs=laneTime(s,c);
+    const next={...c,settledAtMs:online?c.settledAtMs:end,battleAnalytics:accumulateBattleAnalytics(s.battleAnalytics,a.report?.arena?.analytics??[]),groupAnalytics:accumulateGroupAnalytics(s.groupAnalytics,a.report?.arena?.groupAnalytics??[])};
+    const reports=[a.report].filter(r=>r&&(r.completed||r.arena));
+    return {state:next,reports,report:reports.at(-1),effort:{combatMs,workMs:0,overlap:0,combatTime:combatMs,workTime:0}};
   }
-  const c=a.combat.state,w=a.work.state;
-  const combatMs=laneTime(s,c),workMs=laneTime(s,w);
-  const combatWall=c.settledAtMs-s.settledAtMs;
-  const workStart=Math.min(end-s.settledAtMs,s.managerWork.travelMs);
-  const prefix=t=>t>=combatWall?combatMs:managerCombatProductivePrefix(combat,t,online);
-  const overlap=workMs?prefix(Math.min(combatWall,workStart+workMs))-prefix(Math.min(combatWall,workStart)):0;
-  if(!count(overlap)||overlap>Math.min(combatMs,workMs))throw new Error("Invalid productive overlap");
-  // Alternate odd overlap milliseconds between lanes; exact 100-weight
-  // total per wall millisecond, no fractional or lost shared effort.
-  const combatShare=Math.floor((overlap+s.overlapParity)/2);
-  const combatTime=combatMs-overlap+combatShare,workTime=workMs-combatShare;
-  const cw=ACTIVITY_STAT_WEIGHTS.fighting,ww=ACTIVITY_STAT_WEIGHTS[work.activity];
-  const attributeEffort=Object.fromEntries(ATTRIBUTE_IDS.map(id=>{
-    const n=s.attributeEffort[id]+combatTime*(cw[id]??0)+workTime*(ww[id]??0);
-    if(!count(n))throw new RangeError("Manager effort overflow");return [id,n];
-  }));
-  const next={...c,battleAnalytics:accumulateBattleAnalytics(s.battleAnalytics,a.combat.report?.arena?.analytics??[]),...(s.battleGroup?{groupAnalytics:accumulateGroupAnalytics(s.groupAnalytics,a.combat.report?.arena?.groupAnalytics??[])}:{}),skills:{...c.skills,[work.activity]:w.skills[work.activity]},
-    items:w.items,attributeEffort,settledAtMs:end,
-    managerWork:{activity:work.activity,progressMs:w.progressMs,travelMs:Math.max(0,s.managerWork.travelMs-(end-s.settledAtMs))},
-    overlapParity:(s.overlapParity+overlap)%2};
-  const reports=[a.combat.report,a.work.report].filter(r=>r&&(r.completed||r.arena));
-  return {state:next,reports,report:reports.at(-1),effort:{combatMs,workMs,overlap,combatTime,workTime}};
+  return settleLegacyWorkPair(s,end,random,online);
 }
 export function settleManagerOffline(s,now=Date.now(),random=Math.random){
   requireManager(s);if(!count(now))throw new RangeError("Invalid clock");
@@ -159,9 +110,9 @@ export function settleManagerOffline(s,now=Date.now(),random=Math.random){
 }
 export function enterManagerGame(s,now=Date.now(),random=Math.random){
   const out=settleManagerOffline(s,now,random);
-  const active=activateExpertise(out.state),reserve=ingredientReserve(active);
+  const active=activateExpertise(out.state),reserve=active.arenaOnly?{}:ingredientReserve(active);
   const claimed=automateSettledProgress({...out,state:active},reserve,automateEquipment);
-  return {...claimed,state:rotateManagerWork(claimed.state,claimed.mastery?.ready??[]),ingredientReserve:reserve};
+  return {...claimed,state:active.arenaOnly?claimed.state:rotateManagerWork(claimed.state,claimed.mastery?.ready??[]),ingredientReserve:reserve};
 }
 export function settleManagerLive(s,now=Date.now(),random=Math.random){
   requireManager(s);if(!count(now))throw new RangeError("Invalid clock");
@@ -170,8 +121,8 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
   let next=s;
   const apply=()=>{
     const active=activateExpertise(next);
-    const out=automateSettledProgress({state:active},ingredientReserve(active),automateEquipment);
-    next=rotateManagerWork(out.state,out.mastery?.ready??[]);
+    const out=automateSettledProgress({state:active},active.arenaOnly?{}:ingredientReserve(active),automateEquipment);
+    next=active.arenaOnly?out.state:rotateManagerWork(out.state,out.mastery?.ready??[]);
     for(const [id,n] of Object.entries(out.levelsGained??{}))levelsGained[id]=(levelsGained[id]??0)+n;
     for(const [id,n] of Object.entries(out.mastery?.tribute??{}))tribute[id]=(tribute[id]??0)+n;
     teamworkLevelGained+=out.teamworkLevelGained??0;tacticAdvances.push(...(out.tacticAdvances??[]));
@@ -184,7 +135,7 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
     const before=next.settledAtMs;
     const duration=teamBoutMs(next.combatSession,true,Boolean(next.battleGroup));
     const segment=Math.min(now-before,duration-((next.combatSession?.elapsedMs??0)%duration),
-      next.managerWork.travelMs||ACTIVITIES[next.managerWork.activity].durationMs-next.managerWork.progressMs,
+      next.arenaOnly?Infinity:(next.managerWork.travelMs||ACTIVITIES[next.managerWork.activity].durationMs-next.managerWork.progressMs),
       ACTIVITIES.fighting.durationMs-next.progressMs);
     const outcome=pair(next,before+segment,random,true);
     next=outcome.state;reports.push(...outcome.reports);apply();
@@ -193,7 +144,7 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
   const ready=Object.keys(levelsGained);
   return {state:next,reports,report:reports.at(-1),levelsGained,teamworkLevelGained,tacticAdvances,
     ...(ready.length?{mastery:{ready,blocked:[],tribute}}:{}),
-    ingredientReserve:ingredientReserve(next),
+    ingredientReserve:next.arenaOnly?{}:ingredientReserve(next),
     autoEquipment:{upgrades,acquisitions,equipped,spent,preview:managerUpgradePreview(next)}};
 }
 

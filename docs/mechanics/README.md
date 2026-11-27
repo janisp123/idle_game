@@ -2,6 +2,10 @@
 
 **Purpose:** the human-readable, maintained reference for **what the playable game actually calculates**, where to tune it, what tests prevent regressions, and which mechanics are not implemented. Read this before editing progression, balance, drops, combat, scheduling or offline settlement. This handbook is **our game specification**, separate from `docs/library/`'s general engineering research.
 
+## ARENA-ONLY-001 candidate (PR #199)
+
+Public arena entry points in `arena-manager.mjs` settle Fighting only; allocate 100% productive combat effort using existing Fighting weights, and auto-claim Fighting XP only. Coins buy automatic equipment. Noncombat work/loot/crafting are retired from public play; historical descriptions and developer fixtures below remain for regression. Old material counts clear without conversion, historical noncombat skill levels and already earned stats stay frozen. Offline XP cap, 10-second arena, class progression and analytics remain. No new clan feature. Pending CI and release.
+
 ## Manager-only redesign (draft PR #192)
 
 [Implementation plan](MANAGER_IMPLEMENTATION_PLAN.md) · [Max-only tactic screen](MANAGER_TACTICS_SCREEN.md). Candidate runtime `manager-lanes.mjs`, `activity-rotation.mjs`, `manager-equipment.mjs`, `manager-tactics.mjs`, `manager-app.mjs`; old shipped mechanics remain below until release. Phase 7 candidate tests and endgame sensitivity pending; no public deployment.

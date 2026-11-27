@@ -59,7 +59,7 @@ def check():
     assert parser.stylesheet and parser.favicon, "Stylesheet and icon are required"
     assert {"header", "nav", "main", "footer", "h1", "h2"}.issubset(parser.tags)
     assert {"main", "vision", "library"}.issubset(parser.ids)
-    for phrase in ("The Long Vigil", "Life beyond the arena", "Earn your equipment", "may be reset", "Progression limits prevent endless rewards"):
+    for phrase in ("The Long Vigil", "Coins and combat experience", "Earn your equipment", "may be reset", "Progression limits prevent endless rewards"):
         assert phrase in html, f"Missing current alpha landing information: {phrase}"
     assert "hobby" in parser.ids, "Hobby-project statement must be on landing page"
     for phrase in ("A Hobby,", "Not a Business", "personal hobby project, not a business model", "coding and game development", "reliable servers", "hosting and development costs", "loss of progress are possible", "Constructive feedback is always welcome"):
@@ -155,7 +155,8 @@ def check():
         game_parser.close()
         assert game_parser.lang == "en", "Game must declare English document language"
         assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
-        assert {"game","battleGroupPanel","battleGroupHeading","fighterButtons","raceChoice","mainClassChoice","specialClassChoice","tacticButtons","selectedClassProgress","currentWork","workXP","nextWork","battleFighters","arenaPlayers","arenaEnemies","arenaEnvironment","battleCalculation","battlePercent","progressPanel","progressHeading","progressFeed","resourceList","characterStatsPanel","loginReport"}.issubset(game_parser.ids), "Missing manager UI"
+        assert {"game","battleGroupPanel","battleGroupHeading","fighterButtons","raceChoice","mainClassChoice","specialClassChoice","tacticButtons","selectedClassProgress","battleFighters","arenaPlayers","arenaEnemies","arenaEnvironment","battleCalculation","battlePercent","progressPanel","progressHeading","progressFeed","characterStatsPanel","loginReport"}.issubset(game_parser.ids), "Missing manager UI"
+        assert not {"currentWork","workXP","nextWork","activityLevels","resourceList"} & game_parser.ids, "No noncombat activity or resource panels"
         assert not {"weaponButtons","armourButtons"} & game_parser.ids, "Manual equipment controls must not return"
         assert not ({"activityChoices","queuePlanner","wagonQueue","smithBuy","itemGrade","itemQuality","armourChoice","teamFighterChoice"} & game_parser.ids), "Obsolete player controls"
         assert not re.search(r"<select\b", game_html), "Public manager must use buttons, never dropdowns"

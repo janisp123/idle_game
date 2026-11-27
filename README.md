@@ -2,7 +2,7 @@
 
 *An independent grimdark idle gladiator RPG and open browser-game engineering project.*
 
-The Long Vigil is the playable game in the Idle Game hobby project. Fight automatically in the arena, earn equipment, train a specialist and support your character through survival work. Choose a path, let time pass and return when it suits you.
+The Long Vigil is the playable game in the Idle Game hobby project. Fight automatically in the arena, earn coins and experience, and train a seven-character Battle Group. Choose a path, let time pass and return when it suits you.
 
 **This project is actively evolving.** Mechanics, content, visuals and long-term plans may change as ideas are tested. The current build is an experiment, not a promise of a fixed final feature set.
 
@@ -17,10 +17,10 @@ The playable alpha is an experimental test build. Expect changes, rough edges an
 
 ## The game
 
-- **Fight and specialize.** Choose your equipment and develop a fighting style. Weapons, armour and terrain shape the outcome of automatic arena battles.
-- **Build your character.** Train skills, grow attributes, earn rewards and improve your equipment. Specialization brings strengths as well as weaknesses.
-- **Survive beyond the arena.** Gather resources, practise crafts and plan a route of activities to support your progression.
-- **Play at your own pace.** Your character can work while you are away. Rewards depend on your character's current progression and activity; when a skill reaches its limit, return to advance it or let the planned route continue to another activity.
+- **Fight and specialize.** Choose seven classes and combat stances. Class abilities, automatic equipment and terrain shape the outcome.
+- **Build your Battle Group.** Train active classes, grow attributes, earn rewards and improve class-assigned equipment. Specialization brings strengths as well as weaknesses.
+- **Coins and combat experience.** Victories earn coins; fighting trains active classes and shared stats. Equipment upgrades use coins.
+- **Play at your own pace.** Your Battle Group fights while you are away. Rewards follow the frozen combat build and current XP cap; return to activate earned levels.
 
 The Long Vigil is an evolving idle RPG, not a fixed feature list. The game is designed around meaningful choices, gradual progression and a grimdark atmosphere rather than constant attention. Mechanics, balance and content will change during development; the [mechanics handbook](docs/mechanics/README.md) and [changelog](docs/CHANGELOG.md) describe the current implementation.
 
