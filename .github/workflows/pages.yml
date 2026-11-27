@@ -94,3 +94,37 @@ jobs:
       - name: Deploy website
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+
+  notify-release:
+    name: Notify owner of published game
+    needs: deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: release-notice-${{ github.sha }}
+      cancel-in-progress: false
+    steps:
+      - name: Post one completion mention on merged PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.sha }}
+          OWNER: ${{ github.repository_owner }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          number=$(gh api "repos/$GITHUB_REPOSITORY/commits/$RELEASE_SHA/pulls" --jq '[.[] | select(.merged_at != null and .base.ref == "main") | .number] | first // empty')
+          if [[ -z "$number" ]]; then
+            echo "No associated merged pull request; no notice."
+            exit 0
+          fi
+          [[ "$number" =~ ^[0-9]+$ ]]
+          marker="<!-- published-game:$RELEASE_SHA -->"
+          if gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$number/comments" --jq '.[].body' | grep -F "$marker" >/dev/null; then
+            echo "Release notice already exists."
+            exit 0
+          fi
+          body=$(printf '%s\n@%s The game update is merged and GitHub Pages deployment succeeded.\n\nPlay: https://%s.github.io/%s/play/\nDeployment run: %s/%s/actions/runs/%s' "$marker" "$OWNER" "$OWNER" "${GITHUB_REPOSITORY#*/}" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+          gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$number/comments" -f body="$body" --jq .html_url

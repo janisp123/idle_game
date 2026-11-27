@@ -94,3 +94,8 @@ RAID-001 c5 test status: head 5a3beb7 website run 46003947892 passed all 186 Nod
 
 
 RAID-001 verification: latest head 2cdb205 website run 46004209912 failed two exact historical v1/v2 513-bout goldens (184/186); six other workflows passed. Only import URL changes in shared resolver modules since 5a3beb7 (186/186 Node) and raid-only catalog tuning. Restore previously verified shared resolver import specifiers exactly, retain raid tuning and corrected browser test. Do not change golden expectations. Fresh CI required before merge.
+
+
+RAID-001 merged #207 at 3836a47b086e33d3105836ddb959dd4f8def7cb9, verified source on main. Head 25b4e45, all seven checks passed, website run 46004672807: 186/186 and Chromium mobile/desktop. Owner completion mention posted on PR comment 7219228440; Pages not yet independently verified. Balance provisional.
+
+RELEASE-NOTIFY-001 — owner approved an event-driven GitHub completion notice rather than polling every three minutes. Candidate: after successful main-branch Pages deployment, use the existing Actions token with pull-requests:write only in a separate job, look up the merged PR by deployed SHA, post one owner mention with play link and run URL. No checkout or execution of PR-controlled content; skip direct pushes with no associated merged PR; no notifications for failed or pending tests. Marker and per-SHA concurrency prevent repeats on reruns. Native GitHub notification delivery depends on the owner's settings; no direct ChatGPT push or automatic-merge policy change. CI pending.

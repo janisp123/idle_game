@@ -4,6 +4,7 @@
 
 | ID | Date | Approved by | Decision | Status |
 | --- | --- | --- | --- | --- |
+| RELEASE-NOTIFY-001 | 2026-11-27 | Owner | Event-driven GitHub completion mention after successful Pages publication, once per merged playable revision; no intermediate or failed-test notices. Existing merge gates unchanged. | Approved; workflow candidate |
 | RAID-001 | 2026-11-27 | Owner | Five manually started automatically fought raids with unique crews and resistances; 24h nonstacking +10% Fighting XP and tiered damage/defence up to 10%, coins on victory. Higher replaces, same refreshes, lower does not refresh higher. Target five minutes. | Approved direction; staged implementation |
 | CLASS-KITS-001 | 2026-11-27 | Owner | One passive and two fixed automatic cooldown abilities per class, using existing class mastery and stances. No mana, manual skill selection, separate skill points/XP, additional roster slots or currencies. Preserve situational counters and max-only balance gate. Specific effects are candidates. | Approved direction; plan recorded |
 | INDIVIDUAL-STATS-001 | 2026-11-27 | Owner | Replace shared account combat stats with individual active-fighter STR, DEX, CON, INT, WIT, MEN. Distinct class starting attributes and growth distributions; no mana or mana regeneration. Keep stat meanings and coefficients easy to tune, modular only where useful. Preserve old frozen combat and earned progress. Exact profiles/formulas provisional. | Approved direction; staged foundation |

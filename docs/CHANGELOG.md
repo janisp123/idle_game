@@ -1,5 +1,11 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — RAID-001 merged; RELEASE-NOTIFY-001 STARTED
+
+RAID-001 merged #207 at 3836a47; 186/186 tests, all seven workflows and real Chromium passed. Deployment verification separate.
+
+RELEASE-NOTIFY-001 — owner approved an event-driven GitHub completion notice rather than polling every three minutes. Candidate: after successful main-branch Pages deployment, use the existing Actions token with pull-requests:write only in a separate job, look up the merged PR by deployed SHA, post one owner mention with play link and run URL. No checkout or execution of PR-controlled content; skip direct pushes with no associated merged PR; no notifications for failed or pending tests. Marker and per-SHA concurrency prevent repeats on reruns. Native GitHub notification delivery depends on the owner's settings; no direct ChatGPT push or automatic-merge policy change. CI pending.
+
 ## 2026-11-27 — RAID-001 playable candidate
 
 RAID-001 stage 3 candidate — launch buttons for all five raids, saved deterministic encounter, automatic arena pause/resume, strict knockout and one-time coins/blessing, 24h XP and combat bonus, expiry split, larger boss and six minion cards with actual health and weapon icons; mobile smoke and reward/reload tests. Candidate 2.5-second rounds, 120-round limit. Initial balance screen pending; approximate five-minute appropriate-level wins unverified. CI pending; do not claim deployed.

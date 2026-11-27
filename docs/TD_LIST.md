@@ -8,10 +8,19 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## RELEASE-NOTIFY-001 — Published game completion notice
+
+- **Goal / acceptance:** One GitHub mention when a merged playable update successfully deploys; no polling, no alerts on intermediate tests, no repeated notice for the same SHA. Notification uses existing GitHub settings.
+- **Status:** IN_REVIEW — workflow candidate; CI and actual post-deployment delivery pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+- **Dependencies:** Existing Pages deployment workflow and GitHub notification settings.
+
 ## RAID-001 — Raid bosses and blessings
 
 - **Goal / acceptance:** Five raids (10/20/30/40/50), unique boss and six minions, tactical resistances, about five minutes for appropriate good team, coins and nonstacking 24-hour +10% Fighting XP, up to +10% damage/defence. Manual start, automatic fight/resume, persisted one-time rewards, mobile raid view.
-- **Status:** PARTIAL — full playable raid candidate with saved runs, buffs, coins and mobile UI; CI and duration/balance calibration pending.
+- **Status:** PARTIAL — playable implementation merged #207 (3836a47), 186/186 tests and all seven workflows passed, Chromium mobile/desktop passed; deployment verification and duration/balance calibration pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
