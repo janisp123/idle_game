@@ -923,3 +923,8 @@ CLASS-TERRAIN-001 owner extension: terrain should create pronounced situational 
 
 
 Terrain candidate: explicit bow impact/aim penalties in ruins and especially gatehouse; straight narrow bridge remains favorable to clear-line bow shots; dagger close-terrain bonus and padded/leather versus plate matchup, symmetric and applied only to new tactical rules. Added 1080 paired max-only direct dagger-versus-bow/mage/tank battles across five arenas. Fixed legacy symmetry audit's stale source signature match; no test acceptance weakened. 5880 existing max-only matches rerun as well. All class guides and effects are intended tactical identities pending validation, not guaranteed outcomes. No merge yet.
+
+
+## 2026-11-27 — Interlude class identity research
+
+Owner requested research of all original Interlude classes. [31-class identity report](mechanics/INTERLUDE_CLASS_IDENTITIES_20261127.md) maps all original classes to our specializations, records individual skill evidence, our fixed kit, proposed identity, matchups, preferred and adverse terrain, implementation gaps and test plan. Research-only; proposals not implemented. Candidate 04f3acf all seven CI passed (163 tests, all info dialogs on mobile/desktop), 6960 max-only matches; raw PR #200 comment 7216640854. Archers 14/24 open, 0/24 gatehouse; Trickblade 2/24 vs Longshot open, 24/24 gatehouse, but 24/24 vs Oathkeeper both. Need genuine tank counter and differentiated class mechanics before balance approval; no merge yet.

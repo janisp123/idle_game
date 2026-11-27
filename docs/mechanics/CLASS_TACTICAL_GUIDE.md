@@ -2,6 +2,8 @@
 
 Owner-approved design direction: pronounced strengths and weaknesses by terrain. Tactical intentions, not guaranteed win rates. Actual equipment and cooldowns are sourced by the UI from the class registry. No forced team quotas. Summoner signatures are attacks and utility, not separate actors. Max-only balance validation.
 
+Further identity research and proposed distinctions: [Interlude class identities](INTERLUDE_CLASS_IDENTITIES_20261127.md). This is research only; do not claim new abilities are implemented.
+
 ## blademaster
 
 Heavy twin-sword burst.
