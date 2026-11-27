@@ -346,6 +346,8 @@ try{
     await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:script.identifier});
     const check=await evaluate(`(()=>({selects:document.querySelectorAll("select").length,counts:["fighterButtons","weaponButtons","armourButtons","tacticButtons"].map(id=>document.getElementById(id).querySelectorAll("button").length),overflow:document.documentElement.scrollWidth-innerWidth,activity:JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).activity,work:document.getElementById("currentWork").textContent}))()`);
     assert.equal(check.selects,0);assert.deepEqual(check.counts,[2,5,3,3]);assert.ok(check.overflow<=2);assert.equal(check.activity,"fighting");assert.equal(check.work,"Hunting");
+    const placement=await evaluate(`(()=>{const grid=document.querySelector(".manager-grid"),arena=grid.querySelector(".arena-card"),rect=arena.getBoundingClientRect();return {first:grid.firstElementChild===arena,full:Math.abs(rect.width-grid.getBoundingClientRect().width)<=2,above:rect.bottom<=document.getElementById("gladiatorsPanel").getBoundingClientRect().top};})()`);
+    assert.deepEqual(placement,{first:true,full:true,above:true},"arena first and full-width");
     assert.equal(await evaluate('!document.getElementById("gladiatorsPanel").open && !document.getElementById("weaponButtons").checkVisibility()'),true);
     await evaluate('document.querySelector("#gladiatorsPanel > summary").click()');
     assert.equal(await evaluate('document.getElementById("gladiatorsPanel").open && document.getElementById("weaponButtons").checkVisibility()'),true);

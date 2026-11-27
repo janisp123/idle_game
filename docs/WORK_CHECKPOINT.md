@@ -2,6 +2,8 @@
 
 ## PROGRESS-UI-001 — candidate
 
+Owner extended scope: Arena is the primary screen; move it to first card in actual DOM order, above Gladiators, and span full grid width on desktop and mobile. CSS cache version bumped; no game mechanics or saved-data changes. Browser checks first-card order, full width and above Gladiators at both widths. New final-head tests pending.
+
 Owner extended scope 2026-11-27: Gladiators also collapsible, closed on initial page load; native details/summary; all choices remain intact when folded. Browser checks open, select independent loadout, close during automatic play and upgrades, reopen and verify selected weapon/armour/tactic; Progress also checked for live hidden entries and report. No JS or save schema changes; disclosure state is page-local and not persisted on reload. Final CI pending.
 
 Candidate: use native details/summary for the entire Progress card (closed by default); preserve all existing content IDs and JS, no engine or save changes. Browser smoke verifies default hidden feed continues receiving entries, expand and reopen report, collapse again and no overflow at both tested widths. Tests pending.
