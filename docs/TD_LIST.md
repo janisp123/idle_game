@@ -8,10 +8,19 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## EIGHT-ARENAS-001 — Eight tactical environments
+
+- **Goal / acceptance:** Add three meaningful geometry/terrain differences, preserve prior saves and raids, expose all eight through arena selection and analytics, test specialized max-only compositions.
+- **Status:** IN_REVIEW — v8 candidate; functional CI and balance evidence pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+- **Dependencies:** INTERLUDE-CONTROL-001, RANGE-GEOMETRY-001; [plan](mechanics/EIGHT_ARENAS_20261127.md).
+
 ## INTERLUDE-CONTROL-001 — Class control and utility
 
 - **Goal / acceptance:** Distinct bounded control and debuffs, revised class identity kits, max-only paired arena tests, frozen-rule compatibility.
-- **Status:** IN_REVIEW — v7 candidate; CI and numerical balance pending.
+- **Status:** PARTIAL — v7 merged #213 (f621853), 197 tests and seven workflows; numerical balance and deployment verification pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

@@ -4,6 +4,7 @@
 
 | ID | Date | Approved by | Decision | Status |
 | --- | --- | --- | --- | --- |
+| EIGHT-ARENAS-001 | 2026-11-27 | Owner | Expand public arena to eight tactically distinct zones; test diverse specialized compositions at max stats. Preserve frozen old terrain selection and raid rules. | Approved; v8 candidate |
 | INTERLUDE-CONTROL-001 | 2026-11-27 | Owner | Try Interlude-inspired distinct crowd control and debuffs, retain two automatic abilities and max-only tests. Specific coefficients and utility threat target selection provisional. | Approved; v7 candidate |
 | RANGE-GEOMETRY-001 | 2026-11-27 | Owner | Correct ranged engagement geometry and movement before modifying damage, preserve tank/healer priority and environmental tradeoffs. | Approved; v6 arena candidate |
 | TANK-AGGRO-001 | 2026-11-27 | Owner | Living tanks naturally draw primary enemy aggro; healers prioritize wounded tanks in raids, 7v7 and other group encounters. | Approved; v5 candidate |

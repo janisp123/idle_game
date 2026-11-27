@@ -37,7 +37,7 @@ const rows=[
  ["dreadguard","Disruptive Shield",strike("dread_strike","Dread Strike",4,1.18,{effect:"weaken"}),strike("dark_bind","Dark Bind",6,.90,{effect:"control",utility:true})]
 ];
 export const CLASS_KITS=Object.freeze(Object.fromEntries(rows.map(([id,passive,primary,secondary])=>[id,Object.freeze({passive,primary:Object.freeze(primary),secondary:Object.freeze(secondary)})])));
-export const kitActor=a=>[KIT_RULES_VERSION,4,5,6,7].includes(a?.groupCombatRules)&&Boolean(a.classId);
+export const kitActor=a=>[KIT_RULES_VERSION,4,5,6,7,8].includes(a?.groupCombatRules)&&Boolean(a.classId);
 
  // V7 source-inspired variants. Legacy CLASS_KITS remains immutable for frozen v1–v6.
  const hex=(id,name,effect,cooldown,extra={})=>utility(id,name,"tactical_control",cooldown,{effect,...extra});
@@ -73,7 +73,7 @@ export const kitActor=a=>[KIT_RULES_VERSION,4,5,6,7].includes(a?.groupCombatRule
  };
  export const CONTROL_CLASS_KITS=Object.freeze(Object.fromEntries(Object.entries(CLASS_KITS).map(([id,k])=>[id,Object.freeze({...k,...Object.fromEntries(Object.entries(variants[id]??{}).map(([slot,v])=>[slot,Object.freeze(v)]))})])));
 
-export const pilotKit=a=>kitActor(a)?(a.groupCombatRules===7?CONTROL_CLASS_KITS:CLASS_KITS)[a.classId]??null:null;
+export const pilotKit=a=>kitActor(a)?([7,8].includes(a.groupCombatRules)?CONTROL_CLASS_KITS:CLASS_KITS)[a.classId]??null:null;
 export const kitStrength=a=>.75+.25*(a.classLevel-1)/49;
 export const KIT_BALANCE=Object.freeze({daggerShieldImpact:.38,daggerShieldBlock:.65,daggerPlateImpact:.62,daggerBlockedImpact:.19,
  opportunist:1.12,swiftEvasion:.07,swiftPursuit:1.22,nightCritical:.22,nightDamage:.94,
