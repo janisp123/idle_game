@@ -18,7 +18,7 @@ export const GROUP_ARENAS=Object.freeze([...ARENAS,...[
  {id:"grand_hall",name:"Grand Hall",startDistance:1,lineOfSight:1,cover:0,retreatSpace:0,approachSteps:1,clearance:2,detail:"Compact three-lane starting formation, high swing clearance"},
  {id:"marshland",name:"Marshland",startDistance:2,lineOfSight:2,cover:0,retreatSpace:1,approachSteps:3,clearance:2,detail:"Long approach through mud; heavier armour slows movement"}
 ].map(Object.freeze)]);
-export const groupArenaPool=rules=>[8,9].includes(rules)?GROUP_ARENAS:ARENAS;
+export const groupArenaPool=rules=>[8,9,10].includes(rules)?GROUP_ARENAS:ARENAS;
 const AVAILABILITY_BIAS = 0.64;
 const preferences = {
   bow: arena => 2 * arena.lineOfSight + 2 * arena.retreatSpace,
