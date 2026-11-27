@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — CLAN-BUILDINGS-PLAN-001 STARTED
+
+Owner requested an implementation plan only for five level-zero buildings, automatic clan donations, long-term upgrades and 50 weekly clan raids. Baseline b4624c1; basic local clan #223 eb6be9e passed seven checks but unmerged. Draft plan, distinguish requirements from provisional numbers, preserve server boundary. Branch `docs/clan-buildings-weekly-raids-plan`; no runtime changes or merge authorization for the proposed mechanics. Next save plan for owner review.
+
 ## 2026-11-27 — ARENA-PREFERENCES-001 STARTED
 
 Owner approved three starred environments, +10 percentage points each, other five equally reduced, 24-hour lock, symmetric average for future PvP. Branch `feature/arena-preferences`; baseline main 5487e23 (v9, 202 tests). V10 #218 separately verified, not yet merged. Implement deterministic weighted selection, frozen current bout, persistent local settings and star UI; server enforcement awaits multiplayer. Tests pending; next implement candidate.
