@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — CLAN-BUILDINGS-001 STARTED
+
+Owner approved plan #224. Extend unmerged #223 rather than release temporary Academy. Last verified eb6be9e all seven checks. Implement level-zero buildings, construction and weekly raid foundations; provisional prices and combat bonuses require measured validation. Preserve donation cursor and local-only membership. Branch feature/alpha-clan, PR #223; next implement staged changes; reconcile cache #222.
+
 ## 2026-11-27 — ALPHA-CLAN-001 STARTED
 
 Owner approved one local alpha clan, automatic enrollment on login and working bonuses before server. Candidate Ashen Covenant, Academy starting Fighting XP bonus, explicit coin donations and local Academy upgrades. No shared accounts, roster, treasury, forced spending or retroactive rewards. Exact numbers are provisional test parameters. Branch `feature/alpha-clan`; baseline b4624c1. Candidate runtime, save, UI and test harness pushed; tests pending; reconcile overlapping cache repair #222 before merge.
