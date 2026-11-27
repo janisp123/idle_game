@@ -9,9 +9,13 @@ import {equipmentPrice,SMITH_BALANCE} from "../site/play/smith.mjs";
 import {expertiseThreshold} from "../site/play/expertise.mjs";
 import {resolveTeamBattle} from "../site/play/team-combat.mjs";
 import {ARENAS} from "../site/play/arenas.mjs";
+import {xpForAttributeValue,totalMasteryAttributeBonuses} from "../site/play/attributes.mjs";
+import {teamArenaReward} from "../site/play/team-timeline.mjs";
 const rng=()=>.5;
 function max(){
  const s=newManagerGame(0);s.skills.fighting.level=52;s.teamwork.level=50;
+ const bonuses=totalMasteryAttributeBonuses(s.skills),target={STR:141,DEX:141,END:129};
+ s.attributeEffort=Object.fromEntries(Object.entries(target).map(([id,value])=>[id,xpForAttributeValue(value-bonuses[id])*3600000]));s.attributeEffortActive={...s.attributeEffort};
  const team=teamFromState(s);
  for(const [i,id] of ["first","second"].entries()){
   const g=team[id],family=i?"leather":"plate";
@@ -57,4 +61,40 @@ test("old in-flight v3 bout is settled unchanged before clone conversion",()=>{
  const expected=settleTeamSession(old,200),actual=settleManagerLive(s,200,rng);
  assert.equal(actual.reports.find(r=>r.arena).arena.coins,expected.coins);
  assert.equal(actual.state.combatSession.prizeCursor,1);assert.ok(isCloneTeamSession(actual.state.combatSession));
+});
+
+// Same max-only benchmark as the existing manager endgame suite. Use the
+// generated rival population as the actual opponent pool, with paired sides
+// and fixed independently selected arenas. Diagnostic only: do not tune
+// based on one noisy screening sample or claim these are optimal builds.
+test("max-only rival matchup diagnostic, paired-side symmetry and economy",()=>{
+ const s=max(),p=desiredArenaTeam(s),e=captureCloneEnvelope(teamFromState(s),s.managerTactics,52);
+ assert.deepEqual([p.first.str,p.first.dex,p.first.end],[141,141,129]);
+ const catalog=Array.from({length:24},(_,i)=>buildCloneTeam(e,p.first,(20261127+Math.imul(i+1,0x9e3779b9))>>>0));
+ const counts={};for(const team of catalog)for(const fighter of team){const key=fighter.loadout;counts[key]=(counts[key]??0)+1;}
+ const score=(r)=>r.outcome==="victory"?1:r.outcome==="defeat"?0:.5;
+ const byArena={},byBuild=[];let calls=0;
+ for(const [i,player] of catalog.entries()){
+  const results=[];
+  for(const [j,arena] of ARENAS.entries()){
+   let wins=0,draws=0,losses=0;
+   for(const [k,enemy] of catalog.entries()){
+    const seed=(20261127+Math.imul(i+1,0x85ebca6b)+Math.imul(k+1,0xc2b2ae35)+j)>>>0;
+    const a=resolveTeamBattle(player,enemy,seed,arena,{player:50,enemy:50});
+    const b=resolveTeamBattle(enemy,player,seed,arena,{player:50,enemy:50});calls+=2;
+    for(const r of [a,{outcome:b.outcome==="victory"?"defeat":b.outcome==="defeat"?"victory":b.outcome}]){
+     if(r.outcome==="victory")wins++;else if(r.outcome==="defeat")losses++;else draws++;
+    }
+   }
+   results.push({arena:arena.id,wins,losses,draws});
+   const agg=byArena[arena.id]??(byArena[arena.id]={wins:0,losses:0,draws:0});agg.wins+=wins;agg.losses+=losses;agg.draws+=draws;
+  }
+  const n=results.reduce((a,r)=>a+r.wins+r.losses+r.draws,0),wins=results.reduce((a,r)=>a+r.wins,0),draws=results.reduce((a,r)=>a+r.draws,0);
+  byBuild.push({build:player.map(r=>[r.loadout,r.trainingKit.armour.head,r.tactic].join(":")).join("+"),winRate:wins/n,score:(wins+.5*draws)/n,results});
+ }
+ const mirror=catalog[0],mirrorResult=resolveTeamBattle(mirror,mirror,12345,ARENAS[0],{player:50,enemy:50});
+ const rates=byBuild.map(b=>b.winRate);
+ assert.equal(calls,5760);assert.equal(Object.keys(counts).length,5);assert.ok(rates.every(n=>n>=0&&n<=1));
+ const result={profile:{str:141,dex:141,end:129,skill:52,gear:"S Masterwork",tactic:50,teamwork:50},seed:20261127,calls,weaponCounts:counts,byArena,byBuild:byBuild.sort((a,b)=>b.score-a.score),grossCoinsPerHourAt50PercentWins:teamArenaReward(7)*.1*180*.5,mirrorExample:mirrorResult.outcome};
+ console.log("NPC_PARITY_MAX_DIAGNOSTIC "+JSON.stringify(result));
 });
