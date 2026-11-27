@@ -1,19 +1,20 @@
 // Team geometry and decisions; all damage and durability use physical-actions.
-import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=team-002";
+import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=group-002";
 import { coordinationChance } from "./teamwork.mjs?v=team-002";
 import {TACTIC_BALANCE,tacticActivation,validTacticSnapshot} from "./manager-tactics.mjs?v=manager-tactics-001";
-export const TEAM_COMBAT_BALANCE=Object.freeze({maxRoster:6,maxRounds:PHYSICAL_RULES.turnLimit,
+import {validGroupSnapshot,classWeapon,prepareClassActor,expireClassEffects,tryClassAction} from "./battle-group-actions.mjs?v=group-002";
+export const TEAM_COMBAT_BALANCE=Object.freeze({maxRoster:7,maxRounds:PHYSICAL_RULES.turnLimit,
   rearSpace:3,interceptRecovery:1,focusWeight:2,healthWeight:1.5});
 const alive=a=>a.hp>0;
 const gap=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
 const distance=(a,b)=>Math.max(0,gap(a,b)-1);
-const activeWeapon=a=>a.loadout==="bow"&&(!a.arrows||!a.weapon.hp)?WEAPONS.dagger:WEAPONS[a.loadout];
+const activeWeapon=a=>(a.classId&&classWeapon(a))||(a.loadout==="bow"&&(!a.arrows||!a.weapon.hp)?WEAPONS.dagger:WEAPONS[a.loadout]);
 const bowActive=a=>activeWeapon(a)===WEAPONS.bow;
 const other=(actors,a)=>actors.filter(b=>b.side!==a.side&&alive(b));
 const allies=(actors,a)=>actors.filter(b=>b.side===a.side&&b!==a&&alive(b));
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
 export const teamArenaWidth=terrain=>2*TEAM_COMBAT_BALANCE.rearSpace+clamp(terrain.startDistance??2,0,2)+2;
-const validRoster=r=>Array.isArray(r)&&r.length>0&&r.length<=TEAM_COMBAT_BALANCE.maxRoster&&r.every(a=>a&&Object.hasOwn(WEAPONS,a.loadout)&&a.loadout!=="dagger"&&validTacticSnapshot(a)&&["str","dex","end","skill"].every(k=>Number.isFinite(a[k])&&a[k]>=0&&a[k]<=1e6));
+const validRoster=r=>Array.isArray(r)&&r.length>0&&r.length<=TEAM_COMBAT_BALANCE.maxRoster&&r.every(a=>a&&Object.hasOwn(WEAPONS,a.loadout)&&a.loadout!=="dagger"&&(!a.classId||validGroupSnapshot(a))&&validTacticSnapshot(a)&&["str","dex","end","skill"].every(k=>Number.isFinite(a[k])&&a[k]>=0&&a[k]<=1e6));
 function makeActors(roster,side,terrain){
   const start=clamp(terrain.startDistance??2,0,2)+1;
   return roster.map((snapshot,i)=>{
@@ -21,8 +22,8 @@ function makeActors(roster,side,terrain){
     const rear=snapshot.loadout==="bow"&&roster.some(x=>x.loadout!=="bow")?1:0;
     const front=TEAM_COMBAT_BALANCE.rearSpace;
     const x=side==="player"?front-rear:front+start+rear;
-    return {...fighter(snapshot,side),id:side+":"+i,x,y:i,approach:0,
-      retreats:terrain.retreatSpace??(terrain.retreat===false?0:3),intercepted:-1,targetId:null,bleedSource:null,actions:0};
+    return prepareClassActor({...fighter(snapshot,side),id:side+":"+i,x,y:i,approach:0,
+      retreats:terrain.retreatSpace??(terrain.retreat===false?0:3),intercepted:-1,targetId:null,bleedSource:null,actions:0});
   });
 }
 function adjacent(a,actors,height,width,side){
@@ -102,6 +103,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   const has=side=>actors.some(a=>a.side===side&&alive(a));
   record(null,null,"engage");
   for(round=1;round<=TEAM_COMBAT_BALANCE.maxRounds&&has("player")&&has("enemy");round++){
+    for(const a of actors)expireClassEffects(a,round);
     // Random jitter on existing DEX/mobility initiative, no slot-order priority.
     const order=actors.filter(alive).map(a=>({a,score:a.dex+mobility(a)/10+initiative()*10}))
       .sort((a,b)=>b.score-a.score);
@@ -122,6 +124,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
       if(!target)continue;
       a.targetId=target.id;
       const active=activeWeapon(a),bow=bowActive(a);
+      if(a.classId&&tryClassAction(a,target,actors,round,{terrain,roll,speedRoll,record,intercept:(x,y)=>intercept(x,y,actors,round,chance[y.side],decision)}))continue;
       // Defensive fighters may escort threatened allies only when they
       // cannot take a ready attack. Real tile movement and turn cost.
       if(a.activeTactic==="defensive"&&a.shield.hp>0&&!a.guardOpen){

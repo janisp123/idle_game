@@ -4,8 +4,11 @@ import { previewAutoEquipment, AUTO_EQUIPMENT_AT, MAX_AUTO_EQUIPMENT_PURCHASES }
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
 import { initialTeam,validGladiator,teamSnapshots,awardTeamPractice,activateTeamPractice,previewTeamUpgrade,upgradeTeam,chooseTeamWeapon,chooseTeamArmour } from "./team.mjs?v=team-001";
 import { initialTeamwork,validTeamwork,awardTeamwork,activateTeamworkOnLogin } from "./teamwork.mjs?v=team-002";
-import { validTeamSession,startTeamSession,settleTeamSession,teamBoutMs,isCloneTeamSession,CLONE_TEAM_TIMELINE_VERSION } from "./team-timeline.mjs?v=npc-parity-001";
+import { validTeamSession,startTeamSession,settleTeamSession,teamBoutMs,isCloneTeamSession,CLONE_TEAM_TIMELINE_VERSION } from "./team-timeline.mjs?v=group-004";
 import {captureCloneEnvelope} from "./clone-opponents.mjs?v=npc-parity-001";
+import {GROUP_IDS,validBattleGroup,groupSnapshots,awardGroupPractice,activateGroupPractice} from "./battle-group.mjs?v=group-001";
+import {advanceGroupRank} from "./battle-group-rank.mjs?v=group-005";
+import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession} from "./battle-group-timeline.mjs?v=group-005";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
 import {
@@ -218,8 +221,10 @@ export function teamFromState(state){
 function withTeam(state,team){
   return {...state,...team.first,teamSecond:team.second};
 }
-const frozenGrade=s=>s?.players?.first?.difficulty??s?.player?.difficulty??0;
+const frozenGrade=s=>s?.players?.first?.difficulty??s?.players?.member1?.difficulty??s?.player?.difficulty??0;
 function validTeamFields(s){
+  if(s.battleGroup!==undefined&&(!s.teamSecond||!validBattleGroup(s.battleGroup)))return false;
+  if(s.combatSession?.timelineVersion===GROUP_TIMELINE_VERSION)return Boolean(s.battleGroup&&validGladiator(s.teamSecond)&&validTeamwork(s.teamwork)&&validGroupSession(s.combatSession)&&s.combatSession.teamworkLevel<=s.teamwork.level);
   if(s.teamSecond===undefined&&s.teamwork===undefined)
     return (s.combatSession===null||Boolean(s.combatSession?.player?.trainingKit))&&validCombatSession(s.combatSession);
   return validGladiator(s.teamSecond)&&validTeamwork(s.teamwork)&&
@@ -338,6 +343,7 @@ export function readSave(value) {
       fightingRemainderMs:scalePartialProgress(s.fightingRemainderMs,sourceFightingMs,ACTIVITIES.fighting.durationMs),
       expertise:{...s.expertise},expertiseActive:{...s.expertiseActive},
       ...(s.teamSecond?{teamSecond:structuredClone(s.teamSecond),teamwork:{...s.teamwork}}:{}),
+      ...(s.battleGroup?{battleGroup:structuredClone(s.battleGroup)}:{}),
       combatLoadout: s.combatLoadout,
       coins: s.coins,
       armour: { ...s.armour },
@@ -462,7 +468,47 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
   if(elapsedMs)run(elapsedMs);
   return result();
 }
+// Group migration: finish the old frozen bout first, keep its real rewards
+// and legacy practice, then start a new ten-second timeline with exact carry.
+// Old equipment and mastery remain in the legacy fields; no free transfer.
+function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
+ let group=state.battleGroup,teamwork=state.teamwork,session=state.combatSession,old=null;
+ const totals=Object.fromEntries(arenaFields.map(k=>[k,0])),practiceMs=Object.fromEntries(GROUP_IDS.map(id=>[id,0])),groupAnalytics=[];
+ const shared=desiredArenaPlayer(state),desired=groupSnapshots(group,shared);
+ if(session&&session.timelineVersion!==GROUP_TIMELINE_VERSION){
+  const duration=teamBoutMs(session),remaining=(duration-session.elapsedMs%duration)%duration;
+  if(elapsedMs<remaining)return {...settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online),battleGroup:group};
+  if(remaining){
+   old=settleTeamArenaBuild(state,remaining,outcomeCaches,online);session=old.session;teamwork=old.teamwork;
+   for(const k of arenaFields)totals[k]+=old[k];
+  }
+  const factor=teamBoutMs(session)/GROUP_BOUT_MS;
+  session=startGroupSession(group,shared,teamwork.level,(state.settledAtMs+remaining)>>>0,{coinRemainder:(session.coinRemainder??0)*factor,teamworkRemainder:(session.teamworkRemainder??0)*factor});
+  elapsedMs-=remaining;
+ }
+ if(!session)session=startGroupSession(group,shared,teamwork.level,state.settledAtMs>>>0);
+ const run=ms=>{
+  const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.rank.grade]);
+  if(outcomeCaches&&!outcomeCaches.has(key))outcomeCaches.set(key,new Map());
+  const r=settleGroupSession(session,ms,outcomeCaches?.get(key));
+  group=awardGroupPractice(group,session.players,r.practiceMs);teamwork=awardTeamwork(teamwork,r.teamworkXP);session=r.session;
+  for(const k of arenaFields)totals[k]+=r[k];
+  for(const id of GROUP_IDS)practiceMs[id]+=r.practiceMs[id];
+  if(r.bouts){groupAnalytics.push(r.analytics);if(online){if(r.bouts!==1)throw new Error("Rank advances only at a completed live bout");session={...session,rank:advanceGroupRank(session.rank,r.victories?"victory":r.defeats?"defeat":"double_death")};}}
+ };
+ const result=()=>({...totals,session,battleGroup:group,teamwork,practiceMs,expertise:old?.expertise??state.expertise,autoFight:state.autoFight,
+  ...(old?.team?{team:old.team,managerTactics:old.managerTactics}:{}),...(old?.analytics?{analytics:old.analytics}:{}),...(groupAnalytics.length?{groupAnalytics}:{})});
+ if(online||JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level){
+  const remaining=(GROUP_BOUT_MS-session.elapsedMs%GROUP_BOUT_MS)%GROUP_BOUT_MS;
+  if(elapsedMs<remaining){run(elapsedMs);return result();}
+  if(remaining)run(remaining);
+  session={...session,players:desired,teamworkLevel:teamwork.level};elapsedMs-=remaining;
+ }
+ if(elapsedMs)run(elapsedMs);
+ return result();
+}
 function settleArenaBuild(state,elapsedMs,outcomeCaches,online=false){
+  if(state.battleGroup)return settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online);
   if(state.teamSecond)return settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online);
   let desired=desiredArenaPlayer(state);
   let autoFight=state.autoFight??initialAutoFight(desired.difficulty);
@@ -519,13 +565,14 @@ function settleUncappedWork(state, now, random, frozenEffort, xpRandom = random,
     const prize=settleArenaBuild(state,elapsedMs,outcomeCaches,online);
     productiveMs-=prize.downtimeMs;
     next.expertise=prize.expertise;
+    if(prize.battleGroup){next.battleGroup=prize.battleGroup;next.teamwork=prize.teamwork;}
     if(prize.team){next.teamSecond=prize.team.second;next.teamwork=prize.teamwork;if(prize.managerTactics)next.managerTactics=prize.managerTactics;}
     next.combatSession = prize.session;
     if(online){next.autoFight=prize.autoFight;if(prize.autoFight.stage!==(state.difficulties.fighting??0))next.difficulties={...state.difficulties,fighting:prize.autoFight.stage};}
     next.coins = safeAdd(state.coins, prize.coins);
     report.gainedCoins = prize.coins;
     if (prize.bouts || prize.downtimeMs) {
-      const { session: _session, expertise: _expertise, autoFight: _autoFight,team:_team,teamwork:_teamwork,managerTactics:_tactics,...arena } = prize;
+      const { session: _session, expertise: _expertise, autoFight: _autoFight,team:_team,teamwork:_teamwork,managerTactics:_tactics,battleGroup:_group,...arena } = prize;
       report.arena = arena;
     }
   }
@@ -735,7 +782,7 @@ function settleTransition(state, now, random, frozenEffort, stopAtArrival=false,
 
 
 /** Remaining transition time, bounded regardless of absent years. */
-export function arenaBoutProgress(state){const duration=teamBoutMs(state.combatSession,Boolean(state.managerTactics));return (state.combatSession?.elapsedMs??0)%duration/duration;}
+export function arenaBoutProgress(state){const duration=teamBoutMs(state.combatSession,Boolean(state.managerTactics),Boolean(state.battleGroup));return (state.combatSession?.elapsedMs??0)%duration/duration;}
 function finishingDuration(state){
   if(activityRewardCapped(state))return 0;
   if(state.activity==="fighting")return state.combatSession?
@@ -1066,7 +1113,8 @@ export function automateSettledProgress(outcome, reserve = {}, equipmentPolicy =
     const teamwork=activateTeamworkOnLogin(result.state.teamwork);
     result={...result,state:{...result.state,teamwork},teamworkLevelGained:teamwork.level-result.state.teamwork.level};
   }
-  if(result.state.managerTactics){
+  if(result.state.battleGroup){result={...result,state:{...result.state,battleGroup:activateGroupPractice(result.state.battleGroup)}};}
+  if(result.state.managerTactics&&!result.state.battleGroup){
     const a=activateTactics(result.state.managerTactics);
     result={...result,state:{...result.state,managerTactics:a.tactics},tacticAdvances:a.advances};
   }

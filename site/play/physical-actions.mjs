@@ -10,7 +10,7 @@ export const WEAPONS = Object.freeze({
   hammer: { move: "hammer", type: "blunt", range: 0, power: 16, recovery: 3 }
 });
 export const BASH = Object.freeze({ move: "shield_bash", type: "blunt", range: 0, power: 4, recovery: 3, flatScale: .70, gradeScale: .75 });
-export const ARMOUR_FACTOR = Object.freeze({ piercing: 0.8, slashing: 1.15, blunt: 0.45 });
+export const ARMOUR_FACTOR = Object.freeze({ piercing: 0.8, slashing: 1.15, blunt: 0.45, magic: 0.8 });
 export const AIM = Object.freeze({base:.72,dex:.012,skill:.004,closeBow:-.40,closeSpear:-.18,farBow:.12,reachSpear:.10,clearance:.12,minimum:.15,maximum:.96});
 export const GUARD = Object.freeze({block:.29,bluntBlock:.40,parry:.36,recoveringParry:.22,flatReduction:.35,openFactor:.15,counterChance:.15,reachBlockImpact:.85,blockImpact:.43,rangedBlockImpact:.55,bluntBlockImpact:1.0});
 // BAL-002: material absorbs each impact type differently. Multipliers act on
@@ -20,6 +20,7 @@ const MATERIAL_FACTORS=Object.freeze({
   leather:Object.freeze({piercing:1.20,slashing:1.35,blunt:1.0}),
   plate:Object.freeze({piercing:.80,slashing:1.0,blunt:.18})
 });
+const MAGIC_MATERIAL_FACTORS=Object.freeze({padded:1.25,leather:1.0,plate:.75});
 export const TACTICS=Object.freeze({slowApproach:.75,quickMobility:85,retreatLead:-3,shortSpearImpact:.80,constrainedSwing:.85,openSwing:1.08,guardOpenTurns:3,reachInterruptTurns:2,reachSpearImpact:1.18,daggerHandling:.75,farShotImpact:1.68,reachShotImpact:1.48,closeShotImpact:.60});
 // Grade handling is shared by combat and the intact-stat breakdown.
 export function handlingScale(piece) {
@@ -86,7 +87,7 @@ export function protection(target,type=null) {
   if (!target.armour.length) return (target.gear?.physicalReductionPct ?? 0)*(type?ARMOUR_FACTOR[type]:1);
   return target.armour.reduce((sum,item)=>{
     const family=item.itemId?.split(":")[1];
-    const factor=type?(MATERIAL_FACTORS[family]?.[type]??ARMOUR_FACTOR[type]):1;
+    const factor=type==="magic"?(MAGIC_MATERIAL_FACTORS[family]??ARMOUR_FACTOR.magic):type?(MATERIAL_FACTORS[family]?.[type]??ARMOUR_FACTOR[type]):1;
     return sum+(item.hp>0?item.protection*factor:0);
   },0);
 }
@@ -121,8 +122,8 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   // quarters, without paying the full recovery penalty for every swing.
   const clearanceRecovery=actor.loadout==="greatsword"?Math.max(0,constriction-1):constriction;
   actor.recovery=attack.recovery-1+clearanceRecovery;
-  if (attack.move === "shot") actor.arrows--;
-  const shortSpear = actor.loadout === "spear" && distance === 0;
+  if (attack.move === "shot"&&!actor.classId) actor.arrows--;
+  const shortSpear = attack.move === "thrust" && distance === 0;
   const obscuredShot = attack.ranged && distance > 0
     ? (2 - (terrain.lineOfSight ?? 2)) * 0.15 +
       (terrain.cover ?? 0) * (target.shield.hp > 0 ? 0.10 : 0.04) : 0;
@@ -154,12 +155,13 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   const vital = !block && !parry && guardRoll > 1-Math.max(0,.04+(equipped?activePiece.crit:0)-intactArmourSum(target,"critResist"));
   const penetration=equipped?activePiece.penetration*handling:0;
   const materialProtection=protection(target,attack.type)*(1-penetration);
-  const shotImpact=attack.ranged?(distance===2?TACTICS.farShotImpact:distance===1?TACTICS.reachShotImpact:TACTICS.closeShotImpact):1;
+  const shotImpact=attack.ranged&&attack.type!=="magic"?(distance===2?TACTICS.farShotImpact:distance===1?TACTICS.reachShotImpact:TACTICS.closeShotImpact):1;
   const blockImpact=attack.type==="blunt"?GUARD.bluntBlockImpact:attack.move==="thrust"&&distance===1?GUARD.reachBlockImpact:attack.ranged?GUARD.rangedBlockImpact:GUARD.blockImpact;
   // Separate material protection from grade resistance: equal-grade
   // equipment approximately cancels scaling, lower-grade armour does not.
   const resistance=intactArmourSum(target,"resistance");
-  const impact = Math.max(1, Math.round(base * shotImpact * (vital ? 1+Math.max(0,.65+(equipped?activePiece.critDamage:0)-intactArmourSum(target,"critReduction")) : 1) *
+  const classScale=(attack.damageScale??1)*(1+(actor.classBuff??0))*(1-(actor.classWeaken??0))*(1-(target.classGuard??0));
+  const impact = Math.max(1, Math.round(base * classScale * shotImpact * (vital ? 1+Math.max(0,.65+(equipped?activePiece.critDamage:0)-intactArmourSum(target,"critReduction")) : 1) *
     (block ? blockImpact : parry ? 0.35 : 1) *
     (1 - Math.min(80, materialProtection) / 100) /
     (1+resistance*(1-penetration)) - flatGuard(target) * GUARD.flatReduction));
@@ -173,7 +175,7 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   }
   if (intact && attack.move !== "dagger" && attack !== BASH && wear(actor.weapon, 3)) broken.push("attack weapon");
   if (block && target.shield.hp > 0) target.counter = attack.type !== "blunt" && guardRoll < GUARD.counterChance;
-  if (!block && !parry && damage >= 8 && attack.type !== "blunt") { target.bleed = Math.max(target.bleed, 2); onBleed(actor,target); }
+  if (!block && !parry && damage >= 8 && attack.type !== "blunt" && attack.type !== "magic") { target.bleed = Math.max(target.bleed, 2); onBleed(actor,target); }
   if (attack.type === "blunt" && (damage >= 8 || attack === BASH)) {
     target.stagger=1;
     // A heavy impact opens a guard without permanently breaking Masterwork.

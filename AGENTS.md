@@ -1,5 +1,9 @@
 # Agent instructions — Idle Game and public research library
 
+## Mobile-first selection rule — BUTTONS-001 (2026-11-27)
+
+**Owner-approved.** Public gameplay must use visible, touch-friendly buttons and meaningful icons for choices, not dropdowns. Race, main class, specialization, character and combat stance use accessible button groups, clear selected states, and tap targets at least 44 CSS pixels high. Keep icons understandable with labels or accessible names; no manual weapon/armour controls. Browsing a class path is a draft until specialization selection commits. Foldable panels remain appropriate for secondary information. Preserve the no-dropdown static and Chromium checks; archived legacy developer fixtures are not the public manager interface. Apply this to future gameplay UI, not only the current Battle Group editor.
+
 ## Mandatory research and simulation persistence — RESEARCH-SAVE-001 (2026-11-25)
 
 **Owner-approved; applies to chat, cw and codex. GitHub is the source of truth, not chat memory.** After every research or battle/game-system simulation session, including unsuccessful, negative, inconclusive or partial runs, save a durable, searchable record to the repository before reporting completion or moving to another task. Push meaningful milestones during long runs so a new chat can resume without reconstructing the conversation.

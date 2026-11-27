@@ -155,9 +155,11 @@ def check():
         game_parser.close()
         assert game_parser.lang == "en", "Game must declare English document language"
         assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
-        assert {"game","gladiatorsPanel","gladiatorsHeading","fighterButtons","weaponButtons","armourButtons","tacticButtons","currentWork","workXP","nextWork","battleFighters","arenaPlayers","arenaEnemies","arenaEnvironment","battleCalculation","battlePercent","progressPanel","progressHeading","progressFeed","resourceList","characterStatsPanel","loginReport"}.issubset(game_parser.ids), "Missing manager UI"
+        assert {"game","battleGroupPanel","battleGroupHeading","fighterButtons","raceChoice","mainClassChoice","specialClassChoice","tacticButtons","selectedClassProgress","currentWork","workXP","nextWork","battleFighters","arenaPlayers","arenaEnemies","arenaEnvironment","battleCalculation","battlePercent","progressPanel","progressHeading","progressFeed","resourceList","characterStatsPanel","loginReport"}.issubset(game_parser.ids), "Missing manager UI"
+        assert not {"weaponButtons","armourButtons"} & game_parser.ids, "Manual equipment controls must not return"
         assert not ({"activityChoices","queuePlanner","wagonQueue","smithBuy","itemGrade","itemQuality","armourChoice","teamFighterChoice"} & game_parser.ids), "Obsolete player controls"
-        assert "<select" not in game_html, "Manager uses buttons, not dropdowns"
+        assert not re.search(r"<select\b", game_html), "Public manager must use buttons, never dropdowns"
+        assert "classChoiceStatus" in game_parser.ids, "Class draft must be distinguishable from active class"
         assert "arena-art" not in game_html, "No unrelated generic arena painting"
         assert "battleCalculation" in game_html and "max=\"100\"" in game_html
         assert "manager-app.mjs" in game_html and "manager-ui.css" in game_html
