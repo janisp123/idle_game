@@ -36,7 +36,7 @@ export function clanStatBonuses(level,perLevel){const r=Object.fromEntries(CLAN_
 export function clanBonuses(c){const levels=c?.levels??{barracks:0,armoury:0,training:0,bank:0,portal:0},armoury=clanStatBonuses(levels.armoury,1),portal=clanStatBonuses(levels.portal,3);return {members:10+5*levels.barracks,xp:levels.training,coins:levels.bank,armoury,portal,combat:Object.fromEntries(CLAN_STATS.map(k=>[k,armoury[k]+portal[k]]))};}
 export const clanXpMultiplier=s=>s.arenaOnly&&s.activity==="fighting"?1+(s.alphaClan?.levels.training??0)/100:1;
 export const validClanCombat=b=>Boolean(b&&Object.keys(b).length===5&&CLAN_STATS.every(k=>count(b[k])&&b[k]<=50));
-export function clanSnapshot(c){return c?{bank:c.levels.bank,combat:clanBonuses(c).combat}:null;}
+export function clanSnapshot(c){if(!c)return null;const b={bank:c.levels.bank,combat:clanBonuses(c).combat};return b.bank||Object.values(b.combat).some(Boolean)?b:null;}
 export const validClanSnapshot=b=>Boolean(b&&Object.keys(b).length===2&&count(b.bank)&&b.bank<=20&&validClanCombat(b.combat));
 export function setClanPriority(c,id){if(!validAlphaClan(c)||!CLAN_CONSTRUCTION.includes(id))throw new RangeError("Invalid priority");return {...c,priority:id};}
 // At most one completion and one new start per observation. New work never

@@ -10,6 +10,7 @@ import {validGroupSnapshot,classWeapon,prepareClassActor,expireClassEffects,tryC
 export const TEAM_COMBAT_BALANCE=Object.freeze({maxRoster:7,maxRounds:PHYSICAL_RULES.turnLimit,
   rearSpace:3,interceptRecovery:1,focusWeight:2,healthWeight:1.5});
 import {validCombatAttributes,statInitiative} from "./stat-combat.mjs";
+import {validClanCombat} from "./alpha-clan.mjs";
 import {RAID_RULES_VERSION,RAID_MAX_ROUNDS,RAID_MONSTER_BALANCE,raidDefinition} from "./raid-rules.mjs";
 const alive=a=>a.hp>0;
 const gap=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
@@ -144,6 +145,10 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   if(bonus){
     if(![4,5,6,7,8,9,10].includes(rules)||![bonus.damage,bonus.defence].every(v=>Number.isFinite(v)&&v>=0&&v<=.10))throw new RangeError("Invalid raid combat bonus");
     for(const a of actors.filter(x=>x.side==="player")){a.raidBonusDamage=bonus.damage;a.raidBonusDefence=bonus.defence;}
+  }
+  for(const [side,b] of [["player",levels.playerClanBonus],["enemy",levels.enemyClanBonus]])if(b){
+    if(rules!==10||!validClanCombat(b))throw new RangeError("Invalid clan combat bonus");
+    for(const a of actors.filter(x=>x.side===side)){a.clanBonus=b;a.maxHP=Math.round(a.maxHP*(1+b.hp/100));a.hp=a.maxHP;}
   }
   const elimination=rules===ELIMINATION_RULES_VERSION;
   const maxRounds=raid?RAID_MAX_ROUNDS:elimination?ELIMINATION_MAX_ROUNDS:TEAM_COMBAT_BALANCE.maxRounds;

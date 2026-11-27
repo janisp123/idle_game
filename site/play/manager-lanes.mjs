@@ -17,7 +17,7 @@ import {blankArmourRequests,validArmourRequests,requestArmourSet,selectManagerWe
 import {blankTactics,validTactics,chooseTactic,validTacticSnapshot,activateTactics} from "./manager-tactics.mjs?v=manager-tactics-001";
 import {validRaidBuff} from "./raid-rules.mjs";
 import {validArenaPreferences} from "./arena-preferences.mjs";
-import {validAlphaClan} from "./alpha-clan.mjs";
+import {validAlphaClan,migrateAlphaClan} from "./alpha-clan.mjs";
 export const MANAGER_LANES_VERSION=4;
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 const validWork=id=>WORK_ROTATION.includes(id);
@@ -41,7 +41,8 @@ export function newManagerGame(now=Date.now(),firstWork="hunting"){
 }
 export function readManagerGame(value){
   try{
-    const raw=typeof value==="string"?JSON.parse(value):value;
+    let raw=typeof value==="string"?JSON.parse(value):value;
+    if(raw?.alphaClan?.version===1)raw={...raw,alphaClan:migrateAlphaClan(raw.alphaClan)};
     // Phase 2 prototype only accepts its own current timing profile; never
     // silently convert a legacy route or discard a paid combat cursor.
     if(!validManagerShape(raw)||raw.timingProfile!==TIMING_PROFILE)return null;

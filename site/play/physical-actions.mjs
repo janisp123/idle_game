@@ -142,7 +142,7 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   const cornerAim=tacticalActor(actor)&&isArrow(attack)?(COUNTERS.arrowTerrainAim[terrain.id]??0):0;
   const aim = AIM.base - closeCasting - cornerAim + kit.aim + (equipped?activePiece.accuracy*handling:0) + statAim(actor,target,attack.type) + (actor.skill - target.skill) * AIM.skill +
     (distance === 0 && bow ? AIM.closeBow : 0) + (distance===2&&bow?AIM.farBow:0) + (shortSpear ? AIM.closeSpear : attack.move==="thrust"&&distance===1?AIM.reachSpear:0) - obscuredShot - constriction * AIM.clearance * (actor.loadout==='greatsword'?1-.55*handlingScale(activePiece):1);
-  if (roll() >= Math.max(AIM.minimum, Math.min(AIM.maximum, aim))) {
+  if (roll() >= Math.max(AIM.minimum, Math.min(AIM.maximum, aim*(1+(actor.clanBonus?.accuracy??0)/100)))) {
     record(actor, target, "miss", { move: attack.move });
     return;
   }

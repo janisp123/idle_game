@@ -8,10 +8,10 @@ import { validTeamSession,startTeamSession,settleTeamSession,teamBoutMs,isCloneT
 import {captureCloneEnvelope} from "./clone-opponents.mjs?v=npc-parity-001";
 import {GROUP_IDS,validBattleGroup,groupSnapshots,awardGroupPractice,activateGroupPractice} from "./battle-group.mjs?v=group-001";
 import {advanceGroupRank} from "./battle-group-rank.mjs?v=group-005";
-import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession} from "./battle-group-timeline.mjs?v=raid-001";
+import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession,groupCoinRatio} from "./battle-group-timeline.mjs?v=raid-001";
 import {GROUP_COMBAT_RULES_VERSION} from "./group-counter-rules.mjs";
 import {raidCombatBonus,raidXpMultiplier} from "./raid-rules.mjs";
-import {clanXpMultiplier,applyClanRewards} from "./alpha-clan.mjs";
+import {clanXpMultiplier,applyClanRewards,clanSnapshot} from "./alpha-clan.mjs";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
 import {
@@ -481,6 +481,7 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
  const totals=Object.fromEntries(arenaFields.map(k=>[k,0])),practiceMs=Object.fromEntries(GROUP_IDS.map(id=>[id,0])),groupAnalytics=[];
  const shared=desiredArenaPlayer(state),rules=state.arenaOnly?10:GROUP_COMBAT_RULES_VERSION;
  const arenaFavorites=state.arenaOnly?(state.arenaPreferences?.favorites??[]):undefined;
+ const clanBuild=state.arenaOnly?clanSnapshot(state.alphaClan):null;
  const desired=groupSnapshots(group,shared,rules),bonus=state.arenaOnly?raidCombatBonus(state.raidBuff,state.settledAtMs):null;
  if(session&&session.timelineVersion!==GROUP_TIMELINE_VERSION){
   const duration=teamBoutMs(session),remaining=(duration-session.elapsedMs%duration)%duration;
@@ -493,9 +494,9 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
   session=startGroupSession(group,shared,teamwork.level,(state.settledAtMs+remaining)>>>0,{coinRemainder:(session.coinRemainder??0)*factor,teamworkRemainder:(session.teamworkRemainder??0)*factor,rules:online?rules:GROUP_COMBAT_RULES_VERSION,bonus:online?bonus:null,...(online&&arenaFavorites!==undefined?{arenaFavorites}:{})});
   elapsedMs-=remaining;
  }
- if(!session)session=startGroupSession(group,shared,teamwork.level,state.settledAtMs>>>0,{rules,bonus,...(arenaFavorites!==undefined?{arenaFavorites}:{})});
+ if(!session)session=startGroupSession(group,shared,teamwork.level,state.settledAtMs>>>0,{rules,bonus,...(arenaFavorites!==undefined?{arenaFavorites}:{}),...(clanBuild?{clanSnapshot:clanBuild}:{})});
  const run=ms=>{
-  const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.rank.grade,session.groupCombatRules??1,session.raidBonus??null,session.arenaFavorites??null]);
+  const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.rank.grade,session.groupCombatRules??1,session.raidBonus??null,session.arenaFavorites??null,session.clanSnapshot??null]);
   if(outcomeCaches&&!outcomeCaches.has(key))outcomeCaches.set(key,new Map());
   const r=settleGroupSession(session,ms,outcomeCaches?.get(key));
   contribute(r.victories,r.rewardUnits,r.rewardRatio,session.coinRemainder);
@@ -512,7 +513,10 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
   if(elapsedMs<remaining){run(elapsedMs);return result();}
   if(remaining)run(remaining);
   const {raidBonus:oldBonus,...rest}=session;
-  session={...rest,...(online||!state.arenaOnly?{players:desired,teamworkLevel:teamwork.level}:{}),...(online?{groupCombatRules:rules,...(arenaFavorites!==undefined?{arenaFavorites:[...arenaFavorites]}:{})}:{}),...([4,5,6,7,8,9,10].includes(online?rules:session.groupCombatRules)&&bonus?{raidBonus:bonus}:{})};elapsedMs-=remaining;
+  const oldRatio=groupCoinRatio(session);
+  session={...rest,...(online||!state.arenaOnly?{players:desired,teamworkLevel:teamwork.level}:{}),...(online?{groupCombatRules:rules,...(arenaFavorites!==undefined?{arenaFavorites:[...arenaFavorites]}:{})}:{}),...([4,5,6,7,8,9,10].includes(online?rules:session.groupCombatRules)&&bonus?{raidBonus:bonus}:{})};
+  if(online&&clanBuild){session={...session,clanSnapshot:clanBuild};session.coinRemainder=Math.floor(session.coinRemainder*groupCoinRatio(session)/oldRatio);}
+  elapsedMs-=remaining;
  }
  if(elapsedMs)run(elapsedMs);
  return result();

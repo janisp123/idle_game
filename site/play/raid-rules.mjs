@@ -36,7 +36,7 @@ export const raidAttackCategory=attack=>attack.type==="magic"?"magic":attack.ran
 export function raidResistanceFactor(resistance,fraction,category){
  return 1-((resistance==="mixed"||resistance===category||resistance==="physical"&&category!=="magic")?fraction:0);
 }
-export const combatDamageFactor=(actor,target,attack)=>(actor.encounterDamage??1)*(1+(actor.raidBonusDamage??0))*(1-(target.raidBonusDefence??0))*raidResistanceFactor(target.encounterResistance??"none",target.encounterResistFraction??0,raidAttackCategory(attack));
+export const combatDamageFactor=(actor,target,attack)=>(actor.encounterDamage??1)*(1+(actor.raidBonusDamage??0))*(1-(target.raidBonusDefence??0))*(1+(actor.clanBonus?.damage??0)/100)/(1+(target.clanBonus?.defence??0)/100)*raidResistanceFactor(target.encounterResistance??"none",target.encounterResistFraction??0,raidAttackCategory(attack));
 
 export const validRaidCombatBonus=b=>Boolean(b&&Object.keys(b).length===2&&RAID_LEVELS.some(level=>b.damage===RAID_CATALOG[level].bonus.damage&&b.defence===RAID_CATALOG[level].bonus.defence));
 export function raidCombatBonus(buff,now){const {damage,defence}=raidBonus(buff??null,now);return damage||defence?{damage,defence}:null;}

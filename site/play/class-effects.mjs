@@ -16,7 +16,7 @@ export const kitControlAllowed=(a,round)=>!kitActor(a)||round>=(a.classControlUn
 export const kitControlDuration=a=>kitActor(a)&&a.classId==="wellspring"?4:3;
 export function kitPactHeal(a,damage,round){
  if(!kitActor(a)||a.role!=="melee"||!a.kitPactUntil||round>=a.kitPactUntil||damage<=0||a.hp<=0||round<(a.nextHealRound??0))return 0;
- const amount=Math.min(a.maxHP-a.hp,Math.floor(a.maxHP*B.pactMaxHP),Math.floor(damage*a.kitPactFraction*healingFactor(a)));
+ const amount=Math.min(a.maxHP-a.hp,Math.floor(a.maxHP*B.pactMaxHP),Math.floor(damage*a.kitPactFraction*(1+(a.clanBonus?.healing??0)/100)*healingFactor(a)));
  if(amount<=0)return 0;a.hp+=amount;a.nextHealRound=round+2;return amount;
 }
 export const kitTargetDisrupted=a=>kitActor(a)&&a.kitDisruptUntil>0;
@@ -25,7 +25,7 @@ export function kitStatus(a,key,until,value,round,duration=3){
 }
 export function kitHeal(a,b,fraction,round){
  if(b.hp<=0||round<(b.nextHealRound??0))return 0;
- const amount=Math.min(b.maxHP-b.hp,Math.max(1,Math.round((b.encounterHealMaxHP??b.maxHP)*fraction*kitStrength(a)*healingFactor(b)*(a.classId==="lifekeeper"?B.mercyHealing:a.classId==="spiritcaller"?B.spiritHealing:1))));
+ const amount=Math.min(b.maxHP-b.hp,Math.max(1,Math.round((b.encounterHealMaxHP??b.maxHP)*fraction*kitStrength(a)*(1+(a.clanBonus?.healing??0)/100)*healingFactor(b)*(a.classId==="lifekeeper"?B.mercyHealing:a.classId==="spiritcaller"?B.spiritHealing:1))));
  if(amount<=0)return 0;b.hp+=amount;b.nextHealRound=round+2;return amount;
 }
 export function kitStrikeModifiers(a,b,attack,distance){
