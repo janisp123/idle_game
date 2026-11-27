@@ -1,9 +1,12 @@
-// CLASS-KITS-001 pilot, melee and mage batches: immutable class-specific data, no persistence or UI.
+// CLASS-KITS-001 pilot, melee, mage and healer batches: immutable class-specific data, no persistence or UI.
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 export const KIT_RULES_VERSION=3;
 const strike=(id,name,cooldown,scale,extra={})=>({id,name,type:"strike",cooldown,scale,...extra});
 const utility=(id,name,type,cooldown,extra={})=>({id,name,type,cooldown,...extra});
 const rows=[
+ ["lifekeeper","Mercy",utility("greater_mend","Greater Mend","ally_heal",3,{amount:.25,range:3}),utility("group_mend","Group Mend","group_heal",5,{amount:.11,range:3})],
+ ["wellspring","Resilience",utility("cleansing_mend","Cleansing Mend","ally_heal",4,{amount:.20,range:3,cleanse:true}),utility("sanctuary","Sanctuary","sanctuary",5,{range:2,duration:2})],
+ ["bloodsage","Blood Rite",utility("battle_mend","Battle Mend","ally_heal",4,{amount:.17,range:3,boon:.10}),utility("blood_pact","Blood Pact","blood_pact",5,{range:2,duration:4})],
  ["flameweaver","Fire Spread",strike("flame_burst","Flame Burst",4,1.10,{splash:.50}),strike("fire_ring","Fire Ring",5,.95,{range:0,splash:.60,utility:true})],
  ["gravebinder","Curse Affinity",strike("withering_curse","Withering Curse",4,1.05,{effect:"weaken"}),utility("grave_ward","Grave Ward","ward",6,{threshold:.65,amount:.26})],
  ["frostweaver","Quick Casting",strike("frost_bolt","Frost Bolt",4,1.04,{effect:"slow"}),strike("ice_bind","Ice Bind",6,.82,{effect:"control",utility:true})],
@@ -35,7 +38,8 @@ export const KIT_BALANCE=Object.freeze({daggerShieldImpact:.38,daggerShieldBlock
  focusAim:.16,focusDuration:3,slowDuration:2,disruptDuration:2,
  bladeBlockImpact:.62,bladeParryImpact:.53,lineReachImpact:1.15,lineContactImpact:.85,
  rageThreshold:.45,rageImpact:1.23,ragePursuit:.85,totemApproach:1.35,totemImpact:1.18,totemGuard:.18,scrapPlateImpact:1.18,
- flameImpact:.90,flameSplash:1.15,graveCurseImpact:1.18,frostImpact:.83,frostRecovery:-1,galeImpact:1.17,galeRecovery:1,siphonMaxHP:.12});
+ flameImpact:.90,flameSplash:1.15,graveCurseImpact:1.18,frostImpact:.83,frostRecovery:-1,galeImpact:1.17,galeRecovery:1,siphonMaxHP:.12,
+ mercyHealing:1.12,mercyImpact:.78,resilienceSlow:.75,pactDamageFraction:.25,pactMaxHP:.08,pactThreshold:.80,healEmergency:.35});
 for(const [id,k] of Object.entries(CLASS_KITS)){
  if(!GROUP_CLASSES[id]||k.primary.id===k.secondary.id||[k.primary,k.secondary].some(b=>!Number.isInteger(b.cooldown)||b.cooldown<2))throw Error("Invalid class kit "+id);
 }

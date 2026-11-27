@@ -1,15 +1,26 @@
 // Independent cooldowns and a single action budget for class kits.
 import {pilotKit,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
-import {kitStatus,kitHeal,kitControlAllowed} from "./class-effects.mjs";
+import {kitStatus,kitHeal,kitControlAllowed,kitControlDuration} from "./class-effects.mjs";
 import {resolveStrike,wound,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=kits-001";
 const dist=(a,b)=>Math.max(0,Math.abs(a.x-b.x)+Math.abs(a.y-b.y)-1);
 const ratio=a=>a.hp/a.maxHP;
 const alive=a=>a.hp>0;
+const harmful=x=>Boolean(x.bleed||x.stagger||x.classWeaken||x.kitSlowUntil||x.kitDisruptUntil);
+const alliesIn=(a,actors,range)=>actors.filter(x=>x.side===a.side&&alive(x)&&dist(a,x)<=range).sort((x,y)=>ratio(x)-ratio(y)||x.hp-y.hp);
+const healThreshold=a=>a.activeTactic==="defensive"?.90:a.activeTactic==="aggressive"?.58:.78;
+const healChoices=(a,actors,round,ability)=>alliesIn(a,actors,ability.range).filter(x=>ratio(x)<healThreshold(a)&&round>=(x.nextHealRound??0)).sort((x,y)=>ratio(x)-ratio(y));
+const threatened=(x,actors)=>actors.some(y=>y.side!==x.side&&alive(y)&&dist(x,y)<=1);
+const sanctuaryChoices=(a,actors,round,ability)=>alliesIn(a,actors,ability.range).filter(x=>!x.kitBraceUntil&&(harmful(x)||threatened(x,actors))&&ratio(x)<.85);
+const pactChoices=(a,actors,ability)=>alliesIn(a,actors,ability.range).filter(x=>x.role==="melee"&&!x.kitPactUntil&&ratio(x)<B.pactThreshold&&threatened(x,actors));
 function eligible(a,b,actors,round,ability,weapon,terrain){
  const d=dist(a,b),stance=a.activeTactic??"balanced",threshold=stance==="defensive"?.85:stance==="aggressive"?.50:.70;
  switch(ability.type){
  case "strike":return !a.counter&&d<=(ability.range??weapon.range)&&d>=(ability.minRange??0)&&(!ability.maxHP||ratio(a)<=ability.maxHP)&&
   (ability.effect!=="control"||kitControlAllowed(b,round))&&(ability.effect!=="bleed"||!b.bleed)&&(!ability.siphon||round>=(a.nextHealRound??0));
+ case "ally_heal":return healChoices(a,actors,round,ability).length>0;
+ case "group_heal":{const choices=healChoices(a,actors,round,ability);return choices.length>=2&&ratio(choices[0])>=B.healEmergency;}
+ case "sanctuary":return sanctuaryChoices(a,actors,round,ability).length>0;
+ case "blood_pact":return pactChoices(a,actors,ability).length>0;
  case "brace":return !a.kitBraceUntil&&actors.some(x=>x.side!==a.side&&alive(x)&&dist(a,x)<=1&&["ironfist","scrapbreaker","dreadguard","linebreaker","frostweaver"].includes(x.classId));
  case "totem":return !a.kitTotemUntil&&(stance==="balanced"?d>weapon.range&&!a.kitSlowUntil:d<=weapon.range+1);
  case "disrupt":return d===0&&!b.kitDisruptUntil&&!b.stagger;
@@ -35,7 +46,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
    if(ability.effect==="slow"){actual.kitSlowUntil=Math.max(actual.kitSlowUntil??0,round+B.slowDuration+1);record(actual,"slow");}
    if(ability.effect==="bleed"){actual.bleed=Math.max(actual.bleed,3);actual.bleedSource=a.id;record(actual,"deep_wound");}
    if(ability.effect==="weaken"){kitStatus(actual,"classWeaken","weakenUntil",.18*s,round);record(actual,"weaken");}
-   if(ability.effect==="control"&&kitControlAllowed(actual,round)){actual.stagger=Math.max(actual.stagger,1);actual.classControlUntil=round+3;record(actual,"control");}
+   if(ability.effect==="control"&&kitControlAllowed(actual,round)){actual.stagger=Math.max(actual.stagger,1);actual.classControlUntil=round+kitControlDuration(actual);record(actual,"control");}
   }
   if(clean&&ability.siphon){
    const fraction=Math.min(B.siphonMaxHP,hit*ability.siphon/a.maxHP);
@@ -54,6 +65,26 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   return true;
  }
  switch(ability.type){
+ case "ally_heal":case "group_heal":{
+  const targets=healChoices(a,actors,round,ability).slice(0,ability.type==="group_heal"?3:1);
+  let used=false;
+  for(const x of targets){
+   const amount=kitHeal(a,x,ability.amount,round);if(!amount)continue;
+   used=true;record(x,"heal",{healing:amount});
+   if(ability.cleanse&&harmful(x)){x.bleed=0;x.stagger=0;x.classWeaken=0;x.weakenUntil=0;x.kitSlowUntil=0;x.kitDisruptUntil=0;record(x,"cleanse");}
+   if(ability.boon){kitStatus(x,"classBuff","buffUntil",ability.boon*s,round);record(x,"buff",{magnitude:x.classBuff});}
+  }
+  return used;
+ }
+ case "sanctuary":{
+  const x=sanctuaryChoices(a,actors,round,ability)[0];if(!x)return false;
+  x.kitBraceUntil=round+ability.duration+1;record(x,"sanctuary",{until:x.kitBraceUntil});return true;
+ }
+ case "blood_pact":{
+  const x=pactChoices(a,actors,ability)[0];if(!x)return false;
+  x.kitPactUntil=round+ability.duration+1;x.kitPactFraction=B.pactDamageFraction*s;
+  record(x,"blood_pact",{until:x.kitPactUntil,fraction:x.kitPactFraction});return true;
+ }
  case "brace":a.kitBraceUntil=round+ability.duration+1;record(a,"brace",{until:a.kitBraceUntil});return true;
  case "totem":a.kitTotemMode=a.activeTactic??"balanced";a.kitTotemUntil=round+ability.duration+1;record(a,"totem",{mode:a.kitTotemMode,until:a.kitTotemUntil});return true;
  case "disrupt":b.kitDisruptUntil=round+B.disruptDuration+1;b.targetId=null;record(b,"misdirection");return true;
@@ -79,7 +110,8 @@ export function tryKitAction(a,b,actors,round,weapon,ctx){
  const stance=a.activeTactic??"balanced";
  // Secondary utility first when defensive or clearly needed. Aggressive
  // prioritizes actual attacks, except when a pursuit ability is the legal action.
- const secondaryFirst=stance==="defensive"||stance==="balanced"&&(kit.secondary.type!=="strike"||kit.secondary.utility);
+ const urgent=kit.primary.type==="ally_heal"&&healChoices(a,actors,round,kit.primary).some(x=>ratio(x)<B.healEmergency);
+ const secondaryFirst=!urgent&&(stance==="defensive"||stance==="balanced"&&(kit.secondary.type!=="strike"||kit.secondary.utility));
  for(const slot of secondaryFirst?["secondary","primary"]:["primary","secondary"]){
   const ability=kit[slot];if(round<a.kitReady[slot]||!eligible(a,b,actors,round,ability,weapon,ctx.terrain))continue;
   if(!perform(a,b,actors,round,ability,weapon,ctx))continue;

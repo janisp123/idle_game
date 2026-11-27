@@ -3,6 +3,7 @@
 import {GROUP_CLASSES,isGroupClass} from "./battle-group-classes.mjs?v=group-001";
 import {WEAPONS,resolveStrike,wound,attackComponents,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=kits-001";
 import {COUNTERS,tacticalActor} from "./group-counter-rules.mjs";
+import {kitControlAllowed,kitControlDuration} from "./class-effects.mjs";
 export const GROUP_ACTION_BALANCE=Object.freeze({supportRange:3,maxTargets:3,healFraction:.16,healGradeFactor:.018,
  buff:.18,guard:.24,weaken:.16,duration:3,controlImmunity:3,masteryMin:.75,masteryMax:1});
 const B=GROUP_ACTION_BALANCE;
@@ -95,7 +96,7 @@ export function tryClassAction(a,target,actors,round,ctx){
  if(hit){
   if(config.open)actual.guardOpen=Math.max(actual.guardOpen,2);
   if(config.weaken)status(actual,"classWeaken","weakenUntil",B.weaken*s,round);
-  if(config.control&&round>=(actual.classControlUntil??0)){actual.stagger=Math.max(actual.stagger,1);actual.classControlUntil=round+B.controlImmunity;}
+  if(config.control&&round>=(actual.classControlUntil??0)&&kitControlAllowed(actual,round)){actual.stagger=Math.max(actual.stagger,1);actual.classControlUntil=round+kitControlDuration(actual);}
   if(config.guard)status(a,"classGuard","guardUntil",B.guard*.65*s,round);
   if(config.buff)status(a,"classBuff","buffUntil",B.buff*s,round);
   if(config.heal&&wounded.length)heal(a,wounded[0],.6,(x,y,t,e)=>record(y,t,e),round);

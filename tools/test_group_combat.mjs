@@ -71,12 +71,12 @@ test("pilot kits use independent cooldowns, a single action and deterministic le
    last[key]=ev.round;assert.ok(!acted.has(ev.actor+":"+ev.round));acted.add(ev.actor+":"+ev.round);seen.add(snapshot.classId);
   }
  }
- assert.deepEqual([...seen].sort(),ids.sort());
+ assert.deepEqual([...seen].filter(id=>ids.includes(id)).sort(),ids.sort());
 });
 
 import {fighter} from "../site/play/physical-actions.mjs";
 import {prepareClassActor,classWeapon} from "../site/play/battle-group-actions.mjs";
-import {prepareKitActor,expireKitEffects,kitStrikeModifiers,kitControlAllowed,kitApproach} from "../site/play/class-effects.mjs";
+import {prepareKitActor,expireKitEffects,kitStrikeModifiers,kitControlAllowed,kitApproach,kitPactHeal,kitControlDuration} from "../site/play/class-effects.mjs";
 import {tryKitAction} from "../site/play/class-ability-policy.mjs";
 const meleeBatch=["blademaster","linebreaker","ragebreaker","ironfist","scrapbreaker"];
 test("five melee kits have distinct effects, bounded cooldowns and real actions at maximum build",()=>{
@@ -154,4 +154,45 @@ test("mage passives and abilities enforce splash geometry, ward expiry, control 
  frost.recovery=0;frost.kitReady.secondary=1;assert.ok(use(frost,dagger,[frost,dagger],2));assert.ok(!events.some(x=>x.type==="control"));
  gale.hp=Math.floor(gale.maxHP*.4);const before=gale.hp;assert.ok(use(gale,tank,[gale,tank],1));const heal=events.find(x=>x.type==="heal");
  assert.ok(heal&&heal.healing>0);assert.equal(gale.hp-before,heal.healing);assert.ok(heal.healing<=Math.max(1,Math.round(heal.fromDamage*.35)));assert.ok(heal.healing<=Math.round(gale.maxHP*.12));
+});
+
+const healerBatch=["lifekeeper","wellspring","bloodsage"];
+test("three healer kits use independent cooldowns and one action per round in max-only battles",()=>{
+ const p=roster([...healerBatch,"oathkeeper","blademaster","linebreaker","longshot"]),q=roster(["frostweaver","galescourge","trickblade","scrapbreaker","grovewarden","longshot","gravebinder"]);
+ const seen=new Set();
+ for(const arena of ARENAS)for(let i=0;i<8;i++){
+  const seed=20261301+i*1009,r=resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3});
+  assert.deepEqual(r,resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3}));
+  const last={},acted=new Set();
+  for(const ev of r.events){
+   for(const v of Object.values(ev.vitals))assert.ok(Number.isInteger(v.hp)&&v.hp>=0&&v.hp<=v.maxHP);
+   if(ev.type!=="class_ability"||!ev.slot)continue;
+   const [side,j]=ev.actor.split(":"),id=(side==="player"?p:q)[Number(j)].classId,ability=CLASS_KITS[id][ev.slot],key=ev.actor+":"+ev.slot;
+   assert.equal(ev.ability,ability.id);assert.ok(last[key]===undefined||ev.round-last[key]>=ability.cooldown);
+   assert.ok(!acted.has(ev.actor+":"+ev.round));last[key]=ev.round;acted.add(ev.actor+":"+ev.round);seen.add(id);
+  }
+ }
+ for(const id of healerBatch)assert.ok(seen.has(id),"no real ability "+id);
+});
+test("healers rescue before group healing, respect recipient window, cleanse, sanctuary and bounded melee pact",()=>{
+ const ids=[...healerBatch,"oathkeeper","blademaster","linebreaker","trickblade"],snap=roster(ids);
+ const mk=(id,side,x,y)=>prepareKitActor(prepareClassActor({...fighter(snap[ids.indexOf(id)],side),groupCombatRules:3,id:side+":"+id,x,y,kitRound:1,activeTactic:"balanced",retreats:2,approach:0}));
+ const life=mk("lifekeeper","player",0,0),well=mk("wellspring","player",0,1),blood=mk("bloodsage","player",0,2);
+ const tank=mk("oathkeeper","player",1,0),blade=mk("blademaster","player",1,2),line=mk("linebreaker","player",2,0),enemy=mk("trickblade","enemy",2,2);
+ const events=[],ctx={terrain:ARENAS[0],roll:()=>.5,speedRoll:()=>1,record:(x,y,type,extra={})=>events.push({x,y,type,...extra}),intercept:(x,y)=>y,move:()=>false};
+ const actors=[life,well,blood,tank,blade,line,enemy],use=(x,round)=>{events.length=0;x.kitRound=round;return tryKitAction(x,enemy,actors,round,classWeapon(x),ctx);};
+ tank.hp=Math.floor(tank.maxHP*.2);blade.hp=Math.floor(blade.maxHP*.5);line.hp=0;
+ assert.ok(use(life,1));assert.ok(events.some(x=>x.ability==="greater_mend"&&x.type==="heal"&&x.y===tank));
+ assert.equal(tank.nextHealRound,3);assert.equal(line.hp,0);
+ tank.hp=Math.floor(tank.maxHP*.6);life.hp=Math.floor(life.maxHP*.6);life.recovery=0;
+ assert.ok(use(life,2));assert.ok(events.some(x=>x.ability==="group_mend"));assert.ok(events.filter(x=>x.type==="heal").length<=3);assert.ok(!events.some(x=>x.type==="heal"&&(x.y===tank||x.y===line)));
+ blade.hp=Math.floor(blade.maxHP*.2);blade.nextHealRound=0;blade.bleed=2;blade.stagger=1;blade.classWeaken=.1;blade.kitSlowUntil=8;
+ assert.ok(use(well,3));assert.ok(events.some(x=>x.type==="cleanse"&&x.y===blade));assert.equal(blade.bleed+blade.stagger+blade.classWeaken+blade.kitSlowUntil,0);
+ well.recovery=0;blade.hp=Math.floor(blade.maxHP*.5);
+ assert.ok(use(well,4));assert.ok(events.some(x=>x.type==="sanctuary"));const ward=events.find(x=>x.type==="sanctuary").y;assert.equal(kitControlAllowed(ward,5),false);expireKitEffects(ward,7);assert.equal(kitControlAllowed(ward,7),true);
+ assert.equal(kitControlDuration(well),4);
+ tank.hp=tank.maxHP;life.hp=life.maxHP;blade.hp=Math.floor(blade.maxHP*.5);blade.nextHealRound=0;
+ assert.ok(use(blood,5));assert.ok(events.some(x=>x.type==="blood_pact"&&x.y===blade));
+ const before=blade.hp,heal=kitPactHeal(blade,100,5);assert.ok(heal>0&&heal<=25&&heal<=Math.floor(blade.maxHP*.08));assert.equal(blade.hp,before+heal);
+ assert.equal(kitPactHeal(blade,100,6),0);assert.equal(kitPactHeal(blade,0,7),0);expireKitEffects(blade,10);assert.equal(kitPactHeal(blade,100,10),0);
 });

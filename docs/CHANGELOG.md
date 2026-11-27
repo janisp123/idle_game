@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — CLASS-KITS-001 batch C
+
+CLASS-KITS-001 batch C candidate — Owner authorized continuation 2026-11-27. Three healer kits, shared bounded ally healing/cleanse/sanctuary/melee pact. Prior mage head 3d70d59 website 168/169 tests: both mage tests passed; pilot fixture now also contains Flameweaver, old exact cohort assertion failed. Fixed cohort coverage assertion (all events still checked). [Failed-head diagnostic raw 6960 screen](mechanics/CLASS_KITS_MAGE_SCREEN_20261127.md) preserved; mage stack 84/120, not final. 22/31 kits; nine remaining. Next validate corrected head, save raw CI screen, support batch. No merge/deploy.
+
 ## 2026-11-27 — CLASS-KITS-001 batch B
 
 CLASS-KITS-001 batch B candidate — Owner authorized continuation 2026-11-27. Four mage kits with bounded fire splash, curse conditional impact, casting recovery tradeoffs, control immunity and actual-damage-linked healing. Melee candidate ea3d509 website passed 167 tests and mobile/desktop browser; [saved 6960-bout screen](mechanics/CLASS_KITS_MELEE_SCREEN_20261127.md): mage stack 83/120, ranged 14/120, melee 35/120. Six prior workflows passed when recorded; endgame workflow still running at observation. 19/31 kits; 12 remaining. Next validate batch B, preserve raw CI screen, then dedicated healers. No merge or deployment.

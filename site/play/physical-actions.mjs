@@ -1,6 +1,6 @@
 import { dodgeChance } from "./armour.mjs?v=bal-002";
 import {COUNTERS,tacticalActor,isArrow,intactTank} from "./group-counter-rules.mjs";
-import {kitStrikeModifiers,kitStatus,kitControlAllowed} from "./class-effects.mjs";
+import {kitStrikeModifiers,kitStatus,kitControlAllowed,kitControlDuration,kitPactHeal} from "./class-effects.mjs";
 import {kitActor,KIT_BALANCE} from "./class-kits.mjs";
 // Pure provisional arena rules. Distances, injuries and wear are game abstractions.
 export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 5 });
@@ -206,7 +206,7 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
     const newControl=kitActor(actor)&&["ironfist","scrapbreaker"].includes(actor.classId);
     if(!kitActor(target)||(!target.kitBraceUntil&&!newControl)||kitControlAllowed(target,actor.kitRound??1)){
       target.stagger=1;
-      if(newControl&&kitActor(target))target.classControlUntil=(actor.kitRound??1)+3;
+      if(newControl&&kitActor(target))target.classControlUntil=(actor.kitRound??1)+kitControlDuration(target);
     }
     // A heavy impact opens a guard without permanently breaking Masterwork.
     if(attack.move==="hammer")target.guardOpen=TACTICS.guardOpenTurns;
@@ -219,4 +219,8 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   }
   record(actor, target, block ? "block" : parry ? "parry" : vital ? "finisher" : "hit",
     { damage, move: attack.move, broken, defenseSkill: block ? "shield_block" : parry ? "blade_guard" : null });
+  if(!block&&!parry&&attack.type!=="magic"&&!attack.ranged){
+    const healing=kitPactHeal(actor,damage,actor.kitRound??1);
+    if(healing)record(actor,actor,"heal",{healing,fromDamage:damage,source:"blood_pact"});
+  }
 }

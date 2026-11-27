@@ -2,22 +2,28 @@
 import {kitActor,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
 export function prepareKitActor(a){
  if(!kitActor(a))return a;
- return {...a,kitReady:{primary:1,secondary:1},kitStationary:0,kitFocusUntil:0,kitSlowUntil:0,kitDisruptUntil:0,kitBraceUntil:0,kitTotemUntil:0,kitTotemMode:null};
+ return {...a,kitReady:{primary:1,secondary:1},kitStationary:0,kitFocusUntil:0,kitSlowUntil:0,kitDisruptUntil:0,kitBraceUntil:0,kitTotemUntil:0,kitTotemMode:null,kitPactUntil:0,kitPactFraction:0};
 }
 export function expireKitEffects(a,round){
  if(!kitActor(a))return;
- for(const key of ["kitFocusUntil","kitSlowUntil","kitDisruptUntil","kitBraceUntil","kitTotemUntil"])if(round>=a[key])a[key]=0;
+ for(const key of ["kitFocusUntil","kitSlowUntil","kitDisruptUntil","kitBraceUntil","kitTotemUntil","kitPactUntil"])if(round>=a[key])a[key]=0;
 }
 export function markKitMovement(a){if(kitActor(a)){a.kitStationary=0;a.kitFocusUntil=0;}}
-export const kitApproach=a=>!kitActor(a)?1:(a.classId==="swiftblade"?B.swiftPursuit:a.classId==="ragebreaker"?B.ragePursuit:1)*(a.kitSlowUntil>0?.5:1)*(a.kitTotemUntil>0&&a.kitTotemMode==="balanced"?B.totemApproach:1);
+export const kitApproach=a=>!kitActor(a)?1:(a.classId==="swiftblade"?B.swiftPursuit:a.classId==="ragebreaker"?B.ragePursuit:1)*(a.kitSlowUntil>0?(a.classId==="wellspring"?B.resilienceSlow:.5):1)*(a.kitTotemUntil>0&&a.kitTotemMode==="balanced"?B.totemApproach:1);
 export const kitControlAllowed=(a,round)=>!kitActor(a)||round>=(a.classControlUntil??0)&&round>=(a.kitBraceUntil??0);
+export const kitControlDuration=a=>kitActor(a)&&a.classId==="wellspring"?4:3;
+export function kitPactHeal(a,damage,round){
+ if(!kitActor(a)||a.role!=="melee"||!a.kitPactUntil||round>=a.kitPactUntil||damage<=0||a.hp<=0||round<(a.nextHealRound??0))return 0;
+ const amount=Math.min(a.maxHP-a.hp,Math.floor(a.maxHP*B.pactMaxHP),Math.floor(damage*a.kitPactFraction));
+ if(amount<=0)return 0;a.hp+=amount;a.nextHealRound=round+2;return amount;
+}
 export const kitTargetDisrupted=a=>kitActor(a)&&a.kitDisruptUntil>0;
 export function kitStatus(a,key,until,value,round,duration=3){
  a[key]=Math.min(.40,Math.max(a[key]??0,value));a[until]=Math.max(a[until]??0,round+duration);
 }
 export function kitHeal(a,b,fraction,round){
  if(b.hp<=0||round<(b.nextHealRound??0))return 0;
- const amount=Math.min(b.maxHP-b.hp,Math.max(1,Math.round(b.maxHP*fraction*kitStrength(a))));
+ const amount=Math.min(b.maxHP-b.hp,Math.max(1,Math.round(b.maxHP*fraction*kitStrength(a)*(a.classId==="lifekeeper"?B.mercyHealing:1))));
  if(amount<=0)return 0;b.hp+=amount;b.nextHealRound=round+2;return amount;
 }
 export function kitStrikeModifiers(a,b,attack,distance){
@@ -46,6 +52,7 @@ export function kitStrikeModifiers(a,b,attack,distance){
  if(a.classId==="ironfist"&&a.kitTotemUntil>0&&a.kitTotemMode==="aggressive")m.impact*=1+(B.totemImpact-1)*s;
  if(b.classId==="ironfist"&&b.kitTotemUntil>0&&b.kitTotemMode==="defensive")m.impact*=1-B.totemGuard*t;
  if(a.classId==="scrapbreaker"&&attack.type==="blunt"&&plate&&a.weapon.hp>0)m.impact*=1+(B.scrapPlateImpact-1)*s;
+ if(a.classId==="lifekeeper")m.impact*=B.mercyImpact;
  if(attack.type==="magic"){
   if(a.classId==="flameweaver")m.impact*=B.flameImpact;
   if(a.classId==="gravebinder"&&b.classWeaken>0)m.impact*=1+(B.graveCurseImpact-1)*s;
