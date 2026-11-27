@@ -4,6 +4,7 @@
 
 | ID | Date | Approved by | Decision | Status |
 | --- | --- | --- | --- | --- |
+| CLASS-KITS-001 | 2026-11-27 | Owner | One passive and two fixed automatic cooldown abilities per class, using existing class mastery and stances. No mana, manual skill selection, separate skill points/XP, additional roster slots or currencies. Preserve situational counters and max-only balance gate. Specific effects are candidates. | Approved direction; plan recorded |
 | CLASS-TERRAIN-001 | 2026-11-27 | Owner | Pronounced terrain-specific advantages, especially close-range dagger assassins vs light armour and open-field archers vs confined terrain. Every specialization has independent info about ability, weapon/armour, strengths/weaknesses and best/worst terrain. | Approved; started in PR #200 |
 | GROUP-COUNTERS-001 | 2026-11-27 | Owner | Each class has natural counters and vulnerabilities. Tank shields counter arrows, melee pressures backline, magic counters heavy armour; healers/support/summoners have distinct roles, terrain/stances matter. No forced roster mix. Max-only tests until accepted. | Approved; started |
 | ARENA-ONLY-001 | 2026-11-27 | Owner | Only coins and combat XP; no noncombat progression, gathering, crafting, resource inventory or material tribute. Every purchasable upgrade and future clan donation uses coins; XP is not spendable. Preserve earned progress; freeze historical noncombat skill levels. | Approved; started |
