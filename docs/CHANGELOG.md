@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — INDIVIDUAL-STATS-001 STARTED
+
+INDIVIDUAL-STATS-001 — owner approved individual combat attributes, six stats, specialization-specific starting values and growth, no mana, modular tuning without unnecessary abstractions. First increment: pure 31-profile registry, exact weighted productive-time effort, configurable diminishing per-point costs, tests. Legacy account attributes and live combat unchanged until explicit versioned integration. Proposed 100-point start, 100% weights, legacy 100 XP/h and cost curve are provisional. Next: per-slot/per-specialization earned and active effort, frozen combat snapshot v4, NPC parity, six-stat derived effects, migration, UI and alpha max tool; then fresh balance simulations. No claims of live individual growth yet.
+
 ## 2026-11-27 — CLASS-GUIDE-002 / FANTASY-THEME-001
 
 CLASS-GUIDE-002 / FANTASY-THEME-001 — Owner approved 2026-11-27: actual kit information for all specializations, stable general README, original classic fantasy MMORPG-inspired landing and manager styling (no imported Lineage II assets). No gameplay/balance changes. Preserve 44px controls and original hero painting. Browser tests compare names/cooldowns against registry for every class; final CI and deployment pending.

@@ -279,3 +279,35 @@ test("summoner effects are bounded, use existing fighters and siege has a paid d
  assert.equal(forge.kitReady.secondary,8);forge.recovery=0;assert.ok(use(forge,3));assert.ok(events.some(x=>x.type==="siege_release"));assert.ok(foe.hp<before);assert.ok(events.filter(x=>x.type==="splash").length<=2);assert.ok(!events.some(x=>x.type==="splash"&&x.y===far));assert.equal(forge.kitSiege,null);
  forge.recovery=0;forge.kitReady.secondary=1;assert.ok(use(forge,8));foe.x=6;forge.recovery=0;assert.ok(use(forge,10,near));assert.ok(events.some(x=>x.type==="siege_fizzle"));assert.ok(!events.some(x=>x.type==="hit"||x.type==="splash"));assert.equal(forge.kitSiege,null);
 });
+
+import {CHARACTER_ATTRIBUTE_IDS,CHARACTER_ATTRIBUTE_EFFECTS,CHARACTER_CLASS_PROFILES,CHARACTER_ATTRIBUTE_BALANCE,blankCharacterEffort,validCharacterEffort,awardCharacterEffort,characterAttributeProgress,characterAttributes} from "../site/play/character-attributes.mjs";
+test("individual attribute profiles cover all classes with equal budgets and distinct distributions",()=>{
+ const ids=CHARACTER_ATTRIBUTE_IDS;
+ assert.deepEqual(ids,["STR","DEX","CON","INT","WIT","MEN"]);
+ assert.deepEqual(Object.keys(CHARACTER_CLASS_PROFILES).sort(),[...GROUP_CLASS_IDS].sort());
+ const bases=new Set(),weights=new Set();
+ for(const [id,p] of Object.entries(CHARACTER_CLASS_PROFILES)){
+  assert.equal(Object.values(p.base).reduce((a,b)=>a+b,0),100);assert.equal(Object.values(p.growth).reduce((a,b)=>a+b,0),100);
+  assert.ok(Object.isFrozen(p)&&Object.isFrozen(p.base)&&Object.isFrozen(p.growth));
+  assert.deepEqual(characterAttributes(id,blankCharacterEffort()),p.base);
+  assert.ok(!bases.has(JSON.stringify(p.base)));bases.add(JSON.stringify(p.base));
+  assert.ok(!weights.has(JSON.stringify(p.growth)));weights.add(JSON.stringify(p.growth));
+ }
+ assert.ok(CHARACTER_CLASS_PROFILES.longshot.growth.DEX>CHARACTER_CLASS_PROFILES.longshot.growth.STR);
+ assert.ok(CHARACTER_CLASS_PROFILES.galescourge.growth.INT>CHARACTER_CLASS_PROFILES.galescourge.growth.WIT);
+ assert.ok(CHARACTER_CLASS_PROFILES.frostweaver.growth.WIT>CHARACTER_CLASS_PROFILES.frostweaver.growth.INT);
+ assert.ok(!Object.values(CHARACTER_ATTRIBUTE_EFFECTS).join(" ").toLowerCase().includes("mana"));
+});
+test("individual attribute effort is additive, isolated, monotone, and bounded by safe integers",()=>{
+ const zero=blankCharacterEffort(),hour=3600000;
+ for(const id of GROUP_CLASS_IDS){
+  const a=awardCharacterEffort(zero,id,12345),b=awardCharacterEffort(a,id,hour-12345),whole=awardCharacterEffort(zero,id,hour);
+  assert.deepEqual(b,whole);assert.deepEqual(zero,blankCharacterEffort());assert.equal(Object.values(whole).reduce((a,b)=>a+b,0),hour*100);
+  const p=characterAttributeProgress(id,whole);assert.ok(Math.abs(Object.values(p).reduce((n,v)=>n+v.xp,0)-CHARACTER_ATTRIBUTE_BALANCE.xpPerProductiveHour)<1e-9);
+  const later=characterAttributeProgress(id,awardCharacterEffort(whole,id,hour*4320));
+  for(const key of CHARACTER_ATTRIBUTE_IDS){assert.ok(later[key].value>=p[key].value);assert.ok(later[key].progressPercent>=0&&later[key].progressPercent<100);}
+ }
+ const archer=awardCharacterEffort(zero,"longshot",hour*100),mage=awardCharacterEffort(zero,"galescourge",hour*100);
+ assert.ok(archer.DEX>archer.INT&&mage.INT>mage.DEX);
+ assert.throws(()=>awardCharacterEffort(zero,"longshot",-1));assert.throws(()=>awardCharacterEffort(zero,"longshot",Number.MAX_SAFE_INTEGER));assert.throws(()=>characterAttributes("invalid",zero));assert.equal(validCharacterEffort({...zero,END:0}),false);
+});
