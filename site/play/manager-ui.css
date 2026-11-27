@@ -59,3 +59,6 @@ dialog::backdrop{background:#080605cc}dialog button{width:100%}footer{text-align
 
 /* CLAN-BUILDINGS-001 */
 .clan-buildings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.clan-building{min-width:0;border:1px solid currentColor;border-radius:6px;padding:10px}.clan-building h3{margin:0 0 6px}.clan-building button,#clanJoinRaid{width:100%;min-height:44px}.clan-building p{overflow-wrap:anywhere}@media(max-width:450px){.clan-buildings{grid-template-columns:minmax(0,1fr)}}
+
+/* COMING-SOON-001: static previews use the same collapsible navigation. */
+.future-panel summary,.future-clan-panel summary{min-height:44px;box-sizing:border-box;cursor:pointer;overflow-wrap:anywhere}.future-status{font:600 11px system-ui,sans-serif;color:#b9a48c;margin-left:8px;white-space:nowrap}.future-clan-panel{border-top:1px solid #584638;margin-top:14px;padding-top:10px}.world-boss-preview{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}.world-boss-preview li{border:1px solid #584638;border-radius:6px;padding:9px 10px;color:#e6c99e;background:#221c16;overflow-wrap:anywhere}

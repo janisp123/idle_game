@@ -7,7 +7,7 @@
 <title>The Long Vigil — Play</title>
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./game.css">
-<link rel="stylesheet" href="./manager-ui.css?v=clan-buildings-001">
+<link rel="stylesheet" href="./manager-ui.css?v=coming-soon-001">
 <link rel="stylesheet" href="./fantasy-ui.css?v=raid-001">
 <script type="importmap">
 {
@@ -99,7 +99,8 @@
 <p id="battleResult" class="quiet arena-last-result" aria-live="polite">No completed battles yet.</p>
 </section>
 <details id="raidPanel" class="manager-card stats-card"><summary>Raid bosses</summary><p id="raidBuff" class="raid-blessing"></p><p class="quiet">Choose a raid. Your team fights automatically, then returns to the arena. One blessing lasts 24 hours; lower raids cannot refresh higher blessings.</p><div id="raidChoices" class="raid-choices"></div><p id="raidLast" class="quiet" role="status"></p></details>
-<details id="alphaClanPanel" class="manager-card stats-card" aria-labelledby="clanHeading"><summary id="clanHeading">✦ Clan — The Ashen Covenant</summary><p class="quiet">Alpha test clan · Automatically joined on login. Your clan progress is local to this browser; no shared roster or treasury yet.</p><p id="clanMembership" role="status" class="quiet">Loading clan membership…</p><div class="line"><span>Local clan treasury</span><strong id="clanTreasury">—</strong></div><p id="clanDonated" class="quiet"></p><p class="quiet">Every tenth positive arena coin reward goes automatically to the clan warehouse.</p><progress id="clanDonationProgress" max="10" value="0" aria-label="Rewards toward next clan contribution"></progress><p id="clanDonationStatus" class="quiet" role="status"></p><h3>Buildings</h3><div id="clanBuildings" class="clan-buildings"></div><p id="clanConstruction" role="status" class="quiet"></p><h3>Clan combat bonuses</h3><div id="clanBonuses" class="skill-list"></div><h3>Weekly clan raid</h3><p id="clanRaidStatus" class="quiet" role="status"></p><button id="clanJoinRaid" type="button" disabled>Join Raid</button><p class="quiet">Local alpha: allied groups are simulated, not other online players. Registration freezes your current group. Raid resolves at the weekly cutoff on your next visit.</p></details>
+<details id="alphaClanPanel" class="manager-card stats-card" aria-labelledby="clanHeading"><summary id="clanHeading">✦ Clan — The Ashen Covenant</summary><p class="quiet">Alpha test clan · Automatically joined on login. Your clan progress is local to this browser; no shared roster or treasury yet.</p><p id="clanMembership" role="status" class="quiet">Loading clan membership…</p><div class="line"><span>Local clan treasury</span><strong id="clanTreasury">—</strong></div><p id="clanDonated" class="quiet"></p><p class="quiet">Every tenth positive arena coin reward goes automatically to the clan warehouse.</p><progress id="clanDonationProgress" max="10" value="0" aria-label="Rewards toward next clan contribution"></progress><p id="clanDonationStatus" class="quiet" role="status"></p><h3>Buildings</h3><div id="clanBuildings" class="clan-buildings"></div><p id="clanConstruction" role="status" class="quiet"></p><h3>Clan combat bonuses</h3><div id="clanBonuses" class="skill-list"></div><h3>Weekly clan raid</h3><p id="clanRaidStatus" class="quiet" role="status"></p><button id="clanJoinRaid" type="button" disabled>Join Raid</button><p class="quiet">Local alpha: allied groups are simulated, not other online players. Registration freezes your current group. Raid resolves at the weekly cutoff on your next visit.</p>
+<details id="clanWarsPanel" class="future-clan-panel" aria-labelledby="clanWarsHeading"><summary id="clanWarsHeading">Clan Wars <span class="future-status">Coming soon</span></summary><p class="quiet">Clan-versus-clan warfare is not available yet.</p></details></details>
 <details id="battleAnalyticsPanel" class="manager-card stats-card" aria-labelledby="battleAnalyticsHeading">
 <summary id="battleAnalyticsHeading">Battle Analytics</summary>
 <div class="choice-grid two" id="battleAnalyticsScope"></div><div id="battleAnalyticsBody"></div>
@@ -124,6 +125,10 @@
 <p id="latestProgress" class="quiet">No completed rewards yet.</p>
 <ul id="progressFeed" class="progress-feed" aria-label="Recent committed progress"></ul>
 </details>
+<details id="leaderboardPanel" class="manager-card future-panel" aria-labelledby="leaderboardHeading"><summary id="leaderboardHeading">Leaderboard <span class="future-status">Coming soon</span></summary><p class="quiet">Player and clan rankings are not available yet.</p></details>
+<details id="pvpPanel" class="manager-card future-panel" aria-labelledby="pvpHeading"><summary id="pvpHeading">PvP <span class="future-status">Coming soon</span></summary><p class="quiet">Player-versus-player battles are not available yet.</p></details>
+<details id="worldBossesPanel" class="manager-card future-panel" aria-labelledby="worldBossesHeading"><summary id="worldBossesHeading">World Bosses <span class="future-status">Coming soon</span></summary><p class="quiet">Future world boss encounters. None are available to fight yet.</p><ul class="world-boss-preview"><li>Ant Queen</li><li>Spider Queen</li><li>Pirate Queen</li><li>Dragon Queen</li><li>Daemon Queen</li></ul></details>
+<details id="endlessTowerPanel" class="manager-card future-panel" aria-labelledby="endlessTowerHeading"><summary id="endlessTowerHeading">Endless Tower <span class="future-status">Coming soon</span></summary><p class="quiet">Climb increasingly difficult floors with your battle group. Not available yet.</p></details>
 <details id="alphaTools" class="manager-card stats-card" hidden>
 <summary>Alpha testing tools</summary>
 <p class="quiet">Local developer tools. Not normal gameplay.</p>

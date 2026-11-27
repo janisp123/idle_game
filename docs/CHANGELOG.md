@@ -2,7 +2,7 @@
 
 ## 2026-11-27 — COMING-SOON-001 STARTED
 
-Owner requested visible coming-soon tabs: Leaderboard, PvP, World bosses (Ant Queen, Spider Queen, Pirate Queen, Dragon Queen, Daemon Queen), Endless Tower; Clan Wars inside Clan. Static previews only, no gameplay, reward or persistence changes. Baseline a038846, clan #223 merged after seven successful workflows. Branch `feature/coming-soon-panels`; next add markup, responsive styles and browser checks.
+Owner requested visible coming-soon tabs: Leaderboard, PvP, World bosses (Ant Queen, Spider Queen, Pirate Queen, Dragon Queen, Daemon Queen), Endless Tower; Clan Wars inside Clan. Static previews only, no gameplay, reward or persistence changes. Baseline a038846, clan #223 merged after seven successful workflows. Branch `feature/coming-soon-panels`; candidate markup, responsive styles and browser checks pushed. CI pending; no future feature logic added.
 
 ## 2026-11-27 — CLAN-BUILDINGS-001 STARTED
 

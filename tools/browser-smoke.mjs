@@ -357,6 +357,10 @@ try{
     await evaluate('(()=>{const b=[...document.querySelectorAll("#arenaPreferenceChoices button")];b.slice(0,3).forEach(x=>x.click());document.getElementById("arenaPreferenceSave").click();})()');
     await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).arenaPreferences?.favorites?.length===3`),"arena preference saved");
     await evaluate('document.getElementById("arenaPreferencePanel").open=false');
+    const futurePanels=await evaluate(`(()=>{const ids=["leaderboardPanel","pvpPanel","worldBossesPanel","endlessTowerPanel","clanWarsPanel"],panels=ids.map(id=>document.getElementById(id)),before=localStorage.getItem(${JSON.stringify(managerKey)});for(const p of panels)p.querySelector("summary").click();const checks=panels.every(p=>p.open&&p.checkVisibility()&&p.querySelector("summary").getBoundingClientRect().height>=44&&p.querySelector("summary").textContent.includes("Coming soon")&&!p.querySelector("button,input,select,textarea"));const bosses=[...document.querySelectorAll("#worldBossesPanel li")].map(x=>x.textContent);const nested=document.getElementById("alphaClanPanel").contains(document.getElementById("clanWarsPanel"));return {checks,bosses,nested,unchanged:before===localStorage.getItem(${JSON.stringify(managerKey)}),overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};})()`);
+    assert.deepEqual(futurePanels,{checks:true,bosses:["Ant Queen","Spider Queen","Pirate Queen","Dragon Queen","Daemon Queen"],nested:true,unchanged:true,overflow:0},"static coming-soon panels");
+    await shot("coming-soon-"+width);
+    await evaluate('for(const id of ["leaderboardPanel","pvpPanel","worldBossesPanel","endlessTowerPanel","clanWarsPanel"])document.getElementById(id).open=false');
     await shot("alpha-clan-"+width);await evaluate('document.getElementById("alphaClanPanel").open=false');
     assert.equal(await evaluate('!document.getElementById("battleGroupPanel").open && !document.getElementById("specialClassChoice").checkVisibility()'),true);
     await evaluate('document.querySelector("#battleGroupPanel > summary").click()');
