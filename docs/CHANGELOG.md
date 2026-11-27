@@ -2,7 +2,7 @@
 
 ## 2026-11-27 — CLAN-BUILDINGS-PLAN-001 STARTED
 
-Owner requested an implementation plan only for five level-zero buildings, automatic clan donations, long-term upgrades and 50 weekly clan raids. Baseline b4624c1; basic local clan #223 eb6be9e passed seven checks but unmerged. Draft plan, distinguish requirements from provisional numbers, preserve server boundary. Branch `docs/clan-buildings-weekly-raids-plan`; no runtime changes or merge authorization for the proposed mechanics. Next save plan for owner review.
+Owner requested an implementation plan only for five level-zero buildings, automatic clan donations, long-term upgrades and 50 weekly clan raids. Baseline b4624c1; basic local clan #223 eb6be9e passed seven checks but unmerged. Draft plan, distinguish requirements from provisional numbers, preserve server boundary. Branch `docs/clan-buildings-weekly-raids-plan`; no runtime changes or merge authorization for the proposed mechanics. Saved draft in docs/CLAN_BUILDINGS_PLAN.md, PR #224. No runtime changes; await owner approval of design and numbers before implementation.
 
 ## 2026-11-27 — ARENA-PREFERENCES-001 STARTED
 
