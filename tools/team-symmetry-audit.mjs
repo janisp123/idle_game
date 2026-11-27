@@ -20,7 +20,7 @@ try{
  const rep=(a,b)=>{assert.ok(src.includes(a),a);src=src.replace(a,b);};
  // Reverse only the approved geometry changes in a disposable copy for comparison.
  rep('function adjacent(a,actors,height,width,side,terrain={}){\n  const d=side==="player"?1:-1;','function adjacent(a,actors,height,width,side,terrain={}){\n  const d=1;');
- rep('width=teamArenaWidth(terrain),roll=','width=9,roll=');
+ rep('width=teamArenaWidth(terrain,rules),roll=','width=9,roll=');
  await writeFile(p,src);
  const {resolveTeamBattle:baseline}=await import(pathToFileURL(p).href);
  const pairs=[
