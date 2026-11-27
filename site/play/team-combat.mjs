@@ -147,7 +147,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
     for(const a of actors.filter(x=>x.side==="player")){a.raidBonusDamage=bonus.damage;a.raidBonusDefence=bonus.defence;}
   }
   for(const [side,b] of [["player",levels.playerClanBonus],["enemy",levels.enemyClanBonus]])if(b){
-    if(rules!==10||!validClanCombat(b))throw new RangeError("Invalid clan combat bonus");
+    if(!(rules===10||raid&&[4,5].includes(rules))||!validClanCombat(b))throw new RangeError("Invalid clan combat bonus");
     for(const a of actors.filter(x=>x.side===side)){a.clanBonus=b;a.maxHP=Math.round(a.maxHP*(1+b.hp/100));a.hp=a.maxHP;}
   }
   const encounter=levels.clanEncounter;

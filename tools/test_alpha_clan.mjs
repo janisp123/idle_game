@@ -58,3 +58,14 @@ test("actual Fighting XP and Bank bonus follow completed levels; cap and old sna
  assert.equal(groupCoinRatio(session),2000);const result=settleGroupSession(session,100000);
  assert.equal(result.rewardUnits%101,0);assert.ok(result.session.coinRemainder<2000);
 });
+
+import {startArenaRaid} from "../site/play/arena-manager.mjs";
+import {raidResult} from "../site/play/raid-session.mjs";
+test("personal raids freeze completed clan combat bonus, without altering historical raid replay",()=>{
+ const s=fresh(),c={...s.alphaClan,levels:{...s.alphaClan.levels,portal:5}};
+ assert.ok(validAlphaClan(c));const started=startArenaRaid({...s,alphaClan:c},10,t,rand).state;
+ assert.equal(started.raidRun.clanBonus.hp,15);assert.ok(validClanCombatForTest(started.raidRun.clanBonus));
+ assert.deepEqual(readArenaManager(JSON.stringify(started)),started);
+ assert.deepEqual(raidResult(started.raidRun),raidResult(readArenaManager(JSON.stringify(started)).raidRun));
+});
+function validClanCombatForTest(b){return CLAN_STATS.every(k=>Number.isInteger(b[k])&&b[k]>=0);}
