@@ -2,7 +2,7 @@
 import {pilotKit,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
 import {kitStatus,kitHeal,kitControlAllowed,kitControlDuration,controlEligible,applyControl,hasControl,clearControl} from "./class-effects.mjs";
 import {resolveStrike,wound,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=kits-001";
-import {statHealing,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
+import {statHealing,statMagicDamageFactor,classStatusLands} from "./stat-combat.mjs";
 import {combatDamageFactor} from "./raid-rules.mjs";
 import {tankPriorityActor,tankHealOrder,geometryActor} from "./group-counter-rules.mjs";
 const dist=(a,b)=>Math.max(0,Math.abs(a.x-b.x)+Math.abs(a.y-b.y)-1);
@@ -80,13 +80,13 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   let clean=false,hit=0;
   resolveStrike(a,actual,{active:{...weapon,range:ability.range??weapon.range,recovery:ability.recovery??weapon.recovery,damageScale:ability.scale*s,guardPierce:ability.guardPierce===true,familiar:ability.familiar===true},bow:weapon.move==="shot",distance:Math.min(2,dist(a,actual)),terrain:ctx.terrain,roll:ctx.roll,speedRoll:ctx.speedRoll,
    record:(x,y,t,e={})=>{if(x===a&&y===actual&&["hit","finisher"].includes(t)&&e.damage>0){clean=true;hit=e.damage;}ctx.record(x,y,t,{ability:ability.id,...e});},interruptApproach:x=>{x.approach=0;},onBleed:(x,y)=>{y.bleedSource=x.id;}});
-  if(clean&&alive(actual)&&(!ability.effect||statStatusLands(actual,weapon.type,ctx.roll))){
+  if(clean&&alive(actual)&&(!ability.effect||classStatusLands(a,actual,weapon.type,ctx.roll))){
    if(ability.effect==="open"){actual.guardOpen=Math.max(actual.guardOpen,2);record(actual,"guard_open");}
    if(ability.effect==="slow"){actual.kitSlowUntil=Math.max(actual.kitSlowUntil??0,round+B.slowDuration+1);record(actual,"slow");}
    if(ability.effect==="bleed"){actual.bleed=Math.max(actual.bleed,3);actual.bleedSource=a.id;record(actual,"deep_wound");}
    if(ability.effect==="shadow_hex"){kitStatus(actual,"classWeaken","weakenUntil",B.shadeWeakness*s,round);actual.kitDisruptUntil=round+B.disruptDuration+1;actual.targetId=null;record(actual,"weaken");record(actual,"misdirection");}
    if(ability.effect==="weaken"){kitStatus(actual,"classWeaken","weakenUntil",.18*s,round);record(actual,"weaken");}
-   if(ability.effect==="physical_vulnerability"&&applyControl(actual,"physical_vulnerability",round))record(actual,"physical_vulnerability");
+   if(ability.effect==="physical_vulnerability"&&applyControl(actual,"physical_vulnerability",round,a))record(actual,"physical_vulnerability");
    if(ability.effect==="control"&&kitControlAllowed(actual,round)){actual.stagger=Math.max(actual.stagger,1);actual.classControlUntil=round+kitControlDuration(actual);record(actual,"control");}
   }
   if(clean&&ability.siphon){
@@ -100,8 +100,8 @@ function perform(a,b,actors,round,ability,weapon,ctx){
      const raw=hit*combatDamageFactor(a,x,weapon)/combatDamageFactor(a,actual,weapon)*ability.splash*(a.classId==="flameweaver"?1+(B.flameSplash-1)*s:1)*(1-Math.min(80,protection(x,weapon.type))/100)/(1+intactArmourSum(x,"resistance")*.15)*statMagicDamageFactor(x,weapon.type)-flatGuard(x)*.1;
      const damage=wound(a,x,Math.max(1,Math.round(raw)));record(x,"splash",{damage});
     }
-    if(ability.spreadControl&&alive(x)&&statStatusLands(x,weapon.type,ctx.roll)&&applyControl(x,"stun",round))record(x,"stun");
-    if(ability.spreadSlow&&alive(x)&&statStatusLands(x,weapon.type,ctx.roll)){x.kitSlowUntil=Math.max(x.kitSlowUntil??0,round+B.slowDuration+1);record(x,"slow");}
+    if(ability.spreadControl&&alive(x)&&classStatusLands(a,x,weapon.type,ctx.roll)&&applyControl(x,"stun",round,a))record(x,"stun");
+    if(ability.spreadSlow&&alive(x)&&classStatusLands(a,x,weapon.type,ctx.roll)){x.kitSlowUntil=Math.max(x.kitSlowUntil??0,round+B.slowDuration+1);record(x,"slow");}
    }
   }
   return true;
@@ -112,10 +112,10 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   const effect=ability.effect,targets=ability.area?choices.filter(x=>dist(first,x)<=1).slice(0,3):[first];
   for(const x of targets){
    if(effect==="cleanse"){clearControl(x);x.bleed=0;x.stagger=0;x.classWeaken=0;x.weakenUntil=0;x.kitSlowUntil=0;x.kitDisruptUntil=0;record(x,"cleanse");continue;}
-   if(!statStatusLands(x,ability.physical?"physical":"magic",ctx.roll)){record(x,"resist",{effect});continue;}
+   if(!classStatusLands(a,x,ability.physical?"physical":"magic",ctx.roll)){record(x,"resist",{effect});continue;}
    if(ability.physical&&x.role==="tank"&&x.shield.hp>0&&!x.guardOpen&&ctx.roll()<.65){record(x,"resist",{effect,shield:true});continue;}
    if(effect==="dispel"){x.classBuff=0;x.classGuard=0;x.buffUntil=0;x.guardUntil=0;x.kitTempoUntil=0;x.kitFocusUntil=0;x.kitPactUntil=0;x.kitBraceUntil=0;record(x,"dispel");continue;}
-   if(applyControl(x,effect,round)){record(x,effect,{until:x.controlEffects[effect]});if(a.classId==="gravebinder"&&effect==="gloom"&&applyControl(x,"antiheal",round))record(x,"antiheal",{until:x.controlEffects.antiheal});}
+   if(applyControl(x,effect,round,a)){record(x,effect,{until:x.controlEffects[effect]});if(a.classId==="gravebinder"&&effect==="gloom"&&applyControl(x,"antiheal",round,a))record(x,"antiheal",{until:x.controlEffects.antiheal});}
   }
   return true;
  }
@@ -131,7 +131,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   for(const x of targets){
    const guard=mode==="guard",key=guard?"classGuard":"classBuff",until=guard?"guardUntil":"buffUntil";
    kitStatus(x,key,until,amount,round,duration);
-   if(mode==="tempo"||mode==="magic_tempo"){x.kitTempoUntil=round+duration;if([7,8].includes(a.groupCombatRules))x.kitMagicTempo=mode==="magic_tempo";record(x,"tempo",{until:x.kitTempoUntil});}
+   if(mode==="tempo"||mode==="magic_tempo"){x.kitTempoUntil=round+duration;if([7,8,9].includes(a.groupCombatRules))x.kitMagicTempo=mode==="magic_tempo";record(x,"tempo",{until:x.kitTempoUntil});}
    record(x,guard?"ward":"buff",{magnitude:x[key],until:x[until]});
   }
   return true;
@@ -139,7 +139,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
  case "seal":{
   const targets=sealChoices(a,b,actors,round,ability).slice(0,ability.maxTargets);if(targets.length<2)return false;
   for(const x of targets){
-   if(!statStatusLands(x,"magic",ctx.roll)){record(x,"resist");continue;}
+   if(!classStatusLands(a,x,"magic",ctx.roll)){record(x,"resist");continue;}
    if(pilotKit(x)){
     const slot=x.kitReady.primary<=x.kitReady.secondary?"primary":"secondary";
     x.kitReady[slot]=Math.max(round,x.kitReady[slot])+1;
@@ -172,7 +172,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
  }
  case "brace":a.kitBraceUntil=round+ability.duration+1;record(a,"brace",{until:a.kitBraceUntil});return true;
  case "totem":a.kitTotemMode=a.activeTactic??"balanced";a.kitTotemUntil=round+ability.duration+1;record(a,"totem",{mode:a.kitTotemMode,until:a.kitTotemUntil});return true;
- case "disrupt":if(!statStatusLands(b,weapon.type,ctx.roll)){record(b,"resist");return true;}b.kitDisruptUntil=round+B.disruptDuration+1;b.targetId=null;record(b,"misdirection");return true;
+ case "disrupt":if(!classStatusLands(a,b,weapon.type,ctx.roll)){record(b,"resist");return true;}b.kitDisruptUntil=round+B.disruptDuration+1;b.targetId=null;record(b,"misdirection");return true;
  case "dash":{
   let moved=0;for(let i=0;i<2&&dist(a,b)>weapon.range;i++){if(!ctx.move(a,b,false))break;moved++;}
   if(!moved)return false;a.approach=0;record(b,"dash",{tiles:moved});return true;
