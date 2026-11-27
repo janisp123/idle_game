@@ -4,7 +4,7 @@ import {kitStatus,kitHeal,kitControlAllowed,kitControlDuration} from "./class-ef
 import {resolveStrike,wound,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=kits-001";
 import {statHealing,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
 import {combatDamageFactor} from "./raid-rules.mjs";
-import {tankPriorityActor,tankHealOrder} from "./group-counter-rules.mjs";
+import {tankPriorityActor,tankHealOrder,geometryActor} from "./group-counter-rules.mjs";
 const dist=(a,b)=>Math.max(0,Math.abs(a.x-b.x)+Math.abs(a.y-b.y)-1);
 const ratio=a=>a.hp/a.maxHP;
 const alive=a=>a.hp>0;
@@ -24,7 +24,7 @@ const supportMode=(a,actors,ability)=>{
 const supportAmount=(a,ability)=>ability.amount*kitStrength(a)*(a.classId==="runesage"?B.focusedBlessing:a.classId==="wardchanter"?B.protectiveSong:1);
 const supportChoices=(a,actors,ability,mode)=>{
  const amount=supportAmount(a,ability);
- return alliesIn(a,actors,ability.range).filter(x=>mode==="guard"?x.classGuard<amount&&(ratio(x)<.85||threatened(x,actors)):damageRole(x)&&x.classBuff<amount&&(mode!=="tempo"||!x.kitTempoUntil)).sort((x,y)=>mode==="guard"?ratio(x)-ratio(y):Number(threatened(y,actors))-Number(threatened(x,actors))||Number(y.role==="melee")-Number(x.role==="melee")||ratio(y)-ratio(x));
+ return alliesIn(a,actors,ability.range).filter(x=>mode==="guard"?x.classGuard<amount&&(ratio(x)<.85||threatened(x,actors)):damageRole(x)&&x.classBuff<amount&&(mode!=="tempo"||!x.kitTempoUntil)).sort((x,y)=>mode==="guard"?ratio(x)-ratio(y):Number(threatened(y,actors))-Number(threatened(x,actors))||(geometryActor(a)?0:Number(y.role==="melee")-Number(x.role==="melee"))||ratio(y)-ratio(x));
 };
 const sealChoices=(a,b,actors,round,ability)=>{
  if(dist(a,b)>ability.range)return [];
