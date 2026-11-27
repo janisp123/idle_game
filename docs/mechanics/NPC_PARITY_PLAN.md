@@ -35,3 +35,5 @@ V4 clone timeline preserves old v3 in-flight result, paid cursor, seed and fract
 ### Max-only diagnostic
 
 `node --test tools/test_clone_opponents.mjs` now includes 24 seeded generated max builds, all five arenas, both orientations for every pair (5,760 actual resolver calls), STR 141/DEX 141/END 129/Fighting 52, S Masterwork, full mastery, tactics and Teamwork 50. Base seed 20261127. Reports raw per-build/arena counts, representation and gross hourly reward at 50% wins in CI output. This limited sample is diagnostic, not proof of optimality or no dominant meta; inspect final run before release. No lower-grade balance sweep. No results yet.
+
+First website run 45955876806 at 3710e4b: 135 tests passed, one failed (adjacent sequential seeds produced fewer than 10 distinct weapon/tactic combinations). Corrected generator seed avalanche, not the diversity threshold; also refreshed transitive public engine import versions to prevent stale V3 code rejecting V4 saves. Re-run all checks at the new head. No lower-grade balance testing.

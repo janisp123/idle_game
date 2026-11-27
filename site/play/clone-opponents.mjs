@@ -21,7 +21,7 @@ export function captureCloneEnvelope(team,tactics,skill){
   return {budget:sumCapped(Object.entries(g.equipment).map(([k,v])=>equipmentPrice(v)+(k.includes(":")?SMITH_BALANCE.firstArmourCost:0)),maxBudget),
     weaponXP:sumCapped(weapons.map(w=>g.expertiseActive[w]),cap),
     armourXP:sumCapped(ARMOUR_TIERS.map(w=>g.expertiseActive[w]),cap),
-    tacticLevel:1+tacticCost.filter(c=>c<=sumCapped(TACTIC_IDS.map(t=>tacticCost[tactics[id].skills[t].level-1]),tacticCost.at(-1))).length-1};
+    tacticLevel:tacticCost.filter(c=>c<=sumCapped(TACTIC_IDS.map(t=>tacticCost[tactics[id].skills[t].level-1]),tacticCost.at(-1))).length};
  })};
 }
 export function validCloneEnvelope(e){
@@ -39,6 +39,8 @@ const coherent={
  spear:[["plate","balanced"],["leather","defensive"],["plate","aggressive"]]
 };
 const pick=(a,r)=>a[Math.floor(r()*a.length)];
+// Avalanche adjacent seeds before the LCG's first choice. Independent of terrain and player equipment.
+function mixSeed(x){x=Math.imul(x^(x>>>16),0x7feb352d);x=Math.imul(x^(x>>>15),0x846ca68b);return (x^(x>>>16))>>>0;}
 export function cloneChoice(skill,random){
  const weapon=pick(weapons,random),experienced=Math.min(.9,Math.max(0,(skill-1)/49*.9));
  const [family,tactic]=random()<experienced?pick(coherent[weapon],random):[pick(families,random),pick(TACTIC_IDS,random)];
@@ -63,7 +65,7 @@ export function buildCloneTeam(envelope,shared,seed){
  if(!validCloneEnvelope(envelope))throw new RangeError("Invalid clone progression");
  const team={},choices=[];
  for(const [i,id] of TEAM_IDS.entries()){
-  const b=envelope.roster[i],r=seededCombatRandom((seed^Math.imul(i+1,0x9e3779b9))>>>0),c=cloneChoice(shared.skill,r);
+  const b=envelope.roster[i],r=seededCombatRandom(mixSeed(seed^Math.imul(i+1,0x9e3779b9))),c=cloneChoice(shared.skill,r);
   const armoured=b.budget>=slots*SMITH_BALANCE.firstArmourCost,family=armoured?c.family:"none",g=initialGladiator(c.weapon),specs=allocate(b.budget,shared.skill,armoured);
   g.equipment[c.weapon]=specs[0];g.armour=Object.fromEntries(ARMOUR_SLOTS.map(({id})=>[id,family]));
   if(armoured)ARMOUR_SLOTS.forEach(({id},j)=>{g.equipment[id+":"+family]=specs[j+1];});

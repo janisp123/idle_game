@@ -1,15 +1,15 @@
 import {ACTIVITIES,ITEM_LABELS,ITEM_KEYS,SAVE_KEY,xpToNextLevel,desiredArenaTeam,teamFromState,enterGame} from "./engine.mjs?v=npc-parity-001";
 import {newManagerGame,readManagerGame,enterManagerGame,settleManagerLive,chooseManagerArmour,chooseManagerWeapon,chooseManagerTactic} from "./manager-lanes.mjs?v=npc-parity-001";
 import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,migrateLegacyManager} from "./manager-migration.mjs?v=npc-parity-001";
-import {MANAGER_ARMOUR_FAMILIES,equippedArmourFamily,quoteArmourSet,managerEquipmentPreview} from "./manager-equipment.mjs?v=manager-gear-001";
+import {MANAGER_ARMOUR_FAMILIES,equippedArmourFamily,quoteArmourSet,managerEquipmentPreview} from "./manager-equipment.mjs?v=npc-parity-001";
 import {TACTIC_IDS,tacticRequiredXP} from "./manager-tactics.mjs?v=manager-tactics-001";
-import {WORK_ROTATION,nextRotationActivity,ingredientReserve} from "./activity-rotation.mjs?v=manager-rotation-001";
+import {WORK_ROTATION,nextRotationActivity,ingredientReserve} from "./activity-rotation.mjs?v=npc-parity-001";
 import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=gear-a3";
 import {ITEM_GRADES} from "./smith.mjs?v=gear-a3";
 import {createArenaView} from "./arena-view.mjs?v=npc-parity-001";
 import {cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
-import {characterStats} from "./character-stats.mjs?v=apprentice-a4";
-import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=team-004";
+import {characterStats} from "./character-stats.mjs?v=npc-parity-001";
+import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=npc-parity-001";
 
 import {renderBattleAnalytics} from "./analytics-view.mjs?v=npc-parity-001";
 let analyticsScope="all",lastAnalytics=null,lastAnalyticsScope=null;
