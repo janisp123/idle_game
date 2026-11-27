@@ -5,8 +5,8 @@ import {
   newTeamGame, readSave, chooseActivity, settleManagerLane, managerCombatProductivePrefix,
   automateSettledProgress, activateExpertise, activityRewardCapped,
   recipeOptions, PRODUCTION_RECIPES, LIVE_FIGHT_MAX_MS, autoEquipmentPreview
-} from "./engine.mjs?v=manager-lanes-001";
-import {BOUT_MS} from "./combat.mjs?v=gear-a3";
+} from "./engine.mjs?v=arena-speed-001";
+import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=arena-speed-001";
 import {WORK_ROTATION,ingredientReserve,rotateManagerWork,rotationTravelMs} from "./activity-rotation.mjs?v=manager-rotation-001";
 import {blankArmourRequests,validArmourRequests,requestArmourSet,selectManagerWeapon,automateManagerEquipment,managerEquipmentPreview} from "./manager-equipment.mjs?v=manager-gear-001";
 
@@ -44,7 +44,7 @@ export function readManagerGame(value){
     if(!validManagerShape(raw)||raw.timingProfile!==TIMING_PROFILE)return null;
     const s=readSave(raw);
     if(!s||!s.teamSecond)return null;
-    return {...s,managerVersion:MANAGER_LANES_VERSION,
+    return {...s,combatSession:fasterTeamSession(s.combatSession),managerVersion:MANAGER_LANES_VERSION,
       managerWork:{...raw.managerWork},overlapParity:raw.overlapParity,armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
   }catch{return null;}
 }
@@ -153,7 +153,8 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
   for(let i=0;next.settledAtMs<now;i++){
     if(i>=64)throw new Error("Manager live boundary limit");
     const before=next.settledAtMs;
-    const segment=Math.min(now-before,BOUT_MS-((next.combatSession?.elapsedMs??0)%BOUT_MS),
+    const duration=teamBoutMs(next.combatSession,true);
+    const segment=Math.min(now-before,duration-((next.combatSession?.elapsedMs??0)%duration),
       next.managerWork.travelMs||ACTIVITIES[next.managerWork.activity].durationMs-next.managerWork.progressMs,
       ACTIVITIES.fighting.durationMs-next.progressMs);
     const outcome=pair(next,before+segment,random,true);

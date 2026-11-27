@@ -385,14 +385,14 @@ try{
     const setup=await evaluate(`(async()=>{const key=${JSON.stringify(managerKey)},s=JSON.parse(localStorage.getItem(key));
       const m=await import("/play/manager-lanes.mjs"),e=await import("/play/engine.mjs"),t=await import("/play/team-timeline.mjs"),c=await import("/play/combat.mjs");
       s.skills.fighting.level=52;s.skills.fighting.xp=0;s.progressMs=0;s.settledAtMs=${fixedNow+10000};
-      s.combatSession={...t.startTeamSession(e.desiredArenaTeam(s),s.teamwork.level,73),elapsedMs:c.BOUT_MS-1000};
+      s.combatSession={...t.startTeamSession(e.desiredArenaTeam(s),s.teamwork.level,73,true),elapsedMs:t.MANAGER_BOUT_MS-200};
       if(!m.readManagerGame(s))throw Error("Invalid fixture");
-      const r=t.settleTeamSession(s.combatSession,1000);return {save:JSON.stringify(s),outcome:r.victories?"victory":r.defeats?"defeat":"double_death",coins:r.coins};})()`);
+      const r=t.settleTeamSession(s.combatSession,200);return {save:JSON.stringify(s),outcome:r.victories?"victory":r.defeats?"defeat":"double_death",coins:r.coins};})()`);
     const inject=await send("Page.addScriptToEvaluateOnNewDocument",{source:`if(location.href===${JSON.stringify(resultUrl)}){localStorage.setItem(${JSON.stringify(managerKey)},${JSON.stringify(setup.save)});Date.now=()=>${fixedNow+10000};}`});
     await send("Page.navigate",{url:resultUrl});
     await until(()=>evaluate('document.getElementById("saveStatus")?.getAttribute("data-game-ready")==="true" && document.getElementById("battleCalculation").value===99'),"arena 99% frozen fixture");
     await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:inject.identifier});
-    await evaluate(`Date.now=()=>${fixedNow+11000}`);
+    await evaluate(`Date.now=()=>${fixedNow+10200}`);
     await until(()=>evaluate('document.getElementById("battleFighters").dataset.phase==="resolved"'),"arena committed verdict");
     const verdict=await evaluate(`(()=>({outcome:document.getElementById("battleFighters").dataset.outcome,value:document.getElementById("battleCalculation").value,cursor:JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).combatSession.prizeCursor,reward:document.getElementById("arenaReward").textContent}))()`);
     assert.equal(verdict.outcome,setup.outcome);assert.equal(verdict.value,100);assert.equal(verdict.cursor,1);if(setup.coins)assert.match(verdict.reward,new RegExp("\\+"+setup.coins));

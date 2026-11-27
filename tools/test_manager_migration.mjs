@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {newTeamGame,chooseActivity,settle,ACTIVITIES} from "../site/play/engine.mjs";
 import {migrateLegacyManager} from "../site/play/manager-migration.mjs";
 import {readManagerGame,settleManagerOffline} from "../site/play/manager-lanes.mjs";
+import {fasterTeamSession} from "../site/play/team-timeline.mjs";
 const rng=()=>.5;
 test("legacy work migration preserves partial progress, resources and paid interval",()=>{
  let s=chooseActivity(newTeamGame(0),"mining",0,rng).state;
@@ -24,7 +25,7 @@ test("legacy fight migration preserves exact frozen session and original mastery
  let s=chooseActivity(newTeamGame(0),"fighting",0,rng).state;
  s=settle(s,123,rng).state;
  const r=migrateLegacyManager(s,s.settledAtMs,rng);assert.ok(r);
- assert.deepEqual(r.state.combatSession,s.combatSession);
+ assert.deepEqual(r.state.combatSession,fasterTeamSession(s.combatSession));
  assert.deepEqual(r.state.expertise,s.expertise);assert.deepEqual(r.state.teamwork,s.teamwork);
  assert.equal(r.state.managerWork.activity,"hunting");
  assert.equal(r.state.managerTactics.first.selected,"balanced");

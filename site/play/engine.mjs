@@ -4,7 +4,7 @@ import { previewAutoEquipment, AUTO_EQUIPMENT_AT, MAX_AUTO_EQUIPMENT_PURCHASES }
 import { blankExpertise,validExpertise,awardExpertise } from "./expertise.mjs?v=alpha-gear-a3";
 import { initialTeam,validGladiator,teamSnapshots,awardTeamPractice,activateTeamPractice,previewTeamUpgrade,upgradeTeam,chooseTeamWeapon,chooseTeamArmour } from "./team.mjs?v=team-001";
 import { initialTeamwork,validTeamwork,awardTeamwork,activateTeamworkOnLogin } from "./teamwork.mjs?v=team-002";
-import { validTeamSession,startTeamSession,settleTeamSession } from "./team-timeline.mjs?v=manager-tactics-001";
+import { validTeamSession,startTeamSession,settleTeamSession,teamBoutMs } from "./team-timeline.mjs?v=arena-speed-001";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
 import {
@@ -308,7 +308,7 @@ export function readSave(value) {
     // Existing V16 saves may have a pending manual grade change. Keep the
     // actual in-flight grade rather than relabeling an already resolved duel.
     const savedStage=difficulties.fighting??0;
-    const inFlight=s.combatSession&&s.combatSession.elapsedMs%BOUT_MS!==0;
+    const inFlight=s.combatSession&&s.combatSession.elapsedMs%teamBoutMs(s.combatSession)!==0;
     const stage=s.autoFight===undefined&&inFlight?frozenGrade(s.combatSession):savedStage;
     const autoFight=s.autoFight===undefined?initialAutoFight(stage):s.autoFight;
     if(!validAutoFight(autoFight)||autoFight.stage!==stage||
@@ -428,15 +428,15 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
   let team=teamFromState(state),teamwork=state.teamwork,desired=desiredArenaTeam(state),managerTactics=state.managerTactics;
   let autoFight=state.autoFight??initialAutoFight(desired.first.difficulty);
   if(online&&(!validAutoFight(autoFight)||autoFight.stage!==desired.first.difficulty))throw new RangeError("Invalid committed team stage");
-  let session=state.combatSession??startTeamSession(desired,teamwork.level,state.settledAtMs>>>0);
+  let session=state.combatSession??startTeamSession(desired,teamwork.level,state.settledAtMs>>>0,Boolean(state.managerTactics));
   const totals=Object.fromEntries(arenaFields.map(k=>[k,0]));
   const practiceMs={first:0,second:0};
   const run=duration=>{
-    const cacheKey=JSON.stringify(["team",session.seed,session.players,session.teamworkLevel]);
+    const cacheKey=JSON.stringify(["team",session.timelineVersion,session.seed,session.players,session.teamworkLevel]);
     if(outcomeCaches&&!outcomeCaches.has(cacheKey))outcomeCaches.set(cacheKey,new Map());
     const prize=settleTeamSession(session,duration,outcomeCaches?.get(cacheKey));
     team=awardTeamPractice(team,session.players,prize.practiceMs);
-    teamwork=awardTeamwork(teamwork,prize.bouts);
+    teamwork=awardTeamwork(teamwork,prize.teamworkXP);
     if(managerTactics)managerTactics=awardTacticPractice(managerTactics,session.players,prize.practiceMs);
     session=prize.session;
     for(const key of arenaFields)totals[key]+=prize[key];
@@ -449,7 +449,8 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
   };
   const result=()=>({...totals,session,team,teamwork,practiceMs,expertise:team.first.expertise,autoFight,...(managerTactics?{managerTactics}:{})});
   if(online||JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level){
-    const remaining=(BOUT_MS-session.elapsedMs%BOUT_MS)%BOUT_MS;
+    const duration=teamBoutMs(session);
+    const remaining=(duration-session.elapsedMs%duration)%duration;
     if(elapsedMs<remaining){run(elapsedMs);return result();}
     if(remaining)run(remaining);
     session={...session,players:desired,teamworkLevel:teamwork.level};
@@ -731,11 +732,11 @@ function settleTransition(state, now, random, frozenEffort, stopAtArrival=false,
 
 
 /** Remaining transition time, bounded regardless of absent years. */
-export function arenaBoutProgress(state){return (state.combatSession?.elapsedMs??0)%BOUT_MS/BOUT_MS;}
+export function arenaBoutProgress(state){const duration=teamBoutMs(state.combatSession,Boolean(state.managerTactics));return (state.combatSession?.elapsedMs??0)%duration/duration;}
 function finishingDuration(state){
   if(activityRewardCapped(state))return 0;
   if(state.activity==="fighting")return state.combatSession?
-    (BOUT_MS-state.combatSession.elapsedMs%BOUT_MS)%BOUT_MS:0;
+    (teamBoutMs(state.combatSession)-state.combatSession.elapsedMs%teamBoutMs(state.combatSession))%teamBoutMs(state.combatSession):0;
   return ACTIVITIES[state.activity].durationMs-state.progressMs;
 }
 function remainingTransitionMs(state) {
@@ -790,7 +791,7 @@ export const LIVE_FIGHT_MAX_MS=10_000;
 export function settleLive(state,now=Date.now(),random=Math.random){
   if(!validTime(now))throw new RangeError("Invalid clock");
   const session=state.combatSession;
-  const cursorCurrent=!session||(session.prizeCursor??0)===Math.floor(session.elapsedMs/BOUT_MS);
+  const cursorCurrent=!session||(session.prizeCursor??0)===Math.floor(session.elapsedMs/teamBoutMs(session));
   return settleInternal(state,now,random,cursorCurrent&&now>=state.settledAtMs&&now-state.settledAtMs<=LIVE_FIGHT_MAX_MS);
 }
 function settleInternal(state, now, random, online, stopFinalAtCap=false) {
@@ -1081,7 +1082,7 @@ export function enterGameWithApprentice(state, now = Date.now(), random = Math.r
 export function settleLiveWithApprentice(state,now=Date.now(),random=Math.random){
   if(!validTime(now))throw new RangeError("Invalid clock");
   const session=state.combatSession;
-  const cursorCurrent=!session||(session.prizeCursor??0)===Math.floor(session.elapsedMs/BOUT_MS);
+  const cursorCurrent=!session||(session.prizeCursor??0)===Math.floor(session.elapsedMs/teamBoutMs(session));
   if(!cursorCurrent||now<state.settledAtMs||now-state.settledAtMs>LIVE_FIGHT_MAX_MS)
     return enterGameWithApprentice(state,now,random);
   let next=state, teamworkLevelGained=0, spent=0, lastReport=emptyReport(state,0);
@@ -1107,7 +1108,8 @@ export function settleLiveWithApprentice(state,now=Date.now(),random=Math.random
       if(t.phase==="finishing")segment=Math.min(segment,Math.max(1,finishingDuration(next)));
       else segment=Math.min(segment,Math.max(1,remainingTransitionMs(next)));
     }else if(next.activity==="fighting"){
-      segment=Math.min(segment,BOUT_MS-((next.combatSession?.elapsedMs??0)%BOUT_MS));
+      const duration=teamBoutMs(next.combatSession,Boolean(next.managerTactics));
+      segment=Math.min(segment,duration-((next.combatSession?.elapsedMs??0)%duration));
     }else if(next.activity){
       segment=Math.min(segment,Math.max(1,ACTIVITIES[next.activity].durationMs-next.progressMs));
     }
