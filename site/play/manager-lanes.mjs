@@ -5,8 +5,9 @@ import {
   newTeamGame, readSave, chooseActivity, settleManagerLane, managerCombatProductivePrefix,
   automateSettledProgress, activateExpertise, activityRewardCapped,
   recipeOptions, PRODUCTION_RECIPES, LIVE_FIGHT_MAX_MS, autoEquipmentPreview
-} from "./engine.mjs?v=arena-speed-001";
-import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=arena-speed-001";
+} from "./engine.mjs?v=analytics-001";
+import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=analytics-001";
+import {blankBattleAnalytics,validBattleAnalytics,accumulateBattleAnalytics} from "./battle-analytics.mjs?v=analytics-001";
 import {WORK_ROTATION,ingredientReserve,rotateManagerWork,rotationTravelMs} from "./activity-rotation.mjs?v=manager-rotation-001";
 import {blankArmourRequests,validArmourRequests,requestArmourSet,selectManagerWeapon,automateManagerEquipment,managerEquipmentPreview} from "./manager-equipment.mjs?v=manager-gear-001";
 
@@ -34,7 +35,7 @@ function requireManager(s){if(!validManagerShape(s))throw new RangeError("Invali
 export function newManagerGame(now=Date.now(),firstWork="hunting"){
   if(!validWork(firstWork))throw new RangeError("Invalid starting work");
   const s=chooseActivity(newTeamGame(now),"fighting",now).state;
-  return {...s,managerVersion:MANAGER_LANES_VERSION,managerWork:blankWork(firstWork),overlapParity:0,armourRequests:blankArmourRequests(),managerTactics:blankTactics()};
+  return {...s,managerVersion:MANAGER_LANES_VERSION,managerWork:blankWork(firstWork),overlapParity:0,armourRequests:blankArmourRequests(),managerTactics:blankTactics(),battleAnalytics:blankBattleAnalytics()};
 }
 export function readManagerGame(value){
   try{
@@ -43,9 +44,9 @@ export function readManagerGame(value){
     // silently convert a legacy route or discard a paid combat cursor.
     if(!validManagerShape(raw)||raw.timingProfile!==TIMING_PROFILE)return null;
     const s=readSave(raw);
-    if(!s||!s.teamSecond)return null;
+    if(!s||!s.teamSecond||raw.battleAnalytics!==undefined&&!validBattleAnalytics(raw.battleAnalytics))return null;
     return {...s,combatSession:fasterTeamSession(s.combatSession),managerVersion:MANAGER_LANES_VERSION,
-      managerWork:{...raw.managerWork},overlapParity:raw.overlapParity,armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
+      battleAnalytics:raw.battleAnalytics??blankBattleAnalytics(),managerWork:{...raw.managerWork},overlapParity:raw.overlapParity,armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
   }catch{return null;}
 }
 // Internal coordinator hook for Phase 3, never a player-facing action.
@@ -116,7 +117,7 @@ function pair(s,end,random,online){
     const n=s.attributeEffort[id]+combatTime*(cw[id]??0)+workTime*(ww[id]??0);
     if(!count(n))throw new RangeError("Manager effort overflow");return [id,n];
   }));
-  const next={...c,skills:{...c.skills,[work.activity]:w.skills[work.activity]},
+  const next={...c,battleAnalytics:accumulateBattleAnalytics(s.battleAnalytics,a.combat.report?.arena?.analytics??[]),skills:{...c.skills,[work.activity]:w.skills[work.activity]},
     items:w.items,attributeEffort,settledAtMs:end,
     managerWork:{activity:work.activity,progressMs:w.progressMs,travelMs:Math.max(0,s.managerWork.travelMs-(end-s.settledAtMs))},
     overlapParity:(s.overlapParity+overlap)%2};

@@ -2,6 +2,8 @@
 
 ## BATTLE-ANALYTICS-001 · STARTED (2026-11-27, chat)
 
+Candidate: bounded counters by actual frozen arena, distinct enemy weapon presence and unordered enemy weapon pair, exact committed gross coins and completed-bout arena time, lifetime since tracking and latest consecutive fought weapon/armour/tactic setup (all grades). Persist in same manager save; old saves start empty, no guessed history; closed by default; only render while open. Four targeted tests added to website workflow. Tests and mobile verification pending; no merge or deployment.
+
 BATTLE-ANALYTICS-001 — Owner requested 2026-11-27: collapsible Battle Analytics, lifetime recorded battle totals, wins, defeats, draws, win/loss by actual arena and opposing weapon/team composition, average gross arena coins per arena hour. Use committed results only, including bounded frozen offline settlement; no guessed historical breakdown, no per-bout history, no changes to outcome/reward mechanics. Show win rate and sample count, meaningful empty state. Proposed distinction between all recorded battles and recent/current loadout to aid strategy; first implement bounded aggregate foundations and test exact counts, save/reload, offline splits, alpha credit exclusion and mobile display. Baseline a1ff98d (#195 merged; website 45946558825 passed, live deployment not independently verified). Branch `feature/battle-analytics`. Next: extend the existing bounded settlement summary, then wire a saved accumulator and compact UI. No gameplay changes yet.
 
 ## ARENA-SPEED-001 · STARTED (2026-11-27, chat)
