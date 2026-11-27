@@ -37,7 +37,7 @@ const rows=[
  ["dreadguard","Disruptive Shield",strike("dread_strike","Dread Strike",4,1.18,{effect:"weaken"}),strike("dark_bind","Dark Bind",6,.90,{effect:"control",utility:true})]
 ];
 export const CLASS_KITS=Object.freeze(Object.fromEntries(rows.map(([id,passive,primary,secondary])=>[id,Object.freeze({passive,primary:Object.freeze(primary),secondary:Object.freeze(secondary)})])));
-export const kitActor=a=>[KIT_RULES_VERSION,4].includes(a?.groupCombatRules)&&Boolean(a.classId);
+export const kitActor=a=>[KIT_RULES_VERSION,4,5].includes(a?.groupCombatRules)&&Boolean(a.classId);
 export const pilotKit=a=>kitActor(a)?CLASS_KITS[a.classId]??null:null;
 export const kitStrength=a=>.75+.25*(a.classLevel-1)/49;
 export const KIT_BALANCE=Object.freeze({daggerShieldImpact:.38,daggerShieldBlock:.65,daggerPlateImpact:.62,daggerBlockedImpact:.19,

@@ -176,3 +176,74 @@ test("same-grade raid timing screen compares ordinary and counter builds",()=>{
  }
  console.log("RAID_MATCHED_SCREEN "+JSON.stringify({rules:1,quality:"masterwork",investment:"grade threshold productive time",results}));
 });
+
+import {tankFirstTargets,tankHealOrder} from "../site/play/group-counter-rules.mjs";
+import {resolveTeamBattle} from "../site/play/team-combat.mjs";
+import {ARENAS} from "../site/play/arenas.mjs";
+import {tryKitAction} from "../site/play/class-ability-policy.mjs";
+test("v5 tank aggro is strict for primary targets, with living-tank fallback and v4 unchanged",()=>{
+ const a={groupCombatRules:5},tank={role:"tank",hp:50},dead={role:"tank",hp:0},mage={role:"mage",hp:3};
+ assert.deepEqual(tankFirstTargets(a,[mage,tank]),[tank]);
+ assert.deepEqual(tankFirstTargets(a,[mage,dead]),[mage]);
+ assert.deepEqual(tankFirstTargets({groupCombatRules:4},[mage,tank]),[mage,tank]);
+ assert.ok(tankHealOrder(a,tank,mage)<0);assert.equal(tankHealOrder({groupCombatRules:4},tank,mage),0);
+});
+test("v5 healer chooses an injured tank before a critical mage, then falls back to other wounded allies",()=>{
+ const caster={id:"healer",side:"player",classId:"lifekeeper",classLevel:50,role:"healer",groupCombatRules:5,hp:100,maxHP:100,x:0,y:0,recovery:0,kitReady:{primary:0,secondary:0},activeTactic:"defensive"};
+ const tank={id:"tank",side:"player",role:"tank",hp:80,maxHP:100,x:1,y:0},mage={id:"mage",side:"player",role:"mage",hp:5,maxHP:100,x:0,y:1},enemy={id:"enemy",side:"enemy",role:"melee",hp:100,maxHP:100,x:3,y:0};
+ const events=[],ctx={terrain:{},record:(a,b,type,extra)=>events.push({type,target:b?.id,...extra})},weapon={range:2};
+ assert.equal(tryKitAction(caster,enemy,[caster,tank,mage,enemy],1,weapon,ctx),true);
+ assert.equal(events.find(e=>e.type==="heal").target,"tank");
+ caster.recovery=0;caster.kitReady={primary:0,secondary:0};tank.hp=tank.maxHP;events.length=0;
+ assert.equal(tryKitAction(caster,enemy,[caster,tank,mage,enemy],5,weapon,ctx),true);
+ assert.equal(events.find(e=>e.type==="heal").target,"mage");
+});
+test("v5 actual arena and raid traces pursue living opposing tanks on both sides",()=>{
+ const p=raidBenchmarkRoster(50,["oathkeeper","blademaster","flameweaver","galescourge","lifekeeper","war_dancer","nightblade"]);
+ const e=raidBenchmarkRoster(50,["grimwarden","linebreaker","frostweaver","blackbow","wellspring","nightblade","runesage"]);
+ const arena=ARENAS.find(a=>a.id==="walled_courtyard");
+ const r=resolveTeamBattle(p,e,seed,arena,{player:50,enemy:50,groupCombatRules:5});
+ const check=(r,players,enemies)=>{
+  const roster=Object.fromEntries([["player",players],["enemy",enemies]].flatMap(([side,team])=>team.map((a,i)=>[side+":"+i,a])));
+  let previous=r.events[0].vitals,checked=0;
+  for(const ev of r.events.slice(1)){
+   // Dodge records the dodging defender as actor, unlike other strike events.
+   const attacker=ev.type==="dodge"?ev.target:ev.actor,defender=ev.type==="dodge"?ev.actor:ev.target;
+   const a=roster[attacker],b=roster[defender];
+   if(a&&b&&attacker.split(":")[0]!==defender.split(":")[0]&&["hit","finisher","miss","dodge","block","parry","approach","retreat"].includes(ev.type)){
+    const side=defender.split(":")[0];
+    if(Object.entries(roster).some(([id,x])=>id.startsWith(side+":")&&x.role==="tank"&&previous[id].hp>0)){
+     assert.equal(b.role,"tank",ev.type+" "+ev.actor+" -> "+ev.target);checked++;
+    }
+   }
+   previous=ev.vitals;
+  }
+  assert.ok(checked>0);
+ };
+ check(r,p,e);const n=resolveRaid(p,50,seed,50,null,0,5);check(n,p,n.enemies);
+ assert.deepEqual(n,resolveRaid(p,50,seed,50,null,0,5));
+});
+test("v5 arena frozen snapshots remain valid and reproducible; v4 raid default unchanged",()=>{
+ const s=startGroupSession(maxGroup(),max,50,seed,{rules:5});assert.ok(validGroupSession(s));
+ const a=settleGroupSession(s,10000),b=settleGroupSession(JSON.parse(JSON.stringify(s)),10000);
+ assert.deepEqual(a,b);
+ const p=Object.values(groupSnapshots(maxGroup(),max,4)),old=resolveRaid(p,10,seed,50);
+ assert.deepEqual(old,resolveRaid(p,10,seed,50,null,0,4));
+});
+
+test("v5 raid aggro max-only diagnostic compares actual v4/v5 outcomes and tankless versus protected groups",()=>{
+ const results=[];
+ for(const [build,classes] of [["tank_healer",["oathkeeper","flameweaver","galescourge","frostweaver","lifekeeper","blackbow","runesage"]],["no_tank",["blademaster","flameweaver","galescourge","frostweaver","lifekeeper","blackbow","runesage"]],["no_healer",["oathkeeper","flameweaver","galescourge","frostweaver","nightblade","blackbow","runesage"]]]){
+  const p=raidBenchmarkRoster(50,classes);
+  for(const rules of [4,5])for(const s of [seed,seed+17,seed+31]){
+   const r=resolveRaid(p,50,s,50,null,0,rules);
+   const damageByRole={},healingByRole={};
+   for(const ev of r.events){
+    if(ev.target?.startsWith("player:")&&ev.actor?.startsWith("enemy:")&&ev.damage>0){const role=p[Number(ev.target.split(":")[1])].role;damageByRole[role]=(damageByRole[role]??0)+ev.damage;}
+    if(ev.type==="heal"&&ev.target?.startsWith("player:")&&ev.healing>0){const role=p[Number(ev.target.split(":")[1])].role;healingByRole[role]=(healingByRole[role]??0)+ev.healing;}
+   }
+   results.push({build,rules,seed:s,outcome:r.outcome,durationMs:r.durationMs,damageByRole,healingByRole});
+  }
+ }
+ console.log("TANK_AGGRO_RAID_SCREEN "+JSON.stringify(results));
+});

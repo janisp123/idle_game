@@ -23,10 +23,10 @@ export function raidMonsters(level){
  const s=groupSnapshots(g,{difficulty:d.grade,str:1,dex:1,end:1,skill:level},4);
  return GROUP_IDS.map((id,i)=>({...s[id],name:roster[i].name}));
 }
-export function resolveRaid(players,level,seed,teamworkLevel,buff=null,startedAtMs=0){
+export function resolveRaid(players,level,seed,teamworkLevel,buff=null,startedAtMs=0,rules=4){
  if(!count(seed)||seed>0xffffffff||!count(startedAtMs)||!Number.isInteger(teamworkLevel)||teamworkLevel<1||teamworkLevel>50)throw new RangeError("Invalid raid encounter");
  const d=raidDefinition(level),enemies=raidMonsters(level),terrain=ARENAS.find(a=>a.id===d.arenaId),bonus=raidBonus(buff,startedAtMs);
- const result=resolveTeamBattle(players,enemies,seed,terrain,{player:teamworkLevel,enemy:level,groupCombatRules:4,raid:{version:RAID_RULES_VERSION,level},playerBonus:{damage:bonus.damage,defence:bonus.defence}});
+ const result=resolveTeamBattle(players,enemies,seed,terrain,{player:teamworkLevel,enemy:level,groupCombatRules:rules,raid:{version:RAID_RULES_VERSION,level},playerBonus:{damage:bonus.damage,defence:bonus.defence}});
  const durationMs=Math.max(RAID_ROUND_MS,result.rounds*RAID_ROUND_MS);
  return {...result,enemies,terrain,level,durationMs};
 }
