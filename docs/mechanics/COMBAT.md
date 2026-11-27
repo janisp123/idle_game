@@ -188,3 +188,6 @@ First candidate 0ff3206 verified website 45982905013 (161 tests, real Chromium 3
 
 
 Terrain candidate: explicit bow impact/aim penalties in ruins and especially gatehouse; straight narrow bridge remains favorable to clear-line bow shots; dagger close-terrain bonus and padded/leather versus plate matchup, symmetric and applied only to new tactical rules. Added 1080 paired max-only direct dagger-versus-bow/mage/tank battles across five arenas. Fixed legacy symmetry audit's stale source signature match; no test acceptance weakened. 5880 existing max-only matches rerun as well. All class guides and effects are intended tactical identities pending validation, not guaranteed outcomes. No merge yet.
+
+
+CLASS-KITS-001 pilot candidate: ten immutable class kits, distinct conditional traits, two independent cooldowns, real action budget and shared strike/target/movement/heal/status policy. V3 only; explicit v1 and v2 historical golden payouts retained. Other 21 classes still use old one-signature action. Candidate dagger correction uses intact plate and shield mitigation rather than changing old rule values; actual pilot coefficients provisional. Added max-only real trace cooldown/action/HP/determinism checks; further family screen and UI update pending. No merge/deploy.

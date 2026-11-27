@@ -11,8 +11,8 @@ import {cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
 import {initialGroupRank,validGroupRank,rankProfile} from "./battle-group-rank.mjs?v=group-005";
 import {validTacticSnapshot,validTactic} from "./manager-tactics.mjs?v=manager-tactics-001";
 import {awardTeamwork,validTeamwork} from "./teamwork.mjs?v=team-002";
-import {resolveTeamBattle} from "./team-combat.mjs?v=terrain-003";
-import {GROUP_COMBAT_RULES_VERSION} from "./group-counter-rules.mjs";
+import {resolveTeamBattle} from "./team-combat.mjs?v=kits-001";
+import {GROUP_COMBAT_RULES_VERSION,SUPPORTED_GROUP_COMBAT_RULES} from "./group-counter-rules.mjs";
 export {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,GROUP_RECOVERY_MS};
 const duration=GROUP_BOUT_MS,recovery=GROUP_RECOVERY_MS,ratio=BOUT_MS/duration;
 const count=n=>Number.isSafeInteger(n)&&n>=0;
@@ -25,7 +25,7 @@ function validPlayers(p){
 }
 export function validGroupSession(s){
  return Boolean(s?.timelineVersion===GROUP_TIMELINE_VERSION&&count(s.seed)&&s.seed<=0xffffffff&&count(s.elapsedMs)&&s.prizeCursor===Math.floor(s.elapsedMs/duration)&&
-  [s.coinRemainder,s.teamworkRemainder].every(n=>count(n)&&n<ratio)&&validTeamwork({level:s.teamworkLevel,xp:0})&&validPlayers(s.players)&&validGroupRank(s.rank)&&(s.groupCombatRules===undefined||[1,GROUP_COMBAT_RULES_VERSION].includes(s.groupCombatRules)));
+  [s.coinRemainder,s.teamworkRemainder].every(n=>count(n)&&n<ratio)&&validTeamwork({level:s.teamworkLevel,xp:0})&&validPlayers(s.players)&&validGroupRank(s.rank)&&(s.groupCombatRules===undefined||SUPPORTED_GROUP_COMBAT_RULES.includes(s.groupCombatRules)));
 }
 export function startGroupSession(group,shared,teamworkLevel,seed,carry={}){
  const s={timelineVersion:GROUP_TIMELINE_VERSION,groupCombatRules:GROUP_COMBAT_RULES_VERSION,seed,elapsedMs:0,prizeCursor:0,teamworkLevel,

@@ -8,7 +8,7 @@ import { validTeamSession,startTeamSession,settleTeamSession,teamBoutMs,isCloneT
 import {captureCloneEnvelope} from "./clone-opponents.mjs?v=npc-parity-001";
 import {GROUP_IDS,validBattleGroup,groupSnapshots,awardGroupPractice,activateGroupPractice} from "./battle-group.mjs?v=group-001";
 import {advanceGroupRank} from "./battle-group-rank.mjs?v=group-005";
-import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession} from "./battle-group-timeline.mjs?v=terrain-003";
+import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession} from "./battle-group-timeline.mjs?v=kits-001";
 import {GROUP_COMBAT_RULES_VERSION} from "./group-counter-rules.mjs";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";

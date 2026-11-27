@@ -18,8 +18,8 @@ const roster=ids=>{
 const classic=["oathkeeper","blademaster","longshot","flameweaver","lifekeeper","wardchanter","war_dancer"];
 test("seven vs seven actual max-only shared resolver is deterministic, bounded and cooldown-correct",()=>{
  const p=roster(classic),e=roster(["ragebreaker","ironfist","blackbow","galescourge","wellspring","hexchief","forgecaller"]);
- for(const arena of ARENAS){const r=resolveTeamBattle(p,e,20261127,arena,{player:50,enemy:50});
-  assert.deepEqual(r,resolveTeamBattle(p,e,20261127,arena,{player:50,enemy:50}));assert.equal(Object.keys(r.survivors).length,14);assert.ok(r.rounds<=32);
+ for(const arena of ARENAS){const r=resolveTeamBattle(p,e,20261127,arena,{player:50,enemy:50,groupCombatRules:2});
+  assert.deepEqual(r,resolveTeamBattle(p,e,20261127,arena,{player:50,enemy:50,groupCombatRules:2}));assert.equal(Object.keys(r.survivors).length,14);assert.ok(r.rounds<=32);
   const previous={};for(const ev of r.events){for(const v of Object.values(ev.vitals)){assert.ok(v.hp>=0&&v.hp<=v.maxHP);assert.ok(Number.isFinite(v.hp));}
    if(ev.type==="class_ability"){const [side,i]=ev.actor.split(":"),c=GROUP_CLASSES[(side==="player"?p:e)[Number(i)].classId];
     assert.equal(ev.ability,c.ability.effect);if(previous[ev.actor]!==undefined)assert.ok(ev.round-previous[ev.actor]>=c.ability.cooldown);previous[ev.actor]=ev.round;}
@@ -31,7 +31,7 @@ test("all 31 class effects appear in real endgame bouts; healing, ward and offen
  const base=roster(classic),seen=new Set(),kinds=new Set();
  for(let i=0;i<GROUP_CLASS_IDS.length;i+=7){
   const p=roster(Array.from({length:7},(_,j)=>GROUP_CLASS_IDS[(i+j)%GROUP_CLASS_IDS.length]));
-  for(let j=0;j<5;j++){const r=resolveTeamBattle(p,base,(20261127+i*71+j*199)>>>0,ARENAS[j],{player:50,enemy:50});
+  for(let j=0;j<5;j++){const r=resolveTeamBattle(p,base,(20261127+i*71+j*199)>>>0,ARENAS[j],{player:50,enemy:50,groupCombatRules:2});
    for(const ev of r.events){if(ev.type==="class_ability"&&ev.actor.startsWith("player:"))seen.add(p[Number(ev.actor.split(":")[1])].classId);kinds.add(ev.type);if(ev.type==="heal")assert.ok(ev.healing>0);}
   }
  }
@@ -39,7 +39,7 @@ test("all 31 class effects appear in real endgame bouts; healing, ward and offen
  assert.ok(kinds.has("heal")&&kinds.has("ward")&&kinds.has("buff"));
 });
 test("duplicate healers are legal; combat still terminates without mana or extra actors",()=>{
- const p=roster(Array(7).fill("lifekeeper")),r=resolveTeamBattle(p,p,77,ARENAS[0],{player:50,enemy:50});
+ const p=roster(Array(7).fill("lifekeeper")),r=resolveTeamBattle(p,p,77,ARENAS[0],{player:50,enemy:50,groupCombatRules:2});
  assert.ok(r.rounds<=32);assert.equal(Object.keys(r.survivors).length,14);
 });
 
@@ -47,10 +47,29 @@ test("max-only archers cannot heal; tank shield intercepts arrows, magic bypasse
  const p=roster(["oathkeeper","grimwarden","grovewarden","dreadguard","lifekeeper","flameweaver","swiftblade"]);
  const e=roster(Array(7).fill("longshot"));let intercepts=0,blocks=0,heals=0;
  for(const arena of ARENAS)for(let i=0;i<4;i++){
-  const r=resolveTeamBattle(p,e,20261129+i*1009,arena,{player:50,enemy:50});
+  const r=resolveTeamBattle(p,e,20261129+i*1009,arena,{player:50,enemy:50,groupCombatRules:2});
   for(const ev of r.events){if(ev.type==="intercept"&&ev.actor?.startsWith("player:")&&ev.target?.startsWith("enemy:"))intercepts++;if(ev.type==="block"&&ev.move==="shot")blocks++;if(ev.type==="heal"){assert.ok(!ev.actor.startsWith("enemy:"));heals++;}}
  }
  assert.ok(intercepts>0,"no actual arrow interception");assert.ok(blocks>0,"no arrow blocks");assert.ok(heals>0,"no healer action");
  const tanks=roster(Array(7).fill("oathkeeper")),mages=roster(Array(7).fill("flameweaver"));
- for(const arena of ARENAS){const r=resolveTeamBattle(tanks,mages,20261129,arena,{player:50,enemy:50});assert.ok(!r.events.some(x=>x.type==="block"&&x.move==="spell"));}
+ for(const arena of ARENAS){const r=resolveTeamBattle(tanks,mages,20261129,arena,{player:50,enemy:50,groupCombatRules:2});assert.ok(!r.events.some(x=>x.type==="block"&&x.move==="spell"));}
+});
+
+import {CLASS_KITS} from "../site/play/class-kits.mjs";
+test("pilot kits use independent cooldowns, a single action and deterministic legal combat",()=>{
+ const ids=Object.keys(CLASS_KITS),seen=new Set(),p=roster(["trickblade","swiftblade","nightblade","longshot","windbow","blackbow","oathkeeper"]),q=roster(["grimwarden","grovewarden","dreadguard","flameweaver","lifekeeper","longshot","nightblade"]);
+ for(const arena of ARENAS)for(let i=0;i<5;i++){
+  const seed=20261201+i*1009,r=resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3});
+  assert.deepEqual(r,resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3}));
+  const last={},acted=new Set();
+  for(const ev of r.events){
+   for(const v of Object.values(ev.vitals)){assert.ok(v.hp>=0&&v.hp<=v.maxHP);assert.ok(Number.isInteger(v.hp));}
+   if(ev.type!=="class_ability"||!ev.slot)continue;
+   const [side,j]=ev.actor.split(":"),snapshot=(side==="player"?p:q)[Number(j)],k=CLASS_KITS[snapshot.classId],ability=k[ev.slot];
+   assert.equal(ev.ability,ability.id);const key=ev.actor+":"+ev.slot;
+   assert.ok(last[key]===undefined||ev.round-last[key]>=ability.cooldown);
+   last[key]=ev.round;assert.ok(!acted.has(ev.actor+":"+ev.round));acted.add(ev.actor+":"+ev.round);seen.add(snapshot.classId);
+  }
+ }
+ assert.deepEqual([...seen].sort(),ids.sort());
 });
