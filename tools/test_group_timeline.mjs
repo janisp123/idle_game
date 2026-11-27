@@ -27,13 +27,13 @@ test("frozen seven-character timeline partitions exact payouts, practice and ana
  for(const k of ["bouts","victories","defeats","doubleDeaths","coins","teamworkXP","downtimeMs"])assert.equal(a[k]+b[k],all[k],k);
  assert.deepEqual(b.session,all.session);for(const id of GROUP_IDS)assert.equal(a.practiceMs[id]+b.practiceMs[id],all.practiceMs[id]);
  for(const dim of ["zones","classes","races","roles","stances"])for(const [key,row] of Object.entries(all.analytics[dim]))assert.deepEqual(row,row.map((_,i)=>(a.analytics[dim][key]?.[i]??0)+(b.analytics[dim][key]?.[i]??0)));
- assert.equal(all.analytics.outcomes.reduce((x,y)=>x+y,0),all.bouts);assert.equal(all.analytics.ms,all.bouts*20000);
- const c=GROUP_CLASSES.trickblade,changed=selectGroupClass(g,"member1",c.race,c.mainClass,c.id),r=applyGroupSettlement(changed,{level:50,xp:0},s,20000,cache);
+ assert.equal(all.analytics.outcomes.reduce((x,y)=>x+y,0),all.bouts);assert.equal(all.analytics.ms,all.bouts*10000);
+ const c=GROUP_CLASSES.trickblade,changed=selectGroupClass(g,"member1",c.race,c.mainClass,c.id),r=applyGroupSettlement(changed,{level:50,xp:0},s,10000,cache);
  assert.ok(validBattleGroup(r.group));assert.equal(r.group.member1.classes.trickblade.expertise[c.loadout],0);assert.equal(r.group.member1.classes.trickblade.mastery.xp,0);
- assert.equal(groupCombatAtTime(s,10000).progress,.5);
+ assert.equal(groupCombatAtTime(s,5000).progress,.5);
 });
 test("long offline group settlement samples at most one fixed schedule",()=>{
- const s=startGroupSession(maxGroup(),max,50,seed),cache=new Map(),r=settleGroupSession(s,20000*513,cache);
+ const s=startGroupSession(maxGroup(),max,50,seed),cache=new Map(),r=settleGroupSession(s,10000*513,cache);
  assert.equal(r.bouts,513);assert.equal(r.sampledBouts,256);assert.equal(cache.size,256);assert.equal(r.victories+r.defeats+r.doubleDeaths,513);
  assert.ok(r.coins>=0);assert.ok(r.downtimeMs>=0);
  console.log("GROUP_TIMELINE_MAX_DIAGNOSTIC "+JSON.stringify({seed,bouts:r.bouts,sampled:r.sampledBouts,outcomes:r.analytics.outcomes,coins:r.coins,ms:r.analytics.ms,zones:r.analytics.zones,classes:r.analytics.classes}));

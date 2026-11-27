@@ -1,17 +1,18 @@
 // Versioned seven-member timeline; not yet integrated into manager saves.
-// Uses existing 20-second cadence, 2-second recovery and fractional payout.
+// Owner-approved 10-second cadence, 1-second recovery and fractional payout.
 import {ARENA_SCHEDULE_BOUTS,BOUT_MS,seededCombatRandom,validCombatSession} from "./combat.mjs?v=gear-a3";
 import {chooseArena} from "./arenas.mjs?v=bal-002";
 import {GROUP_IDS,groupSnapshots,awardGroupPractice,validBattleGroup} from "./battle-group.mjs?v=group-001";
 import {validGroupSnapshot} from "./battle-group-actions.mjs?v=group-002";
 import {captureGroupCloneEnvelope,validGroupCloneEnvelope,buildGroupCloneTeam} from "./battle-group-clones.mjs?v=group-003";
-import {MANAGER_BOUT_MS,MANAGER_RESURRECTION_MS,teamArenaReward} from "./team-timeline.mjs?v=npc-parity-001";
+import {teamArenaReward} from "./team-timeline.mjs?v=group-004";
+import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,GROUP_RECOVERY_MS} from "./battle-group-timing.mjs";
 import {cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
 import {validTacticSnapshot,validTactic} from "./manager-tactics.mjs?v=manager-tactics-001";
 import {awardTeamwork,validTeamwork} from "./teamwork.mjs?v=team-002";
 import {resolveTeamBattle} from "./team-combat.mjs?v=group-003";
-export const GROUP_TIMELINE_VERSION=5;
-const duration=MANAGER_BOUT_MS,recovery=MANAGER_RESURRECTION_MS,ratio=BOUT_MS/duration;
+export {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,GROUP_RECOVERY_MS};
+const duration=GROUP_BOUT_MS,recovery=GROUP_RECOVERY_MS,ratio=BOUT_MS/duration;
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 const exact=(o,keys)=>o&&typeof o==="object"&&!Array.isArray(o)&&Object.keys(o).length===keys.length&&keys.every(k=>Object.hasOwn(o,k));
 const sharedKeys=["str","dex","end","skill","difficulty"];

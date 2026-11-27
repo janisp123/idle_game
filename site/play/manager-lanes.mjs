@@ -5,8 +5,11 @@ import {
   newTeamGame, readSave, chooseActivity, settleManagerLane, managerCombatProductivePrefix,
   automateSettledProgress, activateExpertise, activityRewardCapped,
   recipeOptions, PRODUCTION_RECIPES, LIVE_FIGHT_MAX_MS, autoEquipmentPreview
-} from "./engine.mjs?v=npc-parity-001";
-import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=npc-parity-001";
+} from "./engine.mjs?v=group-004";
+import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=group-004";
+import {GROUP_TIMELINE_VERSION} from "./battle-group-timing.mjs";
+import {initialBattleGroup,validBattleGroup,selectGroupClass,selectGroupStance,upgradeBattleGroup,previewGroupUpgrade} from "./battle-group.mjs?v=group-001";
+import {blankGroupAnalytics,validGroupAnalytics,accumulateGroupAnalytics} from "./battle-group-analytics.mjs?v=group-004";
 import {blankBattleAnalytics,validBattleAnalytics,accumulateBattleAnalytics} from "./battle-analytics.mjs?v=npc-parity-001";
 import {WORK_ROTATION,ingredientReserve,rotateManagerWork,rotationTravelMs} from "./activity-rotation.mjs?v=npc-parity-001";
 import {blankArmourRequests,validArmourRequests,requestArmourSet,selectManagerWeapon,automateManagerEquipment,managerEquipmentPreview} from "./manager-equipment.mjs?v=npc-parity-001";
@@ -29,7 +32,8 @@ function validManagerShape(s){
     s.managerWork.progressMs<ACTIVITIES[s.managerWork.activity].durationMs&&
     count(s.managerWork.travelMs)&&s.managerWork.travelMs<=Math.max(...WORK_ROTATION.map(id=>rotationTravelMs(id,s.managerWork.activity)))&&
     (!s.managerWork.travelMs||s.managerWork.progressMs===0)&&[0,1].includes(s.overlapParity)&&validArmourRequests(s.armourRequests)&&validTactics(s.managerTactics)&&
-    (!s.combatSession||Object.values(s.combatSession.players??{}).every(validTacticSnapshot));
+    (!s.combatSession||Object.values(s.combatSession.players??{}).every(validTacticSnapshot))&&
+    (s.battleGroup===undefined?s.groupAnalytics===undefined:validBattleGroup(s.battleGroup)&&validGroupAnalytics(s.groupAnalytics));
 }
 function requireManager(s){if(!validManagerShape(s))throw new RangeError("Invalid manager state");}
 export function newManagerGame(now=Date.now(),firstWork="hunting"){
@@ -45,8 +49,8 @@ export function readManagerGame(value){
     if(!validManagerShape(raw)||raw.timingProfile!==TIMING_PROFILE)return null;
     const s=readSave(raw);
     if(!s||!s.teamSecond||raw.battleAnalytics!==undefined&&!validBattleAnalytics(raw.battleAnalytics))return null;
-    return {...s,combatSession:fasterTeamSession(s.combatSession),managerVersion:MANAGER_LANES_VERSION,
-      battleAnalytics:raw.battleAnalytics??blankBattleAnalytics(),managerWork:{...raw.managerWork},overlapParity:raw.overlapParity,armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
+    return {...s,combatSession:s.combatSession?.timelineVersion===GROUP_TIMELINE_VERSION?s.combatSession:fasterTeamSession(s.combatSession),managerVersion:MANAGER_LANES_VERSION,
+      battleAnalytics:raw.battleAnalytics??blankBattleAnalytics(),...(raw.battleGroup?{groupAnalytics:structuredClone(raw.groupAnalytics)}:{}),managerWork:{...raw.managerWork},overlapParity:raw.overlapParity,armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
   }catch{return null;}
 }
 // Internal coordinator hook for Phase 3, never a player-facing action.
@@ -57,6 +61,30 @@ export function assignManagerWork(s,id){
   if(!validWork(id))throw new RangeError("Invalid noncombat work");
   if(s.managerWork.activity===id)return s;
   return {...s,managerWork:{...blankWork(id),travelMs:rotationTravelMs(s.managerWork.activity,id)}};
+}
+// Explicit candidate activation only; manager-app does not opt in yet.
+export function enableBattleGroupManager(s){
+ requireManager(s);return s.battleGroup?s:{...s,battleGroup:initialBattleGroup(),groupAnalytics:blankGroupAnalytics()};
+}
+export function newBattleGroupManager(now=Date.now(),firstWork="hunting"){return enableBattleGroupManager(newManagerGame(now,firstWork));}
+function managerUpgradePreview(s){
+ return s.battleGroup?previewGroupUpgrade(s.battleGroup,s.coins,s.skills.fighting.level):managerEquipmentPreview(s);
+}
+function automateEquipment(out){
+ const s=out.state;if(!s.battleGroup)return automateManagerEquipment(out);
+ // An old frozen bout remains unchanged; no legacy purchases after opt-in.
+ const u=upgradeBattleGroup(s.battleGroup,s.coins,s.skills.fighting.level);
+ return {...out,state:{...s,battleGroup:u.group,coins:u.coins},autoEquipment:{upgrades:u.upgrades,acquisitions:[],equipped:[],spent:u.spent,preview:u.pending}};
+}
+export function chooseManagerGroupClass(s,member,race,mainClass,classId,now=s.settledAtMs,random=Math.random){
+ selectGroupClass(s.battleGroup,member,race,mainClass,classId);
+ const old=now===s.settledAtMs?{state:s,reports:[],levelsGained:{}}:settleManagerLive(s,now,random);
+ return automateEquipment({...old,state:{...old.state,battleGroup:selectGroupClass(old.state.battleGroup,member,race,mainClass,classId)}});
+}
+export function chooseManagerGroupStance(s,member,stance,now=s.settledAtMs,random=Math.random){
+ selectGroupStance(s.battleGroup,member,stance);
+ const old=now===s.settledAtMs?{state:s,reports:[],levelsGained:{}}:settleManagerLive(s,now,random);
+ return {...old,state:{...old.state,battleGroup:selectGroupStance(old.state.battleGroup,member,stance)}};
 }
 function laneTime(before,after){
   const total=ATTRIBUTE_IDS.reduce((n,id)=>n+after.attributeEffort[id]-before.attributeEffort[id],0);
@@ -117,7 +145,7 @@ function pair(s,end,random,online){
     const n=s.attributeEffort[id]+combatTime*(cw[id]??0)+workTime*(ww[id]??0);
     if(!count(n))throw new RangeError("Manager effort overflow");return [id,n];
   }));
-  const next={...c,battleAnalytics:accumulateBattleAnalytics(s.battleAnalytics,a.combat.report?.arena?.analytics??[]),skills:{...c.skills,[work.activity]:w.skills[work.activity]},
+  const next={...c,battleAnalytics:accumulateBattleAnalytics(s.battleAnalytics,a.combat.report?.arena?.analytics??[]),...(s.battleGroup?{groupAnalytics:accumulateGroupAnalytics(s.groupAnalytics,a.combat.report?.arena?.groupAnalytics??[])}:{}),skills:{...c.skills,[work.activity]:w.skills[work.activity]},
     items:w.items,attributeEffort,settledAtMs:end,
     managerWork:{activity:work.activity,progressMs:w.progressMs,travelMs:Math.max(0,s.managerWork.travelMs-(end-s.settledAtMs))},
     overlapParity:(s.overlapParity+overlap)%2};
@@ -132,7 +160,7 @@ export function settleManagerOffline(s,now=Date.now(),random=Math.random){
 export function enterManagerGame(s,now=Date.now(),random=Math.random){
   const out=settleManagerOffline(s,now,random);
   const active=activateExpertise(out.state),reserve=ingredientReserve(active);
-  const claimed=automateSettledProgress({...out,state:active},reserve,automateManagerEquipment);
+  const claimed=automateSettledProgress({...out,state:active},reserve,automateEquipment);
   return {...claimed,state:rotateManagerWork(claimed.state,claimed.mastery?.ready??[]),ingredientReserve:reserve};
 }
 export function settleManagerLive(s,now=Date.now(),random=Math.random){
@@ -142,7 +170,7 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
   let next=s;
   const apply=()=>{
     const active=activateExpertise(next);
-    const out=automateSettledProgress({state:active},ingredientReserve(active),automateManagerEquipment);
+    const out=automateSettledProgress({state:active},ingredientReserve(active),automateEquipment);
     next=rotateManagerWork(out.state,out.mastery?.ready??[]);
     for(const [id,n] of Object.entries(out.levelsGained??{}))levelsGained[id]=(levelsGained[id]??0)+n;
     for(const [id,n] of Object.entries(out.mastery?.tribute??{}))tribute[id]=(tribute[id]??0)+n;
@@ -154,7 +182,7 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
   for(let i=0;next.settledAtMs<now;i++){
     if(i>=64)throw new Error("Manager live boundary limit");
     const before=next.settledAtMs;
-    const duration=teamBoutMs(next.combatSession,true);
+    const duration=teamBoutMs(next.combatSession,true,Boolean(next.battleGroup));
     const segment=Math.min(now-before,duration-((next.combatSession?.elapsedMs??0)%duration),
       next.managerWork.travelMs||ACTIVITIES[next.managerWork.activity].durationMs-next.managerWork.progressMs,
       ACTIVITIES.fighting.durationMs-next.progressMs);
@@ -166,7 +194,7 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
   return {state:next,reports,report:reports.at(-1),levelsGained,teamworkLevelGained,tacticAdvances,
     ...(ready.length?{mastery:{ready,blocked:[],tribute}}:{}),
     ingredientReserve:ingredientReserve(next),
-    autoEquipment:{upgrades,acquisitions,equipped,spent,preview:managerEquipmentPreview(next)}};
+    autoEquipment:{upgrades,acquisitions,equipped,spent,preview:managerUpgradePreview(next)}};
 }
 
 // Public integration adapters must settle the old selection first and commit

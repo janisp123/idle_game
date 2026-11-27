@@ -11,6 +11,7 @@ import {newBattleDelta,recordBattleGroup} from "./battle-analytics.mjs?v=npc-par
 import {buildCloneTeam,validCloneEnvelope,cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
 import {validTacticSnapshot} from "./manager-tactics.mjs?v=manager-tactics-001";
 
+import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS} from "./battle-group-timing.mjs";
 export const TEAM_TIMELINE_VERSION=2;
 export const FAST_TEAM_TIMELINE_VERSION=3;
 export const CLONE_TEAM_TIMELINE_VERSION=4;
@@ -19,7 +20,7 @@ export const MANAGER_BOUT_MS=20_000;
 export const MANAGER_RESURRECTION_MS=2_000;
 const SPEED_RATIO=BOUT_MS/MANAGER_BOUT_MS;
 export const isFastTeamSession=s=>s?.timelineVersion===FAST_TEAM_TIMELINE_VERSION||isCloneTeamSession(s);
-export const teamBoutMs=(s,manager=false)=>isFastTeamSession(s)||(!s&&manager)?MANAGER_BOUT_MS:BOUT_MS;
+export const teamBoutMs=(s,manager=false,group=false)=>s?.timelineVersion===GROUP_TIMELINE_VERSION||(!s&&group)?GROUP_BOUT_MS:isFastTeamSession(s)||(!s&&manager)?MANAGER_BOUT_MS:BOUT_MS;
 const teamRecoveryMs=s=>isFastTeamSession(s)?MANAGER_RESURRECTION_MS:RESURRECTION_MS;
 
 export const TEAM_REWARD_PERCENT=140;
