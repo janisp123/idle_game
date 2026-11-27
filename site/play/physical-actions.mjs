@@ -1,4 +1,7 @@
 import { dodgeChance } from "./armour.mjs?v=bal-002";
+import {COUNTERS,tacticalActor,isArrow,intactTank} from "./group-counter-rules.mjs";
+import {kitStrikeModifiers,kitStatus,kitControlAllowed,kitControlDuration,kitPactHeal} from "./class-effects.mjs";
+import {kitActor,KIT_BALANCE} from "./class-kits.mjs";
 // Pure provisional arena rules. Distances, injuries and wear are game abstractions.
 export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 5 });
 export const WEAPONS = Object.freeze({
@@ -115,13 +118,14 @@ export function vitals(target) {
 // Shared physical strike. Geometry and turn policy belong to the caller.
 export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,speedRoll,record,interruptApproach,onBleed=()=>{}}){
   const attack = actor.counter && actor.shield.hp > 0 ? BASH : active;
+  const kit=kitStrikeModifiers(actor,target,attack,distance);
   const counter = actor.counter;
   actor.counter = false;
   const constriction = Math.max(0, (attack.clearance ?? 0) - (terrain.clearance ?? 2));
   // Shortened greatsword swings still lose accuracy and impact in tight
   // quarters, without paying the full recovery penalty for every swing.
   const clearanceRecovery=actor.loadout==="greatsword"?Math.max(0,constriction-1):constriction;
-  actor.recovery=attack.recovery-1+clearanceRecovery;
+  actor.recovery=attack.recovery-1+clearanceRecovery+kit.recovery;
   if (attack.move === "shot"&&!actor.classId) actor.arrows--;
   const shortSpear = attack.move === "thrust" && distance === 0;
   const obscuredShot = attack.ranged && distance > 0
@@ -131,20 +135,25 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   const equipped=activePiece.hp>0;
   if(equipped && speedRoll()<activePiece.speed)actor.recovery=Math.max(0,actor.recovery-1);
   const handling=attack.move==="dagger"?TACTICS.daggerHandling:1;
-  const aim = AIM.base + (equipped?activePiece.accuracy*handling:0) + (actor.dex - target.dex) * AIM.dex + (actor.skill - target.skill) * AIM.skill +
+  const closeCasting=tacticalActor(actor)&&active.type==="magic"&&distance===0?COUNTERS.exposedCasterAimPenalty:0;
+  const cornerAim=tacticalActor(actor)&&isArrow(attack)?(COUNTERS.arrowTerrainAim[terrain.id]??0):0;
+  const aim = AIM.base - closeCasting - cornerAim + kit.aim + (equipped?activePiece.accuracy*handling:0) + (actor.dex - target.dex) * AIM.dex + (actor.skill - target.skill) * AIM.skill +
     (distance === 0 && bow ? AIM.closeBow : 0) + (distance===2&&bow?AIM.farBow:0) + (shortSpear ? AIM.closeSpear : attack.move==="thrust"&&distance===1?AIM.reachSpear:0) - obscuredShot - constriction * AIM.clearance * (actor.loadout==='greatsword'?1-.55*handlingScale(activePiece):1);
   if (roll() >= Math.max(AIM.minimum, Math.min(AIM.maximum, aim))) {
     record(actor, target, "miss", { move: attack.move });
     return;
   }
   // Actual defense event after accuracy. Broken pieces lose graded dodge.
-  if(roll()<dodgeChance(mobility(target),intactArmourSum(target,"dodge"))){
+  if(roll()<Math.min(kitActor(target)?.98:1,dodgeChance(mobility(target),intactArmourSum(target,"dodge"))+kit.dodge)){
     record(target,actor,"dodge",{move:attack.move});
     return;
   }
   const guardRoll = roll();
-  const block = target.shield.hp > 0 && guardRoll < (attack.type === "blunt" ? GUARD.bluntBlock : GUARD.block)*target.shield.proficiency*(target.guardOpen>0?GUARD.openFactor:1);
-  const parry = !block && target.loadout === "greatsword" && target.weapon.hp > 0 &&
+  const tactical=tacticalActor(actor)&&tacticalActor(target),arrow=tactical&&isArrow(attack),shielded=tactical&&intactTank(target);
+  // A shield catches arrows, not spells. A broken/open guard loses its advantage.
+  const blockChance=tactical&&attack.type==="magic"?0:Math.min(.95,(kit.shieldChance??(arrow&&shielded?COUNTERS.arrowBlock:attack.type==="blunt"?GUARD.bluntBlock:GUARD.block))+kit.block);
+  const block = target.shield.hp > 0 && guardRoll < blockChance*target.shield.proficiency*(target.guardOpen>0?GUARD.openFactor:1);
+  const parry = !block && !(tactical&&attack.type==="magic") && target.loadout === "greatsword" && target.weapon.hp > 0 &&
     target.recovery <= 1 && guardRoll < (target.recovery===0?GUARD.parry+.03*handlingScale(target.weapon):GUARD.recoveringParry+.03*handlingScale(target.weapon))*target.weapon.proficiency*(target.guardOpen>0?GUARD.openFactor:1);
   const intact = actor.weapon.hp > 0 || attack.move === "dagger" || attack === BASH;
   // Broken weapons retain only improvised base damage, never their grade
@@ -155,14 +164,29 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   const vital = !block && !parry && guardRoll > 1-Math.max(0,.04+(equipped?activePiece.crit:0)-intactArmourSum(target,"critResist"));
   const penetration=equipped?activePiece.penetration*handling:0;
   const materialProtection=protection(target,attack.type)*(1-penetration);
-  const shotImpact=attack.ranged&&attack.type!=="magic"?(distance===2?TACTICS.farShotImpact:distance===1?TACTICS.reachShotImpact:TACTICS.closeShotImpact):1;
-  const blockImpact=attack.type==="blunt"?GUARD.bluntBlockImpact:attack.move==="thrust"&&distance===1?GUARD.reachBlockImpact:attack.ranged?GUARD.rangedBlockImpact:GUARD.blockImpact;
+  const shotImpact=attack.ranged&&attack.type!=="magic"?(arrow?(distance===2?COUNTERS.farArrowImpact:distance===1?COUNTERS.reachArrowImpact:COUNTERS.closeArrowImpact):(distance===2?TACTICS.farShotImpact:distance===1?TACTICS.reachShotImpact:TACTICS.closeShotImpact)):1;
+  const blockImpact=kit.blockImpact??(arrow&&shielded?COUNTERS.arrowBlockImpact:attack.type==="blunt"?GUARD.bluntBlockImpact:attack.move==="thrust"&&distance===1?GUARD.reachBlockImpact:attack.ranged?GUARD.rangedBlockImpact:GUARD.blockImpact);
   // Separate material protection from grade resistance: equal-grade
   // equipment approximately cancels scaling, lower-grade armour does not.
   const resistance=intactArmourSum(target,"resistance");
-  const classScale=(attack.damageScale??1)*(1+(actor.classBuff??0))*(1-(actor.classWeaken??0))*(1-(target.classGuard??0));
-  const impact = Math.max(1, Math.round(base * classScale * shotImpact * (vital ? 1+Math.max(0,.65+(equipped?activePiece.critDamage:0)-intactArmourSum(target,"critReduction")) : 1) *
-    (block ? blockImpact : parry ? 0.35 : 1) *
+  let matchup=1;
+  if(tactical){
+    if(arrow)matchup*=COUNTERS.arrowTerrain[terrain.id]??1;
+    if(attack.move==="knife"){
+      const family=target.trainingKit?.armour?.torso;
+      matchup*=(family==="padded"?COUNTERS.daggerVsPadded:family==="leather"?COUNTERS.daggerVsLeather:family==="plate"?COUNTERS.daggerVsPlate:1)*(COUNTERS.daggerTerrain[terrain.id]??1);
+    }
+    if(arrow&&shielded&&!target.guardOpen)matchup*=COUNTERS.shieldedArrowImpact;
+    if(arrow&&target.trainingKit?.armour?.torso==="plate")matchup*=COUNTERS.plateArrowImpact;
+    if(attack.type==="magic"&&target.role==="tank")matchup*=COUNTERS.tankMagicImpact;
+    if(actor.role==="melee"&&distance===0&&["mage","healer","summoner"].includes(target.role))matchup*=COUNTERS.exposedCasterMelee;
+    if(actor.role==="healer")matchup*=COUNTERS.healerAttack;
+    if(actor.role==="support")matchup*=COUNTERS.supportAttack;
+    if(actor.role==="summoner")matchup*=COUNTERS.summonerAttack;
+  }
+  const classScale=(attack.damageScale??1)*matchup*kit.impact*(1+(actor.classBuff??0))*(1-(actor.classWeaken??0))*(1-(target.classGuard??0));
+  const impact = Math.max(1, Math.round(base * classScale * shotImpact * (vital ? 1+Math.max(0,.65+kit.crit+(equipped?activePiece.critDamage:0)-intactArmourSum(target,"critReduction")) : 1) *
+    (block ? blockImpact : parry ? (kit.parryImpact??0.35) : 1) *
     (1 - Math.min(80, materialProtection) / 100) /
     (1+resistance*(1-penetration)) - flatGuard(target) * GUARD.flatReduction));
   const damage = wound(actor, target, impact);
@@ -174,10 +198,16 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
     if (armour && wear(armour, attack.type === "blunt" ? 9 : 5)) broken.push(armour.id);
   }
   if (intact && attack.move !== "dagger" && attack !== BASH && wear(actor.weapon, 3)) broken.push("attack weapon");
-  if (block && target.shield.hp > 0) target.counter = attack.type !== "blunt" && guardRoll < GUARD.counterChance;
+  if(block&&kitActor(target)&&target.classId==="dreadguard"&&target.shield.hp>0){kitStatus(actor,"classWeaken","weakenUntil",KIT_BALANCE.dreadBlockWeaken,actor.kitRound??1);}
+  if (block && target.shield.hp > 0) target.counter = !(tactical&&attack.ranged) && attack.type !== "blunt" && guardRoll < GUARD.counterChance;
   if (!block && !parry && damage >= 8 && attack.type !== "blunt" && attack.type !== "magic") { target.bleed = Math.max(target.bleed, 2); onBleed(actor,target); }
   if (attack.type === "blunt" && (damage >= 8 || attack === BASH)) {
-    target.stagger=1;
+    // The new melee control kits cannot repeatedly stun through immunity or Brace.
+    const newControl=kitActor(actor)&&["ironfist","scrapbreaker"].includes(actor.classId);
+    if(!kitActor(target)||(!target.kitBraceUntil&&!newControl)||kitControlAllowed(target,actor.kitRound??1)){
+      target.stagger=1;
+      if(newControl&&kitActor(target))target.classControlUntil=(actor.kitRound??1)+kitControlDuration(target);
+    }
     // A heavy impact opens a guard without permanently breaking Masterwork.
     if(attack.move==="hammer")target.guardOpen=TACTICS.guardOpenTurns;
   }
@@ -189,4 +219,8 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   }
   record(actor, target, block ? "block" : parry ? "parry" : vital ? "finisher" : "hit",
     { damage, move: attack.move, broken, defenseSkill: block ? "shield_block" : parry ? "blade_guard" : null });
+  if(!block&&!parry&&attack.type!=="magic"&&!attack.ranged){
+    const healing=kitPactHeal(actor,damage,actor.kitRound??1);
+    if(healing)record(actor,actor,"heal",{healing,fromDamage:damage,source:"blood_pact"});
+  }
 }

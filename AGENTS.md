@@ -1,5 +1,9 @@
 # Agent instructions — Idle Game and public research library
 
+## Class and terrain identity — CLASS-TERRAIN-001
+
+Owner-approved: preserve pronounced situational strengths and weaknesses, genuine movement/range/armour interactions and free duplicate compositions. Each specialization has a separate accessible info button with actual equipment and ability, strengths, weaknesses, favourable and unfavourable terrain. Advice is tactical intention until validated by max-only paired tests. See docs/mechanics/CLASS_TACTICAL_GUIDE.md.
+
 ## Arena-only economy — ARENA-ONLY-001 (2026-11-27)
 
 **Owner-approved; supersedes AUTO-ACTIVITY-001 and all survival/resource progression directions.** Public manager has only coins and combat-earned experience/stat growth. No gathering, crafting, material inventory, tributes, noncombat work lanes or noncombat skill advancement. Fighting remains automatic, including productive defeat practice. Coins are the sole spendable currency for every purchasable upgrade, including future clan development. XP is earned, never spent. No alternate currencies or material requirements. Do not implement clans without separate approval. Keep historical test fixtures isolated from the public manager. Existing earned attributes and old skill bonuses retained, but noncombat skills frozen. No material-to-coin conversion. Keep frozen offline cap and class/gear progression.

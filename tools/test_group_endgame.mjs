@@ -54,3 +54,38 @@ test("max-only paired orientation and terrain class composition diagnostic",()=>
  }
  console.log("GROUP_ENDGAME_SCREEN "+JSON.stringify({seeds,shared,fixtures:fixtures.length,configs:results.length,bouts:fixtures.length*2*results.length,results}));
 });
+
+test("max-only direct role counter matrix across all five environments",()=>{
+ const roles=Object.keys(slots),teams=Object.fromEntries(configs.filter(c=>c.name.startsWith("stack:")).map(c=>[c.name.slice(6),roster(c.ids)])),matrix=[];
+ for(let i=0;i<roles.length;i++)for(let j=i+1;j<roles.length;j++){
+  const a=roles[i],b=roles[j],zones={};
+  for(const [z,terrain] of ARENAS.entries()){
+   const r=zones[terrain.id]=[0,0,0];
+   for(let k=0;k<4;k++){const seed=(20261129+z*100003+k*1009)>>>0;
+    add(r,resolveTeamBattle(teams[a],teams[b],seed,terrain,{player:50,enemy:50}).outcome,false);
+    add(r,resolveTeamBattle(teams[b],teams[a],seed,terrain,{player:50,enemy:50}).outcome,true);
+   }
+  }
+  matrix.push({a,b,zones,totals:Object.values(zones).reduce((r,x)=>r.map((n,i)=>n+x[i]),[0,0,0])});
+ }
+ console.log("GROUP_COUNTER_MATRIX "+JSON.stringify({bouts:matrix.length*40,matrix}));
+});
+
+test("max-only terrain identity: each dagger specialization versus bows, mages and tanks",()=>{
+ const results=[];
+ for(const id of ["trickblade","swiftblade","nightblade"]){
+  const p=roster(Array(7).fill(id));
+  for(const opponent of ["longshot","flameweaver","oathkeeper"]){
+   const q=roster(Array(7).fill(opponent)),zones={};
+   for(const [z,arena] of ARENAS.entries()){
+    const r=zones[arena.id]=[0,0,0];
+    for(let k=0;k<12;k++){const seed=(20261130+z*100003+k*1009)>>>0;
+     add(r,resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50}).outcome,false);
+     add(r,resolveTeamBattle(q,p,seed,arena,{player:50,enemy:50}).outcome,true);
+    }
+   }
+   results.push({id,opponent,zones});
+  }
+ }
+ console.log("DAGGER_TERRAIN_SCREEN "+JSON.stringify({bouts:results.length*5*24,results}));
+});

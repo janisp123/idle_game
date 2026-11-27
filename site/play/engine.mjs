@@ -8,7 +8,8 @@ import { validTeamSession,startTeamSession,settleTeamSession,teamBoutMs,isCloneT
 import {captureCloneEnvelope} from "./clone-opponents.mjs?v=npc-parity-001";
 import {GROUP_IDS,validBattleGroup,groupSnapshots,awardGroupPractice,activateGroupPractice} from "./battle-group.mjs?v=group-001";
 import {advanceGroupRank} from "./battle-group-rank.mjs?v=group-005";
-import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession} from "./battle-group-timeline.mjs?v=group-005";
+import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession} from "./battle-group-timeline.mjs?v=kits-001";
+import {GROUP_COMBAT_RULES_VERSION} from "./group-counter-rules.mjs";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
 import {
@@ -488,7 +489,7 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
  }
  if(!session)session=startGroupSession(group,shared,teamwork.level,state.settledAtMs>>>0);
  const run=ms=>{
-  const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.rank.grade]);
+  const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.rank.grade,session.groupCombatRules??1]);
   if(outcomeCaches&&!outcomeCaches.has(key))outcomeCaches.set(key,new Map());
   const r=settleGroupSession(session,ms,outcomeCaches?.get(key));
   group=awardGroupPractice(group,session.players,r.practiceMs);teamwork=awardTeamwork(teamwork,r.teamworkXP);session=r.session;
@@ -502,7 +503,7 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
   const remaining=(GROUP_BOUT_MS-session.elapsedMs%GROUP_BOUT_MS)%GROUP_BOUT_MS;
   if(elapsedMs<remaining){run(elapsedMs);return result();}
   if(remaining)run(remaining);
-  session={...session,players:desired,teamworkLevel:teamwork.level};elapsedMs-=remaining;
+  session={...session,players:desired,teamworkLevel:teamwork.level,...(online?{groupCombatRules:GROUP_COMBAT_RULES_VERSION}:{})};elapsedMs-=remaining;
  }
  if(elapsedMs)run(elapsedMs);
  return result();

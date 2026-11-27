@@ -1,4 +1,4 @@
-import { TIMING_PROFILE, enterGame } from "./engine.mjs?v=group-005";
+import { TIMING_PROFILE, enterGame } from "./engine.mjs?v=kits-001";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 import {expertiseThreshold} from "./expertise.mjs?v=alpha-gear-a3";
 import { awardAttributeTime,blankAttributeEffort } from "./attributes.mjs?v=glad-001";

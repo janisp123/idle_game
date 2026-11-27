@@ -39,3 +39,22 @@ test("long offline group settlement samples at most one fixed schedule",()=>{
  assert.ok(r.coins>=0);assert.ok(r.downtimeMs>=0);
  console.log("GROUP_TIMELINE_MAX_DIAGNOSTIC "+JSON.stringify({seed,bouts:r.bouts,sampled:r.sampledBouts,outcomes:r.analytics.outcomes,coins:r.coins,ms:r.analytics.ms,zones:r.analytics.zones,classes:r.analytics.classes}));
 });
+
+test("legacy saved rules remain frozen and new sessions explicitly use tactical rules",()=>{
+ const next=startGroupSession(maxGroup(),max,50,seed),old={...next};delete old.groupCombatRules;
+ assert.equal(next.groupCombatRules,3);assert.ok(validGroupSession(old));assert.ok(!validGroupSession({...next,groupCombatRules:999}));
+ const a=settleGroupSession(old,10000);assert.equal(a.session.groupCombatRules,undefined);
+ assert.deepEqual(groupCombatAtTime(old),groupCombatAtTime({...old,groupCombatRules:1}));
+});
+
+test("deployed v1 maximum-build schedule preserves exact 513-bout reward history",()=>{
+ const s=startGroupSession(maxGroup(),max,50,seed);delete s.groupCombatRules;
+ const r=settleGroupSession(s,513*10000);
+ assert.deepEqual(r.analytics.outcomes,[272,239,2]);assert.equal(r.coins,3522);assert.equal(r.session.groupCombatRules,undefined);
+});
+
+test("v2 terrain candidate remains exact after pilot kit rule addition",()=>{
+ const s=startGroupSession(maxGroup(),max,50,seed);s.groupCombatRules=2;
+ const r=settleGroupSession(s,513*10000);
+ assert.deepEqual(r.analytics.outcomes,[213,300,0]);assert.equal(r.coins,2758);assert.equal(r.session.groupCombatRules,2);
+});

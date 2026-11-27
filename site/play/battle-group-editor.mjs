@@ -3,6 +3,7 @@
 import {GROUP_IDS} from "./battle-group.mjs?v=group-001";
 import {GROUP_CLASSES,GROUP_RACES,RACE_LABELS,groupMainClasses,groupSpecializations} from "./battle-group-classes.mjs?v=group-001";
 import {ROLE_ICONS,renderGroupProgress} from "./battle-group-progress-view.mjs?v=group-006";
+import {classTacticalInfo} from "./class-tactical-info.mjs?v=class-info-001";
 const RACE_ICONS=Object.freeze({"human":"●","elf":"❋","dark_elf":"☾","orc":"◆","dwarf":"⬢"});
 const $=id=>document.getElementById(id),node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
 function choices(host,entries,value,onChoice){
@@ -18,7 +19,34 @@ function choices(host,entries,value,onChoice){
  }
  for(const b of host.children){b.setAttribute("aria-pressed",String(b.dataset.choice===value));b.onclick=()=>onChoice(b.dataset.choice);}
 }
+function openClassInfo(id){
+ const c=classTacticalInfo(id),dialog=$("classInfoDialog");
+ $("classInfoHeading").textContent=c.name;
+ $("classInfoEquipment").textContent=c.race+" · "+c.role+" · "+c.weapon+" · "+c.armour+" armour";
+ $("classInfoAction").textContent=c.summary+" Signature cooldown: "+c.cooldown+" rounds.";
+ $("classInfoStrong").textContent=c.strong;$("classInfoBest").textContent=c.best;
+ $("classInfoWeak").textContent=c.weak;$("classInfoWorst").textContent=c.worst;
+ if(!dialog.open)dialog.showModal();
+}
+function specializationChoices(host,entries,value,onChoice){
+ const key=JSON.stringify(entries);
+ if(host.dataset.options!==key){
+  const focused=document.activeElement?.dataset?.choice??document.activeElement?.dataset?.classInfo;
+  const isInfo=Boolean(document.activeElement?.dataset?.classInfo),restore=host.contains(document.activeElement);
+  host.replaceChildren(...entries.map(([id,label])=>{
+   const wrap=node("div");wrap.className="specialization-option";
+   const select=node("button",label);select.type="button";select.dataset.choice=id;
+   const info=node("button","ⓘ");info.type="button";info.dataset.classInfo=id;info.className="class-info-button";
+   info.setAttribute("aria-label","Information about "+GROUP_CLASSES[id].name);info.onclick=()=>openClassInfo(id);
+   wrap.append(select,info);return wrap;
+  }));
+  host.dataset.options=key;
+  if(restore)[...host.querySelectorAll(isInfo?"[data-class-info]":"[data-choice]")].find(b=>(isInfo?b.dataset.classInfo:b.dataset.choice)===focused)?.focus();
+ }
+ for(const b of host.querySelectorAll("[data-choice]")){b.setAttribute("aria-pressed",String(b.dataset.choice===value));b.onclick=()=>onChoice(b.dataset.choice);}
+}
 export function createGroupEditor(onClass,onStance){
+ $("classInfoClose").addEventListener("click",()=>$("classInfoDialog").close());
  let current=null,selected=GROUP_IDS[0],draft=null,lastProgress="";
  const host=$("fighterButtons");
  for(const id of GROUP_IDS){
@@ -40,7 +68,7 @@ export function createGroupEditor(onClass,onStance){
    if(id!==r){draft={race:id,main:groupMainClasses(id)[0]};render(current);}
   });
   choices(main,groupMainClasses(r).map(id=>[id,id]),k,id=>{draft={race:r,main:id};render(current);});
-  choices(special,groupSpecializations(r,k).map(x=>[x.id,ROLE_ICONS[x.role]+" "+x.name+" · Lv "+(m.classes[x.id]?.mastery.level??1)]),c.race===r&&c.mainClass===k?c.id:null,id=>{
+  specializationChoices(special,groupSpecializations(r,k).map(x=>[x.id,ROLE_ICONS[x.role]+" "+x.name+" · Lv "+(m.classes[x.id]?.mastery.level??1)]),c.race===r&&c.mainClass===k?c.id:null,id=>{
    const next=GROUP_CLASSES[id];draft=null;if(id===m.selected){render(current);return;}onClass(selected,next);
   });
   const status=draft&&(c.race!==r||c.mainClass!==k)?"Choose a specialization to change class. Active: "+c.name:"Active: "+c.name;

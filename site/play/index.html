@@ -7,8 +7,8 @@
 <title>The Long Vigil — Play</title>
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./game.css">
-<link rel="stylesheet" href="./manager-ui.css?v=group-007">
-<script type="module" src="./manager-app.mjs?v=arena-only-002"></script>
+<link rel="stylesheet" href="./manager-ui.css?v=class-info-001">
+<script type="module" src="./manager-app.mjs?v=kits-001"></script>
 </head>
 <body>
 <a class="skip-link" href="#game">Skip to game</a>
@@ -73,5 +73,6 @@
 <footer>Local browser alpha · The Long Vigil</footer>
 </main>
 <dialog id="loginReport" aria-labelledby="loginReportHeading"><h2 id="loginReportHeading">Last login report</h2><p id="loginReportSummary"></p><ul id="loginReportBody" class="progress-feed"></ul><button id="loginReportDismiss" type="button" autofocus>Continue</button></dialog>
+<dialog id="classInfoDialog" aria-labelledby="classInfoHeading"><h2 id="classInfoHeading"></h2><p id="classInfoEquipment" class="quiet"></p><p id="classInfoAction"></p><dl class="class-info-details"><dt>Strong against / purpose</dt><dd id="classInfoStrong"></dd><dt>Best environments</dt><dd id="classInfoBest"></dd><dt>Weak against</dt><dd id="classInfoWeak"></dd><dt>Unfavourable environments</dt><dd id="classInfoWorst"></dd></dl><p class="quiet">Tactical guidance, not guaranteed outcomes. Alpha balance is still being tested.</p><button id="classInfoClose" type="button" autofocus>Close</button></dialog>
 </body>
 </html>

@@ -2,6 +2,10 @@
 
 **Purpose:** the human-readable, maintained reference for **what the playable game actually calculates**, where to tune it, what tests prevent regressions, and which mechanics are not implemented. Read this before editing progression, balance, drops, combat, scheduling or offline settlement. This handbook is **our game specification**, separate from `docs/library/`'s general engineering research.
 
+## CLASS-KITS-001 planned extension
+
+[Automatic class kits implementation plan](CLASS_KITS_IMPLEMENTATION_PLAN.md) · [Interlude identity research](INTERLUDE_CLASS_IDENTITIES_20261127.md). Owner approved direction. Draft PR #200 contains 31/31 candidate kits (10 pilot, five melee, four mage, three healer, five support, four summoner); all v3 classes have two automatic abilities and a passive. Historical v1/v2 signatures remain for settlement. Live main unchanged. [Pilot evidence](CLASS_KITS_PILOT_SCREEN_20261127.md).
+
 ## ARENA-ONLY-001 candidate (PR #199)
 
 Public arena entry points in `arena-manager.mjs` settle Fighting only; allocate 100% productive combat effort using existing Fighting weights, and auto-claim Fighting XP only. Coins buy automatic equipment. Noncombat work/loot/crafting are retired from public play; historical descriptions and developer fixtures below remain for regression. Old material counts clear without conversion, historical noncombat skill levels and already earned stats stay frozen. Offline XP cap, 10-second arena, class progression and analytics remain. No new clan feature. Pending CI and release.
