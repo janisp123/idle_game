@@ -1,0 +1,23 @@
+/* Original classic fantasy MMORPG theme; no third-party art, logos or fonts. */
+:root{--background:#0a111b;--surface:#111f2d;--surface-raised:#1b2c3c;--ink:#e9e6d8;--soft:#c5ced4;--muted:#a8b7c3;--hairline:#57616b;--gold:#b4a078;--gold-light:#e6d2a0;--blood:#596d9f;--blood-light:#a7bce2}
+body{background:radial-gradient(ellipse at 74% 8%,#354d65 0,transparent 48%),linear-gradient(180deg,#111e2e,#080e17 78%);color:var(--ink)}
+body::before{background:radial-gradient(ellipse at 70% 20%,#7194ba22,transparent 65%)}
+.site-header{background:linear-gradient(180deg,#263849,#101a27);border-color:#8a8067;box-shadow:0 6px 24px #0008}
+.site-header::after{background:linear-gradient(90deg,transparent,#a69a76,#e9d6a4,#a69a76,transparent)}
+.brand-mark span{background:linear-gradient(#e8d6ab,#8a7956)}.brand-divider,.footer-brand span,.nav-github span{color:#d8c28f}
+.navigation a,.navigation .nav-github{color:#dce3e7}
+.hero{background:radial-gradient(ellipse at 70% 45%,#7892b529,transparent 67%),linear-gradient(145deg,#172b3b55,#0c1420aa)}
+.hero h1,.heading-flex h2,.library-intro h2,.closing h2{color:#f0e7cd;text-shadow:0 2px 12px #000b}
+.hero h1 em,.heading-flex h2 span,.library-intro h2 span,.closing h2 em{color:#c1d7ee}
+.eyebrow,.section-kicker,.small-sigil,.hero-lower,.hero-oath{color:#c8b98e}
+.hero-lead,.hero-subtext,.heading-flex p,.library-intro p,.progression-note{color:#c4d0db}
+.hero-art.hero-art-painted{position:relative;outline:1px solid #b4a078;outline-offset:4px;box-shadow:0 0 0 8px #141e2b,0 0 0 9px #655f50,0 18px 45px #0008;border-radius:2px}
+.button,.button-primary,.button-outline{border:1px solid #9d8a61;border-radius:3px;box-shadow:inset 0 0 0 2px #101824,0 4px 12px #0006;color:#ecdfbc;background:linear-gradient(180deg,#374b60,#182638)}
+.button-primary,.button-play{background:linear-gradient(180deg,#d8c596,#a18b5e);color:#182334;border-color:#f1ddb1;box-shadow:inset 0 0 0 2px #6b6049,0 4px 16px #0008}
+.button:hover{filter:brightness(1.14)}
+.principles,.library-section,.closing,.hobby-section{background:linear-gradient(145deg,#152435,#0d1825);border-color:#6d6654}
+.principle-card,.library-row,.status-strip{background:linear-gradient(150deg,#26394b,#13202e);border-color:#6e716e;border-radius:3px;box-shadow:inset 0 0 0 2px #0c1521,0 6px 16px #0003}
+.principle-card h3,.library-row strong,.status-indicator strong{color:#e9d9b2}.principle-card p,.library-row small,.hobby-copy>p:not(.section-kicker){color:#c4d0db}
+.card-glyph,.closing-symbol{color:#b9cde4;text-shadow:0 0 20px #6c91c9}
+.hobby-copy h2,.hobby-copy h2 span{color:#e6d2a0}.site-footer{background:#0b1420;border-color:#695f4f}
+@media(max-width:600px){.hero-art.hero-art-painted{outline-offset:2px;box-shadow:0 0 0 4px #151f2c,0 0 0 5px #655f50,0 8px 25px #0008}}

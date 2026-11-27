@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — CLASS-GUIDE-002 / FANTASY-THEME-001
+
+CLASS-GUIDE-002 / FANTASY-THEME-001 — Owner approved 2026-11-27: actual kit information for all specializations, stable general README, original classic fantasy MMORPG-inspired landing and manager styling (no imported Lineage II assets). No gameplay/balance changes. Preserve 44px controls and original hero painting. Browser tests compare names/cooldowns against registry for every class; final CI and deployment pending.
+
 ## 2026-11-27 — ALPHA-MERGE-001 / CLASS-KITS-001 alpha integration
 
 ALPHA-MERGE-001 — Owner directed always merge during alpha. PR #200 merged f18389ea8b655699f97cf789a10bda2b435b02a5; tested head 913cbb5, all seven workflows, 175/175 tests, mobile/desktop Chromium. 31/31 class kits confirmed on main. Raw 6960-bout max-only screen saved in PR #200 comment 7217488307; mage stack 86/120, ranged 13/120, summoner 27/120. Class guide UI and comprehensive balance remain open, not alpha merge blockers. Pages deployment verification separate. Next: actual kit info UI and max-only class/terrain matrix on fresh main-based PR.
