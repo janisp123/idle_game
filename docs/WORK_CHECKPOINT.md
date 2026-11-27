@@ -522,3 +522,6 @@ Stage 3c verified all seven workflows at e5b5158. Stage 4 candidate: public mana
 
 
 Owner clarification: no dropdowns on mobile; public manager uses buttons for all race, main class, specialization and stance selections. All have 44px minimum tap targets, selected-state aria-pressed, role/race icons where useful. Race/main class browsing remains a draft; only specialization click commits. Static check restores button-only constraint; Chromium asserts zero dropdowns and no class change until specialization chosen. Unreleased branch only; tests pending.
+
+
+BUTTONS-001 approved by Owner; persistent AGENTS.md and DECISIONS.md rule added. Head f52df03: six workflows successful, static check and 153 Node tests passed; website run 45974430597 failed Chromium at simultaneous Fighting/work XP after first 10-second battle. One-second loss recovery can defer the full 10-second Fighting XP cycle; regression now asserts exact first and second completed bouts and both skill lanes after 20 seconds. Also fixed stale closures in reused choice buttons; assert Orc→Human→Orc browsing without mutation before specialization. Final mobile/desktop CI and max-only endgame balance still pending. No deploy.

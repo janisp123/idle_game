@@ -1,6 +1,6 @@
 import {ACTIVITIES,ITEM_LABELS,ITEM_KEYS,SAVE_KEY,xpToNextLevel,desiredArenaTeam,teamFromState,enterGame} from "./engine.mjs?v=group-005";
 import {newBattleGroupManager,enableBattleGroupManager,readManagerGame,enterManagerGame,settleManagerLive,chooseManagerGroupClass,chooseManagerGroupStance} from "./manager-lanes.mjs?v=group-006";
-import {createGroupEditor} from "./battle-group-editor.mjs?v=group-007";
+import {createGroupEditor} from "./battle-group-editor.mjs?v=group-008";
 import {renderGroupAnalytics} from "./battle-group-analytics-view.mjs?v=group-006";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,migrateLegacyManager} from "./manager-migration.mjs?v=npc-parity-001";

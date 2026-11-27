@@ -11,12 +11,12 @@ function choices(host,entries,value,onChoice){
   const focused=document.activeElement?.dataset?.choice;
   const restore=host.contains(document.activeElement);
   host.replaceChildren(...entries.map(([id,label])=>{
-   const b=node("button",label);b.type="button";b.dataset.choice=id;b.addEventListener("click",()=>onChoice(id));return b;
+   const b=node("button",label);b.type="button";b.dataset.choice=id;return b;
   }));
   host.dataset.options=key;
   if(restore){[...host.children].find(b=>b.dataset.choice===focused)?.focus();}
  }
- for(const b of host.children)b.setAttribute("aria-pressed",String(b.dataset.choice===value));
+ for(const b of host.children){b.setAttribute("aria-pressed",String(b.dataset.choice===value));b.onclick=()=>onChoice(b.dataset.choice);}
 }
 export function createGroupEditor(onClass,onStance){
  let current=null,selected=GROUP_IDS[0],draft=null,lastProgress="";
