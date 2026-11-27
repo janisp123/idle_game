@@ -51,7 +51,7 @@ test("actual Fighting XP and Bank bonus follow completed levels; cap and old sna
  const base={...s,skills:{...s.skills,fighting:{level:30,xp:0}},alphaClan:{...c,rewardCursor:9}};
  const neutral={...base,alphaClan:s.alphaClan};
  const a=settleManagerOffline(neutral,t+500000,rand).state,b=settleManagerOffline(base,t+500000,rand).state;
- assert.ok(b.skills.fighting.xp>=a.skills.fighting.xp);assert.equal(b.coins+b.alphaClan.donated,a.coins+a.alphaClan.donated);assert.deepEqual(b.groupAnalytics,a.groupAnalytics);
+ assert.ok(b.skills.fighting.xp>=a.skills.fighting.xp);assert.equal(b.coins+b.alphaClan.donated-base.alphaClan.donated,a.coins+a.alphaClan.donated-neutral.alphaClan.donated);assert.deepEqual(b.groupAnalytics,a.groupAnalytics);
  const cap=settleManagerOffline(base,t+86400000,rand).state;assert.equal(cap.skills.fighting.xp,xpToNextLevel(cap.skills.fighting.level));
  let bank=advanceConstruction(setClanPriority(funded(s.alphaClan,50),"bank"),wall);bank=advanceConstruction(bank,wall+CLAN_DAY);
  const snap=clanSnapshot(bank);assert.equal(snap.bank,1);const session=startGroupSession(s.battleGroup,{difficulty:0,str:1,dex:1,end:1,skill:1},1,123,{rules:10,clanSnapshot:snap});
