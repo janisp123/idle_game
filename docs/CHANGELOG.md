@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — GROUP-COUNTERS-001 STARTED
+
+BATTLE-GROUP-001 / GROUP-COUNTERS-001 STARTED (owner approval 2026-11-27): natural tactical class counters, shielded tanks resist arrows and protect nearby allies, melee pressure/closing, magic vs heavy armour, healing/support/summoning distinct, terrain and stance matter. No class quotas, forced balanced roster, artificial enemy-only modifiers or material economy. Test maximum stats, S Masterwork and full mastery exclusively. Prior max-only screen 5040 bouts: 7 archers 115W/5L, default 71W/48L/1D, tanks 1W/119L; raw PR #198 comment 7215109236. Candidate coefficients not final. Preserve old frozen bout rules via saved rule version; old offline intervals use old rules, switch after live boundary. No reward/gear price/timing changes. Baseline 1c9e7f5. Branch feature/group-tactical-counters.
+
 ## 2026-11-27 — ARENA-ONLY-001 cleanup
 
 ARENA-ONLY-001 cleanup: verified prior head 42b87e8 all seven checks, website 45979606326 157 tests and Chromium 390/1440. Coins sole spendable currency; XP unlocks earned levels. Isolated retired two-lane calculation in legacy-work-lane.mjs, added strict public arena-manager entry points, removed dead legacy presentation branches, fixed README/landing class descriptions. Old engine/fixtures retained for migration and regression; old material counts zero, legacy skills frozen. Backlog reconciled to current economy, balance and blocked clans; previous task text archived in docs/TD_ARCHIVE_20261127.md; historical clan plans marked superseded for materials. No history rewriting or source deletion. Final CI pending; no merge yet.
@@ -902,3 +906,8 @@ Candidate implementation: arenaOnly save mode uses single combat settlement lane
 
 
 First candidate website run 45979500022 failed the landing-copy contract (missing existing progression-cap explanation). Restored exact warning without bringing back noncombat activities. Fresh CI required.
+
+
+## 2026-11-27 — ARENA-ONLY-001 DONE
+
+PR #199 final head cffe1be all seven checks; website 45980441183 158 tests/mobile/desktop; merged 1c9e7f5 and Pages 45981143856 success. Combat-only economy and Git cleanup shipped.

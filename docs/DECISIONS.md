@@ -4,6 +4,7 @@
 
 | ID | Date | Approved by | Decision | Status |
 | --- | --- | --- | --- | --- |
+| GROUP-COUNTERS-001 | 2026-11-27 | Owner | Each class has natural counters and vulnerabilities. Tank shields counter arrows, melee pressures backline, magic counters heavy armour; healers/support/summoners have distinct roles, terrain/stances matter. No forced roster mix. Max-only tests until accepted. | Approved; started |
 | ARENA-ONLY-001 | 2026-11-27 | Owner | Only coins and combat XP; no noncombat progression, gathering, crafting, resource inventory or material tribute. Every purchasable upgrade and future clan donation uses coins; XP is not spendable. Preserve earned progress; freeze historical noncombat skill levels. | Approved; started |
 | BUTTONS-001 | 2026-11-27 | Owner | Mobile-first public gameplay choices use touch-friendly buttons and meaningful icons, not dropdowns. Accessible labels/selected states, 44px tap targets and foldable secondary information. Preserve button-only regressions. | Approved; implementation in PR #198 |
 | GROUP-RANK-001 | 2026-11-27 | Owner | Active class earns its own mastery and gear; inactive classes retain progression; switching to new classes must reduce combat capability, losses lower automatic difficulty and rewards, wins climb. Independent legal clone brackets supersede equal-current-selection progression; no artificial enemy stat penalties. Visible class XP, gear and latest upgrades. Exact thresholds and offline policy candidate. | Approved direction; started |
