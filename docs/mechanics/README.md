@@ -50,3 +50,7 @@ Public arena entry points in `arena-manager.mjs` settle Fighting only; allocate 
 ### Progression-matched rivals (NPC-PARITY-001 candidate)
 
 See [design and validation](NPC_PARITY_PLAN.md). V4 manager timeline uses real derived shared attributes, earned skill, per-fighter gear and practice budgets, identical player snapshot construction and Teamwork, independent seeded equipment/tactic decisions, and unchanged terrain/combat resolver. Win prize tier follows existing Fighting-level smith grade gates. Previous v3 in-flight bout is paid once before conversion. Legacy routes remain unchanged. Validation pending.
+
+## Individual attributes (INDIVIDUAL-STATS-001)
+
+[Research](CHARACTER_ATTRIBUTE_RESEARCH_20261127.md) · [Implementation plan](INDIVIDUAL_STATS_PLAN.md). New pure six-stat foundation is a candidate; live combat still uses historical shared stats until versioned integration. Do not confuse profile estimates with live values.
