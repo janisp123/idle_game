@@ -56,3 +56,7 @@ See [design and validation](NPC_PARITY_PLAN.md). V4 manager timeline uses real d
 [Research](CHARACTER_ATTRIBUTE_RESEARCH_20261127.md) · [Implementation plan](INDIVIDUAL_STATS_PLAN.md). New pure six-stat foundation is a candidate; live combat still uses historical shared stats until versioned integration. Do not confuse profile estimates with live values.
 
 Individual training ledger candidate: existing per-slot class records store six weighted effort counters and separately activated values. Existing legacy records recover class-specific productive time from weapon expertise / 4; no account-wide stat inheritance. Combat still uses old frozen inputs until v4.
+
+## Raid bosses
+
+[RAID-001 plan](RAIDS_PLAN.md) — encounter and reward rules foundation; public launch and reward application not yet integrated.

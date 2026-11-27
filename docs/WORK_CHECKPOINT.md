@@ -70,3 +70,6 @@ INDIVIDUAL-STATS-001 stage 3 STARTED: #205 merged after 179 tests/seven workflow
 
 
 INDIVIDUAL-STATS-001 stage 3 — candidate public arena v4 uses independent STR/DEX/CON/INT/WIT/MEN and class mastery, freezes old account effort (historical compatibility only), preserves old session rule versions until live boundary, clone profiles use same class growth and grade practice, removes account stats panel, shows six selected fighter stats and class base/growth. Named derived stat tuning in stat-combat.mjs. WIT affects magical action recovery, not fixed signature cooldowns. No mana. Shared Fighting progression remains internal reward cap/rank and equipment gate, not a combat attribute. Existing v1-v3 fixture defaults retained. CI pending; numerical balance and six-month benchmark provisional.
+
+
+RAID-001 STARTED (owner approval 2026-11-27). Individual stats #206 merged, 181 tests and all seven workflows passed. Five named raids and fixed crews, explicit raid-only knockout combat and nonstacking 24h blessing functions implemented as stage 1 foundation. No public raid launch or applied rewards yet; CI, raw initial screen, save/expiry integration and UI pending. See docs/mechanics/RAIDS_PLAN.md.

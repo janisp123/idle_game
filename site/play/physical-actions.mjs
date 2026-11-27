@@ -3,6 +3,7 @@ import {COUNTERS,tacticalActor,isArrow,intactTank} from "./group-counter-rules.m
 import {kitStrikeModifiers,kitStatus,kitControlAllowed,kitControlDuration,kitPactHeal} from "./class-effects.mjs";
 import {kitActor,KIT_BALANCE} from "./class-kits.mjs";
 import {individualActor,statAttack,statAim,statSpeed,statCrit,statEvasion,statMobility,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
+import {combatDamageFactor} from "./raid-rules.mjs";
 // Pure provisional arena rules. Distances, injuries and wear are game abstractions.
 export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 5 });
 export const WEAPONS = Object.freeze({
@@ -190,7 +191,7 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   const impact = Math.max(1, Math.round(base * classScale * shotImpact * (vital ? 1+Math.max(0,.65+kit.crit+(equipped?activePiece.critDamage:0)-intactArmourSum(target,"critReduction")) : 1) *
     (block ? blockImpact : parry ? (kit.parryImpact??0.35) : 1) *
     (1 - Math.min(80, materialProtection) / 100) /
-    (1+resistance*(1-penetration)) * statMagicDamageFactor(target,attack.type) - flatGuard(target) * GUARD.flatReduction));
+    (1+resistance*(1-penetration)) * statMagicDamageFactor(target,attack.type) * combatDamageFactor(actor,target,attack) - flatGuard(target) * GUARD.flatReduction));
   const damage = wound(actor, target, impact);
   const broken = [];
   if (block && wear(target.shield, attack.type === "blunt" ? 24 : 5)) broken.push("shield");

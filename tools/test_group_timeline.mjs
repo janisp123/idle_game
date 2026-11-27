@@ -115,3 +115,29 @@ test("six attributes affect distinct v4 combat functions and never legacy combat
  assert.ok(statStatusResistance(plus("CON"),"physical")>statStatusResistance(a,"physical"));assert.ok(statMagicDamageFactor(plus("MEN"),"magic")<statMagicDamageFactor(a,"magic"));assert.ok(statStatusResistance(plus("MEN"),"magic")>statStatusResistance(a,"magic"));
  assert.equal(statAttack({...plus("INT"),groupCombatRules:3},"magic"),6);assert.equal(statSpeed({...a,groupCombatRules:3},"magic"),0);
 });
+
+import {RAID_LEVELS,RAID_CATALOG,RAID_BUFF_MS,RAID_MAX_ROUNDS,RAID_ROUND_MS,raidVictoryBuff,activeRaidBuff,raidBonus,raidResistanceFactor,combatDamageFactor} from "../site/play/raid-rules.mjs";
+import {raidMonsters,resolveRaid} from "../site/play/raid-encounters.mjs";
+test("raid buffs refresh, replace, expire and never stack or downgrade",()=>{
+ const t=1000,b=raidVictoryBuff(null,20,t);assert.deepEqual(b,{level:20,expiresAtMs:t+RAID_BUFF_MS});
+ assert.deepEqual(raidVictoryBuff(b,10,t+1),b);assert.deepEqual(raidVictoryBuff(b,20,t+1),{level:20,expiresAtMs:t+1+RAID_BUFF_MS});
+ const high=raidVictoryBuff(b,50,t+2);assert.deepEqual(raidBonus(high,t+2),{xp:.10,damage:.10,defence:.10});
+ assert.equal(activeRaidBuff(high,high.expiresAtMs),null);assert.equal(raidVictoryBuff(high,10,high.expiresAtMs).level,10);
+ assert.throws(()=>raidVictoryBuff(b,11,t));assert.equal(raidResistanceFactor("physical",.35,"magic"),1);
+ assert.equal(raidResistanceFactor("magic",.4,"magic"),.6);assert.equal(raidResistanceFactor("melee",.4,"ranged"),1);
+ assert.equal(combatDamageFactor({}, {}, {type:"magic"}),1);
+});
+test("five real raid encounters use named crews, bounded time, deterministic knockouts",()=>{
+ const g=maxGroup();for(const m of Object.values(g)){const p=m.classes[m.selected];p.attributeEffort=awardCharacterEffort(blankCharacterEffort(),m.selected,3700*3600000);p.attributeEffortActive={...p.attributeEffort};}
+ const players=Object.values(groupSnapshots(g,max,4)),results=[];
+ for(const level of RAID_LEVELS){const d=RAID_CATALOG[level],e=raidMonsters(level);assert.equal(e.length,7);assert.equal(new Set(e.map(x=>x.name)).size,7);assert.equal(e[0].name,d.boss.name);assert.ok(e.every(x=>x.attributes&&x.classLevel===level));
+  for(const offset of [0,17,31]){
+   const r=resolveRaid(players,level,seed+offset,50);assert.ok(r.rounds<=RAID_MAX_ROUNDS);assert.ok(r.durationMs<=RAID_ROUND_MS*RAID_MAX_ROUNDS);
+   assert.ok(r.events[0].vitals["enemy:0"].maxHP>r.events[0].vitals["enemy:1"].maxHP);
+   if(r.outcome==="victory")assert.ok(Object.entries(r.survivors).filter(([id])=>id.startsWith("enemy:")).every(([,hp])=>hp===0));
+   if(r.reason==="timeout")assert.notEqual(r.outcome,"victory");
+   results.push({level,seed:seed+offset,outcome:r.outcome,rounds:r.rounds,durationMs:r.durationMs,reason:r.reason,bossHP:r.events[0].vitals["enemy:0"].maxHP,bossRemaining:r.survivors["enemy:0"]});
+  }
+ }
+ console.log("RAID_INITIAL_SCREEN "+JSON.stringify({build:"max S masterwork, 3700h individual stats",results}));
+});

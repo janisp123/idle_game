@@ -10,6 +10,7 @@ import {validGroupSnapshot,classWeapon,prepareClassActor,expireClassEffects,tryC
 export const TEAM_COMBAT_BALANCE=Object.freeze({maxRoster:7,maxRounds:PHYSICAL_RULES.turnLimit,
   rearSpace:3,interceptRecovery:1,focusWeight:2,healthWeight:1.5});
 import {validCombatAttributes,statInitiative} from "./stat-combat.mjs";
+import {RAID_RULES_VERSION,RAID_MAX_ROUNDS,RAID_MONSTER_BALANCE,raidDefinition} from "./raid-rules.mjs";
 const alive=a=>a.hp>0;
 const gap=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
 const distance=(a,b)=>Math.max(0,gap(a,b)-1);
@@ -118,6 +119,21 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   if(!SUPPORTED_GROUP_COMBAT_RULES.includes(rules))throw new RangeError("Unknown group combat rules");
   if(rules===4&&![...players,...enemies].every(a=>a.classId&&validCombatAttributes(a.attributes)&&a.str===a.attributes.STR&&a.dex===a.attributes.DEX&&a.end===a.attributes.CON&&a.skill===a.classLevel))throw new RangeError("Invalid individual combat attributes");
   const actors=[...makeActors(players,"player",terrain,rules),...makeActors(enemies,"enemy",terrain,rules)];
+  const raid=levels.raid,bonus=levels.playerBonus;
+  if(raid){
+    if(rules!==4||raid.version!==RAID_RULES_VERSION||enemies.length!==7)throw new RangeError("Invalid raid rules");
+    const d=raidDefinition(raid.level);
+    for(const [i,a] of actors.filter(x=>x.side==="enemy").entries()){
+      a.maxHP=Math.max(1,Math.round(a.maxHP*(i?RAID_MONSTER_BALANCE.crewHP:d.bossHP)));a.hp=a.maxHP;
+      a.encounterDamage=i?RAID_MONSTER_BALANCE.crewDamage:RAID_MONSTER_BALANCE.bossDamage;
+      if(!i){a.encounterResistance=d.resistance;a.encounterResistFraction=d.resistFraction;}
+    }
+  }
+  if(bonus){
+    if(rules!==4||![bonus.damage,bonus.defence].every(v=>Number.isFinite(v)&&v>=0&&v<=.10))throw new RangeError("Invalid raid combat bonus");
+    for(const a of actors.filter(x=>x.side==="player")){a.raidBonusDamage=bonus.damage;a.raidBonusDefence=bonus.defence;}
+  }
+  const maxRounds=raid?RAID_MAX_ROUNDS:TEAM_COMBAT_BALANCE.maxRounds;
   const height=Math.max(players.length,enemies.length),width=teamArenaWidth(terrain),roll=seededRandom(seed),speedRoll=seededRandom((seed^0x85ebca6b)>>>0),
     initiative=seededRandom((seed^0x9e3779b9)>>>0),decision=seededRandom((seed^0x517cc1b7)>>>0);
   const tactical=seededRandom((seed^0x4f7b3241)>>>0);
@@ -128,7 +144,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   };
   const has=side=>actors.some(a=>a.side===side&&alive(a));
   record(null,null,"engage");
-  for(round=1;round<=TEAM_COMBAT_BALANCE.maxRounds&&has("player")&&has("enemy");round++){
+  for(round=1;round<=maxRounds&&has("player")&&has("enemy");round++){
     for(const a of actors){expireClassEffects(a,round);expireKitEffects(a,round);if(kitActor(a))a.kitRound=round;}
     // Random jitter on existing DEX/mobility initiative, no slot-order priority.
     const order=actors.filter(alive).map(a=>({a,score:statInitiative(a,activeWeapon(a).type)+mobility(a)/10+initiative()*10}))
@@ -192,10 +208,10 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   const totals=side=>actors.filter(a=>a.side===side).reduce((r,a)=>({hp:r.hp+a.hp,maxHP:r.maxHP+a.maxHP,inflicted:r.inflicted+a.inflicted}),{hp:0,maxHP:0,inflicted:0});
   const p=totals("player"),e=totals("enemy"),timeout=p.hp>0&&e.hp>0;
   const outcome=!e.hp&&p.hp?"victory":!p.hp&&e.hp?"defeat":
-    timeout&&p.hp/p.maxHP>e.hp/e.maxHP&&p.inflicted>0?"victory":
+    timeout&&raid?"defeat":timeout&&p.hp/p.maxHP>e.hp/e.maxHP&&p.inflicted>0?"victory":
     timeout&&e.hp/e.maxHP>p.hp/p.maxHP&&e.inflicted>0?"defeat":"double_death";
   const survivors=Object.fromEntries(actors.map(a=>[a.id,a.hp]));
   record(null,null,outcome,{reason:timeout?"timeout":"knockout"});
-  return {outcome,reason:timeout?"timeout":"knockout",rounds:Math.min(round-1,TEAM_COMBAT_BALANCE.maxRounds),
+  return {outcome,reason:timeout?"timeout":"knockout",rounds:Math.min(round-1,maxRounds),
     events,survivors,participation:Object.fromEntries(actors.map(a=>[a.id,a.actions]))};
 }
