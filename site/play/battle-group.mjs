@@ -65,7 +65,7 @@ export function groupSnapshots(group,shared,rules=3){
  if(!record(shared)||!["str","dex","end","skill"].every(k=>Number.isFinite(shared[k])&&shared[k]>=0&&shared[k]<=1e6)||!count(shared.difficulty)||shared.difficulty>=ITEM_GRADES.length)throw new RangeError("Invalid shared combat inputs");
  return Object.fromEntries(GROUP_IDS.map((id,i)=>{
   const m=group[id],c=GROUP_CLASSES[m.selected],p=m.classes[m.selected],armour=equippedArmour(c,p),kit=trainingKit(armour,c.loadout,p.equipment),effects=trainingEffects(kit,c.loadout,p.expertiseActive);
-  const attrs=[4,5].includes(rules)?characterAttributes(c.id,migrateProgress(p,c.id).attributeEffortActive):null;
+  const attrs=[4,5,6].includes(rules)?characterAttributes(c.id,migrateProgress(p,c.id).attributeEffortActive):null;
   return [id,{name:"Member "+(i+1),classId:c.id,race:c.race,role:c.role,classLevel:p.mastery.level,tactic:m.stance,tacticLevel:m.stances[m.stance].level,
    difficulty:shared.difficulty,...(attrs?{attributes:attrs,str:attrs.STR,dex:attrs.DEX,end:attrs.CON,skill:p.mastery.level}:{str:shared.str,dex:shared.dex,end:shared.end,skill:shared.skill}),loadout:c.loadout,trainingKit:kit,
    gear:{...armourStats(armour,c.loadout),gearDefense:effects.gearDefense},gearAttack:effects.gearAttack,condition:effects.condition}];

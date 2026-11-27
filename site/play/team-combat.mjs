@@ -1,6 +1,6 @@
 // Team geometry and decisions; all damage and durability use physical-actions.
 import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=kits-001";
-import {COUNTERS,GROUP_COMBAT_RULES_VERSION,SUPPORTED_GROUP_COMBAT_RULES,tacticalActor,intactTank,tankPriorityActor,tankFirstTargets} from "./group-counter-rules.mjs";
+import {COUNTERS,GROUP_COMBAT_RULES_VERSION,SUPPORTED_GROUP_COMBAT_RULES,tacticalActor,intactTank,tankPriorityActor,tankFirstTargets,geometryActor,ENGAGEMENT_GEOMETRY,RANGED_GEOMETRY_RULES_VERSION} from "./group-counter-rules.mjs";
 import {kitActor,pilotKit} from "./class-kits.mjs";
 import {prepareKitActor,expireKitEffects,markKitMovement,kitApproach,kitTargetDisrupted} from "./class-effects.mjs";
 import {tryKitAction} from "./class-ability-policy.mjs";
@@ -14,16 +14,17 @@ import {RAID_RULES_VERSION,RAID_MAX_ROUNDS,RAID_MONSTER_BALANCE,raidDefinition} 
 const alive=a=>a.hp>0;
 const gap=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
 const distance=(a,b)=>Math.max(0,gap(a,b)-1);
-const activeWeapon=a=>(a.classId&&classWeapon(a))||(a.loadout==="bow"&&(!a.arrows||!a.weapon.hp)?WEAPONS.dagger:WEAPONS[a.loadout]);
-const bowActive=a=>activeWeapon(a)===WEAPONS.bow;
+const activeWeapon=a=>{const w=(a.classId&&classWeapon(a))||(a.loadout==="bow"&&(!a.arrows||!a.weapon.hp)?WEAPONS.dagger:WEAPONS[a.loadout]);return geometryActor(a)&&a.engagementRange>w.range&&w.ranged?{...w,range:a.engagementRange}:w;};
+const bowActive=a=>geometryActor(a)?activeWeapon(a).move==="shot":activeWeapon(a)===WEAPONS.bow;
 const other=(actors,a)=>actors.filter(b=>b.side!==a.side&&alive(b));
 const allies=(actors,a)=>actors.filter(b=>b.side===a.side&&b!==a&&alive(b));
 const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
-export const teamArenaWidth=terrain=>2*TEAM_COMBAT_BALANCE.rearSpace+clamp(terrain.startDistance??2,0,2)+2;
+const startDistance=(terrain,rules)=>rules===RANGED_GEOMETRY_RULES_VERSION?(ENGAGEMENT_GEOMETRY[terrain.id]?.startDistance??clamp(terrain.startDistance??2,0,2)):clamp(terrain.startDistance??2,0,2);
+export const teamArenaWidth=(terrain,rules=GROUP_COMBAT_RULES_VERSION)=>2*TEAM_COMBAT_BALANCE.rearSpace+startDistance(terrain,rules)+2;
 const validRoster=r=>Array.isArray(r)&&r.length>0&&r.length<=TEAM_COMBAT_BALANCE.maxRoster&&r.every(a=>a&&Object.hasOwn(WEAPONS,a.loadout)&&a.loadout!=="dagger"&&(!a.classId||validGroupSnapshot(a))&&validTacticSnapshot(a)&&["str","dex","end","skill"].every(k=>Number.isFinite(a[k])&&a[k]>=0&&a[k]<=1e6));
 function makeActors(roster,side,terrain,rules){
-  const start=clamp(terrain.startDistance??2,0,2)+1;
-  const tactical=[2,3,4,5].includes(rules)&&roster.every(x=>x.classId);
+  const start=startDistance(terrain,rules)+1;
+  const tactical=[2,3,4,5,6].includes(rules)&&roster.every(x=>x.classId);
   const frontline=roster.map((s,i)=>({s,i})).filter(({s})=>!classWeapon(s)?.ranged).sort((a,b)=>Number(b.s.role==="tank")-Number(a.s.role==="tank"));
   const backline=roster.map((s,i)=>({s,i})).filter(({i})=>!frontline.some(x=>x.i===i));
   const lanes=Array.from({length:roster.length},(_,i)=>i).sort((a,b)=>Math.abs(a-(roster.length-1)/2)-Math.abs(b-(roster.length-1)/2)||a-b);
@@ -33,7 +34,9 @@ function makeActors(roster,side,terrain,rules){
     const front=TEAM_COMBAT_BALANCE.rearSpace;
     const x=side==="player"?front-rear:front+start+rear;
     const y=tactical?lanes[(rear?backline:frontline.length?frontline:backline).findIndex(x=>x.i===i)]:i;
-    return prepareKitActor(prepareClassActor({...fighter(snapshot,side),...(tactical?{groupCombatRules:rules}:{}),id:side+":"+i,x,y,approach:0,
+    const geometry=rules===RANGED_GEOMETRY_RULES_VERSION?ENGAGEMENT_GEOMETRY[terrain.id]:null;
+    const engagementRange=geometry&&["ranged","mage","summoner"].includes(snapshot.role)&&classWeapon(snapshot)?.ranged?(classWeapon(snapshot).move==="shot"?geometry.bowRange:geometry.spellRange):undefined;
+    return prepareKitActor(prepareClassActor({...fighter(snapshot,side),...(tactical?{groupCombatRules:rules}:{}),...(engagementRange?{engagementRange}:{}),id:side+":"+i,x,y,approach:0,
       retreats:terrain.retreatSpace??(terrain.retreat===false?0:3),intercepted:-1,targetId:null,bleedSource:null,actions:0}));
   });
 }
@@ -42,7 +45,7 @@ function adjacent(a,actors,height,width,side,terrain={}){
   return [[a.x-d,a.y],[a.x+d,a.y],[a.x,a.y-1],[a.x,a.y+1]]
     .filter(([x,y])=>x>=0&&x<width&&y>=0&&y<height&&
       !actors.some(b=>alive(b)&&b!==a&&b.x===x&&b.y===y)&&
-      !(tacticalActor(a)&&terrain.id==="narrow_bridge"&&x>TEAM_COMBAT_BALANCE.rearSpace&&x<TEAM_COMBAT_BALANCE.rearSpace+3&&Math.abs(y-(height-1)/2)>(COUNTERS.bridgeWidth-1)/2)).map(([x,y])=>({x,y}));
+      !(tacticalActor(a)&&terrain.id==="narrow_bridge"&&x>TEAM_COMBAT_BALANCE.rearSpace&&x<TEAM_COMBAT_BALANCE.rearSpace+startDistance(terrain,a.groupCombatRules)+1&&Math.abs(y-(height-1)/2)>(COUNTERS.bridgeWidth-1)/2)).map(([x,y])=>({x,y}));
 }
 function chooseTarget(a,actors,coordinated,roll){
   const enemies=tankFirstTargets(a,other(actors,a)),range=activeWeapon(a).range;
@@ -118,7 +121,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   const chance={player:coordinationChance(levels.player),enemy:coordinationChance(levels.enemy)};
   const rules=levels.groupCombatRules??GROUP_COMBAT_RULES_VERSION;
   if(!SUPPORTED_GROUP_COMBAT_RULES.includes(rules))throw new RangeError("Unknown group combat rules");
-  if([4,5].includes(rules)&&![...players,...enemies].every(a=>a.classId&&validCombatAttributes(a.attributes)&&a.str===a.attributes.STR&&a.dex===a.attributes.DEX&&a.end===a.attributes.CON&&a.skill===a.classLevel))throw new RangeError("Invalid individual combat attributes");
+  if([4,5,6].includes(rules)&&![...players,...enemies].every(a=>a.classId&&validCombatAttributes(a.attributes)&&a.str===a.attributes.STR&&a.dex===a.attributes.DEX&&a.end===a.attributes.CON&&a.skill===a.classLevel))throw new RangeError("Invalid individual combat attributes");
   const actors=[...makeActors(players,"player",terrain,rules),...makeActors(enemies,"enemy",terrain,rules)];
   const raid=levels.raid,bonus=levels.playerBonus;
   if(raid){
@@ -132,11 +135,11 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
     }
   }
   if(bonus){
-    if(![4,5].includes(rules)||![bonus.damage,bonus.defence].every(v=>Number.isFinite(v)&&v>=0&&v<=.10))throw new RangeError("Invalid raid combat bonus");
+    if(![4,5,6].includes(rules)||![bonus.damage,bonus.defence].every(v=>Number.isFinite(v)&&v>=0&&v<=.10))throw new RangeError("Invalid raid combat bonus");
     for(const a of actors.filter(x=>x.side==="player")){a.raidBonusDamage=bonus.damage;a.raidBonusDefence=bonus.defence;}
   }
   const maxRounds=raid?RAID_MAX_ROUNDS:TEAM_COMBAT_BALANCE.maxRounds;
-  const height=Math.max(players.length,enemies.length),width=teamArenaWidth(terrain),roll=seededRandom(seed),speedRoll=seededRandom((seed^0x85ebca6b)>>>0),
+  const height=Math.max(players.length,enemies.length),width=teamArenaWidth(terrain,rules),roll=seededRandom(seed),speedRoll=seededRandom((seed^0x85ebca6b)>>>0),
     initiative=seededRandom((seed^0x9e3779b9)>>>0),decision=seededRandom((seed^0x517cc1b7)>>>0);
   const tactical=seededRandom((seed^0x4f7b3241)>>>0);
   const events=[];let round=0;
@@ -169,6 +172,11 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
       a.targetId=target.id;
       const active=activeWeapon(a),bow=bowActive(a);
       const ctx={terrain,roll,speedRoll,record,intercept:(x,y,range)=>intercept(x,y,actors,round,chance[y.side],decision,range),move:(x,y,retreat)=>move(x,y,actors,height,width,retreat,decision,terrain)};
+      // Open-field archers may spend a READY action on spacing; never free movement during recovery.
+      if(geometryActor(a)&&terrain.id==="open_field"&&a.role==="ranged"&&a.activeTactic!=="aggressive"&&a.recovery===0&&a.retreats>0){
+        const threat=other(actors,a).find(e=>!activeWeapon(e).ranged&&distance(a,e)===0&&mobility(a)>=mobility(e)+TACTICS.retreatLead);
+        if(threat&&move(a,threat,actors,height,width,true,tactical,terrain)){a.retreats--;a.approach=0;record(a,threat,"retreat",{tactic:"maintain_range"});continue;}
+      }
       if(pilotKit(a)?tryKitAction(a,target,actors,round,active,ctx):a.classId&&tryClassAction(a,target,actors,round,ctx))continue;
       // Defensive fighters may escort threatened allies only when they
       // cannot take a ready attack. Real tile movement and turn cost.

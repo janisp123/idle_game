@@ -11,7 +11,7 @@ test("new arena-only game earns only fighting effort, experience and actual priz
  assert.ok(n.skills.fighting.xp>0);assert.equal(n.skills.hunting.xp,0);
  assert.deepEqual(n.attributeEffort,s.attributeEffort);
  assert.deepEqual(n.attributeEffortActive,s.attributeEffortActive);
- assert.equal(n.combatSession.groupCombatRules,5);
+ assert.equal(n.combatSession.groupCombatRules,6);
  for(const m of Object.values(n.battleGroup)){const p=m.classes[m.selected];const total=Object.values(p.attributeEffort).reduce((a,b)=>a+b,0);assert.ok(total>0&&total<=20000*100);assert.deepEqual(p.attributeEffort,p.attributeEffortActive);}
  assert.ok(Object.values(n.combatSession.players).every(p=>p.attributes&&p.skill===p.classLevel));
  assert.deepEqual(readManagerGame(JSON.stringify(n)),n);
@@ -75,3 +75,5 @@ test("active raid blessing multiplies actual fighting XP and frozen combat bonus
  const c=settleManagerOffline(expired,end+20000,rand).state;assert.equal(c.combatSession.raidBonus,undefined);
  assert.equal(raidBonus(c.raidBuff,c.settledAtMs).xp,0);
 });
+
+import "./test_range_geometry_v6.mjs";
