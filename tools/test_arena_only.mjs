@@ -83,3 +83,5 @@ import "./test_interlude_control_v7.mjs";
 import "./test_eight_arenas_v8.mjs";
 
 import "./test_class_mastery_v9.mjs";
+
+import "./test_meta_screen_v9.mjs";
