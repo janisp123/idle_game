@@ -96,7 +96,7 @@ function laneTime(before,after){
 }
 function pair(s,end,random,online){
   if(s.arenaOnly){
-    const a=settleManagerLane(s,end,random,online),c=a.state,combatMs=laneTime(s,c);
+    const a=settleManagerLane(s,end,random,online),c=a.state,combatMs=a.report?.productiveMs??0;
     const next={...c,settledAtMs:online?c.settledAtMs:end,battleAnalytics:accumulateBattleAnalytics(s.battleAnalytics,a.report?.arena?.analytics??[]),groupAnalytics:accumulateGroupAnalytics(s.groupAnalytics,a.report?.arena?.groupAnalytics??[])};
     const reports=[a.report].filter(r=>r&&(r.completed||r.arena));
     return {state:next,reports,report:reports.at(-1),effort:{combatMs,workMs:0,overlap:0,combatTime:combatMs,workTime:0}};

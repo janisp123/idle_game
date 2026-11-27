@@ -9,6 +9,7 @@ import {TACTIC_BALANCE,tacticActivation,validTacticSnapshot} from "./manager-tac
 import {validGroupSnapshot,classWeapon,prepareClassActor,expireClassEffects,tryClassAction} from "./battle-group-actions.mjs?v=kits-001";
 export const TEAM_COMBAT_BALANCE=Object.freeze({maxRoster:7,maxRounds:PHYSICAL_RULES.turnLimit,
   rearSpace:3,interceptRecovery:1,focusWeight:2,healthWeight:1.5});
+import {validCombatAttributes,statInitiative} from "./stat-combat.mjs";
 const alive=a=>a.hp>0;
 const gap=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
 const distance=(a,b)=>Math.max(0,gap(a,b)-1);
@@ -21,7 +22,7 @@ export const teamArenaWidth=terrain=>2*TEAM_COMBAT_BALANCE.rearSpace+clamp(terra
 const validRoster=r=>Array.isArray(r)&&r.length>0&&r.length<=TEAM_COMBAT_BALANCE.maxRoster&&r.every(a=>a&&Object.hasOwn(WEAPONS,a.loadout)&&a.loadout!=="dagger"&&(!a.classId||validGroupSnapshot(a))&&validTacticSnapshot(a)&&["str","dex","end","skill"].every(k=>Number.isFinite(a[k])&&a[k]>=0&&a[k]<=1e6));
 function makeActors(roster,side,terrain,rules){
   const start=clamp(terrain.startDistance??2,0,2)+1;
-  const tactical=[2,3].includes(rules)&&roster.every(x=>x.classId);
+  const tactical=[2,3,4].includes(rules)&&roster.every(x=>x.classId);
   const frontline=roster.map((s,i)=>({s,i})).filter(({s})=>!classWeapon(s)?.ranged).sort((a,b)=>Number(b.s.role==="tank")-Number(a.s.role==="tank"));
   const backline=roster.map((s,i)=>({s,i})).filter(({i})=>!frontline.some(x=>x.i===i));
   const lanes=Array.from({length:roster.length},(_,i)=>i).sort((a,b)=>Math.abs(a-(roster.length-1)/2)-Math.abs(b-(roster.length-1)/2)||a-b);
@@ -115,6 +116,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   const chance={player:coordinationChance(levels.player),enemy:coordinationChance(levels.enemy)};
   const rules=levels.groupCombatRules??GROUP_COMBAT_RULES_VERSION;
   if(!SUPPORTED_GROUP_COMBAT_RULES.includes(rules))throw new RangeError("Unknown group combat rules");
+  if(rules===4&&![...players,...enemies].every(a=>a.classId&&validCombatAttributes(a.attributes)&&a.str===a.attributes.STR&&a.dex===a.attributes.DEX&&a.end===a.attributes.CON&&a.skill===a.classLevel))throw new RangeError("Invalid individual combat attributes");
   const actors=[...makeActors(players,"player",terrain,rules),...makeActors(enemies,"enemy",terrain,rules)];
   const height=Math.max(players.length,enemies.length),width=teamArenaWidth(terrain),roll=seededRandom(seed),speedRoll=seededRandom((seed^0x85ebca6b)>>>0),
     initiative=seededRandom((seed^0x9e3779b9)>>>0),decision=seededRandom((seed^0x517cc1b7)>>>0);
@@ -129,7 +131,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
   for(round=1;round<=TEAM_COMBAT_BALANCE.maxRounds&&has("player")&&has("enemy");round++){
     for(const a of actors){expireClassEffects(a,round);expireKitEffects(a,round);if(kitActor(a))a.kitRound=round;}
     // Random jitter on existing DEX/mobility initiative, no slot-order priority.
-    const order=actors.filter(alive).map(a=>({a,score:a.dex+mobility(a)/10+initiative()*10}))
+    const order=actors.filter(alive).map(a=>({a,score:statInitiative(a,activeWeapon(a).type)+mobility(a)/10+initiative()*10}))
       .sort((a,b)=>b.score-a.score);
     for(const {a} of order){
       if(!alive(a)||!has("player")||!has("enemy"))continue;

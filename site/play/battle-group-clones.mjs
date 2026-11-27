@@ -7,6 +7,7 @@ import {expertiseThreshold,blankExpertise} from "./expertise.mjs?v=alpha-gear-a3
 import {ITEM_GRADES,ITEM_QUALITIES,STARTER_ITEM,SMITH_BALANCE,equipmentPrice,equipmentUnlockLevel} from "./smith.mjs?v=gear-a3";
 import {TACTIC_IDS} from "./manager-tactics.mjs?v=manager-tactics-001";
 import {seededCombatRandom} from "./combat.mjs?v=gear-a3";
+import {blankCharacterEffort,awardCharacterEffort} from "./character-attributes.mjs";
 const cap=expertiseThreshold(7),count=n=>Number.isSafeInteger(n)&&n>=0;
 const maxBudget=(1+ARMOUR_SLOTS.length)*equipmentPrice({grade:7,quality:"masterwork"})+ARMOUR_SLOTS.length*SMITH_BALANCE.firstArmourCost;
 const level=n=>Number.isInteger(n)&&n>=1&&n<=50;
@@ -56,7 +57,7 @@ function allocate(c,budget,skill){
  }
  return equipment;
 }
-export function buildGroupCloneTeam(envelope,shared,seed){
+export function buildGroupCloneTeam(envelope,shared,seed,rules=3){
  if(!validGroupCloneEnvelope(envelope))throw new RangeError("Invalid group clone envelope");
  const choices=groupCloneChoices(shared.skill,seed);
  let group=initialBattleGroup();
@@ -66,8 +67,9 @@ export function buildGroupCloneTeam(envelope,shared,seed){
   const m=group[id],p=m.classes[c.id];
   p.equipment=allocate(c,b.budget,shared.skill);p.mastery={level:b.classLevel,xp:0};
   p.expertise=blankExpertise();p.expertise[c.loadout]=b.weaponXP;p.expertise[c.armour]=b.armourXP;p.expertiseActive={...p.expertise};
+  if(rules===4){p.attributeEffort=awardCharacterEffort(blankCharacterEffort(),c.id,Math.floor(b.weaponXP/4));p.attributeEffortActive={...p.attributeEffort};}
   m.stances[choice.stance]={level:b.tacticLevel,xp:0};
  }
- const snapshots=groupSnapshots(group,shared);
+ const snapshots=groupSnapshots(group,shared,rules);
  return GROUP_IDS.map((id,i)=>({...snapshots[id],name:"Rival "+(i+1)}));
 }

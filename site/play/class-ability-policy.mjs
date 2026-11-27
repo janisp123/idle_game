@@ -2,6 +2,7 @@
 import {pilotKit,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
 import {kitStatus,kitHeal,kitControlAllowed,kitControlDuration} from "./class-effects.mjs";
 import {resolveStrike,wound,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=kits-001";
+import {statHealing,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
 const dist=(a,b)=>Math.max(0,Math.abs(a.x-b.x)+Math.abs(a.y-b.y)-1);
 const ratio=a=>a.hp/a.maxHP;
 const alive=a=>a.hp>0;
@@ -63,7 +64,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   let clean=false,hit=0;
   resolveStrike(a,actual,{active:{...weapon,range:ability.range??weapon.range,recovery:ability.recovery??weapon.recovery,damageScale:ability.scale*s,guardPierce:ability.guardPierce===true,familiar:ability.familiar===true},bow:weapon.move==="shot",distance:Math.min(2,dist(a,actual)),terrain:ctx.terrain,roll:ctx.roll,speedRoll:ctx.speedRoll,
    record:(x,y,t,e={})=>{if(x===a&&y===actual&&["hit","finisher"].includes(t)&&e.damage>0){clean=true;hit=e.damage;}ctx.record(x,y,t,{ability:ability.id,...e});},interruptApproach:x=>{x.approach=0;},onBleed:(x,y)=>{y.bleedSource=x.id;}});
-  if(clean&&alive(actual)){
+  if(clean&&alive(actual)&&(!ability.effect||statStatusLands(actual,weapon.type,ctx.roll))){
    if(ability.effect==="open"){actual.guardOpen=Math.max(actual.guardOpen,2);record(actual,"guard_open");}
    if(ability.effect==="slow"){actual.kitSlowUntil=Math.max(actual.kitSlowUntil??0,round+B.slowDuration+1);record(actual,"slow");}
    if(ability.effect==="bleed"){actual.bleed=Math.max(actual.bleed,3);actual.bleedSource=a.id;record(actual,"deep_wound");}
@@ -79,10 +80,10 @@ function perform(a,b,actors,round,ability,weapon,ctx){
    const nearby=actors.filter(x=>x!==actual&&alive(x)&&x.side!==a.side&&dist(actual,x)<=1&&dist(a,x)<=(ability.range??weapon.range)+1).slice(0,2);
    for(const x of nearby){
     if(ability.splash){
-     const raw=hit*ability.splash*(a.classId==="flameweaver"?1+(B.flameSplash-1)*s:1)*(1-Math.min(80,protection(x,weapon.type))/100)/(1+intactArmourSum(x,"resistance")*.15)-flatGuard(x)*.1;
+     const raw=hit*ability.splash*(a.classId==="flameweaver"?1+(B.flameSplash-1)*s:1)*(1-Math.min(80,protection(x,weapon.type))/100)/(1+intactArmourSum(x,"resistance")*.15)*statMagicDamageFactor(x,weapon.type)-flatGuard(x)*.1;
      const damage=wound(a,x,Math.max(1,Math.round(raw)));record(x,"splash",{damage});
     }
-    if(ability.spreadSlow&&alive(x)){x.kitSlowUntil=Math.max(x.kitSlowUntil??0,round+B.slowDuration+1);record(x,"slow");}
+    if(ability.spreadSlow&&alive(x)&&statStatusLands(x,weapon.type,ctx.roll)){x.kitSlowUntil=Math.max(x.kitSlowUntil??0,round+B.slowDuration+1);record(x,"slow");}
    }
   }
   return true;
@@ -108,6 +109,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
  case "seal":{
   const targets=sealChoices(a,b,actors,round,ability).slice(0,ability.maxTargets);if(targets.length<2)return false;
   for(const x of targets){
+   if(!statStatusLands(x,"magic",ctx.roll)){record(x,"resist");continue;}
    if(pilotKit(x)){
     const slot=x.kitReady.primary<=x.kitReady.secondary?"primary":"secondary";
     x.kitReady[slot]=Math.max(round,x.kitReady[slot])+1;
@@ -121,7 +123,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   const targets=healChoices(a,actors,round,ability).slice(0,ability.type==="group_heal"?3:1);
   let used=false;
   for(const x of targets){
-   const amount=kitHeal(a,x,ability.amount,round);if(!amount)continue;
+   const amount=kitHeal(a,x,ability.amount*statHealing(a),round);if(!amount)continue;
    used=true;record(x,"heal",{healing:amount});
    if(ability.cleanse&&harmful(x)){x.bleed=0;x.stagger=0;x.classWeaken=0;x.weakenUntil=0;x.kitSlowUntil=0;x.kitDisruptUntil=0;record(x,"cleanse");}
    if(ability.boon){kitStatus(x,"classBuff","buffUntil",ability.boon*s,round);record(x,"buff",{magnitude:x.classBuff});}
@@ -139,7 +141,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
  }
  case "brace":a.kitBraceUntil=round+ability.duration+1;record(a,"brace",{until:a.kitBraceUntil});return true;
  case "totem":a.kitTotemMode=a.activeTactic??"balanced";a.kitTotemUntil=round+ability.duration+1;record(a,"totem",{mode:a.kitTotemMode,until:a.kitTotemUntil});return true;
- case "disrupt":b.kitDisruptUntil=round+B.disruptDuration+1;b.targetId=null;record(b,"misdirection");return true;
+ case "disrupt":if(!statStatusLands(b,weapon.type,ctx.roll)){record(b,"resist");return true;}b.kitDisruptUntil=round+B.disruptDuration+1;b.targetId=null;record(b,"misdirection");return true;
  case "dash":{
   let moved=0;for(let i=0;i<2&&dist(a,b)>weapon.range;i++){if(!ctx.move(a,b,false))break;moved++;}
   if(!moved)return false;a.approach=0;record(b,"dash",{tiles:moved});return true;

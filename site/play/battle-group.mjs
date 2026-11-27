@@ -5,7 +5,7 @@ import {ARMOUR_SLOTS,armourStats} from "./armour.mjs?v=bal-002";
 import {blankExpertise,validExpertise,awardExpertise} from "./expertise.mjs?v=alpha-gear-a3";
 import {STARTER_ITEM,isEquipmentItem,trainingKit,trainingEffects,smithQuote,nextEquipmentUpgrade,itemPower,ITEM_GRADES,ITEM_QUALITIES} from "./smith.mjs?v=gear-a3";
 import {TACTIC_IDS,validTactic,tacticRequiredXP} from "./manager-tactics.mjs?v=manager-tactics-001";
-import {blankCharacterEffort,validCharacterEffort,awardCharacterEffort} from "./character-attributes.mjs";
+import {blankCharacterEffort,validCharacterEffort,awardCharacterEffort,characterAttributes} from "./character-attributes.mjs";
 export const GROUP_SIZE=7;
 export const GROUP_IDS=Object.freeze(Array.from({length:GROUP_SIZE},(_,i)=>"member"+(i+1)));
 const count=n=>Number.isSafeInteger(n)&&n>=0;
@@ -60,13 +60,14 @@ export function selectGroupStance(group,member,stance){
 function equippedArmour(c,p){
  return Object.fromEntries(ARMOUR_SLOTS.map(({id})=>[id,Object.hasOwn(p.equipment,id+":"+c.armour)?c.armour:"none"]));
 }
-export function groupSnapshots(group,shared){
+export function groupSnapshots(group,shared,rules=3){
  requireGroup(group);
  if(!record(shared)||!["str","dex","end","skill"].every(k=>Number.isFinite(shared[k])&&shared[k]>=0&&shared[k]<=1e6)||!count(shared.difficulty)||shared.difficulty>=ITEM_GRADES.length)throw new RangeError("Invalid shared combat inputs");
  return Object.fromEntries(GROUP_IDS.map((id,i)=>{
   const m=group[id],c=GROUP_CLASSES[m.selected],p=m.classes[m.selected],armour=equippedArmour(c,p),kit=trainingKit(armour,c.loadout,p.equipment),effects=trainingEffects(kit,c.loadout,p.expertiseActive);
+  const attrs=rules===4?characterAttributes(c.id,migrateProgress(p,c.id).attributeEffortActive):null;
   return [id,{name:"Member "+(i+1),classId:c.id,race:c.race,role:c.role,classLevel:p.mastery.level,tactic:m.stance,tacticLevel:m.stances[m.stance].level,
-   difficulty:shared.difficulty,str:shared.str,dex:shared.dex,end:shared.end,skill:shared.skill,loadout:c.loadout,trainingKit:kit,
+   difficulty:shared.difficulty,...(attrs?{attributes:attrs,str:attrs.STR,dex:attrs.DEX,end:attrs.CON,skill:p.mastery.level}:{str:shared.str,dex:shared.dex,end:shared.end,skill:shared.skill}),loadout:c.loadout,trainingKit:kit,
    gear:{...armourStats(armour,c.loadout),gearDefense:effects.gearDefense},gearAttack:effects.gearAttack,condition:effects.condition}];
  }));
 }

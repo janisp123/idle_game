@@ -17,20 +17,21 @@ export {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,GROUP_RECOVERY_MS};
 const duration=GROUP_BOUT_MS,recovery=GROUP_RECOVERY_MS,ratio=BOUT_MS/duration;
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 const exact=(o,keys)=>o&&typeof o==="object"&&!Array.isArray(o)&&Object.keys(o).length===keys.length&&keys.every(k=>Object.hasOwn(o,k));
+import {validCombatAttributes} from "./stat-combat.mjs";
 const sharedKeys=["str","dex","end","skill","difficulty"];
-function validPlayers(p){
+function validPlayers(p,rules){
  return exact(p,GROUP_IDS)&&GROUP_IDS.every(id=>{
-  const s=p[id];return validGroupSnapshot(s)&&validTactic(s.tactic)&&validTacticSnapshot(s)&&s.trainingKit&&validCombatSession({elapsedMs:0,seed:0,player:s})&&sharedKeys.every(k=>s[k]===p[GROUP_IDS[0]][k]&&Number.isFinite(s[k])&&s[k]>=0&&s[k]<=1e6)&&Number.isInteger(s.difficulty)&&s.difficulty<=7&&s.skill>=1;
+  const s=p[id];return validGroupSnapshot(s)&&validTactic(s.tactic)&&validTacticSnapshot(s)&&s.trainingKit&&validCombatSession({elapsedMs:0,seed:0,player:s})&&(rules===4?validCombatAttributes(s.attributes)&&s.str===s.attributes.STR&&s.dex===s.attributes.DEX&&s.end===s.attributes.CON&&s.skill===s.classLevel&&s.difficulty===p[GROUP_IDS[0]].difficulty:sharedKeys.every(k=>s[k]===p[GROUP_IDS[0]][k]&&Number.isFinite(s[k])&&s[k]>=0&&s[k]<=1e6))&&Number.isInteger(s.difficulty)&&s.difficulty<=7&&s.skill>=1;
  });
 }
 export function validGroupSession(s){
  return Boolean(s?.timelineVersion===GROUP_TIMELINE_VERSION&&count(s.seed)&&s.seed<=0xffffffff&&count(s.elapsedMs)&&s.prizeCursor===Math.floor(s.elapsedMs/duration)&&
-  [s.coinRemainder,s.teamworkRemainder].every(n=>count(n)&&n<ratio)&&validTeamwork({level:s.teamworkLevel,xp:0})&&validPlayers(s.players)&&validGroupRank(s.rank)&&(s.groupCombatRules===undefined||SUPPORTED_GROUP_COMBAT_RULES.includes(s.groupCombatRules)));
+  [s.coinRemainder,s.teamworkRemainder].every(n=>count(n)&&n<ratio)&&validTeamwork({level:s.teamworkLevel,xp:0})&&validPlayers(s.players,s.groupCombatRules??1)&&validGroupRank(s.rank)&&(s.groupCombatRules===undefined||SUPPORTED_GROUP_COMBAT_RULES.includes(s.groupCombatRules)));
 }
 export function startGroupSession(group,shared,teamworkLevel,seed,carry={}){
- const s={timelineVersion:GROUP_TIMELINE_VERSION,groupCombatRules:GROUP_COMBAT_RULES_VERSION,seed,elapsedMs:0,prizeCursor:0,teamworkLevel,
+ const s={timelineVersion:GROUP_TIMELINE_VERSION,groupCombatRules:carry.rules??GROUP_COMBAT_RULES_VERSION,seed,elapsedMs:0,prizeCursor:0,teamworkLevel,
   coinRemainder:carry.coinRemainder??0,teamworkRemainder:carry.teamworkRemainder??0,
-  players:groupSnapshots(group,shared),rank:carry.rank??initialGroupRank(cloneRewardGrade(shared.skill))};
+  players:groupSnapshots(group,shared,carry.rules??GROUP_COMBAT_RULES_VERSION),rank:carry.rank??initialGroupRank(cloneRewardGrade(shared.skill))};
  if(!validGroupSession(s))throw new RangeError("Invalid frozen group session");
  return structuredClone(s);
 }
@@ -38,7 +39,7 @@ export const groupPrizeGrade=s=>s.rank.grade;
 export const groupWinPrize=s=>Math.floor((teamArenaReward(groupPrizeGrade(s))+s.coinRemainder)/ratio);
 function bout(s,index){
  const scheduled=index%ARENA_SCHEDULE_BOUTS,seed=Math.imul(s.seed^scheduled,2654435761)>>>0;
- const bracket=rankProfile(s.rank.grade),players=GROUP_IDS.map(id=>s.players[id]),enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed);
+ const bracket=rankProfile(s.rank.grade),players=GROUP_IDS.map(id=>s.players[id]),enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,s.groupCombatRules??1);
  const roll=seededCombatRandom((seed^0x749ae237)>>>0);
  const positioning=chooseArena(players[Math.floor(roll()*players.length)],enemies[Math.floor(roll()*enemies.length)],roll);
  const terrain=positioning.arena;

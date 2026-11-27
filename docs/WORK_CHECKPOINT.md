@@ -64,3 +64,6 @@ INDIVIDUAL-STATS-001 — owner approved individual combat attributes, six stats,
 
 
 INDIVIDUAL-STATS-001 stage 2 — stage 1 merged #204 (447a0288), 177 tests and seven workflows passed. Added six-stat earned/active effort to each slot/specialization; award only frozen productive member time; old records migrate once using exact class weapon practice quarter-ms, not shared account ledger. Preserve inactive pending effort, activate selected builds only; alpha floor applies selected profiles. No v4 combat changes yet. Migration retains historical account ledger; no arbitrary duplication of shared stats. Pending CI. Next: v4 derived effects, clone parity and frozen snapshot dispatch, individual UI. Candidate 3700h alpha floor inherited from prior team benchmark; recalculate later.
+
+
+INDIVIDUAL-STATS-001 stage 3 STARTED: #205 merged after 179 tests/seven workflows. Public arena v4 candidate uses individual stats and class mastery; account effort frozen for compatibility, productive time reported independently. Preserve old saved rules until live boundary. NPC clones use same class profiles. Next UI/tests before PR; no balance acceptance.
