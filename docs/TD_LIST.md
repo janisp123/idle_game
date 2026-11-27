@@ -8,6 +8,14 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## ARENA-SPEED-001 — Faster actual manager battles
+
+- **Goal / acceptance:** ARENA-SPEED-001 — Owner approved 2026-11-27: actual manager bout 20 seconds (was 200), committed result displayed about 2 seconds; preserve hourly rewards, recovery ratio, skill/mastery pacing as closely as possible. No combat formula retune or third fighter. Versioned manager timeline, retain legacy 200-second format, exact fractional prize and Teamwork carry, preserve already paid cursor and proportional partial bout on migration. Test old/new timing, partition invariance, offline, live, save, UI. STARTED by chat; baseline c8ca08f.
+- **Status:** IN_REVIEW — implementation started.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## PROGRESS-UI-001 — Arena-first layout and collapsible panels
 
 - **Goal / acceptance:** PROGRESS-UI-001 — Owner requested collapsible Progress section, closed by default, with existing last login report, live feed and resources available when expanded. No gameplay, save, or report changes. STARTED by chat; baseline b21e7caa (#193 deployed, Pages 45938381622 success).
