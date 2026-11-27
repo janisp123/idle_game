@@ -8,8 +8,9 @@ import { validTeamSession,startTeamSession,settleTeamSession,teamBoutMs,isCloneT
 import {captureCloneEnvelope} from "./clone-opponents.mjs?v=npc-parity-001";
 import {GROUP_IDS,validBattleGroup,groupSnapshots,awardGroupPractice,activateGroupPractice} from "./battle-group.mjs?v=group-001";
 import {advanceGroupRank} from "./battle-group-rank.mjs?v=group-005";
-import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession} from "./battle-group-timeline.mjs?v=kits-001";
+import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession} from "./battle-group-timeline.mjs?v=raid-001";
 import {GROUP_COMBAT_RULES_VERSION} from "./group-counter-rules.mjs";
+import {raidCombatBonus,raidXpMultiplier} from "./raid-rules.mjs";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
 import {
@@ -476,7 +477,7 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
  let group=state.battleGroup,teamwork=state.teamwork,session=state.combatSession,old=null;
  const totals=Object.fromEntries(arenaFields.map(k=>[k,0])),practiceMs=Object.fromEntries(GROUP_IDS.map(id=>[id,0])),groupAnalytics=[];
  const shared=desiredArenaPlayer(state),rules=state.arenaOnly?4:GROUP_COMBAT_RULES_VERSION;
- const desired=groupSnapshots(group,shared,rules);
+ const desired=groupSnapshots(group,shared,rules),bonus=state.arenaOnly?raidCombatBonus(state.raidBuff,state.settledAtMs):null;
  if(session&&session.timelineVersion!==GROUP_TIMELINE_VERSION){
   const duration=teamBoutMs(session),remaining=(duration-session.elapsedMs%duration)%duration;
   if(elapsedMs<remaining)return {...settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online),battleGroup:group};
@@ -485,12 +486,12 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
    for(const k of arenaFields)totals[k]+=old[k];
   }
   const factor=teamBoutMs(session)/GROUP_BOUT_MS;
-  session=startGroupSession(group,shared,teamwork.level,(state.settledAtMs+remaining)>>>0,{coinRemainder:(session.coinRemainder??0)*factor,teamworkRemainder:(session.teamworkRemainder??0)*factor,rules:online?rules:GROUP_COMBAT_RULES_VERSION});
+  session=startGroupSession(group,shared,teamwork.level,(state.settledAtMs+remaining)>>>0,{coinRemainder:(session.coinRemainder??0)*factor,teamworkRemainder:(session.teamworkRemainder??0)*factor,rules:online?rules:GROUP_COMBAT_RULES_VERSION,bonus:online?bonus:null});
   elapsedMs-=remaining;
  }
- if(!session)session=startGroupSession(group,shared,teamwork.level,state.settledAtMs>>>0,{rules});
+ if(!session)session=startGroupSession(group,shared,teamwork.level,state.settledAtMs>>>0,{rules,bonus});
  const run=ms=>{
-  const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.rank.grade,session.groupCombatRules??1]);
+  const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.rank.grade,session.groupCombatRules??1,session.raidBonus??null]);
   if(outcomeCaches&&!outcomeCaches.has(key))outcomeCaches.set(key,new Map());
   const r=settleGroupSession(session,ms,outcomeCaches?.get(key));
   group=awardGroupPractice(group,session.players,r.practiceMs);teamwork=awardTeamwork(teamwork,r.teamworkXP);session=r.session;
@@ -500,11 +501,13 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
  };
  const result=()=>({...totals,session,battleGroup:group,teamwork,practiceMs,expertise:old?.expertise??state.expertise,autoFight:state.autoFight,
   ...(old?.team?{team:old.team,managerTactics:old.managerTactics}:{}),...(old?.analytics?{analytics:old.analytics}:{}),...(groupAnalytics.length?{groupAnalytics}:{})});
- if(online||!state.arenaOnly&&(JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level)){
+ const bonusChanged=session.groupCombatRules===4&&JSON.stringify(session.raidBonus??null)!==JSON.stringify(bonus);
+ if(online||bonusChanged||!state.arenaOnly&&(JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level)){
   const remaining=(GROUP_BOUT_MS-session.elapsedMs%GROUP_BOUT_MS)%GROUP_BOUT_MS;
   if(elapsedMs<remaining){run(elapsedMs);return result();}
   if(remaining)run(remaining);
-  session={...session,players:desired,teamworkLevel:teamwork.level,...(online?{groupCombatRules:rules}:{})};elapsedMs-=remaining;
+  const {raidBonus:oldBonus,...rest}=session;
+  session={...rest,...(online||!state.arenaOnly?{players:desired,teamworkLevel:teamwork.level}:{}),...(online?{groupCombatRules:rules}:{}),...((online?rules:session.groupCombatRules)===4&&bonus?{raidBonus:bonus}:{})};elapsedMs-=remaining;
  }
  if(elapsedMs)run(elapsedMs);
  return result();
@@ -598,7 +601,7 @@ function settleUncappedWork(state, now, random, frozenEffort, xpRandom = random,
       // resource gatherers also bring home more material. Old-offline levels
       // stay frozen until the player explicitly trains with the Master.
       const efficiency = Math.min(SKILL_BALANCE.maxEfficiency,
-        1 + Math.max(0, prior.level - 1) * SKILL_BALANCE.efficiencyPerLevel)*multiplier;
+        1 + Math.max(0, prior.level - 1) * SKILL_BALANCE.efficiencyPerLevel)*multiplier*raidXpMultiplier(state);
       report.gainedItems = rules.item === null ? 0 :
         crafted ? productive : variedTotal(count * rules.yield * efficiency, random);
       // The Master owns the next level. Extra XP never banks. The
@@ -656,7 +659,7 @@ function settleWork(state,now,random,frozenEffort,stopAtCap=false,online=false){
   const tier=state.difficulties[state.activity]??0;
   const multiplier=tier&&state.activity!=="fighting"?workMultiplier(tier,ACTIVITY_STAT_WEIGHTS[state.activity],
     combatAttributeProgress(frozenEffort,state.skills)):1;
-  const efficiency=Math.min(SKILL_BALANCE.maxEfficiency,1+Math.max(0,prior.level-1)*SKILL_BALANCE.efficiencyPerLevel)*multiplier;
+  const efficiency=Math.min(SKILL_BALANCE.maxEfficiency,1+Math.max(0,prior.level-1)*SKILL_BALANCE.efficiencyPerLevel)*multiplier*raidXpMultiplier(state);
   const cycleXP=rules.xp*efficiency;
   const maxCycles=Math.floor((state.progressMs+duration)/rules.durationMs);
   // No probe or extra RNG work on ordinary live ticks that cannot reach cap.

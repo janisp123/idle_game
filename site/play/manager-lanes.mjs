@@ -5,7 +5,7 @@ import {
   ACTIVITIES, ATTRIBUTE_IDS, TIMING_PROFILE,
   newTeamGame, readSave, chooseActivity, settleManagerLane,
   automateSettledProgress, activateExpertise, LIVE_FIGHT_MAX_MS
-} from "./engine.mjs?v=kits-001";
+} from "./engine.mjs?v=raid-001";
 import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=group-004";
 import {GROUP_TIMELINE_VERSION} from "./battle-group-timing.mjs";
 import {initialBattleGroup,validBattleGroup,migrateGroupAttributes,selectGroupClass,selectGroupStance,upgradeBattleGroup,previewGroupUpgrade} from "./battle-group.mjs?v=group-001";
@@ -15,12 +15,13 @@ import {WORK_ROTATION,ingredientReserve,rotateManagerWork,rotationTravelMs} from
 import {blankArmourRequests,validArmourRequests,requestArmourSet,selectManagerWeapon,automateManagerEquipment,managerEquipmentPreview} from "./manager-equipment.mjs?v=npc-parity-001";
 
 import {blankTactics,validTactics,chooseTactic,validTacticSnapshot,activateTactics} from "./manager-tactics.mjs?v=manager-tactics-001";
+import {validRaidBuff} from "./raid-rules.mjs";
 export const MANAGER_LANES_VERSION=4;
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 const validWork=id=>WORK_ROTATION.includes(id);
 const blankWork=id=>({activity:id,progressMs:0,travelMs:0});
 function validManagerShape(s){
-  return s?.managerVersion===MANAGER_LANES_VERSION&&s.activity==="fighting"&&
+  return (s?.raidBuff===undefined||s.arenaOnly===true&&validRaidBuff(s.raidBuff))&&s?.managerVersion===MANAGER_LANES_VERSION&&s.activity==="fighting"&&
     s.transition===null&&s.wagons?.length===1&&s.wagons[0].activity==="fighting"&&
     s.wagons[0].plannedMs===null&&s.fightingRemainderMs===0&&s.productiveElapsedMs===0&&
     (s.arenaOnly===true?Boolean(s.battleGroup&&s.managerWork===undefined&&s.overlapParity===undefined&&Object.values(s.items??{}).every(v=>v===0)):s.arenaOnly===undefined&&validWork(s.managerWork?.activity)&&count(s.managerWork.progressMs)&&
@@ -45,7 +46,7 @@ export function readManagerGame(value){
     const s=readSave(raw);
     if(!s||!s.teamSecond||raw.battleAnalytics!==undefined&&!validBattleAnalytics(raw.battleAnalytics))return null;
     return {...s,combatSession:s.combatSession?.timelineVersion===GROUP_TIMELINE_VERSION?s.combatSession:fasterTeamSession(s.combatSession),managerVersion:MANAGER_LANES_VERSION,
-      battleAnalytics:raw.battleAnalytics??blankBattleAnalytics(),...(raw.battleGroup?{battleGroup:raw.arenaOnly?migrateGroupAttributes(s.battleGroup):s.battleGroup,groupAnalytics:structuredClone(raw.groupAnalytics)}:{}),...(raw.arenaOnly?{arenaOnly:true}:{managerWork:{...raw.managerWork},overlapParity:raw.overlapParity}),armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
+      ...(raw.raidBuff!==undefined?{raidBuff:raw.raidBuff}:{}),battleAnalytics:raw.battleAnalytics??blankBattleAnalytics(),...(raw.battleGroup?{battleGroup:raw.arenaOnly?migrateGroupAttributes(s.battleGroup):s.battleGroup,groupAnalytics:structuredClone(raw.groupAnalytics)}:{}),...(raw.arenaOnly?{arenaOnly:true}:{managerWork:{...raw.managerWork},overlapParity:raw.overlapParity}),armourRequests:{...raw.armourRequests},managerTactics:structuredClone(raw.managerTactics)};
   }catch{return null;}
 }
 // Internal coordinator hook for Phase 3, never a player-facing action.
@@ -106,7 +107,12 @@ function pair(s,end,random,online){
 export function settleManagerOffline(s,now=Date.now(),random=Math.random){
   requireManager(s);if(!count(now))throw new RangeError("Invalid clock");
   // Frozen inputs; both lanes independently pause at their existing XP cap.
-  return pair(s,Math.max(s.settledAtMs,now),random,false);
+  const end=Math.max(s.settledAtMs,now),expiry=s.raidBuff?.expiresAtMs;
+  if(s.arenaOnly&&expiry>s.settledAtMs&&expiry<end){
+    const a=pair(s,expiry,random,false),b=pair(a.state,end,random,false),reports=[...a.reports,...b.reports],combatMs=a.effort.combatMs+b.effort.combatMs;
+    return {...b,reports,report:reports.at(-1),effort:{...b.effort,combatMs,combatTime:combatMs}};
+  }
+  return pair(s,end,random,false);
 }
 export function enterManagerGame(s,now=Date.now(),random=Math.random){
   const out=settleManagerOffline(s,now,random);
@@ -136,7 +142,8 @@ export function settleManagerLive(s,now=Date.now(),random=Math.random){
     const duration=teamBoutMs(next.combatSession,true,Boolean(next.battleGroup));
     const segment=Math.min(now-before,duration-((next.combatSession?.elapsedMs??0)%duration),
       next.arenaOnly?Infinity:(next.managerWork.travelMs||ACTIVITIES[next.managerWork.activity].durationMs-next.managerWork.progressMs),
-      ACTIVITIES.fighting.durationMs-next.progressMs);
+      ACTIVITIES.fighting.durationMs-next.progressMs,
+      next.raidBuff?.expiresAtMs>before?next.raidBuff.expiresAtMs-before:Infinity);
     const outcome=pair(next,before+segment,random,true);
     next=outcome.state;reports.push(...outcome.reports);apply();
     if(next.settledAtMs<=before)throw new Error("Manager clock failed to advance");

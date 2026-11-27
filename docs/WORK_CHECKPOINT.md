@@ -73,3 +73,6 @@ INDIVIDUAL-STATS-001 stage 3 — candidate public arena v4 uses independent STR/
 
 
 RAID-001 STARTED (owner approval 2026-11-27). Individual stats #206 merged, 181 tests and all seven workflows passed. Five named raids and fixed crews, explicit raid-only knockout combat and nonstacking 24h blessing functions implemented as stage 1 foundation. No public raid launch or applied rewards yet; CI, raw initial screen, save/expiry integration and UI pending. See docs/mechanics/RAIDS_PLAN.md.
+
+
+RAID-001 stage 2 candidate: persisted frozen attempt and single settlement through public arena coordinator, arena paused during raid; offline resume, nonstacking blessings integrated into actual fighting XP cap and v4 combat bonus snapshots, split at expiry. UI and CI pending. No numeric balance claims.
