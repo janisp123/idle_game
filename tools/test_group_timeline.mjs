@@ -207,9 +207,11 @@ test("v5 actual arena and raid traces pursue living opposing tanks on both sides
   const roster=Object.fromEntries([["player",players],["enemy",enemies]].flatMap(([side,team])=>team.map((a,i)=>[side+":"+i,a])));
   let previous=r.events[0].vitals,checked=0;
   for(const ev of r.events.slice(1)){
-   const a=roster[ev.actor],b=roster[ev.target];
-   if(a&&b&&ev.actor.split(":")[0]!==ev.target.split(":")[0]&&["hit","finisher","miss","dodge","block","parry","approach","retreat"].includes(ev.type)){
-    const side=ev.target.split(":")[0];
+   // Dodge records the dodging defender as actor, unlike other strike events.
+   const attacker=ev.type==="dodge"?ev.target:ev.actor,defender=ev.type==="dodge"?ev.actor:ev.target;
+   const a=roster[attacker],b=roster[defender];
+   if(a&&b&&attacker.split(":")[0]!==defender.split(":")[0]&&["hit","finisher","miss","dodge","block","parry","approach","retreat"].includes(ev.type)){
+    const side=defender.split(":")[0];
     if(Object.entries(roster).some(([id,x])=>id.startsWith(side+":")&&x.role==="tank"&&previous[id].hp>0)){
      assert.equal(b.role,"tank",ev.type+" "+ev.actor+" -> "+ev.target);checked++;
     }
@@ -227,4 +229,21 @@ test("v5 arena frozen snapshots remain valid and reproducible; v4 raid default u
  assert.deepEqual(a,b);
  const p=Object.values(groupSnapshots(maxGroup(),max,4)),old=resolveRaid(p,10,seed,50);
  assert.deepEqual(old,resolveRaid(p,10,seed,50,null,0,4));
+});
+
+test("v5 raid aggro max-only diagnostic compares actual v4/v5 outcomes and tankless versus protected groups",()=>{
+ const results=[];
+ for(const [build,classes] of [["tank_healer",["oathkeeper","flameweaver","galescourge","frostweaver","lifekeeper","blackbow","runesage"]],["no_tank",["blademaster","flameweaver","galescourge","frostweaver","lifekeeper","blackbow","runesage"]],["no_healer",["oathkeeper","flameweaver","galescourge","frostweaver","nightblade","blackbow","runesage"]]]){
+  const p=raidBenchmarkRoster(50,classes);
+  for(const rules of [4,5])for(const s of [seed,seed+17,seed+31]){
+   const r=resolveRaid(p,50,s,50,null,0,rules);
+   const damageByRole={},healingByRole={};
+   for(const ev of r.events){
+    if(ev.target?.startsWith("player:")&&ev.actor?.startsWith("enemy:")&&ev.damage>0){const role=p[Number(ev.target.split(":")[1])].role;damageByRole[role]=(damageByRole[role]??0)+ev.damage;}
+    if(ev.type==="heal"&&ev.target?.startsWith("player:")&&ev.healing>0){const role=p[Number(ev.target.split(":")[1])].role;healingByRole[role]=(healingByRole[role]??0)+ev.healing;}
+   }
+   results.push({build,rules,seed:s,outcome:r.outcome,durationMs:r.durationMs,damageByRole,healingByRole});
+  }
+ }
+ console.log("TANK_AGGRO_RAID_SCREEN "+JSON.stringify(results));
 });
