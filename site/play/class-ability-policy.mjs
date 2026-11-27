@@ -1,6 +1,6 @@
 // Independent cooldowns and a single action budget for class kits.
 import {pilotKit,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
-import {kitStatus,kitHeal,kitControlAllowed,kitControlDuration} from "./class-effects.mjs";
+import {kitStatus,kitHeal,kitControlAllowed,kitControlDuration,controlEligible,applyControl,hasControl,clearControl} from "./class-effects.mjs";
 import {resolveStrike,wound,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=kits-001";
 import {statHealing,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
 import {combatDamageFactor} from "./raid-rules.mjs";
@@ -8,7 +8,7 @@ import {tankPriorityActor,tankHealOrder,geometryActor} from "./group-counter-rul
 const dist=(a,b)=>Math.max(0,Math.abs(a.x-b.x)+Math.abs(a.y-b.y)-1);
 const ratio=a=>a.hp/a.maxHP;
 const alive=a=>a.hp>0;
-const harmful=x=>Boolean(x.bleed||x.stagger||x.classWeaken||x.kitSlowUntil||x.kitDisruptUntil);
+const harmful=x=>Boolean(x.bleed||x.stagger||x.classWeaken||x.kitSlowUntil||x.kitDisruptUntil||hasControl(x));
 const alliesIn=(a,actors,range)=>actors.filter(x=>x.side===a.side&&alive(x)&&dist(a,x)<=range).sort((x,y)=>ratio(x)-ratio(y)||x.hp-y.hp);
 const healThreshold=a=>a.activeTactic==="defensive"?.90:a.activeTactic==="aggressive"?.58:.78;
 const healChoices=(a,actors,round,ability)=>alliesIn(a,actors,ability.range).filter(x=>ratio(x)<(tankPriorityActor(a)&&x.role==="tank"?1:healThreshold(a))&&round>=(x.nextHealRound??0)).sort((x,y)=>tankHealOrder(a,x,y)||ratio(x)-ratio(y));
@@ -24,7 +24,7 @@ const supportMode=(a,actors,ability)=>{
 const supportAmount=(a,ability)=>ability.amount*kitStrength(a)*(a.classId==="runesage"?B.focusedBlessing:a.classId==="wardchanter"?B.protectiveSong:1);
 const supportChoices=(a,actors,ability,mode)=>{
  const amount=supportAmount(a,ability);
- return alliesIn(a,actors,ability.range).filter(x=>mode==="guard"?x.classGuard<amount&&(ratio(x)<.85||threatened(x,actors)):damageRole(x)&&x.classBuff<amount&&(mode!=="tempo"||!x.kitTempoUntil)).sort((x,y)=>mode==="guard"?ratio(x)-ratio(y):Number(threatened(y,actors))-Number(threatened(x,actors))||(geometryActor(a)?0:Number(y.role==="melee")-Number(x.role==="melee"))||ratio(y)-ratio(x));
+ return alliesIn(a,actors,ability.range).filter(x=>mode==="guard"?x.classGuard<amount&&(ratio(x)<.85||threatened(x,actors)):damageRole(x)&&(mode!=="magic_tempo"||["mage","summoner"].includes(x.role))&&x.classBuff<amount&&(!["tempo","magic_tempo"].includes(mode)||!x.kitTempoUntil)).sort((x,y)=>mode==="guard"?ratio(x)-ratio(y):Number(threatened(y,actors))-Number(threatened(x,actors))||(geometryActor(a)?0:Number(y.role==="melee")-Number(x.role==="melee"))||ratio(y)-ratio(x));
 };
 const sealChoices=(a,b,actors,round,ability)=>{
  if(dist(a,b)>ability.range)return [];
@@ -33,9 +33,23 @@ const sealChoices=(a,b,actors,round,ability)=>{
 const selfBoonMode=(a,actors)=>a.activeTactic==="defensive"||(a.activeTactic!=="aggressive"&&ratio(a)<.65&&threatened(a,actors))?"guard":"buff";
 const siegeNeighbors=(a,b,actors)=>actors.filter(x=>x!==b&&x.side!==a.side&&alive(x)&&dist(b,x)<=1&&dist(a,x)<=1);
 const pactChoices=(a,actors,ability)=>alliesIn(a,actors,ability.range).filter(x=>x.role==="melee"&&!x.kitPactUntil&&ratio(x)<B.pactThreshold&&threatened(x,actors));
+
+ // Non-damaging tactical utility may select a real threat; ordinary attacks still draw tank aggro.
+ function tacticalChoices(a,b,actors,round,ability,weapon){
+  const effect=ability.effect,reach=ability.range??weapon.range;
+  if(effect==="cleanse")return alliesIn(a,actors,reach).filter(harmful).sort((x,y)=>tankHealOrder(a,x,y)||ratio(x)-ratio(y));
+  let choices=actors.filter(x=>x.side!==a.side&&alive(x)&&dist(a,x)<=reach);
+  if(effect==="dispel")return choices.filter(x=>x.classBuff||x.classGuard||x.kitTempoUntil||x.kitFocusUntil||x.kitPactUntil||x.kitBraceUntil).sort((x,y)=>Number(y===b)-Number(x===b)||dist(a,x)-dist(a,y));
+  choices=choices.filter(x=>controlEligible(x,effect,round));
+  if(effect==="root"||effect==="slow")choices=choices.filter(x=>["melee","tank"].includes(x.role)&&!actors.some(y=>y.side===a.side&&alive(y)&&dist(x,y)===0));
+  if(effect==="silence")choices=choices.filter(x=>["mage","healer","summoner","support"].includes(x.role)&&x.loadout==="bow");
+  if(effect==="gloom"||effect==="antiheal")choices=choices.filter(x=>x===b);
+  return choices.sort((x,y)=>effect==="silence"?Number(y.role==="healer")-Number(x.role==="healer")||dist(a,x)-dist(a,y):["root","slow","stun","paralysis","sleep"].includes(effect)?Number(y.role==="melee")-Number(x.role==="melee")||Number(y.role==="mage")-Number(x.role==="mage")||dist(a,x)-dist(a,y):dist(a,x)-dist(a,y));
+ }
 function eligible(a,b,actors,round,ability,weapon,terrain){
  const d=dist(a,b),stance=a.activeTactic??"balanced",threshold=stance==="defensive"?.85:stance==="aggressive"?.50:.70;
  switch(ability.type){
+ case "tactical_control":return tacticalChoices(a,b,actors,round,ability,weapon).length>0;
  case "strike":return !a.counter&&d<=(ability.range??weapon.range)&&d>=(ability.minRange??0)&&(!ability.maxHP||ratio(a)<=ability.maxHP)&&
   (ability.effect!=="control"||kitControlAllowed(b,round))&&(ability.effect!=="bleed"||!b.bleed)&&(!ability.siphon||round>=(a.nextHealRound??0))&&(ability.effect!=="shadow_hex"||!b.kitDisruptUntil);
  case "self_boon":return selfBoonMode(a,actors)==="guard"?a.classGuard<ability.amount*kitStrength(a)&&threatened(a,actors):a.classBuff<ability.amount*kitStrength(a)&&d<=weapon.range;
@@ -72,25 +86,39 @@ function perform(a,b,actors,round,ability,weapon,ctx){
    if(ability.effect==="bleed"){actual.bleed=Math.max(actual.bleed,3);actual.bleedSource=a.id;record(actual,"deep_wound");}
    if(ability.effect==="shadow_hex"){kitStatus(actual,"classWeaken","weakenUntil",B.shadeWeakness*s,round);actual.kitDisruptUntil=round+B.disruptDuration+1;actual.targetId=null;record(actual,"weaken");record(actual,"misdirection");}
    if(ability.effect==="weaken"){kitStatus(actual,"classWeaken","weakenUntil",.18*s,round);record(actual,"weaken");}
+   if(ability.effect==="physical_vulnerability"&&applyControl(actual,"physical_vulnerability",round))record(actual,"physical_vulnerability");
    if(ability.effect==="control"&&kitControlAllowed(actual,round)){actual.stagger=Math.max(actual.stagger,1);actual.classControlUntil=round+kitControlDuration(actual);record(actual,"control");}
   }
   if(clean&&ability.siphon){
    const fraction=Math.min(B.siphonMaxHP,hit*ability.siphon/a.maxHP);
    const amount=kitHeal(a,a,fraction,round);if(amount)record(a,"heal",{healing:amount,fromDamage:hit});
   }
-  if(clean&&(ability.splash||ability.spreadSlow)){
+  if(clean&&(ability.splash||ability.spreadSlow||ability.spreadControl)){
    const nearby=actors.filter(x=>x!==actual&&alive(x)&&x.side!==a.side&&dist(actual,x)<=1&&dist(a,x)<=(ability.range??weapon.range)+1).slice(0,2);
    for(const x of nearby){
     if(ability.splash){
      const raw=hit*combatDamageFactor(a,x,weapon)/combatDamageFactor(a,actual,weapon)*ability.splash*(a.classId==="flameweaver"?1+(B.flameSplash-1)*s:1)*(1-Math.min(80,protection(x,weapon.type))/100)/(1+intactArmourSum(x,"resistance")*.15)*statMagicDamageFactor(x,weapon.type)-flatGuard(x)*.1;
      const damage=wound(a,x,Math.max(1,Math.round(raw)));record(x,"splash",{damage});
     }
+    if(ability.spreadControl&&alive(x)&&statStatusLands(x,weapon.type,ctx.roll)&&applyControl(x,"stun",round))record(x,"stun");
     if(ability.spreadSlow&&alive(x)&&statStatusLands(x,weapon.type,ctx.roll)){x.kitSlowUntil=Math.max(x.kitSlowUntil??0,round+B.slowDuration+1);record(x,"slow");}
    }
   }
   return true;
  }
  switch(ability.type){
+ case "tactical_control":{
+  const choices=tacticalChoices(a,b,actors,round,ability,weapon),first=choices[0];if(!first)return false;
+  const effect=ability.effect,targets=ability.area?choices.filter(x=>dist(first,x)<=1).slice(0,3):[first];
+  for(const x of targets){
+   if(effect==="cleanse"){clearControl(x);x.bleed=0;x.stagger=0;x.classWeaken=0;x.weakenUntil=0;x.kitSlowUntil=0;x.kitDisruptUntil=0;record(x,"cleanse");continue;}
+   if(!statStatusLands(x,ability.physical?"physical":"magic",ctx.roll)){record(x,"resist",{effect});continue;}
+   if(ability.physical&&x.role==="tank"&&x.shield.hp>0&&!x.guardOpen&&ctx.roll()<.65){record(x,"resist",{effect,shield:true});continue;}
+   if(effect==="dispel"){x.classBuff=0;x.classGuard=0;x.buffUntil=0;x.guardUntil=0;x.kitTempoUntil=0;x.kitFocusUntil=0;x.kitPactUntil=0;x.kitBraceUntil=0;record(x,"dispel");continue;}
+   if(applyControl(x,effect,round)){record(x,effect,{until:x.controlEffects[effect]});if(a.classId==="gravebinder"&&effect==="gloom"&&applyControl(x,"antiheal",round))record(x,"antiheal",{until:x.controlEffects.antiheal});}
+  }
+  return true;
+ }
  case "self_boon":{
   const guard=selfBoonMode(a,actors)==="guard",key=guard?"classGuard":"classBuff",until=guard?"guardUntil":"buffUntil";
   kitStatus(a,key,until,ability.amount*s,round,ability.duration);record(a,guard?"ward":"buff",{magnitude:a[key],until:a[until]});return true;
@@ -103,7 +131,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   for(const x of targets){
    const guard=mode==="guard",key=guard?"classGuard":"classBuff",until=guard?"guardUntil":"buffUntil";
    kitStatus(x,key,until,amount,round,duration);
-   if(mode==="tempo"){x.kitTempoUntil=round+duration;record(x,"tempo",{until:x.kitTempoUntil});}
+   if(mode==="tempo"||mode==="magic_tempo"){x.kitTempoUntil=round+duration;if(a.groupCombatRules===7)x.kitMagicTempo=mode==="magic_tempo";record(x,"tempo",{until:x.kitTempoUntil});}
    record(x,guard?"ward":"buff",{magnitude:x[key],until:x[until]});
   }
   return true;
@@ -127,7 +155,8 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   for(const x of targets){
    const amount=kitHeal(a,x,ability.amount*statHealing(a),round);if(!amount)continue;
    used=true;record(x,"heal",{healing:amount});
-   if(ability.cleanse&&harmful(x)){x.bleed=0;x.stagger=0;x.classWeaken=0;x.weakenUntil=0;x.kitSlowUntil=0;x.kitDisruptUntil=0;record(x,"cleanse");}
+   if(ability.cleanse&&harmful(x)){clearControl(x);x.bleed=0;x.stagger=0;x.classWeaken=0;x.weakenUntil=0;x.kitSlowUntil=0;x.kitDisruptUntil=0;record(x,"cleanse");}
+   if(ability.pact&&x.role==="melee"){x.kitPactUntil=round+3;x.kitPactFraction=B.pactDamageFraction*s;record(x,"blood_pact");}
    if(ability.boon){kitStatus(x,"classBuff","buffUntil",ability.boon*s,round);record(x,"buff",{magnitude:x.classBuff});}
   }
   return used;

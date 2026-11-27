@@ -1,6 +1,6 @@
 import { dodgeChance } from "./armour.mjs?v=bal-002";
 import {COUNTERS,tacticalActor,isArrow,intactTank} from "./group-counter-rules.mjs";
-import {kitStrikeModifiers,kitStatus,kitControlAllowed,kitControlDuration,kitPactHeal} from "./class-effects.mjs";
+import {kitStrikeModifiers,kitStatus,kitControlAllowed,kitControlDuration,kitPactHeal,wakeOnDamage} from "./class-effects.mjs";
 import {kitActor,KIT_BALANCE} from "./class-kits.mjs";
 import {individualActor,statAttack,statAim,statSpeed,statCrit,statEvasion,statMobility,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
 import {combatDamageFactor} from "./raid-rules.mjs";
@@ -77,7 +77,7 @@ export function timeoutVerdict(player, enemy) {
 
 export function wound(actor, target, amount) {
   const damage = Math.min(target.hp, amount);
-  target.hp -= damage;
+  target.hp -= damage;if(damage>0)wakeOnDamage(target);
   actor.inflicted += damage;
   return damage;
 }

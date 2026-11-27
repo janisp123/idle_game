@@ -6,15 +6,17 @@ export function prepareKitActor(a){
 }
 export function expireKitEffects(a,round){
  if(!kitActor(a))return;
+ if(a.groupCombatRules===7)for(const key of Object.keys(a.controlEffects??{}))if(round>=a.controlEffects[key])delete a.controlEffects[key];
  for(const key of ["kitFocusUntil","kitSlowUntil","kitDisruptUntil","kitBraceUntil","kitTotemUntil","kitPactUntil","kitTempoUntil","kitSealUntil"])if(round>=a[key])a[key]=0;
+ if(a.groupCombatRules===7&&!a.kitTempoUntil)a.kitMagicTempo=false;
 }
 export function markKitMovement(a){if(kitActor(a)){a.kitStationary=0;a.kitFocusUntil=0;}}
-export const kitApproach=a=>!kitActor(a)?1:(a.classId==="swiftblade"?B.swiftPursuit:a.classId==="ragebreaker"?B.ragePursuit:a.classId==="forgecaller"?B.forgeApproach:1)*(a.kitSlowUntil>0?(a.classId==="wellspring"?B.resilienceSlow:.5):1)*(a.kitTotemUntil>0&&a.kitTotemMode==="balanced"?B.totemApproach:1);
+export const kitApproach=a=>!kitActor(a)?1:(a.classId==="swiftblade"?B.swiftPursuit:a.classId==="ragebreaker"?B.ragePursuit:a.classId==="forgecaller"?B.forgeApproach:1)*((a.kitSlowUntil>0||controlActive(a,"slow"))?(a.classId==="wellspring"?B.resilienceSlow:.5):1)*(a.kitTotemUntil>0&&a.kitTotemMode==="balanced"?B.totemApproach:1);
 export const kitControlAllowed=(a,round)=>!kitActor(a)||round>=(a.classControlUntil??0)&&round>=(a.kitBraceUntil??0);
 export const kitControlDuration=a=>kitActor(a)&&a.classId==="wellspring"?4:3;
 export function kitPactHeal(a,damage,round){
  if(!kitActor(a)||a.role!=="melee"||!a.kitPactUntil||round>=a.kitPactUntil||damage<=0||a.hp<=0||round<(a.nextHealRound??0))return 0;
- const amount=Math.min(a.maxHP-a.hp,Math.floor(a.maxHP*B.pactMaxHP),Math.floor(damage*a.kitPactFraction));
+ const amount=Math.min(a.maxHP-a.hp,Math.floor(a.maxHP*B.pactMaxHP),Math.floor(damage*a.kitPactFraction*healingFactor(a)));
  if(amount<=0)return 0;a.hp+=amount;a.nextHealRound=round+2;return amount;
 }
 export const kitTargetDisrupted=a=>kitActor(a)&&a.kitDisruptUntil>0;
@@ -23,12 +25,13 @@ export function kitStatus(a,key,until,value,round,duration=3){
 }
 export function kitHeal(a,b,fraction,round){
  if(b.hp<=0||round<(b.nextHealRound??0))return 0;
- const amount=Math.min(b.maxHP-b.hp,Math.max(1,Math.round((b.encounterHealMaxHP??b.maxHP)*fraction*kitStrength(a)*(a.classId==="lifekeeper"?B.mercyHealing:a.classId==="spiritcaller"?B.spiritHealing:1))));
+ const amount=Math.min(b.maxHP-b.hp,Math.max(1,Math.round((b.encounterHealMaxHP??b.maxHP)*fraction*kitStrength(a)*healingFactor(b)*(a.classId==="lifekeeper"?B.mercyHealing:a.classId==="spiritcaller"?B.spiritHealing:1))));
  if(amount<=0)return 0;b.hp+=amount;b.nextHealRound=round+2;return amount;
 }
 export function kitStrikeModifiers(a,b,attack,distance){
  const m={aim:0,dodge:0,impact:1,block:0,crit:0,recovery:0,blockImpact:null,shieldChance:null,parryImpact:null};
  if(!kitActor(a)||!kitActor(b))return m;
+ if(controlActive(b,attack.type==="magic"?"gloom":"physical_vulnerability"))m.impact*=1+CONTROL_BALANCE.vulnerability;
  const s=kitStrength(a),t=kitStrength(b),knife=attack.move==="knife",shot=attack.move==="shot";
  const torso=b.armour.find(p=>p.id==="torso"||p.itemId?.startsWith("torso:"));
  const plate=torso?.hp>0&&b.trainingKit?.armour?.torso==="plate";
@@ -61,7 +64,7 @@ export function kitStrikeModifiers(a,b,attack,distance){
  if(a.classId==="forgecaller")m.impact*=B.forgeImpact;
  if(b.classId==="forgecaller"&&plate&&attack.type!=="magic")m.impact*=1-B.forgePlateGuard*t;
  if(a.classId==="hexchief"&&b.kitSealUntil>0)m.impact*=1+(B.sealImpact-1)*s;
- if(a.kitTempoUntil>0&&attack.recovery>=3)m.recovery+=B.tempoRecovery;
+ if(a.kitTempoUntil>0&&attack.recovery>=3&&(!a.kitMagicTempo||attack.type==="magic"))m.recovery+=B.tempoRecovery;
 
  if(attack.type==="magic"){
   if(a.classId==="flameweaver")m.impact*=B.flameImpact;
@@ -71,3 +74,24 @@ export function kitStrikeModifiers(a,b,attack,distance){
  }
  return m;
 }
+
+ // V7 statuses are transient, nonstacking and cannot refresh while active.
+ export const CONTROL_BALANCE=Object.freeze({root:2,slow:2,stun:1,paralysis:2,silence:2,sleep:2,gloom:3,antiheal:3,physical_vulnerability:3,immunity:3,antihealFraction:.35,vulnerability:.20});
+ export const controlActive=(a,key)=>a.groupCombatRules===7&&Boolean(a.controlEffects?.[key]);
+ export const rooted=a=>controlActive(a,"root");
+ export const silenced=a=>controlActive(a,"silence");
+ export const incapacitated=a=>["stun","paralysis","sleep"].find(k=>controlActive(a,k));
+ export const healingFactor=a=>controlActive(a,"antiheal")?1-CONTROL_BALANCE.antihealFraction:1;
+ const hardOrMove=new Set(["root","stun","paralysis","sleep"]);
+ export const controlEligible=(a,key,round)=>a.groupCombatRules===7&&a.hp>0&&!controlActive(a,key)&&(!hardOrMove.has(key)||kitControlAllowed(a,round))&&(key!=="silence"||round>=(a.silenceImmuneUntil??0));
+ export function applyControl(a,key,round){
+  if(!controlEligible(a,key,round)||!CONTROL_BALANCE[key])return false;
+  a.controlEffects??={};a.controlEffects[key]=round+CONTROL_BALANCE[key]+1;
+  if(hardOrMove.has(key))a.classControlUntil=round+CONTROL_BALANCE[key]+CONTROL_BALANCE.immunity+1;
+  if(key==="silence")a.silenceImmuneUntil=round+CONTROL_BALANCE[key]+CONTROL_BALANCE.immunity+1;
+  if(key==="root")a.approach=0;
+  return true;
+ }
+ export function clearControl(a){if(a.groupCombatRules===7)a.controlEffects={};}
+ export const hasControl=a=>a.groupCombatRules===7&&Object.keys(a.controlEffects??{}).length>0;
+ export function wakeOnDamage(a){if(controlActive(a,"sleep"))delete a.controlEffects.sleep;}
