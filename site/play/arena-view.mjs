@@ -1,7 +1,8 @@
 // Compact arena view; no strike log, HP bar, reward mutation or scheduler.
-import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels} from "./arena-presentation.mjs?v=individual-stats-001";
+import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels} from "./arena-presentation.mjs?v=raid-001";
 const NS="http://www.w3.org/2000/svg";
 const icons={
+ dagger:"M5 21l4-4M6 14l4 4M8 16 18 3l3 0-1 4-10 11",staff:"M5 22 17 6M17 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",wand:"M4 21 16 9M16 3v4M16 11v4M10 9h4M18 9h4",scepter:"M12 22V8M9 8h6M12 1 16 5 12 9 8 5Z",axe:"M5 22 17 3M12 8c1-4 4-6 8-6l1 8c-4 2-7 1-9-2Z",gauntlets:"M4 11V7l2-2 2 2V4l2-1 2 2 2-2 2 2 2-1 2 3v6l-4 7H8Z",mace:"M7 22 15 9M13 3l4-1 4 4-1 4-4 1-4-4Z",
  tank:"M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5Z",melee:"M3 21 21 3M3 3 21 21M3 15l6 6M15 3l6 6",ranged:"M4 3c15 0 17 16 1 18L4 3ZM2 13l19-5",mage:"M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z",healer:"M9 3h6v6h6v6h-6v6H9v-6H3V9h6Z",support:"M9 18V5l12-2v13M9 18c0 4-7 4-7 0s7-4 7 0M21 16c0 4-7 4-7 0s7-4 7 0",summoner:"M12 2l9 10-9 10L3 12Z M12 7v10M7 12h10",
  heart:"M20.8 4.6a5.5 5.5 0 0 0-7.8 0l-1 1-1-1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z",
  armour:"M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5L12 2Z",
@@ -32,6 +33,7 @@ function icon(id){
  svg.setAttribute("stroke-width","1.7");svg.setAttribute("stroke-linecap","round");svg.setAttribute("stroke-linejoin","round");svg.setAttribute("aria-hidden","true");
  p.setAttribute("d",icons[id]??icons.armour);svg.append(p);return svg;
 }
+export function weaponIcon(id,label){const actual={"Dagger":"dagger","Staff":"staff","Wand":"wand","Scepter":"scepter","Mace":"mace","Great axe":"axe","Gauntlets":"gauntlets","Twin swords":"greatsword","Sword":"melee","Polearm":"spear"}[label]??id;return token(actual,label);}
 function token(id,label,value){
  const n=node("span");n.className="arena-token";n.title=label;n.setAttribute("aria-label",label);
  n.append(icon(id));if(value!==undefined)n.append(node("span",String(value)));return n;

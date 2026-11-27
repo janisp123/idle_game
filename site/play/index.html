@@ -8,8 +8,8 @@
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./game.css">
 <link rel="stylesheet" href="./manager-ui.css?v=class-info-001">
-<link rel="stylesheet" href="./fantasy-ui.css?v=individual-stats-001">
-<script type="module" src="./manager-app.mjs?v=individual-stats-001"></script>
+<link rel="stylesheet" href="./fantasy-ui.css?v=raid-001">
+<script type="module" src="./manager-app.mjs?v=raid-002"></script>
 </head>
 <body>
 <a class="skip-link" href="#game">Skip to game</a>
@@ -35,8 +35,10 @@
   </div>
   <div class="arena-side"><h3>Enemy team</h3><div id="arenaEnemies" class="arena-roster"></div></div>
 </div>
+<section id="raidBattle" hidden aria-labelledby="raidHeading"><h3 id="raidHeading"></h3><p id="raidTerrain" class="quiet"></p><div class="raid-match"><div><h3>Your team</h3><div id="raidPlayers" class="raid-team"></div></div><div><h3>Monsters</h3><div id="raidBoss"></div><div id="raidMinions" class="raid-crew"></div></div></div><p id="raidTimer" class="quiet"></p><progress id="raidProgress" max="100" value="0" aria-label="Raid time limit"></progress></section>
 <p id="battleResult" class="quiet arena-last-result" aria-live="polite">No completed battles yet.</p>
 </section>
+<details id="raidPanel" class="manager-card stats-card"><summary>Raid bosses</summary><p id="raidBuff" class="raid-blessing"></p><p class="quiet">Choose a raid. Your team fights automatically, then returns to the arena. One blessing lasts 24 hours; lower raids cannot refresh higher blessings.</p><div id="raidChoices" class="raid-choices"></div><p id="raidLast" class="quiet" role="status"></p></details>
 <details id="battleAnalyticsPanel" class="manager-card stats-card" aria-labelledby="battleAnalyticsHeading">
 <summary id="battleAnalyticsHeading">Battle Analytics</summary>
 <div class="choice-grid two" id="battleAnalyticsScope"></div><div id="battleAnalyticsBody"></div>

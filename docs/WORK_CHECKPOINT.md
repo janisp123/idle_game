@@ -70,3 +70,27 @@ INDIVIDUAL-STATS-001 stage 3 STARTED: #205 merged after 179 tests/seven workflow
 
 
 INDIVIDUAL-STATS-001 stage 3 — candidate public arena v4 uses independent STR/DEX/CON/INT/WIT/MEN and class mastery, freezes old account effort (historical compatibility only), preserves old session rule versions until live boundary, clone profiles use same class growth and grade practice, removes account stats panel, shows six selected fighter stats and class base/growth. Named derived stat tuning in stat-combat.mjs. WIT affects magical action recovery, not fixed signature cooldowns. No mana. Shared Fighting progression remains internal reward cap/rank and equipment gate, not a combat attribute. Existing v1-v3 fixture defaults retained. CI pending; numerical balance and six-month benchmark provisional.
+
+
+RAID-001 STARTED (owner approval 2026-11-27). Individual stats #206 merged, 181 tests and all seven workflows passed. Five named raids and fixed crews, explicit raid-only knockout combat and nonstacking 24h blessing functions implemented as stage 1 foundation. No public raid launch or applied rewards yet; CI, raw initial screen, save/expiry integration and UI pending. See docs/mechanics/RAIDS_PLAN.md.
+
+
+RAID-001 stage 2 candidate: persisted frozen attempt and single settlement through public arena coordinator, arena paused during raid; offline resume, nonstacking blessings integrated into actual fighting XP cap and v4 combat bonus snapshots, split at expiry. UI and CI pending. No numeric balance claims.
+
+
+RAID-001 stage 3 candidate — launch buttons for all five raids, saved deterministic encounter, automatic arena pause/resume, strict knockout and one-time coins/blessing, 24h XP and combat bonus, expiry split, larger boss and six minion cards with actual health and weapon icons; mobile smoke and reward/reload tests. Candidate 2.5-second rounds, 120-round limit. Initial balance screen pending; approximate five-minute appropriate-level wins unverified. CI pending; do not claim deployed.
+
+
+RAID-001 initial foundation screen saved in [RAID_INITIAL_SCREEN_20261127.md](mechanics/RAID_INITIAL_SCREEN_20261127.md): 183 tests and Chromium passed, max team won 12/12 lower raids, timed out 3/3 at level 50. Follow-up limits oversized boss healing base and adds 30 same-grade diagnostics; exact actual timing still unverified. Weapon icons use actual class weapons rather than adapters. Full candidate CI pending.
+
+
+RAID-001 test repair: playable candidate c1afe459 website workflow 46003683324 failed the ten-second XP comparison (rounding/reward-cycle boundary); no merge. Revised test isolates XP-only level 10 blessing across 100s, confirms same coins/analytics, tests level 50 combat bonus separately and save roundtrip/expiry. Corrected numeric CSS selector in browser raid smoke. Buff timer shows hours/minutes. New CI pending.
+
+
+RAID-001 matched-grade screen [RAID_MATCHED_SCREEN_20261127.md](mechanics/RAID_MATCHED_SCREEN_20261127.md) preserved, 30 matched and 15 max-only actual bouts. Counter wins 15/15, mixed 13/15; level 50 counter median 160s. Candidate tuned common 5s rounds, lower boss HP multipliers 9/15/16/15; level 50 remains 9. 10-minute timeout, ~5-minute win goal. Latest full CI pending; previous XP test failure recorded and repaired separately.
+
+
+RAID-001 c5 test status: head 5a3beb7 website run 46003947892 passed all 186 Node tests, but Chromium smoke failed at line 425 because the injected JS string contained unescaped quotation marks in a numeric CSS attribute selector. Corrected to query the first button in the five-choice raid list (level 10). No gameplay changes. Full current-head CI pending; no merge.
+
+
+RAID-001 verification: latest head 2cdb205 website run 46004209912 failed two exact historical v1/v2 513-bout goldens (184/186); six other workflows passed. Only import URL changes in shared resolver modules since 5a3beb7 (186/186 Node) and raid-only catalog tuning. Restore previously verified shared resolver import specifiers exactly, retain raid tuning and corrected browser test. Do not change golden expectations. Fresh CI required before merge.

@@ -23,3 +23,23 @@ dialog::backdrop{background:#050b13d9}
 .class-info-details dt{color:#d9c497}.class-info-details dd{color:#d2dde7}
 
 .individual-attributes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:10px 0}.individual-attributes>div{min-width:0;border:1px solid #65768a;padding:6px;background:#152334}.individual-attributes strong{font-size:11px;color:#d6c397;display:block}.individual-attributes span{font-size:18px;font-variant-numeric:tabular-nums;color:#e9e6d8}.individual-attributes progress{margin:4px 0 0;height:5px}
+
+/* Raid view shares arena cards and original equipment icons. */
+#battleFighters[hidden],#raidBattle[hidden],#arenaNext[hidden]{display:none!important}
+.raid-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));gap:8px}
+.raid-choices button{min-height:64px;text-align:left;padding:10px;white-space:normal}
+.raid-choices strong,.raid-choices small{display:block;overflow-wrap:anywhere}
+.raid-choices small{font-size:11px;color:#c7c6d2;margin-top:4px}
+.raid-blessing{border-left:3px solid #b6a078;padding:8px;color:#e4d5ad;background:#253142;overflow-wrap:anywhere}
+.raid-match{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.55fr);gap:8px;align-items:start}
+.raid-match h3{font-size:13px;text-align:center;margin:7px 0}
+.raid-team,.raid-crew{display:grid;gap:5px}.raid-crew{grid-template-columns:repeat(2,minmax(0,1fr))}
+.raid-fighter{min-width:0;padding:6px;background:#252b3a;overflow-wrap:anywhere}
+.raid-fighter strong{line-height:1.3;font-size:11px;color:#e4d5ad}
+.raid-weapon{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:3px;font-size:11px;margin:4px 0}
+.raid-fighter progress{height:6px;margin:3px 0;accent-color:#a65259}
+.raid-fighter small{font-size:10px;display:block}
+.raid-boss{border:1px solid #c6a76d;padding:14px 7px;background:linear-gradient(#453241,#23293b);margin-bottom:7px}
+.raid-boss strong{font-size:17px}.raid-boss .arena-token svg{width:25px;height:25px}
+.raid-dead{opacity:.48}
+@media(min-width:701px){.raid-team{grid-template-columns:repeat(2,minmax(0,1fr))}.raid-crew{grid-template-columns:repeat(3,minmax(0,1fr))}}

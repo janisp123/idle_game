@@ -3,6 +3,7 @@ import {pilotKit,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
 import {kitStatus,kitHeal,kitControlAllowed,kitControlDuration} from "./class-effects.mjs";
 import {resolveStrike,wound,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=kits-001";
 import {statHealing,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
+import {combatDamageFactor} from "./raid-rules.mjs";
 const dist=(a,b)=>Math.max(0,Math.abs(a.x-b.x)+Math.abs(a.y-b.y)-1);
 const ratio=a=>a.hp/a.maxHP;
 const alive=a=>a.hp>0;
@@ -80,7 +81,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
    const nearby=actors.filter(x=>x!==actual&&alive(x)&&x.side!==a.side&&dist(actual,x)<=1&&dist(a,x)<=(ability.range??weapon.range)+1).slice(0,2);
    for(const x of nearby){
     if(ability.splash){
-     const raw=hit*ability.splash*(a.classId==="flameweaver"?1+(B.flameSplash-1)*s:1)*(1-Math.min(80,protection(x,weapon.type))/100)/(1+intactArmourSum(x,"resistance")*.15)*statMagicDamageFactor(x,weapon.type)-flatGuard(x)*.1;
+     const raw=hit*combatDamageFactor(a,x,weapon)/combatDamageFactor(a,actual,weapon)*ability.splash*(a.classId==="flameweaver"?1+(B.flameSplash-1)*s:1)*(1-Math.min(80,protection(x,weapon.type))/100)/(1+intactArmourSum(x,"resistance")*.15)*statMagicDamageFactor(x,weapon.type)-flatGuard(x)*.1;
      const damage=wound(a,x,Math.max(1,Math.round(raw)));record(x,"splash",{damage});
     }
     if(ability.spreadSlow&&alive(x)&&statStatusLands(x,weapon.type,ctx.roll)){x.kitSlowUntil=Math.max(x.kitSlowUntil??0,round+B.slowDuration+1);record(x,"slow");}
