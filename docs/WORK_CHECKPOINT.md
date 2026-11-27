@@ -55,3 +55,6 @@ Healer candidate 9e63ccc: website 45991891403 passed 171/171 and Chromium mobile
 
 
 CLASS-KITS-001 batch E candidate — Owner authorized continuation 2026-11-27. Four summoners, bounded familiar/construct utility and paid two-phase siege with expiry/fizzle. Registry covers 31/31. Prior support head b636a9f website passed 173/173 and Chromium, [6960 max-only bouts](mechanics/CLASS_KITS_SUPPORT_SCREEN_20261127.md): mage 84/120, summoner 60/120, ranged 14/120. Six workflows verified at observation, broad manager endgame workflow in progress. Next verify batch E, save raw results, update actual class info UI, full specialization matrix/mixed teams and independent holdouts, balance review. No merge/deployment.
+
+
+CLASS-GUIDE-002 / FANTASY-THEME-001 — Owner approved 2026-11-27: actual kit information for all specializations, stable general README, original classic fantasy MMORPG-inspired landing and manager styling (no imported Lineage II assets). No gameplay/balance changes. Preserve 44px controls and original hero painting. Browser tests compare names/cooldowns against registry for every class; final CI and deployment pending.

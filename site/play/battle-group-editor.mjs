@@ -3,7 +3,7 @@
 import {GROUP_IDS} from "./battle-group.mjs?v=group-001";
 import {GROUP_CLASSES,GROUP_RACES,RACE_LABELS,groupMainClasses,groupSpecializations} from "./battle-group-classes.mjs?v=group-001";
 import {ROLE_ICONS,renderGroupProgress} from "./battle-group-progress-view.mjs?v=group-006";
-import {classTacticalInfo} from "./class-tactical-info.mjs?v=class-info-001";
+import {classTacticalInfo} from "./class-tactical-info.mjs?v=class-info-002";
 const RACE_ICONS=Object.freeze({"human":"●","elf":"❋","dark_elf":"☾","orc":"◆","dwarf":"⬢"});
 const $=id=>document.getElementById(id),node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
 function choices(host,entries,value,onChoice){
@@ -23,7 +23,10 @@ function openClassInfo(id){
  const c=classTacticalInfo(id),dialog=$("classInfoDialog");
  $("classInfoHeading").textContent=c.name;
  $("classInfoEquipment").textContent=c.race+" · "+c.role+" · "+c.weapon+" · "+c.armour+" armour";
- $("classInfoAction").textContent=c.summary+" Signature cooldown: "+c.cooldown+" rounds.";
+ $("classInfoAction").textContent="Abilities activate automatically when conditions and cooldowns permit.";
+ $("classInfoPassiveName").textContent=c.passive.name;
+ $("classInfoPassiveEffect").textContent=c.passive.effect;
+ for(const [i,a] of c.abilities.entries()){const prefix=i===0?"classInfoPrimary":"classInfoSecondary";$(prefix+"Name").textContent=a.name;$(prefix+"Effect").textContent=a.effect;$(prefix+"Cooldown").textContent=a.cooldown+" combat rounds";}
  $("classInfoStrong").textContent=c.strong;$("classInfoBest").textContent=c.best;
  $("classInfoWeak").textContent=c.weak;$("classInfoWorst").textContent=c.worst;
  if(!dialog.open)dialog.showModal();

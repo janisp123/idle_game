@@ -1,8 +1,8 @@
 # The Long Vigil · Idle Game
 
-*An independent grimdark idle gladiator RPG and open browser-game engineering project.*
+*An independent fantasy idle RPG and open browser-game engineering project.*
 
-The Long Vigil is the playable game in the Idle Game hobby project. Fight automatically in the arena, earn coins and experience, and train a seven-character Battle Group. Choose a path, let time pass and return when it suits you.
+The Long Vigil is an evolving fantasy world built around automatic combat, character development and tactical choices. Build your group, discover your strengths and progress at your own pace.
 
 **This project is actively evolving.** Mechanics, content, visuals and long-term plans may change as ideas are tested. The current build is an experiment, not a promise of a fixed final feature set.
 
@@ -17,12 +17,9 @@ The playable alpha is an experimental test build. Expect changes, rough edges an
 
 ## The game
 
-- **Fight and specialize.** Choose seven classes and combat stances. Class abilities, automatic equipment and terrain shape the outcome.
-- **Build your Battle Group.** Train active classes, grow attributes, earn rewards and improve class-assigned equipment. Specialization brings strengths as well as weaknesses.
-- **Coins and combat experience.** Victories earn coins; fighting trains active classes and shared stats. Equipment upgrades use coins.
-- **Play at your own pace.** Your Battle Group fights while you are away. Rewards follow the frozen combat build and current XP cap; return to activate earned levels.
+The goal is a fantasy idle RPG with meaningful specialization, strategic group building, rewarding progression and battles where different strengths matter in different situations. Combat should reward planning rather than constant attention, and time away should remain part of the experience.
 
-The Long Vigil is an evolving idle RPG, not a fixed feature list. The game is designed around meaningful choices, gradual progression and a grimdark atmosphere rather than constant attention. Mechanics, balance and content will change during development; the [mechanics handbook](docs/mechanics/README.md) and [changelog](docs/CHANGELOG.md) describe the current implementation.
+The design draws inspiration from classic fantasy MMORPGs while developing its own identity, world and mechanics. Features, balance and presentation will evolve. For current implementation details, see the [mechanics handbook](docs/mechanics/README.md) and [changelog](docs/CHANGELOG.md).
 
 ## A Hobby, Not a Business
 
