@@ -71,6 +71,10 @@ Names: **Owner** is the final approver; **chat** is regular ChatGPT; **cw** is C
 
 A task list entry is not authorization to implement it. For approved changes use small branches and checked PRs. **Owner-approved AUTO-MERGE-001 authorizes merging already-agreed work once objectively ready**, subject to the conditions below. New work, risky exceptions and scope changes still require owner decisions. Record actual evidence and a durable next step. If files or tools are unavailable, say so rather than guessing.
 
+## Alpha release cadence — ALPHA-MERGE-001
+
+**Owner-approved ALPHA-MERGE-001 (2026-11-27):** During alpha, automatically merge agreed, functional increments through checked PRs without waiting for final numerical balance, comprehensive balance acceptance or nonblocking polish. Track these separately as open follow-ups; do not mark unfinished work complete. Preserve required functional CI, security, privacy, save compatibility, scope, branch protection, and deployment verification. Beta restores balance/release acceptance gates; the Owner decides when beta begins. This supersedes conflicting alpha-specific no-merge-until-balanced language and does not authorize unapproved work or failed checks.
+
 ## Owner-approved autonomous merge gate — AUTO-MERGE-001 (2026-11-21)
 
 When the Owner and agent have **already agreed on the specific work to implement**, completing it also grants standing permission to merge the resulting PR **without a separate “merge” message** after *all* of these are verified:

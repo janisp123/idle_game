@@ -4,7 +4,7 @@
 
 ## CLASS-KITS-001 planned extension
 
-[Automatic class kits implementation plan](CLASS_KITS_IMPLEMENTATION_PLAN.md) · [Interlude identity research](INTERLUDE_CLASS_IDENTITIES_20261127.md). Owner approved direction. Draft PR #200 contains 31/31 candidate kits (10 pilot, five melee, four mage, three healer, five support, four summoner); all v3 classes have two automatic abilities and a passive. Historical v1/v2 signatures remain for settlement. Live main unchanged. [Pilot evidence](CLASS_KITS_PILOT_SCREEN_20261127.md).
+[Automatic class kits implementation plan](CLASS_KITS_IMPLEMENTATION_PLAN.md) · [Interlude identity research](INTERLUDE_CLASS_IDENTITIES_20261127.md). Owner approved direction. Merged PR #200 contains 31/31 alpha kits (10 pilot, five melee, four mage, three healer, five support, four summoner); all v3 classes have two automatic abilities and a passive. Historical v1/v2 signatures remain for settlement. Main contains the new kits; balance and class guide UI remain provisional. [Pilot evidence](CLASS_KITS_PILOT_SCREEN_20261127.md).
 
 ## ARENA-ONLY-001 candidate (PR #199)
 

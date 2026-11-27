@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — ALPHA-MERGE-001 / CLASS-KITS-001 alpha integration
+
+ALPHA-MERGE-001 — Owner directed always merge during alpha. PR #200 merged f18389ea8b655699f97cf789a10bda2b435b02a5; tested head 913cbb5, all seven workflows, 175/175 tests, mobile/desktop Chromium. 31/31 class kits confirmed on main. Raw 6960-bout max-only screen saved in PR #200 comment 7217488307; mage stack 86/120, ranged 13/120, summoner 27/120. Class guide UI and comprehensive balance remain open, not alpha merge blockers. Pages deployment verification separate. Next: actual kit info UI and max-only class/terrain matrix on fresh main-based PR.
+
 ## 2026-11-27 — CLASS-KITS-001 batch E
 
 CLASS-KITS-001 batch E candidate — Owner authorized continuation 2026-11-27. Four summoners, bounded familiar/construct utility and paid two-phase siege with expiry/fizzle. Registry covers 31/31. Prior support head b636a9f website passed 173/173 and Chromium, [6960 max-only bouts](mechanics/CLASS_KITS_SUPPORT_SCREEN_20261127.md): mage 84/120, summoner 60/120, ranged 14/120. Six workflows verified at observation, broad manager endgame workflow in progress. Next verify batch E, save raw results, update actual class info UI, full specialization matrix/mixed teams and independent holdouts, balance review. No merge/deployment.

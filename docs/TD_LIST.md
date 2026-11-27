@@ -10,8 +10,8 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 ## CLASS-KITS-001 — Automatic class kits
 
-- **Goal / acceptance:** CLASS-KITS-001 — owner approved direction: one passive and two automatic abilities per specialization, no mana or manual skills. [Implementation plan](mechanics/CLASS_KITS_IMPLEMENTATION_PLAN.md) defines all 31 proposed kits, shared scheduler/effects, explicit versioned save compatibility, pilot 10-class family, max-only validation and UI/release gates. Plan only; no runtime changes or new tests run. Existing #200 terrain candidate 04f3acf all seven checks/163 tests passed; dagger/tank counter defect still open. Next: shared registry and scheduler plus old-rule dispatch. Exact candidate effects and numbers require validation, no release approval inferred.
-- **Status:** IN_REVIEW — 31/31 candidate kits; support 173 tests/browser passed; batch E pending CI, full balance and guide pending.
+- **Goal / acceptance:** CLASS-KITS-001 — owner approved direction: one passive and two automatic abilities per specialization, no mana or manual skills. [Implementation plan](mechanics/CLASS_KITS_IMPLEMENTATION_PLAN.md) defines all 31 proposed kits, shared scheduler/effects, explicit versioned save compatibility, pilot 10-class family, max-only validation and UI/release gates. All 31 kits implemented and merged in #200; numerical balance and class information follow-up remain open.
+- **Status:** PARTIAL — 31/31 kits merged in #200 (f18389e), all seven checks and 175 tests passed. Actual class info UI and full max-only balance pending. ALPHA-MERGE-001 permits incremental alpha merges.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

@@ -48,3 +48,7 @@ Use stable task IDs and precise handoffs: repo, task ID, revision, status, files
 ## Enforcement
 
 Run `python tools/check_project_protocol.py` locally and through GitHub Actions. It checks the file structure, **not whether an AI understood it**. Use the pull request checklist. New projects must start with a GitHub repository template, not a blank repository that lacks these rules.
+
+## ALPHA-MERGE-001
+
+**Owner-approved ALPHA-MERGE-001 (2026-11-27):** During alpha, automatically merge agreed, functional increments through checked PRs without waiting for final numerical balance, comprehensive balance acceptance or nonblocking polish. Track these separately as open follow-ups; do not mark unfinished work complete. Preserve required functional CI, security, privacy, save compatibility, scope, branch protection, and deployment verification. Beta restores balance/release acceptance gates; the Owner decides when beta begins. This supersedes conflicting alpha-specific no-merge-until-balanced language and does not authorize unapproved work or failed checks.

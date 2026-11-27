@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## Latest integration — alpha
+
+ALPHA-MERGE-001 — Owner directed always merge during alpha. PR #200 merged f18389ea8b655699f97cf789a10bda2b435b02a5; tested head 913cbb5, all seven workflows, 175/175 tests, mobile/desktop Chromium. 31/31 class kits confirmed on main. [Raw 6960-bout max-only screen](mechanics/CLASS_KITS_FULL_SCREEN_20261127.md) also saved in PR #200 comment 7217488307; mage stack 86/120, ranged 13/120, summoner 27/120. Class guide UI and comprehensive balance remain open, not alpha merge blockers. Pages deployment verification separate. Next: actual kit info UI and max-only class/terrain matrix on fresh main-based PR.
+
 ## CLASS-KITS-001 — STARTED
 
 CLASS-KITS-001 STARTED — 2026-11-27, Owner instructed implementation. First shared scheduler, status lifecycle and explicit v3 pilot (three daggers, three archers, four tanks), preserve v1 and v2 behavior and frozen settlement. Source baseline 2d5df13, terrain validation 04f3acf all seven checks/163 tests. No balance release before max-only tests and completion of all families. Next: implement and validate pilot; branch feature/group-tactical-counters, PR #200.
