@@ -124,6 +124,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
     if(rules!==4||raid.version!==RAID_RULES_VERSION||enemies.length!==7)throw new RangeError("Invalid raid rules");
     const d=raidDefinition(raid.level);
     for(const [i,a] of actors.filter(x=>x.side==="enemy").entries()){
+      if(!i)a.encounterHealMaxHP=a.maxHP; // Boss health inflation must not inflate percentage healing.
       a.maxHP=Math.max(1,Math.round(a.maxHP*(i?RAID_MONSTER_BALANCE.crewHP:d.bossHP)));a.hp=a.maxHP;
       a.encounterDamage=i?RAID_MONSTER_BALANCE.crewDamage:RAID_MONSTER_BALANCE.bossDamage;
       if(!i){a.encounterResistance=d.resistance;a.encounterResistFraction=d.resistFraction;}

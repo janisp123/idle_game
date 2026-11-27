@@ -23,7 +23,7 @@ export function kitStatus(a,key,until,value,round,duration=3){
 }
 export function kitHeal(a,b,fraction,round){
  if(b.hp<=0||round<(b.nextHealRound??0))return 0;
- const amount=Math.min(b.maxHP-b.hp,Math.max(1,Math.round(b.maxHP*fraction*kitStrength(a)*(a.classId==="lifekeeper"?B.mercyHealing:a.classId==="spiritcaller"?B.spiritHealing:1))));
+ const amount=Math.min(b.maxHP-b.hp,Math.max(1,Math.round((b.encounterHealMaxHP??b.maxHP)*fraction*kitStrength(a)*(a.classId==="lifekeeper"?B.mercyHealing:a.classId==="spiritcaller"?B.spiritHealing:1))));
  if(amount<=0)return 0;b.hp+=amount;b.nextHealRound=round+2;return amount;
 }
 export function kitStrikeModifiers(a,b,attack,distance){

@@ -141,3 +141,38 @@ test("five real raid encounters use named crews, bounded time, deterministic kno
  }
  console.log("RAID_INITIAL_SCREEN "+JSON.stringify({build:"max S masterwork, 3700h individual stats",results}));
 });
+
+import {ARMOUR_SLOTS as RAID_ARMOUR_SLOTS} from "../site/play/armour.mjs";
+const counterRosters={
+ 10:["oathkeeper","flameweaver","frostweaver","galescourge","lifekeeper","spiritcaller","runesage"],
+ 20:["oathkeeper","blademaster","nightblade","blackbow","windbow","lifekeeper","wardchanter"],
+ 30:["oathkeeper","blademaster","flameweaver","galescourge","lifekeeper","war_dancer","nightblade"],
+ 40:["oathkeeper","flameweaver","frostweaver","galescourge","lifekeeper","spiritcaller","runesage"],
+ 50:["oathkeeper","flameweaver","galescourge","frostweaver","lifekeeper","blackbow","runesage"]
+};
+function raidBenchmarkRoster(level,classes){
+ const d=RAID_CATALOG[level];let g=initialBattleGroup();
+ for(const [i,id] of GROUP_IDS.entries()){
+  const c=GROUP_CLASSES[classes[i]];g=selectGroupClass(g,id,c.race,c.mainClass,c.id);
+  const m=g[id],p=m.classes[c.id];p.mastery={level,xp:0};m.stances.balanced={level,xp:0};
+  const item={grade:d.grade,quality:"masterwork"};p.equipment=Object.fromEntries([c.loadout,...RAID_ARMOUR_SLOTS.map(s=>s.id+":"+c.armour)].map(k=>[k,{...item}]));
+  p.expertise[c.loadout]=expertiseThreshold(d.grade);p.expertise[c.armour]=expertiseThreshold(d.grade);p.expertiseActive={...p.expertise};
+  p.attributeEffort=awardCharacterEffort(blankCharacterEffort(),c.id,Math.floor(p.expertise[c.loadout]/4));p.attributeEffortActive={...p.attributeEffort};
+ }
+ return Object.values(groupSnapshots(g,{...max,difficulty:d.grade,skill:level},4));
+}
+test("same-grade raid timing screen compares ordinary and counter builds",()=>{
+ const results=[];
+ for(const level of RAID_LEVELS){
+  const d=RAID_CATALOG[level];
+  for(const [build,classes] of [["mixed",Object.values(initialBattleGroup()).map(m=>m.selected)],["counter",counterRosters[level]]]){
+   const p=raidBenchmarkRoster(level,classes);
+   for(const s of [seed,seed+17,seed+31]){
+    const r=resolveRaid(p,level,s,level);assert.ok(r.durationMs<=RAID_MAX_ROUNDS*RAID_ROUND_MS);
+    if(r.outcome==="victory")assert.ok(Object.entries(r.survivors).filter(([id])=>id.startsWith("enemy:")).every(([,hp])=>hp===0));
+    results.push({level,grade:d.grade,build,classes,seed:s,outcome:r.outcome,durationMs:r.durationMs,bossHP:r.events[0].vitals["enemy:0"].maxHP,bossRemaining:r.survivors["enemy:0"]});
+   }
+  }
+ }
+ console.log("RAID_MATCHED_SCREEN "+JSON.stringify({rules:1,quality:"masterwork",investment:"grade threshold productive time",results}));
+});

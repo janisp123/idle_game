@@ -17,3 +17,5 @@ Candidate decisions: coins 200/500/1000/2000/4000; fixed 7 monsters; duration de
 ## Playable candidate
 
 RAID-001 stage 3 candidate — launch buttons for all five raids, saved deterministic encounter, automatic arena pause/resume, strict knockout and one-time coins/blessing, 24h XP and combat bonus, expiry split, larger boss and six minion cards with actual health and weapon icons; mobile smoke and reward/reload tests. Candidate 2.5-second rounds, 120-round limit. Initial balance screen pending; approximate five-minute appropriate-level wins unverified. CI pending; do not claim deployed.
+
+[Initial max-only raw screen](RAID_INITIAL_SCREEN_20261127.md) — lower raids fast as overlevelled, level 50 timeout. Candidate fix limits incoming boss healing base to unscaled HP, same-grade mixed/counter screen added.

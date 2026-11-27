@@ -79,3 +79,6 @@ RAID-001 stage 2 candidate: persisted frozen attempt and single settlement throu
 
 
 RAID-001 stage 3 candidate — launch buttons for all five raids, saved deterministic encounter, automatic arena pause/resume, strict knockout and one-time coins/blessing, 24h XP and combat bonus, expiry split, larger boss and six minion cards with actual health and weapon icons; mobile smoke and reward/reload tests. Candidate 2.5-second rounds, 120-round limit. Initial balance screen pending; approximate five-minute appropriate-level wins unverified. CI pending; do not claim deployed.
+
+
+RAID-001 initial foundation screen saved in [RAID_INITIAL_SCREEN_20261127.md](mechanics/RAID_INITIAL_SCREEN_20261127.md): 183 tests and Chromium passed, max team won 12/12 lower raids, timed out 3/3 at level 50. Follow-up limits oversized boss healing base and adds 30 same-grade diagnostics; exact actual timing still unverified. Weapon icons use actual class weapons rather than adapters. Full candidate CI pending.

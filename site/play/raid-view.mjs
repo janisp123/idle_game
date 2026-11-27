@@ -1,5 +1,5 @@
 // Read-only raid display; all outcomes come from the persisted combat attempt.
-import {RAID_LEVELS,RAID_CATALOG,RAID_ROUND_MS,activeRaidBuff} from "./raid-rules.mjs";
+import {RAID_LEVELS,RAID_CATALOG,RAID_ROUND_MS,RAID_MAX_ROUNDS,activeRaidBuff} from "./raid-rules.mjs";
 import {raidResult} from "./raid-session.mjs";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 import {GROUP_IDS} from "./battle-group.mjs?v=group-001";
@@ -32,8 +32,8 @@ export function createRaidView(onStart){
   const r=raidResult(run),elapsed=Math.min(run.durationMs,Math.max(0,now-run.startedAtMs)),round=Math.min(r.rounds,Math.floor(elapsed/RAID_ROUND_MS)),key=run.startedAtMs+":"+run.level+":"+round;
   $("raidHeading").textContent="Raid · "+RAID_CATALOG[run.level].boss.name;
   $("raidTerrain").textContent=r.terrain.name+" · Lv "+run.level;
-  $("raidTimer").textContent=time(elapsed)+" elapsed · "+time(RAID_ROUND_MS*120-elapsed)+" until limit";
-  $("raidProgress").value=Math.min(100,100*elapsed/(RAID_ROUND_MS*120));
+  $("raidTimer").textContent=time(elapsed)+" elapsed · "+time(RAID_ROUND_MS*RAID_MAX_ROUNDS-elapsed)+" until limit";
+  $("raidProgress").value=Math.min(100,100*elapsed/(RAID_ROUND_MS*RAID_MAX_ROUNDS));
   if(shown===key)return;shown=key;
   const v=r.events.filter(e=>e.round<=round).at(-1).vitals;
   $("raidPlayers").replaceChildren(...GROUP_IDS.map((id,i)=>card(run.frozen.players[id],v["player:"+i])));
