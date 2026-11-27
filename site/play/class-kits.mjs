@@ -1,9 +1,13 @@
-// CLASS-KITS-001 pilot, melee, mage, healer and support batches: immutable class-specific data, no persistence or UI.
+// CLASS-KITS-001 complete 31-class candidate: immutable class-specific data, no persistence or UI.
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 export const KIT_RULES_VERSION=3;
 const strike=(id,name,cooldown,scale,extra={})=>({id,name,type:"strike",cooldown,scale,...extra});
 const utility=(id,name,type,cooldown,extra={})=>({id,name,type,cooldown,...extra});
 const rows=[
+ ["beastcaller","Familiar Bond",strike("familiar_strike","Familiar Strike",3,1.20,{familiar:true}),utility("familiar_aid","Familiar Aid","self_boon",5,{amount:.18,duration:3})],
+ ["spiritcaller","Supportive Familiar",strike("spirit_bolt","Spirit Bolt",4,1.08),utility("spirit_aid","Spirit Aid","ally_heal",5,{amount:.13,range:2})],
+ ["shadebinder","Disruptive Familiar",strike("shade_strike","Shade Strike",4,1.13),strike("shadow_hex","Shadow Hex",5,.85,{effect:"shadow_hex",utility:true})],
+ ["forgecaller","Construct Bond",strike("construct_strike","Construct Strike",4,1.18),utility("siege_pulse","Siege Pulse","siege_charge",7,{range:0,scale:1.40,splash:.55,recovery:3})],
  ["runesage","Focused Blessings",strike("light_bolt","Light Bolt",4,1.08),utility("blessing","Blessing","support_buff",5,{range:3,amount:.24,duration:3,maxTargets:1,mode:"stance"})],
  ["wardchanter","Protective Songs",strike("sword_cut","Sword Cut",4,1.08),utility("sheltering_song","Sheltering Song","support_buff",5,{range:2,amount:.22,duration:3,maxTargets:3,mode:"guard"})],
  ["war_dancer","Battle Rhythm",strike("twin_cut","Twin Cut",4,1.15),utility("war_dance","War Dance","support_buff",5,{range:2,amount:.12,duration:3,maxTargets:3,mode:"tempo"})],
@@ -46,7 +50,11 @@ export const KIT_BALANCE=Object.freeze({daggerShieldImpact:.38,daggerShieldBlock
  flameImpact:.90,flameSplash:1.15,graveCurseImpact:1.18,frostImpact:.83,frostRecovery:-1,galeImpact:1.17,galeRecovery:1,siphonMaxHP:.12,
  mercyHealing:1.12,mercyImpact:.78,resilienceSlow:.75,pactDamageFraction:.25,pactMaxHP:.08,pactThreshold:.80,healEmergency:.35,
  focusedBlessing:1.12,protectiveSong:1.12,wardchanterImpact:.86,warcallerImpact:.83,
- chantExtraDuration:1,tempoImpact:.10,tempoRecovery:-1,sealImmunity:4,sealImpact:1.12});
+ chantExtraDuration:1,tempoImpact:.10,tempoRecovery:-1,sealImmunity:4,sealImpact:1.12,
+ beastDirectImpact:.88,beastFamiliarImpact:1.12,spiritImpact:.85,spiritHealing:1.10,
+ shadeImpact:.90,shadeDisruptAim:.10,shadeWeakness:.22,forgeApproach:.80,forgePlateGuard:.12,forgeImpact:.90});
 for(const [id,k] of Object.entries(CLASS_KITS)){
  if(!GROUP_CLASSES[id]||k.primary.id===k.secondary.id||[k.primary,k.secondary].some(b=>!Number.isInteger(b.cooldown)||b.cooldown<2))throw Error("Invalid class kit "+id);
 }
+
+if(Object.keys(CLASS_KITS).length!==Object.keys(GROUP_CLASSES).length||Object.keys(GROUP_CLASSES).some(id=>!Object.hasOwn(CLASS_KITS,id)))throw Error("Incomplete class kit registry");

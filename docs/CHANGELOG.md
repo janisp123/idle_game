@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — CLASS-KITS-001 batch E
+
+CLASS-KITS-001 batch E candidate — Owner authorized continuation 2026-11-27. Four summoners, bounded familiar/construct utility and paid two-phase siege with expiry/fizzle. Registry covers 31/31. Prior support head b636a9f website passed 173/173 and Chromium, [6960 max-only bouts](mechanics/CLASS_KITS_SUPPORT_SCREEN_20261127.md): mage 84/120, summoner 60/120, ranged 14/120. Six workflows verified at observation, broad manager endgame workflow in progress. Next verify batch E, save raw results, update actual class info UI, full specialization matrix/mixed teams and independent holdouts, balance review. No merge/deployment.
+
 ## 2026-11-27 — CLASS-KITS-001 batch D
 
 CLASS-KITS-001 batch D candidate — Owner authorized continuation 2026-11-27. Five support kits: focused blessing, protective song, offensive tempo, bounded cluster cooldown delay, longer stance chant. Prior healer head 9e63ccc Node suite passed (website reached Chromium); final results not yet available at authoring. 27/31 kits; four summoners remain. Next verify both CI heads, save raw screens, implement summoners. No merge or deployment.

@@ -27,12 +27,16 @@ const sealChoices=(a,b,actors,round,ability)=>{
  if(dist(a,b)>ability.range)return [];
  return actors.filter(x=>x.side!==a.side&&alive(x)&&x.classId&&!x.kitSealUntil&&dist(b,x)<=1&&dist(a,x)<=ability.range+1&&(pilotKit(x)?Math.min(x.kitReady.primary,x.kitReady.secondary)<=round+1:x.readyRound<=round+1)).sort((x,y)=>Number(y===b)-Number(x===b)||dist(a,x)-dist(a,y));
 };
+const selfBoonMode=(a,actors)=>a.activeTactic==="defensive"||(a.activeTactic!=="aggressive"&&ratio(a)<.65&&threatened(a,actors))?"guard":"buff";
+const siegeNeighbors=(a,b,actors)=>actors.filter(x=>x!==b&&x.side!==a.side&&alive(x)&&dist(b,x)<=1&&dist(a,x)<=1);
 const pactChoices=(a,actors,ability)=>alliesIn(a,actors,ability.range).filter(x=>x.role==="melee"&&!x.kitPactUntil&&ratio(x)<B.pactThreshold&&threatened(x,actors));
 function eligible(a,b,actors,round,ability,weapon,terrain){
  const d=dist(a,b),stance=a.activeTactic??"balanced",threshold=stance==="defensive"?.85:stance==="aggressive"?.50:.70;
  switch(ability.type){
  case "strike":return !a.counter&&d<=(ability.range??weapon.range)&&d>=(ability.minRange??0)&&(!ability.maxHP||ratio(a)<=ability.maxHP)&&
-  (ability.effect!=="control"||kitControlAllowed(b,round))&&(ability.effect!=="bleed"||!b.bleed)&&(!ability.siphon||round>=(a.nextHealRound??0));
+  (ability.effect!=="control"||kitControlAllowed(b,round))&&(ability.effect!=="bleed"||!b.bleed)&&(!ability.siphon||round>=(a.nextHealRound??0))&&(ability.effect!=="shadow_hex"||!b.kitDisruptUntil);
+ case "self_boon":return selfBoonMode(a,actors)==="guard"?a.classGuard<ability.amount*kitStrength(a)&&threatened(a,actors):a.classBuff<ability.amount*kitStrength(a)&&d<=weapon.range;
+ case "siege_charge":return !a.counter&&!a.kitSiege&&d<=ability.range&&siegeNeighbors(a,b,actors).length>0;
  case "support_buff":return supportChoices(a,actors,ability,supportMode(a,actors,ability)).length>0;
  case "seal":return sealChoices(a,b,actors,round,ability).length>=2;
  case "ally_heal":return healChoices(a,actors,round,ability).length>0;
@@ -57,12 +61,13 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   const actual=ctx.intercept(a,b,ability.range??weapon.range);
   if(actual!==b)ctx.record(actual,a,"intercept",{protected:b.id,ability:ability.id});
   let clean=false,hit=0;
-  resolveStrike(a,actual,{active:{...weapon,range:ability.range??weapon.range,recovery:ability.recovery??weapon.recovery,damageScale:ability.scale*s,guardPierce:ability.guardPierce===true},bow:weapon.move==="shot",distance:Math.min(2,dist(a,actual)),terrain:ctx.terrain,roll:ctx.roll,speedRoll:ctx.speedRoll,
+  resolveStrike(a,actual,{active:{...weapon,range:ability.range??weapon.range,recovery:ability.recovery??weapon.recovery,damageScale:ability.scale*s,guardPierce:ability.guardPierce===true,familiar:ability.familiar===true},bow:weapon.move==="shot",distance:Math.min(2,dist(a,actual)),terrain:ctx.terrain,roll:ctx.roll,speedRoll:ctx.speedRoll,
    record:(x,y,t,e={})=>{if(x===a&&y===actual&&["hit","finisher"].includes(t)&&e.damage>0){clean=true;hit=e.damage;}ctx.record(x,y,t,{ability:ability.id,...e});},interruptApproach:x=>{x.approach=0;},onBleed:(x,y)=>{y.bleedSource=x.id;}});
   if(clean&&alive(actual)){
    if(ability.effect==="open"){actual.guardOpen=Math.max(actual.guardOpen,2);record(actual,"guard_open");}
    if(ability.effect==="slow"){actual.kitSlowUntil=Math.max(actual.kitSlowUntil??0,round+B.slowDuration+1);record(actual,"slow");}
    if(ability.effect==="bleed"){actual.bleed=Math.max(actual.bleed,3);actual.bleedSource=a.id;record(actual,"deep_wound");}
+   if(ability.effect==="shadow_hex"){kitStatus(actual,"classWeaken","weakenUntil",B.shadeWeakness*s,round);actual.kitDisruptUntil=round+B.disruptDuration+1;actual.targetId=null;record(actual,"weaken");record(actual,"misdirection");}
    if(ability.effect==="weaken"){kitStatus(actual,"classWeaken","weakenUntil",.18*s,round);record(actual,"weaken");}
    if(ability.effect==="control"&&kitControlAllowed(actual,round)){actual.stagger=Math.max(actual.stagger,1);actual.classControlUntil=round+kitControlDuration(actual);record(actual,"control");}
   }
@@ -83,6 +88,11 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   return true;
  }
  switch(ability.type){
+ case "self_boon":{
+  const guard=selfBoonMode(a,actors)==="guard",key=guard?"classGuard":"classBuff",until=guard?"guardUntil":"buffUntil";
+  kitStatus(a,key,until,ability.amount*s,round,ability.duration);record(a,guard?"ward":"buff",{magnitude:a[key],until:a[until]});return true;
+ }
+ case "siege_charge":a.kitSiege={targetId:b.id,ready:round+2,expires:round+3};record(b,"siege_charge",{readyRound:round+2});return true;
  case "support_buff":{
   const mode=supportMode(a,actors,ability),targets=supportChoices(a,actors,ability,mode).slice(0,ability.maxTargets);
   if(!targets.length)return false;
@@ -149,6 +159,18 @@ function perform(a,b,actors,round,ability,weapon,ctx){
 }
 export function tryKitAction(a,b,actors,round,weapon,ctx){
  const kit=pilotKit(a);if(!kit||a.recovery>0||!alive(a)||!alive(b))return false;
+ if(a.kitSiege){
+  const charge=a.kitSiege,ability=kit.secondary;
+  if(round<charge.ready)return false;
+  a.kitSiege=null;
+  const target=actors.find(x=>x.id===charge.targetId&&x.side!==a.side&&alive(x));
+  if(round>charge.expires||!target||dist(a,target)>ability.range||a.counter){
+   a.recovery=Math.max(1,a.recovery);ctx.record(a,target??null,"siege_fizzle",{ability:ability.id});return true;
+  }
+  ctx.record(a,target,"siege_release",{ability:ability.id});
+  perform(a,target,actors,round,{...ability,type:"strike"},weapon,ctx);
+  return true;
+ }
  const stance=a.activeTactic??"balanced";
  // Secondary utility first when defensive or clearly needed. Aggressive
  // prioritizes actual attacks, except when a pursuit ability is the legal action.

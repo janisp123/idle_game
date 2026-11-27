@@ -233,3 +233,49 @@ test("support buffs are bounded, stance dependent, expire and seal cannot chain 
  hex.recovery=0;hex.kitReady.secondary=1;assert.ok(use(hex,2,foe2));assert.ok(!events.some(x=>x.type==="seal"));assert.equal(foe2.kitReady.primary,2);
  expireKitEffects(foe2,5);assert.equal(foe2.kitSealUntil,0);
 });
+
+const summonerBatch=["beastcaller","spiritcaller","shadebinder","forgecaller"];
+test("all 31 classes have immutable unique kits and summoners act in real max-only bouts",()=>{
+ assert.deepEqual(Object.keys(CLASS_KITS).sort(),[...GROUP_CLASS_IDS].sort());
+ const abilityIds=new Set();
+ for(const k of Object.values(CLASS_KITS)){
+  assert.ok(Object.isFrozen(k));assert.ok(k.passive);
+  for(const ability of [k.primary,k.secondary]){assert.ok(Object.isFrozen(ability));assert.ok(!abilityIds.has(ability.id));abilityIds.add(ability.id);}
+ }
+ const p=roster([...summonerBatch,"oathkeeper","longshot","lifekeeper"]),q=roster(["blademaster","frostweaver","trickblade","scrapbreaker","gravebinder","longshot","forgecaller"]);
+ const seen=new Set();
+ for(const arena of ARENAS)for(let i=0;i<8;i++){
+  const seed=20261411+i*1009,r=resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3});
+  assert.deepEqual(r,resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3}));
+  assert.equal(Object.keys(r.survivors).length,14);
+  const last={},acted=new Set();
+  for(const ev of r.events){
+   for(const v of Object.values(ev.vitals))assert.ok(Number.isInteger(v.hp)&&v.hp>=0&&v.hp<=v.maxHP);
+   if(ev.type==="siege_release"||ev.type==="siege_fizzle"){assert.ok(!acted.has(ev.actor+":"+ev.round));acted.add(ev.actor+":"+ev.round);continue;}
+   if(ev.type!=="class_ability"||!ev.slot)continue;
+   const [side,j]=ev.actor.split(":"),id=(side==="player"?p:q)[Number(j)].classId,ability=CLASS_KITS[id][ev.slot],key=ev.actor+":"+ev.slot;
+   assert.equal(ev.ability,ability.id);assert.ok(last[key]===undefined||ev.round-last[key]>=ability.cooldown);
+   assert.ok(!acted.has(ev.actor+":"+ev.round));last[key]=ev.round;acted.add(ev.actor+":"+ev.round);seen.add(id);
+  }
+ }
+ for(const id of summonerBatch)assert.ok(seen.has(id),"no real ability "+id);
+});
+test("summoner effects are bounded, use existing fighters and siege has a paid delayed release or fizzle",()=>{
+ const ids=[...summonerBatch,"oathkeeper","longshot","trickblade"],snap=roster(ids);
+ const mk=(id,side,x,y)=>prepareKitActor(prepareClassActor({...fighter(snap[ids.indexOf(id)],side),groupCombatRules:3,id:side+":"+id+":"+x+":"+y,x,y,kitRound:1,activeTactic:"balanced",retreats:2,approach:0}));
+ const beast=mk("beastcaller","player",0,0),spirit=mk("spiritcaller","player",0,1),shade=mk("shadebinder","player",0,2),forge=mk("forgecaller","player",1,2);
+ const tank=mk("oathkeeper","player",1,0),foe=mk("longshot","enemy",2,2),near=mk("trickblade","enemy",2,1),far=mk("longshot","enemy",7,7);
+ const actors=[beast,spirit,shade,forge,tank,foe,near,far],events=[];let i=0;
+ const ctx={terrain:ARENAS[0],roll:()=>[0,.99,.5][i++%3],speedRoll:()=>1,record:(x,y,type,extra={})=>events.push({x,y,type,...extra}),intercept:(x,y)=>y,move:()=>false};
+ const use=(x,round,target=foe)=>{events.length=0;i=0;x.kitRound=round;return tryKitAction(x,target,actors,round,classWeapon(x),ctx);};
+ const direct=kitStrikeModifiers(beast,foe,classWeapon(beast),1).impact;
+ assert.ok(kitStrikeModifiers(beast,foe,{...classWeapon(beast),familiar:true},1).impact>direct);
+ assert.ok(use(beast,1,near));assert.ok(events.some(x=>x.ability==="familiar_aid"&&x.type==="buff"));
+ tank.hp=Math.floor(tank.maxHP*.5);assert.ok(use(spirit,1,near));assert.ok(events.some(x=>x.ability==="spirit_aid"&&x.type==="heal"&&x.y===tank));
+ assert.ok(use(shade,1,foe));assert.ok(foe.classWeaken>0&&foe.kitDisruptUntil>0);
+ assert.ok(kitApproach(forge)<1);
+ assert.ok(kitStrikeModifiers(near,forge,classWeapon(near),0).impact<kitStrikeModifiers(near,tank,classWeapon(near),0).impact||kitStrikeModifiers(near,forge,classWeapon(near),0).impact<1);
+ const before=foe.hp;assert.ok(use(forge,1));assert.ok(events.some(x=>x.type==="siege_charge"));assert.equal(foe.hp,before);
+ assert.equal(forge.kitReady.secondary,8);forge.recovery=0;assert.ok(use(forge,3));assert.ok(events.some(x=>x.type==="siege_release"));assert.ok(foe.hp<before);assert.ok(events.filter(x=>x.type==="splash").length<=2);assert.ok(!events.some(x=>x.type==="splash"&&x.y===far));assert.equal(forge.kitSiege,null);
+ forge.recovery=0;forge.kitReady.secondary=1;assert.ok(use(forge,8));foe.x=6;forge.recovery=0;assert.ok(use(forge,10,near));assert.ok(events.some(x=>x.type==="siege_fizzle"));assert.ok(!events.some(x=>x.type==="hit"||x.type==="splash"));assert.equal(forge.kitSiege,null);
+});
