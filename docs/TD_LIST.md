@@ -11,7 +11,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## ARENA-PREFERENCES-001 — Preferred environments
 
 - **Goal / acceptance:** Exactly three starred zones; +10 percentage points per favorite, 24h lock, equal averaging for future PvP, deterministic frozen arena selection and local save/UI.
-- **Status:** IN_REVIEW — candidate PR #219; CI and V10 overlap reconciliation pending. Server anti-cheat is a future multiplayer requirement.
+- **Status:** PARTIAL — #219 merged b4624c1, all seven checks and 207 tests, Pages run 46034588465 succeeded; fresh mobile verification passed, returning mobile browser reported missing buttons. Cache repair #222 pending. Server anti-cheat is a future multiplayer requirement.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

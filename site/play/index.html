@@ -9,7 +9,48 @@
 <link rel="stylesheet" href="./game.css">
 <link rel="stylesheet" href="./manager-ui.css?v=class-info-001">
 <link rel="stylesheet" href="./fantasy-ui.css?v=raid-001">
-<script type="module" src="./manager-app.mjs?v=raid-002"></script>
+<!-- Keep every changed arena dependency on the same release URL, including legacy aliases. -->
+<script type="importmap">
+{
+  "imports": {
+    "./engine.mjs": "./engine.mjs?v=arena-v10-pref-20261127-1",
+    "./engine.mjs?v=raid-001": "./engine.mjs?v=arena-v10-pref-20261127-1",
+    "./engine.mjs?v=individual-stats-001": "./engine.mjs?v=arena-v10-pref-20261127-1",
+    "./engine.mjs?v=kits-001": "./engine.mjs?v=arena-v10-pref-20261127-1",
+    "./engine.mjs?v=gear-a3": "./engine.mjs?v=arena-v10-pref-20261127-1",
+    "./engine.mjs?v=group-001": "./engine.mjs?v=arena-v10-pref-20261127-1",
+    "./arena-manager.mjs": "./arena-manager.mjs?v=arena-v10-pref-20261127-1",
+    "./arena-manager.mjs?v=raid-001": "./arena-manager.mjs?v=arena-v10-pref-20261127-1",
+    "./manager-lanes.mjs": "./manager-lanes.mjs?v=arena-v10-pref-20261127-1",
+    "./manager-lanes.mjs?v=raid-001": "./manager-lanes.mjs?v=arena-v10-pref-20261127-1",
+    "./manager-lanes.mjs?v=individual-stats-001": "./manager-lanes.mjs?v=arena-v10-pref-20261127-1",
+    "./arena-presentation.mjs": "./arena-presentation.mjs?v=arena-v10-pref-20261127-1",
+    "./arena-presentation.mjs?v=raid-001": "./arena-presentation.mjs?v=arena-v10-pref-20261127-1",
+    "./battle-group-timeline.mjs": "./battle-group-timeline.mjs?v=arena-v10-pref-20261127-1",
+    "./battle-group-timeline.mjs?v=raid-001": "./battle-group-timeline.mjs?v=arena-v10-pref-20261127-1",
+    "./battle-group-timeline.mjs?v=group-001": "./battle-group-timeline.mjs?v=arena-v10-pref-20261127-1",
+    "./arenas.mjs": "./arenas.mjs?v=arena-v10-pref-20261127-1",
+    "./arenas.mjs?v=bal-002": "./arenas.mjs?v=arena-v10-pref-20261127-1",
+    "./battle-group.mjs": "./battle-group.mjs?v=arena-v10-pref-20261127-1",
+    "./battle-group.mjs?v=group-001": "./battle-group.mjs?v=arena-v10-pref-20261127-1",
+    "./battle-group-clones.mjs": "./battle-group-clones.mjs?v=arena-v10-pref-20261127-1",
+    "./battle-group-clones.mjs?v=group-003": "./battle-group-clones.mjs?v=arena-v10-pref-20261127-1",
+    "./team-combat.mjs": "./team-combat.mjs?v=arena-v10-pref-20261127-1",
+    "./team-combat.mjs?v=raid-001": "./team-combat.mjs?v=arena-v10-pref-20261127-1",
+    "./team-combat.mjs?v=manager-tactics-001": "./team-combat.mjs?v=arena-v10-pref-20261127-1",
+    "./team-combat.mjs?v=kits-001": "./team-combat.mjs?v=arena-v10-pref-20261127-1",
+    "./physical-actions.mjs": "./physical-actions.mjs?v=arena-v10-pref-20261127-1",
+    "./physical-actions.mjs?v=kits-001": "./physical-actions.mjs?v=arena-v10-pref-20261127-1",
+    "./class-ability-policy.mjs": "./class-ability-policy.mjs?v=arena-v10-pref-20261127-1",
+    "./class-effects.mjs": "./class-effects.mjs?v=arena-v10-pref-20261127-1",
+    "./class-kits.mjs": "./class-kits.mjs?v=arena-v10-pref-20261127-1",
+    "./group-counter-rules.mjs": "./group-counter-rules.mjs?v=arena-v10-pref-20261127-1",
+    "./stat-combat.mjs": "./stat-combat.mjs?v=arena-v10-pref-20261127-1",
+    "./arena-preferences.mjs": "./arena-preferences.mjs?v=arena-v10-pref-20261127-1"
+  }
+}
+</script>
+<script type="module" src="./manager-app.mjs?v=arena-v10-pref-20261127-1"></script>
 </head>
 <body>
 <a class="skip-link" href="#game">Skip to game</a>
@@ -23,7 +64,7 @@
 <div class="line"><strong id="arenaStage">Non-grade</strong><span id="fightingLevel">Fighting Lv 1</span></div>
 <progress id="fightingXP" aria-label="Fighting experience" value="0" max="40"></progress>
 <p id="arenaNext" class="quiet"></p>
-<details id="arenaPreferencePanel"><summary>★ Preferred environments</summary><p class="quiet">Star exactly three of eight. Each becomes 22.5% likely instead of 12.5%; the other five become 6.5%. Save once every 24 hours. Changes apply to the next battle.</p><div id="arenaPreferenceChoices" class="choice-grid two" role="group" aria-label="Preferred environments"></div><button id="arenaPreferenceSave" type="button">Save three favorites</button><p id="arenaPreferenceStatus" class="quiet" role="status"></p></details>
+<details id="arenaPreferencePanel"><summary>★ Preferred environments</summary><p class="quiet">Star exactly three of eight. Each becomes 22.5% likely instead of 12.5%; the other five become 6.5%. Save once every 24 hours. Changes apply to the next battle.</p><div id="arenaPreferenceChoices" class="choice-grid two" role="group" aria-label="Preferred environments"></div><button id="arenaPreferenceSave" type="button" disabled>Save three favorites</button><p id="arenaPreferenceStatus" class="quiet" role="status">Loading environments…</p></details>
 <div id="battleFighters" class="arena-match" data-phase="preparing">
   <div class="arena-side"><h3>Your team</h3><div id="arenaPlayers" class="arena-roster"></div></div>
   <div class="arena-center">

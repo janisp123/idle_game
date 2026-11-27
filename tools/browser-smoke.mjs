@@ -348,6 +348,20 @@ try{
     assert.equal(check.selects,0);assert.deepEqual(check.counts,[7,3,5,5,2]);assert.equal(check.manual,false);assert.ok(check.overflow<=2);assert.equal(check.activity,"fighting");assert.equal(check.arenaOnly,true);assert.equal(check.removed,true);
     const placement=await evaluate(`(()=>{const grid=document.querySelector(".manager-grid"),arena=grid.querySelector(".arena-card"),rect=arena.getBoundingClientRect();return {first:grid.firstElementChild===arena,full:Math.abs(rect.width-grid.getBoundingClientRect().width)<=2,above:rect.bottom<=document.getElementById("battleGroupPanel").getBoundingClientRect().top};})()`);
     assert.deepEqual(placement,{first:true,full:true,above:true},"arena first and full-width");
+    // Returning browsers must fetch the new entry and coherent updated dependency URLs.
+    const pref=await evaluate(`(()=>{const p=document.getElementById("arenaPreferencePanel");p.open=true;const buttons=[...p.querySelectorAll("[data-zone]")],save=document.getElementById("arenaPreferenceSave");const bounds=p.getBoundingClientRect();return {count:buttons.length,visible:buttons.every(b=>b.checkVisibility()),touch:buttons.every(b=>b.getBoundingClientRect().height>=44&&b.getBoundingClientRect().left>=bounds.left-1&&b.getBoundingClientRect().right<=bounds.right+1),disabled:save.disabled,urls:performance.getEntriesByType("resource").map(e=>e.name)};})()`);
+    assert.equal(pref.count,8);assert.ok(pref.visible&&pref.touch&&pref.disabled,"eight visible touch targets; save initially disabled");
+    for(const n of ["manager-app","arena-manager","manager-lanes","engine","arena-presentation","battle-group-timeline","arenas","team-combat","physical-actions","group-counter-rules","class-kits","stat-combat","arena-preferences"]){
+      const hits=pref.urls.filter(u=>new URL(u).pathname.endsWith("/"+n+".mjs"));
+      assert.ok(hits.length&&hits.every(u=>new URL(u).searchParams.get("v")==="arena-v10-pref-20261127-1"),"stale module URL: "+n+" "+JSON.stringify(hits));
+    }
+    await evaluate('(()=>{const b=[...document.querySelectorAll("#arenaPreferenceChoices button")];b.slice(0,3).forEach(x=>x.click());})()');
+    assert.equal(await evaluate('document.querySelectorAll("#arenaPreferenceChoices [aria-pressed=true]").length===3 && !document.getElementById("arenaPreferenceSave").disabled && [...document.querySelectorAll("#arenaPreferenceChoices [aria-pressed=false]")].every(b=>b.disabled)'),true);
+    await shot("arena-preferences-"+width);
+    await evaluate('document.getElementById("arenaPreferenceSave").click()');
+    await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).arenaPreferences?.favorites?.length===3 && [...document.querySelectorAll("#arenaPreferenceChoices button")].every(b=>b.disabled)`),"saved favorite zones locked "+width);
+    await evaluate('document.getElementById("arenaPreferencePanel").open=false');
+
     assert.equal(await evaluate('!document.getElementById("battleGroupPanel").open && !document.getElementById("specialClassChoice").checkVisibility()'),true);
     await evaluate('document.querySelector("#battleGroupPanel > summary").click()');
     assert.equal(await evaluate('document.getElementById("battleGroupPanel").open && document.getElementById("specialClassChoice").checkVisibility()'),true);

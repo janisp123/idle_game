@@ -2,7 +2,7 @@
 
 ## 2026-11-27 — ARENA-PREFERENCES-CACHE-001 STARTED
 
-Owner reported mobile panel opens but choices are absent (old battle UI still running). Merged #219 b4624c1 deployed; fresh mobile session has eight choices, existing browser has none. Likely mixed HTML/JS cache because entry URL and dependency versions were unchanged. Approved preference feature repair only: version browser module paths consistently, disable save until initialized, add explicit browser interaction and module URL checks. Preserve all saves and combat mechanics. Branch `fix/arena-preference-cache`; next implement and validate.
+Owner reported mobile panel opens but choices are absent (old battle UI still running). Merged #219 b4624c1 deployed; fresh mobile session has eight choices, existing browser has none. Likely mixed HTML/JS cache because entry URL and dependency versions were unchanged. Approved preference feature repair only: version browser module paths consistently, disable save until initialized, add explicit browser interaction and module URL checks. Preserve all saves and combat mechanics. Branch `fix/arena-preference-cache`; candidate import map, versioned entry, fail-closed save button and browser regression pushed; verify CI and live deployment.
 
 ## 2026-11-27 — ARENA-PREFERENCES-001 STARTED
 
