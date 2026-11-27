@@ -352,7 +352,7 @@ try{
     await evaluate('document.querySelector("#battleGroupPanel > summary").click()');
     assert.equal(await evaluate('document.getElementById("battleGroupPanel").open && document.getElementById("specialClassChoice").checkVisibility()'),true);
     await evaluate('document.querySelector("#fighterButtons [data-choice=member2]").click();const r=document.getElementById("raceChoice");r.value="orc";r.dispatchEvent(new Event("change"));const c=document.getElementById("specialClassChoice");c.value="ragebreaker";c.dispatchEvent(new Event("change"))');
-    await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).battleGroup.member2.selected==="ragebreaker"`),"manager weapon");
+    await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).battleGroup.member2.selected==="ragebreaker"`),"manager class");
     await evaluate('document.querySelector("#tacticButtons [data-choice=defensive]").click()');
     await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return s.battleGroup.member2.selected==="ragebreaker"&&s.battleGroup.member2.stance==="defensive"&&s.battleGroup.member1.stance==="balanced";})()`),"manager independent choices");
     await evaluate('document.querySelector("#battleGroupPanel > summary").click()');
@@ -364,7 +364,7 @@ try{
     await shot("manager-"+width);
     await evaluate('document.getElementById("alphaTools").open=true;document.getElementById("alphaCoins").click()');
     await until(()=>evaluate('document.getElementById("alphaStatus").textContent==="Test credit added."'),"manager test coins");
-    await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return Object.keys(s.battleGroup.member2.classes.ragebreaker.equipment).length===5;})()`),"manager atomic armour acquisition");
+    await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return Object.keys(s.battleGroup.member2.classes.ragebreaker.equipment).length===5;})()`),"manager automatic class armour acquisition");
     await evaluate('document.querySelector("#battleGroupPanel > summary").click()');
     const retained=await evaluate('document.getElementById("specialClassChoice").value==="ragebreaker" && document.getElementById("raceChoice").value==="orc" && document.querySelector("#tacticButtons [data-choice=defensive]").getAttribute("aria-pressed")==="true"');
     assert.equal(retained,true,"selected loadout survives collapse and automation");
@@ -399,7 +399,7 @@ try{
     await shot("arena-result-"+width);
     // Analytics must count the committed result even while collapsed.
     const analytics=await evaluate(`(()=>{const p=document.getElementById("battleAnalyticsPanel"),a=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).groupAnalytics;return {open:p.open,visible:document.getElementById("battleAnalyticsBody").checkVisibility(),outcomes:a.all.outcomes,coins:a.all.coins};})()`);
-    assert.equal(analytics.open,false);assert.equal(analytics.visible,false);assert.ok(analytics.outcomes.reduce((a,b)=>a+b,0)>=1);assert.ok(analytics.coins>=setup.coins);
+    assert.equal(analytics.open,false);assert.equal(analytics.visible,false);assert.equal(analytics.outcomes.reduce((a,b)=>a+b,0),1);assert.equal(analytics.coins,setup.coins);
     await evaluate('document.querySelector("#battleAnalyticsPanel > summary").click()');
     await until(()=>evaluate('document.querySelectorAll("#battleAnalyticsBody .analytics-kpi").length===6'),"analytics metrics");
     assert.ok(await evaluate('document.getElementById("battleAnalyticsBody").textContent.includes("Against enemy classes") && document.documentElement.scrollWidth-innerWidth<=2'));

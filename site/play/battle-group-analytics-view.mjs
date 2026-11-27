@@ -5,6 +5,7 @@ const n=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined
 const total=r=>r.reduce((a,b)=>a+b,0),num=x=>x.toLocaleString("en-GB"),title=s=>s[0].toUpperCase()+s.slice(1);
 const label=(dim,k)=>dim==="classes"?GROUP_CLASSES[k].name:dim==="races"?RACE_LABELS[k]:dim==="zones"?ARENAS.find(a=>a.id===k).name:title(k);
 export function renderGroupAnalytics(host,data,scope,legacy){
+ const open=new Map([...host.querySelectorAll("details[data-dimension]")].map(d=>[d.dataset.dimension,d.open]));
  host.replaceChildren();
  const s=scope==="latest"?data.latest?.stats:data.all;
  if(scope==="latest"&&data.latest)host.append(n("p","Last fought setup: "+data.latest.key.split("|").map(x=>GROUP_CLASSES[x.split(":")[0]].name+" ("+x.split(":")[1]+")").join(", "),"quiet"));
@@ -15,7 +16,7 @@ export function renderGroupAnalytics(host,data,scope,legacy){
   }
   host.append(cards,n("p","Recorded completed fights across arena difficulties. Opponent categories may overlap; each distinct class, race, role or stance counts once per battle.","quiet"));
   for(const [dim,heading] of [["zones","By environment"],["classes","Against enemy classes"],["races","Against enemy races"],["roles","Against enemy roles"],["stances","Against enemy stances"]]){
-   const details=n("details");details.open=dim==="zones";details.append(n("summary",heading));
+   const details=n("details");details.dataset.dimension=dim;details.open=open.get(dim)??(dim==="zones");details.append(n("summary",heading));
    for(const [key,r] of Object.entries(s[dim]).sort((a,b)=>total(b[1])-total(a[1])||a[0].localeCompare(b[0]))){
     const count=total(r);if(!count)continue;
     const box=n("div",undefined,"analytics-row"),head=n("div",undefined,"line"),bar=n("div",undefined,"analytics-bar");
