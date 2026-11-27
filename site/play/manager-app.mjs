@@ -6,15 +6,16 @@ import {TACTIC_IDS,tacticRequiredXP} from "./manager-tactics.mjs?v=manager-tacti
 import {WORK_ROTATION,nextRotationActivity,ingredientReserve} from "./activity-rotation.mjs?v=manager-rotation-001";
 import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=gear-a3";
 import {ITEM_GRADES} from "./smith.mjs?v=gear-a3";
-import {teamCombatAtTime} from "./team-timeline.mjs?v=manager-tactics-001";
+import {createArenaView} from "./arena-view.mjs?v=arena-minimal-001";
 import {requiredAutoFightWins} from "./auto-fight.mjs?v=auto-fight-03";
 import {characterStats} from "./character-stats.mjs?v=apprentice-a4";
 import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=team-004";
 
 const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString("en-GB"),title=s=>s[0].toUpperCase()+s.slice(1),label=id=>ITEM_LABELS[id]??id;
 const descriptions={aggressive:"Presses forward and focuses vulnerable enemies.",balanced:"Uses opportunities and normal protection.",defensive:"Protects allies and keeps distance where possible."};
-let state,stored=null,clock=null,selected="first",lastVisible=false,chain=Promise.resolve(),feed=[],loginLines=[],loginSummary="No return rewards yet.",battleKey="",lastBattle=null,blocked=false;
+let state,stored=null,clock=null,selected="first",lastVisible=false,chain=Promise.resolve(),feed=[],loginLines=[],loginSummary="No return rewards yet.",blocked=false;
 const now=()=>alphaTime(clock,Date.now());
+const arenaView=createArenaView();
 const node=(tag,content)=>{const n=document.createElement(tag);if(content!==undefined)n.textContent=content;return n;};
 function text(id,value){$(id).textContent=value;}
 function meter(id,skill){const p=$(id);p.max=xpToNextLevel(skill.level);p.value=skill.xp;}
@@ -42,8 +43,6 @@ function reportLines(out){
 }
 function publish(out,entry=false,opening=state?.coins??0){
  const lines=reportLines(out);
- const arenaLine=lines.find(line=>line.includes(" battles · "));
- if(arenaLine)text("battleResult",arenaLine);
  if(lines.length){feed=[...lines.reverse(),...feed].slice(0,30);text("latestProgress",feed[0]);$("progressFeed").replaceChildren(...feed.map(x=>node("li",x)));}
  if(entry){loginLines=reportLines(out);loginSummary="Coins: "+fmt(opening)+" → "+fmt(out.state.coins)+". "+(loginLines.length?"Committed progress since last save.":"No new completed rewards.");}
 }
@@ -59,13 +58,7 @@ function render(){
  const sk=t.skills[t.selected];text("tacticStatus",descriptions[t.selected]+" · Lv "+sk.level+(sk.level===50?" · Mastered":" · "+fmt(Math.floor(sk.xp/tacticRequiredXP(sk.level)*100))+"%"));
  text("arenaStage",ITEM_GRADES[state.difficulties.fighting??0]);text("fightingLevel","Fighting Lv "+state.skills.fighting.level);meter("fightingXP",state.skills.fighting);
  const af=state.autoFight;let required=requiredAutoFightWins(af);text("arenaNext",required?"Next difficulty: "+af.streak+" / "+required+" wins · Teamwork Lv "+state.teamwork.level:"Teamwork Lv "+state.teamwork.level);
- if(state.combatSession){const s=state.combatSession,key=JSON.stringify([s.seed,s.elapsedMs,s.players,s.teamworkLevel]);
-   if(key!==battleKey){battleKey=key;lastBattle=teamCombatAtTime(s);}
-   const ev=lastBattle.event,names={"player:0":"Gladiator I","player:1":"Gladiator II","enemy:0":"Opponent I","enemy:1":"Opponent II"};
-   text("battleEvent","Battle "+lastBattle.bout+" · "+ev.type.replaceAll("_"," ")+(ev.actor?" · "+names[ev.actor]:"")+(ev.target?" → "+names[ev.target]:"")+(ev.damage?" · "+ev.damage+" damage":""));
-   const roster=[...Object.values(s.players),...lastBattle.enemies];
-   $("battleFighters").replaceChildren(...Object.entries(names).map(([id,name],i)=>{const v=ev.vitals[id],card=node("div");card.className="battle-fighter"+(i>=2?" enemy":"");const p=node("progress");p.max=v.maxHP;p.value=v.hp;p.setAttribute("aria-label",name+" health");card.append(node("strong",name),node("small",COMBAT_LOADOUTS[roster[i].loadout].name),p,node("small","HP "+v.hp+"/"+v.maxHP+" · Armour "+v.armour+"/"+v.maxArmour));return card;}));
- }else{$("battleFighters").replaceChildren();text("battleEvent","Preparing the arena");}
+ arenaView.render(state);
  const w=state.managerWork,id=w.activity,skill=state.skills[id];text("currentWork",ACTIVITIES[id].title);text("workLevel","Lv "+skill.level);meter("workXP",skill);
  text("workStatus",w.travelMs?"Travelling and preparing · Fighting continues.":"Working automatically until the next level.");
  const after=nextRotationActivity(state,id);text("nextWork","Next: "+(after?ACTIVITIES[after].title:"Waiting for materials"));
@@ -79,15 +72,15 @@ function enqueue(fn){chain=chain.then(()=>lock(fn)).catch(err=>{text("saveStatus
 function commit(out,entry=false,newClock=clock){
  if(blocked)throw Error("Save cannot be read. Original data retained.");
  const current=localStorage.getItem(MANAGER_SAVE_KEY);
- if(current!==stored){const newer=readManagerGame(current);if(!newer)throw Error("Save changed in another tab");state=newer;stored=current;clock=parseAlphaClock(localStorage.getItem(MANAGER_CLOCK_KEY));lastVisible=false;render();return false;}
+ if(current!==stored){const newer=readManagerGame(current);if(!newer)throw Error("Save changed in another tab");state=newer;arenaView.reset();stored=current;clock=parseAlphaClock(localStorage.getItem(MANAGER_CLOCK_KEY));lastVisible=false;render();return false;}
  const serialized=JSON.stringify(out.state);
  if(!readManagerGame(serialized))throw Error("Candidate save failed validation");
  // One atomic storage write for the state. Clock changes are explicit test
  // controls; normal play never modifies the companion clock.
  if(newClock!==clock){if(newClock)localStorage.setItem(MANAGER_CLOCK_KEY,JSON.stringify(newClock));else localStorage.removeItem(MANAGER_CLOCK_KEY);}
  localStorage.setItem(MANAGER_SAVE_KEY,serialized);stored=serialized;
- const opening=state?.coins??0;state=out.state;clock=newClock;
- publish(out,entry,opening);render();text("saveStatus","Saved locally");return true;
+ const before=state,opening=state?.coins??0;state=out.state;clock=newClock;
+ arenaView.committed(before,out,entry);publish(out,entry,opening);render();text("saveStatus","Saved locally");return true;
 }
 function settleForAction(){return lastVisible&&document.visibilityState!=="hidden"?settleManagerLive(state,now()):enterManagerGame(state,now());}
 function choose(action){const fighter=selected;enqueue(()=>{if(!state||blocked)return;if(!lastVisible){if(!commit(enterManagerGame(state,now()),true))return;}const out=action(state,now(),fighter);if(commit(out))lastVisible=document.visibilityState!=="hidden";});}
@@ -104,7 +97,7 @@ $("alphaCoins").addEventListener("click",()=>alpha(s=>{const r=alphaGrantCoins(s
 $("alphaMaxStats").addEventListener("click",()=>alpha(s=>{const team=teamFromState(s),a=equippedArmourFamily(team.first)??"none",b=equippedArmourFamily(team.second)??"none";return alphaMaxStats(s,a,s.settledAtMs,Math.random,b);},"Six-month benchmark applied to selected equipment."));
 $("alphaDay").addEventListener("click",()=>alpha(s=>{const c=advanceAlphaClock(clock,Date.now(),ALPHA_DAY_MS);return {...enterManagerGame(s,alphaTime(c,Date.now())),clock:c,entry:true};},"24 hours simulated."));
 $("alphaSpeed").addEventListener("click",()=>alpha(s=>({state:s,clock:setAlphaSpeed(clock,Date.now(),clock?.speed===10?1:10)}),"Test speed changed."));
-$("alphaReset").addEventListener("click",()=>{if(confirm("Reset this manager save?"))enqueue(()=>{stored=localStorage.getItem(MANAGER_SAVE_KEY);blocked=false;feed=[];loginLines=[];$("progressFeed").replaceChildren();commit({state:newManagerGame(Date.now())},false,null);});});
+$("alphaReset").addEventListener("click",()=>{if(confirm("Reset this manager save?"))enqueue(()=>{stored=localStorage.getItem(MANAGER_SAVE_KEY);blocked=false;feed=[];loginLines=[];arenaView.reset();$("progressFeed").replaceChildren();commit({state:newManagerGame(Date.now())},false,null);});});
 function tick(){if(document.visibilityState==="hidden"){lastVisible=false;return;}enqueue(()=>{if(!state||blocked)return;const out=settleForAction();if(commit(out,!lastVisible))lastVisible=true;});}
 document.addEventListener("visibilitychange",()=>{lastVisible=false;if(document.visibilityState!=="hidden")tick();});
 window.addEventListener("pagehide",()=>{lastVisible=false;});

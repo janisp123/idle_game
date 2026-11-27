@@ -7,8 +7,8 @@
 <title>The Long Vigil — Play</title>
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./game.css">
-<link rel="stylesheet" href="./manager-ui.css?v=manager-001">
-<script type="module" src="./manager-app.mjs?v=manager-001"></script>
+<link rel="stylesheet" href="./manager-ui.css?v=arena-minimal-001">
+<script type="module" src="./manager-app.mjs?v=arena-minimal-001"></script>
 </head>
 <body>
 <a class="skip-link" href="#game">Skip to game</a>
@@ -30,13 +30,22 @@
 </section>
 <section class="manager-card arena-card" aria-labelledby="arenaHeading">
 <h2 id="arenaHeading">Arena <span class="live-label">Automatic</span></h2>
-<img class="arena-art" src="./assets/fighting.webp" alt="Gladiators in the arena" width="960" height="540">
 <div class="line"><strong id="arenaStage">Non-grade</strong><span id="fightingLevel">Fighting Lv 1</span></div>
 <progress id="fightingXP" aria-label="Fighting experience" value="0" max="40"></progress>
 <p id="arenaNext" class="quiet"></p>
-<p id="battleEvent" class="battle-event">Preparing the arena</p>
-<div id="battleFighters" class="battle-grid" aria-label="Live combatants"></div>
-<p id="battleResult" class="quiet">Battles run automatically.</p>
+<div id="battleFighters" class="arena-match" data-phase="preparing">
+  <div class="arena-side"><h3>Your team</h3><div id="arenaPlayers" class="arena-roster"></div></div>
+  <div class="arena-center">
+    <div id="arenaEnvironmentIcon" class="arena-environment-icon" aria-hidden="true"></div>
+    <p id="arenaEnvironment">—</p>
+    <p id="battleEvent" class="arena-phase" role="status">Preparing</p>
+    <progress id="battleCalculation" aria-label="Battle calculation" max="100" value="0"></progress>
+    <strong id="battlePercent" class="arena-percent">0%</strong>
+    <p id="arenaReward" class="arena-reward" hidden></p>
+  </div>
+  <div class="arena-side"><h3>Enemy team</h3><div id="arenaEnemies" class="arena-roster"></div></div>
+</div>
+<p id="battleResult" class="quiet arena-last-result" aria-live="polite">No completed battles yet.</p>
 </section>
 <section class="manager-card" aria-labelledby="workHeading">
 <h2 id="workHeading">Activities <span class="live-label">Automatic</span></h2>
