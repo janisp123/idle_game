@@ -1,6 +1,8 @@
 # Current working checkpoint
 
-## PROGRESS-UI-001 — started
+## PROGRESS-UI-001 — candidate
+
+Candidate: use native details/summary for the entire Progress card (closed by default); preserve all existing content IDs and JS, no engine or save changes. Browser smoke verifies default hidden feed continues receiving entries, expand and reopen report, collapse again and no overflow at both tested widths. Tests pending.
 
 PROGRESS-UI-001 — Owner requested collapsible Progress section, closed by default, with existing last login report, live feed and resources available when expanded. No gameplay, save, or report changes. STARTED by chat; baseline b21e7caa (#193 deployed, Pages 45938381622 success).
 

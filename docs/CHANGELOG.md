@@ -2,6 +2,8 @@
 
 ## PROGRESS-UI-001 · STARTED (2026-11-27, chat)
 
+Candidate: use native details/summary for the entire Progress card (closed by default); preserve all existing content IDs and JS, no engine or save changes. Browser smoke verifies default hidden feed continues receiving entries, expand and reopen report, collapse again and no overflow at both tested widths. Tests pending.
+
 PROGRESS-UI-001 — Owner requested collapsible Progress section, closed by default, with existing last login report, live feed and resources available when expanded. No gameplay, save, or report changes. STARTED by chat; baseline b21e7caa (#193 deployed, Pages 45938381622 success).
 
 ## ARENA-UI-002 · STARTED (2026-11-26, chat)

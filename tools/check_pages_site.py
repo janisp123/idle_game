@@ -155,7 +155,7 @@ def check():
         game_parser.close()
         assert game_parser.lang == "en", "Game must declare English document language"
         assert game_parser.stylesheet and game_parser.favicon, "Game CSS/favicon missing"
-        assert {"game","fighterButtons","weaponButtons","armourButtons","tacticButtons","currentWork","workXP","nextWork","battleFighters","arenaPlayers","arenaEnemies","arenaEnvironment","battleCalculation","battlePercent","progressFeed","resourceList","characterStatsPanel","loginReport"}.issubset(game_parser.ids), "Missing manager UI"
+        assert {"game","fighterButtons","weaponButtons","armourButtons","tacticButtons","currentWork","workXP","nextWork","battleFighters","arenaPlayers","arenaEnemies","arenaEnvironment","battleCalculation","battlePercent","progressPanel","progressHeading","progressFeed","resourceList","characterStatsPanel","loginReport"}.issubset(game_parser.ids), "Missing manager UI"
         assert not ({"activityChoices","queuePlanner","wagonQueue","smithBuy","itemGrade","itemQuality","armourChoice","teamFighterChoice"} & game_parser.ids), "Obsolete player controls"
         assert "<select" not in game_html, "Manager uses buttons, not dropdowns"
         assert "arena-art" not in game_html, "No unrelated generic arena painting"

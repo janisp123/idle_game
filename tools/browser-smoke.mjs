@@ -358,9 +358,16 @@ try{
     await evaluate('document.getElementById("alphaTools").open=true;document.getElementById("alphaCoins").click()');
     await until(()=>evaluate('document.getElementById("alphaStatus").textContent==="Test credit added."'),"manager test coins");
     await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return Object.values(s.teamSecond.armour).every(x=>x==="plate")&&s.armourRequests.second===null;})()`),"manager atomic armour acquisition");
+    // Progress remains available and updates while its native disclosure is closed.
+    const folded=await evaluate(`(()=>{const p=document.getElementById("progressPanel"),feed=document.getElementById("progressFeed");return {open:p.open,displayed:feed.getClientRects().length,entries:feed.children.length};})()`);
+    assert.equal(folded.open,false);assert.equal(folded.displayed,0);assert.ok(folded.entries>0);
+    await evaluate('document.querySelector("#progressPanel > summary").click()');
+    assert.equal(await evaluate('document.getElementById("progressPanel").open && document.getElementById("progressFeed").getClientRects().length>0'),true);
     await evaluate('document.getElementById("loginReportReopen").click()');
     assert.equal(await evaluate('document.getElementById("loginReport").open'),true);
     await evaluate('document.getElementById("loginReportDismiss").click()');
+    await evaluate('document.querySelector("#progressPanel > summary").click()');
+    assert.equal(await evaluate('!document.getElementById("progressPanel").open && document.getElementById("progressFeed").getClientRects().length===0'),true);
     assert.ok(await evaluate("document.documentElement.scrollWidth-innerWidth<=2"));
     // Use a valid frozen real bout at 99%, then cross its prize boundary.
     const resultUrl=origin+"/play/?arena-result="+width;
