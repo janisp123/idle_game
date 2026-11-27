@@ -76,3 +76,65 @@ test("balanced long range versus balanced melee, matched core, every terrain (60
  }
  console.log("BALANCED_RANGE_MELEE_V5 "+JSON.stringify({range,melee,hours,rows}));
 });
+
+test("matched ranged/melee causal trace: v4/v5, 60 paired seeds per terrain",()=>{
+ const range=["oathkeeper","lifekeeper","runesage","longshot","blackbow","flameweaver","galescourge"],melee=["oathkeeper","lifekeeper","runesage","blademaster","linebreaker","trickblade","nightblade"];
+ const ranged=roster(range),close=roster(melee),summaries=[],traces=[];
+ const strike=new Set(["hit","finisher","block","parry","miss","dodge"]),movement=new Set(["approach","dash","retreat"]);
+ const sum=(xs)=>xs.reduce((a,b)=>a+b,0);
+ for(const zone of ARENAS)for(const rules of [4,5]){
+  const totals={wins:[0,0,0],timeouts:0,firstAttack:[0,0],firstDpsAttack:[0,0],firstTankKO:[0,0],tankSurvives:[0,0],openingApproach:[0,0],openingMove:[0,0],damage:[0,0],tankDamage:[0,0],healing:[0,0],blocks:[0,0],attempts:[0,0],dpsDamage:[0,0],endHP:[0,0]};
+  const perClass={};
+  let sampled=false;
+  for(let i=0;i<60;i++)for(const swapped of [false,true]){
+   const seed=(20261127+i*7919)>>>0,side=swapped?"enemy":"player",other=swapped?"player":"enemy";
+   const r=resolveTeamBattle(swapped?close:ranged,swapped?ranged:close,seed,zone,{player:50,enemy:50,groupCombatRules:rules});
+   const rosterMap=Object.fromEntries([["player",swapped?melee:range],["enemy",swapped?range:melee]].flatMap(([s,team])=>team.map((c,i)=>[s+":"+i,c])));
+   const index=id=>id?.startsWith(side+":")?0:1;
+   const init=r.events[0].vitals,first=[33,33],firstDps=[33,33],tankKO=[33,33];let prev=init;
+   const firstPerActor={},rounds={},actorTotals={};
+   for(const ev of r.events.slice(1)){
+    const actor=ev.type==="dodge"?ev.target:ev.actor,target=ev.type==="dodge"?ev.actor:ev.target;
+    const a=rosterMap[actor],b=rosterMap[target],n=index(actor),m=index(target);
+    const isAttack=a&&b&&n!==m&&strike.has(ev.type);
+    if(a){
+     const key=n+":"+a,entry=perClass[key]??={attempts:0,damage:0,blocks:0,moveEvents:0,actualMoves:0,firstStrikeSum:0,firstStrikeCount:0};
+     const v=prev[actor],w=ev.vitals[actor];
+     const moved=v&&w&&(v.x!==w.x||v.y!==w.y);
+     if(movement.has(ev.type)){entry.moveEvents++;if(moved)entry.actualMoves++;if(first[n]===33)totals.openingApproach[n]++;if(moved&&first[n]===33)totals.openingMove[n]++;}
+     if(isAttack){
+      first[n]=Math.min(first[n],ev.round);if(!["oathkeeper","lifekeeper","runesage"].includes(a))firstDps[n]=Math.min(firstDps[n],ev.round);
+      if(firstPerActor[actor]===undefined){firstPerActor[actor]=ev.round;entry.firstStrikeCount++;entry.firstStrikeSum+=ev.round;}
+      entry.attempts++;totals.attempts[n]++;if(ev.type==="block"){entry.blocks++;totals.blocks[n]++;}
+     }
+     if(a&&b&&n!==m&&ev.damage>0){entry.damage+=ev.damage;totals.damage[n]+=ev.damage;if(b==="oathkeeper")totals.tankDamage[n]+=ev.damage;if(!["oathkeeper","lifekeeper","runesage"].includes(a))totals.dpsDamage[n]+=ev.damage;}
+     if(ev.type==="heal"&&b&&n===m)totals.healing[n]+=ev.healing??0;
+    }
+    for(const s of [side,other])if(prev[s+":0"].hp>0&&ev.vitals[s+":0"].hp===0)tankKO[index(s+":0")]=Math.min(tankKO[index(s+":0")],ev.round);
+    if(!sampled&&rules===5&&r.outcome===(swapped?"victory":"defeat")){
+     const row=rounds[ev.round]??={round:ev.round,events:[],hp:null,positions:null};
+     if(a&&b&&(isAttack||ev.damage>0||ev.type==="heal"||movement.has(ev.type))){
+      const v=prev[actor],w=ev.vitals[actor],t=prev[target];
+      row.events.push({side:n===0?"range":"melee",actor:a,target:b,type:ev.type,damage:ev.damage,healing:ev.healing??0,ability:ev.ability??null,from:[v.x,v.y],to:[w.x,w.y],distance:Math.max(0,Math.abs(v.x-t.x)+Math.abs(v.y-t.y)-1)});
+     }
+     row.hp=[side,other].map(s=>Object.entries(ev.vitals).filter(([k])=>k.startsWith(s+":")).map(([,v])=>v.hp));
+     row.positions=[side,other].map(s=>Object.entries(ev.vitals).filter(([k])=>k.startsWith(s+":")).map(([,v])=>[v.x,v.y]));
+    }
+    prev=ev.vitals;
+   }
+   const winner=r.outcome==="double_death"?2:(r.outcome==="victory")!==swapped?0:1;totals.wins[winner]++;if(r.reason==="timeout")totals.timeouts++;
+   for(let n=0;n<2;n++){
+    totals.firstAttack[n]+=first[n];totals.firstDpsAttack[n]+=firstDps[n];totals.firstTankKO[n]+=tankKO[n];if(tankKO[n]===33)totals.tankSurvives[n]++;
+    const s=n===0?side:other;totals.endHP[n]+=sum(Object.entries(prev).filter(([k])=>k.startsWith(s+":")).map(([,v])=>v.hp))/sum(Object.entries(init).filter(([k])=>k.startsWith(s+":")).map(([,v])=>v.maxHP));
+   }
+   if(!sampled&&rules===5&&winner===1){
+    sampled=true;
+    traces.push({zone:zone.id,seed,swapped,outcome:r.outcome,reason:r.reason,rounds:r.rounds,roster:[range,melee],start:[side,other].map(s=>Object.entries(init).filter(([k])=>k.startsWith(s+":")).map(([,v])=>[v.x,v.y,v.hp])),steps:Object.values(rounds)});
+   }
+  }
+  summaries.push({zone:zone.id,rules,bouts:120,totals,perClass});
+ }
+ console.log("RANGE_MELEE_CAUSAL_SUMMARY "+JSON.stringify(summaries));
+ // Store per-round HP and movement, with detailed events for open and bridge examples.
+ for(const t of traces)console.log("RANGE_MELEE_TRACE "+JSON.stringify(t));
+});
