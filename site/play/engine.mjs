@@ -1047,7 +1047,7 @@ export function skillSpoils(skillId) {
 /** Quoted tribute at the exact current inventory snapshot. No fees/currency. */
 export function skillMasterOffer(state, reserve = {}) {
   const ready = [], blocked = [], tribute = {};
-  for (const skillId of SKILL_IDS) {
+  for (const skillId of state.arenaOnly?["fighting"]:SKILL_IDS) {
     const skill = state.skills[skillId];
     const readiness = skillMasterReadiness(state, skillId);
     if (!readiness.xpReady) continue;
