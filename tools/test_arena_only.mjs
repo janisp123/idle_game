@@ -11,7 +11,7 @@ test("new arena-only game earns only fighting effort, experience and actual priz
  assert.ok(n.skills.fighting.xp>0);assert.equal(n.skills.hunting.xp,0);
  assert.deepEqual(n.attributeEffort,s.attributeEffort);
  assert.deepEqual(n.attributeEffortActive,s.attributeEffortActive);
- assert.equal(n.combatSession.groupCombatRules,8);
+ assert.equal(n.combatSession.groupCombatRules,9);
  for(const m of Object.values(n.battleGroup)){const p=m.classes[m.selected];const total=Object.values(p.attributeEffort).reduce((a,b)=>a+b,0);assert.ok(total>0&&total<=20000*100);assert.deepEqual(p.attributeEffort,p.attributeEffortActive);}
  assert.ok(Object.values(n.combatSession.players).every(p=>p.attributes&&p.skill===p.classLevel));
  assert.deepEqual(readManagerGame(JSON.stringify(n)),n);
@@ -81,3 +81,5 @@ import "./test_range_geometry_v6.mjs";
 import "./test_interlude_control_v7.mjs";
 
 import "./test_eight_arenas_v8.mjs";
+
+import "./test_class_mastery_v9.mjs";

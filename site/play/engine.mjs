@@ -476,7 +476,7 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
 function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
  let group=state.battleGroup,teamwork=state.teamwork,session=state.combatSession,old=null;
  const totals=Object.fromEntries(arenaFields.map(k=>[k,0])),practiceMs=Object.fromEntries(GROUP_IDS.map(id=>[id,0])),groupAnalytics=[];
- const shared=desiredArenaPlayer(state),rules=state.arenaOnly?8:GROUP_COMBAT_RULES_VERSION;
+ const shared=desiredArenaPlayer(state),rules=state.arenaOnly?9:GROUP_COMBAT_RULES_VERSION;
  const desired=groupSnapshots(group,shared,rules),bonus=state.arenaOnly?raidCombatBonus(state.raidBuff,state.settledAtMs):null;
  if(session&&session.timelineVersion!==GROUP_TIMELINE_VERSION){
   const duration=teamBoutMs(session),remaining=(duration-session.elapsedMs%duration)%duration;
@@ -501,13 +501,13 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
  };
  const result=()=>({...totals,session,battleGroup:group,teamwork,practiceMs,expertise:old?.expertise??state.expertise,autoFight:state.autoFight,
   ...(old?.team?{team:old.team,managerTactics:old.managerTactics}:{}),...(old?.analytics?{analytics:old.analytics}:{}),...(groupAnalytics.length?{groupAnalytics}:{})});
- const bonusChanged=[4,5,6,7,8].includes(session.groupCombatRules)&&JSON.stringify(session.raidBonus??null)!==JSON.stringify(bonus);
+ const bonusChanged=[4,5,6,7,8,9].includes(session.groupCombatRules)&&JSON.stringify(session.raidBonus??null)!==JSON.stringify(bonus);
  if(online||bonusChanged||!state.arenaOnly&&(JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level)){
   const remaining=(GROUP_BOUT_MS-session.elapsedMs%GROUP_BOUT_MS)%GROUP_BOUT_MS;
   if(elapsedMs<remaining){run(elapsedMs);return result();}
   if(remaining)run(remaining);
   const {raidBonus:oldBonus,...rest}=session;
-  session={...rest,...(online||!state.arenaOnly?{players:desired,teamworkLevel:teamwork.level}:{}),...(online?{groupCombatRules:rules}:{}),...([4,5,6,7,8].includes(online?rules:session.groupCombatRules)&&bonus?{raidBonus:bonus}:{})};elapsedMs-=remaining;
+  session={...rest,...(online||!state.arenaOnly?{players:desired,teamworkLevel:teamwork.level}:{}),...(online?{groupCombatRules:rules}:{}),...([4,5,6,7,8,9].includes(online?rules:session.groupCombatRules)&&bonus?{raidBonus:bonus}:{})};elapsedMs-=remaining;
  }
  if(elapsedMs)run(elapsedMs);
  return result();

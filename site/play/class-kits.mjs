@@ -37,7 +37,7 @@ const rows=[
  ["dreadguard","Disruptive Shield",strike("dread_strike","Dread Strike",4,1.18,{effect:"weaken"}),strike("dark_bind","Dark Bind",6,.90,{effect:"control",utility:true})]
 ];
 export const CLASS_KITS=Object.freeze(Object.fromEntries(rows.map(([id,passive,primary,secondary])=>[id,Object.freeze({passive,primary:Object.freeze(primary),secondary:Object.freeze(secondary)})])));
-export const kitActor=a=>[KIT_RULES_VERSION,4,5,6,7,8].includes(a?.groupCombatRules)&&Boolean(a.classId);
+export const kitActor=a=>[KIT_RULES_VERSION,4,5,6,7,8,9].includes(a?.groupCombatRules)&&Boolean(a.classId);
 
  // V7 source-inspired variants. Legacy CLASS_KITS remains immutable for frozen v1–v6.
  const hex=(id,name,effect,cooldown,extra={})=>utility(id,name,"tactical_control",cooldown,{effect,...extra});
@@ -73,8 +73,11 @@ export const kitActor=a=>[KIT_RULES_VERSION,4,5,6,7,8].includes(a?.groupCombatRu
  };
  export const CONTROL_CLASS_KITS=Object.freeze(Object.fromEntries(Object.entries(CLASS_KITS).map(([id,k])=>[id,Object.freeze({...k,...Object.fromEntries(Object.entries(variants[id]??{}).map(([slot,v])=>[slot,Object.freeze(v)]))})])));
 
-export const pilotKit=a=>kitActor(a)?([7,8].includes(a.groupCombatRules)?CONTROL_CLASS_KITS:CLASS_KITS)[a.classId]??null:null;
-export const kitStrength=a=>.75+.25*(a.classLevel-1)/49;
+export const pilotKit=a=>kitActor(a)?([7,8,9].includes(a.groupCombatRules)?CONTROL_CLASS_KITS:CLASS_KITS)[a.classId]??null:null;
+export const classMasteryStrength=level=>.5+.5*(level-1)/49;
+export const kitStrength=a=>a.groupCombatRules===9?classMasteryStrength(a.classLevel):.75+.25*(a.classLevel-1)/49;
+// Scale a beneficial modifier around its neutral value, not the base attack.
+export const masteryBonus=(a,magnitude)=>a.groupCombatRules===9?magnitude*kitStrength(a):magnitude;
 export const KIT_BALANCE=Object.freeze({daggerShieldImpact:.38,daggerShieldBlock:.65,daggerPlateImpact:.62,daggerBlockedImpact:.19,
  opportunist:1.12,swiftEvasion:.07,swiftPursuit:1.22,nightCritical:.22,nightDamage:.94,
  marksmanAim:.10,marksmanImpact:1.10,windImpact:.87,blackImpact:1.16,

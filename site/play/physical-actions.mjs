@@ -1,7 +1,7 @@
 import { dodgeChance } from "./armour.mjs?v=bal-002";
 import {COUNTERS,tacticalActor,isArrow,intactTank} from "./group-counter-rules.mjs";
 import {kitStrikeModifiers,kitStatus,kitControlAllowed,kitControlDuration,kitPactHeal,wakeOnDamage} from "./class-effects.mjs";
-import {kitActor,KIT_BALANCE} from "./class-kits.mjs";
+import {kitActor,masteryBonus,KIT_BALANCE} from "./class-kits.mjs";
 import {individualActor,statAttack,statAim,statSpeed,statCrit,statEvasion,statMobility,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
 import {combatDamageFactor} from "./raid-rules.mjs";
 // Pure provisional arena rules. Distances, injuries and wear are game abstractions.
@@ -201,15 +201,15 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
     if (armour && wear(armour, attack.type === "blunt" ? 9 : 5)) broken.push(armour.id);
   }
   if (intact && attack.move !== "dagger" && attack !== BASH && wear(actor.weapon, 3)) broken.push("attack weapon");
-  if(block&&kitActor(target)&&target.classId==="dreadguard"&&target.shield.hp>0){kitStatus(actor,"classWeaken","weakenUntil",KIT_BALANCE.dreadBlockWeaken,actor.kitRound??1);}
+  if(block&&kitActor(target)&&target.classId==="dreadguard"&&target.shield.hp>0){kitStatus(actor,"classWeaken","weakenUntil",masteryBonus(target,KIT_BALANCE.dreadBlockWeaken),actor.kitRound??1);}
   if (block && target.shield.hp > 0) target.counter = !(tactical&&attack.ranged) && attack.type !== "blunt" && guardRoll < GUARD.counterChance;
   if (!block && !parry && damage >= 8 && attack.type !== "blunt" && attack.type !== "magic" && statStatusLands(target,"physical",roll)) { target.bleed = Math.max(target.bleed, 2); onBleed(actor,target); }
   if (attack.type === "blunt" && (damage >= 8 || attack === BASH)) {
     // The new melee control kits cannot repeatedly stun through immunity or Brace.
     const newControl=kitActor(actor)&&["ironfist","scrapbreaker"].includes(actor.classId);
-    if(([7,8].includes(target.groupCombatRules)?kitControlAllowed(target,actor.kitRound??1):(!kitActor(target)||(!target.kitBraceUntil&&!newControl)||kitControlAllowed(target,actor.kitRound??1)))&&statStatusLands(target,"physical",roll)){
+    if(([7,8,9].includes(target.groupCombatRules)?kitControlAllowed(target,actor.kitRound??1):(!kitActor(target)||(!target.kitBraceUntil&&!newControl)||kitControlAllowed(target,actor.kitRound??1)))&&statStatusLands(target,"physical",roll)){
       target.stagger=1;
-      if((newControl||[7,8].includes(target.groupCombatRules))&&kitActor(target))target.classControlUntil=(actor.kitRound??1)+kitControlDuration(target);
+      if((newControl||[7,8,9].includes(target.groupCombatRules))&&kitActor(target))target.classControlUntil=(actor.kitRound??1)+kitControlDuration(target);
     }
     // A heavy impact opens a guard without permanently breaking Masterwork.
     if(attack.move==="hammer")target.guardOpen=TACTICS.guardOpenTurns;
