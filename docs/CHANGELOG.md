@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — CLASS-KITS-001 STARTED
+
+CLASS-KITS-001 STARTED — 2026-11-27, Owner instructed implementation. First shared scheduler, status lifecycle and explicit v3 pilot (three daggers, three archers, four tanks), preserve v1 and v2 behavior and frozen settlement. Source baseline 2d5df13, terrain validation 04f3acf all seven checks/163 tests. No balance release before max-only tests and completion of all families. Next: implement and validate pilot; branch feature/group-tactical-counters, PR #200.
+
 ## 2026-11-27 — CLASS-KITS-001 planning milestone
 
 CLASS-KITS-001 — owner approved direction: one passive and two automatic abilities per specialization, no mana or manual skills. [Implementation plan](mechanics/CLASS_KITS_IMPLEMENTATION_PLAN.md) defines all 31 proposed kits, shared scheduler/effects, explicit versioned save compatibility, pilot 10-class family, max-only validation and UI/release gates. Plan only; no runtime changes or new tests run. Existing #200 terrain candidate 04f3acf all seven checks/163 tests passed; dagger/tank counter defect still open. Next: shared registry and scheduler plus old-rule dispatch. Exact candidate effects and numbers require validation, no release approval inferred.
