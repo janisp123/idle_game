@@ -75,3 +75,5 @@ test("active raid blessing multiplies actual fighting XP and frozen combat bonus
  const c=settleManagerOffline(expired,end+20000,rand).state;assert.equal(c.combatSession.raidBonus,undefined);
  assert.equal(raidBonus(c.raidBuff,c.settledAtMs).xp,0);
 });
+
+import "./test_max_7v7_v5.mjs";
