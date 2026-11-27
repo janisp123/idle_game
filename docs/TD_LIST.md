@@ -8,6 +8,15 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## NPC-PARITY-001 — Equal-progression gladiator opponents
+
+- **Goal / acceptance:** Owner approved 2026-11-27: enemies grow with the player's earned progression, with comparable activity/skill levels and earned stats, gear grades/qualities and upgrades, weapon/armour and tactic mastery, Teamwork, identical combat advantages/disadvantages and same terrain/RNG rules. Outcomes should be driven primarily by weapon/armour/tactic combinations and terrain/battle luck at comparable progression, not artificial enemy stat bonuses or full mastery shortcuts. Opponents choose independent builds; no reactive counter-picking or deliberate loss compensation. Endgame validation exclusively maximum stats and S Masterwork first. Include truthful opponent tactic icons and analytics breakdown. Preserve frozen offline bouts, reward/cap and saved data invariants. Existing adaptive grade ladder and coin payout coupling require separate explicit design resolution before gameplay integration; do not silently replace either.
+- **Status:** IN_REVIEW — STARTED; design and source audit, no runtime changes yet.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+- **Plan:** [Opponent parity](mechanics/NPC_PARITY_PLAN.md).
+
 ## BATTLE-ANALYTICS-001 — Foldable battle analytics
 
 - **Goal / acceptance:** BATTLE-ANALYTICS-001 — Owner requested 2026-11-27: collapsible Battle Analytics, lifetime recorded battle totals, wins, defeats, draws, win/loss by actual arena and opposing weapon/team composition, average gross arena coins per arena hour. Use committed results only, including bounded frozen offline settlement; no guessed historical breakdown, no per-bout history, no changes to outcome/reward mechanics. Show win rate and sample count, meaningful empty state. Proposed distinction between all recorded battles and recent/current loadout to aid strategy; first implement bounded aggregate foundations and test exact counts, save/reload, offline splits, alpha credit exclusion and mobile display. Baseline a1ff98d (#195 merged; website 45946558825 passed, live deployment not independently verified).
