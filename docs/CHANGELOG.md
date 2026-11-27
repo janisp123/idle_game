@@ -1035,3 +1035,5 @@ ALPHA-CLAN-001 update (owner 2026-11-27): automatic donation of every tenth posi
 
 
 CLAN-BUILDINGS-001 (owner approved plan #224): candidate replaces temporary Academy with five level-zero buildings, automatic 480-day minimum construction, member capacity, rotating Armoury/Portal bonuses, Bank and Fighting XP, weekly local signup and sequential actual simulated sorties carrying enemy HP across groups. Alpha uses snapshot at registration (server cutoff snapshot later); synthetic allies are based on player progression, no shared data. Personal raid integration, cost/difficulty calibration and independent full 50-tier balance simulation remain pending. Candidate cost = base × target level² (50 Barracks/Bank/Training, 20 Armoury); no measured affordability yet. Cache repair import map incorporated with additional aliases. Tests pending.
+
+CLAN-BUILDINGS-001: added 730-day economy and 50-tier raid diagnostic harness; final candidate CI and calibration pending.
