@@ -2,7 +2,7 @@
 
 ## 2026-11-27 — V10-META-CLASS-001 STARTED
 
-Owner approved V10 competitive meta and all-class diagnostics. Baseline merged V10 3a3b8bf, 204 tests and 3840 mirrored fights per version. Preference PR #219 is being integrated separately. Reuse v9 competitive/ablation screen (16 teams; 7680 plus 1152 independent battles), now V10 elimination; add within-role class substitution trials across all eight zones and three reference opponents. No gameplay changes or balance acceptance. Branch `test/v10-competitive-class-screen`; next run CI and save raw results.
+Owner approved V10 competitive meta and all-class diagnostics. Baseline merged V10 3a3b8bf, 204 tests and 3840 mirrored fights per version. Preference PR #219 is being integrated separately. Reuse v9 competitive/ablation screen (16 teams; 7680 plus 1152 independent battles), now V10 elimination; add within-role class substitution trials across all eight zones and three reference opponents. No gameplay changes or balance acceptance. Branch `test/v10-competitive-class-screen`; candidate harness and report pushed; next run CI and save raw results.
 
 ## 2026-11-27 — TANK-AGGRO-001 candidate
 

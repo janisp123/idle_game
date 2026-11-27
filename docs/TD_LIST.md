@@ -8,6 +8,14 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## V10-META-CLASS-001 — Competitive and class role diagnostics
+
+- **Goal / acceptance:** 8832 V10 competitive and ablation fights plus 2976 class-substitution trials; investigate terrain counters and class roles with max stats; retain raw reproducible outcomes. Evaluate arena preferences as probability reweighting of matchup results. No runtime changes.
+- **Status:** IN_REVIEW — research candidate PR #221; CI and findings pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## ARENA-ELIMINATION-001 — Fight until elimination
 
 - **Goal / acceptance:** Keep 10-second arena cadence, resolve to elimination rather than remaining HP score, bounded safety draw, preserve historical frozen encounters and raid timing, compare max-only compositions across eight environments.

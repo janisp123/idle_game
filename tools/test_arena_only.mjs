@@ -85,3 +85,5 @@ import "./test_eight_arenas_v8.mjs";
 import "./test_class_mastery_v9.mjs";
 
 import "./test_elimination_v10.mjs";
+
+import "./test_meta_class_v10.mjs";
