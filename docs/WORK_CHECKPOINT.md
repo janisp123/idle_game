@@ -535,3 +535,6 @@ Stage 4 and BUTTONS-001 verified at 33258d6: all seven workflows successful; web
 
 
 Candidate implementation: arenaOnly save mode uses single combat settlement lane and full productive Fighting attribute effort; no managerWork/overlap or materials, no material claims; only Fighting auto-levels, existing class/stance/Teamwork/gear rules unchanged. Old historical noncombat skill levels/effort retained to avoid erasing stats but frozen and hidden; materials retired without conversion. Prior manager save enters arena-only before new elapsed settlement, legacy source retained. Public Activities/Resources panels removed, shared attribute readout replaces obsolete individual weapon stats, landing/README copy updated. Legacy noncombat code remains only for old regression fixtures; no public access. New node and real browser tests validate no noncombat gains, frozen bout and cap. CI pending. No merge/deploy yet.
+
+
+First candidate website run 45979500022 failed the landing-copy contract (missing existing progression-cap explanation). Restored exact warning without bringing back noncombat activities. Fresh CI required.
