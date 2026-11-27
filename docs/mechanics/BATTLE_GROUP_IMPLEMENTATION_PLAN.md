@@ -13,3 +13,8 @@ Owner approved 2026-11-27: evolve current idle manager into seven-character Batt
 
 ## Supersession
 [BATTLE_GROUP_CLASS_DESIGN.md](BATTLE_GROUP_CLASS_DESIGN.md) is reference research, not numerical spec. All mana, mana restoration, charge/momentum/fury meters, separate summon actors, skill trees and manual controls there are superseded by cooldown-only shared actions for this initial implementation. Retain class identity rather than copy original skill names. Candidate gear adapters and cooldowns require simulation. No new servers/telemetry/PvP.
+
+## Stage 1 candidate milestone
+
+Stage 1 candidate: 31-class registry, seven independent slots, class-derived equipment adapters, sparse reversible mastery, frozen active practice, automatic paid smith purchases and exact treasury, tests wired into website CI. Current weapon adapters deliberately reuse existing five physical profiles; displayed class signatures are descriptors only and NOT live abilities. Race modifiers, real cooldown resolver, clone/session/manager integration, UI, analytics and economy calibration remain. No public runtime changes; no tests verified yet.
+`node --test tools/test_battle_group.mjs`. Gear adapters: staff/scepter/wand use temporary bow profile, dagger/gauntlets use temporary sword-shield profile, twin swords use greatsword, axe uses hammer; not final mechanics or user-visible kit. Padded armour is reused as the initial caster armour. No mana. Class mastery currently reuses tactic XP threshold as a provisional independent track, not tuned. A new class owns only a starter weapon and auto buys armour at existing legal prices. No balance simulation performed.
