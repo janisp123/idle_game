@@ -8,7 +8,11 @@ export const COUNTERS=Object.freeze({
  interceptRange:2,arrowInterceptions:2,healRepeatRounds:2,
  healerAttack:.72,supportAttack:.88,summonerAttack:.82,
  exposedCasterAimPenalty:.12,targetCounterPriority:1.5,bridgeWidth:3,
- exposedCasterMelee:1.22
+ exposedCasterMelee:1.22,
+ daggerVsPadded:1.48,daggerVsLeather:1.18,daggerVsPlate:.72,
+ daggerTerrain:Object.freeze({open_field:1,narrow_bridge:1.02,ruined_streets:1.28,walled_courtyard:1.04,gatehouse_chamber:1.42}),
+ arrowTerrain:Object.freeze({open_field:1,narrow_bridge:.94,ruined_streets:.66,walled_courtyard:.85,gatehouse_chamber:.40}),
+ arrowTerrainAim:Object.freeze({open_field:0,narrow_bridge:0,ruined_streets:.10,walled_courtyard:.04,gatehouse_chamber:.22})
 });
 export const tacticalActor=a=>Boolean(a.classId&&a.groupCombatRules===GROUP_COMBAT_RULES_VERSION);
 export const isArrow=attack=>attack.move==="shot";

@@ -70,3 +70,22 @@ test("max-only direct role counter matrix across all five environments",()=>{
  }
  console.log("GROUP_COUNTER_MATRIX "+JSON.stringify({bouts:matrix.length*40,matrix}));
 });
+
+test("max-only terrain identity: each dagger specialization versus bows, mages and tanks",()=>{
+ const results=[];
+ for(const id of ["trickblade","swiftblade","nightblade"]){
+  const p=roster(Array(7).fill(id));
+  for(const opponent of ["longshot","flameweaver","oathkeeper"]){
+   const q=roster(Array(7).fill(opponent)),zones={};
+   for(const [z,arena] of ARENAS.entries()){
+    const r=zones[arena.id]=[0,0,0];
+    for(let k=0;k<12;k++){const seed=(20261130+z*100003+k*1009)>>>0;
+     add(r,resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50}).outcome,false);
+     add(r,resolveTeamBattle(q,p,seed,arena,{player:50,enemy:50}).outcome,true);
+    }
+   }
+   results.push({id,opponent,zones});
+  }
+ }
+ console.log("DAGGER_TERRAIN_SCREEN "+JSON.stringify({bouts:results.length*5*24,results}));
+});

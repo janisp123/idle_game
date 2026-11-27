@@ -1,12 +1,12 @@
-import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=counters-001";
+import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=terrain-003";
 import {ATTRIBUTES,effectiveAttributeProgress} from "./attributes.mjs?v=glad-001";
-import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance} from "./arena-manager.mjs?v=counters-001";
+import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance} from "./arena-manager.mjs?v=terrain-003";
 import {createGroupEditor} from "./battle-group-editor.mjs?v=class-info-001";
 import {renderGroupAnalytics} from "./battle-group-analytics-view.mjs?v=group-006";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,migrateLegacyManager} from "./manager-migration.mjs?v=npc-parity-001";
 import {ITEM_GRADES} from "./smith.mjs?v=gear-a3";
-import {createArenaView} from "./arena-view.mjs?v=counters-001";
+import {createArenaView} from "./arena-view.mjs?v=terrain-003";
 import {cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
 import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=arena-only-001";
 

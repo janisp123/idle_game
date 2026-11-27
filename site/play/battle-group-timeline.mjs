@@ -3,7 +3,7 @@
 import {ARENA_SCHEDULE_BOUTS,BOUT_MS,seededCombatRandom,validCombatSession} from "./combat.mjs?v=gear-a3";
 import {chooseArena} from "./arenas.mjs?v=bal-002";
 import {GROUP_IDS,groupSnapshots,awardGroupPractice,validBattleGroup} from "./battle-group.mjs?v=group-001";
-import {validGroupSnapshot} from "./battle-group-actions.mjs?v=counters-001";
+import {validGroupSnapshot} from "./battle-group-actions.mjs?v=terrain-003";
 import {captureGroupCloneEnvelope,validGroupCloneEnvelope,buildGroupCloneTeam} from "./battle-group-clones.mjs?v=group-003";
 import {teamArenaReward} from "./team-timeline.mjs?v=group-004";
 import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,GROUP_RECOVERY_MS} from "./battle-group-timing.mjs";
@@ -11,7 +11,7 @@ import {cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
 import {initialGroupRank,validGroupRank,rankProfile} from "./battle-group-rank.mjs?v=group-005";
 import {validTacticSnapshot,validTactic} from "./manager-tactics.mjs?v=manager-tactics-001";
 import {awardTeamwork,validTeamwork} from "./teamwork.mjs?v=team-002";
-import {resolveTeamBattle} from "./team-combat.mjs?v=counters-001";
+import {resolveTeamBattle} from "./team-combat.mjs?v=terrain-003";
 import {GROUP_COMBAT_RULES_VERSION} from "./group-counter-rules.mjs";
 export {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,GROUP_RECOVERY_MS};
 const duration=GROUP_BOUT_MS,recovery=GROUP_RECOVERY_MS,ratio=BOUT_MS/duration;

@@ -133,7 +133,8 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   if(equipped && speedRoll()<activePiece.speed)actor.recovery=Math.max(0,actor.recovery-1);
   const handling=attack.move==="dagger"?TACTICS.daggerHandling:1;
   const closeCasting=tacticalActor(actor)&&active.type==="magic"&&distance===0?COUNTERS.exposedCasterAimPenalty:0;
-  const aim = AIM.base - closeCasting + (equipped?activePiece.accuracy*handling:0) + (actor.dex - target.dex) * AIM.dex + (actor.skill - target.skill) * AIM.skill +
+  const cornerAim=tacticalActor(actor)&&isArrow(attack)?(COUNTERS.arrowTerrainAim[terrain.id]??0):0;
+  const aim = AIM.base - closeCasting - cornerAim + (equipped?activePiece.accuracy*handling:0) + (actor.dex - target.dex) * AIM.dex + (actor.skill - target.skill) * AIM.skill +
     (distance === 0 && bow ? AIM.closeBow : 0) + (distance===2&&bow?AIM.farBow:0) + (shortSpear ? AIM.closeSpear : attack.move==="thrust"&&distance===1?AIM.reachSpear:0) - obscuredShot - constriction * AIM.clearance * (actor.loadout==='greatsword'?1-.55*handlingScale(activePiece):1);
   if (roll() >= Math.max(AIM.minimum, Math.min(AIM.maximum, aim))) {
     record(actor, target, "miss", { move: attack.move });
@@ -167,6 +168,11 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   const resistance=intactArmourSum(target,"resistance");
   let matchup=1;
   if(tactical){
+    if(arrow)matchup*=COUNTERS.arrowTerrain[terrain.id]??1;
+    if(attack.move==="knife"){
+      const family=target.trainingKit?.armour?.torso;
+      matchup*=(family==="padded"?COUNTERS.daggerVsPadded:family==="leather"?COUNTERS.daggerVsLeather:family==="plate"?COUNTERS.daggerVsPlate:1)*(COUNTERS.daggerTerrain[terrain.id]??1);
+    }
     if(arrow&&shielded&&!target.guardOpen)matchup*=COUNTERS.shieldedArrowImpact;
     if(arrow&&target.trainingKit?.armour?.torso==="plate")matchup*=COUNTERS.plateArrowImpact;
     if(attack.type==="magic"&&target.role==="tank")matchup*=COUNTERS.tankMagicImpact;
