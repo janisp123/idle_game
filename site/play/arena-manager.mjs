@@ -2,6 +2,7 @@
 import {newArenaManager,enableArenaOnly,readManagerGame,enterManagerGame,settleManagerLive,chooseManagerGroupClass,chooseManagerGroupStance} from "./manager-lanes.mjs?v=raid-001";
 import {validRaidRun,validRaidLast,beginRaid,advanceRaid} from "./raid-session.mjs";
 import {saveArenaPreferences} from "./arena-preferences.mjs";
+import {enrollAlphaClan,canDonateClan,donateClan,canUpgradeAcademy,upgradeAcademy} from "./alpha-clan.mjs";
 export {newArenaManager,enableArenaOnly};
 export function readArenaManager(value){
  try{
@@ -20,7 +21,7 @@ function settlePublic(s,now=Date.now(),random=Math.random,online=false){
  const after=settle(out.state,Math.max(now,out.state.settledAtMs),random);
  return {...after,raidFinished:out.finished};
 }
-export const enterArena=(s,now,random)=>settlePublic(s,now,random,false);
+export function enterArena(s,now,random){const out=settlePublic(s,now,random,false);return {...out,state:enrollAlphaClan(out.state)};}
 export const settleArenaLive=(s,now,random)=>settlePublic(s,now,random,true);
 export function startArenaRaid(s,level,now=s.settledAtMs,random=Math.random){
  requireArena(s);if(s.raidRun)return {state:s,reports:[]};
@@ -37,3 +38,7 @@ export function chooseArenaPreferences(s,favorites,now=s.settledAtMs,wallNow=Dat
  const out=settleArenaLive(s,now,random);
  return {...out,state:{...out.state,arenaPreferences:preferences}};
 }
+
+// Explicit local clan actions settle earned progress before changing bonuses or balances.
+export function chooseClanDonation(s,now=s.settledAtMs,wallNow=Date.now(),random=Math.random){const out=settleArenaLive(s,now,random);return canDonateClan(out.state,wallNow)?{...out,state:donateClan(out.state,wallNow)}:out;}
+export function chooseClanAcademy(s,now=s.settledAtMs,random=Math.random){const out=settleArenaLive(s,now,random);return canUpgradeAcademy(out.state)?{...out,state:upgradeAcademy(out.state)}:out;}

@@ -1,5 +1,7 @@
 # Clan system — approved direction and implementation boundaries
 
+**Alpha exception (Owner, 2026-11-27):** ALPHA-CLAN-001 authorizes a clearly labeled single local test clan, automatic enrollment on login, and functioning bonuses before server. Candidate Ashen Covenant, Academy level 1 +5% Fighting XP, levels 2–6 +1 percentage point per upgrade (max +10%), one voluntary 100-coin donation per rolling real 24h, next upgrade costs 100 × current level, local irreversible treasury only. Existing progress settled before enrollment or upgrades; bonus multiplies active raid XP factor and obeys XP cap. No shared membership roster, balances, roles or server. These numeric values are provisional alpha tests, not multiplayer balance approval. Existing historical shared-clan constraints remain.
+
 **Superseding owner decision (ARENA-ONLY-001, 2026-11-27):** future clans receive coin donations and spend coins exclusively on all upgrades. Material warehouse, resource donations, material prerequisites, and Activities navigation in this historical design are retired. No clan runtime or new prices are authorized here. Rework the historical plan against the coin-only game before implementation.
 
 **Status:** Owner-approved design, 2026-11-25. Real shared clans are not implemented. The current browser-only alpha exposes a Clan entry with an explicit availability notice. This document governs subsequent account-backed implementation, not a promise that the current UI works online.

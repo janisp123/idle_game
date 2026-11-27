@@ -1,5 +1,5 @@
 import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=raid-001";
-import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,chooseArenaPreferences} from "./arena-manager.mjs?v=raid-001";
+import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,chooseArenaPreferences,chooseClanDonation,chooseClanAcademy} from "./arena-manager.mjs?v=raid-001";
 import {createGroupEditor} from "./battle-group-editor.mjs?v=individual-stats-001";
 import {renderGroupAnalytics} from "./battle-group-analytics-view.mjs?v=group-006";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
@@ -13,6 +13,7 @@ import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSp
 import {renderGroupProgress} from "./battle-group-progress-view.mjs?v=individual-stats-001";
 import {GROUP_ARENAS} from "./arenas.mjs?v=bal-002";
 import {preferenceUnlockAt} from "./arena-preferences.mjs";
+import {ALPHA_CLAN,clanXpBonus,academyCost,donationUnlockAt,canDonateClan,canUpgradeAcademy} from "./alpha-clan.mjs";
 let analyticsScope="all",lastAnalytics=null,lastAnalyticsScope=null;
 const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString("en-GB"),title=s=>s[0].toUpperCase()+s.slice(1);
 let state,stored=null,clock=null,lastVisible=false,chain=Promise.resolve(),feed=[],loginLines=[],loginSummary="No return rewards yet.",blocked=false;
@@ -54,11 +55,22 @@ function renderPreferences(){
 }
 for(const arena of GROUP_ARENAS){const b=node("button");b.type="button";b.dataset.zone=arena.id;b.style.minHeight="44px";b.addEventListener("click",()=>{if(!state||Date.now()<preferenceUnlockAt(state.arenaPreferences))return;const i=preferenceDraft.indexOf(arena.id);if(i>=0)preferenceDraft.splice(i,1);else if(preferenceDraft.length<3)preferenceDraft.push(arena.id);renderPreferences();});$("arenaPreferenceChoices").append(b);}
 $("arenaPreferenceSave").addEventListener("click",()=>{const selected=[...preferenceDraft];choose((s,t)=>Date.now()<preferenceUnlockAt(s.arenaPreferences)?{state:s,reports:[]}:chooseArenaPreferences(s,selected,t));});
+function renderClan(){
+ const c=state.alphaClan;if(!c)return;
+ const now=Date.now(),cost=academyCost(c),left=Math.max(0,donationUnlockAt(c)-now);
+ text("clanAcademy","Level "+c.academyLevel+" · +"+Math.round(clanXpBonus(c)*100)+"% Fighting XP");
+ text("clanTreasury",fmt(c.treasury)+" coins");text("clanDonated","Your total contributions: "+fmt(c.donated)+" coins");
+ text("clanUpgrade",cost===null?"Academy at maximum":"Upgrade · "+fmt(cost)+" coins");
+ text("clanDonationStatus",left?"Next donation in "+Math.ceil(left/3600000)+"h":"One voluntary "+ALPHA_CLAN.donation+"-coin donation per 24h.");
+ $("clanDonate").disabled=!canDonateClan(state,now);$("clanUpgrade").disabled=!canUpgradeAcademy(state);
+}
+$("clanDonate").addEventListener("click",()=>{if(state&&canDonateClan(state,Date.now())&&confirm("Donate 100 coins permanently to your local test clan?"))choose((s,t)=>chooseClanDonation(s,t));});
+$("clanUpgrade").addEventListener("click",()=>choose((s,t)=>chooseClanAcademy(s,t)));
 function render(){
  if(!state)return;
  text("character-heading",state.name==="Wanderer"?"Your Battle Group":state.name);
  text("coinWallet",fmt(state.coins)+" coins");
- editor.render(state.battleGroup);renderPreferences();
+ editor.render(state.battleGroup);renderPreferences();renderClan();
  text("arenaStage","Arena difficulty: "+ITEM_GRADES[state.combatSession?.rank?.grade??cloneRewardGrade(state.skills.fighting.level)]);text("fightingLevel","Fighting Lv "+state.skills.fighting.level);meter("fightingXP",state.skills.fighting);
  text("arenaNext", "Automatic matchmaking · Teamwork Lv "+state.teamwork.level);
  $("groupProgressOverview").hidden=false;if($("progressPanel").open)renderGroupProgress($("groupProgressOverview"),state.battleGroup);
@@ -99,7 +111,7 @@ $("alphaCoins").addEventListener("click",()=>alpha(s=>{const r=alphaGrantCoins(s
 $("alphaMaxStats").addEventListener("click",()=>alpha(s=>{return alphaMaxStats(s,"none",s.settledAtMs,Math.random,"none");},"Six-month benchmark applied to selected character attributes and equipment."));
 $("alphaDay").addEventListener("click",()=>alpha(s=>{const c=advanceAlphaClock(clock,Date.now(),ALPHA_DAY_MS);return {...enterArena(s,alphaTime(c,Date.now())),clock:c,entry:true};},"24 hours simulated."));
 $("alphaSpeed").addEventListener("click",()=>alpha(s=>({state:s,clock:setAlphaSpeed(clock,Date.now(),clock?.speed===10?1:10)}),"Test speed changed."));
-$("alphaReset").addEventListener("click",()=>{if(confirm("Reset this manager save?"))enqueue(()=>{stored=localStorage.getItem(MANAGER_SAVE_KEY);blocked=false;feed=[];loginLines=[];editor.reset();arenaView.reset();$("progressFeed").replaceChildren();commit({state:newArenaManager(Date.now())},false,null);});});
+$("alphaReset").addEventListener("click",()=>{if(confirm("Reset this manager save?"))enqueue(()=>{stored=localStorage.getItem(MANAGER_SAVE_KEY);blocked=false;feed=[];loginLines=[];editor.reset();arenaView.reset();$("progressFeed").replaceChildren();const t=Date.now();commit(enterArena(newArenaManager(t),t),false,null);});});
 function tick(){if(document.visibilityState==="hidden"){lastVisible=false;return;}enqueue(()=>{if(!state||blocked)return;const out=settleForAction();if(commit(out,!lastVisible))lastVisible=true;});}
 document.addEventListener("visibilitychange",()=>{lastVisible=false;if(document.visibilityState!=="hidden")tick();});
 window.addEventListener("pagehide",()=>{lastVisible=false;});
@@ -115,7 +127,7 @@ enqueue(()=>{
   }else{clock=null;state=newArenaManager(Date.now());}
  }
  if(stored&&JSON.parse(stored).arenaOnly!==true){commit(enterArena(state,now()),true);text("migrationNotice","Coins, earned stats and combat progress retained. Noncombat activities and materials retired.");$("migrationNotice").hidden=false;}
- else if(!stored||state.settledAtMs<now())commit(enterArena(state,now()),true);else render();
+ else if(!stored||!state.alphaClan||state.settledAtMs<now())commit(enterArena(state,now()),true);else render();
  lastVisible=document.visibilityState!=="hidden";$("saveStatus").setAttribute("data-game-ready","true");text("saveStatus","Saved locally");
 });
 setInterval(tick,500);

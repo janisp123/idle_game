@@ -4,6 +4,7 @@
 
 | ID | Date | Approved by | Decision | Status |
 | --- | --- | --- | --- | --- |
+| ALPHA-CLAN-001 | 2026-11-27 | Owner | One automatic local test clan on login before server; actual clan bonuses. Candidate name Ashen Covenant; local coin donation and Academy upgrades with provisional XP values, no shared claims or retroactive rewards. | Approved prototype scope; #223 pending |
 | ARENA-PREFERENCES-001 | 2026-11-27 | Owner | Three favorites; +10 percentage points each; 24-hour change lock; average both players\u2019 distributions in PvP. | Approved; local alpha candidate |
 | ARENA-ELIMINATION-001 | 2026-11-27 | Owner | Continue internal arena rounds until a team is eliminated; keep ten-second bout cadence. Safety ceiling resolves unresolved draws, never HP scoring. Preserve raids and old frozen rules. | Approved; v10 candidate |
 | CLASS-MASTERY-002 | 2026-11-27 | Owner | Scale class abilities from 50% novice to 100% mastery 50, improve debuff application with mastery, cap control duration, keep max balance comparable. | Approved; v9 candidate |

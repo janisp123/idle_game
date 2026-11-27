@@ -11,6 +11,7 @@ import {advanceGroupRank} from "./battle-group-rank.mjs?v=group-005";
 import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession} from "./battle-group-timeline.mjs?v=raid-001";
 import {GROUP_COMBAT_RULES_VERSION} from "./group-counter-rules.mjs";
 import {raidCombatBonus,raidXpMultiplier} from "./raid-rules.mjs";
+import {clanXpMultiplier} from "./alpha-clan.mjs";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
 import {
@@ -602,7 +603,7 @@ function settleUncappedWork(state, now, random, frozenEffort, xpRandom = random,
       // resource gatherers also bring home more material. Old-offline levels
       // stay frozen until the player explicitly trains with the Master.
       const efficiency = Math.min(SKILL_BALANCE.maxEfficiency,
-        1 + Math.max(0, prior.level - 1) * SKILL_BALANCE.efficiencyPerLevel)*multiplier*raidXpMultiplier(state);
+        1 + Math.max(0, prior.level - 1) * SKILL_BALANCE.efficiencyPerLevel)*multiplier*raidXpMultiplier(state)*clanXpMultiplier(state);
       report.gainedItems = rules.item === null ? 0 :
         crafted ? productive : variedTotal(count * rules.yield * efficiency, random);
       // The Master owns the next level. Extra XP never banks. The
@@ -660,7 +661,7 @@ function settleWork(state,now,random,frozenEffort,stopAtCap=false,online=false){
   const tier=state.difficulties[state.activity]??0;
   const multiplier=tier&&state.activity!=="fighting"?workMultiplier(tier,ACTIVITY_STAT_WEIGHTS[state.activity],
     combatAttributeProgress(frozenEffort,state.skills)):1;
-  const efficiency=Math.min(SKILL_BALANCE.maxEfficiency,1+Math.max(0,prior.level-1)*SKILL_BALANCE.efficiencyPerLevel)*multiplier*raidXpMultiplier(state);
+  const efficiency=Math.min(SKILL_BALANCE.maxEfficiency,1+Math.max(0,prior.level-1)*SKILL_BALANCE.efficiencyPerLevel)*multiplier*raidXpMultiplier(state)*clanXpMultiplier(state);
   const cycleXP=rules.xp*efficiency;
   const maxCycles=Math.floor((state.progressMs+duration)/rules.durationMs);
   // No probe or extra RNG work on ordinary live ticks that cannot reach cap.

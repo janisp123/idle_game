@@ -128,3 +128,6 @@ ARENA-ELIMINATION-001 — Owner approved remove HP-fraction decisions, continue 
 ARENA-PREFERENCES-001 #219 — Owner approved three stars, 24h lock and equal PvP averaging. Local NPC arena uses one player distribution (22.5% starred, 6.5% others, 12.5% neutral). Future PvP pure helper averages both distributions (22.5/14.5/6.5 when both choose three). Existing frozen battles retain old selection until live boundary; offline settlement uses frozen favorites. Local real-clock lock is not tamper-resistant; no multiplayer backend exists. Candidate code, tests and UI saved; CI pending, reconcile overlapping V10 #218 before merge.
 
 V10 #218 merged 3a3b8bf after all seven CI checks passed; 204 tests, 3840 battles per version. Preferences reconciled with v10 in #219; final combined checks required.
+
+
+ALPHA-CLAN-001 #223 — Owner approved local prototype automatic clan enrollment and real bonuses. Ashen Covenant candidate includes optional 100 coin donation per rolling real 24h, local irreversible treasury, Academy level 1 +5% Fighting XP through max level 6 +10%, upgrade costs 100 × current level. Enrollment/upgrade settles old rewards first; XP cap and raid bonus preserved, no forced spending, no shared claims. Tests and deployment pending; reconcile cache repair #222 before merge.

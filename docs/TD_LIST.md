@@ -107,10 +107,18 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Requested by:** Owner.
 - **Implemented by:** chat (runtime PR #198; balance not complete).
 
+## ALPHA-CLAN-001 — Local Ashen Covenant prototype
+
+- **Goal / acceptance:** Automatic login membership, local treasury, voluntary coin donation, Academy XP bonus and upgrade, no retroactive reward or shared authority; save and mobile tests.
+- **Status:** IN_REVIEW — PR #223 candidate; tests pending; reconcile #222 first.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## CLAN-001 — Future coin-only clan development
 
 - **Goal / acceptance:** Future shared clans use coin donations and coin-only improvements; no resource warehouse or material prerequisites. Existing membership/leadership/security research retained; obsolete material-economy sections superseded. Update design before implementation; no live shared clans without approved accounts/server architecture.
-- **Status:** BLOCKED — server/account architecture and revised coin-only plan; no clan runtime approved in current change.
+- **Status:** BLOCKED — server/account architecture and revised coin-only plan; shared clan runtime blocked; local alpha prototype separately approved in ALPHA-CLAN-001.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
