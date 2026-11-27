@@ -11,7 +11,7 @@ import {advanceGroupRank} from "./battle-group-rank.mjs?v=group-005";
 import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession} from "./battle-group-timeline.mjs?v=raid-001";
 import {GROUP_COMBAT_RULES_VERSION} from "./group-counter-rules.mjs";
 import {raidCombatBonus,raidXpMultiplier} from "./raid-rules.mjs";
-import {clanXpMultiplier} from "./alpha-clan.mjs";
+import {clanXpMultiplier,applyClanRewards} from "./alpha-clan.mjs";
 import { settleArenaPrizes } from "./arena-wallet.mjs?v=gear-a3";
 import { initialAutoFight, validAutoFight, finishAutoFightBout } from "./auto-fight.mjs?v=auto-fight-03";
 import {
@@ -475,16 +475,18 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
 // and legacy practice, then start a new ten-second timeline with exact carry.
 // Old equipment and mastery remain in the legacy fields; no free transfer.
 function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
- let group=state.battleGroup,teamwork=state.teamwork,session=state.combatSession,old=null;
+ let group=state.battleGroup,teamwork=state.teamwork,session=state.combatSession,old=null,clan=state.alphaClan,clanDonation=0;
+ const contribute=(wins,units,ratio,carry=0)=>{if(!clan)return;const r=applyClanRewards(clan,wins,units,ratio,carry);clan=r.clan;clanDonation+=r.donated;};
+ const legacyContribution=r=>{if(r.coins>0){if(r.victories!==1)throw new Error("Expected a single legacy payout");contribute(1,r.coins,1);}};
  const totals=Object.fromEntries(arenaFields.map(k=>[k,0])),practiceMs=Object.fromEntries(GROUP_IDS.map(id=>[id,0])),groupAnalytics=[];
  const shared=desiredArenaPlayer(state),rules=state.arenaOnly?10:GROUP_COMBAT_RULES_VERSION;
  const arenaFavorites=state.arenaOnly?(state.arenaPreferences?.favorites??[]):undefined;
  const desired=groupSnapshots(group,shared,rules),bonus=state.arenaOnly?raidCombatBonus(state.raidBuff,state.settledAtMs):null;
  if(session&&session.timelineVersion!==GROUP_TIMELINE_VERSION){
   const duration=teamBoutMs(session),remaining=(duration-session.elapsedMs%duration)%duration;
-  if(elapsedMs<remaining)return {...settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online),battleGroup:group};
+  if(elapsedMs<remaining){const r=settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online);legacyContribution(r);return {...r,battleGroup:group,...(clan?{alphaClan:clan,clanDonation}:{})};}
   if(remaining){
-   old=settleTeamArenaBuild(state,remaining,outcomeCaches,online);session=old.session;teamwork=old.teamwork;
+   old=settleTeamArenaBuild(state,remaining,outcomeCaches,online);legacyContribution(old);session=old.session;teamwork=old.teamwork;
    for(const k of arenaFields)totals[k]+=old[k];
   }
   const factor=teamBoutMs(session)/GROUP_BOUT_MS;
@@ -496,12 +498,13 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
   const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.rank.grade,session.groupCombatRules??1,session.raidBonus??null,session.arenaFavorites??null]);
   if(outcomeCaches&&!outcomeCaches.has(key))outcomeCaches.set(key,new Map());
   const r=settleGroupSession(session,ms,outcomeCaches?.get(key));
+  contribute(r.victories,r.rewardUnits,r.rewardRatio,session.coinRemainder);
   group=awardGroupPractice(group,session.players,r.practiceMs);teamwork=awardTeamwork(teamwork,r.teamworkXP);session=r.session;
   for(const k of arenaFields)totals[k]+=r[k];
   for(const id of GROUP_IDS)practiceMs[id]+=r.practiceMs[id];
   if(r.bouts){groupAnalytics.push(r.analytics);if(online){if(r.bouts!==1)throw new Error("Rank advances only at a completed live bout");session={...session,rank:advanceGroupRank(session.rank,r.victories?"victory":r.defeats?"defeat":"double_death")};}}
  };
- const result=()=>({...totals,session,battleGroup:group,teamwork,practiceMs,expertise:old?.expertise??state.expertise,autoFight:state.autoFight,
+ const result=()=>({...totals,session,battleGroup:group,teamwork,practiceMs,...(clan?{alphaClan:clan,clanDonation}:{}),expertise:old?.expertise??state.expertise,autoFight:state.autoFight,
   ...(old?.team?{team:old.team,managerTactics:old.managerTactics}:{}),...(old?.analytics?{analytics:old.analytics}:{}),...(groupAnalytics.length?{groupAnalytics}:{})});
  const bonusChanged=[4,5,6,7,8,9,10].includes(session.groupCombatRules)&&JSON.stringify(session.raidBonus??null)!==JSON.stringify(bonus);
  if(online||bonusChanged||!state.arenaOnly&&(JSON.stringify(session.players)!==JSON.stringify(desired)||session.teamworkLevel!==teamwork.level)){
@@ -576,10 +579,13 @@ function settleUncappedWork(state, now, random, frozenEffort, xpRandom = random,
     if(prize.team){next.teamSecond=prize.team.second;next.teamwork=prize.teamwork;if(prize.managerTactics)next.managerTactics=prize.managerTactics;}
     next.combatSession = prize.session;
     if(online){next.autoFight=prize.autoFight;if(prize.autoFight.stage!==(state.difficulties.fighting??0))next.difficulties={...state.difficulties,fighting:prize.autoFight.stage};}
-    next.coins = safeAdd(state.coins, prize.coins);
-    report.gainedCoins = prize.coins;
+    const donated=prize.clanDonation??0;
+    if(prize.alphaClan)next.alphaClan=prize.alphaClan;
+    next.coins = safeAdd(state.coins, prize.coins-donated);
+    report.gainedCoins = prize.coins-donated;
+    if(donated)report.clanDonation=donated;
     if (prize.bouts || prize.downtimeMs) {
-      const { session: _session, expertise: _expertise, autoFight: _autoFight,team:_team,teamwork:_teamwork,managerTactics:_tactics,battleGroup:_group,...arena } = prize;
+      const { session: _session, expertise: _expertise, autoFight: _autoFight,team:_team,teamwork:_teamwork,managerTactics:_tactics,battleGroup:_group,alphaClan:_clan,...arena } = prize;
       report.arena = arena;
     }
   }

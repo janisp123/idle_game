@@ -2,7 +2,7 @@
 import {newArenaManager,enableArenaOnly,readManagerGame,enterManagerGame,settleManagerLive,chooseManagerGroupClass,chooseManagerGroupStance} from "./manager-lanes.mjs?v=raid-001";
 import {validRaidRun,validRaidLast,beginRaid,advanceRaid} from "./raid-session.mjs";
 import {saveArenaPreferences} from "./arena-preferences.mjs";
-import {enrollAlphaClan,canDonateClan,donateClan,canUpgradeAcademy,upgradeAcademy} from "./alpha-clan.mjs";
+import {enrollAlphaClan,canUpgradeAcademy,upgradeAcademy} from "./alpha-clan.mjs";
 export {newArenaManager,enableArenaOnly};
 export function readArenaManager(value){
  try{
@@ -40,5 +40,4 @@ export function chooseArenaPreferences(s,favorites,now=s.settledAtMs,wallNow=Dat
 }
 
 // Explicit local clan actions settle earned progress before changing bonuses or balances.
-export function chooseClanDonation(s,now=s.settledAtMs,wallNow=Date.now(),random=Math.random){const out=settleArenaLive(s,now,random);return canDonateClan(out.state,wallNow)?{...out,state:donateClan(out.state,wallNow)}:out;}
 export function chooseClanAcademy(s,now=s.settledAtMs,random=Math.random){const out=settleArenaLive(s,now,random);return canUpgradeAcademy(out.state)?{...out,state:upgradeAcademy(out.state)}:out;}

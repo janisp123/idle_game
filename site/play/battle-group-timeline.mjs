@@ -91,7 +91,7 @@ export function settleGroupSession(s,ms,cache=new Map()){
  const coins=Math.floor(coinUnits/ratio),teamworkXP=Math.floor(workUnits/ratio);
  analytics.coins=coins;analytics.ms=bouts*duration;
  return {session:{...s,elapsedMs:end,prizeCursor:complete,coinRemainder:coinUnits%ratio,teamworkRemainder:workUnits%ratio},
-  bouts,victories:analytics.outcomes[0],defeats:analytics.outcomes[1],doubleDeaths:analytics.outcomes[2],coins,teamworkXP,downtimeMs,practiceMs,sampledBouts:sampled.size,analytics};
+  rewardUnits:teamArenaReward(groupPrizeGrade(s)),rewardRatio:ratio,bouts,victories:analytics.outcomes[0],defeats:analytics.outcomes[1],doubleDeaths:analytics.outcomes[2],coins,teamworkXP,downtimeMs,practiceMs,sampledBouts:sampled.size,analytics};
 }
 export function applyGroupSettlement(group,teamwork,s,ms,cache){
  if(!validBattleGroup(group)||!validTeamwork(teamwork)||teamwork.level<s.teamworkLevel)throw new RangeError("Invalid group progression");

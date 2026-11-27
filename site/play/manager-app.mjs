@@ -1,5 +1,5 @@
 import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=raid-001";
-import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,chooseArenaPreferences,chooseClanDonation,chooseClanAcademy} from "./arena-manager.mjs?v=raid-001";
+import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,chooseArenaPreferences,chooseClanAcademy} from "./arena-manager.mjs?v=raid-001";
 import {createGroupEditor} from "./battle-group-editor.mjs?v=individual-stats-001";
 import {renderGroupAnalytics} from "./battle-group-analytics-view.mjs?v=group-006";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
@@ -13,7 +13,7 @@ import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSp
 import {renderGroupProgress} from "./battle-group-progress-view.mjs?v=individual-stats-001";
 import {GROUP_ARENAS} from "./arenas.mjs?v=bal-002";
 import {preferenceUnlockAt} from "./arena-preferences.mjs";
-import {ALPHA_CLAN,clanXpBonus,academyCost,donationUnlockAt,canDonateClan,canUpgradeAcademy} from "./alpha-clan.mjs";
+import {ALPHA_CLAN,clanXpBonus,academyCost,canUpgradeAcademy} from "./alpha-clan.mjs";
 let analyticsScope="all",lastAnalytics=null,lastAnalyticsScope=null;
 const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString("en-GB"),title=s=>s[0].toUpperCase()+s.slice(1);
 let state,stored=null,clock=null,lastVisible=false,chain=Promise.resolve(),feed=[],loginLines=[],loginSummary="No return rewards yet.",blocked=false;
@@ -30,7 +30,9 @@ function renderList(host,rows){host.replaceChildren(...rows.flatMap(([a,b])=>[no
 function reportLines(out){
  const lines=[];if(out.raidFinished){const r=out.raidFinished;lines.push("Raid Lv "+r.level+" · "+(r.outcome==="victory"?"Victory · +"+fmt(r.coins)+" coins · blessing awarded or refreshed if eligible":"Defeat"));}const sum={bouts:0,victories:0,defeats:0,doubleDeaths:0,coins:0};
  for(const r of out.reports??[])for(const k of Object.keys(sum))sum[k]+=r?.arena?.[k]??0;
- if(sum.bouts)lines.push(sum.bouts+" battles · "+sum.victories+" wins · "+sum.defeats+" losses · "+sum.doubleDeaths+" draws · +"+fmt(sum.coins)+" coins");
+ const clanDonation=(out.reports??[]).reduce((n,r)=>n+(r?.clanDonation??0),0);
+ if(sum.bouts)lines.push(sum.bouts+" battles · "+sum.victories+" wins · "+sum.defeats+" losses · "+sum.doubleDeaths+" draws · +"+fmt(sum.coins-clanDonation)+" coins");
+ if(clanDonation)lines.push("Clan warehouse +"+fmt(clanDonation)+" coins (automatic contribution)");
  if(out.levelsGained?.fighting)lines.push("Fighting +"+out.levelsGained.fighting+" level(s)");
  if(out.teamworkLevelGained)lines.push("Teamwork +"+out.teamworkLevelGained+" level(s)");
  const grouped=new Map();
@@ -57,14 +59,14 @@ for(const arena of GROUP_ARENAS){const b=node("button");b.type="button";b.datase
 $("arenaPreferenceSave").addEventListener("click",()=>{const selected=[...preferenceDraft];choose((s,t)=>Date.now()<preferenceUnlockAt(s.arenaPreferences)?{state:s,reports:[]}:chooseArenaPreferences(s,selected,t));});
 function renderClan(){
  const c=state.alphaClan;if(!c)return;
- const now=Date.now(),cost=academyCost(c),left=Math.max(0,donationUnlockAt(c)-now);
+ const cost=academyCost(c);
  text("clanAcademy","Level "+c.academyLevel+" · +"+Math.round(clanXpBonus(c)*100)+"% Fighting XP");
  text("clanTreasury",fmt(c.treasury)+" coins");text("clanDonated","Your total contributions: "+fmt(c.donated)+" coins");
  text("clanUpgrade",cost===null?"Academy at maximum":"Upgrade · "+fmt(cost)+" coins");
- text("clanDonationStatus",left?"Next donation in "+Math.ceil(left/3600000)+"h":"One voluntary "+ALPHA_CLAN.donation+"-coin donation per 24h.");
- $("clanDonate").disabled=!canDonateClan(state,now);$("clanUpgrade").disabled=!canUpgradeAcademy(state);
+ text("clanDonationStatus",c.rewardCursor+"/10 rewards · next donation in "+(ALPHA_CLAN.rewardInterval-c.rewardCursor)+" positive coin rewards.");
+ $("clanDonationProgress").value=c.rewardCursor;$("clanUpgrade").disabled=!canUpgradeAcademy(state);
 }
-$("clanDonate").addEventListener("click",()=>{if(state&&canDonateClan(state,Date.now())&&confirm("Donate 100 coins permanently to your local test clan?"))choose((s,t)=>chooseClanDonation(s,t));});
+
 $("clanUpgrade").addEventListener("click",()=>choose((s,t)=>chooseClanAcademy(s,t)));
 function render(){
  if(!state)return;

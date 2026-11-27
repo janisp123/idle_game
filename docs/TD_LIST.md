@@ -109,7 +109,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 ## ALPHA-CLAN-001 — Local Ashen Covenant prototype
 
-- **Goal / acceptance:** Automatic login membership, local treasury, voluntary coin donation, Academy XP bonus and upgrade, no retroactive reward or shared authority; save and mobile tests.
+- **Goal / acceptance:** Automatic login membership, local treasury, automatic every-tenth positive arena reward contribution, Academy XP bonus and upgrade, no retroactive reward or shared authority; save and mobile tests.
 - **Status:** IN_REVIEW — PR #223 candidate; tests pending; reconcile #222 first.
 - **Added by:** chat.
 - **Requested by:** Owner.
@@ -130,3 +130,6 @@ CLASS-TERRAIN-001 approved extension of BATTLE-GROUP-001: Terrain candidate: exp
 
 
 Interlude identity research completed: [31-class source-backed proposal](mechanics/INTERLUDE_CLASS_IDENTITIES_20261127.md); review/approve specific combat changes before implementation.
+
+
+ALPHA-CLAN-001 update (owner 2026-11-27): automatic donation of every tenth positive whole-coin arena reward after enrollment. No manual donation or daily cap; replaces the candidate 100-coin donation. Zero payouts, defeats, raid prizes, prior wallet and developer grants excluded. Persist reward cursor; apply before equipment spending and keep gross combat analytics, net wallet, and contribution report. Academy costs/bonus remain provisional. Offline settlement uses the same bounded exact fractional payout calculation. First candidate passed 210 unit tests but browser script had duplicate clan variable; corrected. New CI pending.

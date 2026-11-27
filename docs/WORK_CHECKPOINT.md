@@ -131,3 +131,6 @@ V10 #218 merged 3a3b8bf after all seven CI checks passed; 204 tests, 3840 battle
 
 
 ALPHA-CLAN-001 #223 — Owner approved local prototype automatic clan enrollment and real bonuses. Ashen Covenant candidate includes optional 100 coin donation per rolling real 24h, local irreversible treasury, Academy level 1 +5% Fighting XP through max level 6 +10%, upgrade costs 100 × current level. Enrollment/upgrade settles old rewards first; XP cap and raid bonus preserved, no forced spending, no shared claims. Tests and deployment pending; reconcile cache repair #222 before merge.
+
+
+ALPHA-CLAN-001 update (owner 2026-11-27): automatic donation of every tenth positive whole-coin arena reward after enrollment. No manual donation or daily cap; replaces the candidate 100-coin donation. Zero payouts, defeats, raid prizes, prior wallet and developer grants excluded. Persist reward cursor; apply before equipment spending and keep gross combat analytics, net wallet, and contribution report. Academy costs/bonus remain provisional. Offline settlement uses the same bounded exact fractional payout calculation. First candidate passed 210 unit tests but browser script had duplicate clan variable; corrected. New CI pending.
