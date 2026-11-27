@@ -1,9 +1,14 @@
-// CLASS-KITS-001 pilot, melee, mage and healer batches: immutable class-specific data, no persistence or UI.
+// CLASS-KITS-001 pilot, melee, mage, healer and support batches: immutable class-specific data, no persistence or UI.
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 export const KIT_RULES_VERSION=3;
 const strike=(id,name,cooldown,scale,extra={})=>({id,name,type:"strike",cooldown,scale,...extra});
 const utility=(id,name,type,cooldown,extra={})=>({id,name,type,cooldown,...extra});
 const rows=[
+ ["runesage","Focused Blessings",strike("light_bolt","Light Bolt",4,1.08),utility("blessing","Blessing","support_buff",5,{range:3,amount:.24,duration:3,maxTargets:1,mode:"stance"})],
+ ["wardchanter","Protective Songs",strike("sword_cut","Sword Cut",4,1.08),utility("sheltering_song","Sheltering Song","support_buff",5,{range:2,amount:.22,duration:3,maxTargets:3,mode:"guard"})],
+ ["war_dancer","Battle Rhythm",strike("twin_cut","Twin Cut",4,1.15),utility("war_dance","War Dance","support_buff",5,{range:2,amount:.12,duration:3,maxTargets:3,mode:"tempo"})],
+ ["hexchief","Seal Affinity",strike("hex_bolt","Hex Bolt",4,1.04,{effect:"weaken"}),utility("sealing_circle","Sealing Circle","seal",6,{range:2,maxTargets:3})],
+ ["warcaller","Chant Endurance",strike("war_bolt","War Bolt",4,1.05),utility("battle_chant","Battle Chant","support_buff",5,{range:3,amount:.16,duration:3,maxTargets:3,mode:"stance"})],
  ["lifekeeper","Mercy",utility("greater_mend","Greater Mend","ally_heal",3,{amount:.25,range:3}),utility("group_mend","Group Mend","group_heal",5,{amount:.11,range:3})],
  ["wellspring","Resilience",utility("cleansing_mend","Cleansing Mend","ally_heal",4,{amount:.20,range:3,cleanse:true}),utility("sanctuary","Sanctuary","sanctuary",5,{range:2,duration:2})],
  ["bloodsage","Blood Rite",utility("battle_mend","Battle Mend","ally_heal",4,{amount:.17,range:3,boon:.10}),utility("blood_pact","Blood Pact","blood_pact",5,{range:2,duration:4})],
@@ -39,7 +44,9 @@ export const KIT_BALANCE=Object.freeze({daggerShieldImpact:.38,daggerShieldBlock
  bladeBlockImpact:.62,bladeParryImpact:.53,lineReachImpact:1.15,lineContactImpact:.85,
  rageThreshold:.45,rageImpact:1.23,ragePursuit:.85,totemApproach:1.35,totemImpact:1.18,totemGuard:.18,scrapPlateImpact:1.18,
  flameImpact:.90,flameSplash:1.15,graveCurseImpact:1.18,frostImpact:.83,frostRecovery:-1,galeImpact:1.17,galeRecovery:1,siphonMaxHP:.12,
- mercyHealing:1.12,mercyImpact:.78,resilienceSlow:.75,pactDamageFraction:.25,pactMaxHP:.08,pactThreshold:.80,healEmergency:.35});
+ mercyHealing:1.12,mercyImpact:.78,resilienceSlow:.75,pactDamageFraction:.25,pactMaxHP:.08,pactThreshold:.80,healEmergency:.35,
+ focusedBlessing:1.12,protectiveSong:1.12,wardchanterImpact:.86,warcallerImpact:.83,
+ chantExtraDuration:1,tempoImpact:.10,tempoRecovery:-1,sealImmunity:4,sealImpact:1.12});
 for(const [id,k] of Object.entries(CLASS_KITS)){
  if(!GROUP_CLASSES[id]||k.primary.id===k.secondary.id||[k.primary,k.secondary].some(b=>!Number.isInteger(b.cooldown)||b.cooldown<2))throw Error("Invalid class kit "+id);
 }

@@ -196,3 +196,40 @@ test("healers rescue before group healing, respect recipient window, cleanse, sa
  const before=blade.hp,heal=kitPactHeal(blade,100,5);assert.ok(heal>0&&heal<=25&&heal<=Math.floor(blade.maxHP*.08));assert.equal(blade.hp,before+heal);
  assert.equal(kitPactHeal(blade,100,6),0);assert.equal(kitPactHeal(blade,0,7),0);expireKitEffects(blade,10);assert.equal(kitPactHeal(blade,100,10),0);
 });
+
+const supportBatch=["runesage","wardchanter","war_dancer","hexchief","warcaller"];
+test("five support kits use independent cooldowns and single actions in max-only battles",()=>{
+ const p=roster([...supportBatch,"blademaster","longshot"]),q=roster(["oathkeeper","frostweaver","trickblade","scrapbreaker","gravebinder","longshot","lifekeeper"]);
+ const seen=new Set();
+ for(const arena of ARENAS)for(let i=0;i<8;i++){
+  const seed=20261311+i*1009,r=resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3});
+  assert.deepEqual(r,resolveTeamBattle(p,q,seed,arena,{player:50,enemy:50,groupCombatRules:3}));
+  const last={},acted=new Set();
+  for(const ev of r.events){
+   for(const v of Object.values(ev.vitals))assert.ok(Number.isInteger(v.hp)&&v.hp>=0&&v.hp<=v.maxHP);
+   if(ev.type!=="class_ability"||!ev.slot)continue;
+   const [side,j]=ev.actor.split(":"),id=(side==="player"?p:q)[Number(j)].classId,ability=CLASS_KITS[id][ev.slot],key=ev.actor+":"+ev.slot;
+   assert.equal(ev.ability,ability.id);assert.ok(last[key]===undefined||ev.round-last[key]>=ability.cooldown);
+   assert.ok(!acted.has(ev.actor+":"+ev.round));last[key]=ev.round;acted.add(ev.actor+":"+ev.round);seen.add(id);
+  }
+ }
+ for(const id of supportBatch)assert.ok(seen.has(id),"no real ability "+id);
+});
+test("support buffs are bounded, stance dependent, expire and seal cannot chain indefinitely",()=>{
+ const ids=[...supportBatch,"ragebreaker","frostweaver"],snap=roster(ids);
+ const mk=(id,side,x,y)=>prepareKitActor(prepareClassActor({...fighter(snap[ids.indexOf(id)],side),groupCombatRules:3,id:side+":"+id+":"+x+":"+y,x,y,kitRound:1,activeTactic:"balanced",retreats:2,approach:0}));
+ const rune=mk("runesage","player",0,0),ward=mk("wardchanter","player",0,1),dance=mk("war_dancer","player",0,2),hex=mk("hexchief","player",1,1),chant=mk("warcaller","player",1,2);
+ const ally=mk("ragebreaker","player",1,0),ally2=mk("frostweaver","player",1,3);
+ const foe=mk("ragebreaker","enemy",2,0),foe2=mk("frostweaver","enemy",2,1),foe3=mk("frostweaver","enemy",3,1),far=mk("frostweaver","enemy",7,7);
+ const actors=[rune,ward,dance,hex,chant,ally,ally2,foe,foe2,foe3,far],events=[],ctx={terrain:ARENAS[0],roll:()=>.5,speedRoll:()=>1,record:(x,y,type,extra={})=>events.push({x,y,type,...extra}),intercept:(x,y)=>y,move:()=>false};
+ const use=(x,round,target=foe)=>{events.length=0;x.kitRound=round;return tryKitAction(x,target,actors,round,classWeapon(x),ctx);};
+ ally.hp=Math.floor(ally.maxHP*.5);rune.activeTactic="defensive";
+ assert.ok(use(rune,1));assert.equal(events.filter(x=>x.type==="ward").length,1);assert.ok(ally.classGuard>.24);
+ const originalGuard=ally.classGuard;assert.ok(use(ward,1));assert.ok(events.filter(x=>x.type==="ward").length<=3);assert.equal(ally.classGuard,originalGuard);
+ assert.ok(use(dance,1));assert.ok(events.some(x=>x.type==="tempo"&&x.y===ally));assert.ok(events.filter(x=>x.type==="tempo").length<=3);
+ assert.ok(kitStrikeModifiers(ally,foe,classWeapon(ally),0).recovery<0);expireKitEffects(ally,4);assert.equal(kitStrikeModifiers(ally,foe,classWeapon(ally),0).recovery,0);
+ chant.activeTactic="defensive";assert.ok(use(chant,1));assert.ok(events.filter(x=>x.type==="ward").length<=3);assert.ok(events.some(x=>x.type==="ward"&&x.until===5));
+ assert.ok(use(hex,1,foe2));assert.equal(events.filter(x=>x.type==="seal").length,3);assert.equal(foe2.kitReady.primary,2);assert.equal(far.kitReady.primary,1);
+ hex.recovery=0;hex.kitReady.secondary=1;assert.ok(use(hex,2,foe2));assert.ok(!events.some(x=>x.type==="seal"));assert.equal(foe2.kitReady.primary,2);
+ expireKitEffects(foe2,5);assert.equal(foe2.kitSealUntil,0);
+});

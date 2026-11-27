@@ -2,11 +2,11 @@
 import {kitActor,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
 export function prepareKitActor(a){
  if(!kitActor(a))return a;
- return {...a,kitReady:{primary:1,secondary:1},kitStationary:0,kitFocusUntil:0,kitSlowUntil:0,kitDisruptUntil:0,kitBraceUntil:0,kitTotemUntil:0,kitTotemMode:null,kitPactUntil:0,kitPactFraction:0};
+ return {...a,kitReady:{primary:1,secondary:1},kitStationary:0,kitFocusUntil:0,kitSlowUntil:0,kitDisruptUntil:0,kitBraceUntil:0,kitTotemUntil:0,kitTotemMode:null,kitPactUntil:0,kitPactFraction:0,kitTempoUntil:0,kitSealUntil:0};
 }
 export function expireKitEffects(a,round){
  if(!kitActor(a))return;
- for(const key of ["kitFocusUntil","kitSlowUntil","kitDisruptUntil","kitBraceUntil","kitTotemUntil","kitPactUntil"])if(round>=a[key])a[key]=0;
+ for(const key of ["kitFocusUntil","kitSlowUntil","kitDisruptUntil","kitBraceUntil","kitTotemUntil","kitPactUntil","kitTempoUntil","kitSealUntil"])if(round>=a[key])a[key]=0;
 }
 export function markKitMovement(a){if(kitActor(a)){a.kitStationary=0;a.kitFocusUntil=0;}}
 export const kitApproach=a=>!kitActor(a)?1:(a.classId==="swiftblade"?B.swiftPursuit:a.classId==="ragebreaker"?B.ragePursuit:1)*(a.kitSlowUntil>0?(a.classId==="wellspring"?B.resilienceSlow:.5):1)*(a.kitTotemUntil>0&&a.kitTotemMode==="balanced"?B.totemApproach:1);
@@ -53,6 +53,11 @@ export function kitStrikeModifiers(a,b,attack,distance){
  if(b.classId==="ironfist"&&b.kitTotemUntil>0&&b.kitTotemMode==="defensive")m.impact*=1-B.totemGuard*t;
  if(a.classId==="scrapbreaker"&&attack.type==="blunt"&&plate&&a.weapon.hp>0)m.impact*=1+(B.scrapPlateImpact-1)*s;
  if(a.classId==="lifekeeper")m.impact*=B.mercyImpact;
+ if(a.classId==="wardchanter")m.impact*=B.wardchanterImpact;
+ if(a.classId==="warcaller")m.impact*=B.warcallerImpact;
+ if(a.classId==="hexchief"&&b.kitSealUntil>0)m.impact*=1+(B.sealImpact-1)*s;
+ if(a.kitTempoUntil>0&&attack.recovery>=3)m.recovery+=B.tempoRecovery;
+
  if(attack.type==="magic"){
   if(a.classId==="flameweaver")m.impact*=B.flameImpact;
   if(a.classId==="gravebinder"&&b.classWeaken>0)m.impact*=1+(B.graveCurseImpact-1)*s;

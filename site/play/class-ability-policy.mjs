@@ -11,12 +11,30 @@ const healThreshold=a=>a.activeTactic==="defensive"?.90:a.activeTactic==="aggres
 const healChoices=(a,actors,round,ability)=>alliesIn(a,actors,ability.range).filter(x=>ratio(x)<healThreshold(a)&&round>=(x.nextHealRound??0)).sort((x,y)=>ratio(x)-ratio(y));
 const threatened=(x,actors)=>actors.some(y=>y.side!==x.side&&alive(y)&&dist(x,y)<=1);
 const sanctuaryChoices=(a,actors,round,ability)=>alliesIn(a,actors,ability.range).filter(x=>!x.kitBraceUntil&&(harmful(x)||threatened(x,actors))&&ratio(x)<.85);
+const damageRole=x=>["melee","ranged","mage","summoner"].includes(x.role);
+const supportMode=(a,actors,ability)=>{
+ if(ability.mode!=="stance")return ability.mode;
+ if(a.activeTactic==="defensive")return "guard";
+ if(a.activeTactic==="aggressive")return "buff";
+ return alliesIn(a,actors,ability.range).some(x=>ratio(x)<.65&&threatened(x,actors))?"guard":"buff";
+};
+const supportAmount=(a,ability)=>ability.amount*kitStrength(a)*(a.classId==="runesage"?B.focusedBlessing:a.classId==="wardchanter"?B.protectiveSong:1);
+const supportChoices=(a,actors,ability,mode)=>{
+ const amount=supportAmount(a,ability);
+ return alliesIn(a,actors,ability.range).filter(x=>mode==="guard"?x.classGuard<amount&&(ratio(x)<.85||threatened(x,actors)):damageRole(x)&&x.classBuff<amount&&(mode!=="tempo"||!x.kitTempoUntil)).sort((x,y)=>mode==="guard"?ratio(x)-ratio(y):Number(threatened(y,actors))-Number(threatened(x,actors))||Number(y.role==="melee")-Number(x.role==="melee")||ratio(y)-ratio(x));
+};
+const sealChoices=(a,b,actors,round,ability)=>{
+ if(dist(a,b)>ability.range)return [];
+ return actors.filter(x=>x.side!==a.side&&alive(x)&&x.classId&&!x.kitSealUntil&&dist(b,x)<=1&&dist(a,x)<=ability.range+1&&(pilotKit(x)?Math.min(x.kitReady.primary,x.kitReady.secondary)<=round+1:x.readyRound<=round+1)).sort((x,y)=>Number(y===b)-Number(x===b)||dist(a,x)-dist(a,y));
+};
 const pactChoices=(a,actors,ability)=>alliesIn(a,actors,ability.range).filter(x=>x.role==="melee"&&!x.kitPactUntil&&ratio(x)<B.pactThreshold&&threatened(x,actors));
 function eligible(a,b,actors,round,ability,weapon,terrain){
  const d=dist(a,b),stance=a.activeTactic??"balanced",threshold=stance==="defensive"?.85:stance==="aggressive"?.50:.70;
  switch(ability.type){
  case "strike":return !a.counter&&d<=(ability.range??weapon.range)&&d>=(ability.minRange??0)&&(!ability.maxHP||ratio(a)<=ability.maxHP)&&
   (ability.effect!=="control"||kitControlAllowed(b,round))&&(ability.effect!=="bleed"||!b.bleed)&&(!ability.siphon||round>=(a.nextHealRound??0));
+ case "support_buff":return supportChoices(a,actors,ability,supportMode(a,actors,ability)).length>0;
+ case "seal":return sealChoices(a,b,actors,round,ability).length>=2;
  case "ally_heal":return healChoices(a,actors,round,ability).length>0;
  case "group_heal":{const choices=healChoices(a,actors,round,ability);return choices.length>=2&&ratio(choices[0])>=B.healEmergency;}
  case "sanctuary":return sanctuaryChoices(a,actors,round,ability).length>0;
@@ -65,6 +83,30 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   return true;
  }
  switch(ability.type){
+ case "support_buff":{
+  const mode=supportMode(a,actors,ability),targets=supportChoices(a,actors,ability,mode).slice(0,ability.maxTargets);
+  if(!targets.length)return false;
+  const duration=ability.duration+(a.classId==="warcaller"?B.chantExtraDuration:0),amount=supportAmount(a,ability);
+  for(const x of targets){
+   const guard=mode==="guard",key=guard?"classGuard":"classBuff",until=guard?"guardUntil":"buffUntil";
+   kitStatus(x,key,until,amount,round,duration);
+   if(mode==="tempo"){x.kitTempoUntil=round+duration;record(x,"tempo",{until:x.kitTempoUntil});}
+   record(x,guard?"ward":"buff",{magnitude:x[key],until:x[until]});
+  }
+  return true;
+ }
+ case "seal":{
+  const targets=sealChoices(a,b,actors,round,ability).slice(0,ability.maxTargets);if(targets.length<2)return false;
+  for(const x of targets){
+   if(pilotKit(x)){
+    const slot=x.kitReady.primary<=x.kitReady.secondary?"primary":"secondary";
+    x.kitReady[slot]=Math.max(round,x.kitReady[slot])+1;
+    record(x,"seal",{delayedSlot:slot,readyRound:x.kitReady[slot]});
+   }else{x.readyRound=Math.max(round,x.readyRound)+1;record(x,"seal",{readyRound:x.readyRound});}
+   x.kitSealUntil=round+B.sealImmunity;
+  }
+  return true;
+ }
  case "ally_heal":case "group_heal":{
   const targets=healChoices(a,actors,round,ability).slice(0,ability.type==="group_heal"?3:1);
   let used=false;

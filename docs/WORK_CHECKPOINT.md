@@ -43,3 +43,6 @@ CLASS-KITS-001 batch B candidate — Owner authorized continuation 2026-11-27. F
 
 
 CLASS-KITS-001 batch C candidate — Owner authorized continuation 2026-11-27. Three healer kits, shared bounded ally healing/cleanse/sanctuary/melee pact. Prior mage head 3d70d59 website 168/169 tests: both mage tests passed; pilot fixture now also contains Flameweaver, old exact cohort assertion failed. Fixed cohort coverage assertion (all events still checked). [Failed-head diagnostic raw 6960 screen](mechanics/CLASS_KITS_MAGE_SCREEN_20261127.md) preserved; mage stack 84/120, not final. 22/31 kits; nine remaining. Next validate corrected head, save raw CI screen, support batch. No merge/deploy.
+
+
+CLASS-KITS-001 batch D candidate — Owner authorized continuation 2026-11-27. Five support kits: focused blessing, protective song, offensive tempo, bounded cluster cooldown delay, longer stance chant. Prior healer head 9e63ccc Node suite passed (website reached Chromium); final results not yet available at authoring. 27/31 kits; four summoners remain. Next verify both CI heads, save raw screens, implement summoners. No merge or deployment.
