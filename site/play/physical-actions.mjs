@@ -2,6 +2,7 @@ import { dodgeChance } from "./armour.mjs?v=bal-002";
 import {COUNTERS,tacticalActor,isArrow,intactTank} from "./group-counter-rules.mjs";
 import {kitStrikeModifiers,kitStatus,kitControlAllowed,kitControlDuration,kitPactHeal} from "./class-effects.mjs";
 import {kitActor,KIT_BALANCE} from "./class-kits.mjs";
+import {individualActor,statAttack,statAim,statSpeed,statCrit,statEvasion,statMobility,statMagicDamageFactor,statStatusLands} from "./stat-combat.mjs";
 // Pure provisional arena rules. Distances, injuries and wear are game abstractions.
 export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 5 });
 export const WEAPONS = Object.freeze({
@@ -35,7 +36,7 @@ export function attackComponents(actor,attack,activePiece){
   const flatScale=attack.flatScale??1,gradeScale=attack.gradeScale??1,strengthScale=attack.strengthScale??1;
   const flat=equipped?(activePiece.flatAttack??actor.gearAttack??0)*flatScale:0;
   const multiplier=equipped?1+((activePiece.damageMultiplier??1)-1)*gradeScale:1;
-  const strength=actor.str*.3*strengthScale,gear=flat*.65;
+  const strength=statAttack(actor,attack.type)*strengthScale,gear=flat*.65;
   return {weapon:attack.power,strength,gear,flat,multiplier,flatScale,gradeScale,strengthScale,base:(attack.power+strength+gear)*multiplier};
 }
 
@@ -106,7 +107,7 @@ export function flatGuard(target) {
   return target.gear?.gearDefense??0;
 }
 
-export const mobility = actor => Math.min(100,(actor.gear?.mobilityPct ?? 95)+intactArmourSum(actor,"mobility"));
+export const mobility = actor => Math.min(100,(actor.gear?.mobilityPct ?? 95)+intactArmourSum(actor,"mobility")+statMobility(actor));
 export function vitals(target) {
   return { hp: target.hp, maxHP: target.maxHP, arrows: target.arrows, shield: target.shield.hp,
     shieldMax: target.shield.maxHP, weapon: target.weapon.hp, weaponMax: target.weapon.maxHP,
@@ -134,17 +135,18 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   const activePiece=attack===BASH?actor.shield:actor.weapon;
   const equipped=activePiece.hp>0;
   if(equipped && speedRoll()<activePiece.speed)actor.recovery=Math.max(0,actor.recovery-1);
+  if(individualActor(actor)&&actor.recovery>0&&speedRoll()<statSpeed(actor,attack.type))actor.recovery--;
   const handling=attack.move==="dagger"?TACTICS.daggerHandling:1;
   const closeCasting=tacticalActor(actor)&&active.type==="magic"&&distance===0?COUNTERS.exposedCasterAimPenalty:0;
   const cornerAim=tacticalActor(actor)&&isArrow(attack)?(COUNTERS.arrowTerrainAim[terrain.id]??0):0;
-  const aim = AIM.base - closeCasting - cornerAim + kit.aim + (equipped?activePiece.accuracy*handling:0) + (actor.dex - target.dex) * AIM.dex + (actor.skill - target.skill) * AIM.skill +
+  const aim = AIM.base - closeCasting - cornerAim + kit.aim + (equipped?activePiece.accuracy*handling:0) + statAim(actor,target,attack.type) + (actor.skill - target.skill) * AIM.skill +
     (distance === 0 && bow ? AIM.closeBow : 0) + (distance===2&&bow?AIM.farBow:0) + (shortSpear ? AIM.closeSpear : attack.move==="thrust"&&distance===1?AIM.reachSpear:0) - obscuredShot - constriction * AIM.clearance * (actor.loadout==='greatsword'?1-.55*handlingScale(activePiece):1);
   if (roll() >= Math.max(AIM.minimum, Math.min(AIM.maximum, aim))) {
     record(actor, target, "miss", { move: attack.move });
     return;
   }
   // Actual defense event after accuracy. Broken pieces lose graded dodge.
-  if(roll()<Math.min(kitActor(target)?.98:1,dodgeChance(mobility(target),intactArmourSum(target,"dodge"))+kit.dodge)){
+  if(roll()<Math.min(kitActor(target)?.98:1,dodgeChance(mobility(target),intactArmourSum(target,"dodge"))+kit.dodge+statEvasion(target))){
     record(target,actor,"dodge",{move:attack.move});
     return;
   }
@@ -161,7 +163,7 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   // while the kit is intact; the shield bash uses the actual shield.
   const base = attackComponents(actor,attack,activePiece).base *
     (intact ? 1 : 0.55) * (shortSpear ? TACTICS.shortSpearImpact : attack.move==="thrust"&&distance===1?TACTICS.reachSpearImpact:1) * (attack.move==="swing"?(constriction>0?TACTICS.constrainedSwing+.13*handlingScale(activePiece):TACTICS.openSwing):1) * (counter && attack !== BASH ? 1.18 : 1);
-  const vital = !block && !parry && guardRoll > 1-Math.max(0,.04+(equipped?activePiece.crit:0)-intactArmourSum(target,"critResist"));
+  const vital = !block && !parry && guardRoll > 1-Math.max(0,.04+statCrit(actor,attack.type)+(equipped?activePiece.crit:0)-intactArmourSum(target,"critResist"));
   const penetration=equipped?activePiece.penetration*handling:0;
   const materialProtection=protection(target,attack.type)*(1-penetration);
   const shotImpact=attack.ranged&&attack.type!=="magic"?(arrow?(distance===2?COUNTERS.farArrowImpact:distance===1?COUNTERS.reachArrowImpact:COUNTERS.closeArrowImpact):(distance===2?TACTICS.farShotImpact:distance===1?TACTICS.reachShotImpact:TACTICS.closeShotImpact)):1;
@@ -188,7 +190,7 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   const impact = Math.max(1, Math.round(base * classScale * shotImpact * (vital ? 1+Math.max(0,.65+kit.crit+(equipped?activePiece.critDamage:0)-intactArmourSum(target,"critReduction")) : 1) *
     (block ? blockImpact : parry ? (kit.parryImpact??0.35) : 1) *
     (1 - Math.min(80, materialProtection) / 100) /
-    (1+resistance*(1-penetration)) - flatGuard(target) * GUARD.flatReduction));
+    (1+resistance*(1-penetration)) * statMagicDamageFactor(target,attack.type) - flatGuard(target) * GUARD.flatReduction));
   const damage = wound(actor, target, impact);
   const broken = [];
   if (block && wear(target.shield, attack.type === "blunt" ? 24 : 5)) broken.push("shield");
@@ -200,11 +202,11 @@ export function resolveStrike(actor,target,{active,bow,distance,terrain,roll,spe
   if (intact && attack.move !== "dagger" && attack !== BASH && wear(actor.weapon, 3)) broken.push("attack weapon");
   if(block&&kitActor(target)&&target.classId==="dreadguard"&&target.shield.hp>0){kitStatus(actor,"classWeaken","weakenUntil",KIT_BALANCE.dreadBlockWeaken,actor.kitRound??1);}
   if (block && target.shield.hp > 0) target.counter = !(tactical&&attack.ranged) && attack.type !== "blunt" && guardRoll < GUARD.counterChance;
-  if (!block && !parry && damage >= 8 && attack.type !== "blunt" && attack.type !== "magic") { target.bleed = Math.max(target.bleed, 2); onBleed(actor,target); }
+  if (!block && !parry && damage >= 8 && attack.type !== "blunt" && attack.type !== "magic" && statStatusLands(target,"physical",roll)) { target.bleed = Math.max(target.bleed, 2); onBleed(actor,target); }
   if (attack.type === "blunt" && (damage >= 8 || attack === BASH)) {
     // The new melee control kits cannot repeatedly stun through immunity or Brace.
     const newControl=kitActor(actor)&&["ironfist","scrapbreaker"].includes(actor.classId);
-    if(!kitActor(target)||(!target.kitBraceUntil&&!newControl)||kitControlAllowed(target,actor.kitRound??1)){
+    if((!kitActor(target)||(!target.kitBraceUntil&&!newControl)||kitControlAllowed(target,actor.kitRound??1))&&statStatusLands(target,"physical",roll)){
       target.stagger=1;
       if(newControl&&kitActor(target))target.classControlUntil=(actor.kitRound??1)+kitControlDuration(target);
     }

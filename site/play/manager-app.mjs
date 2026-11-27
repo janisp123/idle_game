@@ -1,16 +1,15 @@
-import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=kits-001";
-import {ATTRIBUTES,effectiveAttributeProgress} from "./attributes.mjs?v=glad-001";
-import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance} from "./arena-manager.mjs?v=kits-001";
-import {createGroupEditor} from "./battle-group-editor.mjs?v=class-info-002";
+import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=individual-stats-001";
+import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance} from "./arena-manager.mjs?v=individual-stats-001";
+import {createGroupEditor} from "./battle-group-editor.mjs?v=individual-stats-001";
 import {renderGroupAnalytics} from "./battle-group-analytics-view.mjs?v=group-006";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
-import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,migrateLegacyManager} from "./manager-migration.mjs?v=npc-parity-001";
+import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,migrateLegacyManager} from "./manager-migration.mjs?v=individual-stats-001";
 import {ITEM_GRADES} from "./smith.mjs?v=gear-a3";
-import {createArenaView} from "./arena-view.mjs?v=kits-001";
+import {createArenaView} from "./arena-view.mjs?v=individual-stats-001";
 import {cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
-import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=kits-001";
+import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=individual-stats-001";
 
-import {renderGroupProgress} from "./battle-group-progress-view.mjs?v=group-005";
+import {renderGroupProgress} from "./battle-group-progress-view.mjs?v=individual-stats-001";
 let analyticsScope="all",lastAnalytics=null,lastAnalyticsScope=null;
 const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString("en-GB"),title=s=>s[0].toUpperCase()+s.slice(1);
 let state,stored=null,clock=null,lastVisible=false,chain=Promise.resolve(),feed=[],loginLines=[],loginSummary="No return rewards yet.",blocked=false;
@@ -52,10 +51,6 @@ function render(){
  if($("battleAnalyticsPanel").open&&(lastAnalytics!==state.groupAnalytics||lastAnalyticsScope!==analyticsScope)){
   renderGroupAnalytics($("battleAnalyticsBody"),state.groupAnalytics,analyticsScope,state.battleAnalytics);lastAnalytics=state.groupAnalytics;lastAnalyticsScope=analyticsScope;
  }
- if($("characterStatsPanel").open){
-  const attrs=effectiveAttributeProgress(state.attributeEffort,state.skills);
-  renderList($("characterStats"),ATTRIBUTES.map(a=>[a.name+" ("+a.id+")",fmt(attrs[a.id].value)]));
- }
  $("alphaSpeed").setAttribute("aria-pressed",String(clock?.speed===10));
 }
 function lock(fn){return navigator.locks?.request?navigator.locks.request(MANAGER_SAVE_KEY,fn):Promise.resolve().then(fn);}
@@ -75,7 +70,6 @@ function commit(out,entry=false,newClock=clock){
 }
 function settleForAction(){return lastVisible&&document.visibilityState!=="hidden"?settleArenaLive(state,now()):enterArena(state,now());}
 function choose(action){enqueue(()=>{if(!state||blocked)return;if(!lastVisible){if(!commit(enterArena(state,now()),true))return;}const out=action(state,now());if(commit(out))lastVisible=document.visibilityState!=="hidden";});}
-$("characterStatsPanel").addEventListener("toggle",render);
 $("progressPanel").addEventListener("toggle",render);
 $("battleAnalyticsPanel").addEventListener("toggle",render);
 choice($("battleAnalyticsScope"),[["all","All recorded"],["latest","Latest setup"]],"all",id=>{analyticsScope=id;pressed($("battleAnalyticsScope"),id);render();});
@@ -84,7 +78,7 @@ $("loginReportDismiss").addEventListener("click",()=>$("loginReport").close());
 $("alphaTools").hidden=!ALPHA_TOOLS_ENABLED;
 function alpha(fn,description){enqueue(()=>{if(!state||blocked)return;const base=settleForAction();if(!commit(base))return;const out=fn(state);if(commit(out,Boolean(out.entry),out.clock??clock))text("alphaStatus",description);});}
 $("alphaCoins").addEventListener("click",()=>alpha(s=>{const r=alphaGrantCoins(s,s.settledAtMs);return {state:r.state};},"Test credit added."));
-$("alphaMaxStats").addEventListener("click",()=>alpha(s=>{return alphaMaxStats(s,"none",s.settledAtMs,Math.random,"none");},"Six-month benchmark applied to selected equipment."));
+$("alphaMaxStats").addEventListener("click",()=>alpha(s=>{return alphaMaxStats(s,"none",s.settledAtMs,Math.random,"none");},"Six-month benchmark applied to selected character attributes and equipment."));
 $("alphaDay").addEventListener("click",()=>alpha(s=>{const c=advanceAlphaClock(clock,Date.now(),ALPHA_DAY_MS);return {...enterArena(s,alphaTime(c,Date.now())),clock:c,entry:true};},"24 hours simulated."));
 $("alphaSpeed").addEventListener("click",()=>alpha(s=>({state:s,clock:setAlphaSpeed(clock,Date.now(),clock?.speed===10?1:10)}),"Test speed changed."));
 $("alphaReset").addEventListener("click",()=>{if(confirm("Reset this manager save?"))enqueue(()=>{stored=localStorage.getItem(MANAGER_SAVE_KEY);blocked=false;feed=[];loginLines=[];editor.reset();arenaView.reset();$("progressFeed").replaceChildren();commit({state:newArenaManager(Date.now())},false,null);});});

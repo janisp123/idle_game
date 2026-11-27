@@ -64,3 +64,9 @@ INDIVIDUAL-STATS-001 — owner approved individual combat attributes, six stats,
 
 
 INDIVIDUAL-STATS-001 stage 2 — stage 1 merged #204 (447a0288), 177 tests and seven workflows passed. Added six-stat earned/active effort to each slot/specialization; award only frozen productive member time; old records migrate once using exact class weapon practice quarter-ms, not shared account ledger. Preserve inactive pending effort, activate selected builds only; alpha floor applies selected profiles. No v4 combat changes yet. Migration retains historical account ledger; no arbitrary duplication of shared stats. Pending CI. Next: v4 derived effects, clone parity and frozen snapshot dispatch, individual UI. Candidate 3700h alpha floor inherited from prior team benchmark; recalculate later.
+
+
+INDIVIDUAL-STATS-001 stage 3 STARTED: #205 merged after 179 tests/seven workflows. Public arena v4 candidate uses individual stats and class mastery; account effort frozen for compatibility, productive time reported independently. Preserve old saved rules until live boundary. NPC clones use same class profiles. Next UI/tests before PR; no balance acceptance.
+
+
+INDIVIDUAL-STATS-001 stage 3 — candidate public arena v4 uses independent STR/DEX/CON/INT/WIT/MEN and class mastery, freezes old account effort (historical compatibility only), preserves old session rule versions until live boundary, clone profiles use same class growth and grade practice, removes account stats panel, shows six selected fighter stats and class base/growth. Named derived stat tuning in stat-combat.mjs. WIT affects magical action recovery, not fixed signature cooldowns. No mana. Shared Fighting progression remains internal reward cap/rank and equipment gate, not a combat attribute. Existing v1-v3 fixture defaults retained. CI pending; numerical balance and six-month benchmark provisional.

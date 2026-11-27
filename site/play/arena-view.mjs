@@ -1,5 +1,5 @@
 // Compact arena view; no strike log, HP bar, reward mutation or scheduler.
-import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels} from "./arena-presentation.mjs?v=kits-001";
+import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels} from "./arena-presentation.mjs?v=individual-stats-001";
 const NS="http://www.w3.org/2000/svg";
 const icons={
  tank:"M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5Z",melee:"M3 21 21 3M3 3 21 21M3 15l6 6M15 3l6 6",ranged:"M4 3c15 0 17 16 1 18L4 3ZM2 13l19-5",mage:"M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5Z",healer:"M9 3h6v6h6v6h-6v6H9v-6H3V9h6Z",support:"M9 18V5l12-2v13M9 18c0 4-7 4-7 0s7-4 7 0M21 16c0 4-7 4-7 0s7-4 7 0",summoner:"M12 2l9 10-9 10L3 12Z M12 7v10M7 12h10",

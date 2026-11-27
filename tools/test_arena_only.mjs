@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {newArenaManager,newBattleGroupManager,enableArenaOnly,readManagerGame,settleManagerLive,settleManagerOffline,enterManagerGame,assignManagerWork,chooseManagerGroupClass} from "../site/play/manager-lanes.mjs";
-import {ACTIVITY_STAT_WEIGHTS,xpToNextLevel} from "../site/play/engine.mjs";
+import {xpToNextLevel} from "../site/play/engine.mjs";
 const now=2026112700,rand=()=>.5;
 const noWork=s=>{assert.equal(s.arenaOnly,true);assert.equal(s.managerWork,undefined);assert.equal(s.overlapParity,undefined);assert.ok(Object.values(s.items).every(v=>v===0));};
 test("new arena-only game earns only fighting effort, experience and actual prizes",()=>{
@@ -9,10 +9,11 @@ test("new arena-only game earns only fighting effort, experience and actual priz
  const a=settleManagerLive(s,now+20000,rand),n=a.state;noWork(n);
  assert.equal(n.groupAnalytics.all.ms,20000);
  assert.ok(n.skills.fighting.xp>0);assert.equal(n.skills.hunting.xp,0);
- const effort=Object.fromEntries(Object.keys(s.attributeEffort).map(k=>[k,n.attributeEffort[k]-s.attributeEffort[k]]));
- const total=Object.values(effort).reduce((a,b)=>a+b,0);
- assert.ok(total>0&&total<=20000*100);
- for(const [k,v] of Object.entries(effort))assert.equal(v,total*ACTIVITY_STAT_WEIGHTS.fighting[k]/100);
+ assert.deepEqual(n.attributeEffort,s.attributeEffort);
+ assert.deepEqual(n.attributeEffortActive,s.attributeEffortActive);
+ assert.equal(n.combatSession.groupCombatRules,4);
+ for(const m of Object.values(n.battleGroup)){const p=m.classes[m.selected];const total=Object.values(p.attributeEffort).reduce((a,b)=>a+b,0);assert.ok(total>0&&total<=20000*100);assert.deepEqual(p.attributeEffort,p.attributeEffortActive);}
+ assert.ok(Object.values(n.combatSession.players).every(p=>p.attributes&&p.skill===p.classLevel));
  assert.deepEqual(readManagerGame(JSON.stringify(n)),n);
  assert.throws(()=>assignManagerWork(n,"mining"),/retired/);
 });

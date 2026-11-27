@@ -8,8 +8,8 @@
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./game.css">
 <link rel="stylesheet" href="./manager-ui.css?v=class-info-001">
-<link rel="stylesheet" href="./fantasy-ui.css?v=1">
-<script type="module" src="./manager-app.mjs?v=class-info-002"></script>
+<link rel="stylesheet" href="./fantasy-ui.css?v=individual-stats-001">
+<script type="module" src="./manager-app.mjs?v=individual-stats-001"></script>
 </head>
 <body>
 <a class="skip-link" href="#game">Skip to game</a>
@@ -61,9 +61,6 @@
 <p id="latestProgress" class="quiet">No completed rewards yet.</p>
 <ul id="progressFeed" class="progress-feed" aria-label="Recent committed progress"></ul>
 </details>
-<section class="manager-card stats-card">
-<details id="characterStatsPanel"><summary>Character stats</summary><div id="characterStats" class="skill-list"></div></details>
-</section>
 <details id="alphaTools" class="manager-card stats-card" hidden>
 <summary>Alpha testing tools</summary>
 <p class="quiet">Local developer tools. Not normal gameplay.</p>
@@ -74,6 +71,6 @@
 <footer>Local browser alpha · The Long Vigil</footer>
 </main>
 <dialog id="loginReport" aria-labelledby="loginReportHeading"><h2 id="loginReportHeading">Last login report</h2><p id="loginReportSummary"></p><ul id="loginReportBody" class="progress-feed"></ul><button id="loginReportDismiss" type="button" autofocus>Continue</button></dialog>
-<dialog id="classInfoDialog" aria-labelledby="classInfoHeading"><h2 id="classInfoHeading"></h2><p id="classInfoEquipment" class="quiet"></p><p id="classInfoAction" class="quiet"></p><div class="class-kit-cards"><section class="class-kit-entry passive"><span class="kit-emblem" aria-hidden="true">✦</span><div><small>Passive trait</small><h3 id="classInfoPassiveName"></h3><p id="classInfoPassiveEffect"></p></div></section><section class="class-kit-entry"><span class="kit-emblem" aria-hidden="true">Ⅰ</span><div><small>Automatic ability · <span id="classInfoPrimaryCooldown"></span></small><h3 id="classInfoPrimaryName"></h3><p id="classInfoPrimaryEffect"></p></div></section><section class="class-kit-entry"><span class="kit-emblem" aria-hidden="true">Ⅱ</span><div><small>Automatic ability · <span id="classInfoSecondaryCooldown"></span></small><h3 id="classInfoSecondaryName"></h3><p id="classInfoSecondaryEffect"></p></div></section></div><dl class="class-info-details"><dt>Strong against / purpose</dt><dd id="classInfoStrong"></dd><dt>Best environments</dt><dd id="classInfoBest"></dd><dt>Weak against</dt><dd id="classInfoWeak"></dd><dt>Unfavourable environments</dt><dd id="classInfoWorst"></dd></dl><p class="quiet">Tactical guidance, not guaranteed outcomes. Alpha balance is still being tested.</p><button id="classInfoClose" type="button" autofocus>Close</button></dialog>
+<dialog id="classInfoDialog" aria-labelledby="classInfoHeading"><h2 id="classInfoHeading"></h2><p id="classInfoEquipment" class="quiet"></p><p id="classInfoAction" class="quiet"></p><p id="classInfoAttributes" class="quiet"></p><p id="classInfoGrowth" class="quiet"></p><div class="class-kit-cards"><section class="class-kit-entry passive"><span class="kit-emblem" aria-hidden="true">✦</span><div><small>Passive trait</small><h3 id="classInfoPassiveName"></h3><p id="classInfoPassiveEffect"></p></div></section><section class="class-kit-entry"><span class="kit-emblem" aria-hidden="true">Ⅰ</span><div><small>Automatic ability · <span id="classInfoPrimaryCooldown"></span></small><h3 id="classInfoPrimaryName"></h3><p id="classInfoPrimaryEffect"></p></div></section><section class="class-kit-entry"><span class="kit-emblem" aria-hidden="true">Ⅱ</span><div><small>Automatic ability · <span id="classInfoSecondaryCooldown"></span></small><h3 id="classInfoSecondaryName"></h3><p id="classInfoSecondaryEffect"></p></div></section></div><dl class="class-info-details"><dt>Strong against / purpose</dt><dd id="classInfoStrong"></dd><dt>Best environments</dt><dd id="classInfoBest"></dd><dt>Weak against</dt><dd id="classInfoWeak"></dd><dt>Unfavourable environments</dt><dd id="classInfoWorst"></dd></dl><p class="quiet">Tactical guidance, not guaranteed outcomes. Alpha balance is still being tested.</p><button id="classInfoClose" type="button" autofocus>Close</button></dialog>
 </body>
 </html>
