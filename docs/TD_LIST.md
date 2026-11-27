@@ -8,10 +8,19 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## ARENA-ELIMINATION-001 — Fight until elimination
+
+- **Goal / acceptance:** Keep 10-second arena cadence, resolve to elimination rather than remaining HP score, bounded safety draw, preserve historical frozen encounters and raid timing, compare max-only compositions across eight environments.
+- **Status:** IN_REVIEW — v10 candidate; functional, performance and balance checks pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+- **Dependencies:** CLASS-MASTERY-002; EIGHT-ARENAS-001.
+
 ## CLASS-MASTERY-002 — Meaningful class skill progression
 
 - **Goal / acceptance:** Level 1 ability effectiveness 50%, level 50 100%; mastery increases class effect reliability and scaled debuff magnitude without longer hard control, preserve max combat and frozen saves.
-- **Status:** IN_REVIEW — v9 candidate; tests pending.
+- **Status:** PARTIAL — v9 merged #216 (5487e23), 202 tests, seven workflows, 240 exact max parity checks. Deployment verification pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

@@ -4,6 +4,7 @@
 
 | ID | Date | Approved by | Decision | Status |
 | --- | --- | --- | --- | --- |
+| ARENA-ELIMINATION-001 | 2026-11-27 | Owner | Continue internal arena rounds until a team is eliminated; keep ten-second bout cadence. Safety ceiling resolves unresolved draws, never HP scoring. Preserve raids and old frozen rules. | Approved; v10 candidate |
 | CLASS-MASTERY-002 | 2026-11-27 | Owner | Scale class abilities from 50% novice to 100% mastery 50, improve debuff application with mastery, cap control duration, keep max balance comparable. | Approved; v9 candidate |
 | EIGHT-ARENAS-001 | 2026-11-27 | Owner | Expand public arena to eight tactically distinct zones; test diverse specialized compositions at max stats. Preserve frozen old terrain selection and raid rules. | Approved; v8 candidate |
 | INTERLUDE-CONTROL-001 | 2026-11-27 | Owner | Try Interlude-inspired distinct crowd control and debuffs, retain two automatic abilities and max-only tests. Specific coefficients and utility threat target selection provisional. | Approved; v7 candidate |
