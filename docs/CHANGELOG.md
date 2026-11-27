@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-27 — ARENA-ONLY-001 STARTED
+
+ARENA-ONLY-001 — Owner approved 2026-11-27: remove noncombat progression, gathering, crafting, materials, inventories and tributes from public gameplay. Coins earned in combat and XP/stat progression from fighting only; equipment and future clan donations use coins. XP continues on defeats (existing productive combat/recovery rules). No clan implementation. Preserve coins, class builds, frozen combat, analytics, already earned attributes and historical skill bonuses; archive legacy resource mechanics for regression only. Existing material balances removed with no conversion; old noncombat levels frozen, not displayed or claimed. No changes to combat balance or gear prices. Baseline 9fc6579 / PR #198 deployed via 45976758295; ranged stack imbalance 115/120 in max screen remains separate. Branch feature/arena-only; STARTED, not tested.
+
 ## 2026-11-27 — BATTLE-GROUP-001 STARTED
 
 Owner approved 2026-11-27: evolve current idle manager into seven-character Battle Group. Five races, three-level race/main class/specialization selection with 31 Interlude-inspired original specializations; replace manual weapon and armour choices with class-assigned automatic equipment. Keep three stances, shared progression, automatic activities/upgrades, clone enemies, unknown terrain, 10-second arena, minimal icons, foldable Battle Analytics. No mana or manual skills; shared cooldown-only abilities. Reversible active-only class/stance progression. Preserve old saves and frozen settlement. Use max stats/S Masterwork endgame-only balance until owner accepts. Stage on isolated branch; do not expose unfinished gameplay. Numerical class tuning, seven-member economy, and migration details are candidate design.

@@ -8,6 +8,14 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## ARENA-ONLY-001 — Coins and combat XP only
+
+- **Goal / acceptance:** ARENA-ONLY-001 — Owner approved 2026-11-27: remove noncombat progression, gathering, crafting, materials, inventories and tributes from public gameplay. Coins earned in combat and XP/stat progression from fighting only; equipment and future clan donations use coins. XP continues on defeats (existing productive combat/recovery rules). No clan implementation. Preserve coins, class builds, frozen combat, analytics, already earned attributes and historical skill bonuses; archive legacy resource mechanics for regression only. Existing material balances removed with no conversion; old noncombat levels frozen, not displayed or claimed. No changes to combat balance or gear prices. Baseline 9fc6579 / PR #198 deployed via 45976758295; ranged stack imbalance 115/120 in max screen remains separate. Branch feature/arena-only; STARTED, not tested.
+- **Status:** PARTIAL — started.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## BATTLE-GROUP-001 — Seven-character class-based Battle Group
 
 - **Goal / acceptance:** Owner approved 2026-11-27: evolve current idle manager into seven-character Battle Group. Five races, three-level race/main class/specialization selection with 31 Interlude-inspired original specializations; replace manual weapon and armour choices with class-assigned automatic equipment. Keep three stances, shared progression, automatic activities/upgrades, clone enemies, unknown terrain, 10-second arena, minimal icons, foldable Battle Analytics. No mana or manual skills; shared cooldown-only abilities. Reversible active-only class/stance progression. Preserve old saves and frozen settlement. Use max stats/S Masterwork endgame-only balance until owner accepts. Stage on isolated branch; do not expose unfinished gameplay. Numerical class tuning, seven-member economy, and migration details are candidate design.
