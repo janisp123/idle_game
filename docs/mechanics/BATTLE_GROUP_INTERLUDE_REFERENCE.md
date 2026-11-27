@@ -19,3 +19,7 @@ Reference tree: Human 11, Elf 7, Dark Elf 7, Orc 4, Dwarf 2 final professions. C
 For each of 31 final professions, document independently paraphrased role, weapon/armour mastery, resource use, tactical signature, typical allies, weaknesses, and distinguish shared mechanics from class-specific mechanics. Group into tanks, melee/archer/caster damage, summoners, healers, and several buff/debuff supports; dwarven economic/siege identities need combat-relevant adaptations. Record original source links per entry. Propose original race/class names and new skill mechanics for approval. All new numerical values, seven-member formation and class mastery economy remain design questions. Do not assume original 1v1 or 9-player party balance translates to our seven-member automatic combat.
 
 No simulation performed. No source code or asset copied; no implementation or merge. Next deliver a reviewable original 31-specialization design matrix after further research.
+
+## Research milestone: class matrix
+
+[Complete 31-specialization proposal](BATTLE_GROUP_CLASS_DESIGN.md), with sourced class mapping, original names/actions, automatic gear, synergy/counters, architecture, example groups and endgame-only validation plan. All 31 covered at design level, not a full original skill-rank audit. No implementation or simulation.

@@ -1,8 +1,8 @@
 # Current working checkpoint
 
-## Battle Group reference research — discussion only
+## Battle Group reference research — 31-class proposal ready for review
 
-See [Interlude source discovery](mechanics/BATTLE_GROUP_INTERLUDE_REFERENCE.md). Seven-member class-based concept discussed; original class matrix and combat design not yet approved for implementation. No runtime changes. Branch `research/battle-group-interlude`.
+See [Interlude source discovery](mechanics/BATTLE_GROUP_INTERLUDE_REFERENCE.md) and [complete 31-specialization design](mechanics/BATTLE_GROUP_CLASS_DESIGN.md). Owner requested research/design; proposed original names, gear, role-specific mechanics, counterplay, seven-member examples, shared architecture and max-only validation plan ready for review. No numeric policies approved, simulations run, runtime changes or deployment. Branch `research/battle-group-interlude`.
 
 ## NPC-PARITY-001 — Equal-progression gladiator opponents · STARTED (2026-11-27, chat)
 
