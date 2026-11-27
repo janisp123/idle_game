@@ -1,5 +1,7 @@
 # CLASS-KITS-001 — Automatic class abilities implementation plan
 
+**2026-11-27 owner update:** ALPHA-MERGE-001 supersedes this plan's alpha balance-release gates. PR #200 merged all 31 kits after functional CI; remaining UI and balance stages continue in fresh incremental PRs. Beta requires balance acceptance. Historical baseline and proposed plan below retained.
+
 **Owner-approved direction, 2026-11-27. Planning milestone only.** Scope: one passive trait and two automatic class abilities for each of the 31 specializations. No manual skill selection, mana, skill points, new spendable currency, cooldown management UI, separate ability XP tracks, or additional party slots. Fixed equipment and existing active-class progression remain. Specific kit effects, coefficients and priorities below are candidates for iterative endgame testing, not promises of final balance. Use [Interlude identity research](INTERLUDE_CLASS_IDENTITIES_20261127.md) as source for class identity, not copied retail formulas.
 
 ## 0. Establish the baseline and isolate the work
