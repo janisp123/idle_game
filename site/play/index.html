@@ -7,9 +7,9 @@
 <title>The Long Vigil — Play</title>
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./game.css">
-<link rel="stylesheet" href="./manager-ui.css?v=class-info-001">
+<link rel="stylesheet" href="./manager-ui.css?v=clan-buildings-001">
 <link rel="stylesheet" href="./fantasy-ui.css?v=raid-001">
-<script type="module" src="./manager-app.mjs?v=alpha-clan-001"></script>
+<script type="module" src="./manager-app.mjs?v=clan-buildings-001"></script>
 </head>
 <body>
 <a class="skip-link" href="#game">Skip to game</a>
@@ -40,7 +40,7 @@
 <p id="battleResult" class="quiet arena-last-result" aria-live="polite">No completed battles yet.</p>
 </section>
 <details id="raidPanel" class="manager-card stats-card"><summary>Raid bosses</summary><p id="raidBuff" class="raid-blessing"></p><p class="quiet">Choose a raid. Your team fights automatically, then returns to the arena. One blessing lasts 24 hours; lower raids cannot refresh higher blessings.</p><div id="raidChoices" class="raid-choices"></div><p id="raidLast" class="quiet" role="status"></p></details>
-<details id="alphaClanPanel" class="manager-card stats-card" aria-labelledby="clanHeading"><summary id="clanHeading">✦ Clan — The Ashen Covenant</summary><p class="quiet">Alpha test clan · Automatically joined on login. Your clan progress is local to this browser; no shared roster or treasury yet.</p><h3>Clan Academy</h3><p id="clanAcademy" role="status" class="quiet">Loading clan membership…</p><div class="line"><span>Local clan treasury</span><strong id="clanTreasury">—</strong></div><p id="clanDonated" class="quiet"></p><p class="quiet">Every tenth positive arena coin reward goes automatically to the clan warehouse.</p><progress id="clanDonationProgress" max="10" value="0" aria-label="Rewards toward next clan contribution"></progress><button id="clanUpgrade" type="button" disabled>Upgrade Academy</button><p id="clanDonationStatus" class="quiet" role="status"></p></details>
+<details id="alphaClanPanel" class="manager-card stats-card" aria-labelledby="clanHeading"><summary id="clanHeading">✦ Clan — The Ashen Covenant</summary><p class="quiet">Alpha test clan · Automatically joined on login. Your clan progress is local to this browser; no shared roster or treasury yet.</p><p id="clanMembership" role="status" class="quiet">Loading clan membership…</p><div class="line"><span>Local clan treasury</span><strong id="clanTreasury">—</strong></div><p id="clanDonated" class="quiet"></p><p class="quiet">Every tenth positive arena coin reward goes automatically to the clan warehouse.</p><progress id="clanDonationProgress" max="10" value="0" aria-label="Rewards toward next clan contribution"></progress><p id="clanDonationStatus" class="quiet" role="status"></p><h3>Buildings</h3><div id="clanBuildings" class="clan-buildings"></div><p id="clanConstruction" role="status" class="quiet"></p><h3>Clan combat bonuses</h3><div id="clanBonuses" class="skill-list"></div><h3>Weekly clan raid</h3><p id="clanRaidStatus" class="quiet" role="status"></p><button id="clanJoinRaid" type="button" disabled>Join Raid</button><p class="quiet">Local alpha: allied groups are simulated, not other online players. Registration freezes your current group. Raid resolves at the weekly cutoff on your next visit.</p></details>
 <details id="battleAnalyticsPanel" class="manager-card stats-card" aria-labelledby="battleAnalyticsHeading">
 <summary id="battleAnalyticsHeading">Battle Analytics</summary>
 <div class="choice-grid two" id="battleAnalyticsScope"></div><div id="battleAnalyticsBody"></div>
@@ -68,7 +68,7 @@
 <details id="alphaTools" class="manager-card stats-card" hidden>
 <summary>Alpha testing tools</summary>
 <p class="quiet">Local developer tools. Not normal gameplay.</p>
-<div class="choice-grid two"><button id="alphaMaxStats" type="button">Max stats</button><button id="alphaCoins" type="button">+100,000 coins</button><button id="alphaDay" type="button">Test 24 hours idle</button><button id="alphaSpeed" type="button" aria-pressed="false">Speed ×10</button><button id="alphaReset" type="button">Reset progress</button></div>
+<div class="choice-grid two"><button id="alphaMaxStats" type="button">Max stats</button><button id="alphaCoins" type="button">+100,000 coins</button><button id="alphaDay" type="button">Test 24 hours idle</button><button id="alphaSpeed" type="button" aria-pressed="false">Speed ×10</button><button id="alphaReset" type="button">Reset progress</button><button id="alphaClanRaid" type="button" disabled>Test registered clan raid</button></div>
 <p id="alphaStatus" role="status" class="quiet"></p>
 </details>
 </div>

@@ -16,7 +16,7 @@ export function validAlphaClan(c){
  const q=c.construction;
  if(q!==null&&(!q||!CLAN_CONSTRUCTION.includes(q.id)||q.level!==c.levels[q.id]+1||q.level>CLAN_BUILDINGS[q.id].max||!count(q.start)||!count(q.end)||q.cost!==buildingCost(q.id,q.level)||q.end-q.start!==buildingDuration(q.id,q.level)))return false;
  const r=c.raid;
- if(!r||!(r.joinedWeek===null||count(r.joinedWeek))||!(r.lastWeek===null||count(r.lastWeek))||!(r.lastOutcome===null||["victory","defeat"].includes(r.lastOutcome))||(r.lastWeek===null)!==(r.lastOutcome===null)||(r.joinedWeek!==null&&r.lastWeek!==null&&r.joinedWeek<=r.lastWeek))return false;
+ if(!r||!(r.joinedWeek===null||count(r.joinedWeek))||!(r.lastWeek===null||count(r.lastWeek))||!(r.lastOutcome===null||["victory","defeat"].includes(r.lastOutcome))||(r.lastWeek===null)!==(r.lastOutcome===null)||(r.joinedWeek!==null&&r.lastWeek!==null&&r.joinedWeek<=r.lastWeek)||(r.joinedWeek===null)!==(r.registration===null)||r.registration!==null&&(!r.registration||r.registration.level!==c.levels.portal+1||r.registration.week!==r.joinedWeek))return false;
  return c.donated===c.treasury+spent(c)+c.legacySpent;
 }
 export function migrateAlphaClan(c){
@@ -26,7 +26,7 @@ export function migrateAlphaClan(c){
  if(c.id!==ALPHA_CLAN.id||!count(c.joinedAtMs)||!count(c.treasury)||!count(c.donated)||c.treasury>c.donated||!count(c.rewardCursor)||c.rewardCursor>=10)return c;
  return {...freshClan(c.joinedAtMs),treasury:c.treasury,donated:c.donated,rewardCursor:c.rewardCursor,legacySpent:c.donated-c.treasury};
 }
-function freshClan(t){return {id:ALPHA_CLAN.id,version:2,joinedAtMs:t,treasury:0,donated:0,rewardCursor:0,legacySpent:0,levels:Object.fromEntries(Object.keys(CLAN_BUILDINGS).map(k=>[k,0])),priority:"training",construction:null,raid:{joinedWeek:null,lastWeek:null,lastOutcome:null}};}
+function freshClan(t){return {id:ALPHA_CLAN.id,version:2,joinedAtMs:t,treasury:0,donated:0,rewardCursor:0,legacySpent:0,levels:Object.fromEntries(Object.keys(CLAN_BUILDINGS).map(k=>[k,0])),priority:"training",construction:null,raid:{joinedWeek:null,lastWeek:null,lastOutcome:null,registration:null}};}
 export function enrollAlphaClan(s){
  if(!s.arenaOnly||!count(s.settledAtMs))throw new RangeError("Invalid clan enrollment");
  if(s.alphaClan!==undefined){if(!validAlphaClan(s.alphaClan))throw new RangeError("Invalid clan save");return s;}
@@ -53,8 +53,8 @@ export function advanceConstruction(c,now){
  if(!count(end))throw new RangeError("Construction time overflow");
  return {...next,treasury:next.treasury-cost,construction:{id,level,start:now,end,cost}};
 }
-export function joinClanWeek(c,now){if(!validAlphaClan(c)||!count(now))throw new RangeError("Invalid clan signup");const w=clanWeek(now);if(c.levels.portal===50||c.raid.joinedWeek!==null||c.raid.lastWeek===w)return c;return {...c,raid:{...c.raid,joinedWeek:w}};}
-export function completeClanWeek(c,now,outcome){if(!validAlphaClan(c)||!count(now)||!["victory","defeat"].includes(outcome))throw new RangeError("Invalid clan raid outcome");const w=c.raid.joinedWeek;if(w===null||now<clanWeekEnd(w))return c;return {...c,levels:{...c.levels,portal:Math.min(50,c.levels.portal+Number(outcome==="victory"))},raid:{joinedWeek:null,lastWeek:w,lastOutcome:outcome}};}
+export function joinClanWeek(c,now,registration){if(!validAlphaClan(c)||!count(now))throw new RangeError("Invalid clan signup");const w=clanWeek(now);if(c.levels.portal===50||c.raid.joinedWeek!==null||c.raid.lastWeek!==null&&c.raid.lastWeek>=w)return c;if(!registration||registration.week!==w||registration.level!==c.levels.portal+1)throw new RangeError("Invalid raid registration");return {...c,raid:{...c.raid,joinedWeek:w,registration}};}
+export function completeClanWeek(c,now,outcome){if(!validAlphaClan(c)||!count(now)||!["victory","defeat"].includes(outcome))throw new RangeError("Invalid clan raid outcome");const w=c.raid.joinedWeek;if(w===null||now<clanWeekEnd(w))return c;return {...c,levels:{...c.levels,portal:Math.min(50,c.levels.portal+Number(outcome==="victory"))},raid:{joinedWeek:null,lastWeek:w,lastOutcome:outcome,registration:null}};}
 // A settlement segment has one reward grade and one fractional carry. Each
 // positive whole-coin payout advances the saved cursor; zero payouts do not.
 // The bounded period avoids looping over every win in long offline intervals.

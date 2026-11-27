@@ -1,5 +1,5 @@
 import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=raid-001";
-import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,chooseArenaPreferences,chooseClanAcademy} from "./arena-manager.mjs?v=raid-001";
+import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,chooseArenaPreferences,chooseClanPriority,chooseClanRaid,testClanRaid} from "./arena-manager.mjs?v=raid-001";
 import {createGroupEditor} from "./battle-group-editor.mjs?v=individual-stats-001";
 import {renderGroupAnalytics} from "./battle-group-analytics-view.mjs?v=group-006";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
@@ -13,7 +13,7 @@ import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSp
 import {renderGroupProgress} from "./battle-group-progress-view.mjs?v=individual-stats-001";
 import {GROUP_ARENAS} from "./arenas.mjs?v=bal-002";
 import {preferenceUnlockAt} from "./arena-preferences.mjs";
-import {ALPHA_CLAN,clanXpBonus,academyCost,canUpgradeAcademy} from "./alpha-clan.mjs";
+import {ALPHA_CLAN,CLAN_BUILDINGS,CLAN_CONSTRUCTION,CLAN_STATS,clanBonuses,buildingCost,buildingDuration,clanWeek,clanWeekEnd} from "./alpha-clan.mjs";
 let analyticsScope="all",lastAnalytics=null,lastAnalyticsScope=null;
 const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString("en-GB"),title=s=>s[0].toUpperCase()+s.slice(1);
 let state,stored=null,clock=null,lastVisible=false,chain=Promise.resolve(),feed=[],loginLines=[],loginSummary="No return rewards yet.",blocked=false;
@@ -28,7 +28,7 @@ function choice(host,entries,value,handler){for(const [id,label] of entries){con
 function pressed(host,id){for(const b of host.querySelectorAll("button"))b.setAttribute("aria-pressed",String(b.dataset.choice===id));}
 function renderList(host,rows){host.replaceChildren(...rows.flatMap(([a,b])=>[node("span",a),node("strong",String(b))]));}
 function reportLines(out){
- const lines=[];if(out.raidFinished){const r=out.raidFinished;lines.push("Raid Lv "+r.level+" · "+(r.outcome==="victory"?"Victory · +"+fmt(r.coins)+" coins · blessing awarded or refreshed if eligible":"Defeat"));}const sum={bouts:0,victories:0,defeats:0,doubleDeaths:0,coins:0};
+ const lines=[];if(out.clanRaidResult){const r=out.clanRaidResult;lines.push("Clan Raid "+r.level+" · "+r.outcome+" · "+r.groups+" groups ("+r.simulatedAllies+" simulated)");}if(out.raidFinished){const r=out.raidFinished;lines.push("Raid Lv "+r.level+" · "+(r.outcome==="victory"?"Victory · +"+fmt(r.coins)+" coins · blessing awarded or refreshed if eligible":"Defeat"));}const sum={bouts:0,victories:0,defeats:0,doubleDeaths:0,coins:0};
  for(const r of out.reports??[])for(const k of Object.keys(sum))sum[k]+=r?.arena?.[k]??0;
  const clanDonation=(out.reports??[]).reduce((n,r)=>n+(r?.clanDonation??0),0);
  if(sum.bouts)lines.push(sum.bouts+" battles · "+sum.victories+" wins · "+sum.defeats+" losses · "+sum.doubleDeaths+" draws · +"+fmt(sum.coins-clanDonation)+" coins");
@@ -57,17 +57,35 @@ function renderPreferences(){
 }
 for(const arena of GROUP_ARENAS){const b=node("button");b.type="button";b.dataset.zone=arena.id;b.style.minHeight="44px";b.addEventListener("click",()=>{if(!state||Date.now()<preferenceUnlockAt(state.arenaPreferences))return;const i=preferenceDraft.indexOf(arena.id);if(i>=0)preferenceDraft.splice(i,1);else if(preferenceDraft.length<3)preferenceDraft.push(arena.id);renderPreferences();});$("arenaPreferenceChoices").append(b);}
 $("arenaPreferenceSave").addEventListener("click",()=>{const selected=[...preferenceDraft];choose((s,t)=>Date.now()<preferenceUnlockAt(s.arenaPreferences)?{state:s,reports:[]}:chooseArenaPreferences(s,selected,t));});
+const clanCards={};
+for(const [id,b] of Object.entries(CLAN_BUILDINGS)){
+ const card=node("section"),heading=node("h3",b.name),description=node("p"),meter=node("progress"),action=node("button");
+ card.className="clan-building";description.className="quiet";meter.max=b.max;meter.value=0;meter.setAttribute("aria-label",b.name+" level");card.append(heading,meter,description);
+ if(CLAN_CONSTRUCTION.includes(id)){action.type="button";action.textContent="Set priority";action.disabled=true;action.addEventListener("click",()=>choose((s,t)=>chooseClanPriority(s,id,t)));card.append(action);}
+ $("clanBuildings").append(card);clanCards[id]={heading,description,meter,action};
+}
 function renderClan(){
  const c=state.alphaClan;if(!c)return;
- const cost=academyCost(c);
- text("clanAcademy","Level "+c.academyLevel+" · +"+Math.round(clanXpBonus(c)*100)+"% Fighting XP");
+ const b=clanBonuses(c),now=Date.now(),w=clanWeek(now),q=c.construction;
+ text("clanMembership","Member · 1 local tester · "+b.members+" available member slots");
  text("clanTreasury",fmt(c.treasury)+" coins");text("clanDonated","Your total contributions: "+fmt(c.donated)+" coins");
- text("clanUpgrade",cost===null?"Academy at maximum":"Upgrade · "+fmt(cost)+" coins");
- text("clanDonationStatus",c.rewardCursor+"/10 rewards · next donation in "+(ALPHA_CLAN.rewardInterval-c.rewardCursor)+" positive coin rewards.");
- $("clanDonationProgress").value=c.rewardCursor;$("clanUpgrade").disabled=!canUpgradeAcademy(state);
+ text("clanDonationStatus",c.rewardCursor+"/10 rewards · next donation in "+(ALPHA_CLAN.rewardInterval-c.rewardCursor)+" positive coin rewards.");$("clanDonationProgress").value=c.rewardCursor;
+ for(const [id,d] of Object.entries(CLAN_BUILDINGS)){
+  const level=c.levels[id],card=clanCards[id],max=level===d.max;
+  card.heading.textContent=d.name+" · "+level+"/"+d.max;card.meter.value=level;
+  const effect=id==="barracks"?b.members+" member slots":id==="bank"?"+"+b.coins+"% arena coins":id==="training"?"+"+b.xp+"% Fighting XP":id==="portal"?level+" raids cleared":"Permanent combat bonuses";
+  card.description.textContent=effect+(id==="portal"||max?"": " · Next: "+fmt(buildingCost(id,level+1))+" coins / "+buildingDuration(id,level+1)/86400000+"d");
+  if(CLAN_CONSTRUCTION.includes(id)){card.action.disabled=max;card.action.setAttribute("aria-pressed",String(c.priority===id));card.action.textContent=c.priority===id?"Priority selected":"Set priority";}
+ }
+ text("clanConstruction",q?CLAN_BUILDINGS[q.id].name+" → Lv "+q.level+" · "+Math.max(0,Math.ceil((q.end-now)/3600000))+"h left":"Construction idle · waiting for treasury funds or all buildings complete");
+ renderList($("clanBonuses"),CLAN_STATS.map(k=>[title(k)+" (Armoury + Portal)","+"+b.armoury[k]+"% + "+b.portal[k]+"%"]));
+ const raid=c.raid;
+ text("clanRaidStatus",c.levels.portal===50?"All 50 raids cleared": "Raid "+(c.levels.portal+1)+"/50 · "+(raid.joinedWeek!==null?"Registered · "+Math.max(0,Math.ceil((clanWeekEnd(raid.joinedWeek)-now)/3600000))+"h to cutoff":raid.lastWeek!==null&&raid.lastWeek>=w?"Attempt completed this week":"Registration open")+(raid.lastOutcome?" · Last: "+raid.lastOutcome:""));
+ $("clanJoinRaid").disabled=c.levels.portal===50||raid.joinedWeek!==null||raid.lastWeek!==null&&raid.lastWeek>=w;
+ $("alphaClanRaid").disabled=raid.joinedWeek===null;
 }
-
-$("clanUpgrade").addEventListener("click",()=>choose((s,t)=>chooseClanAcademy(s,t)));
+$("clanJoinRaid").addEventListener("click",()=>choose((s,t)=>chooseClanRaid(s,t)));
+$("alphaClanRaid").addEventListener("click",()=>{if(ALPHA_TOOLS_ENABLED)alpha(s=>testClanRaid(s,s.settledAtMs),"Registered local clan raid simulated.");});
 function render(){
  if(!state)return;
  text("character-heading",state.name==="Wanderer"?"Your Battle Group":state.name);
