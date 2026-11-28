@@ -11,14 +11,14 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## REPO-CLEANUP-002 — Codex execution priority: finish repository hygiene before features
 
 - **Goal / acceptance:** Owner instructs Codex to execute the nine-phase cleanup continuously, using existing evidence instead of restarting research. Freeze features, balance retuning and unrelated work until independent final audit and Owner acceptance. Preserve useful knowledge, exact evidence, current behavior and security. No history rewrite. [Master plan](mechanics/REPOSITORY_CLEANUP_MASTER_PLAN.md).
-- **Status:** PARTIAL — #244 handoff merged at `2a5d9e6c`. Codex verified 216 guarded removals, 194 recoverable archive tags and 22 deliberately retained branches. [Manifest](mechanics/REPO_CLEANUP_002_REF_MANIFEST.md), [PR #245](https://github.com/janisp123/idle_game/pull/245). Phase 01 journal merged at `da8d4c7a`. Phase 02 governance is under Owner review in [PR #246](https://github.com/janisp123/idle_game/pull/246).
+- **Status:** PARTIAL — #244 handoff merged at `2a5d9e6c`. Codex verified 216 guarded removals, 194 recoverable archive tags and 22 deliberately retained branches. [Manifest](mechanics/REPO_CLEANUP_002_REF_MANIFEST.md), [PR #245](https://github.com/janisp123/idle_game/pull/245). Phase 01 journal merged at `da8d4c7a`. The Owner approved Phase 02, merged as `8053f789`. [PR #247](https://github.com/janisp123/idle_game/pull/247) records the Phase 03 documentation cleanup. Knowledge-library review follows.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
 
 ### Execute in order — implementation, not another planning exercise
 
-1. **Preflight:** Fetch latest remote main:TD_LIST first, AGENTS, decisions, checkpoint, open PRs and merge/deployment. Read the master plan, [branch inventory](mechanics/BRANCH_INVENTORY_20261128.md), [exact ancestry/deletion candidates](https://github.com/janisp123/idle_game/pull/243#issuecomment-7242566717), [instruction audit](https://github.com/janisp123/idle_game/pull/243#issuecomment-7242585835). Reuse findings; verify changed facts and destructive-action prerequisites only. #243 merged; #242 deployed. If #244 is pending, read exact head for preparation but do not edit competing implementation before integration.
+1. **Preflight:** Fetch latest remote main:TD_LIST first, AGENTS, decisions, checkpoint, open PRs and merge/deployment. Read the master plan, [branch inventory](mechanics/BRANCH_INVENTORY_20261128.md), [exact ancestry/deletion candidates](https://github.com/janisp123/idle_game/pull/243#issuecomment-7242566717), [instruction audit](https://github.com/janisp123/idle_game/pull/243#issuecomment-7242585835). Reuse findings; verify changed facts and destructive-action prerequisites only. #243 and #244 merged. #242 is the latest verified game deployment.
 2. **Git hygiene:** Use authenticated local git/gh. All 213 merged PR merge SHAs reachable from audited main; 19 exact branch heads reachable. Recheck remote heads, main ancestry, protection and open PR use. Delete only verified disposable refs using exact-SHA leases. For 194 nonancestor heads, 25 exceptional refs and any new branches, preserve unique work and research in durable reachable refs or main evidence first; verify recovery. Review shared heads, unrelated template histories and closed research separately. No blanket deletion, force-push to main, history rewrite or garbage collection. Record exact SHA, disposition, archival location, verification and deletion manifest.
 3. **AI instructions:** Reconcile AGENTS and DECISIONS using saved nine-point audit, latest approved decisions and current code. Preserve rule IDs, security, licensing, research, merge gates, mobile/class/terrain identity and alpha policy. Archive old manual Master, two-character/queue/material economy, obsolete MVP/handoffs and conflicting active labels. Separate governance PR; exact diff for required Owner review/manual checked merge; no native auto-merge for governance changes.
 4. **Documentation:** Make WORK_CHECKPOINT concise/current, TD_LIST active, mechanics README current source map. Archive superseded specs, completed tasks and chronological logs via recoverable history/index. Preserve attribution, links and unfinished accepted work. Separate implemented behavior, design and unvalidated balance. Check internal links and eliminate stale candidate instructions.
@@ -35,22 +35,6 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - Continue after safe completed work. While CI is pending, use local/read-only analysis, persist findings without competing edits. Isolate items needing permission and do independent work within existing rules. Stop only for genuine decision/access, failure of essential checks, conflict or inability to continue safely; report exact blocker and next step. Never claim background work, unrun tests or unverified deletion.
 - No broad repeat research, new features, balance retuning, prestige, monetization, PvP/server work or arbitrary progression cap. Preserve current roster/level gates, six attributes, automatic active-choice advancement, coin-only economy, eight environments, ten-second arena, tower/raid/clan, save/reload and frozen offline settlement. No tuning changes unless separately approved reproduced defect.
 - Baseline main ea49cec2: 410 tracked files / 19,119,016 bytes; site 5,137,221; docs 12,249,618; 62 mechanics JSON / 10,659,473 bytes; 240 refs at #243 inventory. Use same definitions for comparison; distinguish Git storage, tracked bytes and browser transfer. No arbitrary size target. Record phase status in TD/checkpoint and archive completed blocks in changelog.
-
-## REPO-CLEANUP-001 — Reconcile obsolete PRs and active task records
-
-- **Goal / acceptance:** Inspect all ten stale PRs against current main; preserve unique unfinished work and historical research by exact references, close obsolete implementation candidates, update live task statuses and next cleanup steps. No source, save, workflow, permission, history or branch deletions in this pass.
-- **Status:** DONE — #241 auto-merged 32078b9, final full gate 28/28 and standalone protocol passed; no site change. Ten stale PRs closed; remaining source cleanup under S09. Duplicate CI run had Chromium startup timeout; final browser integrity 5/5.
-- **Added by:** chat.
-- **Requested by:** Owner.
-- **Implemented by:** Not yet.
-
-## S09-RETIRED-ART-001 — Isolate obsolete activity artwork
-
-- **Goal / acceptance:** Archive twelve retired activity paintings outside published site without losing image bytes; prove not used by current or historical fixture activity mappings, scan site/tools static references, retain existing art and browser tests. No gameplay, save or CI changes.
-- **Status:** DONE — #242 merged ea49cec2; both full gates 28/28, Pages 46166609963 success. Twelve archived blobs (757994 bytes), current/legacy required scenes retained.
-- **Added by:** chat.
-- **Requested by:** Owner (repository cleanup).
-- **Implemented by:** chat (PR #242).
 
 ## RELEASE-NOTIFY-001 — Published game completion notice
 
@@ -122,7 +106,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## ARENA-ELIMINATION-001 — Fight until elimination
 
 - **Goal / acceptance:** Keep 10-second arena cadence, resolve to elimination rather than remaining HP score, bounded safety draw, preserve historical frozen encounters and raid timing, compare max-only compositions across eight environments.
-- **Status:** PARTIAL — V10 elimination integrated; current full CI passed. S03 correctness, S07 performance and max-only balance remain; #221 diagnostic archived for current-baseline port.
+- **Status:** PARTIAL — V10 elimination merged in #218 (3a3b8bf). S03 correctness, S07 performance and max-only balance remain; #221 diagnostic archived for current-baseline port.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -131,7 +115,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## CLASS-MASTERY-002 — Meaningful class skill progression
 
 - **Goal / acceptance:** Level 1 ability effectiveness 50%, level 50 100%; mastery increases class effect reliability and scaled debuff magnitude without longer hard control, preserve max combat and frozen saves.
-- **Status:** PARTIAL — v9 merged #216 (5487e23), 202 tests, seven workflows, 240 exact max parity checks. Deployment verification pending.
+- **Status:** PARTIAL — v9 merged #216 (5487e23), 202 tests, seven workflows, 240 exact max parity checks. [Pages run 46025265894](https://github.com/janisp123/idle_game/actions/runs/46025265894) succeeded. Current-baseline balance remains open.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -140,7 +124,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## EIGHT-ARENAS-001 — Eight tactical environments
 
 - **Goal / acceptance:** Add three meaningful geometry/terrain differences, preserve prior saves and raids, expose all eight through arena selection and analytics, test specialized max-only compositions.
-- **Status:** PARTIAL — v8 merged #214 (3d404f1), 200 tests, all seven workflows, 5760 simulations. Broader balance and deployment verification pending.
+- **Status:** PARTIAL — v8 merged #214 (3d404f1), 200 tests, all seven workflows, 5760 simulations. [Pages run 46021258223](https://github.com/janisp123/idle_game/actions/runs/46021258223) succeeded. Broader balance remains open.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -149,7 +133,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## INTERLUDE-CONTROL-001 — Class control and utility
 
 - **Goal / acceptance:** Distinct bounded control and debuffs, revised class identity kits, max-only paired arena tests, frozen-rule compatibility.
-- **Status:** PARTIAL — v7 merged #213 (f621853), 197 tests and seven workflows; numerical balance and deployment verification pending.
+- **Status:** PARTIAL — v7 merged #213 (f621853), 197 tests and seven workflows; [Pages run 46019483493](https://github.com/janisp123/idle_game/actions/runs/46019483493) succeeded. Numerical balance remains open.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -158,7 +142,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## RANGE-GEOMETRY-001 — Ranged engagement geometry
 
 - **Goal / acceptance:** Give ranged compositions real distance-based advantages in open terrain while retaining melee strengths in close quarters, tank aggro and healer priority. No damage inflation or scripted winners.
-- **Status:** PARTIAL — v6 merged #211 (938ffc8), 194 tests, seven workflows. Deployment verification and broader balance pending.
+- **Status:** PARTIAL — v6 merged #211 (938ffc8), 194 tests, seven workflows. [Pages run 46018020656](https://github.com/janisp123/idle_game/actions/runs/46018020656) succeeded. Broader balance remains open.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -167,7 +151,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## TANK-AGGRO-001 — Tank aggro and healer priority
 
 - **Goal / acceptance:** Living tanks are the primary enemy target; healers prioritize injured tanks in all new group encounters, including raids. Preserve actual movement, range, cooldowns and prior frozen outcomes. Both sides use the same rules.
-- **Status:** PARTIAL — v5 merged #209 (87d949f), 191 tests, all seven workflows passed. Balance and live deployment verification pending.
+- **Status:** PARTIAL — v5 merged #209 (87d949f), 191 tests, all seven workflows passed. [Pages run 46011447146](https://github.com/janisp123/idle_game/actions/runs/46011447146) succeeded. Balance remains open.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -176,7 +160,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## RAID-001 — Raid bosses and blessings
 
 - **Goal / acceptance:** Five raids (10/20/30/40/50), unique boss and six minions, tactical resistances, about five minutes for appropriate good team, coins and nonstacking 24-hour +10% Fighting XP, up to +10% damage/defence. Manual start, automatic fight/resume, persisted one-time rewards, mobile raid view.
-- **Status:** PARTIAL — full playable raid candidate with saved runs, buffs, coins and mobile UI; CI and duration/balance calibration pending.
+- **Status:** PARTIAL — raid foundation merged in #207 (3836a47), with tower qualification integrated in #228. S05 duration, calibration and integrated correctness remain open.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -199,12 +183,12 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
-- **Dependencies:** CLASS-TERRAIN-001 / GROUP-COUNTERS-001 draft PR #200; [plan](mechanics/CLASS_KITS_IMPLEMENTATION_PLAN.md).
+- **Dependencies:** CLASS-TERRAIN-001 / GROUP-COUNTERS-001 merged PR #200; [plan](mechanics/CLASS_KITS_IMPLEMENTATION_PLAN.md).
 
 ## BATTLE-GROUP-001 — Endgame class and composition balance
 
 - **Goal / acceptance:** Seven-character runtime, 31 classes, 10-second fights, button-only manager, independent class gear/XP, adaptive rank and analytics deployed in #198 (9fc6579, Pages 45976758295). Remaining work is maximum-stat, S Masterwork-only tuning, especially ranged stacking (115/120 wins in 5040-bout screen) and counterplay; meaningful terrain differences, class roles and equipment economy. No new mechanics until owner approves. Raw diagnostic PR #198 comment 7215109236; [plan](mechanics/BATTLE_GROUP_IMPLEMENTATION_PLAN.md).
-- **Status:** PARTIAL — deployed playable alpha; GROUP-COUNTERS-001 started. BATTLE-GROUP-001 / GROUP-COUNTERS-001 STARTED (owner approval 2026-11-27): natural tactical class counters, shielded tanks resist arrows and protect nearby allies, melee pressure/closing, magic vs heavy armour, healing/support/summoning distinct, terrain and stance matter. No class quotas, forced balanced roster, artificial enemy-only modifiers or material economy. Test maximum stats, S Masterwork and full mastery exclusively. Prior max-only screen 5040 bouts: 7 archers 115W/5L, default 71W/48L/1D, tanks 1W/119L; raw PR #198 comment 7215109236. Candidate coefficients not final. Preserve old frozen bout rules via saved rule version; old offline intervals use old rules, switch after live boundary. No reward/gear price/timing changes. Baseline 1c9e7f5. Branch feature/group-tactical-counters.
+- **Status:** PARTIAL — playable alpha merged in #198; tactical class counters and kits merged in #200. S03 and S10 own correctness and current max-only calibration. Historical 5040-bout results remain in #198 comment 7215109236. Preserve versioned frozen settlement and the current reward, progression and terrain scope.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** chat (runtime PR #198; balance not complete).
@@ -267,20 +251,4 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 Stale PR disposition and exact archived revisions: [repository cleanup ledger](mechanics/REPOSITORY_CLEANUP_20261128.md). Historical balance and class research from #210/#217/#221/#212 remain accessible and are assigned to S03/S10 current-baseline audit.
 
-Historical backlog: [archive](TD_ARCHIVE_20261127.md). Completed task details also remain in Git history and the changelog.
-
-
-CLASS-TERRAIN-001 approved extension of BATTLE-GROUP-001: Terrain candidate: explicit bow impact/aim penalties in ruins and especially gatehouse; straight narrow bridge remains favorable to clear-line bow shots; dagger close-terrain bonus and padded/leather versus plate matchup, symmetric and applied only to new tactical rules. Added 1080 paired max-only direct dagger-versus-bow/mage/tank battles across five arenas. Fixed legacy symmetry audit's stale source signature match; no test acceptance weakened. 5880 existing max-only matches rerun as well. All class guides and effects are intended tactical identities pending validation, not guaranteed outcomes. No merge yet.
-
-
-Interlude identity research completed: [31-class source-backed proposal](mechanics/INTERLUDE_CLASS_IDENTITIES_20261127.md); review/approve specific combat changes before implementation.
-
-
-ALPHA-CLAN-001 update (owner 2026-11-27): automatic donation of every tenth positive whole-coin arena reward after enrollment. No manual donation or daily cap; replaces the candidate 100-coin donation. Zero payouts, defeats, raid prizes, prior wallet and developer grants excluded. Persist reward cursor; apply before equipment spending and keep gross combat analytics, net wallet, and contribution report. Academy costs/bonus remain provisional. Offline settlement uses the same bounded exact fractional payout calculation. First candidate passed 210 unit tests but browser script had duplicate clan variable; corrected. New CI pending.
-
-
-CLAN-BUILDINGS-001 (owner approved plan #224): candidate replaces temporary Academy with five level-zero buildings, automatic 480-day minimum construction, member capacity, rotating Armoury/Portal bonuses, Bank and Fighting XP, weekly local signup and sequential actual simulated sorties carrying enemy HP across groups. Alpha uses snapshot at registration (server cutoff snapshot later); synthetic allies are based on player progression, no shared data. Personal raid integration, cost/difficulty calibration and independent full 50-tier balance simulation remain pending. Candidate cost = base × target level² (50 Barracks/Bank/Training, 20 Armoury); no measured affordability yet. Cache repair import map incorporated with additional aliases. Tests pending.
-
-TOWER-001 candidate PR #228: permanent sequential tower floors; clear thresholds unlock current personal raids; no additional boss catalog or currency. Individual attempts use existing 10-second group cadence and V10 elimination with fixed deterministic floor opponents; manual next attempt/retry, arena resumes after completion, first-clear coins = 5 × floor. Provisional grade bracket (one per seven floors, capped S) and enemy HP/damage multiplier .35+.021×floor; no numerical balance claim. Legacy access derived from existing successful raid evidence, active blessing/attempt; no invented floor clears. CI and staff branch reconciliation pending.
-
-RECRUITMENT-001 owner clarification (2026-11-28): wipe existing alpha player progress, no grandfathering. Public route uses manager-v2 save and clock keys; old manager/prototype saves and clocks are not migrated and are removed locally after the new valid save commits. Preserve unrelated site storage, source/history and internal historical regression fixtures. Reset occurs when updated game loads on each device; no central player database exists. Browser smoke verifies retired-key cleanup and fresh 1v1. Validation pending.
+Historical tasks and candidate handoffs are indexed in the [changelog](CHANGELOG.md#2026-11-28--repo-cleanup-002-phase-03-started) and preserved in the [previous backlog snapshot](https://github.com/janisp123/idle_game/blob/8053f7890154e5fcf728f3a242b14355e9fb1132/docs/TD_LIST.md). Earlier archive: [2026-11-27](TD_ARCHIVE_20261127.md).
