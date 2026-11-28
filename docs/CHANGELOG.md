@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — REPO-CLEANUP-001 STARTED
+
+Owner approved cleanup after read-only inventory: 409 tracked files, 19,102,750 bytes, 120 site files (5,895,215 bytes), ten stale open PRs. Base 32f0864, #240 native auto-merge and Pages/notification verified. Archive stale PRs with exact branch/head and follow-up classification; preserve unique work, no branch/history deletion. Reconcile active tasks and historical status without changing mechanics. Runtime and dead-code removal follow separately after proof of reachability and tests.
+
 ## 2026-11-28 — ARENA-ROSTER-UI-001 candidate #240
 
 Seven visible positions from real frozen group preview; grey locked Fighting level labels on both sides, distinct from active fighters. Exact recruitment thresholds and fresh/full mobile/desktop regression; cache token arena-roster-001. No combat, rewards, save or gate changes. Full CI and native auto-merge verification pending.
