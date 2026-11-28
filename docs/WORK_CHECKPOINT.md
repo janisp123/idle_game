@@ -144,3 +144,5 @@ CLAN-BUILDINGS-001 diagnostic harness tools/test_clan_progression.mjs: actual fi
 COMING-SOON-001 — PR #225: static preview panels, responsive CSS and browser assertions for all five named bosses, nested Clan Wars, collapsed navigation, visibility and unchanged save. No JS/engine changes. Baseline a038846 (#223 merged, seven checks passed; live deployment not verified here). CI pending.
 
 FORGECALLER-SIEGE-001: owner-approved future class identity recorded in docs/mechanics/FORGECALLER_SIEGE.md, PR #227. Exceptional siege engineer for clan PvP; existing hammer/plate and normal arena behavior preserved. Specific mechanics are design proposals, coefficients and shared warfare remain blocked. No code changes.
+
+FORGECALLER-SIEGE-001 owner clarification (2026-11-28): siege-only limit of one Forgecaller per player's battle group, not one per clan. Enforce at registration and authoritative roster lock; explain invalid composition without automatic replacement. No restriction in ordinary arenas or non-siege encounters. Future design only.

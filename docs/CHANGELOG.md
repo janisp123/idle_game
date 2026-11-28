@@ -1046,3 +1046,5 @@ CLAN-BUILDINGS-001: added 730-day economy and 50-tier raid diagnostic harness; f
 FORGECALLER-SIEGE-001 STARTED (Owner, 2026-11-28): define Forgecaller as exceptional in future clan PvP and siege warfare, no blanket arena buff. Document the intended role and future acceptance tests; clan warfare remains unavailable. Baseline deba3ac; branch design/forgecaller-siege.
 
 FORGECALLER-SIEGE-001: owner-approved future class identity recorded in docs/mechanics/FORGECALLER_SIEGE.md, PR #227. Exceptional siege engineer for clan PvP; existing hammer/plate and normal arena behavior preserved. Specific mechanics are design proposals, coefficients and shared warfare remain blocked. No code changes.
+
+FORGECALLER-SIEGE-001 owner clarification (2026-11-28): siege-only limit of one Forgecaller per player's battle group, not one per clan. Enforce at registration and authoritative roster lock; explain invalid composition without automatic replacement. No restriction in ordinary arenas or non-siege encounters. Future design only.

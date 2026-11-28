@@ -10,7 +10,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 ## FORGECALLER-SIEGE-001 — Clan warfare engineer
 
-- **Goal / acceptance:** Forgecaller exceptional in fortified clan battles through constructs and siege objective utility, meaningful counterplay and no blanket ordinary arena buff. See [siege identity](mechanics/FORGECALLER_SIEGE.md).
+- **Goal / acceptance:** Forgecaller exceptional in fortified clan battles through constructs and siege objective utility, meaningful counterplay and no blanket ordinary arena buff; maximum one Forgecaller per player in siege battles only. See [siege identity](mechanics/FORGECALLER_SIEGE.md).
 - **Status:** BLOCKED — clan PvP/siege engine and shared authoritative clan infrastructure not implemented; approved direction documented.
 - **Added by:** chat.
 - **Requested by:** Owner.
