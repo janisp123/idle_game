@@ -11,7 +11,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## REPO-CLEANUP-002 — Codex execution priority: finish repository hygiene before features
 
 - **Goal / acceptance:** Owner instructs Codex to execute the nine-phase cleanup continuously, using existing evidence instead of restarting research. Freeze features, balance retuning and unrelated work until independent final audit and Owner acceptance. Preserve useful knowledge, exact evidence, current behavior and security. No history rewrite. [Master plan](mechanics/REPOSITORY_CLEANUP_MASTER_PLAN.md).
-- **Status:** PARTIAL — #244 handoff merged at `2a5d9e6c`. Codex verified 216 guarded removals, 194 recoverable archive tags and 22 deliberately retained branches. [Manifest](mechanics/REPO_CLEANUP_002_REF_MANIFEST.md), [PR #245](https://github.com/janisp123/idle_game/pull/245). Next phase is Owner-reviewed governance after #245 integrates.
+- **Status:** PARTIAL — #244 handoff merged at `2a5d9e6c`. Codex verified 216 guarded removals, 194 recoverable archive tags and 22 deliberately retained branches. [Manifest](mechanics/REPO_CLEANUP_002_REF_MANIFEST.md), [PR #245](https://github.com/janisp123/idle_game/pull/245). Phase 01 journal merged at `da8d4c7a`. Phase 02 governance is under Owner review in [PR #246](https://github.com/janisp123/idle_game/pull/246).
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

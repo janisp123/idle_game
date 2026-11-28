@@ -35,7 +35,7 @@ Read-only requests create no journal entries. The separate unattended research a
 
 ## AUTO-MERGE-001 — agreed work may merge when verified
 
-The Owner granted standing approval on 2026-11-21: if the specific work was agreed, fully completed and tested, the PR is ready on the final head, and there is no conflict or decision requiring the Owner, merge without asking again. Read the full five-gate checklist in `AGENTS.md` first. If any gate fails, stop and request the needed decision. Confirm merged source on `main` and live deployment separately.
+Follow the canonical [AUTO-MERGE-001 gate](../AGENTS.md#owner-approved-autonomous-merge-gate--auto-merge-001-2026-11-21), [RELEASE-GATE-001 controls](../AGENTS.md#native-automatic-merge--release-gate-001-2026-11-28) and [ALPHA-MERGE-001 cadence](../AGENTS.md#alpha-release-cadence--alpha-merge-001) in AGENTS.md. Use its separate research-only allowlist for unattended research.
 
 ## Agent names and task attribution
 
@@ -51,4 +51,4 @@ Run `python tools/check_project_protocol.py` locally and through GitHub Actions.
 
 ## ALPHA-MERGE-001
 
-**Owner-approved ALPHA-MERGE-001 (2026-11-27):** During alpha, automatically merge agreed, functional increments through checked PRs without waiting for final numerical balance, comprehensive balance acceptance or nonblocking polish. Track these separately as open follow-ups; do not mark unfinished work complete. Preserve required functional CI, security, privacy, save compatibility, scope, branch protection, and deployment verification. Beta restores balance/release acceptance gates; the Owner decides when beta begins. This supersedes conflicting alpha-specific no-merge-until-balanced language and does not authorize unapproved work or failed checks.
+See the [canonical alpha release cadence](../AGENTS.md#alpha-release-cadence--alpha-merge-001).
