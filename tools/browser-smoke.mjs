@@ -352,7 +352,22 @@ try{
     assert.deepEqual(lockedInfo,{open:true,unchanged:true},"locked choices cannot commit; their class guides remain readable");
     const lockedMainInfo=await evaluate(`(()=>{const key=${JSON.stringify(managerKey)},before=localStorage.getItem(key),b=document.querySelector("#mainClassChoice [data-main-info=Warrior]");if(!b||b.disabled)return false;b.click();const d=document.getElementById("mainInfoDialog"),paths=[...d.querySelectorAll("[data-path-info]")];const good=d.open&&document.getElementById("mainInfoSkill").textContent==="Power Strike"&&paths.map(p=>p.dataset.pathInfo).join(",")==="blademaster,linebreaker"&&b.getBoundingClientRect().width>=44&&b.getBoundingClientRect().height>=44&&d.scrollWidth<=d.clientWidth+2;paths[0].click();const detail=document.getElementById("classInfoDialog").open&&document.getElementById("classInfoHeading").textContent==="Blademaster";document.getElementById("classInfoClose").click();document.getElementById("mainInfoClose").click();return good&&detail&&before===localStorage.getItem(key);})()`);
     assert.equal(lockedMainInfo,true,"locked main class guide and nested specialization are read-only");
+    const stanceLocked=await evaluate(`(()=>{const key=${JSON.stringify(managerKey)},before=JSON.parse(localStorage.getItem(key)).battleGroup.member1;const buttons=[...document.querySelectorAll("#tacticButtons [data-choice]")];const ok=buttons.length===3&&buttons.every(b=>b.dataset.choice==="balanced"?!b.disabled&&b.getAttribute("aria-pressed")==="true":b.disabled&&b.dataset.locked==="true"&&b.getAttribute("aria-pressed")==="false"&&b.textContent.includes("Unlock Lv 10")&&getComputedStyle(b).backgroundColor==="rgb(39, 39, 39)");buttons.find(b=>b.dataset.choice==="aggressive").click();return ok&&JSON.stringify(before)===JSON.stringify(JSON.parse(localStorage.getItem(key)).battleGroup.member1)})()`);
+    assert.equal(stanceLocked,true,"fresh character has only Balanced available");
     await shot("recruitment-"+width);
+    for(const level of [9,10]){
+      const stanceSave=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));s.battleGroup.member1.recruitment={active:true,level:${level},xp:0};return JSON.stringify(s)})()`);
+      const stanceUrl=origin+"/play/?stance-level="+level+"-"+width;
+      const stanceInject=await send("Page.addScriptToEvaluateOnNewDocument",{source:`if(location.href===${JSON.stringify(stanceUrl)}){localStorage.setItem(${JSON.stringify(managerKey)},${JSON.stringify(stanceSave)});Date.now=()=>${fixedNow};}`});
+      await send("Page.navigate",{url:stanceUrl});await until(()=>evaluate('document.getElementById("saveStatus")?.getAttribute("data-game-ready")==="true"'),"stance level "+level+" loaded");
+      await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:stanceInject.identifier});
+      await evaluate('document.getElementById("battleGroupPanel").open=true');
+      assert.equal(await evaluate(`[...document.querySelectorAll("#tacticButtons [data-choice]")].every(b=>b.disabled===(${level}===9&&b.dataset.choice!=="balanced"))`),true);
+      if(level===10){
+        await evaluate('document.querySelector("#tacticButtons [data-choice=aggressive]").click()');
+        await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).battleGroup.member1.stance==="aggressive"`),"level 10 stance persisted");
+      }
+    }
     // Exact boundary fixtures: character 1 unlocks main class at 20, specialization at 30.
     const mainSave=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));s.battleGroup.member1.recruitment={active:true,level:20,xp:0};return JSON.stringify(s)})()`);
     const mainUrl=origin+"/play/?main-unlock="+width;

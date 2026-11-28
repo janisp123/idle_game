@@ -1,7 +1,7 @@
 // Equal-progression synthetic seven-character opponents. Frozen, independent
 // choices. Candidate uses each member's selected investment (not inactive kits).
 import {GROUP_CLASSES,GROUP_CLASS_IDS,GROUP_ROLES} from "./battle-group-classes.mjs?v=group-001";
-import {GROUP_IDS,MAIN_CLASS_LEVEL,SPECIALIZATION_LEVEL,basicRace,basicClass,initialBattleGroup,validBattleGroup,selectGroupClass,selectGroupStance,groupSnapshots} from "./battle-group.mjs?v=group-001";
+import {GROUP_IDS,MAIN_CLASS_LEVEL,SPECIALIZATION_LEVEL,STANCE_UNLOCK_LEVEL,effectiveGroupStance,basicRace,basicClass,initialBattleGroup,validBattleGroup,selectGroupClass,selectGroupStance,groupSnapshots} from "./battle-group.mjs?v=group-001";
 import {ARMOUR_SLOTS} from "./armour.mjs?v=bal-002";
 import {expertiseThreshold,blankExpertise} from "./expertise.mjs?v=alpha-gear-a3";
 import {ITEM_GRADES,ITEM_QUALITIES,STARTER_ITEM,SMITH_BALANCE,equipmentPrice,equipmentUnlockLevel} from "./smith.mjs?v=gear-a3";
@@ -21,7 +21,7 @@ export function captureGroupCloneEnvelope(group){
   const m=group[id],c=GROUP_CLASSES[m.selected],p=m.classes[m.selected];
   return {budget:Object.entries(p.equipment).reduce((n,[k,v])=>n+equipmentPrice(v)+(k.includes(":")?SMITH_BALANCE.firstArmourCost:0),0),
    weaponXP:Math.min(cap,p.expertiseActive[c.loadout]),armourXP:Math.min(cap,p.expertiseActive[c.armour]),
-   classLevel:p.mastery.level,tacticLevel:m.stances[m.stance].level};
+   classLevel:p.mastery.level,tacticLevel:m.stances[effectiveGroupStance(m)].level};
  })};
 }
 export const validGroupCloneEnvelope=e=>Boolean(e?.version===1&&Array.isArray(e.roster)&&e.roster.length===GROUP_IDS.length&&e.roster.every(b=>b&&count(b.budget)&&b.budget<=maxBudget&&count(b.weaponXP)&&b.weaponXP<=cap&&count(b.armourXP)&&b.armourXP<=cap&&level(b.classLevel)&&level(b.tacticLevel)));
@@ -57,18 +57,19 @@ function allocate(c,budget,skill){
  }
  return equipment;
 }
-export function buildGroupCloneTeam(envelope,shared,seed,rules=3,recruitCount,recruitLevels){
+export function buildGroupCloneTeam(envelope,shared,seed,rules=3,recruitCount,recruitLevels,enforceStanceGate=true){
  if(!validGroupCloneEnvelope(envelope))throw new RangeError("Invalid group clone envelope");
  const choices=groupCloneChoices(shared.skill,seed);
  let group=initialBattleGroup();
  for(const [i,id] of GROUP_IDS.entries()){
   const b=envelope.roster[i],choice=choices[i],chosen=GROUP_CLASSES[choice.classId],l=recruitLevels?.[i],c=l!==undefined?(l<MAIN_CLASS_LEVEL?basicRace(chosen.race):l<SPECIALIZATION_LEVEL?basicClass(chosen.race,chosen.mainClass):chosen):recruitCount!==undefined&&b.classLevel<20?basicClass(chosen.race,chosen.mainClass):chosen;
-  group=selectGroupClass(group,id,c.race,c.mainClass,c.id);group=selectGroupStance(group,id,choice.stance);
+  const stance=enforceStanceGate&&l!==undefined&&l<STANCE_UNLOCK_LEVEL?"balanced":choice.stance;
+  group=selectGroupClass(group,id,c.race,c.mainClass,c.id);group=selectGroupStance(group,id,stance);
   const m=group[id],p=m.classes[c.id];
   p.equipment=allocate(c,b.budget,shared.skill);p.mastery={level:b.classLevel,xp:0};
   p.expertise=blankExpertise();p.expertise[c.loadout]=b.weaponXP;p.expertise[c.armour]=b.armourXP;p.expertiseActive={...p.expertise};
   if([4,5,6,7,8,9,10].includes(rules)){p.attributeEffort=awardCharacterEffort(blankCharacterEffort(),c.id,Math.floor(b.weaponXP/4));p.attributeEffortActive={...p.attributeEffort};}
-  m.stances[choice.stance]={level:b.tacticLevel,xp:0};
+  m.stances[stance]={level:b.tacticLevel,xp:0};
  }
  const snapshots=groupSnapshots(group,shared,rules);
  return GROUP_IDS.slice(0,recruitCount??7).map((id,i)=>({...snapshots[id],...(recruitLevels?.[i]!==undefined?{recruitLevel:recruitLevels[i],...(recruitLevels[i]<SPECIALIZATION_LEVEL?{novice:true}:{})}:recruitCount!==undefined&&envelope.roster[i].classLevel<20?{novice:true}:{}),name:"Rival "+(i+1)}));

@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — STANCE-UNLOCK-001 STARTED
+
+Owner-approved S02 progression fix: Balanced only before individual character level 10. Base b08ec6d (#236 merged, all 28 CI jobs passed, Pages push success); main protection verified. Branch fix/stance-unlock-level10. Next apply one canonical level gate to selection, frozen player snapshots, arena/tower clone choices and grey UI. Preserve existing stance practice, no unnecessary alpha reset. Stale overlapping #215 remains excluded. Auto-merge integration test pending; manual checked merge only.
+
 ## 2026-11-28 — RELEASE-GATE-001 STARTED
 
 Owner approved native GitHub auto-merge with full safety. Base 4a6da03, previous guide release verified live; branch infra/required-release-gate. Existing ruleset requires only protocol, no bypass; direct main-write test rejected with unchanged SHA. All nine existing suites to be retained; one release check, no elevated PR tokens, no external-fork auto-merge. Draft #236: reusable full gate candidate submitted, scope/failure policy tests added; verify CI, then owner adds required check and strict freshness. Old overlapping #208 is stale, unmergeable and excluded. No gameplay changes.
