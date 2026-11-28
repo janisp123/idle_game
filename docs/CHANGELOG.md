@@ -2,7 +2,7 @@
 
 ## 2026-11-28 — REPO-CLEANUP-002 phase 01 STARTED
 
-Codex resumed the approved repository cleanup after #244 merged at `2a5d9e6c21d666933faf587f76b52b9b7372e7ae`. Both full release runs and standalone protocol passed. Branch `cleanup/repo-cleanup-002-git-hygiene`; scope is branch classification, verified recovery, guarded ref actions and the phase journal/checkpoint. The saved #243 audit identifies 19 exact heads already reachable from main and 194 exact merged heads that require durable retention. No ref actions have been taken. Next verify current tips, protected refs and open usage, then record the recovery and deletion manifest.
+Codex resumed the approved repository cleanup after #244 merged at `2a5d9e6c21d666933faf587f76b52b9b7372e7ae`. Both full release runs and standalone protocol passed. Branch `cleanup/repo-cleanup-002-git-hygiene`; scope is branch classification, verified recovery, guarded ref actions and the phase journal/checkpoint. The saved #243 audit identifies 19 exact heads already reachable from main and 194 exact merged heads that require durable retention. No ref actions have been taken. Draft #245 records the [exact ref manifest](mechanics/REPO_CLEANUP_002_REF_MANIFEST.md) after verifying current tips, protected refs, open usage and main ancestry. Next verify recovery from published archive tags before exact-SHA ref actions.
 
 ## 2026-11-28 — REPO-CLEANUP-002 #244 Codex handoff
 
