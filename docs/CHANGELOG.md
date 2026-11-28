@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — S09-RETIRED-ART-001 STARTED
+
+Owner-approved repository cleanup continues on current main 32078b9. #241 auto-merged; final run 46163303700 28/28 and standalone protocol passed; duplicate run 46163303179 failed only because Chromium startup timed out before any browser integrity checks (all nine Node tests passed, final run all five browser cases passed). No production changes in #241, no Pages deployment required. Record runner-startup reliability separately. First isolated asset cleanup: twelve obsolete activity paintings not mapped by the eleven current/legacy engine activities, preserve exact bytes outside published site, additive static reference checks, existing art and browser tests unchanged. No gameplay or save changes.
+
 ## 2026-11-28 — REPO-CLEANUP-001 reconciliation candidate
 
 #240 native auto-merge and Pages/notice verified. Ten stale PRs classified with exact head/branch and follow-up; no source deletions. Completed active tasks moved below; old goals preserved in history. Remaining checks explicitly in active backlog.

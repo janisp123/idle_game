@@ -11,9 +11,17 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## REPO-CLEANUP-001 — Reconcile obsolete PRs and active task records
 
 - **Goal / acceptance:** Inspect all ten stale PRs against current main; preserve unique unfinished work and historical research by exact references, close obsolete implementation candidates, update live task statuses and next cleanup steps. No source, save, workflow, permission, history or branch deletions in this pass.
-- **Status:** IN_REVIEW — #241; all ten stale PRs closed unmerged, unique work and exact revisions preserved; six completed task records archived in CHANGELOG. CI pending; next separate legacy dependency/asset inventory.
+- **Status:** DONE — #241 auto-merged 32078b9, final full gate 28/28 and standalone protocol passed; no site change. Ten stale PRs closed; remaining source cleanup under S09. Duplicate CI run had Chromium startup timeout; final browser integrity 5/5.
 - **Added by:** chat.
 - **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## S09-RETIRED-ART-001 — Isolate obsolete activity artwork
+
+- **Goal / acceptance:** Archive twelve retired activity paintings outside published site without losing image bytes; prove not used by current or historical fixture activity mappings, scan site/tools static references, retain existing art and browser tests. No gameplay, save or CI changes.
+- **Status:** PARTIAL — STARTED cleanup/retired-activity-art at 32078b9.
+- **Added by:** chat.
+- **Requested by:** Owner (repository cleanup).
 - **Implemented by:** Not yet.
 
 ## RELEASE-NOTIFY-001 — Published game completion notice
