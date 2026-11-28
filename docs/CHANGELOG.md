@@ -1,5 +1,58 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — REPO-CLEANUP-001 reconciliation candidate
+
+#240 native auto-merge and Pages/notice verified. Ten stale PRs classified with exact head/branch and follow-up; no source deletions. Completed active tasks moved below; old goals preserved in history. Remaining checks explicitly in active backlog.
+
+### MAIN-CLASS-GUIDE-001 — Readable main class and advancement guides
+
+- **Goal / acceptance:** Independent 44px info buttons on every race-specific main class, readable while selection locked; show actual basic skill/cooldown, strengths/weaknesses, level 20/30 gates and exact specialization paths with detailed guides. Browsing never selects class, changes gear or spends coins. All race/class paths and mobile/desktop verified.
+- **Status:** DONE — #235 merged 4a6da03, seven workflows and 223 regression tests passed, live main-class-guide-001 verified.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+### S01-ATOMIC-CLOCK-001 — Atomic test clock and manager state
+
+- **Goal / acceptance:** Preserve old clock and save together on storage failure; no partial day jump; successful retry/reload exactly once; old v2 clock readable and explicit reset remains reset. No game-rule changes or new save wipe.
+- **Status:** DONE — #234 merged 0b74c56, all 8 checks passed, 223 existing and 14 save-integrity tests; live atomic-clock-20261128 verified.
+- **Added by:** chat.
+- **Requested by:** Owner (STABILIZATION-001).
+- **Implemented by:** Not yet.
+
+### ARENA-ROSTER-UI-001 — Seven visible arena positions per side
+
+- **Goal / acceptance:** Always show seven arena slots on both sides, inactive positions neutral grey with Fighting Lv 5/10/15/20/25/30 unlock labels. Fresh 1v1 shows six locked each side; real combat remains matched active roster only. Canonical RECRUIT_LEVELS, no fake combatants, test every threshold, 7v7 and mobile/desktop overflow. Owner confirmed both sides.
+- **Status:** DONE — #240 auto-merged 32f0864, both full gates 28/28 and standalone protocol passed; Pages 46162460865 and live arena-roster-001 verified.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+### STANCE-UNLOCK-001 — Combat stance selection at character level 10
+
+- **Goal / acceptance:** Balanced is the sole active stance before individual character level 10; other stances are visibly locked. At 10 all combat stance choices unlock. Preserve earned stance records and frozen encounter correctness; test both sides at levels 9/10, reload and switching. Do not implement during S00/S01; separate isolated S02 fix.
+- **Status:** DONE — #237 merged 25f8e28; final 28/28 jobs and standalone protocol passed. Main source verified, Pages run 46159650057 succeeded.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+### SPECIALIZATION-LOCK-UI-001 — Explicit grey specialization lock
+
+- **Goal / acceptance:** Below character level 30, specialization buttons are neutral grey with a lock/level label and no selected highlight. Level 30 restores normal selection and color (supersedes original Lv20 threshold). Class info stays available. No new save reset or combat changes.
+- **Status:** DONE — #230 merged 8c4039c; #231 superseded threshold; current #240 full CI and deployed browser checks verify lock through 29, active at 30.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+### COMING-SOON-001 — Future feature previews
+
+- **Goal / acceptance:** Visible foldable Coming soon sections for Leaderboard, PvP, World Bosses (Ant Queen, Spider Queen, Pirate Queen, Dragon Queen, Daemon Queen), Endless Tower; Clan Wars nested under Clan. No gameplay, rewards, server or save changes.
+- **Status:** DONE — #225 merged deba3ac, current #240 mobile/desktop smoke covers future panels and read-only behavior.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+
 ## 2026-11-28 — REPO-CLEANUP-001 STARTED
 
 Owner approved cleanup after read-only inventory: 409 tracked files, 19,102,750 bytes, 120 site files (5,895,215 bytes), ten stale open PRs. Base 32f0864, #240 native auto-merge and Pages/notification verified. Archive stale PRs with exact branch/head and follow-up classification; preserve unique work, no branch/history deletion. Reconcile active tasks and historical status without changing mechanics. Runtime and dead-code removal follow separately after proof of reachability and tests.
