@@ -4,6 +4,7 @@ import {raidResult} from "./raid-session.mjs?v=raid-002";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
 import {GROUP_IDS} from "./battle-group.mjs?v=group-001";
 import {weaponIcon} from "./arena-view.mjs?v=raid-002";
+import {raidUnlocked,towerProgress} from "./endless-tower.mjs";
 const $=id=>document.getElementById(id),node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const pct=n=>Math.round(n*100)+"%";
 const time=ms=>{const sec=Math.max(0,Math.ceil(ms/1000));return Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");};
@@ -27,8 +28,8 @@ export function createRaidView(onStart){
   const now=s.settledAtMs,run=s.raidRun,buff=activeRaidBuff(s.raidBuff??null,now);
   $("raidBuff").textContent=buff?"Blessing · Lv "+buff.level+" · "+rewards(RAID_CATALOG[buff.level])+" · "+blessingTime(buff.expiresAtMs-now)+" remaining":"No active raid blessing";
   $("raidLast").textContent=s.raidLast?"Last raid: "+RAID_CATALOG[s.raidLast.level].boss.name+" · "+(s.raidLast.outcome==="victory"?"Victory · +"+s.raidLast.coins+" coins":"Defeat"):"No raids completed yet.";
-  for(const b of buttons)b.disabled=Boolean(run);
-  $("raidBattle").hidden=!run;$("battleFighters").hidden=Boolean(run);$("arenaNext").hidden=Boolean(run);
+  for(const b of buttons){const level=Number(b.dataset.raidLevel),unlocked=raidUnlocked(s,level);b.disabled=Boolean(run||towerProgress(s).run||!unlocked);b.lastElementChild.textContent=unlocked?rewards(RAID_CATALOG[level])+" · "+RAID_CATALOG[level].coins.toLocaleString()+" coins":"Locked · Clear tower floor "+level;}
+  $("raidBattle").hidden=!run;$("battleFighters").hidden=Boolean(run||towerProgress(s).run);$("arenaNext").hidden=Boolean(run||towerProgress(s).run);
   if(!run){shown="";return;}
   const r=raidResult(run),elapsed=Math.min(run.durationMs,Math.max(0,now-run.startedAtMs)),round=Math.min(r.rounds,Math.floor(elapsed/RAID_ROUND_MS)),key=run.startedAtMs+":"+run.level+":"+round;
   $("raidHeading").textContent="Raid · "+RAID_CATALOG[run.level].boss.name;

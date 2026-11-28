@@ -1,5 +1,5 @@
 import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=raid-001";
-import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,chooseArenaPreferences,chooseClanPriority,chooseClanRaid,testClanRaid} from "./arena-manager.mjs?v=raid-001";
+import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,startArenaTower,chooseArenaPreferences,chooseClanPriority,chooseClanRaid,testClanRaid} from "./arena-manager.mjs?v=raid-001";
 import {createGroupEditor} from "./battle-group-editor.mjs?v=individual-stats-001";
 import {renderGroupAnalytics} from "./battle-group-analytics-view.mjs?v=group-006";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
@@ -19,6 +19,7 @@ const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString("en-GB")
 let state,stored=null,clock=null,lastVisible=false,chain=Promise.resolve(),feed=[],loginLines=[],loginSummary="No return rewards yet.",blocked=false;
 const now=()=>alphaTime(clock,Date.now());
 const arenaView=createArenaView();
+import {towerProgress,towerDifficulty,TOWER_ATTEMPT_MS} from "./endless-tower.mjs";
 const raidView=createRaidView(level=>choose((s,t)=>startArenaRaid(s,level,t)));
 const editor=createGroupEditor((id,c)=>choose((s,t)=>chooseArenaClass(s,id,c.race,c.mainClass,c.id,t)),(id,stance)=>choose((s,t)=>chooseArenaStance(s,id,stance,t)));
 const node=(tag,content)=>{const n=document.createElement(tag);if(content!==undefined)n.textContent=content;return n;};
@@ -28,7 +29,7 @@ function choice(host,entries,value,handler){for(const [id,label] of entries){con
 function pressed(host,id){for(const b of host.querySelectorAll("button"))b.setAttribute("aria-pressed",String(b.dataset.choice===id));}
 function renderList(host,rows){host.replaceChildren(...rows.flatMap(([a,b])=>[node("span",a),node("strong",String(b))]));}
 function reportLines(out){
- const lines=[];if(out.clanRaidResult){const r=out.clanRaidResult;lines.push("Clan Raid "+r.level+" · "+r.outcome+" · "+r.groups+" groups ("+r.simulatedAllies+" simulated)");}if(out.raidFinished){const r=out.raidFinished;lines.push("Raid Lv "+r.level+" · "+(r.outcome==="victory"?"Victory · +"+fmt(r.coins)+" coins · blessing awarded or refreshed if eligible":"Defeat"));}const sum={bouts:0,victories:0,defeats:0,doubleDeaths:0,coins:0};
+ const lines=[];if(out.towerFinished){const r=out.towerFinished;lines.push("Tower floor "+r.floor+" · "+r.outcome+(r.coins?" · +"+fmt(r.coins)+" coins":""));}if(out.clanRaidResult){const r=out.clanRaidResult;lines.push("Clan Raid "+r.level+" · "+r.outcome+" · "+r.groups+" groups ("+r.simulatedAllies+" simulated)");}if(out.raidFinished){const r=out.raidFinished;lines.push("Raid Lv "+r.level+" · "+(r.outcome==="victory"?"Victory · +"+fmt(r.coins)+" coins · blessing awarded or refreshed if eligible":"Defeat"));}const sum={bouts:0,victories:0,defeats:0,doubleDeaths:0,coins:0};
  for(const r of out.reports??[])for(const k of Object.keys(sum))sum[k]+=r?.arena?.[k]??0;
  const clanDonation=(out.reports??[]).reduce((n,r)=>n+(r?.clanDonation??0),0);
  if(sum.bouts)lines.push(sum.bouts+" battles · "+sum.victories+" wins · "+sum.defeats+" losses · "+sum.doubleDeaths+" draws · +"+fmt(sum.coins-clanDonation)+" coins");
@@ -86,6 +87,8 @@ function renderClan(){
 }
 $("clanJoinRaid").addEventListener("click",()=>choose((s,t)=>chooseClanRaid(s,t)));
 $("alphaClanRaid").addEventListener("click",()=>{if(ALPHA_TOOLS_ENABLED)alpha(s=>testClanRaid(s,s.settledAtMs),"Registered local clan raid simulated.");});
+$("towerAttempt").addEventListener("click",()=>choose((s,t)=>startArenaTower(s,t)));
+function renderTower(){const t=towerProgress(state),run=t.run,next=t.highest+1; text("towerHighest","Highest cleared floor: "+t.highest);text("towerNext","Next floor: "+next+" · "+(next<=50?"Raid unlocks every 10 floors":"Endless challenge"));text("towerLast",t.last?"Floor "+t.last.floor+" · "+t.last.outcome+(t.last.coins?" · +"+fmt(t.last.coins)+" coins":""):"No tower attempts yet.");$("towerAttempt").disabled=Boolean(run||state.raidRun);$("towerAttempt").textContent=run?"Fighting floor "+run.floor:"Attempt floor "+next;$("towerFight").hidden=!run;const left=run?Math.max(0,run.startedAtMs+TOWER_ATTEMPT_MS-state.settledAtMs):0;text("towerFightStatus",run?"Tower floor "+run.floor+" · "+Math.ceil(left/1000)+"s remaining":"");$("towerFightProgress").value=run?100*(1-left/TOWER_ATTEMPT_MS):0;}
 function render(){
  if(!state)return;
  text("character-heading",state.name==="Wanderer"?"Your Battle Group":state.name);
@@ -94,10 +97,10 @@ function render(){
  text("arenaStage","Arena difficulty: "+ITEM_GRADES[state.combatSession?.rank?.grade??cloneRewardGrade(state.skills.fighting.level)]);text("fightingLevel","Fighting Lv "+state.skills.fighting.level);meter("fightingXP",state.skills.fighting);
  text("arenaNext", "Automatic matchmaking · Teamwork Lv "+state.teamwork.level);
  $("groupProgressOverview").hidden=false;if($("progressPanel").open)renderGroupProgress($("groupProgressOverview"),state.battleGroup);
- if(!state.raidRun)arenaView.render(state);
- raidView.render(state);
- $("alphaCoins").disabled=Boolean(state.raidRun);$("alphaMaxStats").disabled=Boolean(state.raidRun);
- for(const b of document.querySelectorAll("#raceChoice button[data-choice],#mainClassChoice button[data-choice],#specialClassChoice button[data-choice],#tacticButtons button"))b.disabled=Boolean(state.raidRun);
+ if(!state.raidRun&&!towerProgress(state).run)arenaView.render(state);
+ raidView.render(state);renderTower();
+ $("alphaCoins").disabled=Boolean(state.raidRun||towerProgress(state).run);$("alphaMaxStats").disabled=Boolean(state.raidRun||towerProgress(state).run);
+ for(const b of document.querySelectorAll("#raceChoice button[data-choice],#mainClassChoice button[data-choice],#specialClassChoice button[data-choice],#tacticButtons button"))b.disabled=Boolean(state.raidRun||towerProgress(state).run);
  if($("battleAnalyticsPanel").open&&(lastAnalytics!==state.groupAnalytics||lastAnalyticsScope!==analyticsScope)){
   renderGroupAnalytics($("battleAnalyticsBody"),state.groupAnalytics,analyticsScope,state.battleAnalytics);lastAnalytics=state.groupAnalytics;lastAnalyticsScope=analyticsScope;
  }

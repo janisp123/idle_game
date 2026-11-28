@@ -159,6 +159,10 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
       a.encounterDamage=.65+encounter.level*.01;
     }
   }
+  if(levels.towerFactor!==undefined){
+    const factor=levels.towerFactor;if(rules!==10||raid||encounter||!Number.isFinite(factor)||factor<=0||factor>1e15)throw new RangeError("Invalid tower difficulty");
+    for(const a of actors.filter(x=>x.side==="enemy")){a.encounterHealMaxHP=a.maxHP;a.maxHP=Math.max(1,Math.round(a.maxHP*factor));a.hp=a.maxHP;a.encounterDamage=factor;}
+  }
   const elimination=rules===ELIMINATION_RULES_VERSION;
   const maxRounds=raid||encounter?RAID_MAX_ROUNDS:elimination?ELIMINATION_MAX_ROUNDS:TEAM_COMBAT_BALANCE.maxRounds;
   const height=Math.max(players.length,enemies.length),width=teamArenaWidth(terrain,rules),roll=seededRandom(seed),speedRoll=seededRandom((seed^0x85ebca6b)>>>0),
