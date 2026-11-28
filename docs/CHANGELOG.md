@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — REPO-CLEANUP-002 Codex handoff STARTED
+
+Owner explicitly requests detailed executable TD instructions before using Codex quota. #243 merged 153962ef, both full gates 28/28 and standalone protocol success; no competing PR. Branch docs/cleanup-codex-execution-handoff. Scope: TD_LIST, WORK_CHECKPOINT, CHANGELOG and master plan only; record existing evidence and exact next steps; no gameplay, governance, CI, or branch deletions. Codex is next implementation owner; Chat stops overlapping writes after handoff. Next: safe branch cleanup with local authenticated Git, then instruction/spec/library/evidence/source/site/test phases in order.
+
 ## 2026-11-28 — REPO-CLEANUP-002 #243 candidate
 
 Master plan and exact-SHA branch inventory recorded. REST pages returned 240 refs (including main/active cleanup), 243 PRs; 213 exact merged PR heads, 19 closed unmerged, 3 changed-head, 3 unmatched. No deletions; retention and exceptional-ref review next. Full CI pending. #242 Pages success verified. No gameplay or governance change.
