@@ -14,6 +14,10 @@ const exact=(o,keys)=>record(o)&&Object.keys(o).length===keys.length&&keys.every
 const levelValid=s=>record(s)&&Number.isInteger(s.level)&&s.level>=1&&s.level<=50&&count(s.xp)&&s.xp<=tacticRequiredXP(s.level);
 const skill=()=>({level:1,xp:0});
 export const RECRUIT_LEVELS=Object.freeze([1,5,10,15,20,25,30]);
+export const STANCE_UNLOCK_LEVEL=10;
+export const stanceUnlocked=m=>!m.recruitment||m.recruitment.level>=STANCE_UNLOCK_LEVEL;
+export const stanceAllowed=(m,stance)=>m.recruitment?.active!==false&&validTactic(stance)&&(stance==="balanced"||stanceUnlocked(m));
+export const effectiveGroupStance=m=>stanceUnlocked(m)?m.stance:"balanced";
 export const MAIN_CLASS_LEVEL=20;
 export const SPECIALIZATION_LEVEL=30;
 export const mainClassUnlocked=m=>!m.recruitment||m.recruitment.level>=MAIN_CLASS_LEVEL;
@@ -28,7 +32,8 @@ export function normalizeRecruitChoices(g){
  if(!recruitmentEnabled(g))return g;
  return Object.fromEntries(GROUP_IDS.map(id=>{
   const m=g[id],c=GROUP_CLASSES[m.selected],next=!mainClassUnlocked(m)?basicRace(c.race):!specializationUnlocked(m)?basicClass(c.race,c.mainClass):c;
-  return [id,next.id===m.selected?m:{...m,selected:next.id,classes:{...m.classes,[next.id]:m.classes[next.id]??freshProgress(next.id)}}];
+  const stance=effectiveGroupStance(m);
+  return [id,next.id===m.selected&&stance===m.stance?m:{...m,stance,...(next.id===m.selected?{}:{selected:next.id,classes:{...m.classes,[next.id]:m.classes[next.id]??freshProgress(next.id)}})}];
  }));
 }
 export function initialRecruitGroup(){const g=initialBattleGroup();return Object.fromEntries(GROUP_IDS.map((id,i)=>{const m=g[id],c=GROUP_CLASSES[m.selected],base=basicRace(c.race).id;return [id,{...m,selected:base,classes:{[base]:freshProgress(base)},recruitment:{active:i===0,...skill()}}];}));}
@@ -75,7 +80,7 @@ export function selectGroupClass(group,member,race,mainClass,classId){
  return {...group,[member]:{...m,selected:classId,classes:{...m.classes,[classId]:m.classes[classId]??freshProgress(classId)}}};
 }
 export function selectGroupStance(group,member,stance){
- requireGroup(group);requireMember(member);if(group[member].recruitment?.active===false||!validTactic(stance))throw new RangeError("Invalid stance");
+ requireGroup(group);requireMember(member);if(!stanceAllowed(group[member],stance))throw new RangeError("Invalid or locked stance");
  return {...group,[member]:{...group[member],stance}};
 }
 function equippedArmour(c,p){
@@ -86,8 +91,8 @@ export function groupSnapshots(group,shared,rules=3){
  if(!record(shared)||!["str","dex","end","skill"].every(k=>Number.isFinite(shared[k])&&shared[k]>=0&&shared[k]<=1e6)||!count(shared.difficulty)||shared.difficulty>=ITEM_GRADES.length)throw new RangeError("Invalid shared combat inputs");
  return Object.fromEntries(activeGroupIds(group).map((id,i)=>{
   const m=group[id],c=GROUP_CLASSES[m.selected],p=m.classes[m.selected],armour=equippedArmour(c,p),kit=trainingKit(armour,c.loadout,p.equipment),effects=trainingEffects(kit,c.loadout,p.expertiseActive);
-  const attrs=[4,5,6,7,8,9,10].includes(rules)?characterAttributes(c.id,migrateProgress(p,c.id).attributeEffortActive):null;
-  return [id,{name:"Member "+(i+1),...(!specializationUnlocked(m)?{novice:true}:{}),...(m.recruitment?{recruitLevel:m.recruitment.level}:{}),classId:c.id,race:c.race,role:c.role,classLevel:p.mastery.level,tactic:m.stance,tacticLevel:m.stances[m.stance].level,
+  const stance=effectiveGroupStance(m),attrs=[4,5,6,7,8,9,10].includes(rules)?characterAttributes(c.id,migrateProgress(p,c.id).attributeEffortActive):null;
+  return [id,{name:"Member "+(i+1),...(!specializationUnlocked(m)?{novice:true}:{}),...(m.recruitment?{recruitLevel:m.recruitment.level}:{}),classId:c.id,race:c.race,role:c.role,classLevel:p.mastery.level,tactic:stance,tacticLevel:m.stances[stance].level,
    difficulty:shared.difficulty,...(attrs?{attributes:attrs,str:attrs.STR,dex:attrs.DEX,end:attrs.CON,skill:p.mastery.level}:{str:shared.str,dex:shared.dex,end:shared.end,skill:shared.skill}),loadout:c.loadout,trainingKit:kit,
    gear:{...armourStats(armour,c.loadout),gearDefense:effects.gearDefense},gearAttack:effects.gearAttack,condition:effects.condition}];
  }));
@@ -108,8 +113,8 @@ export function awardGroupPractice(group,snapshots,productiveMs){
 export function activateGroupPractice(group){
  requireGroup(group);
  return Object.fromEntries(GROUP_IDS.map(id=>{
-  const m=group[id];if(m.recruitment?.active===false)return [id,m];const p=migrateProgress(m.classes[m.selected],m.selected);
-  return [id,{...m,...(m.recruitment?{recruitment:advanceSkill(m.recruitment)}:{}),stances:{...m.stances,[m.stance]:advanceSkill(m.stances[m.stance])},classes:{...m.classes,[m.selected]:{...p,mastery:advanceSkill(p.mastery),expertiseActive:{...p.expertise},attributeEffortActive:{...p.attributeEffort}}}}];
+  const m=group[id];if(m.recruitment?.active===false)return [id,m];const p=migrateProgress(m.classes[m.selected],m.selected),stance=effectiveGroupStance(m);
+  return [id,{...m,stance,...(m.recruitment?{recruitment:advanceSkill(m.recruitment)}:{}),stances:{...m.stances,[stance]:advanceSkill(m.stances[stance])},classes:{...m.classes,[m.selected]:{...p,mastery:advanceSkill(p.mastery),expertiseActive:{...p.expertise},attributeEffortActive:{...p.attributeEffort}}}}];
  }));
 }
 // New class receives only its starter weapon; armour is automatically bought

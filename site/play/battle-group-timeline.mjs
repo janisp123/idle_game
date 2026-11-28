@@ -4,7 +4,7 @@ import {ARENA_SCHEDULE_BOUTS,BOUT_MS,seededCombatRandom,validCombatSession} from
 import {chooseArena,groupArenaPool} from "./arenas.mjs?v=bal-002";
 import {validArenaFavorites,choosePreferredGroupArena} from "./arena-preferences.mjs";
 import {validClanSnapshot} from "./alpha-clan.mjs";
-import {GROUP_IDS,recruitmentEnabled,groupSnapshots,awardGroupPractice,validBattleGroup} from "./battle-group.mjs?v=group-001";
+import {GROUP_IDS,STANCE_UNLOCK_LEVEL,recruitmentEnabled,groupSnapshots,awardGroupPractice,validBattleGroup} from "./battle-group.mjs?v=group-001";
 import {validGroupSnapshot} from "./battle-group-actions.mjs?v=kits-001";
 import {captureGroupCloneEnvelope,validGroupCloneEnvelope,buildGroupCloneTeam} from "./battle-group-clones.mjs?v=group-003";
 import {teamArenaReward} from "./team-timeline.mjs?v=group-004";
@@ -31,12 +31,12 @@ function validPlayers(p,rules){
 }
 export function validGroupSession(s){
  return Boolean(s?.timelineVersion===GROUP_TIMELINE_VERSION&&count(s.seed)&&s.seed<=0xffffffff&&count(s.elapsedMs)&&s.prizeCursor===Math.floor(s.elapsedMs/duration)&&
-  (s.arenaFavorites===undefined||(groupArenaPool(s.groupCombatRules??1).length===8&&validArenaFavorites(s.arenaFavorites)))&&(s.clanSnapshot===undefined||s.groupCombatRules===10&&validClanSnapshot(s.clanSnapshot))&&count(s.coinRemainder)&&s.coinRemainder<groupCoinRatio(s)&&count(s.teamworkRemainder)&&s.teamworkRemainder<ratio&&validTeamwork({level:s.teamworkLevel,xp:0})&&validPlayers(s.players,s.groupCombatRules??1)&&(s.recruitment===true||s.recruitment===undefined&&Object.keys(s.players).length===7)&&(s.raidBonus===undefined||[4,5,6,7,8,9,10].includes(s.groupCombatRules)&&validRaidCombatBonus(s.raidBonus))&&validGroupRank(s.rank)&&(s.groupCombatRules===undefined||SUPPORTED_GROUP_COMBAT_RULES.includes(s.groupCombatRules)));
+  (s.arenaFavorites===undefined||(groupArenaPool(s.groupCombatRules??1).length===8&&validArenaFavorites(s.arenaFavorites)))&&(s.clanSnapshot===undefined||s.groupCombatRules===10&&validClanSnapshot(s.clanSnapshot))&&count(s.coinRemainder)&&s.coinRemainder<groupCoinRatio(s)&&count(s.teamworkRemainder)&&s.teamworkRemainder<ratio&&validTeamwork({level:s.teamworkLevel,xp:0})&&validPlayers(s.players,s.groupCombatRules??1)&&(s.recruitment===true||s.recruitment===undefined&&Object.keys(s.players).length===7)&&(s.raidBonus===undefined||[4,5,6,7,8,9,10].includes(s.groupCombatRules)&&validRaidCombatBonus(s.raidBonus))&&(s.stanceGate===undefined||s.stanceGate===1&&s.recruitment===true&&Object.values(s.players).every(p=>Number.isInteger(p.recruitLevel)&&(p.recruitLevel>=STANCE_UNLOCK_LEVEL||p.tactic==="balanced")))&&validGroupRank(s.rank)&&(s.groupCombatRules===undefined||SUPPORTED_GROUP_COMBAT_RULES.includes(s.groupCombatRules)));
 }
 export function startGroupSession(group,shared,teamworkLevel,seed,carry={}){
  const s={timelineVersion:GROUP_TIMELINE_VERSION,groupCombatRules:carry.rules??GROUP_COMBAT_RULES_VERSION,seed,elapsedMs:0,prizeCursor:0,teamworkLevel,
   coinRemainder:carry.coinRemainder??0,teamworkRemainder:carry.teamworkRemainder??0,
-  players:groupSnapshots(group,shared,carry.rules??GROUP_COMBAT_RULES_VERSION),...(recruitmentEnabled(group)?{recruitment:true}:{}),...(carry.arenaFavorites!==undefined?{arenaFavorites:[...carry.arenaFavorites]}:{}),...(carry.bonus?{raidBonus:carry.bonus}:{}),...(carry.clanSnapshot?{clanSnapshot:carry.clanSnapshot}:{}),rank:carry.rank??initialGroupRank(cloneRewardGrade(shared.skill))};
+  players:groupSnapshots(group,shared,carry.rules??GROUP_COMBAT_RULES_VERSION),...(recruitmentEnabled(group)?{recruitment:true,stanceGate:1}:{}),...(carry.arenaFavorites!==undefined?{arenaFavorites:[...carry.arenaFavorites]}:{}),...(carry.bonus?{raidBonus:carry.bonus}:{}),...(carry.clanSnapshot?{clanSnapshot:carry.clanSnapshot}:{}),rank:carry.rank??initialGroupRank(cloneRewardGrade(shared.skill))};
  if(!validGroupSession(s))throw new RangeError("Invalid frozen group session");
  return structuredClone(s);
 }
@@ -44,7 +44,7 @@ export const groupPrizeGrade=s=>s.rank.grade;
 export const groupWinPrize=s=>Math.floor((groupRewardUnits(s)+s.coinRemainder)/groupCoinRatio(s));
 function bout(s,index){
  const scheduled=index%ARENA_SCHEDULE_BOUTS,seed=Math.imul(s.seed^scheduled,2654435761)>>>0;
- const bracket=rankProfile(s.rank.grade),players=Object.values(s.players),enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,s.groupCombatRules??1,s.recruitment?players.length:undefined,s.recruitment&&players.every(p=>p.recruitLevel!==undefined)?players.map(p=>p.recruitLevel):undefined);
+ const bracket=rankProfile(s.rank.grade),players=Object.values(s.players),enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,s.groupCombatRules??1,s.recruitment?players.length:undefined,s.recruitment&&players.every(p=>p.recruitLevel!==undefined)?players.map(p=>p.recruitLevel):undefined,s.stanceGate===1);
  const roll=seededCombatRandom((seed^0x749ae237)>>>0);
  const positioning=s.arenaFavorites===undefined?chooseArena(players[Math.floor(roll()*players.length)],enemies[Math.floor(roll()*enemies.length)],roll,groupArenaPool(s.groupCombatRules??1)):{arena:choosePreferredGroupArena(s.arenaFavorites,roll)};
  const terrain=positioning.arena;

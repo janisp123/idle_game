@@ -51,7 +51,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## STANCE-UNLOCK-001 — Combat stance selection at character level 10
 
 - **Goal / acceptance:** Balanced is the sole active stance before individual character level 10; other stances are visibly locked. At 10 all combat stance choices unlock. Preserve earned stance records and frozen encounter correctness; test both sides at levels 9/10, reload and switching. Do not implement during S00/S01; separate isolated S02 fix.
-- **Status:** PARTIAL — STARTED on fix/stance-unlock-level10; exact Lv 9/10 player/enemy/UI tests planned.
+- **Status:** IN_REVIEW — #237 candidate implements canonical stance gate, symmetric arena/tower rivals, frozen-boundary preservation, grey Lv10 labels and Node/Chromium tests. CI pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

@@ -1,6 +1,6 @@
 // Button-only three-step selection. A race/main-class draft never spends
 // coins or changes the active class until the player chooses a specialization.
-import {GROUP_IDS,RECRUIT_LEVELS,MAIN_CLASS_LEVEL,SPECIALIZATION_LEVEL,mainClassUnlocked,specializationUnlocked,basicRace,basicClass} from "./battle-group.mjs?v=individual-stats-001";
+import {GROUP_IDS,RECRUIT_LEVELS,MAIN_CLASS_LEVEL,SPECIALIZATION_LEVEL,STANCE_UNLOCK_LEVEL,stanceAllowed,effectiveGroupStance,mainClassUnlocked,specializationUnlocked,basicRace,basicClass} from "./battle-group.mjs?v=individual-stats-001";
 import {GROUP_CLASSES,GROUP_RACES,RACE_LABELS,groupMainClasses,groupSpecializations} from "./battle-group-classes.mjs?v=group-001";
 import {ROLE_ICONS,renderGroupProgress} from "./battle-group-progress-view.mjs?v=individual-stats-001";
 import {MAIN_CLASS_SKILLS} from "./class-kits.mjs";
@@ -135,7 +135,12 @@ export function createGroupEditor(onClass,onStance){
   for(const b of special.querySelectorAll("[data-choice]")){b.disabled=novice;b.dataset.locked=String(novice);b.title=novice?"Unlocks at character level "+SPECIALIZATION_LEVEL:"";}
   const status=raceOnly?"Character level "+m.recruitment.level+" · Choose a race. Main class unlocks at "+MAIN_CLASS_LEVEL+". Specialization unlocks at "+SPECIALIZATION_LEVEL+".":novice?"Character level "+m.recruitment.level+" · Specializations unlock at level "+SPECIALIZATION_LEVEL+". Active class skill: "+MAIN_CLASS_SKILLS[c.mainClass].name+" — "+MAIN_CLASS_SKILLS[c.mainClass].description:draft&&(c.race!==r||c.mainClass!==k)?"Choose a specialization to change class. Active: "+c.name:"Active: "+c.name;
   if($("classChoiceStatus").textContent!==status)$("classChoiceStatus").textContent=status;
-  for(const b of $("tacticButtons").children)b.setAttribute("aria-pressed",String(b.dataset.choice===m.stance));
+  for(const b of $("tacticButtons").children){
+   const stance=b.dataset.choice,locked=!stanceAllowed(m,stance),name=stance[0].toUpperCase()+stance.slice(1),label=locked?"🔒 "+name+" · Unlock Lv "+STANCE_UNLOCK_LEVEL:name;
+   b.disabled=locked;b.dataset.locked=String(locked);b.title=locked?"Unlocks at character level "+STANCE_UNLOCK_LEVEL:name;
+   if(b.textContent!==label)b.textContent=label;
+   b.setAttribute("aria-pressed",String(!locked&&stance===effectiveGroupStance(m)));
+  }
   const key=JSON.stringify([selected,m]);if(key!==lastProgress){renderGroupProgress($("selectedClassProgress"),group,selected);lastProgress=key;}
  }
  return {render,reset(){selected=GROUP_IDS[0];draft=null;lastProgress="";}};
