@@ -11,7 +11,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## RELEASE-GATE-001 — Required complete test gate for native auto-merge
 
 - **Goal / acceptance:** One always-present, fail-closed required release check on each internal PR. Preserve existing tests and Pages publishing, require all existing functional and audit workflows for non-research PRs; narrow existing research-only allowlist may run protocol only. Missing, failed, cancelled or unexpected skipped checks block the gate. No write tokens or automatic merge action inside CI; never arm external, stale, overlapping or security-sensitive PRs. Owner must add the new required check and strict up-to-date policy in the existing ruleset before native auto-merge may be used. Test both full and research-only paths.
-- **Status:** PARTIAL — owner approved setup; repository auto-merge and squash-only verified, direct main-write canary rejected, existing ruleset only requires protocol. Candidate in draft #236: nine reusable suites, universal release-gate and six policy unit tests, narrow research-only exemption; first CI caught obsolete SIM-003 path-filter assertion, now updated to enforce universal trigger, reusable suites and complete required aggregate. Full rerun pending. Owner ruleset setup remains blocked until verified.
+- **Status:** PARTIAL — #236 merged b08ec6d after two complete 28/28 runs; Pages push 46156612904 passed. Owner activated protocol + release-gate, strict freshness and no bypass, verified via API. Negative end-to-end PR test and native auto-merge verification remain pending; do not arm unattended merges yet. Notifications deferred by Owner.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -51,7 +51,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## STANCE-UNLOCK-001 — Combat stance selection at character level 10
 
 - **Goal / acceptance:** Balanced is the sole active stance before individual character level 10; other stances are visibly locked. At 10 all combat stance choices unlock. Preserve earned stance records and frozen encounter correctness; test both sides at levels 9/10, reload and switching. Do not implement during S00/S01; separate isolated S02 fix.
-- **Status:** TODO — Owner requested earlier priority, next isolated progression fix after active PR.
+- **Status:** PARTIAL — STARTED on fix/stance-unlock-level10; exact Lv 9/10 player/enemy/UI tests planned.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
