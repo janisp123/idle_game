@@ -3,11 +3,12 @@
 import {settleLegacyWorkPair} from "./legacy-work-lane.mjs";
 import {
   ACTIVITIES, ATTRIBUTE_IDS, TIMING_PROFILE,
-  newTeamGame, readSave, chooseActivity, settleManagerLane,
+  newTeamGame, readSave, chooseActivity, settleManagerLane, desiredArenaPlayer,
   automateSettledProgress, activateExpertise, LIVE_FIGHT_MAX_MS
 } from "./engine.mjs?v=raid-001";
 import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=group-004";
 import {GROUP_TIMELINE_VERSION} from "./battle-group-timing.mjs";
+import {startGroupSession} from "./battle-group-timeline.mjs?v=raid-001";
 import {initialBattleGroup,initialRecruitGroup,syncRecruitment,validBattleGroup,migrateGroupAttributes,selectGroupClass,selectGroupStance,upgradeBattleGroup,previewGroupUpgrade} from "./battle-group.mjs?v=group-001";
 import {blankGroupAnalytics,validGroupAnalytics,accumulateGroupAnalytics} from "./battle-group-analytics.mjs?v=group-004";
 import {blankBattleAnalytics,validBattleAnalytics,accumulateBattleAnalytics} from "./battle-analytics.mjs?v=npc-parity-001";
@@ -73,7 +74,7 @@ export function enableArenaOnly(s){
  const {managerWork,overlapParity,...next}=enableBattleGroupManager(s);
  return {...next,battleGroup:migrateGroupAttributes(next.battleGroup),arenaOnly:true,items:Object.fromEntries(Object.keys(s.items).map(id=>[id,0]))};
 }
-export function newArenaManager(now=Date.now(),recruit=false){const s=enableArenaOnly(newBattleGroupManager(now));return recruit?{...s,battleGroup:initialRecruitGroup(),combatSession:null}:s;}
+export function newArenaManager(now=Date.now(),recruit=false){const s=enableArenaOnly(newBattleGroupManager(now));if(!recruit)return s;const battleGroup=initialRecruitGroup();return {...s,battleGroup,combatSession:startGroupSession(battleGroup,desiredArenaPlayer(s),s.teamwork.level,now>>>0,{rules:10,arenaFavorites:[]})};}
 function managerUpgradePreview(s){
  return s.battleGroup?previewGroupUpgrade(s.battleGroup,s.coins,s.skills.fighting.level):managerEquipmentPreview(s);
 }

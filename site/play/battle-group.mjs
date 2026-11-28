@@ -81,7 +81,7 @@ export function groupSnapshots(group,shared,rules=3){
  }));
 }
 function awardSkill(s,ms){const limit=tacticRequiredXP(s.level);return {...s,xp:s.xp+Math.min(ms,limit-s.xp)};}
-function advanceSkill(s){return s.level<50&&s.xp===tacticRequiredXP(s.level)?{level:s.level+1,xp:0}:s;}
+function advanceSkill(s){return s.level<50&&s.xp===tacticRequiredXP(s.level)?{...s,level:s.level+1,xp:0}:s;}
 export function awardGroupPractice(group,snapshots,productiveMs){
  requireGroup(group);if(!snapshots||!Object.keys(snapshots).length||!Object.keys(snapshots).every((id,i)=>id===GROUP_IDS[i])||!exact(productiveMs,GROUP_IDS))throw new RangeError("Invalid frozen practice");
  return Object.fromEntries(GROUP_IDS.map(id=>{

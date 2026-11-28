@@ -349,7 +349,7 @@ try{
     assert.equal(locked.slots.length,7);assert.equal(locked.slots[0][0],false);for(const [i,level] of [5,10,15,20,25,30].entries()){assert.equal(locked.slots[i+1][0],true);assert.ok(locked.slots[i+1][1].includes("Lv "+level));}assert.equal(locked.special,true);assert.equal(locked.players,1);assert.equal(locked.enemies,1);
     await shot("recruitment-"+width);
     // The remaining historical public-route regression fixture deliberately retains its legacy full roster.
-    const legacySave=await evaluate(`(async()=>{const m=await import("/play/arena-manager.mjs");return JSON.stringify(m.enterArena(m.newArenaManager(Date.now()),Date.now(),()=>.5).state)})()`);
+    const legacySave=await evaluate(`(async()=>{const m=await import("/play/arena-manager.mjs");return JSON.stringify(m.enterArena(m.newArenaManager(${fixedNow}),${fixedNow},()=>.5).state)})()`);
     const legacyUrl=origin+"/play/?manager-legacy="+width;
     const legacyInject=await send("Page.addScriptToEvaluateOnNewDocument",{source:`if(location.href===${JSON.stringify(legacyUrl)})localStorage.setItem(${JSON.stringify(managerKey)},${JSON.stringify(legacySave)});`});
     await send("Page.navigate",{url:legacyUrl});await until(()=>evaluate('document.getElementById("saveStatus")?.getAttribute("data-game-ready")==="true"'),"legacy full roster loaded");
