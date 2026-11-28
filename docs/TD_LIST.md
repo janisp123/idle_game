@@ -115,7 +115,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## CLASS-MASTERY-002 — Meaningful class skill progression
 
 - **Goal / acceptance:** Level 1 ability effectiveness 50%, level 50 100%; mastery increases class effect reliability and scaled debuff magnitude without longer hard control, preserve max combat and frozen saves.
-- **Status:** PARTIAL — v9 merged #216 (5487e23), 202 tests, seven workflows, 240 exact max parity checks. Deployment verification pending.
+- **Status:** PARTIAL — v9 merged #216 (5487e23), 202 tests, seven workflows, 240 exact max parity checks. [Pages run 46025265894](https://github.com/janisp123/idle_game/actions/runs/46025265894) succeeded. Current-baseline balance remains open.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -124,7 +124,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## EIGHT-ARENAS-001 — Eight tactical environments
 
 - **Goal / acceptance:** Add three meaningful geometry/terrain differences, preserve prior saves and raids, expose all eight through arena selection and analytics, test specialized max-only compositions.
-- **Status:** PARTIAL — v8 merged #214 (3d404f1), 200 tests, all seven workflows, 5760 simulations. Broader balance and deployment verification pending.
+- **Status:** PARTIAL — v8 merged #214 (3d404f1), 200 tests, all seven workflows, 5760 simulations. [Pages run 46021258223](https://github.com/janisp123/idle_game/actions/runs/46021258223) succeeded. Broader balance remains open.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -133,7 +133,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## INTERLUDE-CONTROL-001 — Class control and utility
 
 - **Goal / acceptance:** Distinct bounded control and debuffs, revised class identity kits, max-only paired arena tests, frozen-rule compatibility.
-- **Status:** PARTIAL — v7 merged #213 (f621853), 197 tests and seven workflows; numerical balance and deployment verification pending.
+- **Status:** PARTIAL — v7 merged #213 (f621853), 197 tests and seven workflows; [Pages run 46019483493](https://github.com/janisp123/idle_game/actions/runs/46019483493) succeeded. Numerical balance remains open.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -142,7 +142,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## RANGE-GEOMETRY-001 — Ranged engagement geometry
 
 - **Goal / acceptance:** Give ranged compositions real distance-based advantages in open terrain while retaining melee strengths in close quarters, tank aggro and healer priority. No damage inflation or scripted winners.
-- **Status:** PARTIAL — v6 merged #211 (938ffc8), 194 tests, seven workflows. Deployment verification and broader balance pending.
+- **Status:** PARTIAL — v6 merged #211 (938ffc8), 194 tests, seven workflows. [Pages run 46018020656](https://github.com/janisp123/idle_game/actions/runs/46018020656) succeeded. Broader balance remains open.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -151,7 +151,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## TANK-AGGRO-001 — Tank aggro and healer priority
 
 - **Goal / acceptance:** Living tanks are the primary enemy target; healers prioritize injured tanks in all new group encounters, including raids. Preserve actual movement, range, cooldowns and prior frozen outcomes. Both sides use the same rules.
-- **Status:** PARTIAL — v5 merged #209 (87d949f), 191 tests, all seven workflows passed. Balance and live deployment verification pending.
+- **Status:** PARTIAL — v5 merged #209 (87d949f), 191 tests, all seven workflows passed. [Pages run 46011447146](https://github.com/janisp123/idle_game/actions/runs/46011447146) succeeded. Balance remains open.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
