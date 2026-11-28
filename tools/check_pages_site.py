@@ -203,7 +203,7 @@ def check():
         for name, digest in retired_art.items():
             assert not (play_root / "assets" / name).exists(), f"Retired painting still published: {name}"
             data = (archive / name).read_bytes()
-            assert hashlib.sha1(f"blob {len(data)}\\0".encode() + data).hexdigest() == digest, f"Archive changed: {name}"
+            assert hashlib.sha1(f"blob {len(data)}\0".encode() + data).hexdigest() == digest, f"Archive changed: {name}"
         # Search executable sources and developer fixtures for literal filenames;
         # the dynamic legacy scene path is covered by required_scenes above.
         for root in (SITE, SITE.parent / "tools"):
