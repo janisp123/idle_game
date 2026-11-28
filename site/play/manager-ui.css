@@ -65,4 +65,7 @@ dialog::backdrop{background:#080605cc}dialog button{width:100%}footer{text-align
 
 #towerAttempt{width:100%;min-height:44px}#towerFight{padding:12px;border:1px solid #584638;border-radius:6px}
 
-#fighterButtons button:disabled{opacity:.65}#specialClassChoice [data-locked=true]{opacity:.6}
+#fighterButtons button:disabled{opacity:.65}
+/* Neutral forged iron instead of the active gold selection, even on hover. */
+#specialClassChoice button[data-choice][data-locked=true]{background:#272727;color:#b5b5b5;border:1px solid #555;opacity:1;cursor:not-allowed;font-weight:400;padding:8px 7px;filter:grayscale(1);box-shadow:none}
+#specialClassChoice[data-locked=true] .class-info-button{background:#272727;color:#b5b5b5;border-color:#555;filter:grayscale(1)}
