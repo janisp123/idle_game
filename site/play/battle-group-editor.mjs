@@ -75,10 +75,12 @@ export function createGroupEditor(onClass,onStance){
    if(id!==r){draft={race:id,main:groupMainClasses(id)[0]};render(current);}
   });
   choices(main,groupMainClasses(r).map(id=>[id,id]),k,id=>{if(novice){const next=basicClass(r,id);draft=null;if(next.id!==m.selected)onClass(selected,next);else render(current);return;}draft={race:r,main:id};render(current);});
-  specializationChoices(special,groupSpecializations(r,k).map(x=>[x.id,ROLE_ICONS[x.role]+" "+x.name+" · Lv "+(m.classes[x.id]?.mastery.level??1)]),c.race===r&&c.mainClass===k?c.id:null,id=>{
+  specializationChoices(special,groupSpecializations(r,k).map(x=>[x.id,novice?"🔒 "+x.name+" · Unlock Lv "+SPECIALIZATION_LEVEL:ROLE_ICONS[x.role]+" "+x.name+" · Lv "+(m.classes[x.id]?.mastery.level??1)]),!novice&&c.race===r&&c.mainClass===k?c.id:null,id=>{
+   if(novice)return;
    const next=GROUP_CLASSES[id];draft=null;if(id===m.selected){render(current);return;}onClass(selected,next);
   });
-  for(const b of special.querySelectorAll("[data-choice]")){b.disabled=novice;b.dataset.locked=String(novice);}
+  special.dataset.locked=String(novice);
+  for(const b of special.querySelectorAll("[data-choice]")){b.disabled=novice;b.dataset.locked=String(novice);b.title=novice?"Unlocks at character level "+SPECIALIZATION_LEVEL:"";}
   const status=novice?"Character level "+m.recruitment.level+" · Specializations unlock at level "+SPECIALIZATION_LEVEL+". Choose a basic profession.":draft&&(c.race!==r||c.mainClass!==k)?"Choose a specialization to change class. Active: "+c.name:"Active: "+c.name;
   if($("classChoiceStatus").textContent!==status)$("classChoiceStatus").textContent=status;
   for(const b of $("tacticButtons").children)b.setAttribute("aria-pressed",String(b.dataset.choice===m.stance));
