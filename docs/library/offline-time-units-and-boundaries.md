@@ -2,7 +2,7 @@
 
 **Category:** Simulation / offline progression / resource economy  
 **General-purpose benefit:** Advance production and resource-consuming activities over a long offline interval without replaying every frame and without corrupting balances.  
-**Our-game fit:** `[OUR-GAME: FIT]` — essential for reliable, uncapped mining/crafting activities and cost-effective server settlement; adapt the continuous-flow model only where the game's rules are genuinely continuous.  
+**Our-game fit:** `[OUR-GAME: FIT]` for consistent units, frozen settlement and exact reward boundaries. Continuous-flow mining and crafting remain general examples and historical fixture context.
 **Evidence:** `[EVIDENCE: DESIGN-NOTE]` — independently written algorithm analysis and proposed tests; no prototype or benchmark has been run in this repository.  
 **Reviewed:** 2026-11-19
 
@@ -67,7 +67,7 @@ An event-boundary simulation advances directly to the earliest moment when the r
 - Resource stock reaches zero.
 - A timed action/crafting encounter completes.
 - A production modifier begins or expires.
-- In games that support automatic offline advancement, an upgrade/skill threshold is reached. **Not an offline boundary for our game:** see OFF-001; player/skill levels and effective combat stats stay frozen until login.
+- In games that support automatic offline advancement, an upgrade/skill threshold is reached. For this game, reaching the CAP-001 cap pauses eligible rewards. OFF-001 keeps levels and effective combat inputs frozen until return.
 - An activity queue changes steps.
 - An asynchronous group membership interval begins or ends.
 - A stored ruleset changes effective version.
@@ -157,7 +157,7 @@ For long-running browser games, use a **trusted server timestamp** for authorita
 - Keep durable rule-version and migration strategies for players who may return after many game updates.
 - Use units and number types able to represent decades of accumulated items without overflow or precision corruption.
 
-For the design promising uncapped offline progress, a maximum processing budget should trigger **resumable settlement**, not reward truncation. Store a continuation state or split the computation into safe transactions while preserving exactly-once updates.
+For games that allow long absences, use **resumable settlement** when the processing budget is exhausted. Complete the eligible work within the applicable reward rules. Store a continuation state or split the computation into safe transactions while preserving exactly-once updates.
 
 ## 6. Tests that catch the dangerous mistakes
 
@@ -175,7 +175,7 @@ The following are **proposed checks**, not tests run as part of this article.
 | Two time intervals `a` then `b` | Consistent with settlement over `a+b` when no external commands intervene |
 | 0, negative or non-finite durations | Explicitly handled/rejected; never infinite loop |
 | Exact event at target timestamp | Process once according to documented boundary order |
-| One-year or twenty-year idle interval | Completes within measured resource budget without reward cap |
+| One-year or twenty-year idle interval | Completes within the measured resource budget and respects the configured reward policy |
 | Retry same offline-settlement transaction | Exactly-once inventory, reward and watermark update |
 
 Also use randomized **property-based tests**: generate nonnegative stock, production/consumption rates, and short time windows, then compare the optimized solver against a tiny-step reference simulator. Test starvation, near-equal rates, floating-point sensitivity, and simultaneous boundaries explicitly.
@@ -200,15 +200,10 @@ Avoid claims such as “20 years always settles instantly” until the implement
 
 `[OUR-GAME: FIT]`
 
-- Use consistent time units and explicit rules for every task's stop condition.
-- Mine stone and hunt enemies as **discrete encounters**; don't pretend distinct events or combat-state changes are continuous. **Skill level and effective combat stats are frozen for the whole offline interval in our game**; accumulated XP can only level the player after login (OFF-001).
-- Keep the five-task automation running without a forced offline cap, but compress repeated cycles only when mathematically valid.
-- Respect the **seven-day offline group participation** boundary: after it, switch to solo settlement even if the player remains away for years.
-- Compute 3d7 outcomes and rare rewards with correct probabilities, without issuing a separate serialized server event for every historical encounter.
-- Build golden tests for the exact timestamp at which input stock, cooldowns and group membership expire.
-- Optimize for **low server CPU, low database write volume, predictable memory and resumability**, not for ticking every character continuously.
-
-**What does not fit:** Limiting rewards to an arbitrary offline window, stopping combat while absent, silently skipping a remainder when a solver's iteration guard is reached, or applying **XP-driven skill/stat gains during absence** despite the frozen-build rule OFF-001. This article also describes other game designs where mid-offline levelling is possible; those are general examples, not our requirements.
+- Use consistent time units and test exactly before, at and after each meaningful boundary.
+- Preserve discrete arena encounters, the frozen build and rules (OFF-001), and the current-level reward limit (CAP-001). Apply eligible advances after settlement at entry or at the applicable live boundary.
+- Treat stock exhaustion, repeat queues and seven-day group membership as examples for games that use those rules. Preserve production semantics when compressing repeated cycles.
+- Keep engine work bounded and deterministic. Test length-independent cap handling, cooldowns, versioned rules and crash/retry behavior. Record actual cost and limitations.
 
 ## Open questions
 

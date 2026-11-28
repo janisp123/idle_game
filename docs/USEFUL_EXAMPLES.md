@@ -1,7 +1,7 @@
 # Useful Examples — Browser Game Engineering Patterns
 
 **Purpose:** Public educational reference for implementing browser and idle games.  
-**Last edited:** 2026-11-21  
+**Last edited:** 2026-11-28
 **Status:** Conceptual engineering guidance. Examples below are original explanatory sketches; they are **not copied source code**, audited software components, or guarantees of production performance.  
 **Scope:** General browser-game techniques, **including features we might never use**. The fit tag is specific to our game and does not indicate whether a technique is valuable to someone else.
 
@@ -9,17 +9,17 @@ See [RESEARCH_LIBRARY.md](RESEARCH_LIBRARY.md) for the library's purpose and [EN
 
 ## Read selectively — agents and implementers
 
-**This file is a catalogue, not a second requirements document.** For a concrete game task, start from the [short combat/offline handoff](brainstorm/ARCHITECTURE_AND_BALANCING.md#combatoffline-handoff--concise-context-for-codex-2026-11-20), the current decision/task files and its relevant topic notes. Open **only the entry that answers a question**; never treat the P01–P18 list as a collection of features to build.
+Use this catalogue for focused research. Start gameplay work from the [mechanics source map](mechanics/README.md), [approved decisions](DECISIONS.md) and [active backlog](TD_LIST.md). Open the relevant example when it answers a technical question.
 
 | When the task concerns... | Start with | Do not assume |
 | --- | --- | --- |
 | Hit/miss, damage, attack timers, combat/death/loot boundaries | [P17](#p17--small-independent-rpg-combat-and-reward-modules), then P01 as needed | The illustrative formula has been selected or tested |
-| Online fights versus years of offline gains | [P18](#p18--offline-combat-research-comparison-choose-algorithms-not-foreign-gameplay), then P02/P15 as needed | Every approach is suitable; in particular, full tick replay and capped time are **not** our intended offline model |
+| Online fights versus years of offline gains | [P18](#p18--offline-combat-research-comparison-choose-algorithms-not-foreign-gameplay), then P02/P15 as needed | A long absence permits unlimited rewards or requires replaying every tick |
 | Lucky drops, resource statistics, large stack quantities | P03, P13 | Expected values are exact outcomes or rounding can guarantee rare drops |
 | Duplicate claims, saves, large time gaps | P16, P15, then P05/P07 as needed | The project already has production-grade persistence or security |
 | UI, events, groups, operations, monetisation | Relevant P06–P14 entries only | These features are in the first prototype scope |
 
-**Evidence and priority:** Entries are original explanatory **DESIGN-NOTEs**, not proven code in our project. **OFF-001 overrides generic research examples for our own game: XP accrues offline, but no skill levels, stats, perks or effective gear are upgraded until the player returns.** An entry's usefulness tag does not override `docs/DECISIONS.md` or authorise implementation. Older brainstorm variants and external examples have lower priority than the latest explicitly supported direction. Unresolved choices go back to the owner. Detailed third-party source locations are in a separate private index and are not automatically available to Codex.
+**Evidence and priority:** These examples are design notes. OFF-001 freezes the effective build during absence. CAP-001 caps eligible rewards at the current level. The [approved decisions](DECISIONS.md#current-gameplay-decisions) govern implementation.
 
 ## Quick index
 
@@ -27,7 +27,7 @@ See [RESEARCH_LIBRARY.md](RESEARCH_LIBRARY.md) for the library's purpose and [EN
 | --- | --- | --- | --- |
 | P01 | Pure simulation core | Testable gameplay without UI dependencies | `[OUR-GAME: FIT]` |
 | P02 | Event-based offline catch-up | Progress while a user is absent | `[OUR-GAME: ADAPT]` |
-| P03 | [Bulk random loot](library/bulk-random-loot-sampling.md) | Efficient independent and exclusive loot sampling and rare-tail correctness | `[OUR-GAME: FIT]` |
+| P03 | [Bulk random loot](library/bulk-random-loot-sampling.md) | Efficient independent and exclusive loot sampling and rare-tail correctness | `[OUR-GAME: NOT-FIT]` for the current coin-only economy |
 | P04 | Configured activities and entities | Expand content without rewriting core logic | `[OUR-GAME: FIT]` |
 | P05 | Versioned saves and migrations | Keep old accounts working after updates | `[OUR-GAME: FIT]` |
 | P06 | Typed event stream | Connect combat, quests, UI logs and statistics | `[OUR-GAME: ADAPT]` |
@@ -35,7 +35,7 @@ See [RESEARCH_LIBRARY.md](RESEARCH_LIBRARY.md) for the library's purpose and [EN
 | P08 | Cooperative reward settlement | Distribute group outcomes fairly and exactly once | `[OUR-GAME: ADAPT]` |
 | P09 | Feature-based mobile interface | Responsive navigation and reduced UI complexity | `[OUR-GAME: FIT]` |
 | P10 | Real-time ticking / server loops | Fast-paced continuous multiplayer worlds | `[OUR-GAME: NOT-FIT]` for dormant character simulation |
-| P11 | Offline progression caps | Bound computational or economy exposure | `[OUR-GAME: NOT-FIT]` |
+| P11 | Offline progression caps | Bound computational or economy exposure | `[OUR-GAME: ADAPT]` for reward caps |
 | P12 | Daily rewards and login streaks | Encourage short repeat sessions | `[OUR-GAME: NOT-FIT]` |
 | P13 | Transactional inventory accounting | Avoid duplication, negative stacks and lost claims | `[OUR-GAME: FIT]` |
 | P14 | Automated testing and observability | Catch errors and measure cost before release | `[OUR-GAME: FIT]` |
@@ -100,7 +100,7 @@ The number of loop iterations should depend mostly on **meaningful state changes
 
 **Important:** A five-task repeating queue can still introduce many boundaries. Repeated deterministic cycles may need fast-forward mathematics; a naive loop over cycles is not automatically scalable. Bulk reward sampling must preserve rarity. Round quantities carefully and use safe integers or a deliberate large-number representation.
 
-**Our-game restriction:** Solo progression must continue indefinitely, including combat and rare loot. Multiplayer group membership lasts at most seven days offline, then deterministic solo fallback applies. Unlike some valid game designs, a one-day or one-week offline cap is incompatible with our promise.
+**Current game fit:** Elapsed absence has no fixed calendar cutoff. CAP-001 pauses eligible rewards at the current level, and OFF-001 keeps the effective build frozen until return. Mining, crafting and queue transitions are historical fixture examples. The seven-day multiplayer fallback was an earlier design proposal.
 
 **Tests:** 1 hour, 24 hours, 7-day transition, 1 year and 20 years; zero resources, skill thresholds, old rule versions, chained tasks, and extremely large totals.
 
@@ -108,7 +108,7 @@ The number of loop iterations should depend mostly on **meaningful state changes
 
 ## P03 — Randomness, loot and bulk sampling
 
-`[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`
+`[OUR-GAME: NOT-FIT]` `[EVIDENCE: DESIGN-NOTE]`
 
 **Guide:** [Bulk random loot without per-encounter rolls](library/bulk-random-loot-sampling.md). Compare exact independent binomial counts, mutually exclusive outcomes, geometric skipping, tail tests and RNG versioning. The guide is educational; no reward rules are approved or tested for our game.
 
@@ -205,7 +205,7 @@ load(record):
 
 **Correctness:** Lock or transactionally serialize reward settlement. Use stable encounter/claim IDs so retries don't award twice.
 
-**Our-game boundary:** Offline group participation expires seven days after the last login; afterwards the character continues solo. Nobody joins another group while offline. Record member joins/leaves/kicks as timestamped boundaries instead of simulating an always-active process for each absent player.
+**Current game fit:** Shared multiplayer settlement requires separate approval and server authority. In games with an offline membership window, record joins, departures and expiry as timestamped boundaries. A seven-day window was an earlier design proposal for this project.
 
 **Tests:** 1 to 20 members, zero/negative weights, leader departure, changing equipment, last-member exit, exact remainders, duplicate claims and logout near the eligibility boundary.
 
@@ -239,13 +239,13 @@ load(record):
 
 ## P11 — Offline time caps
 
-`[OUR-GAME: NOT-FIT]` `[EVIDENCE: DESIGN-NOTE]`
+`[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`
 
 **Where useful generally:** Games balancing a limited daily economy, requiring recurring player engagement, or using expensive per-action replay without efficient aggregation.
 
 **Typical options:** Absolute cap, reduced offline efficiency, or allowing only certain activities while offline.
 
-**Our reason not to use them:** They contradict the deliberate goal that a character can be absent for decades and still accumulate their intended progress. Solve the computation problem rather than shifting the penalty onto the player.
+**Current game fit:** CAP-001 caps eligible rewards at one current level. OFF-001 settles absence against the frozen build without a fixed calendar cutoff. Fixed time windows, reward limits and processing budgets are distinct policies.
 
 ---
 

@@ -102,7 +102,7 @@ Proposed CI gate: a release smoke test should assert the HTML references only ex
 
 `[OUR-GAME: FIT]` A small, dependency-free static prototype benefits immediately from coherent HTML/CSS/scene releases, cache-safe URLs and real-browser screenshot tests. This addresses a class of visual regressions without changing gameplay. The current browser-only save must be backed up before schema migration.
 
-`[OUR-GAME: ADAPT]` A precaching service worker could later support true installable/offline mobile play, but it requires an approved feature scope, cache quota policy, lifecycle UX and save compatibility tests. Unlimited *offline progression* is a simulation rule, not a guarantee that every version of the game's web assets remains cached indefinitely. A future authoritative server must remain the source of truth for rewards.
+`[OUR-GAME: ADAPT]` A precaching service worker could later support true installable/offline mobile play, but it requires an approved feature scope, cache quota policy, lifecycle UX and save compatibility tests. Frozen settlement and reward caps govern simulation. Service-worker policy governs whether the application can load cached assets. A future authoritative server must remain the source of truth for rewards.
 
 ## Open questions
 

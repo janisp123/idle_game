@@ -12,7 +12,7 @@ Combat rules become difficult to test when damage, timers, rewards and rendering
 
 ## Implementation pattern and pitfalls
 
-**Evidence examined:** publicly readable code from a classic MMORPG-style server recreation, plus a larger modular server framework. We inspected actual combat damage calculations, player/NPC fighting loops and a separate loot-roll function in the former, and the latter's high-level engine/content separation. These are **readable implementations**, not verified formulas from the proprietary original games. Source names and URLs are not published under this repository's standing rule.
+**Evidence examined:** publicly readable code from a classic MMORPG-style server recreation, plus a larger modular server framework. We inspected actual combat damage calculations, player/NPC fighting loops and a separate loot-roll function in the former, and the latter's high-level engine/content separation. These are **readable implementations**, not verified formulas from the proprietary original games. This historical comparison omitted the source names and URLs. Follow the [current library sourcing rules](../RESEARCH_LIBRARY.md#what-belongs-here) when adding verifiable citations.
 
 **Observed boundaries and reusable lessons:**
 
@@ -63,7 +63,7 @@ estimateOffline(segment, combatModel):
 
 ## Complexity and alternatives
 
-A single hit calculation uses constant work for fixed-size attributes; scheduling work grows with **actual attacks and state changes**, not the number of UI frames. A live encounter runner may use a short tick, an event queue or direct next-attack scheduling; an unlimited-offline estimator needs separate aggregation. Watch for tie-order ambiguity, impossible damage, RNG correlations and recovery time.
+A single hit calculation uses constant work for fixed-size attributes; scheduling work grows with **actual attacks and state changes**, not the number of UI frames. A live encounter runner may use a short tick, an event queue or direct next-attack scheduling; a long-absence estimator needs separate aggregation within applicable reward boundaries. Watch for tie-order ambiguity, impossible damage, RNG correlations and recovery time.
 
 ## Our-game assessment
 

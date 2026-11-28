@@ -33,7 +33,7 @@ Include a reproducible command and results **only if actually executed on our ow
 
 ## Our-game assessment
 
-Keep general educational value distinct from our design. Explain what fits our low-cost, mobile-first, uncapped idle game and what doesn't. A `NOT-FIT` entry can still be valuable to other developers.
+Describe fit against the [current approved decisions](../DECISIONS.md). A `NOT-FIT` entry can still be valuable to other developers.
 
 ## Open questions
 
