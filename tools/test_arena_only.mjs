@@ -94,3 +94,5 @@ import "./test_alpha_clan.mjs";
 import "./test_clan_progression.mjs";
 
 import "./test_endless_tower.mjs";
+
+import "./test_recruitment.mjs";

@@ -8,6 +8,14 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## RECRUITMENT-001 — Gradual character and specialization unlocks
+
+- **Goal / acceptance:** Seven visible slots at Fighting 1/5/10/15/20/25/30; individual character level 20 unlocks free specialization selection. Locked slots neither fight, train nor buy gear; matched enemy count and novice restriction. Max-only 7v7 balance unchanged. Preserve prior saves and frozen sessions.
+- **Status:** IN_REVIEW — PR #229; validation pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## TOWER-001 — Endless Tower and raid qualification
 
 - **Goal / acceptance:** Permanent sequential floor clears unlock existing raids at 10/20/30/40/50. Endless higher floors, existing rewards/blessings, first-clear coins only, frozen deterministic attempts and offline settlement. Preserve earned legacy raid access.
