@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'tools/stabilization-save-integrity.mjs'
+      - 'tools/stabilization-save-browser.mjs'
       - '.github/workflows/stabilization-save-integrity.yml'
       - 'site/play/engine.mjs'
       - 'site/play/arena-manager.mjs'
@@ -23,10 +24,15 @@ jobs:
           node-version: '22'
       - name: Reproduce save and offline invariants
         run: node tools/stabilization-save-integrity.mjs
+      - name: Browser storage failure and simultaneous tab tests
+        if: always()
+        run: node tools/stabilization-save-browser.mjs
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: stabilization-save-integrity
-          path: stabilization-save-integrity.json
+          path: |
+            stabilization-save-integrity.json
+            stabilization-save-browser.json
           if-no-files-found: error
           retention-days: 30
