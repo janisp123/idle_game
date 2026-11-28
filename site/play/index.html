@@ -7,7 +7,7 @@
 <title>The Long Vigil — Play</title>
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./game.css">
-<link rel="stylesheet" href="./manager-ui.css?v=staged-recruitment-001">
+<link rel="stylesheet" href="./manager-ui.css?v=main-class-guide-001">
 <link rel="stylesheet" href="./fantasy-ui.css?v=raid-001">
 <script type="importmap">
 {
@@ -30,7 +30,7 @@
     "./battle-group-timeline.mjs?v=group-001": "./battle-group-timeline.mjs?v=staged-recruitment-20261128-2",
     "./arenas.mjs": "./arenas.mjs?v=staged-recruitment-20261128-2",
     "./arenas.mjs?v=bal-002": "./arenas.mjs?v=staged-recruitment-20261128-2",
-    "./battle-group-editor.mjs?v=individual-stats-001": "./battle-group-editor.mjs?v=staged-recruitment-20261128-2",
+    "./battle-group-editor.mjs?v=individual-stats-001": "./battle-group-editor.mjs?v=main-class-guide-001",
     "./battle-group-progress-view.mjs?v=individual-stats-001": "./battle-group-progress-view.mjs?v=staged-recruitment-20261128-2",
     "./battle-group.mjs?v=individual-stats-001": "./battle-group.mjs?v=staged-recruitment-20261128-2",
     "./battle-group.mjs": "./battle-group.mjs?v=staged-recruitment-20261128-2",
@@ -137,7 +137,7 @@
 <div id="fighterButtons" class="group-slots" role="group" aria-label="Choose character"></div>
 <div class="group-selectors">
 <h3 id="raceHeading">Race</h3><div id="raceChoice" class="choice-grid three" role="group" aria-labelledby="raceHeading"></div>
-<h3 id="mainClassHeading">Main class</h3><div id="mainClassChoice" class="choice-grid three" role="group" aria-labelledby="mainClassHeading"></div>
+<h3 id="mainClassHeading">Main class</h3><div id="mainClassChoice" class="choice-grid two" role="group" aria-labelledby="mainClassHeading"></div>
 <h3 id="specialClassHeading">Specialization</h3><div id="specialClassChoice" class="choice-grid two" role="group" aria-labelledby="specialClassHeading"></div>
 <p id="classChoiceStatus" class="quiet" aria-live="polite"></p>
 </div>
@@ -166,6 +166,7 @@
 <footer>Local browser alpha · The Long Vigil</footer>
 </main>
 <dialog id="loginReport" aria-labelledby="loginReportHeading"><h2 id="loginReportHeading">Last login report</h2><p id="loginReportSummary"></p><ul id="loginReportBody" class="progress-feed"></ul><button id="loginReportDismiss" type="button" autofocus>Continue</button></dialog>
+<dialog id="mainInfoDialog" aria-labelledby="mainInfoHeading"><h2 id="mainInfoHeading"></h2><p class="quiet">Main class unlocks at character level 20. Information is available now.</p><p id="mainInfoRole"></p><div class="class-kit-cards"><section class="class-kit-entry"><span class="kit-emblem" aria-hidden="true">Ⅰ</span><div><small>Basic automatic skill · <span id="mainInfoCooldown"></span></small><h3 id="mainInfoSkill"></h3><p id="mainInfoSkillEffect"></p></div></section></div><dl class="class-info-details"><dt>Strengths</dt><dd id="mainInfoStrong"></dd><dt>Weaknesses</dt><dd id="mainInfoWeak"></dd></dl><h3>Specialization paths · Level 30</h3><p class="quiet">The specialization replaces the basic skill with its own kit. Open a guide to explore its abilities and combat role.</p><div id="mainInfoPaths"></div><p class="quiet">Choices may be changed after unlocking. Tactical guidance, not guaranteed results.</p><button id="mainInfoClose" type="button" autofocus>Close</button></dialog>
 <dialog id="classInfoDialog" aria-labelledby="classInfoHeading"><h2 id="classInfoHeading"></h2><p id="classInfoEquipment" class="quiet"></p><p id="classInfoAction" class="quiet"></p><p id="classInfoAttributes" class="quiet"></p><p id="classInfoGrowth" class="quiet"></p><div class="class-kit-cards"><section class="class-kit-entry passive"><span class="kit-emblem" aria-hidden="true">✦</span><div><small>Passive trait</small><h3 id="classInfoPassiveName"></h3><p id="classInfoPassiveEffect"></p></div></section><section class="class-kit-entry"><span class="kit-emblem" aria-hidden="true">Ⅰ</span><div><small>Automatic ability · <span id="classInfoPrimaryCooldown"></span></small><h3 id="classInfoPrimaryName"></h3><p id="classInfoPrimaryEffect"></p></div></section><section class="class-kit-entry"><span class="kit-emblem" aria-hidden="true">Ⅱ</span><div><small>Automatic ability · <span id="classInfoSecondaryCooldown"></span></small><h3 id="classInfoSecondaryName"></h3><p id="classInfoSecondaryEffect"></p></div></section></div><dl class="class-info-details"><dt>Strong against / purpose</dt><dd id="classInfoStrong"></dd><dt>Best environments</dt><dd id="classInfoBest"></dd><dt>Weak against</dt><dd id="classInfoWeak"></dd><dt>Unfavourable environments</dt><dd id="classInfoWorst"></dd></dl><p class="quiet">Tactical guidance, not guaranteed outcomes. Alpha balance is still being tested.</p><button id="classInfoClose" type="button" autofocus>Close</button></dialog>
 </body>
 </html>

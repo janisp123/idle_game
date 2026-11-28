@@ -11,7 +11,15 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## STABILIZATION-001 — Whole-game correctness, performance and repository audit
 
 - **Goal / acceptance:** Audit all public systems against current approved behavior, measure runtime and repo bloat, isolate obsolete code safely, fix verified defects in small tested PRs; no new feature scope or history rewrite. [Initial audit and test matrix](mechanics/STABILIZATION_AUDIT_20261128.md). [Sequential execution and non-overlap protocol](mechanics/STABILIZATION_EXECUTION_PLAN.md).
-- **Status:** PARTIAL — S00 merged #233 (41f3af7); 14/14 structural saves and four browser scenarios passed. S01 save integrity underway; [baseline evidence](mechanics/STABILIZATION_BASELINE_RESULTS.md).
+- **Status:** PARTIAL — S00 merged #233 (41f3af7); 14/14 structural saves and four browser scenarios passed. S01 atomic clock fix merged and deployed; remaining fallback/hidden-page audit tracked. [baseline evidence](mechanics/STABILIZATION_BASELINE_RESULTS.md).
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## MAIN-CLASS-GUIDE-001 — Readable main class and advancement guides
+
+- **Goal / acceptance:** Independent 44px info buttons on every race-specific main class, readable while selection locked; show actual basic skill/cooldown, strengths/weaknesses, level 20/30 gates and exact specialization paths with detailed guides. Browsing never selects class, changes gear or spends coins. All race/class paths and mobile/desktop verified.
+- **Status:** IN_REVIEW — owner approved; candidate UI-only branch, tests pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -19,7 +27,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## S01-ATOMIC-CLOCK-001 — Atomic test clock and manager state
 
 - **Goal / acceptance:** Preserve old clock and save together on storage failure; no partial day jump; successful retry/reload exactly once; old v2 clock readable and explicit reset remains reset. No game-rule changes or new save wipe.
-- **Status:** IN_REVIEW — reproducible browser failure in run 46147925408; candidate fix in #234, final checks pending.
+- **Status:** DONE — #234 merged 0b74c56, all 8 checks passed, 223 existing and 14 save-integrity tests; live atomic-clock-20261128 verified.
 - **Added by:** chat.
 - **Requested by:** Owner (STABILIZATION-001).
 - **Implemented by:** Not yet.
@@ -27,7 +35,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## ARENA-ROSTER-UI-001 — Seven visible arena positions per side
 
 - **Goal / acceptance:** Always show seven arena slots on both sides, inactive positions neutral grey with Fighting Lv 5/10/15/20/25/30 unlock labels. Fresh 1v1 shows six locked each side; real combat remains matched active roster only. Canonical RECRUIT_LEVELS, no fake combatants, test every threshold, 7v7 and mobile/desktop overflow. Owner confirmed both sides.
-- **Status:** TODO — S08 UI; separate isolated fix after prior phases.
+- **Status:** TODO — Owner requested earlier priority, separate isolated UI fix after active PR.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -35,7 +43,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## STANCE-UNLOCK-001 — Combat stance selection at character level 10
 
 - **Goal / acceptance:** Balanced is the sole active stance before individual character level 10; other stances are visibly locked. At 10 all combat stance choices unlock. Preserve earned stance records and frozen encounter correctness; test both sides at levels 9/10, reload and switching. Do not implement during S00/S01; separate isolated S02 fix.
-- **Status:** TODO — queued for S02 after baseline and save integrity.
+- **Status:** TODO — Owner requested earlier priority, next isolated progression fix after active PR.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
