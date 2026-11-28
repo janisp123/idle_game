@@ -5,6 +5,7 @@ on:
     paths:
       - 'tools/stabilization-baseline.mjs'
       - '.github/workflows/stabilization-baseline.yml'
+      - 'tools/stabilization-browser.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,9 +20,14 @@ jobs:
           node-version: '22'
       - name: Capture deterministic synthetic baseline and tracked inventory
         run: node tools/stabilization-baseline.mjs
+      - name: Measure browser baseline on synthetic fresh and maxed saves
+        run: node tools/stabilization-browser.mjs
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: stabilization-baseline
-          path: stabilization-baseline.json
+          path: |
+            stabilization-baseline.json
+            stabilization-browser.json
+            stabilization-synthetic-fixtures.json
           if-no-files-found: error
           retention-days: 30

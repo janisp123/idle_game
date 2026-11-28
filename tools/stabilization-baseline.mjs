@@ -5,6 +5,7 @@ import {posix as path} from "node:path";
 import {createHash} from "node:crypto";
 import {performance} from "node:perf_hooks";
 import assert from "node:assert/strict";
+import {isDeepStrictEqual} from "node:util";
 import {newArenaManager,enterArena,readArenaManager,settleArenaLive,startArenaTower,startArenaRaid,chooseClanRaid} from "../site/play/arena-manager.mjs";
 import {alphaMaxStats} from "../site/play/alpha-tools.mjs";
 import {GROUP_IDS,syncRecruitment,activeGroupIds,upgradeBattleGroup} from "../site/play/battle-group.mjs";
@@ -55,7 +56,15 @@ const raidBase={...fixtures.maxed,tower:{...fixtures.maxed.tower,highest:10}};
 const raid=startArenaRaid(raidBase,10,now,rand).state;assert.ok(raid.raidRun);fixtures.raidPending=raid;fixtures.raidFinished=enterArena(raid,now+raid.raidRun.durationMs,rand,now).state;
 const clan=chooseClanRaid(fixtures.maxed,now,now,rand).state;assert.ok(clan.alphaClan.raid.registration);fixtures.clanPending=clan;fixtures.clanFinished=enterArena(clan,now,rand,clanWeekEnd(clan.alphaClan.raid.registration.week)).state;
 const legacy=structuredClone(fixtures.fresh);for(const a of Object.values(legacy.combatSession.players))delete a.recruitLevel;fixtures.legacyFrozen=legacy;
-const summaries={};for(const [id,s] of Object.entries(fixtures)){const serialized=JSON.stringify(s);const restored=readArenaManager(serialized);summaries[id]={sha256:sha(serialized),bytes:Buffer.byteLength(serialized),roster:activeGroupIds(s.battleGroup).length,valid:!!restored,roundtripIdentical:!!restored&&JSON.stringify(restored)===serialized};}
+function differences(a,b,p="",out=[]){
+ if(isDeepStrictEqual(a,b)||out.length>=30)return out;
+ if(a&&b&&typeof a==="object"&&typeof b==="object"&&Array.isArray(a)===Array.isArray(b)){
+  for(const key of new Set([...Object.keys(a),...Object.keys(b)])){differences(a[key],b[key],p+"/"+key,out);if(out.length>=30)break;}
+ }else out.push(p||"/");
+ return out;
+}
+const summaries={};for(const [id,s] of Object.entries(fixtures)){const serialized=JSON.stringify(s);const restored=readArenaManager(serialized);summaries[id]={sha256:sha(serialized),bytes:Buffer.byteLength(serialized),roster:activeGroupIds(s.battleGroup).length,valid:!!restored,roundtripIdentical:!!restored&&JSON.stringify(restored)===serialized,structuralEqual:!!restored&&isDeepStrictEqual(s,restored),changedPaths:restored?differences(s,restored):["unreadable"]};}
+writeFileSync("stabilization-synthetic-fixtures.json",JSON.stringify({now,fresh:fixtures.fresh,maxed:fixtures.maxed}));
 const metrics=[];
 function bench(id,fn,n=10){
  fn();const times=[],digests=[];for(let i=0;i<n;i++){const t=performance.now();const out=fn();times.push(performance.now()-t);digests.push(sha(out));}

@@ -16,6 +16,14 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
 
+## STANCE-UNLOCK-001 — Combat stance selection at character level 10
+
+- **Goal / acceptance:** Balanced is the sole active stance before individual character level 10; other stances are visibly locked. At 10 all combat stance choices unlock. Preserve earned stance records and frozen encounter correctness; test both sides at levels 9/10, reload and switching. Do not implement during S00/S01; separate isolated S02 fix.
+- **Status:** TODO — queued for S02 after baseline and save integrity.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## MAIN-CLASS-SKILLS-001 — One basic automatic skill per main class
 
 - **Goal / acceptance:** Exactly one skill at individual level 20–29; no skill before 20; full specialist kit replaces it at 30; both sides use shared combat rules. No endgame retune.
