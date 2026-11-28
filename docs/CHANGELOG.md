@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — REPO-CLEANUP-002 STARTED
+
+Owner approved the nine-phase cleanup master plan and feature freeze until final repository audit. Base ea49cec2; #242 merged, full gates 28/28, Pages 46166609963 success. No overlapping open PRs. Branch cleanup/repository-master-inventory; initial scope docs/CHANGELOG.md, docs/TD_LIST.md, docs/WORK_CHECKPOINT.md, docs/mechanics/REPOSITORY_CLEANUP_MASTER_PLAN.md and docs/mechanics/BRANCH_INVENTORY_20261128.md. No runtime, tests, governance files, research library edits, branch deletion or history rewrite in this PR. Next: inventory remote refs and PR associations, preserve exact heads, distinguish merged/squash-merged/closed/unmatched; document removal candidates only after evidence. Subsequent phases separate PRs. Final feature release gate remains blocked until cleanup complete and independent review.
+
 ## 2026-11-28 — S09-RETIRED-ART-001 candidate #242
 
 Archive twelve retired activity paintings, 757994 bytes removed from published site candidate; identical blobs preserved in tools/fixtures/retired-art. Existing live/legacy activity mappings and required art retained. Additive static assertions; full CI pending. No game logic, save or permission changes.
