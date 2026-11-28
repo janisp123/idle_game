@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — REPO-CLEANUP-002 phase 05 STARTED
+
+Codex continues the approved simulation-evidence cleanup after [#248](https://github.com/janisp123/idle_game/pull/248) merged at `5866d844136a87d65a21e708a3c6a1bedf721205` with full release gate 46172780912 and standalone protocol passed. Branch `cleanup/repo-cleanup-002-evidence`. Scope is the 62 baseline mechanics JSON artifacts, the inventory and affected raw-evidence links, and the task journal. Next verify exact recovered blobs and executable consumers, then retain the aggregates and index the complete raw revisions.
+
 ## 2026-11-28 — REPO-CLEANUP-002 phase 04 STARTED
 
 Codex continues from [#247](https://github.com/janisp123/idle_game/pull/247), merged at `5a8e11c4a66600cd1ef34df856b403621b4658ce`. Full release run 46171700438 passed 28/28 after a documented Chromium startup retry, and standalone protocol passed. Branch `cleanup/repo-cleanup-002-library`. Scope is the library index, map, examples, affected article fit notes and required journal records. [PR #248](https://github.com/janisp123/idle_game/pull/248) reconciles game-specific notes with ARENA-ONLY-001, OFF-001 and CAP-001. The prior wording is recoverable at the base commit. General methods, source links, queue items and negative evidence remain available. Next review simulation output and consumers after integration.
