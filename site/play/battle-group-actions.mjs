@@ -16,7 +16,7 @@ const profiles=Object.freeze({
  "Sword":spec("sword","slashing",0,8)
 });
 const magicRoles=["mage","healer","summoner","support"];
-export const validGroupSnapshot=s=>(s?.novice===undefined||s.novice===true)&&isGroupClass(s?.classId)&&s.race===GROUP_CLASSES[s.classId].race&&s.role===GROUP_CLASSES[s.classId].role&&s.loadout===GROUP_CLASSES[s.classId].loadout&&Number.isInteger(s.classLevel)&&s.classLevel>=1&&s.classLevel<=50;
+export const validGroupSnapshot=s=>(s?.recruitLevel===undefined||Number.isInteger(s.recruitLevel)&&s.recruitLevel>=1&&s.recruitLevel<=50&&Boolean(s.novice)===(s.recruitLevel<30))&&(s?.novice===undefined||s.novice===true)&&isGroupClass(s?.classId)&&s.race===GROUP_CLASSES[s.classId].race&&s.role===GROUP_CLASSES[s.classId].role&&s.loadout===GROUP_CLASSES[s.classId].loadout&&Number.isInteger(s.classLevel)&&s.classLevel>=1&&s.classLevel<=50;
 export function classWeapon(a){
  const c=GROUP_CLASSES[a.classId];
  if(!c)return null;

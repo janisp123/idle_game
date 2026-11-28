@@ -14,12 +14,24 @@ const exact=(o,keys)=>record(o)&&Object.keys(o).length===keys.length&&keys.every
 const levelValid=s=>record(s)&&Number.isInteger(s.level)&&s.level>=1&&s.level<=50&&count(s.xp)&&s.xp<=tacticRequiredXP(s.level);
 const skill=()=>({level:1,xp:0});
 export const RECRUIT_LEVELS=Object.freeze([1,5,10,15,20,25,30]);
-export const SPECIALIZATION_LEVEL=20;
+export const MAIN_CLASS_LEVEL=20;
+export const SPECIALIZATION_LEVEL=30;
+export const mainClassUnlocked=m=>!m.recruitment||m.recruitment.level>=MAIN_CLASS_LEVEL;
 export const activeGroupIds=g=>GROUP_IDS.filter(id=>g[id].recruitment?.active!==false);
 export const recruitmentEnabled=g=>g[GROUP_IDS[0]].recruitment!==undefined;
 export const specializationUnlocked=m=>!m.recruitment||m.recruitment.level>=SPECIALIZATION_LEVEL;
 export function basicClass(race,profession){return Object.values(GROUP_CLASSES).find(c=>c.race===race&&c.mainClass===profession);}
-export function initialRecruitGroup(){const g=initialBattleGroup();return Object.fromEntries(GROUP_IDS.map((id,i)=>{const m=g[id],c=GROUP_CLASSES[m.selected],base=basicClass(c.race,c.mainClass).id;return [id,{...m,selected:base,classes:{[base]:freshProgress(base)},recruitment:{active:i===0,...skill()}}];}));}
+// Fixed race-stage adapters: existing basic equipment/attributes, no specialist kit.
+const RACE_BASICS=Object.freeze({human:"oathkeeper",elf:"grovewarden",dark_elf:"dreadguard",orc:"ragebreaker",dwarf:"scrapbreaker"});
+export const basicRace=race=>GROUP_CLASSES[RACE_BASICS[race]];
+export function normalizeRecruitChoices(g){
+ if(!recruitmentEnabled(g))return g;
+ return Object.fromEntries(GROUP_IDS.map(id=>{
+  const m=g[id],c=GROUP_CLASSES[m.selected],next=!mainClassUnlocked(m)?basicRace(c.race):!specializationUnlocked(m)?basicClass(c.race,c.mainClass):c;
+  return [id,next.id===m.selected?m:{...m,selected:next.id,classes:{...m.classes,[next.id]:m.classes[next.id]??freshProgress(next.id)}}];
+ }));
+}
+export function initialRecruitGroup(){const g=initialBattleGroup();return Object.fromEntries(GROUP_IDS.map((id,i)=>{const m=g[id],c=GROUP_CLASSES[m.selected],base=basicRace(c.race).id;return [id,{...m,selected:base,classes:{[base]:freshProgress(base)},recruitment:{active:i===0,...skill()}}];}));}
 export function syncRecruitment(g,fightingLevel){if(!recruitmentEnabled(g))return g;return Object.fromEntries(GROUP_IDS.map((id,i)=>{const m=g[id];return [id,!m.recruitment.active&&fightingLevel>=RECRUIT_LEVELS[i]?{...m,recruitment:{...m.recruitment,active:true}}:m];}));}
 export function maxRecruitment(g){if(!recruitmentEnabled(g))return g;return Object.fromEntries(GROUP_IDS.map(id=>[id,{...g[id],recruitment:{active:true,level:50,xp:0}}]));}
 const armourIds=c=>ARMOUR_SLOTS.map(s=>s.id+":"+c.armour);
@@ -59,7 +71,7 @@ export function initialBattleGroup(){
 }
 export function selectGroupClass(group,member,race,mainClass,classId){
  requireGroup(group);requireMember(member);resolveGroupClass(race,mainClass,classId);
- const m=group[member];if(m.recruitment?.active===false||!specializationUnlocked(m)&&basicClass(race,mainClass).id!==classId)throw new RangeError("Character or specialization locked");
+ const m=group[member];if(m.recruitment?.active===false||!mainClassUnlocked(m)&&basicRace(race).id!==classId||!specializationUnlocked(m)&&basicClass(race,mainClass).id!==classId)throw new RangeError("Character or specialization locked");
  return {...group,[member]:{...m,selected:classId,classes:{...m.classes,[classId]:m.classes[classId]??freshProgress(classId)}}};
 }
 export function selectGroupStance(group,member,stance){
@@ -75,7 +87,7 @@ export function groupSnapshots(group,shared,rules=3){
  return Object.fromEntries(activeGroupIds(group).map((id,i)=>{
   const m=group[id],c=GROUP_CLASSES[m.selected],p=m.classes[m.selected],armour=equippedArmour(c,p),kit=trainingKit(armour,c.loadout,p.equipment),effects=trainingEffects(kit,c.loadout,p.expertiseActive);
   const attrs=[4,5,6,7,8,9,10].includes(rules)?characterAttributes(c.id,migrateProgress(p,c.id).attributeEffortActive):null;
-  return [id,{name:"Member "+(i+1),...(!specializationUnlocked(m)?{novice:true}:{}),classId:c.id,race:c.race,role:c.role,classLevel:p.mastery.level,tactic:m.stance,tacticLevel:m.stances[m.stance].level,
+  return [id,{name:"Member "+(i+1),...(!specializationUnlocked(m)?{novice:true}:{}),...(m.recruitment?{recruitLevel:m.recruitment.level}:{}),classId:c.id,race:c.race,role:c.role,classLevel:p.mastery.level,tactic:m.stance,tacticLevel:m.stances[m.stance].level,
    difficulty:shared.difficulty,...(attrs?{attributes:attrs,str:attrs.STR,dex:attrs.DEX,end:attrs.CON,skill:p.mastery.level}:{str:shared.str,dex:shared.dex,end:shared.end,skill:shared.skill}),loadout:c.loadout,trainingKit:kit,
    gear:{...armourStats(armour,c.loadout),gearDefense:effects.gearDefense},gearAttack:effects.gearAttack,condition:effects.condition}];
  }));

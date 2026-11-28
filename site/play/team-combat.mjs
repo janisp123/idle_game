@@ -1,7 +1,7 @@
 // Team geometry and decisions; all damage and durability use physical-actions.
 import { PHYSICAL_RULES,WEAPONS,TACTICS,seededRandom,fighter,wound,vitals,mobility,resolveStrike } from "./physical-actions.mjs?v=kits-001";
 import {COUNTERS,GROUP_COMBAT_RULES_VERSION,SUPPORTED_GROUP_COMBAT_RULES,tacticalActor,intactTank,tankPriorityActor,tankFirstTargets,geometryActor,engagementGeometry,RANGED_GEOMETRY_RULES_VERSION,terrainTileBlocked,terrainApproachFactor,ELIMINATION_RULES_VERSION,ELIMINATION_MAX_ROUNDS} from "./group-counter-rules.mjs";
-import {kitActor,pilotKit} from "./class-kits.mjs";
+import {kitActor,pilotKit,mainClassSkill} from "./class-kits.mjs";
 import {prepareKitActor,expireKitEffects,markKitMovement,kitApproach,kitTargetDisrupted,rooted,silenced,incapacitated} from "./class-effects.mjs";
 import {tryKitAction} from "./class-ability-policy.mjs";
 import { coordinationChance } from "./teamwork.mjs?v=team-002";
@@ -204,7 +204,7 @@ export function resolveTeamBattle(players,enemies,seed,terrain={},levels={player
         const threat=other(actors,a).find(e=>!activeWeapon(e).ranged&&distance(a,e)===0&&mobility(a)>=mobility(e)+TACTICS.retreatLead);
         if(threat&&move(a,threat,actors,height,width,true,tactical,terrain)){a.retreats--;a.approach=0;record(a,threat,"retreat",{tactic:"maintain_range"});continue;}
       }
-      if(!(silenced(a)&&active.type==="magic")&&(pilotKit(a)?tryKitAction(a,target,actors,round,active,ctx):a.classId&&tryClassAction(a,target,actors,round,ctx)))continue;
+      if(!(silenced(a)&&active.type==="magic")&&((pilotKit(a)||mainClassSkill(a))?tryKitAction(a,target,actors,round,active,ctx):a.classId&&tryClassAction(a,target,actors,round,ctx)))continue;
       // Defensive fighters may escort threatened allies only when they
       // cannot take a ready attack. Real tile movement and turn cost.
       if(a.activeTactic==="defensive"&&a.shield.hp>0&&!a.guardOpen){

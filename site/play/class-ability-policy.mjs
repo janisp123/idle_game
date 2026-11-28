@@ -1,5 +1,5 @@
 // Independent cooldowns and a single action budget for class kits.
-import {pilotKit,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
+import {pilotKit,mainClassSkill,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
 import {kitStatus,kitHeal,kitControlAllowed,kitControlDuration,controlEligible,applyControl,hasControl,clearControl} from "./class-effects.mjs";
 import {resolveStrike,wound,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=kits-001";
 import {statHealing,statMagicDamageFactor,classStatusLands} from "./stat-combat.mjs";
@@ -21,7 +21,7 @@ const supportMode=(a,actors,ability)=>{
  if(a.activeTactic==="aggressive")return "buff";
  return alliesIn(a,actors,ability.range).some(x=>ratio(x)<.65&&threatened(x,actors))?"guard":"buff";
 };
-const supportAmount=(a,ability)=>ability.amount*kitStrength(a)*(a.classId==="runesage"?B.focusedBlessing:a.classId==="wardchanter"?B.protectiveSong:1);
+const supportAmount=(a,ability)=>ability.amount*kitStrength(a)*(ability.basic?1:a.classId==="runesage"?B.focusedBlessing:a.classId==="wardchanter"?B.protectiveSong:1);
 const supportChoices=(a,actors,ability,mode)=>{
  const amount=supportAmount(a,ability);
  return alliesIn(a,actors,ability.range).filter(x=>mode==="guard"?x.classGuard<amount&&(ratio(x)<.85||threatened(x,actors)):damageRole(x)&&(mode!=="magic_tempo"||["mage","summoner"].includes(x.role))&&x.classBuff<amount&&(!["tempo","magic_tempo"].includes(mode)||!x.kitTempoUntil)).sort((x,y)=>mode==="guard"?ratio(x)-ratio(y):Number(threatened(y,actors))-Number(threatened(x,actors))||(geometryActor(a)?0:Number(y.role==="melee")-Number(x.role==="melee"))||ratio(y)-ratio(x));
@@ -78,7 +78,7 @@ function perform(a,b,actors,round,ability,weapon,ctx){
   const actual=ctx.intercept(a,b,ability.range??weapon.range);
   if(actual!==b)ctx.record(actual,a,"intercept",{protected:b.id,ability:ability.id});
   let clean=false,hit=0;
-  resolveStrike(a,actual,{active:{...weapon,range:ability.range??weapon.range,recovery:ability.recovery??weapon.recovery,damageScale:ability.scale*s,guardPierce:ability.guardPierce===true,familiar:ability.familiar===true},bow:weapon.move==="shot",distance:Math.min(2,dist(a,actual)),terrain:ctx.terrain,roll:ctx.roll,speedRoll:ctx.speedRoll,
+  resolveStrike(a,actual,{active:{...weapon,range:ability.range??weapon.range,recovery:ability.recovery??weapon.recovery,damageScale:ability.scale*(ability.basic?1:s),guardPierce:ability.guardPierce===true,familiar:ability.familiar===true},bow:weapon.move==="shot",distance:Math.min(2,dist(a,actual)),terrain:ctx.terrain,roll:ctx.roll,speedRoll:ctx.speedRoll,
    record:(x,y,t,e={})=>{if(x===a&&y===actual&&["hit","finisher"].includes(t)&&e.damage>0){clean=true;hit=e.damage;}ctx.record(x,y,t,{ability:ability.id,...e});},interruptApproach:x=>{x.approach=0;},onBleed:(x,y)=>{y.bleedSource=x.id;}});
   if(clean&&alive(actual)&&(!ability.effect||classStatusLands(a,actual,weapon.type,ctx.roll))){
    if(ability.effect==="open"){actual.guardOpen=Math.max(actual.guardOpen,2);record(actual,"guard_open");}
@@ -191,7 +191,12 @@ function perform(a,b,actors,round,ability,weapon,ctx){
  }
 }
 export function tryKitAction(a,b,actors,round,weapon,ctx){
- const kit=pilotKit(a);if(!kit||a.recovery>0||!alive(a)||!alive(b))return false;
+ const basic=mainClassSkill(a),kit=pilotKit(a);if((!basic&&!kit)||a.recovery>0||!alive(a)||!alive(b))return false;
+ if(basic){
+  if(round<a.kitReady.primary||!eligible(a,b,actors,round,basic,weapon,ctx.terrain)||!perform(a,b,actors,round,basic,weapon,ctx))return false;
+  a.kitReady.primary=round+basic.cooldown;a.recovery=Math.max(0,a.recovery,basic.type==="strike"?0:1);
+  ctx.record(a,null,"class_ability",{ability:basic.id,slot:"primary"});return true;
+ }
  if(a.kitSiege){
   const charge=a.kitSiege,ability=kit.secondary;
   if(round<charge.ready)return false;

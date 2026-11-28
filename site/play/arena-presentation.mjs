@@ -1,7 +1,7 @@
 // Read-only adapter. Real frozen team timeline remains the sole combat authority.
 import {teamCombatAtTime,teamWinPrize,teamBoutMs} from "./team-timeline.mjs?v=group-004";
 import {groupCombatAtTime,groupWinPrize,GROUP_TIMELINE_VERSION} from "./battle-group-timeline.mjs?v=raid-001";
-import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
+import {GROUP_CLASSES,RACE_LABELS} from "./battle-group-classes.mjs?v=group-001";
 import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=gear-a3";
 const title=s=>s[0].toUpperCase()+s.slice(1);
 export const battleLabels=Object.freeze({victory:"Victory",defeat:"Defeat",double_death:"Draw"});
@@ -15,7 +15,7 @@ function fighter(snapshot,v,index){
   const pieces=snapshot.trainingKit?.armour;
   const family=typeof snapshot.armour==="string"?snapshot.armour:pieces?
     new Set(Object.values(pieces)).size===1?Object.values(pieces)[0]:"mixed":null;
-  return {number:index+1,className:snapshot.novice?GROUP_CLASSES[snapshot.classId]?.mainClass:GROUP_CLASSES[snapshot.classId]?.name,role:snapshot.role,classLevel:snapshot.classLevel,weapon:snapshot.loadout,weaponName:COMBAT_LOADOUTS[snapshot.loadout].name,
+  return {number:index+1,className:snapshot.recruitLevel!==undefined&&snapshot.recruitLevel<20?RACE_LABELS[snapshot.race]:snapshot.novice?GROUP_CLASSES[snapshot.classId]?.mainClass:GROUP_CLASSES[snapshot.classId]?.name,role:snapshot.role,classLevel:snapshot.classLevel,weapon:snapshot.loadout,weaponName:COMBAT_LOADOUTS[snapshot.loadout].name,
     family,armourName:family?title(family):null,tactic:snapshot.tactic??null,
     hp:v.maxHP,armour:v.maxArmour};
 }

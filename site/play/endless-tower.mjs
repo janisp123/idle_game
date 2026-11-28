@@ -34,7 +34,7 @@ export function beginTower(s){
  const floor=t.highest+1,d=towerDifficulty(floor),seed=seedFor(floor),bracket=rankProfile(d.grade);
  const bonus=raidCombatBonus(s.raidBuff,s.settledAtMs),clanBonus=s.alphaClan?clanBonuses(s.alphaClan).combat:null;
  const frozen=startGroupSession(s.battleGroup,{difficulty:d.grade,str:1,dex:1,end:1,skill:s.skills.fighting.level},s.teamwork.level,seed,{rules:10,bonus});
- const enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,10,frozen.recruitment?Object.keys(frozen.players).length:undefined),arenaId=GROUP_ARENAS[(floor-1)%GROUP_ARENAS.length].id;
+ const enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,10,frozen.recruitment?Object.keys(frozen.players).length:undefined,frozen.recruitment&&Object.values(frozen.players).every(p=>p.recruitLevel!==undefined)?Object.values(frozen.players).map(p=>p.recruitLevel):undefined),arenaId=GROUP_ARENAS[(floor-1)%GROUP_ARENAS.length].id;
  const run={version:TOWER_VERSION,floor,startedAtMs:s.settledAtMs,seed,frozen,enemies,enemyTeamwork:bracket.teamworkLevel,arenaId,clanBonus};
  const tower={...t,run};if(!validTower(tower,s.settledAtMs))throw new RangeError("Invalid tower attempt");return {...s,tower};
 }

@@ -8,10 +8,26 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## MAIN-CLASS-SKILLS-001 — One basic automatic skill per main class
+
+- **Goal / acceptance:** Exactly one skill at individual level 20–29; no skill before 20; full specialist kit replaces it at 30; both sides use shared combat rules. No endgame retune.
+- **Status:** IN_REVIEW — PR #231; CI pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## STAGED-RECRUITMENT-001 — Race, class and specialization stages
+
+- **Goal / acceptance:** Race only before individual level 20; main class at 20; specialization at 30. Grey locked controls, symmetric arena/tower stages, no new save wipe, preserve frozen legacy sessions, max-only 7v7 calibration unchanged.
+- **Status:** IN_REVIEW — staged candidate, CI pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## SPECIALIZATION-LOCK-UI-001 — Explicit grey specialization lock
 
 - **Goal / acceptance:** Below character level 20, specialization buttons are neutral grey with a lock/level label and no selected highlight. Level 20 restores normal selection and color. Class info stays available. No new save reset or combat changes.
-- **Status:** IN_REVIEW — PR #230; Chromium checks pending.
+- **Status:** PARTIAL — PR #230 merged 8c4039c, seven workflows, 220 tests and mobile/desktop Chromium; Pages verification pending; superseded level gate by STAGED-RECRUITMENT-001.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
