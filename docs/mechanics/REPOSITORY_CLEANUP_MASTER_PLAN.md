@@ -26,3 +26,7 @@ One implementation PR at a time; remote main TD first, fresh branch, exact scope
 - Independent final audit and owner acceptance; record before/after metrics and any exceptions.
 
 Current phase 01 inventory. Branch removal/tag creation not supported by current connector; use authorized Owner/Codex workflow after reviewed manifest. No changes to runtime, tests, governance or branch protections in plan PR.
+
+## Codex handoff (#244)
+
+Follow the detailed REPO-CLEANUP-002 block in [TD_LIST](../TD_LIST.md). #243 merged 153962ef, both 28/28 gates and protocol passed. [Ancestry manifest](https://github.com/janisp123/idle_game/pull/243#issuecomment-7242566717) verifies 213 merge commits, 19 direct heads, 194 nonancestor heads; [instruction audit](https://github.com/janisp123/idle_game/pull/243#issuecomment-7242585835) identifies nine conflict groups. Reuse findings; verify changed facts and execute. Codex uses authenticated local Git for guarded ref actions unavailable to Chat. Chat stops overlapping implementation. Feature freeze until independent audit and Owner acceptance.
