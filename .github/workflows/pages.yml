@@ -94,7 +94,9 @@ jobs:
           marker="<!-- published-game:$RELEASE_SHA -->"
           comments=$(gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues/$number/comments")
           # Only our bot's exact marker counts; arbitrary external comments cannot spoof it.
-          if jq -e --arg marker "$marker" 'any(.[][]; .user.login == "github-actions[bot]" and ((.body // "") | split("\n")[0]) == $marker)' <<< "$comments" >/dev/null; then
+          duplicate=$(jq -c --arg marker "$marker" 'if type != "array" or any(.[]; type != "array") then error("Invalid comment pages") else any(.[][]; .user.login == "github-actions[bot]" and ((.body // "") | split("\n")[0]) == $marker) end' <<< "$comments")
+          [[ "$duplicate" == true || "$duplicate" == false ]]
+          if [[ "$duplicate" == true ]]; then
             echo "Release notice already exists."
             exit 0
           fi

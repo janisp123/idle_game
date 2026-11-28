@@ -284,7 +284,8 @@ else process.exit(6);
       {name:"wrong base",pulls:[[{...merged,base:{...merged.base,ref:"develop"}}]],comments:[[]],post:false},
       {name:"ambiguous",pulls:[[merged,{...merged,number:238}]],comments:[[]],post:false,error:true},
       {name:"pull API failure",pulls:[[]],comments:[[]],post:false,error:true,fail:"pulls"},
-      {name:"comment API failure",pulls:[[merged]],comments:[[]],post:false,error:true,fail:"comments"}
+      {name:"comment API failure",pulls:[[merged]],comments:[[]],post:false,error:true,fail:"comments"},
+      {name:"malformed comment pages",pulls:[[merged]],comments:{unexpected:true},post:false,error:true}
     ];
     for(const f of cases){
       rmSync(log,{force:true});
