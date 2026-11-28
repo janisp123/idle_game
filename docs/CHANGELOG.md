@@ -4,6 +4,24 @@
 
 Codex continues the approved documentation cleanup from `8053f7890154e5fcf728f3a242b14355e9fb1132`. Governance PR #246 merged after Owner approval, independent review and two 28/28 release runs plus standalone protocol. Branch `cleanup/repo-cleanup-002-docs`. Scope is WORK_CHECKPOINT, TD_LIST, CHANGELOG and the mechanics README. Next archive stale handoffs at their exact revision, reconcile active tasks, and validate current source and evidence links.
 
+[PR #247](https://github.com/janisp123/idle_game/pull/247) updates the checkpoint, active backlog and mechanics source map. The previous versions remain recoverable at `8053f7890154e5fcf728f3a242b14355e9fb1132`. Completed tasks moved here with attribution and release evidence preserved. Full release checks apply. Next is Phase 04 after integration.
+
+### REPO-CLEANUP-001 — Reconcile obsolete PRs and active task records
+
+- **Goal / acceptance:** Inspect all ten stale PRs against current main; preserve unique unfinished work and historical research by exact references, close obsolete implementation candidates, update live task statuses and next cleanup steps. No source, save, workflow, permission, history or branch deletions in this pass.
+- **Status:** DONE — #241 auto-merged 32078b9, final full gate 28/28 and standalone protocol passed; no site change. Ten stale PRs closed; remaining source cleanup under S09. Duplicate CI run had Chromium startup timeout; final browser integrity 5/5.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+### S09-RETIRED-ART-001 — Isolate obsolete activity artwork
+
+- **Goal / acceptance:** Archive twelve retired activity paintings outside published site without losing image bytes; prove not used by current or historical fixture activity mappings, scan site/tools static references, retain existing art and browser tests. No gameplay, save or CI changes.
+- **Status:** DONE — #242 merged ea49cec2; both full gates 28/28, Pages 46166609963 success. Twelve archived blobs (757994 bytes), current/legacy required scenes retained.
+- **Added by:** chat.
+- **Requested by:** Owner (repository cleanup).
+- **Implemented by:** chat (PR #242).
+
 ## 2026-11-28 — REPO-CLEANUP-002 phase 02 STARTED
 
 Codex continues the approved cleanup after [#245](https://github.com/janisp123/idle_game/pull/245) merged at `da8d4c7a719a9c21cf0c17a9d0f7f12dd68e8a12`. Both full release runs passed 28/28, standalone protocol passed, and the independently reviewed ref manifest is on main. Branch `cleanup/repo-cleanup-002-governance`. Scope is `AGENTS.md`, `docs/DECISIONS.md`, `docs/AGENT_PROTOCOL.md` for contradictory shared workflow wording, and task journal/checkpoint records. [PR #246](https://github.com/janisp123/idle_game/pull/246) reconciles the [saved nine-point audit](https://github.com/janisp123/idle_game/pull/243#issuecomment-7242585835) against approved decisions and current code. The current rules separate entry and live automatic advancement from historical manual Master, two-character, queue and material policies. Superseded IDs point to the exact previous register on main. The exact governance diff requires Owner review and a protected manual merge. The next phase is the documentation and checkpoint cleanup after integration.
