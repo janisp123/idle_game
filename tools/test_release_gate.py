@@ -69,5 +69,9 @@ class ReleaseGateTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 verify_revision(other, pr, repo)
 
+class DisposableNegativeIntegrationCanary(unittest.TestCase):
+    def test_intentional_release_failure_never_merge(self):
+        self.fail("RELEASE-GATE-001: intentional disposable negative integration canary")
+
 if __name__ == "__main__":
     unittest.main()
