@@ -11,7 +11,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## RELEASE-NOTIFY-001 — Published game completion notice
 
 - **Goal / acceptance:** Exactly one event-driven GitHub owner mention per merged playable revision after successful Pages deployment. Include exact SHA, cache-busting play link and deployment run. No intermediate CI spam, direct push or ambiguous PR notices; deduplicate reruns. No external mail secrets or global notification changes. GitHub email/push delivery depends on owner mention settings and must be verified.
-- **Status:** IN_REVIEW — #238 replaces closed stale #208; exact merged SHA, main-only successful publication, one bot-marked mention, no checkout, mock API regression. Full CI and real delivery pending. Manual checked merge only.
+- **Status:** PARTIAL — #238 merged e4489db, 28/28 final jobs; Pages run 46161259289 success, bot notice 7241733269 confirmed. Owner receipt/email not yet confirmed.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -19,7 +19,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## RELEASE-GATE-001 — Required complete test gate for native auto-merge
 
 - **Goal / acceptance:** One always-present, fail-closed required release check on each internal PR. Preserve existing tests and Pages publishing, require all existing functional and audit workflows for non-research PRs; narrow existing research-only allowlist may run protocol only. Missing, failed, cancelled or unexpected skipped checks block the gate. No write tokens or automatic merge action inside CI; never arm external, stale, overlapping or security-sensitive PRs. Owner must add the new required check and strict up-to-date policy in the existing ruleset before native auto-merge may be used. Test both full and research-only paths.
-- **Status:** PARTIAL — #236 merged b08ec6d after two complete 28/28 runs; Pages push 46156612904 passed. Owner activated protocol + release-gate, strict freshness and no bypass, verified via API. Negative end-to-end PR test and native auto-merge verification remain pending; do not arm unattended merges yet. Notification task renewed by Owner; separate manual checked PR.
+- **Status:** PARTIAL — #236 merged b08ec6d after two complete 28/28 runs; Pages push 46156612904 passed. Owner activated protocol + release-gate, strict freshness and no bypass, verified via API. Negative PR #239 passed: intentional failing gate, standalone protocol success, actual GitHub merge rejected HTTP 405, main unchanged; closed unmerged. Positive native auto-merge verification on approved arena roster PR pending; research-only integration still pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -51,7 +51,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## ARENA-ROSTER-UI-001 — Seven visible arena positions per side
 
 - **Goal / acceptance:** Always show seven arena slots on both sides, inactive positions neutral grey with Fighting Lv 5/10/15/20/25/30 unlock labels. Fresh 1v1 shows six locked each side; real combat remains matched active roster only. Canonical RECRUIT_LEVELS, no fake combatants, test every threshold, 7v7 and mobile/desktop overflow. Owner confirmed both sides.
-- **Status:** TODO — Owner requested earlier priority, separate isolated UI fix after active PR.
+- **Status:** IN_REVIEW — #240 candidate renders canonical seven positions on both sides, grey Fighting Lv labels; real frozen fighters unchanged. Every threshold tested by added Node fixture; fresh and full mobile/desktop checks added. CI and positive native auto-merge pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -59,7 +59,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## STANCE-UNLOCK-001 — Combat stance selection at character level 10
 
 - **Goal / acceptance:** Balanced is the sole active stance before individual character level 10; other stances are visibly locked. At 10 all combat stance choices unlock. Preserve earned stance records and frozen encounter correctness; test both sides at levels 9/10, reload and switching. Do not implement during S00/S01; separate isolated S02 fix.
-- **Status:** DONE — #237 merged 25f8e28; final 28/28 jobs and standalone protocol passed. Main source verified, Pages run 46159650057 pending at last check.
+- **Status:** DONE — #237 merged 25f8e28; final 28/28 jobs and standalone protocol passed. Main source verified, Pages run 46159650057 succeeded.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

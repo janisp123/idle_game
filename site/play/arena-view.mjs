@@ -1,5 +1,5 @@
 // Compact arena view; no strike log, HP bar, reward mutation or scheduler.
-import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels} from "./arena-presentation.mjs?v=raid-001";
+import {battlePreviewKey,battlePercentage,buildBattlePreview,committedBattleResult,battleLabels,arenaRosterSlots} from "./arena-presentation.mjs?v=raid-001";
 const NS="http://www.w3.org/2000/svg";
 const icons={
  dagger:"M5 21l4-4M6 14l4 4M8 16 18 3l3 0-1 4-10 11",staff:"M5 22 17 6M17 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",wand:"M4 21 16 9M16 3v4M16 11v4M10 9h4M18 9h4",scepter:"M12 22V8M9 8h6M12 1 16 5 12 9 8 5Z",axe:"M5 22 17 3M12 8c1-4 4-6 8-6l1 8c-4 2-7 1-9-2Z",gauntlets:"M4 11V7l2-2 2 2V4l2-1 2 2 2-2 2 2 2-1 2 3v6l-4 7H8Z",mace:"M7 22 15 9M13 3l4-1 4 4-1 4-4 1-4-4Z",
@@ -48,13 +48,22 @@ function fighter(f){
  row.append(token("heart","Health "+f.hp,f.hp),token("armour","Armour "+f.armour,f.armour));
  card.append(node("strong",["I","II"][f.number-1]),head,row);return card;
 }
+function rosterSlot(slot){
+ if(slot.fighter)return fighter(slot.fighter);
+ const card=node("div");card.className="arena-slot-locked group-fighter";
+ card.dataset.unlockLevel=String(slot.unlockLevel);
+ const label=node("span","Fighting Lv "+slot.unlockLevel);label.className="group-class-label";
+ card.append(node("strong",String(slot.number)),label);
+ card.setAttribute("aria-label","Slot "+slot.number+" — unlocks at Fighting level "+slot.unlockLevel);
+ return card;
+}
 export function createArenaView(){
  let preview=null,shownKey="",reveal=null,last=null;
  const show=(p)=>{
   const key=p?.key??"";
   if(shownKey===key)return;shownKey=key;
-  $("arenaPlayers").replaceChildren(...(p?.players??[]).map(fighter));
-  $("arenaEnemies").replaceChildren(...(p?.enemies??[]).map(fighter));
+  $("arenaPlayers").replaceChildren(...arenaRosterSlots(p,"players").map(rosterSlot));
+  $("arenaEnemies").replaceChildren(...arenaRosterSlots(p,"enemies").map(rosterSlot));
   $("arenaEnvironmentIcon").replaceChildren(...(p?[icon(p.environment.id)]:[]));
   $("arenaEnvironment").textContent=p?.environment.name??"—";
  };
