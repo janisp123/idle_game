@@ -135,3 +135,5 @@ CLAN-BUILDINGS-001 (owner approved plan #224): candidate replaces temporary Acad
 
 
 COMING-SOON-001 (Owner, 2026-11-27): expose Leaderboard, PvP, World Bosses (Ant Queen, Spider Queen, Pirate Queen, Dragon Queen, Daemon Queen), Endless Tower, and Clan Wars inside Clan as static Coming soon panels. No implementation authorization for the future gameplay features themselves.
+
+FORGECALLER-SIEGE-001: owner-approved future class identity recorded in docs/mechanics/FORGECALLER_SIEGE.md, PR #227. Exceptional siege engineer for clan PvP; existing hammer/plate and normal arena behavior preserved. Specific mechanics are design proposals, coefficients and shared warfare remain blocked. No code changes.
