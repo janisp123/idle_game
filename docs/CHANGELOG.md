@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — RELEASE-GATE-001 negative integration test STARTED (DISPOSABLE; NEVER MERGE)
+
+Owner explicitly approved a real protected-main negative merge test. Base e4489db, notification #238 merged with 28/28 final jobs; deployment pending. This branch adds an intentionally failing test-only canary, proves standalone protocol succeeds but release-gate fails, attempts an exact-head squash through normal protected GitHub API, verifies rejection and unchanged main, then closes without merging. No gameplay, permissions, secrets, workflow or ruleset changes. Never arm auto-merge here. If merge unexpectedly succeeds, stop all releases and restore main via checked PR.
+
 ## 2026-11-28 — RELEASE-NOTIFY-001 STARTED
 
 Owner renewed request for one completion notification after merge and deployment, no global Actions email spam. Fresh branch infra/release-completion-notice at 25f8e28 (#237 merged, all 28 final jobs passed). Supersede stale #208, retain current required gate. Next add restricted main-only post-deploy mention, dedupe tests and verify delivery; no mail credentials. Manual merge only.
