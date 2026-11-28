@@ -1,14 +1,14 @@
-import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=raid-001";
-import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,startArenaTower,chooseArenaPreferences,chooseClanPriority,chooseClanRaid,testClanRaid} from "./arena-manager.mjs?v=raid-001";
+import {xpToNextLevel} from "./engine.mjs?v=raid-001";
+import {newArenaManager,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,startArenaTower,chooseArenaPreferences,chooseClanPriority,chooseClanRaid,testClanRaid} from "./arena-manager.mjs?v=raid-001";
 import {createGroupEditor} from "./battle-group-editor.mjs?v=individual-stats-001";
 import {renderGroupAnalytics} from "./battle-group-analytics-view.mjs?v=group-006";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
-import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,migrateLegacyManager} from "./manager-migration.mjs?v=individual-stats-001";
+import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,RETIRED_MANAGER_KEYS} from "./manager-migration.mjs?v=individual-stats-001";
 import {ITEM_GRADES} from "./smith.mjs?v=gear-a3";
 import {createArenaView} from "./arena-view.mjs?v=raid-002";
 import {createRaidView} from "./raid-view.mjs?v=raid-002";
 import {cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
-import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=individual-stats-001";
+import {ALPHA_TOOLS_ENABLED,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=individual-stats-001";
 
 import {renderGroupProgress} from "./battle-group-progress-view.mjs?v=individual-stats-001";
 import {GROUP_ARENAS} from "./arenas.mjs?v=bal-002";
@@ -142,15 +142,10 @@ window.addEventListener("storage",e=>{if(e.key===MANAGER_SAVE_KEY){lastVisible=f
 enqueue(()=>{
  stored=localStorage.getItem(MANAGER_SAVE_KEY);clock=parseAlphaClock(localStorage.getItem(MANAGER_CLOCK_KEY));
  if(stored){state=readArenaManager(stored);if(!state){blocked=true;throw Error("Manager save is unreadable; no data has been overwritten.");}}
- else{
-  const legacy=localStorage.getItem(SAVE_KEY);
-  if(legacy){clock=parseAlphaClock(localStorage.getItem(ALPHA_CLOCK_KEY));const migration=migrateLegacyManager(legacy,0);
-   if(migration){state=enableArenaOnly(migration.state);if(clock)localStorage.setItem(MANAGER_CLOCK_KEY,JSON.stringify(clock));text("migrationNotice","Previous combat progress retained. Only fighting remains; old materials are retired.");$("migrationNotice").hidden=false;}
-   else{clock=null;state=newArenaManager(Date.now(),true);text("migrationNotice","Old alpha save could not be migrated; original data retained. New manager save started.");$("migrationNotice").hidden=false;}
-  }else{clock=null;state=newArenaManager(Date.now(),true);}
- }
- if(stored&&JSON.parse(stored).arenaOnly!==true){commit(enterArena(state,now()),true);text("migrationNotice","Coins, earned stats and combat progress retained. Noncombat activities and materials retired.");$("migrationNotice").hidden=false;}
- else if(!stored||!state.alphaClan||state.settledAtMs<now())commit(enterArena(state,now()),true);else render();
+ else{clock=null;state=newArenaManager(Date.now(),true);localStorage.removeItem(MANAGER_CLOCK_KEY);}
+ if(!stored||!state.alphaClan||state.settledAtMs<now()){if(!commit(enterArena(state,now()),true))return;}else render();
+ // Only remove this game's retired keys after a valid new-epoch save exists.
+ for(const key of RETIRED_MANAGER_KEYS)localStorage.removeItem(key);
  lastVisible=document.visibilityState!=="hidden";$("saveStatus").setAttribute("data-game-ready","true");text("saveStatus","Saved locally");
 });
 setInterval(tick,500);

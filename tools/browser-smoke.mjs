@@ -338,17 +338,18 @@ try{
     console.log(JSON.stringify({width,autoFight:true,liveStage:online.after.autoFight.stage,offlineStage:hidden.after.autoFight.stage,liveCoins:online.after.coins,offlineCoins:hidden.after.coins}));
     console.log("Browser smoke passed at "+width+"px: reset notice, alpha controls, persistence and real verdicts.");
     // Actual public manager route (legacy fixtures above remain independent).
-    const managerKey="idle-game-manager-v1";
+    const managerKey="idle-game-manager-v2";
     const url=origin+"/play/?manager="+width;
-    const script=await send("Page.addScriptToEvaluateOnNewDocument",{source:`if(location.href===${JSON.stringify(url)}){localStorage.removeItem(${JSON.stringify(managerKey)});localStorage.removeItem("idle-game-manager-clock-v1");localStorage.removeItem(${JSON.stringify(saveKey)});Date.now=()=>${fixedNow};}`});
+    const script=await send("Page.addScriptToEvaluateOnNewDocument",{source:`if(location.href===${JSON.stringify(url)}){localStorage.removeItem(${JSON.stringify(managerKey)});localStorage.removeItem("idle-game-manager-clock-v2");localStorage.setItem("idle-game-manager-v1","retired player progress");localStorage.setItem("idle-game-manager-clock-v1","retired clock");localStorage.setItem(${JSON.stringify(saveKey)},"retired prototype progress");localStorage.setItem("idle-game-alpha-clock-v1","retired prototype clock");localStorage.setItem("unrelated-storage-test","keep");Date.now=()=>${fixedNow};}`});
     await send("Page.navigate",{url});
     await until(async()=>{const status=await evaluate(`({ready:document.getElementById("saveStatus")?.getAttribute("data-game-ready"),notice:document.getElementById("migrationNotice")?.textContent,status:document.getElementById("saveStatus")?.textContent})`);if(status?.status==="Progress not saved")throw Error(status.notice);if(runtimeErrors.length)throw Error(runtimeErrors.at(-1));return status?.ready==="true";},"manager loaded "+width);
     await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:script.identifier});
     await evaluate('document.getElementById("battleGroupPanel").open=true');
     const locked=await evaluate(`(()=>({slots:[...document.querySelectorAll("#fighterButtons button")].map(b=>[b.disabled,b.textContent]),special:[...document.querySelectorAll("#specialClassChoice [data-choice]")].every(b=>b.disabled),players:document.getElementById("arenaPlayers").children.length,enemies:document.getElementById("arenaEnemies").children.length}))()`);
     assert.equal(locked.slots.length,7);assert.equal(locked.slots[0][0],false);for(const [i,level] of [5,10,15,20,25,30].entries()){assert.equal(locked.slots[i+1][0],true);assert.ok(locked.slots[i+1][1].includes("Lv "+level));}assert.equal(locked.special,true);assert.equal(locked.players,1);assert.equal(locked.enemies,1);
+    assert.equal(await evaluate('["idle-game-manager-v1","idle-game-manager-clock-v1","idle-game-prototype-v1","idle-game-alpha-clock-v1"].every(k=>localStorage.getItem(k)===null)&&localStorage.getItem("unrelated-storage-test")==="keep"'),true,"old game saves retired, unrelated storage retained");
     await shot("recruitment-"+width);
-    // The remaining historical public-route regression fixture deliberately retains its legacy full roster.
+    // Inject a full-roster regression fixture directly into the new test namespace; production never imports retired saves.
     const legacySave=await evaluate(`(async()=>{const m=await import("/play/arena-manager.mjs");return JSON.stringify(m.enterArena(m.newArenaManager(${fixedNow}),${fixedNow},()=>.5).state)})()`);
     const legacyUrl=origin+"/play/?manager-legacy="+width;
     const legacyInject=await send("Page.addScriptToEvaluateOnNewDocument",{source:`if(location.href===${JSON.stringify(legacyUrl)})localStorage.setItem(${JSON.stringify(managerKey)},${JSON.stringify(legacySave)});`});

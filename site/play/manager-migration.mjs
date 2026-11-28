@@ -6,8 +6,10 @@ import {newManagerGame,readManagerGame,MANAGER_LANES_VERSION} from "./manager-la
 import {blankArmourRequests} from "./manager-equipment.mjs?v=npc-parity-001";
 import {blankTactics} from "./manager-tactics.mjs?v=manager-tactics-001";
 import {WORK_ROTATION} from "./activity-rotation.mjs?v=npc-parity-001";
-export const MANAGER_SAVE_KEY="idle-game-manager-v1";
-export const MANAGER_CLOCK_KEY="idle-game-manager-clock-v1";
+// Alpha reset: a new namespace prevents stale tabs from restoring old progress.
+export const MANAGER_SAVE_KEY="idle-game-manager-v2";
+export const MANAGER_CLOCK_KEY="idle-game-manager-clock-v2";
+export const RETIRED_MANAGER_KEYS=Object.freeze(["idle-game-manager-v1","idle-game-manager-clock-v1","idle-game-prototype-v1","idle-game-alpha-clock-v1"]);
 export function migrateLegacyManager(value,now,random=Math.random){
  const old=readSave(value);
  if(!old?.teamSecond)return null;
