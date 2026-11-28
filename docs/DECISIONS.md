@@ -135,3 +135,5 @@ CLAN-BUILDINGS-001 (owner approved plan #224): candidate replaces temporary Acad
 
 
 COMING-SOON-001 (Owner, 2026-11-27): expose Leaderboard, PvP, World Bosses (Ant Queen, Spider Queen, Pirate Queen, Dragon Queen, Daemon Queen), Endless Tower, and Clan Wars inside Clan as static Coming soon panels. No implementation authorization for the future gameplay features themselves.
+
+STAFF-001 candidate PR #226: 13 magical classes equip one actual two-handed staff, no ammo/shield; physical Forgecaller retains hammer. Staff grade, quality and class-specific expertise migrate from old bow slot without charges. Legacy frozen opponents/sessions retain old equipment mapping via staffEquipment marker. Existing class spell power, weight and graded coefficients retained for initial parity, no new balance coefficients. CI pending.

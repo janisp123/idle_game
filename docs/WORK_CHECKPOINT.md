@@ -142,3 +142,5 @@ CLAN-BUILDINGS-001 diagnostic harness tools/test_clan_progression.mjs: actual fi
 
 
 COMING-SOON-001 — PR #225: static preview panels, responsive CSS and browser assertions for all five named bosses, nested Clan Wars, collapsed navigation, visibility and unchanged save. No JS/engine changes. Baseline a038846 (#223 merged, seven checks passed; live deployment not verified here). CI pending.
+
+STAFF-001 candidate PR #226: 13 magical classes equip one actual two-handed staff, no ammo/shield; physical Forgecaller retains hammer. Staff grade, quality and class-specific expertise migrate from old bow slot without charges. Legacy frozen opponents/sessions retain old equipment mapping via staffEquipment marker. Existing class spell power, weight and graded coefficients retained for initial parity, no new balance coefficients. CI pending.

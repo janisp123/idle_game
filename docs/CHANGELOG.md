@@ -1044,3 +1044,5 @@ CLAN-BUILDINGS-001: added 730-day economy and 50-tier raid diagnostic harness; f
 
 
 STAFF-001 STARTED (owner 2026-11-28): single real two-handed staff weapon for all magical casters (13 former bow adapters; physical Forgecaller keeps hammer). Convert class-local weapon grade/quality and expertise without spending or resetting; retain frozen legacy snapshots and encounter replay. Preserve class-specific attacks and balance coefficients initially. Baseline deba3ac; branch feature/two-handed-staff; next implement and test.
+
+STAFF-001 candidate PR #226: 13 magical classes equip one actual two-handed staff, no ammo/shield; physical Forgecaller retains hammer. Staff grade, quality and class-specific expertise migrate from old bow slot without charges. Legacy frozen opponents/sessions retain old equipment mapping via staffEquipment marker. Existing class spell power, weight and graded coefficients retained for initial parity, no new balance coefficients. CI pending.
