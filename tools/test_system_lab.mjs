@@ -245,3 +245,57 @@ test("SIM-003 both simulation workflows automatically cover production modules",
   const yaml=readFileSync(".github/workflows/system-lab.yml","utf8");
   assert.match(yaml,/github.event_name == 'workflow_dispatch' && inputs.full_balance == true/);
 });
+
+test("RELEASE-NOTIFY-001 actual post-deploy script: exact PR, no duplicate, no unrelated notice",()=>{
+  const yaml=readFileSync(".github/workflows/pages.yml","utf8");
+  const job=yaml.slice(yaml.indexOf("\n  notify-release:\n"));
+  assert.match(job,/needs: deploy\n/);
+  assert.match(job,/needs\.deploy\.result == 'success' && github\.ref == 'refs\/heads\/main'/);
+  assert.match(job,/pull-requests: write/);
+  assert.match(job,/group: release-notice-\$\{\{ github\.sha \}\}/);
+  assert.doesNotMatch(job,/actions\/checkout|pull_request_target|secrets\.|continue-on-error:/);
+  const script=job.split("        run: |\n")[1].split("\n").map(l=>l.slice(10)).join("\n");
+  assert.ok(script.startsWith("set -euo pipefail"));
+  const folder=mkdtempSync(join(tmpdir(),"idle-release-notice-"));
+  try {
+    const sha="a".repeat(40),repo="janisp123/idle_game",marker="<!-- published-game:"+sha+" -->";
+    const merged={number:237,merged_at:"2026-11-28T00:00:00Z",merge_commit_sha:sha,base:{ref:"main",repo:{full_name:repo}}};
+    const executable=join(folder,"gh"),log=join(folder,"post.json");
+    writeFileSync(executable,`#!/usr/bin/env node
+const fs=require("node:fs");
+const args=process.argv.slice(2),route=args.find(x=>x.startsWith("repos/")),f=JSON.parse(process.env.FIXTURE);
+if(args.includes("POST")){
+  if(!route.endsWith("/issues/237/comments"))process.exit(9);
+  fs.writeFileSync(process.env.POST_LOG,JSON.stringify(args));
+  console.log("https://github.com/test/notice");process.exit(0);
+}
+if(route.endsWith("/pulls")){if(f.fail==="pulls")process.exit(7);console.log(JSON.stringify(f.pulls));}
+else if(route.endsWith("/comments")){if(f.fail==="comments")process.exit(8);console.log(JSON.stringify(f.comments));}
+else process.exit(6);
+`,{mode:0o700});
+    const env={...process.env,PATH:folder+":"+process.env.PATH,RELEASE_SHA:sha,OWNER:"janisp123",GITHUB_REPOSITORY:repo,GITHUB_SERVER_URL:"https://github.com",GITHUB_RUN_ID:"123",GH_TOKEN:"synthetic-no-network",POST_LOG:log};
+    const cases=[
+      {name:"exact on second page",pulls:[[],[merged]],comments:[[]],post:true},
+      {name:"duplicate bot marker on second page",pulls:[[merged]],comments:[[],[{user:{login:"github-actions[bot]"},body:marker+"\nnotice"}]],post:false},
+      {name:"external marker does not suppress",pulls:[[merged]],comments:[[{user:{login:"stranger"},body:marker}]],post:true},
+      {name:"no merged PR",pulls:[[]],comments:[[]],post:false},
+      {name:"wrong revision",pulls:[[{...merged,merge_commit_sha:"b".repeat(40)}]],comments:[[]],post:false},
+      {name:"unmerged",pulls:[[{...merged,merged_at:null}]],comments:[[]],post:false},
+      {name:"wrong base",pulls:[[{...merged,base:{...merged.base,ref:"develop"}}]],comments:[[]],post:false},
+      {name:"ambiguous",pulls:[[merged,{...merged,number:238}]],comments:[[]],post:false,error:true},
+      {name:"pull API failure",pulls:[[]],comments:[[]],post:false,error:true,fail:"pulls"},
+      {name:"comment API failure",pulls:[[merged]],comments:[[]],post:false,error:true,fail:"comments"}
+    ];
+    for(const f of cases){
+      rmSync(log,{force:true});
+      const run=()=>execFileSync("bash",["-c",script],{encoding:"utf8",env:{...env,FIXTURE:JSON.stringify(f)}});
+      if(f.error)assert.throws(run,undefined,f.name);else run();
+      if(f.post){
+        const args=JSON.parse(readFileSync(log,"utf8")),body=args.find(x=>x.startsWith("body="));
+        assert.ok(body.startsWith("body="+marker+"\n@janisp123 "));
+        assert.ok(body.includes("https://janisp123.github.io/idle_game/play/?v="+sha.slice(0,7)));
+        assert.ok(body.includes("https://github.com/"+repo+"/actions/runs/123"));
+      }else assert.throws(()=>readFileSync(log,"utf8"),{code:"ENOENT"},f.name);
+    }
+  } finally {rmSync(folder,{recursive:true,force:true});}
+});

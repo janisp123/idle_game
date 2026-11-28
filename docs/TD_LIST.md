@@ -11,7 +11,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## RELEASE-NOTIFY-001 — Published game completion notice
 
 - **Goal / acceptance:** Exactly one event-driven GitHub owner mention per merged playable revision after successful Pages deployment. Include exact SHA, cache-busting play link and deployment run. No intermediate CI spam, direct push or ambiguous PR notices; deduplicate reruns. No external mail secrets or global notification changes. GitHub email/push delivery depends on owner mention settings and must be verified.
-- **Status:** PARTIAL — STARTED on infra/release-completion-notice; supersedes stale #208. Manual checked merge only.
+- **Status:** IN_REVIEW — #238 replaces closed stale #208; exact merged SHA, main-only successful publication, one bot-marked mention, no checkout, mock API regression. Full CI and real delivery pending. Manual checked merge only.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

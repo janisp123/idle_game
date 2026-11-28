@@ -56,3 +56,47 @@ jobs:
       - name: Deploy website
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+
+  notify-release:
+    name: Notify owner of published game
+    needs: deploy
+    if: ${{ needs.deploy.result == 'success' && github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: release-notice-${{ github.sha }}
+      cancel-in-progress: false
+    steps:
+      - name: Post one completion mention on exact merged PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ github.sha }}
+          OWNER: ${{ github.repository_owner }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$OWNER" =~ ^[A-Za-z0-9-]+$ && "$GITHUB_REPOSITORY" == "$OWNER/"* ]]
+          # Only a PR whose actual merge commit is this deployed revision qualifies.
+          pulls=$(gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/commits/$RELEASE_SHA/pulls")
+          numbers=$(jq -c --arg sha "$RELEASE_SHA" --arg repo "$GITHUB_REPOSITORY" '[.[][] | select(.merged_at != null and .merge_commit_sha == $sha and .base.ref == "main" and .base.repo.full_name == $repo) | .number] | unique' <<< "$pulls")
+          count=$(jq 'length' <<< "$numbers")
+          if [[ "$count" == 0 ]]; then
+            echo "No exact merged pull request; no notice."
+            exit 0
+          fi
+          [[ "$count" == 1 ]] || { echo "Ambiguous merged pull request; no notice."; exit 1; }
+          number=$(jq -r '.[0]' <<< "$numbers")
+          [[ "$number" =~ ^[1-9][0-9]*$ ]]
+          marker="<!-- published-game:$RELEASE_SHA -->"
+          comments=$(gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues/$number/comments")
+          # Only our bot's exact marker counts; arbitrary external comments cannot spoof it.
+          if jq -e --arg marker "$marker" 'any(.[][]; .user.login == "github-actions[bot]" and ((.body // "") | split("\n")[0]) == $marker)' <<< "$comments" >/dev/null; then
+            echo "Release notice already exists."
+            exit 0
+          fi
+          body=$(printf '%s\n@%s Game update merged and deployed successfully.\n\nRevision: %s\nPlay: https://%s.github.io/%s/play/?v=%s\nDeployment: %s/%s/actions/runs/%s' "$marker" "$OWNER" "$RELEASE_SHA" "$OWNER" "${GITHUB_REPOSITORY#*/}" "${RELEASE_SHA:0:7}" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+          gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$number/comments" -f body="$body" --jq .html_url
