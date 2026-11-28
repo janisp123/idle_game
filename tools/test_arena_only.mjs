@@ -48,6 +48,7 @@ import {upgradeBattleGroup} from "../site/play/battle-group.mjs";
 import {RAID_CATALOG} from "../site/play/raid-rules.mjs";
 test("raid pause, persisted frozen attempt, completion once, and resumed arena",()=>{
  let s=newArenaManager(now);s=alphaMaxStats(s,"none",now,rand).state;s={...s,battleGroup:upgradeBattleGroup(s.battleGroup,100000000,52).group};
+ s={...s,tower:{version:1,highest:10,legacyAccess:0,run:null,last:null}};
  const out=startArenaRaid(s,10,now,rand),run=out.state.raidRun,end=run.startedAtMs+run.durationMs,r=raidResult(run);
  assert.ok(run);assert.deepEqual(startArenaRaid(out.state,20,now,rand).state,out.state);
  const mid=settleArenaLive(out.state,now+Math.floor(run.durationMs/2),rand).state;
@@ -91,3 +92,5 @@ import "./test_arena_preferences.mjs";
 import "./test_alpha_clan.mjs";
 
 import "./test_clan_progression.mjs";
+
+import "./test_endless_tower.mjs";

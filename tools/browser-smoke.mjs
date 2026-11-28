@@ -357,10 +357,10 @@ try{
     await evaluate('(()=>{const b=[...document.querySelectorAll("#arenaPreferenceChoices button")];b.slice(0,3).forEach(x=>x.click());document.getElementById("arenaPreferenceSave").click();})()');
     await until(()=>evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).arenaPreferences?.favorites?.length===3`),"arena preference saved");
     await evaluate('document.getElementById("arenaPreferencePanel").open=false');
-    const futurePanels=await evaluate(`(()=>{const ids=["leaderboardPanel","pvpPanel","worldBossesPanel","endlessTowerPanel","clanWarsPanel"],panels=ids.map(id=>document.getElementById(id)),before=localStorage.getItem(${JSON.stringify(managerKey)});for(const p of panels)p.querySelector("summary").click();const checks=panels.every(p=>p.open&&p.checkVisibility()&&p.querySelector("summary").getBoundingClientRect().height>=44&&p.querySelector("summary").textContent.includes("Coming soon")&&!p.querySelector("button,input,select,textarea"));const bosses=[...document.querySelectorAll("#worldBossesPanel li")].map(x=>x.textContent);const nested=document.getElementById("alphaClanPanel").contains(document.getElementById("clanWarsPanel"));return {checks,bosses,nested,unchanged:before===localStorage.getItem(${JSON.stringify(managerKey)}),overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};})()`);
+    const futurePanels=await evaluate(`(()=>{const ids=["leaderboardPanel","pvpPanel","worldBossesPanel","clanWarsPanel"],panels=ids.map(id=>document.getElementById(id)),before=localStorage.getItem(${JSON.stringify(managerKey)});for(const p of panels)p.querySelector("summary").click();const checks=panels.every(p=>p.open&&p.checkVisibility()&&p.querySelector("summary").getBoundingClientRect().height>=44&&p.querySelector("summary").textContent.includes("Coming soon")&&!p.querySelector("button,input,select,textarea"));const bosses=[...document.querySelectorAll("#worldBossesPanel li")].map(x=>x.textContent);const nested=document.getElementById("alphaClanPanel").contains(document.getElementById("clanWarsPanel"));return {checks,bosses,nested,unchanged:before===localStorage.getItem(${JSON.stringify(managerKey)}),overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};})()`);
     assert.deepEqual(futurePanels,{checks:true,bosses:["Ant Queen","Spider Queen","Pirate Queen","Dragon Queen","Daemon Queen"],nested:true,unchanged:true,overflow:0},"static coming-soon panels");
     await shot("coming-soon-"+width);
-    await evaluate('for(const id of ["leaderboardPanel","pvpPanel","worldBossesPanel","endlessTowerPanel","clanWarsPanel"])document.getElementById(id).open=false');
+    await evaluate('for(const id of ["leaderboardPanel","pvpPanel","worldBossesPanel","clanWarsPanel"])document.getElementById(id).open=false');
     await shot("alpha-clan-"+width);await evaluate('document.getElementById("alphaClanPanel").open=false');
     assert.equal(await evaluate('!document.getElementById("battleGroupPanel").open && !document.getElementById("specialClassChoice").checkVisibility()'),true);
     await evaluate('document.querySelector("#battleGroupPanel > summary").click()');
@@ -436,6 +436,15 @@ try{
     assert.equal(await evaluate(`JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)})).combatSession.prizeCursor`),1);
     await evaluate('document.querySelector("#raidPanel > summary").click()');
     assert.equal(await evaluate('document.querySelectorAll("#raidChoices button[data-raid-level]").length'),5);
+    assert.equal(await evaluate('Array.from(document.querySelectorAll("#raidChoices button")).every(b=>b.disabled)'),true);
+    await evaluate('document.getElementById("endlessTowerPanel").open=true;document.getElementById("towerAttempt").click()');
+    await until(()=>evaluate('!document.getElementById("towerFight").hidden && document.getElementById("towerAttempt").disabled'),"tower attempt rendered");
+    await shot("tower-"+width);
+    await evaluate(`Date.now=()=>${fixedNow+30100}`);
+    await until(()=>evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));return s.tower?.last?.floor===1&&!s.tower.run;})()`),"tower offline-safe settlement");
+    await evaluate(`(()=>{const key=${JSON.stringify(managerKey)},s=JSON.parse(localStorage.getItem(key));s.tower={version:1,highest:10,legacyAccess:0,run:null,last:null};const value=JSON.stringify(s);localStorage.setItem(key,value);dispatchEvent(new StorageEvent("storage",{key,newValue:value}));})()`);
+    await until(()=>evaluate('!document.querySelector("#raidChoices button").disabled'),"floor 10 raid unlock");
+    assert.equal(await evaluate('Array.from(document.querySelectorAll("#raidChoices button")).filter(b=>!b.disabled).length'),1);
     await evaluate('document.getElementById("raidChoices").querySelector("button").click()');
     await until(()=>evaluate('!document.getElementById("raidBattle").hidden && document.querySelectorAll("#raidMinions .raid-fighter").length===6'),"raid encounter rendered");
     assert.ok(await evaluate('document.querySelectorAll("#raidPlayers .raid-fighter").length===7 && document.querySelector("#raidBoss .raid-boss").textContent.includes("Ironjaw") && document.getElementById("battleFighters").hidden && document.documentElement.scrollWidth-innerWidth<=2'));

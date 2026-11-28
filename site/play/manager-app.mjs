@@ -19,7 +19,7 @@ const $=id=>document.getElementById(id),fmt=n=>Number(n).toLocaleString("en-GB")
 let state,stored=null,clock=null,lastVisible=false,chain=Promise.resolve(),feed=[],loginLines=[],loginSummary="No return rewards yet.",blocked=false;
 const now=()=>alphaTime(clock,Date.now());
 const arenaView=createArenaView();
-import {towerProgress,towerDifficulty,TOWER_ATTEMPT_MS} from "./endless-tower.mjs";
+import {towerProgress,TOWER_ATTEMPT_MS} from "./endless-tower.mjs";
 const raidView=createRaidView(level=>choose((s,t)=>startArenaRaid(s,level,t)));
 const editor=createGroupEditor((id,c)=>choose((s,t)=>chooseArenaClass(s,id,c.race,c.mainClass,c.id,t)),(id,stance)=>choose((s,t)=>chooseArenaStance(s,id,stance,t)));
 const node=(tag,content)=>{const n=document.createElement(tag);if(content!==undefined)n.textContent=content;return n;};

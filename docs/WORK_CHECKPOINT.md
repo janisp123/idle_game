@@ -142,3 +142,5 @@ CLAN-BUILDINGS-001 diagnostic harness tools/test_clan_progression.mjs: actual fi
 
 
 COMING-SOON-001 — PR #225: static preview panels, responsive CSS and browser assertions for all five named bosses, nested Clan Wars, collapsed navigation, visibility and unchanged save. No JS/engine changes. Baseline a038846 (#223 merged, seven checks passed; live deployment not verified here). CI pending.
+
+TOWER-001 candidate PR #228: permanent sequential tower floors; clear thresholds unlock current personal raids; no additional boss catalog or currency. Individual attempts use existing 10-second group cadence and V10 elimination with fixed deterministic floor opponents; manual next attempt/retry, arena resumes after completion, first-clear coins = 5 × floor. Provisional grade bracket (one per seven floors, capped S) and enemy HP/damage multiplier .35+.021×floor; no numerical balance claim. Legacy access derived from existing successful raid evidence, active blessing/attempt; no invented floor clears. CI and staff branch reconciliation pending.

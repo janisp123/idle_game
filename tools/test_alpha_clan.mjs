@@ -63,7 +63,7 @@ import {startArenaRaid} from "../site/play/arena-manager.mjs";
 import {raidResult} from "../site/play/raid-session.mjs";
 test("personal raids freeze completed clan combat bonus, without altering historical raid replay",()=>{
  const s=fresh(),c={...s.alphaClan,levels:{...s.alphaClan.levels,portal:5}};
- assert.ok(validAlphaClan(c));const started=startArenaRaid({...s,alphaClan:c},10,t,rand).state;
+ assert.ok(validAlphaClan(c));const started=startArenaRaid({...s,alphaClan:c,tower:{version:1,highest:10,legacyAccess:0,run:null,last:null}},10,t,rand).state;
  assert.equal(started.raidRun.clanBonus.hp,15);assert.ok(validClanCombatForTest(started.raidRun.clanBonus));
  assert.deepEqual(readArenaManager(JSON.stringify(started)),started);
  assert.deepEqual(raidResult(started.raidRun),raidResult(readArenaManager(JSON.stringify(started)).raidRun));

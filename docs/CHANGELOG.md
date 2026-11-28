@@ -1044,3 +1044,5 @@ CLAN-BUILDINGS-001: added 730-day economy and 50-tier raid diagnostic harness; f
 
 
 TOWER-001 STARTED (Owner 2026-11-28): implement Endless Tower as permanent raid qualification path, floors 10/20/30/40/50 unlock existing bosses, beyond 50 endless. Preserve earned raid blessings and already completed/active raid access. No separate currencies/gear. Separate branch from unmerged STAFF-001, which must be reconciled before its release. Baseline deba3ac; next implement deterministic floor attempts and raid gating.
+
+TOWER-001 candidate PR #228: permanent sequential tower floors; clear thresholds unlock current personal raids; no additional boss catalog or currency. Individual attempts use existing 10-second group cadence and V10 elimination with fixed deterministic floor opponents; manual next attempt/retry, arena resumes after completion, first-clear coins = 5 × floor. Provisional grade bracket (one per seven floors, capped S) and enemy HP/damage multiplier .35+.021×floor; no numerical balance claim. Legacy access derived from existing successful raid evidence, active blessing/attempt; no invented floor clears. CI and staff branch reconciliation pending.
