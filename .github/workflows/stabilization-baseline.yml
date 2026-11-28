@@ -1,11 +1,6 @@
 name: Stabilization baseline
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'tools/stabilization-baseline.mjs'
-      - '.github/workflows/stabilization-baseline.yml'
-      - 'tools/stabilization-browser.mjs'
+  workflow_call:
   workflow_dispatch:
 permissions:
   contents: read

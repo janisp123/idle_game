@@ -1,11 +1,6 @@
 name: Team reward and positioning sensitivity
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'site/play/**'
-      - 'tools/team-*-audit.mjs'
-      - '.github/workflows/team-sensitivity.yml'
+  workflow_call:
   workflow_dispatch:
 permissions:
   contents: read

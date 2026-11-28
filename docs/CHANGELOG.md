@@ -2,7 +2,7 @@
 
 ## 2026-11-28 — RELEASE-GATE-001 STARTED
 
-Owner approved native GitHub auto-merge with full safety. Base 4a6da03, previous guide release verified live; branch infra/required-release-gate. Existing ruleset requires only protocol, no bypass; direct main-write test rejected with unchanged SHA. All nine existing suites to be retained; one release check, no elevated PR tokens, no external-fork auto-merge. Next implement/test gate, then owner adds required check and strict freshness. Old overlapping #208 is stale, unmergeable and excluded. No gameplay changes.
+Owner approved native GitHub auto-merge with full safety. Base 4a6da03, previous guide release verified live; branch infra/required-release-gate. Existing ruleset requires only protocol, no bypass; direct main-write test rejected with unchanged SHA. All nine existing suites to be retained; one release check, no elevated PR tokens, no external-fork auto-merge. Draft #236: reusable full gate candidate submitted, scope/failure policy tests added; verify CI, then owner adds required check and strict freshness. Old overlapping #208 is stale, unmergeable and excluded. No gameplay changes.
 
 ## 2026-11-28 — MAIN-CLASS-GUIDE-001 STARTED
 

@@ -11,7 +11,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## RELEASE-GATE-001 — Required complete test gate for native auto-merge
 
 - **Goal / acceptance:** One always-present, fail-closed required release check on each internal PR. Preserve existing tests and Pages publishing, require all existing functional and audit workflows for non-research PRs; narrow existing research-only allowlist may run protocol only. Missing, failed, cancelled or unexpected skipped checks block the gate. No write tokens or automatic merge action inside CI; never arm external, stale, overlapping or security-sensitive PRs. Owner must add the new required check and strict up-to-date policy in the existing ruleset before native auto-merge may be used. Test both full and research-only paths.
-- **Status:** PARTIAL — owner approved setup; repository auto-merge and squash-only verified, direct main-write canary rejected, existing ruleset only requires protocol. Started isolated infrastructure branch.
+- **Status:** PARTIAL — owner approved setup; repository auto-merge and squash-only verified, direct main-write canary rejected, existing ruleset only requires protocol. Candidate in draft #236: nine reusable suites, universal release-gate and six policy unit tests, narrow research-only exemption; full CI pending. Owner ruleset setup remains blocked until verified.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

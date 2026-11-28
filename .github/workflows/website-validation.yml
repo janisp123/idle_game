@@ -1,0 +1,37 @@
+name: Website validation (reusable)
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate static site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - name: Check site structure and local links
+        run: python tools/check_pages_site.py
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - name: Check game module syntax
+        run: node --check site/play/arena-presentation.mjs && node --check site/play/arena-view.mjs && node --check site/play/manager-app.mjs && node --check site/play/manager-migration.mjs && node --check site/play/app.mjs && node --check site/play/engine.mjs && node --check site/play/loot.mjs && node --check site/play/production.mjs && node --check site/play/attributes.mjs && node --check site/play/combat.mjs && node --check site/play/combat-skills.mjs && node --check site/play/combat-art.mjs && node --check tools/combat-simulator.mjs && node --check tools/test_combat_simulator.mjs
+      - name: Test offline engine, skill migration and browser UI
+        run: node --test tools/test_arena_only.mjs tools/test_group_endgame.mjs tools/test_group_rank.mjs tools/test_group_manager.mjs tools/test_group_timeline.mjs tools/test_group_combat.mjs tools/test_battle_group.mjs tools/test_clone_opponents.mjs tools/test_battle_analytics.mjs tools/test_arena_speed.mjs tools/test_arena_presentation.mjs tools/test_manager_migration.mjs tools/test_game_engine.mjs tools/test_physical_duel.mjs tools/test_arenas.mjs tools/test_game_ui.mjs tools/test_combat.mjs tools/test_combat_art.mjs tools/test_combat_simulator.mjs
+      - name: Real Chromium browser smoke (mobile and desktop)
+        run: node tools/browser-smoke.mjs
+      - name: Attach browser smoke screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+          path: browser-smoke-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
