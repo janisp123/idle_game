@@ -25,7 +25,7 @@ One implementation PR at a time; remote main TD first, fresh branch, exact scope
 - Full CI, save and browser tests pass; website published and checked.
 - Independent final audit and owner acceptance; record before/after metrics and any exceptions.
 
-Current phase 01 inventory. Branch removal/tag creation not supported by current connector; use authorized Owner/Codex workflow after reviewed manifest. No changes to runtime, tests, governance or branch protections in plan PR.
+Phase 01 ref actions were applied through authenticated Git. The [verified manifest](REPO_CLEANUP_002_REF_MANIFEST.md) records 216 removed branches, 194 archive tags and 22 retained branches. Next is phase 02, with separate Owner review of the governance diff.
 
 ## Codex handoff (#244)
 

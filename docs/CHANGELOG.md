@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — REPO-CLEANUP-002 phase 01 STARTED
+
+Codex resumed the approved repository cleanup after #244 merged at `2a5d9e6c21d666933faf587f76b52b9b7372e7ae`. Both full release runs and standalone protocol passed. Branch `cleanup/repo-cleanup-002-git-hygiene`; scope is branch classification, verified recovery, guarded ref actions and the phase journal/checkpoint. The saved #243 audit identifies 19 exact heads already reachable from main and 194 exact merged heads that require durable retention. [PR #245](https://github.com/janisp123/idle_game/pull/245) records the [exact ref manifest](mechanics/REPO_CLEANUP_002_REF_MANIFEST.md). Created 194 archive tags and verified fresh recovery and Git connectivity before deleting 216 refs by exact-SHA lease. Live readback confirmed 24 branches, including main and the active journal branch, and all archive tags. Twenty-two exceptional branches were deliberately retained. Next reconcile agent instructions in a separate Owner-reviewed governance PR after #245 integrates.
+
 ## 2026-11-28 — REPO-CLEANUP-002 #244 Codex handoff
 
 Owner requests executable TD to avoid wasting reset. #243 merged 153962ef; both full runs 46167213015 and 46167204809 28/28; protocol 46167204817 success. Ancestry and instruction audits in #243 comments 7242566717 and 7242585835. TD now specifies exact execution, retention, source/site/test scope, approvals and independent acceptance. Checkpoint identifies Codex as next implementation owner. No gameplay, governance, CI or ref deletions; full CI pending.

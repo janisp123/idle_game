@@ -1,8 +1,8 @@
 # Current working checkpoint
 
-## CURRENT — REPO-CLEANUP-002 Codex handoff (#244)
+## CURRENT — REPO-CLEANUP-002 phase 01 (#245)
 
-Feature freeze; Codex owns next implementation after #244 merge; Chat stops overlapping writes. #243 merged 153962ef, both 28/28 full gates and protocol passed; no site changes. #242 Pages 46166609963 success. Read TD_LIST first; new REPO-CLEANUP-002 block specifies exact sequence and stop policy. Reuse #243 comments 7242566717 (ancestry) and 7242585835 (instruction contradictions). Next: safe local Git branch cleanup; no refs deleted. #244 docs-only CI pending. Historical entries below are NOT current directions.
+Feature freeze remains active. #244 merged at `2a5d9e6c21d666933faf587f76b52b9b7372e7ae` after both full release gates and standalone protocol passed. The [phase 01 manifest](mechanics/REPO_CLEANUP_002_REF_MANIFEST.md) records 216 verified removals by exact-SHA lease, 194 independently recoverable archive tags and 22 retained exceptional branches. [PR #245](https://github.com/janisp123/idle_game/pull/245) records the results. Latest site release remains #242, [Pages run 46166609963](https://github.com/janisp123/idle_game/actions/runs/46166609963). After #245 integrates, reconcile governance using the [saved instruction audit](https://github.com/janisp123/idle_game/pull/243#issuecomment-7242585835). That separate PR requires Owner review and a checked manual merge. The entries below preserve historical handoffs.
 
 ## Latest integration — alpha
 
