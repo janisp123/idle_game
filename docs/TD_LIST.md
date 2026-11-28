@@ -8,6 +8,14 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## REPO-CLEANUP-002 — Repository hygiene master plan
+
+- **Goal / acceptance:** Owner-approved feature freeze through nine cleanup phases and independent final audit. Classify refs, reconcile agent instructions and documentation, retain useful research/evidence, remove proven-obsolete public code/assets, optimize website and validate tests/infrastructure. No history rewrite or loss of unique work. [Master plan](mechanics/REPOSITORY_CLEANUP_MASTER_PLAN.md); [branch inventory](mechanics/BRANCH_INVENTORY_20261128.md).
+- **Status:** PARTIAL — #243 candidate: phase 01 inventory 240 refs including main and cleanup branch, 213 exact merged PR heads, 19 closed unmerged, 3 changed-head, 3 unmatched. No deletions; verify durable retention and review exceptional branches before removal. Full CI pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## REPO-CLEANUP-001 — Reconcile obsolete PRs and active task records
 
 - **Goal / acceptance:** Inspect all ten stale PRs against current main; preserve unique unfinished work and historical research by exact references, close obsolete implementation candidates, update live task statuses and next cleanup steps. No source, save, workflow, permission, history or branch deletions in this pass.
@@ -19,10 +27,10 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## S09-RETIRED-ART-001 — Isolate obsolete activity artwork
 
 - **Goal / acceptance:** Archive twelve retired activity paintings outside published site without losing image bytes; prove not used by current or historical fixture activity mappings, scan site/tools static references, retain existing art and browser tests. No gameplay, save or CI changes.
-- **Status:** IN_REVIEW — #242 candidate: twelve exact artwork blobs archived outside site (757994 bytes); current/legacy required scene assets retained. Additive archive hash and literal-reference tests; full CI pending.
+- **Status:** DONE — #242 merged ea49cec2; both full gates 28/28, Pages 46166609963 success. Twelve archived blobs (757994 bytes), current/legacy required scenes retained.
 - **Added by:** chat.
 - **Requested by:** Owner (repository cleanup).
-- **Implemented by:** Not yet.
+- **Implemented by:** chat (PR #242).
 
 ## RELEASE-NOTIFY-001 — Published game completion notice
 
