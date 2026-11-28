@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — REPO-CLEANUP-002 phase 03 STARTED
+
+Codex continues the approved documentation cleanup from `8053f7890154e5fcf728f3a242b14355e9fb1132`. Governance PR #246 merged after Owner approval, independent review and two 28/28 release runs plus standalone protocol. Branch `cleanup/repo-cleanup-002-docs`. Scope is WORK_CHECKPOINT, TD_LIST, CHANGELOG and the mechanics README. Next archive stale handoffs at their exact revision, reconcile active tasks, and validate current source and evidence links.
+
 ## 2026-11-28 — REPO-CLEANUP-002 phase 02 STARTED
 
 Codex continues the approved cleanup after [#245](https://github.com/janisp123/idle_game/pull/245) merged at `da8d4c7a719a9c21cf0c17a9d0f7f12dd68e8a12`. Both full release runs passed 28/28, standalone protocol passed, and the independently reviewed ref manifest is on main. Branch `cleanup/repo-cleanup-002-governance`. Scope is `AGENTS.md`, `docs/DECISIONS.md`, `docs/AGENT_PROTOCOL.md` for contradictory shared workflow wording, and task journal/checkpoint records. [PR #246](https://github.com/janisp123/idle_game/pull/246) reconciles the [saved nine-point audit](https://github.com/janisp123/idle_game/pull/243#issuecomment-7242585835) against approved decisions and current code. The current rules separate entry and live automatic advancement from historical manual Master, two-character, queue and material policies. Superseded IDs point to the exact previous register on main. The exact governance diff requires Owner review and a protected manual merge. The next phase is the documentation and checkpoint cleanup after integration.
