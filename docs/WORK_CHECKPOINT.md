@@ -1,8 +1,8 @@
 # Current working checkpoint
 
-## CURRENT — REPO-CLEANUP-002 phase 01 (#245)
+## CURRENT — REPO-CLEANUP-002 phase 02 (#246)
 
-Feature freeze remains active. #244 merged at `2a5d9e6c21d666933faf587f76b52b9b7372e7ae` after both full release gates and standalone protocol passed. The [phase 01 manifest](mechanics/REPO_CLEANUP_002_REF_MANIFEST.md) records 216 verified removals by exact-SHA lease, 194 independently recoverable archive tags and 22 retained exceptional branches. [PR #245](https://github.com/janisp123/idle_game/pull/245) records the results. Latest site release remains #242, [Pages run 46166609963](https://github.com/janisp123/idle_game/actions/runs/46166609963). After #245 integrates, reconcile governance using the [saved instruction audit](https://github.com/janisp123/idle_game/pull/243#issuecomment-7242585835). That separate PR requires Owner review and a checked manual merge. The entries below preserve historical handoffs.
+Feature freeze remains active. #244 merged at `2a5d9e6c21d666933faf587f76b52b9b7372e7ae` after both full release gates and standalone protocol passed. The [phase 01 manifest](mechanics/REPO_CLEANUP_002_REF_MANIFEST.md) records 216 verified removals by exact-SHA lease, 194 independently recoverable archive tags and 22 retained exceptional branches. [PR #245](https://github.com/janisp123/idle_game/pull/245) records the results and merged at `da8d4c7a719a9c21cf0c17a9d0f7f12dd68e8a12` after both 28/28 release runs and standalone protocol passed. Latest site release remains #242, [Pages run 46166609963](https://github.com/janisp123/idle_game/actions/runs/46166609963). The separate [governance PR #246](https://github.com/janisp123/idle_game/pull/246) reuses the [saved instruction audit](https://github.com/janisp123/idle_game/pull/243#issuecomment-7242585835). Owner review and a checked manual merge are required before the documentation phase. The entries below preserve historical handoffs.
 
 ## Latest integration — alpha
 
