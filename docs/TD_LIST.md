@@ -8,6 +8,14 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## REPO-CLEANUP-001 — Reconcile obsolete PRs and active task records
+
+- **Goal / acceptance:** Inspect all ten stale PRs against current main; preserve unique unfinished work and historical research by exact references, close obsolete implementation candidates, update live task statuses and next cleanup steps. No source, save, workflow, permission, history or branch deletions in this pass.
+- **Status:** IN_REVIEW — #241; all ten stale PRs closed unmerged, unique work and exact revisions preserved; six completed task records archived in CHANGELOG. CI pending; next separate legacy dependency/asset inventory.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## RELEASE-NOTIFY-001 — Published game completion notice
 
 - **Goal / acceptance:** Exactly one event-driven GitHub owner mention per merged playable revision after successful Pages deployment. Include exact SHA, cache-busting play link and deployment run. No intermediate CI spam, direct push or ambiguous PR notices; deduplicate reruns. No external mail secrets or global notification changes. GitHub email/push delivery depends on owner mention settings and must be verified.
@@ -19,7 +27,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## RELEASE-GATE-001 — Required complete test gate for native auto-merge
 
 - **Goal / acceptance:** One always-present, fail-closed required release check on each internal PR. Preserve existing tests and Pages publishing, require all existing functional and audit workflows for non-research PRs; narrow existing research-only allowlist may run protocol only. Missing, failed, cancelled or unexpected skipped checks block the gate. No write tokens or automatic merge action inside CI; never arm external, stale, overlapping or security-sensitive PRs. Owner must add the new required check and strict up-to-date policy in the existing ruleset before native auto-merge may be used. Test both full and research-only paths.
-- **Status:** PARTIAL — #236 merged b08ec6d after two complete 28/28 runs; Pages push 46156612904 passed. Owner activated protocol + release-gate, strict freshness and no bypass, verified via API. Negative PR #239 passed: intentional failing gate, standalone protocol success, actual GitHub merge rejected HTTP 405, main unchanged; closed unmerged. Positive native auto-merge verification on approved arena roster PR pending; research-only integration still pending.
+- **Status:** PARTIAL — #236 merged b08ec6d after two complete 28/28 runs; Pages push 46156612904 passed. Owner activated protocol + release-gate, strict freshness and no bypass, verified via API. Negative PR #239 passed: intentional failing gate, standalone protocol success, actual GitHub merge rejected HTTP 405, main unchanged; closed unmerged. Positive native auto-merge #240 succeeded at 32f0864 with both full 28/28 gates and standalone protocol; Pages 46162460865 and bot notice verified. Research-only integration still pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -28,38 +36,6 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 - **Goal / acceptance:** Audit all public systems against current approved behavior, measure runtime and repo bloat, isolate obsolete code safely, fix verified defects in small tested PRs; no new feature scope or history rewrite. [Initial audit and test matrix](mechanics/STABILIZATION_AUDIT_20261128.md). [Sequential execution and non-overlap protocol](mechanics/STABILIZATION_EXECUTION_PLAN.md).
 - **Status:** PARTIAL — S00 merged #233 (41f3af7); 14/14 structural saves and four browser scenarios passed. S01 atomic clock fix merged and deployed; remaining fallback/hidden-page audit tracked. [baseline evidence](mechanics/STABILIZATION_BASELINE_RESULTS.md).
-- **Added by:** chat.
-- **Requested by:** Owner.
-- **Implemented by:** Not yet.
-
-## MAIN-CLASS-GUIDE-001 — Readable main class and advancement guides
-
-- **Goal / acceptance:** Independent 44px info buttons on every race-specific main class, readable while selection locked; show actual basic skill/cooldown, strengths/weaknesses, level 20/30 gates and exact specialization paths with detailed guides. Browsing never selects class, changes gear or spends coins. All race/class paths and mobile/desktop verified.
-- **Status:** DONE — #235 merged 4a6da03, seven workflows and 223 regression tests passed, live main-class-guide-001 verified.
-- **Added by:** chat.
-- **Requested by:** Owner.
-- **Implemented by:** Not yet.
-
-## S01-ATOMIC-CLOCK-001 — Atomic test clock and manager state
-
-- **Goal / acceptance:** Preserve old clock and save together on storage failure; no partial day jump; successful retry/reload exactly once; old v2 clock readable and explicit reset remains reset. No game-rule changes or new save wipe.
-- **Status:** DONE — #234 merged 0b74c56, all 8 checks passed, 223 existing and 14 save-integrity tests; live atomic-clock-20261128 verified.
-- **Added by:** chat.
-- **Requested by:** Owner (STABILIZATION-001).
-- **Implemented by:** Not yet.
-
-## ARENA-ROSTER-UI-001 — Seven visible arena positions per side
-
-- **Goal / acceptance:** Always show seven arena slots on both sides, inactive positions neutral grey with Fighting Lv 5/10/15/20/25/30 unlock labels. Fresh 1v1 shows six locked each side; real combat remains matched active roster only. Canonical RECRUIT_LEVELS, no fake combatants, test every threshold, 7v7 and mobile/desktop overflow. Owner confirmed both sides.
-- **Status:** IN_REVIEW — #240 candidate renders canonical seven positions on both sides, grey Fighting Lv labels; real frozen fighters unchanged. Every threshold tested by added Node fixture; fresh and full mobile/desktop checks added. CI and positive native auto-merge pending.
-- **Added by:** chat.
-- **Requested by:** Owner.
-- **Implemented by:** Not yet.
-
-## STANCE-UNLOCK-001 — Combat stance selection at character level 10
-
-- **Goal / acceptance:** Balanced is the sole active stance before individual character level 10; other stances are visibly locked. At 10 all combat stance choices unlock. Preserve earned stance records and frozen encounter correctness; test both sides at levels 9/10, reload and switching. Do not implement during S00/S01; separate isolated S02 fix.
-- **Status:** DONE — #237 merged 25f8e28; final 28/28 jobs and standalone protocol passed. Main source verified, Pages run 46159650057 succeeded.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -80,17 +56,10 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
 
-## SPECIALIZATION-LOCK-UI-001 — Explicit grey specialization lock
-
-- **Goal / acceptance:** Below character level 20, specialization buttons are neutral grey with a lock/level label and no selected highlight. Level 20 restores normal selection and color. Class info stays available. No new save reset or combat changes.
-- **Status:** PARTIAL — PR #230 merged 8c4039c, seven workflows, 220 tests and mobile/desktop Chromium; Pages verification pending; superseded level gate by STAGED-RECRUITMENT-001.
-- **Added by:** chat.
-- **Requested by:** Owner.
-- **Implemented by:** Not yet.
 
 ## RECRUITMENT-001 — Gradual character and specialization unlocks
 
-- **Goal / acceptance:** Seven visible slots at Fighting 1/5/10/15/20/25/30; individual character level 20 unlocks free specialization selection. Locked slots neither fight, train nor buy gear; matched enemy count and novice restriction. Max-only 7v7 balance unchanged. Reset all pre-recruitment player saves at the new public save epoch; preserve frozen sessions within the new epoch.
+- **Goal / acceptance:** Seven visible slots at Fighting 1/5/10/15/20/25/30; individual character level 20 unlocks main class, 30 unlocks specialization (STAGED-RECRUITMENT-001). Locked slots neither fight, train nor buy gear; matched enemy count and novice restriction. Max-only 7v7 balance unchanged. Reset all pre-recruitment player saves at the new public save epoch; preserve frozen sessions within the new epoch.
 - **Status:** PARTIAL — PR #229 merged 09a38a4; all seven workflows passed, deployed initial 1v1 and visible locked slots verified on 2026-11-28. Full balance calibration pending. Specialization presentation follow-up #230.
 - **Added by:** chat.
 - **Requested by:** Owner.
@@ -99,23 +68,16 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## TOWER-001 — Endless Tower and raid qualification
 
 - **Goal / acceptance:** Permanent sequential floor clears unlock existing raids at 10/20/30/40/50. Endless higher floors, existing rewards/blessings, first-clear coins only, frozen deterministic attempts and offline settlement. Preserve earned legacy raid access.
-- **Status:** IN_REVIEW — PR #228; tests and calibration pending.
+- **Status:** PARTIAL — #228 merged ee6fb5a; current live tower runtime, S05 integrated correctness and calibration pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
 
-## COMING-SOON-001 — Future feature previews
-
-- **Goal / acceptance:** Visible foldable Coming soon sections for Leaderboard, PvP, World Bosses (Ant Queen, Spider Queen, Pirate Queen, Dragon Queen, Daemon Queen), Endless Tower; Clan Wars nested under Clan. No gameplay, rewards, server or save changes.
-- **Status:** IN_REVIEW — PR #225; mobile/desktop smoke verification pending.
-- **Added by:** chat.
-- **Requested by:** Owner.
-- **Implemented by:** Not yet.
 
 ## ARENA-PREFERENCES-001 — Preferred environments
 
 - **Goal / acceptance:** Exactly three starred zones; +10 percentage points per favorite, 24h lock, equal averaging for future PvP, deterministic frozen arena selection and local save/UI.
-- **Status:** IN_REVIEW — candidate PR #219; CI and V10 overlap reconciliation pending. Server anti-cheat is a future multiplayer requirement.
+- **Status:** PARTIAL — #219 merged b4624c1; current #240 browser tests eight visible zones and saving three. Stale #222 closed unmerged; S09 stale-cache and S03 distribution/frozen behavior audit remain; future server anti-cheat separate.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -124,7 +86,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## ARENA-ELIMINATION-001 — Fight until elimination
 
 - **Goal / acceptance:** Keep 10-second arena cadence, resolve to elimination rather than remaining HP score, bounded safety draw, preserve historical frozen encounters and raid timing, compare max-only compositions across eight environments.
-- **Status:** IN_REVIEW — v10 candidate; functional, performance and balance checks pending.
+- **Status:** PARTIAL — V10 elimination integrated; current full CI passed. S03 correctness, S07 performance and max-only balance remain; #221 diagnostic archived for current-baseline port.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -214,15 +176,15 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## CLAN-BUILDINGS-001 — Five buildings and weekly local clan raids
 
 - **Goal / acceptance:** Plan #224 approved; all buildings start zero, weekly raids, 480-day minimum construction, actual bonuses and automatic donations.
-- **Status:** IN_REVIEW — expanded PR #223 candidate; balance and CI pending.
+- **Status:** PARTIAL — #223 merged a038846; five-building local runtime and revised plan present; S06 verification and 50-tier calibration pending. Old plan #224 closed unmerged.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
 
 ## ALPHA-CLAN-001 — Local Ashen Covenant prototype
 
-- **Goal / acceptance:** Automatic login membership, local treasury, automatic every-tenth positive arena reward contribution, Academy XP bonus and upgrade, no retroactive reward or shared authority; save and mobile tests.
-- **Status:** IN_REVIEW — PR #223 candidate; tests pending; reconcile #222 first.
+- **Goal / acceptance:** Automatic login membership, local treasury, automatic every-tenth positive arena reward contribution; five buildings supersede Academy under CLAN-BUILDINGS-001. No retroactive reward or shared authority; save and mobile tests.
+- **Status:** PARTIAL — #223 merged a038846; five-building plan supersedes Academy; current browser tests local membership, registration, five buildings and donation display. S06 correctness pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -234,6 +196,40 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
+
+## STAFF-001 — Real two-handed magical staff
+
+- **Goal / acceptance:** Owner-approved candidate #226; rebuild against current equipment/class/raid model after stabilization. No loss of earned gear; preserve class identity and tested frozen sessions. Do not merge stale candidate.
+- **Status:** TODO — archived unfinished; deferred until stabilization permits.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## TACTIC-INFO-001 — Read-only stance information
+
+- **Goal / acceptance:** Reassess #215 with level-10 stance lock; independent accessible info, current mastery and actual effects, no mutation.
+- **Status:** TODO — archived unfinished; S08 UI audit.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## LANDING-ALIGNMENT-001 — Responsive landing alignment
+
+- **Goal / acceptance:** Reassess #220 on current mobile/desktop; preserve artwork, navigation and game behavior.
+- **Status:** TODO — archived unfinished; S08 UI audit.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## FORGECALLER-SIEGE-001 — Future siege design
+
+- **Goal / acceptance:** Preserve owner-approved design-only direction from #227; exceptional in future clan warfare without live arena changes. Server-backed clan architecture prerequisite.
+- **Status:** BLOCKED — archived design, future server feature.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+Stale PR disposition and exact archived revisions: [repository cleanup ledger](mechanics/REPOSITORY_CLEANUP_20261128.md). Historical balance and class research from #210/#217/#221/#212 remain accessible and are assigned to S03/S10 current-baseline audit.
 
 Historical backlog: [archive](TD_ARCHIVE_20261127.md). Completed task details also remain in Git history and the changelog.
 
