@@ -180,6 +180,41 @@ def check():
             raw = picture.read_bytes()
             assert len(raw) > 30_000, f"Activity painting suspiciously small: {name}"
             assert raw[:4] == b"RIFF" and raw[8:12] == b"WEBP", f"Invalid WebP: {name}"
+        # Archived activity art must remain byte-identical and never leak into
+        # the published tree or an active/legacy scene mapping.
+        retired_art = {
+            "alchemy.webp": "72a890f2c1e0d2906b4a33383b480db2ebe91524",
+            "assassination.webp": "d4f210fcb7851b923f65c3109b0f401a0be0c4fb",
+            "bandit_raiding.webp": "c27c20bae98f4bd09945c135a35fb903de11b1ba",
+            "burglary.webp": "dd6e6f5f148f8daa4d212f8574fa649e825bcb44",
+            "caravan_plundering.webp": "2ad62fdcc0b5aefec1f4d03dcb136d789a6b8373",
+            "carpentry.webp": "902de0d9aa0afcf40c711fce757913b525186637",
+            "cattle_rustling.webp": "d210cdc220f071d1cf17fcee24a01e5acb55572d",
+            "extortion.webp": "ac11055dfe43d79c3711efe0eed0dd946a14b768",
+            "grave_robbing.webp": "7a454b97966e3f7b88be9d3810009297fa065fe5",
+            "highway_robbery.webp": "8b15586ddeb4d29309feb302c03a47f4d9f1ec3e",
+            "kidnapping.webp": "187e2d1c5b3c086dca8443f2475aac2dff10f225",
+            "slave_raiding.webp": "491f95d7e1ec7feb8ee1e6c296e007c21aa8f15f",
+        }
+        required_scenes = {scene_aliases.get(activity_id, activity_id) + ".webp"
+                           for activity_id in activity_ids}
+        assert not required_scenes.intersection(retired_art), "Retired art still required by engine activities"
+        archive = SITE.parent / "tools" / "fixtures" / "retired-art"
+        for name, digest in retired_art.items():
+            assert not (play_root / "assets" / name).exists(), f"Retired painting still published: {name}"
+            data = (archive / name).read_bytes()
+            assert hashlib.sha1(f"blob {len(data)}\\0".encode() + data).hexdigest() == digest, f"Archive changed: {name}"
+        # Search executable sources and developer fixtures for literal filenames;
+        # the dynamic legacy scene path is covered by required_scenes above.
+        for root in (SITE, SITE.parent / "tools"):
+            for source in root.rglob("*"):
+                if not source.is_file() or source.resolve() == Path(__file__).resolve():
+                    continue
+                if source.suffix not in (".mjs", ".js", ".html", ".css", ".py", ".json", ".svg"):
+                    continue
+                contents = source.read_text(encoding="utf-8")
+                for name in retired_art:
+                    assert name not in contents, f"Retired art reference in {source}: {name}"
         assert "prefers-reduced-motion" in (play_root / "game.css").read_text(encoding="utf-8")
         theme = (play_root / "iron-ui.css").read_text(encoding="utf-8")
         assert "prefers-reduced-motion" in theme, "Respect reduced-motion users"

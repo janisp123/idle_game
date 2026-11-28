@@ -19,7 +19,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## S09-RETIRED-ART-001 — Isolate obsolete activity artwork
 
 - **Goal / acceptance:** Archive twelve retired activity paintings outside published site without losing image bytes; prove not used by current or historical fixture activity mappings, scan site/tools static references, retain existing art and browser tests. No gameplay, save or CI changes.
-- **Status:** PARTIAL — STARTED cleanup/retired-activity-art at 32078b9.
+- **Status:** IN_REVIEW — #242 candidate: twelve exact artwork blobs archived outside site (757994 bytes); current/legacy required scene assets retained. Additive archive hash and literal-reference tests; full CI pending.
 - **Added by:** chat.
 - **Requested by:** Owner (repository cleanup).
 - **Implemented by:** Not yet.
