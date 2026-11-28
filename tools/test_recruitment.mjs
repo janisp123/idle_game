@@ -4,6 +4,7 @@ import {newArenaManager,enterArena,readArenaManager,chooseArenaClass,chooseArena
 import {GROUP_IDS,activeGroupIds,initialRecruitGroup,syncRecruitment,mainClassUnlocked,specializationUnlocked,basicRace,normalizeRecruitChoices,selectGroupClass,selectGroupStance,stanceUnlocked,groupSnapshots,awardGroupPractice,activateGroupPractice,previewGroupUpgrade,maxRecruitment} from "../site/play/battle-group.mjs";
 import {startGroupSession,groupCombatAtTime,settleGroupSession,GROUP_BOUT_MS} from "../site/play/battle-group-timeline.mjs";
 import {tacticRequiredXP} from "../site/play/manager-tactics.mjs";
+import {buildBattlePreview,arenaRosterSlots} from "../site/play/arena-presentation.mjs";
 const shared={difficulty:0,str:1,dex:1,end:1,skill:1},now=1800000000000,rand=()=>.5;
 test("recruit thresholds, permanent availability, matching enemy counts and no locked practice",()=>{
  let g=initialRecruitGroup();for(const [i,l] of [1,5,10,15,20,25,30].entries()){
@@ -118,4 +119,26 @@ test("public stance gate survives save and reload at levels 9 and 10",()=>{
  s=chooseArenaStance(s,"member1","aggressive",now,rand).state;
  assert.equal(readArenaManager(JSON.stringify(s)).battleGroup.member1.stance,"aggressive");
  assert.equal(readArenaManager(JSON.stringify(s)).battleGroup.member1.recruitment.level,10);
+});
+
+test("seven visible arena positions for both sides at every recruitment threshold; real frozen fighters unchanged",()=>{
+ let g=initialRecruitGroup();
+ for(const [i,l] of [1,5,10,15,20,25,30].entries()){
+  g=syncRecruitment(g,l);
+  const session=startGroupSession(g,shared,1,123,{rules:10}),raw=JSON.stringify(session),preview=buildBattlePreview(session);
+  for(const side of ["players","enemies"]){
+   const fighters=preview[side],slots=arenaRosterSlots(preview,side);
+   assert.equal(fighters.length,i+1);
+   assert.equal(slots.length,7);
+   assert.deepEqual(slots.slice(0,i+1).map(s=>s.fighter),fighters);
+   for(const [j,slot] of slots.slice(i+1).entries()){
+    assert.deepEqual(slot,{number:i+2+j,unlockLevel:[1,5,10,15,20,25,30][i+1+j]});
+    assert.equal(Object.hasOwn(slot,"fighter"),false);
+   }
+  }
+  assert.equal(JSON.stringify(session),raw);
+ }
+ const legacy={players:[{number:1},{number:2}],group:false};
+ assert.deepEqual(arenaRosterSlots(legacy,"players"),legacy.players.map(fighter=>({fighter})));
+ assert.deepEqual(arenaRosterSlots(null,"players"),[]);
 });

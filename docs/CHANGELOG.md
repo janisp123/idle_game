@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — ARENA-ROSTER-UI-001 candidate #240
+
+Seven visible positions from real frozen group preview; grey locked Fighting level labels on both sides, distinct from active fighters. Exact recruitment thresholds and fresh/full mobile/desktop regression; cache token arena-roster-001. No combat, rewards, save or gate changes. Full CI and native auto-merge verification pending.
+
 ## 2026-11-28 — ARENA-ROSTER-UI-001 STARTED
 
 Owner approved seven visible arena slots per side; frozen active combatants remain the only real fighters. Base e4489db; branch fix/arena-roster-seven-slots. #238 deployed and posted bot mention; #239 negative integration test rejected by GitHub HTTP 405 for failing release-gate, closed unmerged. Next implement presentation-only locked slots and tests; positive native auto-merge test only after exact reviewed final head, unchanged base and expected required checks. No gameplay, save, workflow or permissions changes.

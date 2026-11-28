@@ -51,7 +51,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## ARENA-ROSTER-UI-001 — Seven visible arena positions per side
 
 - **Goal / acceptance:** Always show seven arena slots on both sides, inactive positions neutral grey with Fighting Lv 5/10/15/20/25/30 unlock labels. Fresh 1v1 shows six locked each side; real combat remains matched active roster only. Canonical RECRUIT_LEVELS, no fake combatants, test every threshold, 7v7 and mobile/desktop overflow. Owner confirmed both sides.
-- **Status:** PARTIAL — STARTED on fix/arena-roster-seven-slots, base e4489db; presentation-only change, no combat or save modifications.
+- **Status:** IN_REVIEW — #240 candidate renders canonical seven positions on both sides, grey Fighting Lv labels; real frozen fighters unchanged. Every threshold tested by added Node fixture; fresh and full mobile/desktop checks added. CI and positive native auto-merge pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
