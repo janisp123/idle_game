@@ -8,6 +8,14 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## RELEASE-GATE-001 — Required complete test gate for native auto-merge
+
+- **Goal / acceptance:** One always-present, fail-closed required release check on each internal PR. Preserve existing tests and Pages publishing, require all existing functional and audit workflows for non-research PRs; narrow existing research-only allowlist may run protocol only. Missing, failed, cancelled or unexpected skipped checks block the gate. No write tokens or automatic merge action inside CI; never arm external, stale, overlapping or security-sensitive PRs. Owner must add the new required check and strict up-to-date policy in the existing ruleset before native auto-merge may be used. Test both full and research-only paths.
+- **Status:** PARTIAL — owner approved setup; repository auto-merge and squash-only verified, direct main-write canary rejected, existing ruleset only requires protocol. Candidate in draft #236: nine reusable suites, universal release-gate and six policy unit tests, narrow research-only exemption; first CI caught obsolete SIM-003 path-filter assertion, now updated to enforce universal trigger, reusable suites and complete required aggregate. Full rerun pending. Owner ruleset setup remains blocked until verified.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## STABILIZATION-001 — Whole-game correctness, performance and repository audit
 
 - **Goal / acceptance:** Audit all public systems against current approved behavior, measure runtime and repo bloat, isolate obsolete code safely, fix verified defects in small tested PRs; no new feature scope or history rewrite. [Initial audit and test matrix](mechanics/STABILIZATION_AUDIT_20261128.md). [Sequential execution and non-overlap protocol](mechanics/STABILIZATION_EXECUTION_PLAN.md).
@@ -19,7 +27,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## MAIN-CLASS-GUIDE-001 — Readable main class and advancement guides
 
 - **Goal / acceptance:** Independent 44px info buttons on every race-specific main class, readable while selection locked; show actual basic skill/cooldown, strengths/weaknesses, level 20/30 gates and exact specialization paths with detailed guides. Browsing never selects class, changes gear or spends coins. All race/class paths and mobile/desktop verified.
-- **Status:** IN_REVIEW — owner approved; candidate UI-only branch, tests pending.
+- **Status:** DONE — #235 merged 4a6da03, seven workflows and 223 regression tests passed, live main-class-guide-001 verified.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.

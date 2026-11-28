@@ -8,19 +8,7 @@ on:
         type: string
         required: true
         default: '{"battles":10000,"grade":"F","loadout":"greatsword","armour":"leather","skill":10,"str":14,"dex":14,"end":14,"trace":2}'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'site/play/**/*.mjs'
-      - '!site/play/app.mjs'
-      - '!site/play/character-stats.mjs'
-      - '!site/play/result-readout.mjs'
-      - "tools/combat-simulator.mjs"
-      - "tools/test_combat_simulator.mjs"
-      - "tools/test_auto_fight.mjs"
-      - "tools/test_auto_fight_integration.mjs"
-      - "tools/gladiator-benchmark.mjs"
-      - ".github/workflows/combat-simulator.yml"
+  workflow_call:
 
 permissions:
   contents: read

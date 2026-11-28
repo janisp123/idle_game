@@ -1,11 +1,6 @@
 name: Team combat and economy audit
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'site/play/**'
-      - 'tools/team-*-audit.mjs'
-      - '.github/workflows/team-audit.yml'
+  workflow_call:
   workflow_dispatch:
 permissions:
   contents: read

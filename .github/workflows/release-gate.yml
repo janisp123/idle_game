@@ -1,0 +1,89 @@
+name: Required release gate
+
+# Every PR gets the same required check, even when only research docs change.
+# No pull_request_target, secrets, write token, auto-merge action or deployment.
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  scope:
+    name: Validate release scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      research_only: ${{ steps.scope.outputs.research_only }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Exercise fail-closed gate policy
+        run: python3 tools/test_release_gate.py
+      - name: Classify exact internal PR revision
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/release_gate.py scope
+
+  protocol:
+    uses: ./.github/workflows/project-protocol.yml
+
+  website:
+    needs: scope
+    if: needs.scope.outputs.research_only == 'false'
+    uses: ./.github/workflows/website-validation.yml
+
+  combat:
+    needs: scope
+    if: needs.scope.outputs.research_only == 'false'
+    uses: ./.github/workflows/combat-simulator.yml
+
+  endgame:
+    needs: scope
+    if: needs.scope.outputs.research_only == 'false'
+    uses: ./.github/workflows/manager-endgame.yml
+
+  lab:
+    needs: scope
+    if: needs.scope.outputs.research_only == 'false'
+    uses: ./.github/workflows/system-lab.yml
+
+  baseline:
+    needs: scope
+    if: needs.scope.outputs.research_only == 'false'
+    uses: ./.github/workflows/stabilization-baseline.yml
+
+  integrity:
+    needs: scope
+    if: needs.scope.outputs.research_only == 'false'
+    uses: ./.github/workflows/stabilization-save-integrity.yml
+
+  team_audit:
+    needs: scope
+    if: needs.scope.outputs.research_only == 'false'
+    uses: ./.github/workflows/team-audit.yml
+
+  sensitivity:
+    needs: scope
+    if: needs.scope.outputs.research_only == 'false'
+    uses: ./.github/workflows/team-sensitivity.yml
+
+  release-gate:
+    name: release-gate
+    if: ${{ always() }}
+    needs: [scope, protocol, website, combat, endgame, lab, baseline, integrity, team_audit, sensitivity]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Require every applicable suite to succeed
+        env:
+          GATE_RESULTS: ${{ toJSON(needs) }}
+        run: python3 tools/release_gate.py final

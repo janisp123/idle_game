@@ -1,11 +1,6 @@
 name: Manager endgame validation
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'site/play/**/*.mjs'
-      - 'tools/manager-endgame-validation.mjs'
-      - '.github/workflows/manager-endgame.yml'
+  workflow_call:
   workflow_dispatch:
 permissions:
   contents: read

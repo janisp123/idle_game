@@ -212,24 +212,36 @@ test('build baseline uses real normal/alpha settlement and conserves arena curre
   assert.deepEqual(report,await runBuildBaseline({scenarios:[scenario],seed:20261125}));
 });
 
-// Guard the CI source coverage contract as well as runtime parity. New game
-// modules are automatically covered by the recursive glob, unless explicitly
-// presentation-only. The broad filter is intentional; full balance stays manual.
+// Guard the CI source coverage contract as well as runtime parity. Every PR
+// now reaches the universal gate; only the exact research-only policy may skip
+// the reusable simulation suites. Full optional balance reports stay manual.
 test("SIM-003 both simulation workflows automatically cover production modules",()=>{
-  for(const path of [".github/workflows/combat-simulator.yml",".github/workflows/system-lab.yml"]){
-    const yaml=readFileSync(path,"utf8");
-    const paths=yaml.slice(yaml.indexOf("  pull_request:"),yaml.indexOf("\npermissions:"));
-    assert.ok(paths.includes("'site/play/**/*.mjs'"));
-    for(const excluded of paths.matchAll(/'!site\/play\/([^']+)'/g)){
-      const name=excluded[1];
-      assert.ok(["app.mjs","character-stats.mjs","result-readout.mjs"].includes(name));
-      // An excluded UI module must not be imported by a production module
-      // covered by the actual mechanics/simulation graph.
-      for(const source of ["engine","combat","physical-duel","smith","armour","arena-wallet","expertise","attributes","difficulty","production","loot"]){
-        assert.ok(!readFileSync("site/play/"+source+".mjs","utf8").includes("./"+name),source+" imports excluded "+name);
-      }
-    }
+  const gate=readFileSync(".github/workflows/release-gate.yml","utf8");
+  const trigger=gate.slice(gate.indexOf("\non:\n"),gate.indexOf("\npermissions:"));
+  assert.match(trigger,/pull_request:\s*\n\s+branches: \[main\]/);
+  assert.match(trigger,/types: \[opened, synchronize, reopened, ready_for_review\]/);
+  assert.doesNotMatch(trigger,/paths(?:-ignore)?:|pull_request_target:/);
+  const jobs=Object.fromEntries([...gate.matchAll(/^  ([\w-]+):\n((?:    [^\n]*\n|\n)*)/gm)].map(m=>[m[1],m[2]]));
+  for(const [job,file] of [["combat","combat-simulator"],["lab","system-lab"]]){
+    const yaml=readFileSync(".github/workflows/"+file+".yml","utf8");
+    assert.match(yaml,/^  workflow_call:$/m);
+    assert.match(yaml,/^  workflow_dispatch:/m);
+    assert.ok(jobs[job],"missing reusable simulation job "+job);
+    assert.match(jobs[job],/^    needs: scope$/m);
+    assert.match(jobs[job],/^    if: needs\.scope\.outputs\.research_only == 'false'$/m);
+    assert.ok(jobs[job].includes("uses: ./.github/workflows/"+file+".yml"));
+    assert.doesNotMatch(jobs[job],/continue-on-error:/);
   }
+  assert.match(jobs.scope,/run: python3 tools\/test_release_gate\.py/);
+  assert.match(jobs.scope,/run: python3 tools\/release_gate\.py scope/);
+  const final=jobs["release-gate"];
+  assert.ok(final,"required aggregate missing");
+  assert.match(final,/^    name: release-gate$/m);
+  assert.ok(final.includes("if: ${{ always() }}"));
+  const needs=final.match(/^    needs: \[([^\]]+)\]$/m)[1].split(",").map(x=>x.trim());
+  assert.deepEqual([...needs].sort(),["scope","protocol","website","combat","endgame","lab","baseline","integrity","team_audit","sensitivity"].sort());
+  assert.match(final,/run: python3 tools\/release_gate\.py final/);
+  assert.doesNotMatch(final,/continue-on-error:/);
   const yaml=readFileSync(".github/workflows/system-lab.yml","utf8");
   assert.match(yaml,/github.event_name == 'workflow_dispatch' && inputs.full_balance == true/);
 });
