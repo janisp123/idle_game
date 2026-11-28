@@ -4,7 +4,7 @@ Base `32f086421b30624b7dd3aedea70bac9c9d118638`. Owner approved cleanup. #240 na
 
 ## Stale PR disposition
 
-All candidates below are explicitly archived for closure without merge, not declared implemented. Keep branches and full Git history. Exact SHA links preserve the evidence and source. Rebuild any still-needed work on fresh main; no parallel implementation or stale cherry-pick.
+All ten candidates below were closed without merge, with explanatory comments, on 2026-11-28. GitHub open-PR inventory confirmed only cleanup #241 remains. They are not declared implemented. Keep branches and full Git history. Exact SHA links preserve the evidence and source. Rebuild any still-needed work on fresh main; no parallel implementation or stale cherry-pick.
 
 | PR | Exact archived head / branch | Classification | Follow-up |
 | --- | --- | --- | --- |

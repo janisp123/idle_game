@@ -11,7 +11,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## REPO-CLEANUP-001 — Reconcile obsolete PRs and active task records
 
 - **Goal / acceptance:** Inspect all ten stale PRs against current main; preserve unique unfinished work and historical research by exact references, close obsolete implementation candidates, update live task statuses and next cleanup steps. No source, save, workflow, permission, history or branch deletions in this pass.
-- **Status:** PARTIAL — STARTED cleanup/reconcile-old-prs-backlog at 32f0864.
+- **Status:** IN_REVIEW — #241; all ten stale PRs closed unmerged, unique work and exact revisions preserved; six completed task records archived in CHANGELOG. CI pending; next separate legacy dependency/asset inventory.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -77,7 +77,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## ARENA-PREFERENCES-001 — Preferred environments
 
 - **Goal / acceptance:** Exactly three starred zones; +10 percentage points per favorite, 24h lock, equal averaging for future PvP, deterministic frozen arena selection and local save/UI.
-- **Status:** PARTIAL — #219 merged b4624c1; current #240 browser tests eight visible zones and saving three. Stale #222 archived for closure; S09 stale-cache and S03 distribution/frozen behavior audit remain; future server anti-cheat separate.
+- **Status:** PARTIAL — #219 merged b4624c1; current #240 browser tests eight visible zones and saving three. Stale #222 closed unmerged; S09 stale-cache and S03 distribution/frozen behavior audit remain; future server anti-cheat separate.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -176,7 +176,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## CLAN-BUILDINGS-001 — Five buildings and weekly local clan raids
 
 - **Goal / acceptance:** Plan #224 approved; all buildings start zero, weekly raids, 480-day minimum construction, actual bonuses and automatic donations.
-- **Status:** PARTIAL — #223 merged a038846; five-building local runtime and revised plan present; S06 verification and 50-tier calibration pending. Old plan #224 archived for closure.
+- **Status:** PARTIAL — #223 merged a038846; five-building local runtime and revised plan present; S06 verification and 50-tier calibration pending. Old plan #224 closed unmerged.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
