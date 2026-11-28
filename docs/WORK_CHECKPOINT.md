@@ -1,5 +1,9 @@
 # Current working checkpoint
 
+## CURRENT — REPO-CLEANUP-002 Codex handoff (#244)
+
+Feature freeze; Codex owns next implementation after #244 merge; Chat stops overlapping writes. #243 merged 153962ef, both 28/28 full gates and protocol passed; no site changes. #242 Pages 46166609963 success. Read TD_LIST first; new REPO-CLEANUP-002 block specifies exact sequence and stop policy. Reuse #243 comments 7242566717 (ancestry) and 7242585835 (instruction contradictions). Next: safe local Git branch cleanup; no refs deleted. #244 docs-only CI pending. Historical entries below are NOT current directions.
+
 ## Latest integration — alpha
 
 ALPHA-MERGE-001 — Owner directed always merge during alpha. PR #200 merged f18389ea8b655699f97cf789a10bda2b435b02a5; tested head 913cbb5, all seven workflows, 175/175 tests, mobile/desktop Chromium. 31/31 class kits confirmed on main. [Raw 6960-bout max-only screen](mechanics/CLASS_KITS_FULL_SCREEN_20261127.md) also saved in PR #200 comment 7217488307; mage stack 86/120, ranged 13/120, summoner 27/120. Class guide UI and comprehensive balance remain open, not alpha merge blockers. Pages deployment verification separate. Next: actual kit info UI and max-only class/terrain matrix on fresh main-based PR.
