@@ -11,7 +11,7 @@ export function expireKitEffects(a,round){
  if([7,8,9,10].includes(a.groupCombatRules)&&!a.kitTempoUntil)a.kitMagicTempo=false;
 }
 export function markKitMovement(a){if(kitActor(a)){a.kitStationary=0;a.kitFocusUntil=0;}}
-export const kitApproach=a=>!kitActor(a)?1:(a.classId==="swiftblade"?B.swiftPursuit:a.classId==="ragebreaker"?B.ragePursuit:a.classId==="forgecaller"?B.forgeApproach:1)*((a.kitSlowUntil>0||controlActive(a,"slow"))?(a.classId==="wellspring"?B.resilienceSlow:.5):1)*(a.kitTotemUntil>0&&a.kitTotemMode==="balanced"?B.totemApproach:1);
+export const kitApproach=a=>!kitActor(a)?1:(a.novice?1:a.classId==="swiftblade"?B.swiftPursuit:a.classId==="ragebreaker"?B.ragePursuit:a.classId==="forgecaller"?B.forgeApproach:1)*((a.kitSlowUntil>0||controlActive(a,"slow"))?(a.classId==="wellspring"?B.resilienceSlow:.5):1)*(a.kitTotemUntil>0&&a.kitTotemMode==="balanced"?B.totemApproach:1);
 export const kitControlAllowed=(a,round)=>!kitActor(a)||round>=(a.classControlUntil??0)&&round>=(a.kitBraceUntil??0);
 export const kitControlDuration=a=>kitActor(a)&&a.classId==="wellspring"?4:3;
 export function kitPactHeal(a,damage,round){
@@ -30,7 +30,7 @@ export function kitHeal(a,b,fraction,round){
 }
 export function kitStrikeModifiers(a,b,attack,distance){
  const m={aim:0,dodge:0,impact:1,block:0,crit:0,recovery:0,blockImpact:null,shieldChance:null,parryImpact:null};
- if(!kitActor(a)||!kitActor(b))return m;
+ if(!kitActor(a)||!kitActor(b)||a.novice||b.novice)return m;
  const vulnerability=attack.type==="magic"?"gloom":"physical_vulnerability";
  if(controlActive(b,vulnerability))m.impact*=1+CONTROL_BALANCE.vulnerability*(b.controlStrength?.[vulnerability]??1);
  const s=kitStrength(a),t=kitStrength(b),knife=attack.move==="knife",shot=attack.move==="shot";

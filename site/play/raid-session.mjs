@@ -16,7 +16,7 @@ export function raidResult(run){
  return cachedResult;
 }
 export function beginRaid(s,level,seed=s.settledAtMs>>>0){
- if(!s.arenaOnly||s.raidRun)throw new RangeError("Cannot begin raid");
+ if(!s.arenaOnly||s.raidRun||Object.values(s.battleGroup).some(m=>m.recruitment?.active===false))throw new RangeError("Cannot begin raid");
  const d=raidDefinition(level),frozen=startGroupSession(s.battleGroup,{difficulty:d.grade,str:1,dex:1,end:1,skill:s.skills.fighting.level},s.teamwork.level,seed,{rules:5});
  const buff=s.raidBuff??null,clanBonus=s.alphaClan?clanBonuses(s.alphaClan).combat:null,result=resolveRaid(GROUP_IDS.map(id=>frozen.players[id]),level,seed,s.teamwork.level,buff,s.settledAtMs,frozen.groupCombatRules,clanBonus);
  const raidRun={version:RAID_RULES_VERSION,level,startedAtMs:s.settledAtMs,durationMs:result.durationMs,buff,frozen,...(clanBonus?{clanBonus}:{})};

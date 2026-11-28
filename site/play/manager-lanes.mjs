@@ -8,7 +8,7 @@ import {
 } from "./engine.mjs?v=raid-001";
 import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=group-004";
 import {GROUP_TIMELINE_VERSION} from "./battle-group-timing.mjs";
-import {initialBattleGroup,validBattleGroup,migrateGroupAttributes,selectGroupClass,selectGroupStance,upgradeBattleGroup,previewGroupUpgrade} from "./battle-group.mjs?v=group-001";
+import {initialBattleGroup,initialRecruitGroup,syncRecruitment,validBattleGroup,migrateGroupAttributes,selectGroupClass,selectGroupStance,upgradeBattleGroup,previewGroupUpgrade} from "./battle-group.mjs?v=group-001";
 import {blankGroupAnalytics,validGroupAnalytics,accumulateGroupAnalytics} from "./battle-group-analytics.mjs?v=group-004";
 import {blankBattleAnalytics,validBattleAnalytics,accumulateBattleAnalytics} from "./battle-analytics.mjs?v=npc-parity-001";
 import {WORK_ROTATION,ingredientReserve,rotateManagerWork,rotationTravelMs} from "./activity-rotation.mjs?v=npc-parity-001";
@@ -73,14 +73,14 @@ export function enableArenaOnly(s){
  const {managerWork,overlapParity,...next}=enableBattleGroupManager(s);
  return {...next,battleGroup:migrateGroupAttributes(next.battleGroup),arenaOnly:true,items:Object.fromEntries(Object.keys(s.items).map(id=>[id,0]))};
 }
-export function newArenaManager(now=Date.now()){return enableArenaOnly(newBattleGroupManager(now));}
+export function newArenaManager(now=Date.now(),recruit=false){const s=enableArenaOnly(newBattleGroupManager(now));return recruit?{...s,battleGroup:initialRecruitGroup(),combatSession:null}:s;}
 function managerUpgradePreview(s){
  return s.battleGroup?previewGroupUpgrade(s.battleGroup,s.coins,s.skills.fighting.level):managerEquipmentPreview(s);
 }
 function automateEquipment(out){
  const s=out.state;if(!s.battleGroup)return automateManagerEquipment(out);
  // An old frozen bout remains unchanged; no legacy purchases after opt-in.
- const u=upgradeBattleGroup(s.battleGroup,s.coins,s.skills.fighting.level);
+ const u=upgradeBattleGroup(syncRecruitment(s.battleGroup,s.skills.fighting.level),s.coins,s.skills.fighting.level);
  return {...out,state:{...s,battleGroup:u.group,coins:u.coins},autoEquipment:{upgrades:u.upgrades,acquisitions:[],equipped:[],spent:u.spent,preview:u.pending}};
 }
 export function chooseManagerGroupClass(s,member,race,mainClass,classId,now=s.settledAtMs,random=Math.random){
@@ -101,7 +101,7 @@ function laneTime(before,after){
 function pair(s,end,random,online){
   if(s.arenaOnly){
     const a=settleManagerLane(s,end,random,online),c=a.state,combatMs=a.report?.productiveMs??0;
-    const next={...c,settledAtMs:online?c.settledAtMs:end,battleAnalytics:accumulateBattleAnalytics(s.battleAnalytics,a.report?.arena?.analytics??[]),groupAnalytics:accumulateGroupAnalytics(s.groupAnalytics,a.report?.arena?.groupAnalytics??[])};
+    const next={...c,battleGroup:syncRecruitment(c.battleGroup,c.skills.fighting.level),settledAtMs:online?c.settledAtMs:end,battleAnalytics:accumulateBattleAnalytics(s.battleAnalytics,a.report?.arena?.analytics??[]),groupAnalytics:accumulateGroupAnalytics(s.groupAnalytics,a.report?.arena?.groupAnalytics??[])};
     const reports=[a.report].filter(r=>r&&(r.completed||r.arena));
     return {state:next,reports,report:reports.at(-1),effort:{combatMs,workMs:0,overlap:0,combatTime:combatMs,workTime:0}};
   }

@@ -73,7 +73,7 @@ export const kitActor=a=>[KIT_RULES_VERSION,4,5,6,7,8,9,10].includes(a?.groupCom
  };
  export const CONTROL_CLASS_KITS=Object.freeze(Object.fromEntries(Object.entries(CLASS_KITS).map(([id,k])=>[id,Object.freeze({...k,...Object.fromEntries(Object.entries(variants[id]??{}).map(([slot,v])=>[slot,Object.freeze(v)]))})])));
 
-export const pilotKit=a=>kitActor(a)?([7,8,9,10].includes(a.groupCombatRules)?CONTROL_CLASS_KITS:CLASS_KITS)[a.classId]??null:null;
+export const pilotKit=a=>kitActor(a)&&!a.novice?([7,8,9,10].includes(a.groupCombatRules)?CONTROL_CLASS_KITS:CLASS_KITS)[a.classId]??null:null;
 export const classMasteryStrength=level=>.5+.5*(level-1)/49;
 export const kitStrength=a=>[9,10].includes(a.groupCombatRules)?classMasteryStrength(a.classLevel):.75+.25*(a.classLevel-1)/49;
 // Scale a beneficial modifier around its neutral value, not the base attack.

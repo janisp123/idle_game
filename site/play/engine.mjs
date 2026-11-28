@@ -6,7 +6,7 @@ import { initialTeam,validGladiator,teamSnapshots,awardTeamPractice,activateTeam
 import { initialTeamwork,validTeamwork,awardTeamwork,activateTeamworkOnLogin } from "./teamwork.mjs?v=team-002";
 import { validTeamSession,startTeamSession,settleTeamSession,teamBoutMs,isCloneTeamSession,CLONE_TEAM_TIMELINE_VERSION } from "./team-timeline.mjs?v=group-004";
 import {captureCloneEnvelope} from "./clone-opponents.mjs?v=npc-parity-001";
-import {GROUP_IDS,validBattleGroup,groupSnapshots,awardGroupPractice,activateGroupPractice} from "./battle-group.mjs?v=group-001";
+import {GROUP_IDS,recruitmentEnabled,validBattleGroup,groupSnapshots,awardGroupPractice,activateGroupPractice} from "./battle-group.mjs?v=group-001";
 import {advanceGroupRank} from "./battle-group-rank.mjs?v=group-005";
 import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession,groupCoinRatio} from "./battle-group-timeline.mjs?v=raid-001";
 import {GROUP_COMBAT_RULES_VERSION} from "./group-counter-rules.mjs";
@@ -496,7 +496,7 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
  }
  if(!session)session=startGroupSession(group,shared,teamwork.level,state.settledAtMs>>>0,{rules,bonus,...(arenaFavorites!==undefined?{arenaFavorites}:{}),...(clanBuild?{clanSnapshot:clanBuild}:{})});
  const run=ms=>{
-  const key=JSON.stringify(["group",session.seed,session.players,session.teamworkLevel,session.rank.grade,session.groupCombatRules??1,session.raidBonus??null,session.arenaFavorites??null,session.clanSnapshot??null]);
+  const key=JSON.stringify(["group",session.seed,session.players,session.recruitment??null,session.teamworkLevel,session.rank.grade,session.groupCombatRules??1,session.raidBonus??null,session.arenaFavorites??null,session.clanSnapshot??null]);
   if(outcomeCaches&&!outcomeCaches.has(key))outcomeCaches.set(key,new Map());
   const r=settleGroupSession(session,ms,outcomeCaches?.get(key));
   contribute(r.victories,r.rewardUnits,r.rewardRatio,session.coinRemainder);
@@ -514,7 +514,7 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
   if(remaining)run(remaining);
   const {raidBonus:oldBonus,...rest}=session;
   const oldRatio=groupCoinRatio(session);
-  session={...rest,...(online||!state.arenaOnly?{players:desired,teamworkLevel:teamwork.level}:{}),...(online?{groupCombatRules:rules,...(arenaFavorites!==undefined?{arenaFavorites:[...arenaFavorites]}:{})}:{}),...([4,5,6,7,8,9,10].includes(online?rules:session.groupCombatRules)&&bonus?{raidBonus:bonus}:{})};
+  session={...rest,...(online||!state.arenaOnly?{players:desired,teamworkLevel:teamwork.level,...(recruitmentEnabled(group)?{recruitment:true}:{})}:{}),...(online?{groupCombatRules:rules,...(arenaFavorites!==undefined?{arenaFavorites:[...arenaFavorites]}:{})}:{}),...([4,5,6,7,8,9,10].includes(online?rules:session.groupCombatRules)&&bonus?{raidBonus:bonus}:{})};
   if(online&&clanBuild){session={...session,clanSnapshot:clanBuild};session.coinRemainder=Math.floor(session.coinRemainder*groupCoinRatio(session)/oldRatio);}
   elapsedMs-=remaining;
  }

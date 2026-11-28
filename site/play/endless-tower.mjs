@@ -27,19 +27,19 @@ export function validTower(t,now){
  if(!t||t.version!==TOWER_VERSION||!count(t.highest)||t.highest>Math.floor(Number.MAX_SAFE_INTEGER/5)||![0,...RAID_LEVELS].includes(t.legacyAccess))return false;
  if(t.last!==null&&!(t.last&&validFloor(t.last.floor)&&count(t.last.finishedAtMs)&&t.last.finishedAtMs<=now&&["victory","defeat","double_death"].includes(t.last.outcome)&&t.last.floor===(t.last.outcome==="victory"?t.highest:t.highest+1)&&t.last.coins===(t.last.outcome==="victory"?towerReward(t.last.floor):0)))return false;
  const r=t.run;if(r===null)return true;
- return Boolean(r&&r.version===TOWER_VERSION&&validFloor(r.floor)&&r.floor===t.highest+1&&count(r.startedAtMs)&&r.startedAtMs<=now&&now<r.startedAtMs+TOWER_ATTEMPT_MS&&r.seed===seedFor(r.floor)&&validGroupSession(r.frozen)&&r.frozen.seed===r.seed&&r.frozen.elapsedMs===0&&r.frozen.groupCombatRules===10&&Array.isArray(r.enemies)&&r.enemies.length===7&&r.enemies.every(e=>validGroupSnapshot(e)&&validCombatSession({elapsedMs:0,seed:0,player:e}))&&Number.isInteger(r.enemyTeamwork)&&r.enemyTeamwork>=1&&r.enemyTeamwork<=50&&GROUP_ARENAS.some(a=>a.id===r.arenaId)&&(r.clanBonus===null||validClanCombat(r.clanBonus)));
+ return Boolean(r&&r.version===TOWER_VERSION&&validFloor(r.floor)&&r.floor===t.highest+1&&count(r.startedAtMs)&&r.startedAtMs<=now&&now<r.startedAtMs+TOWER_ATTEMPT_MS&&r.seed===seedFor(r.floor)&&validGroupSession(r.frozen)&&r.frozen.seed===r.seed&&r.frozen.elapsedMs===0&&r.frozen.groupCombatRules===10&&Array.isArray(r.enemies)&&r.enemies.length===Object.keys(r.frozen.players).length&&r.enemies.every(e=>validGroupSnapshot(e)&&validCombatSession({elapsedMs:0,seed:0,player:e}))&&Number.isInteger(r.enemyTeamwork)&&r.enemyTeamwork>=1&&r.enemyTeamwork<=50&&GROUP_ARENAS.some(a=>a.id===r.arenaId)&&(r.clanBonus===null||validClanCombat(r.clanBonus)));
 }
 export function beginTower(s){
  const t=towerProgress(s);if(s.raidRun||t.run)return s;
  const floor=t.highest+1,d=towerDifficulty(floor),seed=seedFor(floor),bracket=rankProfile(d.grade);
  const bonus=raidCombatBonus(s.raidBuff,s.settledAtMs),clanBonus=s.alphaClan?clanBonuses(s.alphaClan).combat:null;
  const frozen=startGroupSession(s.battleGroup,{difficulty:d.grade,str:1,dex:1,end:1,skill:s.skills.fighting.level},s.teamwork.level,seed,{rules:10,bonus});
- const enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,10),arenaId=GROUP_ARENAS[(floor-1)%GROUP_ARENAS.length].id;
+ const enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,10,frozen.recruitment?Object.keys(frozen.players).length:undefined),arenaId=GROUP_ARENAS[(floor-1)%GROUP_ARENAS.length].id;
  const run={version:TOWER_VERSION,floor,startedAtMs:s.settledAtMs,seed,frozen,enemies,enemyTeamwork:bracket.teamworkLevel,arenaId,clanBonus};
  const tower={...t,run};if(!validTower(tower,s.settledAtMs))throw new RangeError("Invalid tower attempt");return {...s,tower};
 }
 export function resolveTower(run){
- const terrain=GROUP_ARENAS.find(a=>a.id===run.arenaId),players=GROUP_IDS.map(id=>run.frozen.players[id]);
+ const terrain=GROUP_ARENAS.find(a=>a.id===run.arenaId),players=Object.values(run.frozen.players);
  return resolveTeamBattle(players,run.enemies,run.seed,terrain,{player:run.frozen.teamworkLevel,enemy:run.enemyTeamwork,groupCombatRules:10,towerFactor:towerDifficulty(run.floor).factor,...(run.frozen.raidBonus?{playerBonus:run.frozen.raidBonus}:{}),...(run.clanBonus?{playerClanBonus:run.clanBonus}:{})});
 }
 export function advanceTower(s,now){

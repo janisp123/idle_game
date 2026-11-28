@@ -6,7 +6,7 @@ const count=n=>Number.isSafeInteger(n)&&n>=0;
 const plus=(a,b)=>{const n=a+b;if(!count(n))throw new RangeError("Group analytics overflow");return n;};
 const row=r=>Array.isArray(r)&&r.length===3&&r.every(count)&&count(r[0]+r[1]+r[2]);
 const blank=()=>({outcomes:[0,0,0],coins:0,ms:0,...Object.fromEntries(Object.keys(dims).map(k=>[k,{}]))});
-const validKey=k=>typeof k==="string"&&k.split("|").length===7&&k.split("|").every(x=>{const [c,t,...rest]=x.split(":");return !rest.length&&GROUP_CLASS_IDS.includes(c)&&TACTIC_IDS.includes(t);});
+const validKey=k=>typeof k==="string"&&k.split("|").length>=1&&k.split("|").length<=7&&k.split("|").every(x=>{const [c,t,...rest]=x.split(":");return !rest.length&&GROUP_CLASS_IDS.includes(c)&&TACTIC_IDS.includes(t);});
 function validStats(s){
  if(!s||!row(s.outcomes)||!count(s.coins)||!count(s.ms))return false;
  return Object.entries(dims).every(([d,keys])=>s[d]&&typeof s[d]==="object"&&!Array.isArray(s[d])&&Object.entries(s[d]).every(([k,r])=>keys.includes(k)&&row(r)&&r.every((n,i)=>n<=s.outcomes[i]))&&

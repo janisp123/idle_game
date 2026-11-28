@@ -15,7 +15,7 @@ export function validClanRegistration(r){
 }
 export function registerClanRaid(s,wallNow){
  const c=s.alphaClan,w=clanWeek(wallNow);
- if(c.levels.portal===50||c.raid.joinedWeek!==null||c.raid.lastWeek!==null&&c.raid.lastWeek>=w)return s;
+ if(Object.values(s.battleGroup).some(m=>m.recruitment?.active===false)||c.levels.portal===50||c.raid.joinedWeek!==null||c.raid.lastWeek!==null&&c.raid.lastWeek>=w)return s;
  const skill=s.skills.fighting.level,seed=Math.imul(w^c.levels.portal,2654435761)>>>0;
  const frozen=startGroupSession(s.battleGroup,{difficulty:cloneRewardGrade(skill),str:1,dex:1,end:1,skill},s.teamwork.level,seed,{rules:10});
  const registration={week:w,level:c.levels.portal+1,seed,frozen,envelope:captureGroupCloneEnvelope(s.battleGroup),skill,bonus:clanBonuses(c).combat};

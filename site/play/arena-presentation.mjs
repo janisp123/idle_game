@@ -6,7 +6,7 @@ import {COMBAT_LOADOUTS} from "./combat-skills.mjs?v=gear-a3";
 const title=s=>s[0].toUpperCase()+s.slice(1);
 export const battleLabels=Object.freeze({victory:"Victory",defeat:"Defeat",double_death:"Draw"});
 export function battlePreviewKey(s){
-  return s?JSON.stringify([s.timelineVersion,s.seed,Math.floor(s.elapsedMs/teamBoutMs(s)),s.players,s.teamworkLevel,s.coinRemainder??0,s.cloneEnvelope??null,s.rank?.grade??null,s.groupCombatRules??1,s.raidBonus??null,s.arenaFavorites??null,s.clanSnapshot??null]):"";
+  return s?JSON.stringify([s.timelineVersion,s.seed,Math.floor(s.elapsedMs/teamBoutMs(s)),s.players,s.recruitment??null,s.teamworkLevel,s.coinRemainder??0,s.cloneEnvelope??null,s.rank?.grade??null,s.groupCombatRules??1,s.raidBonus??null,s.arenaFavorites??null,s.clanSnapshot??null]):"";
 }
 export function battlePercentage(s){
   return s?Math.min(99,Math.floor(100*(s.elapsedMs%teamBoutMs(s))/teamBoutMs(s))):0;
@@ -15,7 +15,7 @@ function fighter(snapshot,v,index){
   const pieces=snapshot.trainingKit?.armour;
   const family=typeof snapshot.armour==="string"?snapshot.armour:pieces?
     new Set(Object.values(pieces)).size===1?Object.values(pieces)[0]:"mixed":null;
-  return {number:index+1,className:GROUP_CLASSES[snapshot.classId]?.name,role:snapshot.role,classLevel:snapshot.classLevel,weapon:snapshot.loadout,weaponName:COMBAT_LOADOUTS[snapshot.loadout].name,
+  return {number:index+1,className:snapshot.novice?GROUP_CLASSES[snapshot.classId]?.mainClass:GROUP_CLASSES[snapshot.classId]?.name,role:snapshot.role,classLevel:snapshot.classLevel,weapon:snapshot.loadout,weaponName:COMBAT_LOADOUTS[snapshot.loadout].name,
     family,armourName:family?title(family):null,tactic:snapshot.tactic??null,
     hp:v.maxHP,armour:v.maxArmour};
 }
