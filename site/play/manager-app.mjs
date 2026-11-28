@@ -147,7 +147,7 @@ enqueue(()=>{
   }else{clock=null;state=newArenaManager(Date.now());}
  }
  if(stored&&JSON.parse(stored).arenaOnly!==true){commit(enterArena(state,now()),true);text("migrationNotice","Coins, earned stats and combat progress retained. Noncombat activities and materials retired.");$("migrationNotice").hidden=false;}
- else if(!stored||!state.alphaClan||state.settledAtMs<now())commit(enterArena(state,now()),true);else render();
+ else if(!stored||!state.alphaClan||state.settledAtMs<now()||JSON.stringify(JSON.parse(stored).battleGroup)!==JSON.stringify(state.battleGroup))commit(enterArena(state,now()),true);else render();
  lastVisible=document.visibilityState!=="hidden";$("saveStatus").setAttribute("data-game-ready","true");text("saveStatus","Saved locally");
 });
 setInterval(tick,500);

@@ -30,7 +30,7 @@ function validPlayers(p,rules){
  });
 }
 export function validGroupSession(s){
- return Boolean(s?.timelineVersion===GROUP_TIMELINE_VERSION&&count(s.seed)&&s.seed<=0xffffffff&&count(s.elapsedMs)&&s.prizeCursor===Math.floor(s.elapsedMs/duration)&&
+ return Boolean(s?.timelineVersion===GROUP_TIMELINE_VERSION&&(s.staffEquipment===undefined||s.staffEquipment===true)&&count(s.seed)&&s.seed<=0xffffffff&&count(s.elapsedMs)&&s.prizeCursor===Math.floor(s.elapsedMs/duration)&&
   (s.arenaFavorites===undefined||(groupArenaPool(s.groupCombatRules??1).length===8&&validArenaFavorites(s.arenaFavorites)))&&(s.clanSnapshot===undefined||s.groupCombatRules===10&&validClanSnapshot(s.clanSnapshot))&&count(s.coinRemainder)&&s.coinRemainder<groupCoinRatio(s)&&count(s.teamworkRemainder)&&s.teamworkRemainder<ratio&&validTeamwork({level:s.teamworkLevel,xp:0})&&validPlayers(s.players,s.groupCombatRules??1)&&(s.raidBonus===undefined||[4,5,6,7,8,9,10].includes(s.groupCombatRules)&&validRaidCombatBonus(s.raidBonus))&&validGroupRank(s.rank)&&(s.groupCombatRules===undefined||SUPPORTED_GROUP_COMBAT_RULES.includes(s.groupCombatRules)));
 }
 export function startGroupSession(group,shared,teamworkLevel,seed,carry={}){

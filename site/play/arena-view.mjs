@@ -33,7 +33,7 @@ function icon(id){
  svg.setAttribute("stroke-width","1.7");svg.setAttribute("stroke-linecap","round");svg.setAttribute("stroke-linejoin","round");svg.setAttribute("aria-hidden","true");
  p.setAttribute("d",icons[id]??icons.armour);svg.append(p);return svg;
 }
-export function weaponIcon(id,label){const actual={"Dagger":"dagger","Staff":"staff","Wand":"wand","Scepter":"scepter","Mace":"mace","Great axe":"axe","Gauntlets":"gauntlets","Twin swords":"greatsword","Sword":"melee","Polearm":"spear"}[label]??id;return token(actual,label);}
+export function weaponIcon(id,label){const actual={"Dagger":"dagger","Staff":"staff","Two-handed staff":"staff","Wand":"wand","Scepter":"scepter","Mace":"mace","Great axe":"axe","Gauntlets":"gauntlets","Twin swords":"greatsword","Sword":"melee","Polearm":"spear"}[label]??id;return token(actual,label);}
 function token(id,label,value){
  const n=node("span");n.className="arena-token";n.title=label;n.setAttribute("aria-label",label);
  n.append(icon(id));if(value!==undefined)n.append(node("span",String(value)));return n;

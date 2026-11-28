@@ -30,7 +30,9 @@ export const COMBAT_SKILLS = Object.freeze({
   })
 });
 
-export const COMBAT_LOADOUTS = Object.freeze({
+// Staff is group-only; keep historical solo loadout enumeration unchanged.
+export const GROUP_STAFF_LOADOUT=Object.freeze({id:"staff",name:"Two-handed staff",weapon:"staff",attackSkill:"spell",defenseSkill:"sidestep",initiativeBonus:1});
+export const COMBAT_LOADOUTS = Object.freeze(Object.defineProperty({
   greatsword: Object.freeze({
     id: "greatsword", name: "Greatsword",
     attackSkill: "heavy_swing", defenseSkill: "blade_guard",
@@ -43,10 +45,9 @@ export const COMBAT_LOADOUTS = Object.freeze({
   }),
   hammer:Object.freeze({id:"hammer",name:"War Hammer",attackSkill:"hammer_blow",
     defenseSkill:"haft_guard",weapon:"hammer",initiativeBonus:-3}),
-  staff:Object.freeze({id:"staff",name:"Two-handed staff",weapon:"staff",attackSkill:"spell",defenseSkill:"sidestep",initiativeBonus:1}),
   bow:{id:"bow",name:"Bow",weapon:"bow",attackSkill:"arrow",defenseSkill:"sidestep",initiativeBonus:1},
   spear:{id:"spear",name:"Spear",weapon:"spear",attackSkill:"thrust",defenseSkill:"haft_guard",initiativeBonus:2}
-});
+},"staff",{value:GROUP_STAFF_LOADOUT,enumerable:false}));
 export const DEFAULT_COMBAT_LOADOUT = "greatsword";
 export const validCombatLoadout = id => typeof id === "string" &&
   Object.hasOwn(COMBAT_LOADOUTS, id);

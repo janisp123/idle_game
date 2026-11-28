@@ -483,7 +483,7 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
  const shared=desiredArenaPlayer(state),rules=state.arenaOnly?10:GROUP_COMBAT_RULES_VERSION;
  const arenaFavorites=state.arenaOnly?(state.arenaPreferences?.favorites??[]):undefined;
  const clanBuild=state.arenaOnly?clanSnapshot(state.alphaClan):null;
- const desired=groupSnapshots(group,shared,rules),bonus=state.arenaOnly?raidCombatBonus(state.raidBuff,state.settledAtMs):null;
+ const desired=groupSnapshots(group,shared,rules,online||state.arenaOnly||session?.staffEquipment===true),bonus=state.arenaOnly?raidCombatBonus(state.raidBuff,state.settledAtMs):null;
  if(session&&session.timelineVersion!==GROUP_TIMELINE_VERSION){
   const duration=teamBoutMs(session),remaining=(duration-session.elapsedMs%duration)%duration;
   if(elapsedMs<remaining){const r=settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online);legacyContribution(r);return {...r,battleGroup:group,...(clan?{alphaClan:clan,clanDonation}:{})};}
@@ -515,7 +515,7 @@ function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
   if(remaining)run(remaining);
   const {raidBonus:oldBonus,...rest}=session;
   const oldRatio=groupCoinRatio(session);
-  session={...rest,...(online||!state.arenaOnly?{players:desired,teamworkLevel:teamwork.level,staffEquipment:true}:{}),...(online?{groupCombatRules:rules,...(arenaFavorites!==undefined?{arenaFavorites:[...arenaFavorites]}:{})}:{}),...([4,5,6,7,8,9,10].includes(online?rules:session.groupCombatRules)&&bonus?{raidBonus:bonus}:{})};
+  session={...rest,...(online||!state.arenaOnly?{players:desired,teamworkLevel:teamwork.level,...(online||session.staffEquipment===true?{staffEquipment:true}:{})}:{}),...(online?{groupCombatRules:rules,...(arenaFavorites!==undefined?{arenaFavorites:[...arenaFavorites]}:{})}:{}),...([4,5,6,7,8,9,10].includes(online?rules:session.groupCombatRules)&&bonus?{raidBonus:bonus}:{})};
   if(online&&clanBuild){session={...session,clanSnapshot:clanBuild};session.coinRemainder=Math.floor(session.coinRemainder*groupCoinRatio(session)/oldRatio);}
   elapsedMs-=remaining;
  }

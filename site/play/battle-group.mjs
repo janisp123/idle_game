@@ -60,7 +60,7 @@ export function initialBattleGroup(){
  return Object.fromEntries(GROUP_IDS.map((id,i)=>{const selected=DEFAULT_GROUP_CLASSES[i];return [id,{selected,stance:"balanced",stances:Object.fromEntries(TACTIC_IDS.map(t=>[t,skill()])),classes:{[selected]:freshProgress(selected)}}];}));
 }
 export function selectGroupClass(group,member,race,mainClass,classId){
- requireGroup(group);requireMember(member);resolveGroupClass(race,mainClass,classId);
+ group=migrateGroupWeapons(group);requireMember(member);resolveGroupClass(race,mainClass,classId);
  const m=group[member];
  return {...group,[member]:{...m,selected:classId,classes:{...m.classes,[classId]:m.classes[classId]??freshProgress(classId)}}};
 }
@@ -96,7 +96,7 @@ export function awardGroupPractice(group,snapshots,productiveMs){
 }
 // Activate only the selected class and stance, at existing Master/login boundary.
 export function activateGroupPractice(group){
- requireGroup(group);
+ group=migrateGroupWeapons(group);
  return Object.fromEntries(GROUP_IDS.map(id=>{
   const m=group[id],p=migrateProgress(m.classes[m.selected],m.selected);
   return [id,{...m,stances:{...m.stances,[m.stance]:advanceSkill(m.stances[m.stance])},classes:{...m.classes,[m.selected]:{...p,mastery:advanceSkill(p.mastery),expertiseActive:{...p.expertise},attributeEffortActive:{...p.attributeEffort}}}}];
@@ -105,7 +105,7 @@ export function activateGroupPractice(group){
 // New class receives only its starter weapon; armour is automatically bought
 // at the real smith price. No player-managed kit selection and no inactive buys.
 export function previewGroupUpgrade(group,coins,fightingLevel){
- requireGroup(group);if(!count(coins)||!count(fightingLevel)||fightingLevel<1)throw new RangeError("Invalid group treasury");
+ group=migrateGroupWeapons(group);if(!count(coins)||!count(fightingLevel)||fightingLevel<1)throw new RangeError("Invalid group treasury");
  const candidates=GROUP_IDS.flatMap((id,i)=>{
   const m=group[id],c=GROUP_CLASSES[m.selected],p=m.classes[m.selected];
   return [c.loadout,...armourIds(c)].flatMap((itemId,j)=>{
@@ -120,7 +120,7 @@ export function previewGroupUpgrade(group,coins,fightingLevel){
 }
 export const MAX_GROUP_UPGRADES=GROUP_SIZE*(1+ARMOUR_SLOTS.length)*ITEM_GRADES.length*ITEM_QUALITIES.length;
 export function upgradeBattleGroup(group,coins,fightingLevel){
- let next=group,balance=coins;const upgrades=[];
+ let next=migrateGroupWeapons(group),balance=coins;const upgrades=[];
  for(let i=0;i<MAX_GROUP_UPGRADES;i++){
   const choice=previewGroupUpgrade(next,balance,fightingLevel);
   if(!choice?.quote.available)break;
