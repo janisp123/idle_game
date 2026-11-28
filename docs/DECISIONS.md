@@ -135,3 +135,5 @@ CLAN-BUILDINGS-001 (owner approved plan #224): candidate replaces temporary Acad
 
 
 COMING-SOON-001 (Owner, 2026-11-27): expose Leaderboard, PvP, World Bosses (Ant Queen, Spider Queen, Pirate Queen, Dragon Queen, Daemon Queen), Endless Tower, and Clan Wars inside Clan as static Coming soon panels. No implementation authorization for the future gameplay features themselves.
+
+TOWER-001 candidate PR #228: permanent sequential tower floors; clear thresholds unlock current personal raids; no additional boss catalog or currency. Individual attempts use existing 10-second group cadence and V10 elimination with fixed deterministic floor opponents; manual next attempt/retry, arena resumes after completion, first-clear coins = 5 × floor. Provisional grade bracket (one per seven floors, capped S) and enemy HP/damage multiplier .35+.021×floor; no numerical balance claim. Legacy access derived from existing successful raid evidence, active blessing/attempt; no invented floor clears. CI and staff branch reconciliation pending.

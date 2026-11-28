@@ -4,6 +4,7 @@ import {validRaidRun,validRaidLast,beginRaid,advanceRaid} from "./raid-session.m
 import {saveArenaPreferences} from "./arena-preferences.mjs";
 import {enrollAlphaClan,advanceConstruction,setClanPriority,clanWeekEnd} from "./alpha-clan.mjs";
 import {validClanRegistration,registerClanRaid,settleClanRaid} from "./clan-raid.mjs";
+import {towerProgress,validTower,raidUnlocked,beginTower,advanceTower} from "./endless-tower.mjs";
 export {newArenaManager,enableArenaOnly};
 export function readArenaManager(value){
  try{
@@ -11,28 +12,34 @@ export function readArenaManager(value){
   if(s.alphaClan?.raid.registration&&!validClanRegistration(s.alphaClan.raid.registration))return null;
   if(raw.raidRun!==undefined&&!validRaidRun(raw.raidRun)||raw.raidLast!==undefined&&!validRaidLast(raw.raidLast))return null;
   if(raw.raidRun&&(raw.raidRun.startedAtMs>s.settledAtMs||s.settledAtMs>=raw.raidRun.startedAtMs+raw.raidRun.durationMs))return null;
-  return {...enableArenaOnly(s),...(raw.raidRun!==undefined?{raidRun:raw.raidRun}:{}),...(raw.raidLast!==undefined?{raidLast:raw.raidLast}:{})};
+  if(raw.tower!==undefined&&(!validTower(raw.tower,s.settledAtMs)||raw.tower.run&&raw.raidRun))return null;
+  return {...enableArenaOnly(s),...(raw.tower!==undefined?{tower:raw.tower}:{}),...(raw.raidRun!==undefined?{raidRun:raw.raidRun}:{}),...(raw.raidLast!==undefined?{raidLast:raw.raidLast}:{})};
  }catch{return null;}
 }
 const requireArena=s=>{if(s?.arenaOnly!==true)throw new RangeError("Public game requires arena-only mode");return s;};
 function settlePublic(s,now=Date.now(),random=Math.random,online=false){
  requireArena(s);const settle=online?settleManagerLive:enterManagerGame;
- if(!s.raidRun)return settle(s,now,random);
+ const tower=towerProgress(s);
+ const keep=out=>({...out,state:{...out.state,tower:out.state.tower??tower}});
+ if(tower.run){const out=advanceTower(s,now);if(!out.finished)return {state:out.state,reports:[]};const after=settle(out.state,Math.max(now,out.state.settledAtMs),random);return {...after,state:{...after.state,tower:out.state.tower},towerFinished:out.finished};}
+ if(!s.raidRun)return keep(settle(s,now,random));
  const out=advanceRaid(s,now);
- if(!out.finished)return {state:out.state,reports:[]};
+ if(!out.finished)return keep({state:out.state,reports:[]});
  const after=settle(out.state,Math.max(now,out.state.settledAtMs),random);
- return {...after,raidFinished:out.finished};
+ return keep({...after,raidFinished:out.finished});
 }
 function updateClan(out,wallNow){const s=out.state;if(!s.alphaClan)return out;const r=settleClanRaid(s,wallNow);return {...out,...r,state:{...r.state,alphaClan:advanceConstruction(r.state.alphaClan,wallNow)}};}
 export function enterArena(s,now,random,wallNow=Date.now()){const out=settlePublic(s,now,random,false);return updateClan({...out,state:enrollAlphaClan(out.state)},wallNow);}
 export const settleArenaLive=(s,now,random,wallNow=Date.now())=>updateClan(settlePublic(s,now,random,true),wallNow);
 export function startArenaRaid(s,level,now=s.settledAtMs,random=Math.random){
- requireArena(s);if(s.raidRun)return {state:s,reports:[]};
+ requireArena(s);if(s.raidRun||towerProgress(s).run||!raidUnlocked(s,level))return {state:s,reports:[]};
  const out=settleArenaLive(s,now,random);
  return {...out,state:beginRaid(out.state,level)};
 }
-export const chooseArenaClass=(s,...args)=>s.raidRun?{state:s,reports:[]}:chooseManagerGroupClass(requireArena(s),...args);
-export const chooseArenaStance=(s,...args)=>s.raidRun?{state:s,reports:[]}:chooseManagerGroupStance(requireArena(s),...args);
+export function startArenaTower(s,now=s.settledAtMs,random=Math.random){requireArena(s);if(s.raidRun||towerProgress(s).run)return {state:s,reports:[]};const out=settleArenaLive(s,now,random);return {...out,state:beginTower(out.state)};}
+const chooseGroup=(fn,s,args)=>{if(s.raidRun||towerProgress(s).run)return {state:s,reports:[]};const out=fn(requireArena(s),...args);return {...out,state:{...out.state,tower:towerProgress(s)}};};
+export const chooseArenaClass=(s,...args)=>chooseGroup(chooseManagerGroupClass,s,args);
+export const chooseArenaStance=(s,...args)=>chooseGroup(chooseManagerGroupStance,s,args);
 
 // Real wall-clock lock is separate from the accelerated alpha game clock.
 export function chooseArenaPreferences(s,favorites,now=s.settledAtMs,wallNow=Date.now(),random=Math.random){

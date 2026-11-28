@@ -11,7 +11,9 @@ const fresh=()=>enterArena(newArenaManager(t),t,rand,wall).state;
 const funded=(c,n)=>({...c,treasury:c.treasury+n,donated:c.donated+n});
 test("local enrollment occurs after offline settlement; all five buildings level zero",()=>{
  const s=newArenaManager(t),end=t+100000,old=enterManagerGame(s,end,rand).state,joined=enterArena(s,end,rand,wall).state;
- assert.deepEqual({...joined,alphaClan:undefined},{...old,alphaClan:undefined});
+ assert.deepEqual(joined.tower,{version:1,highest:0,legacyAccess:0,run:null,last:null});
+ const {tower,...withoutTower}=joined;
+ assert.deepEqual({...withoutTower,alphaClan:undefined},{...old,alphaClan:undefined});
  assert.deepEqual(joined.alphaClan.levels,{barracks:0,armoury:0,training:0,bank:0,portal:0});assert.equal(clanBonuses(joined.alphaClan).xp,0);assert.equal(clanBonuses(joined.alphaClan).members,10);
  assert.deepEqual(readArenaManager(JSON.stringify(joined)),joined);
  assert.deepEqual(enterArena(joined,end,rand,wall).state.alphaClan,joined.alphaClan);
@@ -63,7 +65,7 @@ import {startArenaRaid} from "../site/play/arena-manager.mjs";
 import {raidResult} from "../site/play/raid-session.mjs";
 test("personal raids freeze completed clan combat bonus, without altering historical raid replay",()=>{
  const s=fresh(),c={...s.alphaClan,levels:{...s.alphaClan.levels,portal:5}};
- assert.ok(validAlphaClan(c));const started=startArenaRaid({...s,alphaClan:c},10,t,rand).state;
+ assert.ok(validAlphaClan(c));const started=startArenaRaid({...s,alphaClan:c,tower:{version:1,highest:10,legacyAccess:0,run:null,last:null}},10,t,rand).state;
  assert.equal(started.raidRun.clanBonus.hp,15);assert.ok(validClanCombatForTest(started.raidRun.clanBonus));
  assert.deepEqual(readArenaManager(JSON.stringify(started)),started);
  assert.deepEqual(raidResult(started.raidRun),raidResult(readArenaManager(JSON.stringify(started)).raidRun));
