@@ -17,7 +17,7 @@ The public [landing page](../../site/index.html) links to [Play Now](../../site/
 ## Validation and calibration
 
 - Use the [stabilization test sequence](STABILIZATION_EXECUTION_PLAN.md) and [S00 results](STABILIZATION_BASELINE_RESULTS.md) for save, offline and browser verification. [Browser smoke](../../tools/browser-smoke.mjs) serves the Pages entry locally and checks mobile and desktop behavior. Document exact baselines and preserve deterministic frozen outcomes when editing formulas.
-- Keep playable changes and their mechanics documentation in the same PR. [System lab](SYSTEM_LAB.md) and [combat simulator](COMBAT_SIMULATOR.md) are developer references. Their scenarios span multiple historical engine generations.
+- Keep playable changes and their mechanics documentation in the same PR. [System lab](SYSTEM_LAB.md) and [combat simulator](COMBAT_SIMULATOR.md) are developer references. Their scenarios span multiple historical engine generations. The [simulation evidence inventory](SIMULATION_EVIDENCE_INDEX.md) links raw runs, compact aggregates and executable consumers.
 - Numerical endgame calibration and open functional follow-ups are tracked in the [active backlog](../TD_LIST.md). Treat design plans and prior combat screens as evidence at their recorded revision.
 
 ## Historical specifications and research
