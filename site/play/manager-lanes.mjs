@@ -9,7 +9,7 @@ import {
 import {teamBoutMs,fasterTeamSession} from "./team-timeline.mjs?v=group-004";
 import {GROUP_TIMELINE_VERSION} from "./battle-group-timing.mjs";
 import {startGroupSession} from "./battle-group-timeline.mjs?v=raid-001";
-import {initialBattleGroup,initialRecruitGroup,syncRecruitment,validBattleGroup,migrateGroupAttributes,selectGroupClass,selectGroupStance,upgradeBattleGroup,previewGroupUpgrade} from "./battle-group.mjs?v=group-001";
+import {initialBattleGroup,initialRecruitGroup,syncRecruitment,normalizeRecruitChoices,validBattleGroup,migrateGroupAttributes,selectGroupClass,selectGroupStance,upgradeBattleGroup,previewGroupUpgrade} from "./battle-group.mjs?v=group-001";
 import {blankGroupAnalytics,validGroupAnalytics,accumulateGroupAnalytics} from "./battle-group-analytics.mjs?v=group-004";
 import {blankBattleAnalytics,validBattleAnalytics,accumulateBattleAnalytics} from "./battle-analytics.mjs?v=npc-parity-001";
 import {WORK_ROTATION,ingredientReserve,rotateManagerWork,rotationTravelMs} from "./activity-rotation.mjs?v=npc-parity-001";
@@ -81,7 +81,7 @@ function managerUpgradePreview(s){
 function automateEquipment(out){
  const s=out.state;if(!s.battleGroup)return automateManagerEquipment(out);
  // An old frozen bout remains unchanged; no legacy purchases after opt-in.
- const u=upgradeBattleGroup(syncRecruitment(s.battleGroup,s.skills.fighting.level),s.coins,s.skills.fighting.level);
+ const u=upgradeBattleGroup(normalizeRecruitChoices(syncRecruitment(s.battleGroup,s.skills.fighting.level)),s.coins,s.skills.fighting.level);
  return {...out,state:{...s,battleGroup:u.group,coins:u.coins},autoEquipment:{upgrades:u.upgrades,acquisitions:[],equipped:[],spent:u.spent,preview:u.pending}};
 }
 export function chooseManagerGroupClass(s,member,race,mainClass,classId,now=s.settledAtMs,random=Math.random){

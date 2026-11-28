@@ -44,7 +44,7 @@ export const groupPrizeGrade=s=>s.rank.grade;
 export const groupWinPrize=s=>Math.floor((groupRewardUnits(s)+s.coinRemainder)/groupCoinRatio(s));
 function bout(s,index){
  const scheduled=index%ARENA_SCHEDULE_BOUTS,seed=Math.imul(s.seed^scheduled,2654435761)>>>0;
- const bracket=rankProfile(s.rank.grade),players=Object.values(s.players),enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,s.groupCombatRules??1,s.recruitment?players.length:undefined);
+ const bracket=rankProfile(s.rank.grade),players=Object.values(s.players),enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,s.groupCombatRules??1,s.recruitment?players.length:undefined,s.recruitment&&players.every(p=>p.recruitLevel!==undefined)?players.map(p=>p.recruitLevel):undefined);
  const roll=seededCombatRandom((seed^0x749ae237)>>>0);
  const positioning=s.arenaFavorites===undefined?chooseArena(players[Math.floor(roll()*players.length)],enemies[Math.floor(roll()*enemies.length)],roll,groupArenaPool(s.groupCombatRules??1)):{arena:choosePreferredGroupArena(s.arenaFavorites,roll)};
  const terrain=positioning.arena;

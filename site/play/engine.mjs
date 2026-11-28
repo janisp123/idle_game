@@ -6,7 +6,7 @@ import { initialTeam,validGladiator,teamSnapshots,awardTeamPractice,activateTeam
 import { initialTeamwork,validTeamwork,awardTeamwork,activateTeamworkOnLogin } from "./teamwork.mjs?v=team-002";
 import { validTeamSession,startTeamSession,settleTeamSession,teamBoutMs,isCloneTeamSession,CLONE_TEAM_TIMELINE_VERSION } from "./team-timeline.mjs?v=group-004";
 import {captureCloneEnvelope} from "./clone-opponents.mjs?v=npc-parity-001";
-import {GROUP_IDS,recruitmentEnabled,validBattleGroup,groupSnapshots,awardGroupPractice,activateGroupPractice} from "./battle-group.mjs?v=group-001";
+import {GROUP_IDS,recruitmentEnabled,normalizeRecruitChoices,validBattleGroup,groupSnapshots,awardGroupPractice,activateGroupPractice} from "./battle-group.mjs?v=group-001";
 import {advanceGroupRank} from "./battle-group-rank.mjs?v=group-005";
 import {GROUP_TIMELINE_VERSION,GROUP_BOUT_MS,validGroupSession,startGroupSession,settleGroupSession,groupCoinRatio} from "./battle-group-timeline.mjs?v=raid-001";
 import {GROUP_COMBAT_RULES_VERSION} from "./group-counter-rules.mjs";
@@ -475,7 +475,7 @@ function settleTeamArenaBuild(state,elapsedMs,outcomeCaches,online){
 // and legacy practice, then start a new ten-second timeline with exact carry.
 // Old equipment and mastery remain in the legacy fields; no free transfer.
 function settleGroupArenaBuild(state,elapsedMs,outcomeCaches,online){
- let group=state.battleGroup,teamwork=state.teamwork,session=state.combatSession,old=null,clan=state.alphaClan,clanDonation=0;
+ let group=normalizeRecruitChoices(state.battleGroup),teamwork=state.teamwork,session=state.combatSession,old=null,clan=state.alphaClan,clanDonation=0;
  const contribute=(wins,units,ratio,carry=0)=>{if(!clan)return;const r=applyClanRewards(clan,wins,units,ratio,carry);clan=r.clan;clanDonation+=r.donated;};
  const legacyContribution=r=>{if(r.coins>0){if(r.victories!==1)throw new Error("Expected a single legacy payout");contribute(1,r.coins,1);}};
  const totals=Object.fromEntries(arenaFields.map(k=>[k,0])),practiceMs=Object.fromEntries(GROUP_IDS.map(id=>[id,0])),groupAnalytics=[];
