@@ -11,7 +11,23 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## STABILIZATION-001 — Whole-game correctness, performance and repository audit
 
 - **Goal / acceptance:** Audit all public systems against current approved behavior, measure runtime and repo bloat, isolate obsolete code safely, fix verified defects in small tested PRs; no new feature scope or history rewrite. [Initial audit and test matrix](mechanics/STABILIZATION_AUDIT_20261128.md). [Sequential execution and non-overlap protocol](mechanics/STABILIZATION_EXECUTION_PLAN.md).
-- **Status:** PARTIAL — initial source review and baseline CI verified; full checkout inventory, profiling and system validation pending.
+- **Status:** PARTIAL — S00 baseline underway on audit/s00-baseline; dedicated test-only CI, no production edits; #232 merged 68e5918, #231 live deployment verified. S01 blocked until baseline reviewed.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## ARENA-ROSTER-UI-001 — Seven visible arena positions per side
+
+- **Goal / acceptance:** Always show seven arena slots on both sides, inactive positions neutral grey with Fighting Lv 5/10/15/20/25/30 unlock labels. Fresh 1v1 shows six locked each side; real combat remains matched active roster only. Canonical RECRUIT_LEVELS, no fake combatants, test every threshold, 7v7 and mobile/desktop overflow. Owner confirmed both sides.
+- **Status:** TODO — S08 UI; separate isolated fix after prior phases.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## STANCE-UNLOCK-001 — Combat stance selection at character level 10
+
+- **Goal / acceptance:** Balanced is the sole active stance before individual character level 10; other stances are visibly locked. At 10 all combat stance choices unlock. Preserve earned stance records and frozen encounter correctness; test both sides at levels 9/10, reload and switching. Do not implement during S00/S01; separate isolated S02 fix.
+- **Status:** TODO — queued for S02 after baseline and save integrity.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -19,7 +35,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## MAIN-CLASS-SKILLS-001 — One basic automatic skill per main class
 
 - **Goal / acceptance:** Exactly one skill at individual level 20–29; no skill before 20; full specialist kit replaces it at 30; both sides use shared combat rules. No endgame retune.
-- **Status:** PARTIAL — merged #231 (9624c14), all seven workflows and 223 tests passed; Pages and all-skill runtime coverage pending.
+- **Status:** PARTIAL — merged #231 (9624c14), all seven workflows and 223 tests passed; Pages verified; all-skill runtime coverage pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -27,7 +43,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## STAGED-RECRUITMENT-001 — Race, class and specialization stages
 
 - **Goal / acceptance:** Race only before individual level 20; main class at 20; specialization at 30. Grey locked controls, symmetric arena/tower stages, no new save wipe, preserve frozen legacy sessions, max-only 7v7 calibration unchanged.
-- **Status:** PARTIAL — merged #231 (9624c14), all seven workflows and 223 tests passed; Pages and natural progression calibration pending.
+- **Status:** PARTIAL — merged #231 (9624c14), all seven workflows and 223 tests passed; Pages verified; natural progression calibration pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
