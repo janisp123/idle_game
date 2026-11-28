@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — REPO-CLEANUP-002 phase 04 STARTED
+
+Codex continues from [#247](https://github.com/janisp123/idle_game/pull/247), merged at `5a8e11c4a66600cd1ef34df856b403621b4658ce`. Full release run 46171700438 passed 28/28 after a documented Chromium startup retry, and standalone protocol passed. Branch `cleanup/repo-cleanup-002-library`. Scope is the library index, map, examples, affected article fit notes and required journal records. Next reconcile game-specific references with ARENA-ONLY-001, OFF-001 and CAP-001 while preserving source provenance and negative evidence.
+
 ## 2026-11-28 — REPO-CLEANUP-002 phase 03 STARTED
 
 Codex continues the approved documentation cleanup from `8053f7890154e5fcf728f3a242b14355e9fb1132`. Governance PR #246 merged after Owner approval, independent review and two 28/28 release runs plus standalone protocol. Branch `cleanup/repo-cleanup-002-docs`. Scope is WORK_CHECKPOINT, TD_LIST, CHANGELOG and the mechanics README. Next archive stale handoffs at their exact revision, reconcile active tasks, and validate current source and evidence links.
