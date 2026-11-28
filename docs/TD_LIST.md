@@ -10,7 +10,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 
 ## STABILIZATION-001 — Whole-game correctness, performance and repository audit
 
-- **Goal / acceptance:** Audit all public systems against current approved behavior, measure runtime and repo bloat, isolate obsolete code safely, fix verified defects in small tested PRs; no new feature scope or history rewrite. [Initial audit and test matrix](mechanics/STABILIZATION_AUDIT_20261128.md).
+- **Goal / acceptance:** Audit all public systems against current approved behavior, measure runtime and repo bloat, isolate obsolete code safely, fix verified defects in small tested PRs; no new feature scope or history rewrite. [Initial audit and test matrix](mechanics/STABILIZATION_AUDIT_20261128.md). [Sequential execution and non-overlap protocol](mechanics/STABILIZATION_EXECUTION_PLAN.md).
 - **Status:** PARTIAL — initial source review and baseline CI verified; full checkout inventory, profiling and system validation pending.
 - **Added by:** chat.
 - **Requested by:** Owner.

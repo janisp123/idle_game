@@ -159,3 +159,5 @@ MAIN-CLASS-SKILLS-001 — Owner approved 2026-11-28: each main class has one aut
 
 
 STABILIZATION-001 STARTED (Owner 2026-11-28): #231 merged 9624c14; final head 25f8f7f seven workflows PASS, 223 tests and mobile/desktop Chromium. Live page HTTP 200 still shows previous level-20 gate at observation; deployment pending. [Initial source audit](mechanics/STABILIZATION_AUDIT_20261128.md) records ten findings and whole-system matrix; no gameplay edits or new simulation/profiling claims. Next: full repo dependency/asset inventory, performance baseline and P0 finite progression and stage-skill correctness checks.
+
+STABILIZATION-001 owner requested non-overlapping testing/fixes: [S00–S10 execution protocol](mechanics/STABILIZATION_EXECUTION_PLAN.md). One active implementation PR across agents; read-only audits may run in parallel; each fix gets explicit base/file/interface reservation, reproducer, full regression and deployment evidence. Next S00 reproducible baseline; no production edits or new test claims in this plan.

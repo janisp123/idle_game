@@ -29,3 +29,6 @@ All seven PR workflows passed: website 46143122643 (job 140973247570; 223/223 No
 2. Small isolated changes, full CI + targeted tests; preserve deterministic rewards and historical frozen behavior. Keep 7v7 max-only balance and no-prestige direction.
 3. Compare before/after metrics; do not promise speedup or claim removed code until measured. Save raw results. Verify Pages after each public change.
 4. First follow-up: reproduce completion-cap discrepancy and run full repository import/asset inventory and performance baseline in a real checkout (GitHub Actions or Codex). Record evidence before edits.
+
+## Execution protocol
+Follow [the sequential stabilization execution plan](STABILIZATION_EXECUTION_PLAN.md). Parallel read-only audits, one active implementation PR, phase-specific path/interface reservations and regression gates.
