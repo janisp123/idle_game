@@ -1064,3 +1064,6 @@ STAGED-RECRUITMENT-001 — Owner approved 2026-11-28: race only at character 1�
 
 
 MAIN-CLASS-SKILLS-001 — Owner approved 2026-11-28: each main class has one automatic basic skill at individual levels 20–29, replaced by full specialization kit at 30. 13 immutable skill definitions, shared cooldown scheduler/action budget, no separate skill points or new endgame mechanics. Basic strikes use fixed modest attack multipliers; support/guard/heal use existing scaled effects. Initial names, coefficients and five-round cooldown provisional, not numerical balance acceptance. UI displays name/description; symmetric arena/tower snapshots and raid players, no skill on earlier frozen legacy snapshots. Added registry/stage and real combat trace tests. CI pending.
+
+
+STABILIZATION-001 STARTED (Owner 2026-11-28): #231 merged 9624c14; final head 25f8f7f seven workflows PASS, 223 tests and mobile/desktop Chromium. Live page HTTP 200 still shows previous level-20 gate at observation; deployment pending. [Initial source audit](mechanics/STABILIZATION_AUDIT_20261128.md) records ten findings and whole-system matrix; no gameplay edits or new simulation/profiling claims. Next: full repo dependency/asset inventory, performance baseline and P0 finite progression and stage-skill correctness checks.

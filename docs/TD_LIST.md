@@ -8,10 +8,18 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## STABILIZATION-001 — Whole-game correctness, performance and repository audit
+
+- **Goal / acceptance:** Audit all public systems against current approved behavior, measure runtime and repo bloat, isolate obsolete code safely, fix verified defects in small tested PRs; no new feature scope or history rewrite. [Initial audit and test matrix](mechanics/STABILIZATION_AUDIT_20261128.md). [Sequential execution and non-overlap protocol](mechanics/STABILIZATION_EXECUTION_PLAN.md).
+- **Status:** PARTIAL — initial source review and baseline CI verified; full checkout inventory, profiling and system validation pending.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## MAIN-CLASS-SKILLS-001 — One basic automatic skill per main class
 
 - **Goal / acceptance:** Exactly one skill at individual level 20–29; no skill before 20; full specialist kit replaces it at 30; both sides use shared combat rules. No endgame retune.
-- **Status:** IN_REVIEW — PR #231; CI pending.
+- **Status:** PARTIAL — merged #231 (9624c14), all seven workflows and 223 tests passed; Pages and all-skill runtime coverage pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -19,7 +27,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## STAGED-RECRUITMENT-001 — Race, class and specialization stages
 
 - **Goal / acceptance:** Race only before individual level 20; main class at 20; specialization at 30. Grey locked controls, symmetric arena/tower stages, no new save wipe, preserve frozen legacy sessions, max-only 7v7 calibration unchanged.
-- **Status:** IN_REVIEW — staged candidate, CI pending.
+- **Status:** PARTIAL — merged #231 (9624c14), all seven workflows and 223 tests passed; Pages and natural progression calibration pending.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
