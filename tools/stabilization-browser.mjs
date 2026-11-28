@@ -77,22 +77,35 @@ try {
  for(const width of [390,1440])for(const [label,fixture] of Object.entries({fresh,maxed})){
   await send("Emulation.setDeviceMetricsOverride",{width,height:width===390?844:1000,deviceScaleFactor:1,mobile:width===390});
   const url=origin+"/play/?baseline="+width+"-"+label;
-  const source="if(location.href==="+JSON.stringify(url)+"){localStorage.setItem("+JSON.stringify(managerKey)+","+JSON.stringify(JSON.stringify(fixture))+");localStorage.removeItem('idle-game-manager-clock-v2');const base=performance.now();Date.now=()=>"+now+"+Math.floor(performance.now()-base);window.__s00={writes:0,writeMs:0,longTasks:[],frames:[]};const orig=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){const t=performance.now();try{return orig.call(this,k,v);}finally{if(k==="+JSON.stringify(managerKey)+"){window.__s00.writes++;window.__s00.writeMs+=performance.now()-t;}}};try{new PerformanceObserver(l=>window.__s00.longTasks.push(...l.getEntries().map(e=>e.duration))).observe({type:'longtask',buffered:true});}catch{};let prev=performance.now();function frame(t){window.__s00.frames.push(t-prev);prev=t;requestAnimationFrame(frame);}requestAnimationFrame(frame);}";
+  const source="if(location.href==="+JSON.stringify(url)+"){localStorage.setItem("+JSON.stringify(managerKey)+","+JSON.stringify(JSON.stringify(fixture))+");localStorage.removeItem('idle-game-manager-clock-v2');Date.now=()=>"+now+";window.__s00={writes:0,writeMs:0,longTasks:[],frames:[]};const orig=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){const t=performance.now();try{return orig.call(this,k,v);}finally{if(k==="+JSON.stringify(managerKey)+"){window.__s00.writes++;window.__s00.writeMs+=performance.now()-t;}}};try{new PerformanceObserver(l=>window.__s00.longTasks.push(...l.getEntries().map(e=>e.duration))).observe({type:'longtask',buffered:true});}catch{};let prev=performance.now();function frame(t){window.__s00.frames.push(t-prev);prev=t;requestAnimationFrame(frame);}requestAnimationFrame(frame);}";
   const injected=await send("Page.addScriptToEvaluateOnNewDocument",{source});
   const t=Date.now();await send("Page.navigate",{url});
-  await until(()=>evaluate("location.href==="+JSON.stringify(url)+"&&document.getElementById('saveStatus')?.getAttribute('data-game-ready')==='true'"),"baseline ready");
+  try {
+   await until(async()=>{
+    const status=await evaluate("({url:location.href,ready:document.getElementById('saveStatus')?.getAttribute('data-game-ready'),status:document.getElementById('saveStatus')?.textContent,notice:document.getElementById('migrationNotice')?.textContent,injected:!!window.__s00})");
+    if(status.url!==url)return false;
+    if(status.status==="Progress not saved"||runtimeErrors.length)throw Error(JSON.stringify({status,runtimeErrors}));
+    return status.ready==="true"&&status.injected;
+   },"baseline ready "+width+" "+label);
+  }catch(error){
+   console.log("S00_BROWSER_BOOT_FAILURE "+JSON.stringify({width,label,error:String(error),runtimeErrors,failedRequests:failures}));
+   throw error;
+  }
   const readyMs=Date.now()-t;
   await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:injected.identifier});
   await evaluate("if(document.getElementById('loginReport')?.open)document.getElementById('loginReportDismiss').click();");
   const before=await send("Performance.getMetrics");
   const start=await evaluate("({writes:window.__s00.writes,writeMs:window.__s00.writeMs,longTasks:window.__s00.longTasks.length,frames:window.__s00.frames.length})");
+  await evaluate("(()=>{const base=performance.now();Date.now=()=>"+now+"+Math.floor(performance.now()-base);})()");
   await delay(15000);
   const after=await send("Performance.getMetrics");
   const result=await evaluate(`(()=>{const b=${JSON.stringify(start)},s=window.__s00,r=performance.getEntriesByType("resource"),frames=s.frames.slice(b.frames).sort((a,b)=>a-b);return {writes:s.writes-b.writes,writeMs:s.writeMs-b.writeMs,longTasks:s.longTasks.slice(b.longTasks),frameP95Ms:frames[Math.ceil(frames.length*.95)-1]??null,resourceCount:r.length,transferBytes:r.reduce((n,x)=>n+x.transferSize,0),decodedBytes:r.reduce((n,x)=>n+x.decodedBodySize,0),saveBytes:new TextEncoder().encode(localStorage.getItem("idle-game-manager-v2")).length,overflow:document.documentElement.scrollWidth-innerWidth,status:document.getElementById("saveStatus").textContent};})()`);
   const a=Object.fromEntries(after.metrics.map(x=>[x.name,x.value])),b=Object.fromEntries(before.metrics.map(x=>[x.name,x.value]));
   const row={width,label,readyMs,intervalMs:15000,...result,heapBytes:a.JSHeapUsedSize,taskDurationSeconds:a.TaskDuration-b.TaskDuration,scriptDurationSeconds:a.ScriptDuration-b.ScriptDuration,layoutCount:a.LayoutCount-b.LayoutCount};
   rows.push(row);console.log("S00_BROWSER "+JSON.stringify(row));
+  assert.equal(result.status,"Saved locally",await evaluate("document.getElementById('migrationNotice')?.textContent"));
+  assert.ok(result.writes>0,"No persisted live ticks");
  }
  await writeFile("stabilization-browser.json",JSON.stringify({rows,runtimeErrors,failedRequests:failures},null,2));
  assert.deepEqual(runtimeErrors,[]);assert.deepEqual(failures,[]);
-}finally{socket?.close();chrome.kill();server.close();await delay(200);await rm(profile,{recursive:true,force:true}).catch(()=>{});}
+}finally{await writeFile("stabilization-browser.json",JSON.stringify({rows,runtimeErrors,failedRequests:failures},null,2));socket?.close();chrome.kill();server.close();await delay(200);await rm(profile,{recursive:true,force:true}).catch(()=>{});}

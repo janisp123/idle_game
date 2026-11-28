@@ -65,6 +65,7 @@ function differences(a,b,p="",out=[]){
 }
 const summaries={};for(const [id,s] of Object.entries(fixtures)){const serialized=JSON.stringify(s);const restored=readArenaManager(serialized);summaries[id]={sha256:sha(serialized),bytes:Buffer.byteLength(serialized),roster:activeGroupIds(s.battleGroup).length,valid:!!restored,roundtripIdentical:!!restored&&JSON.stringify(restored)===serialized,structuralEqual:!!restored&&isDeepStrictEqual(s,restored),changedPaths:restored?differences(s,restored):["unreadable"]};}
 writeFileSync("stabilization-synthetic-fixtures.json",JSON.stringify({now,fresh:fixtures.fresh,maxed:fixtures.maxed}));
+const diagnostics={};for(const name of ["fresh","maxed"]){const fixture=fixtures[name];for(const elapsed of [0,500,10000]){const next=enterArena(fixture,now+elapsed,rand,now+elapsed).state;diagnostics[name+"-entry-"+elapsed]={valid:!!readArenaManager(JSON.stringify(next)),settledAtMs:next.settledAtMs};}}console.log("S00_ENTRY_VALIDATION "+JSON.stringify(diagnostics));
 const metrics=[];
 function bench(id,fn,n=10){
  fn();const times=[],digests=[];for(let i=0;i<n;i++){const t=performance.now();const out=fn();times.push(performance.now()-t);digests.push(sha(out));}
@@ -80,7 +81,7 @@ for(const name of ["fresh","level20","maxed"]){
 bench("fresh-24h-offline",()=>enterArena(fixtures.fresh,now+day,rand,now+day).state);
 bench("fresh-30d-offline",()=>enterArena(fixtures.fresh,now+30*day,rand,now+30*day).state);
 bench("maxed-24h-offline",()=>enterArena(fixtures.maxed,now+day,rand,now+day).state,3);
-const report={commit:git("rev-parse","HEAD"),node:process.version,platform:process.platform,arch:process.arch,seed,now,inventory,fixtures:summaries,metrics,limitations:["Synthetic fixtures, not natural progression or a real player save.","Node timings only, no browser CPU/memory or transferred bytes yet.","Three repeats for expensive maxed offline path; descriptive, not a reliable p95.","Literal imports only; candidates are not safe-to-delete findings.","No balance assessment."]};
+const report={commit:git("rev-parse","HEAD"),node:process.version,platform:process.platform,arch:process.arch,seed,now,inventory,fixtures:summaries,diagnostics,metrics,limitations:["Synthetic fixtures, not natural progression or a real player save.","Node timings only, no browser CPU/memory or transferred bytes yet.","Three repeats for expensive maxed offline path; descriptive, not a reliable p95.","Literal imports only; candidates are not safe-to-delete findings.","No balance assessment."]};
 writeFileSync("stabilization-baseline.json",JSON.stringify(report,null,2)+"\n");
 console.log("S00_INVENTORY "+JSON.stringify({trackedFiles:inventory.trackedFiles,trackedBytes:inventory.trackedBytes,siteFiles:inventory.siteFiles,siteBytes:inventory.siteBytes,modules:physical.length,aliasCount:Object.keys(map).length,duplicateGroups:duplicates.length,unresolved,dynamicUnknown}));
 console.log("S00_FIXTURES "+JSON.stringify(summaries));

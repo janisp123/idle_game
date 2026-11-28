@@ -22,7 +22,8 @@ jobs:
         run: node tools/stabilization-baseline.mjs
       - name: Measure browser baseline on synthetic fresh and maxed saves
         run: node tools/stabilization-browser.mjs
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: stabilization-baseline
           path: |
