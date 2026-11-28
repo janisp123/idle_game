@@ -1,0 +1,32 @@
+name: Stabilization save integrity
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/stabilization-save-integrity.mjs'
+      - '.github/workflows/stabilization-save-integrity.yml'
+      - 'site/play/engine.mjs'
+      - 'site/play/arena-manager.mjs'
+      - 'site/play/manager-lanes.mjs'
+      - 'site/play/manager-app.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  save-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Reproduce save and offline invariants
+        run: node tools/stabilization-save-integrity.mjs
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: stabilization-save-integrity
+          path: stabilization-save-integrity.json
+          if-no-files-found: error
+          retention-days: 30
