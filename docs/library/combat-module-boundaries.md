@@ -12,7 +12,7 @@ Combat rules become difficult to test when damage, timers, rewards and rendering
 
 ## Implementation pattern and pitfalls
 
-**Evidence examined:** publicly readable code from a classic MMORPG-style server recreation, plus a larger modular server framework. We inspected actual combat damage calculations, player/NPC fighting loops and a separate loot-roll function in the former, and the latter's high-level engine/content separation. These are **readable implementations**, not verified formulas from the proprietary original games. Source names and URLs are not published under this repository's standing rule.
+**Evidence examined:** publicly readable code from a classic MMORPG-style server recreation, plus a larger modular server framework. We inspected actual combat damage calculations, player/NPC fighting loops and a separate loot-roll function in the former, and the latter's high-level engine/content separation. These are **readable implementations**, not verified formulas from the proprietary original games. This historical comparison omitted the source names and URLs. Follow the [current library sourcing rules](../RESEARCH_LIBRARY.md#what-belongs-here) when adding verifiable citations.
 
 **Observed boundaries and reusable lessons:**
 

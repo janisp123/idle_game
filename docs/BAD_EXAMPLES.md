@@ -25,4 +25,4 @@ A bad example belongs here only when a researcher can state **the precise precon
 - **Conditional tradeoff or our-game conflict:** explain the relevant conditions; do not call other valid designs universally defective.
 - **Unconfirmed claim:** keep in a private research report or queue until adequately supported, **not** in this catalogue.
 
-**Do not publish outside project/source names, unlicensed code, credentials or source URLs.** The private run report may retain specific source provenance. The list can be updated on a research PR when a genuinely distinct, evidence-supported failure is discovered; **do not append entries for commit activity or duplicate old warnings**.
+Cite inspectable public sources where they support a claim. Keep unlicensed code, credentials and private research notes out of the catalogue. The list can be updated on a research PR when a genuinely distinct, evidence-supported failure is discovered; **do not append entries for commit activity or duplicate old warnings**.

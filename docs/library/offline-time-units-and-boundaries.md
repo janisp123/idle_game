@@ -157,7 +157,7 @@ For long-running browser games, use a **trusted server timestamp** for authorita
 - Keep durable rule-version and migration strategies for players who may return after many game updates.
 - Use units and number types able to represent decades of accumulated items without overflow or precision corruption.
 
-For the design promising uncapped offline progress, a maximum processing budget should trigger **resumable settlement**, not reward truncation. Store a continuation state or split the computation into safe transactions while preserving exactly-once updates.
+For games that allow long absences, use **resumable settlement** when the processing budget is exhausted. Complete the eligible work within the applicable reward rules. Store a continuation state or split the computation into safe transactions while preserving exactly-once updates.
 
 ## 6. Tests that catch the dangerous mistakes
 
@@ -175,7 +175,7 @@ The following are **proposed checks**, not tests run as part of this article.
 | Two time intervals `a` then `b` | Consistent with settlement over `a+b` when no external commands intervene |
 | 0, negative or non-finite durations | Explicitly handled/rejected; never infinite loop |
 | Exact event at target timestamp | Process once according to documented boundary order |
-| One-year or twenty-year idle interval | Completes within measured resource budget without reward cap |
+| One-year or twenty-year idle interval | Completes within the measured resource budget and respects the configured reward policy |
 | Retry same offline-settlement transaction | Exactly-once inventory, reward and watermark update |
 
 Also use randomized **property-based tests**: generate nonnegative stock, production/consumption rates, and short time windows, then compare the optimized solver against a tiny-step reference simulator. Test starvation, near-equal rates, floating-point sensitivity, and simultaneous boundaries explicitly.

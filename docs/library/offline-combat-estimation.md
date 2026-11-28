@@ -12,7 +12,7 @@ A combat-capable idle game must estimate victories, defeats, downtime and reward
 
 ## Compared approaches and implementation sketch
 
-**Reviewed:** 2026-11-20. **Evidence:** Publicly readable implementations and documentation in several browser/mobile idle RPGs and an open source MMORPG-style server. The code was **inspected**, not executed, benchmarked or validated in our repository. This historical comparison did not publish its source index. Follow the [current library sourcing rules](../RESEARCH_LIBRARY.md#what-belongs-here) when adding verifiable citations.
+**Reviewed:** 2026-11-20. **Evidence:** Publicly readable implementations and documentation in several browser/mobile idle RPGs and an open source MMORPG-style server. The code was **inspected**, not executed, benchmarked or validated in our repository. This historical comparison did not publish its source index. The Owner kept a separate source-location index for research handoffs. Follow the [current library sourcing rules](../RESEARCH_LIBRARY.md#what-belongs-here) when adding verifiable citations.
 
 ### Compared implementation patterns
 
