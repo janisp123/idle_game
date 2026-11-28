@@ -16,7 +16,7 @@ const profiles=Object.freeze({
  "Sword":spec("sword","slashing",0,8)
 });
 const magicRoles=["mage","healer","summoner","support"];
-export const validGroupSnapshot=s=>isGroupClass(s?.classId)&&s.race===GROUP_CLASSES[s.classId].race&&s.role===GROUP_CLASSES[s.classId].role&&s.loadout===GROUP_CLASSES[s.classId].loadout&&Number.isInteger(s.classLevel)&&s.classLevel>=1&&s.classLevel<=50;
+export const validGroupSnapshot=s=>(s?.novice===undefined||s.novice===true)&&isGroupClass(s?.classId)&&s.race===GROUP_CLASSES[s.classId].race&&s.role===GROUP_CLASSES[s.classId].role&&s.loadout===GROUP_CLASSES[s.classId].loadout&&Number.isInteger(s.classLevel)&&s.classLevel>=1&&s.classLevel<=50;
 export function classWeapon(a){
  const c=GROUP_CLASSES[a.classId];
  if(!c)return null;
@@ -59,7 +59,7 @@ const offensive=Object.freeze({
 // One action per turn. Ability consumes ordinary recovery plus its cooldown.
 // All ranged and melee offensive abilities use the real strike resolver.
 export function tryClassAction(a,target,actors,round,ctx){
- if(!validGroupSnapshot(a)||a.recovery>0||round<a.readyRound)return false;
+ if(a.novice||!validGroupSnapshot(a)||a.recovery>0||round<a.readyRound)return false;
  const c=GROUP_CLASSES[a.classId],effect=c.ability.effect,s=strength(a),stance=a.activeTactic??"balanced";
  const record=(b,type,extra={})=>ctx.record(a,b,type,{ability:effect,...extra});
  const finish=()=>{a.readyRound=round+c.ability.cooldown;a.recovery=Math.max(1,a.recovery);record(null,"class_ability");return true;};

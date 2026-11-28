@@ -4,6 +4,7 @@ import {validRaidRun,validRaidLast,beginRaid,advanceRaid} from "./raid-session.m
 import {saveArenaPreferences} from "./arena-preferences.mjs";
 import {enrollAlphaClan,advanceConstruction,setClanPriority,clanWeekEnd} from "./alpha-clan.mjs";
 import {validClanRegistration,registerClanRaid,settleClanRaid} from "./clan-raid.mjs";
+import {activeGroupIds} from "./battle-group.mjs?v=group-001";
 import {towerProgress,validTower,raidUnlocked,beginTower,advanceTower} from "./endless-tower.mjs";
 export {newArenaManager,enableArenaOnly};
 export function readArenaManager(value){
@@ -32,7 +33,7 @@ function updateClan(out,wallNow){const s=out.state;if(!s.alphaClan)return out;co
 export function enterArena(s,now,random,wallNow=Date.now()){const out=settlePublic(s,now,random,false);return updateClan({...out,state:enrollAlphaClan(out.state)},wallNow);}
 export const settleArenaLive=(s,now,random,wallNow=Date.now())=>updateClan(settlePublic(s,now,random,true),wallNow);
 export function startArenaRaid(s,level,now=s.settledAtMs,random=Math.random){
- requireArena(s);if(s.raidRun||towerProgress(s).run||!raidUnlocked(s,level))return {state:s,reports:[]};
+ requireArena(s);if(s.raidRun||towerProgress(s).run||activeGroupIds(s.battleGroup).length<7||!raidUnlocked(s,level))return {state:s,reports:[]};
  const out=settleArenaLive(s,now,random);
  return {...out,state:beginRaid(out.state,level)};
 }

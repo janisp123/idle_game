@@ -1,14 +1,14 @@
-import {SAVE_KEY,xpToNextLevel} from "./engine.mjs?v=raid-001";
-import {newArenaManager,enableArenaOnly,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,startArenaTower,chooseArenaPreferences,chooseClanPriority,chooseClanRaid,testClanRaid} from "./arena-manager.mjs?v=raid-001";
+import {xpToNextLevel} from "./engine.mjs?v=raid-001";
+import {newArenaManager,readArenaManager,enterArena,settleArenaLive,chooseArenaClass,chooseArenaStance,startArenaRaid,startArenaTower,chooseArenaPreferences,chooseClanPriority,chooseClanRaid,testClanRaid} from "./arena-manager.mjs?v=raid-001";
 import {createGroupEditor} from "./battle-group-editor.mjs?v=individual-stats-001";
 import {renderGroupAnalytics} from "./battle-group-analytics-view.mjs?v=group-006";
 import {GROUP_CLASSES} from "./battle-group-classes.mjs?v=group-001";
-import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,migrateLegacyManager} from "./manager-migration.mjs?v=individual-stats-001";
+import {MANAGER_SAVE_KEY,MANAGER_CLOCK_KEY,RETIRED_MANAGER_KEYS} from "./manager-migration.mjs?v=individual-stats-001";
 import {ITEM_GRADES} from "./smith.mjs?v=gear-a3";
 import {createArenaView} from "./arena-view.mjs?v=raid-002";
 import {createRaidView} from "./raid-view.mjs?v=raid-002";
 import {cloneRewardGrade} from "./clone-opponents.mjs?v=npc-parity-001";
-import {ALPHA_TOOLS_ENABLED,ALPHA_CLOCK_KEY,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=individual-stats-001";
+import {ALPHA_TOOLS_ENABLED,alphaTime,parseAlphaClock,setAlphaSpeed,advanceAlphaClock,alphaMaxStats,alphaGrantCoins,ALPHA_DAY_MS} from "./alpha-tools.mjs?v=individual-stats-001";
 
 import {renderGroupProgress} from "./battle-group-progress-view.mjs?v=individual-stats-001";
 import {GROUP_ARENAS} from "./arenas.mjs?v=bal-002";
@@ -82,7 +82,7 @@ function renderClan(){
  renderList($("clanBonuses"),CLAN_STATS.map(k=>[title(k)+" (Armoury + Portal)","+"+b.armoury[k]+"% + "+b.portal[k]+"%"]));
  const raid=c.raid;
  text("clanRaidStatus",c.levels.portal===50?"All 50 raids cleared": "Raid "+(c.levels.portal+1)+"/50 · "+(raid.joinedWeek!==null?"Registered · "+Math.max(0,Math.ceil((clanWeekEnd(raid.joinedWeek)-now)/3600000))+"h to cutoff":raid.lastWeek!==null&&raid.lastWeek>=w?"Attempt completed this week":"Registration open")+(raid.lastOutcome?" · Last: "+raid.lastOutcome:""));
- $("clanJoinRaid").disabled=c.levels.portal===50||raid.joinedWeek!==null||raid.lastWeek!==null&&raid.lastWeek>=w;
+ $("clanJoinRaid").disabled=Object.values(state.battleGroup).some(m=>m.recruitment?.active===false)||c.levels.portal===50||raid.joinedWeek!==null||raid.lastWeek!==null&&raid.lastWeek>=w;
  $("alphaClanRaid").disabled=raid.joinedWeek===null;
 }
 $("clanJoinRaid").addEventListener("click",()=>choose((s,t)=>chooseClanRaid(s,t)));
@@ -100,7 +100,7 @@ function render(){
  if(!state.raidRun&&!towerProgress(state).run)arenaView.render(state);
  raidView.render(state);renderTower();
  $("alphaCoins").disabled=Boolean(state.raidRun||towerProgress(state).run);$("alphaMaxStats").disabled=Boolean(state.raidRun||towerProgress(state).run);
- for(const b of document.querySelectorAll("#raceChoice button[data-choice],#mainClassChoice button[data-choice],#specialClassChoice button[data-choice],#tacticButtons button"))b.disabled=Boolean(state.raidRun||towerProgress(state).run);
+ for(const b of document.querySelectorAll("#raceChoice button[data-choice],#mainClassChoice button[data-choice],#specialClassChoice button[data-choice],#tacticButtons button"))b.disabled=Boolean(state.raidRun||towerProgress(state).run||b.dataset.locked==="true");
  if($("battleAnalyticsPanel").open&&(lastAnalytics!==state.groupAnalytics||lastAnalyticsScope!==analyticsScope)){
   renderGroupAnalytics($("battleAnalyticsBody"),state.groupAnalytics,analyticsScope,state.battleAnalytics);lastAnalytics=state.groupAnalytics;lastAnalyticsScope=analyticsScope;
  }
@@ -134,7 +134,7 @@ $("alphaCoins").addEventListener("click",()=>alpha(s=>{const r=alphaGrantCoins(s
 $("alphaMaxStats").addEventListener("click",()=>alpha(s=>{return alphaMaxStats(s,"none",s.settledAtMs,Math.random,"none");},"Six-month benchmark applied to selected character attributes and equipment."));
 $("alphaDay").addEventListener("click",()=>alpha(s=>{const c=advanceAlphaClock(clock,Date.now(),ALPHA_DAY_MS);return {...enterArena(s,alphaTime(c,Date.now())),clock:c,entry:true};},"24 hours simulated."));
 $("alphaSpeed").addEventListener("click",()=>alpha(s=>({state:s,clock:setAlphaSpeed(clock,Date.now(),clock?.speed===10?1:10)}),"Test speed changed."));
-$("alphaReset").addEventListener("click",()=>{if(confirm("Reset this manager save?"))enqueue(()=>{stored=localStorage.getItem(MANAGER_SAVE_KEY);blocked=false;feed=[];loginLines=[];editor.reset();arenaView.reset();$("progressFeed").replaceChildren();const t=Date.now();commit(enterArena(newArenaManager(t),t),false,null);});});
+$("alphaReset").addEventListener("click",()=>{if(confirm("Reset this manager save?"))enqueue(()=>{stored=localStorage.getItem(MANAGER_SAVE_KEY);blocked=false;feed=[];loginLines=[];editor.reset();arenaView.reset();$("progressFeed").replaceChildren();const t=Date.now();commit(enterArena(newArenaManager(t,true),t),false,null);});});
 function tick(){if(document.visibilityState==="hidden"){lastVisible=false;return;}enqueue(()=>{if(!state||blocked)return;const out=settleForAction();if(commit(out,!lastVisible))lastVisible=true;});}
 document.addEventListener("visibilitychange",()=>{lastVisible=false;if(document.visibilityState!=="hidden")tick();});
 window.addEventListener("pagehide",()=>{lastVisible=false;});
@@ -142,15 +142,10 @@ window.addEventListener("storage",e=>{if(e.key===MANAGER_SAVE_KEY){lastVisible=f
 enqueue(()=>{
  stored=localStorage.getItem(MANAGER_SAVE_KEY);clock=parseAlphaClock(localStorage.getItem(MANAGER_CLOCK_KEY));
  if(stored){state=readArenaManager(stored);if(!state){blocked=true;throw Error("Manager save is unreadable; no data has been overwritten.");}}
- else{
-  const legacy=localStorage.getItem(SAVE_KEY);
-  if(legacy){clock=parseAlphaClock(localStorage.getItem(ALPHA_CLOCK_KEY));const migration=migrateLegacyManager(legacy,0);
-   if(migration){state=enableArenaOnly(migration.state);if(clock)localStorage.setItem(MANAGER_CLOCK_KEY,JSON.stringify(clock));text("migrationNotice","Previous combat progress retained. Only fighting remains; old materials are retired.");$("migrationNotice").hidden=false;}
-   else{clock=null;state=newArenaManager(Date.now());text("migrationNotice","Old alpha save could not be migrated; original data retained. New manager save started.");$("migrationNotice").hidden=false;}
-  }else{clock=null;state=newArenaManager(Date.now());}
- }
- if(stored&&JSON.parse(stored).arenaOnly!==true){commit(enterArena(state,now()),true);text("migrationNotice","Coins, earned stats and combat progress retained. Noncombat activities and materials retired.");$("migrationNotice").hidden=false;}
- else if(!stored||!state.alphaClan||state.settledAtMs<now())commit(enterArena(state,now()),true);else render();
+ else{clock=null;state=newArenaManager(Date.now(),true);localStorage.removeItem(MANAGER_CLOCK_KEY);}
+ if(!stored||!state.alphaClan||state.settledAtMs<now()){if(!commit(enterArena(state,now()),true))return;}else render();
+ // Only remove this game's retired keys after a valid new-epoch save exists.
+ for(const key of RETIRED_MANAGER_KEYS)localStorage.removeItem(key);
  lastVisible=document.visibilityState!=="hidden";$("saveStatus").setAttribute("data-game-ready","true");text("saveStatus","Saved locally");
 });
 setInterval(tick,500);

@@ -1,6 +1,6 @@
 // Button-only three-step selection. A race/main-class draft never spends
 // coins or changes the active class until the player chooses a specialization.
-import {GROUP_IDS} from "./battle-group.mjs?v=individual-stats-001";
+import {GROUP_IDS,RECRUIT_LEVELS,SPECIALIZATION_LEVEL,specializationUnlocked,basicClass} from "./battle-group.mjs?v=individual-stats-001";
 import {GROUP_CLASSES,GROUP_RACES,RACE_LABELS,groupMainClasses,groupSpecializations} from "./battle-group-classes.mjs?v=group-001";
 import {ROLE_ICONS,renderGroupProgress} from "./battle-group-progress-view.mjs?v=individual-stats-001";
 import {classTacticalInfo} from "./class-tactical-info.mjs?v=class-info-002";
@@ -58,7 +58,7 @@ export function createGroupEditor(onClass,onStance){
  const host=$("fighterButtons");
  for(const id of GROUP_IDS){
   const b=node("button");b.type="button";b.dataset.choice=id;
-  b.addEventListener("click",()=>{selected=id;draft=null;render(current);});host.append(b);
+  b.addEventListener("click",()=>{if(current?.[id]?.recruitment?.active===false)return;selected=id;draft=null;render(current);});host.append(b);
  }
  const race=$("raceChoice"),main=$("mainClassChoice"),special=$("specialClassChoice");
  for(const stance of ["aggressive","balanced","defensive"]){
@@ -67,18 +67,19 @@ export function createGroupEditor(onClass,onStance){
  function render(group){
   if(!group)return;current=group;
   for(const b of host.children){const id=b.dataset.choice,m=group[id],c=GROUP_CLASSES[m.selected],p=m.classes[c.id];
-   const label=ROLE_ICONS[c.role]+" "+(GROUP_IDS.indexOf(id)+1)+" · "+c.name+" · Lv "+p.mastery.level;
+   const index=GROUP_IDS.indexOf(id),locked=m.recruitment?.active===false,novice=!specializationUnlocked(m);const label=locked?"🔒 "+(index+1)+" · Fighting Lv "+RECRUIT_LEVELS[index]:ROLE_ICONS[c.role]+" "+(index+1)+" · "+(novice?c.mainClass:c.name)+" · Lv "+(m.recruitment?.level??p.mastery.level);b.disabled=locked;
    if(b.textContent!==label)b.textContent=label;b.setAttribute("aria-pressed",String(id===selected));b.title=label;
   }
-  const m=group[selected],c=GROUP_CLASSES[m.selected],r=draft?.race??c.race,k=draft?.main??c.mainClass;
+  const m=group[selected],c=GROUP_CLASSES[m.selected],r=draft?.race??c.race,k=draft?.main??c.mainClass,novice=!specializationUnlocked(m);
   choices(race,GROUP_RACES.map(id=>[id,RACE_ICONS[id]+" "+RACE_LABELS[id]]),r,id=>{
    if(id!==r){draft={race:id,main:groupMainClasses(id)[0]};render(current);}
   });
-  choices(main,groupMainClasses(r).map(id=>[id,id]),k,id=>{draft={race:r,main:id};render(current);});
+  choices(main,groupMainClasses(r).map(id=>[id,id]),k,id=>{if(novice){const next=basicClass(r,id);draft=null;if(next.id!==m.selected)onClass(selected,next);else render(current);return;}draft={race:r,main:id};render(current);});
   specializationChoices(special,groupSpecializations(r,k).map(x=>[x.id,ROLE_ICONS[x.role]+" "+x.name+" · Lv "+(m.classes[x.id]?.mastery.level??1)]),c.race===r&&c.mainClass===k?c.id:null,id=>{
    const next=GROUP_CLASSES[id];draft=null;if(id===m.selected){render(current);return;}onClass(selected,next);
   });
-  const status=draft&&(c.race!==r||c.mainClass!==k)?"Choose a specialization to change class. Active: "+c.name:"Active: "+c.name;
+  for(const b of special.querySelectorAll("[data-choice]")){b.disabled=novice;b.dataset.locked=String(novice);}
+  const status=novice?"Character level "+m.recruitment.level+" · Specializations unlock at level "+SPECIALIZATION_LEVEL+". Choose a basic profession.":draft&&(c.race!==r||c.mainClass!==k)?"Choose a specialization to change class. Active: "+c.name:"Active: "+c.name;
   if($("classChoiceStatus").textContent!==status)$("classChoiceStatus").textContent=status;
   for(const b of $("tacticButtons").children)b.setAttribute("aria-pressed",String(b.dataset.choice===m.stance));
   const key=JSON.stringify([selected,m]);if(key!==lastProgress){renderGroupProgress($("selectedClassProgress"),group,selected);lastProgress=key;}
