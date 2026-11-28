@@ -73,6 +73,26 @@ export const kitActor=a=>[KIT_RULES_VERSION,4,5,6,7,8,9,10].includes(a?.groupCom
  };
  export const CONTROL_CLASS_KITS=Object.freeze(Object.fromEntries(Object.entries(CLASS_KITS).map(([id,k])=>[id,Object.freeze({...k,...Object.fromEntries(Object.entries(variants[id]??{}).map(([slot,v])=>[slot,Object.freeze(v)]))})])));
 
+// Main-class stage has exactly one automatic skill, no specialized passive.
+const basicStrike=(id,name,scale,description,extra={})=>({...strike(id,name,5,scale,extra),basic:true,description});
+const basicUtility=(id,name,type,description,extra)=>({...utility(id,name,type,5,extra),basic:true,description});
+export const MAIN_CLASS_SKILLS=Object.freeze(Object.fromEntries(Object.entries({
+ Warrior:basicStrike("basic_power_strike","Power Strike",1.25,"A stronger weapon attack."),
+ Knight:basicUtility("basic_guard","Guard","ward","Protect yourself when injured.",{amount:.20,threshold:.80}),
+ Rogue:basicStrike("basic_feint","Feint",1.15,"Strike and briefly open the enemy guard.",{effect:"open"}),
+ Wizard:basicStrike("basic_arcane_bolt","Arcane Bolt",1.30,"A stronger single-target magic attack."),
+ Cleric:basicUtility("basic_mend","Mend","ally_heal","Heal one injured ally, including yourself.",{amount:.18,range:3}),
+ Scout:basicStrike("basic_quick_strike","Quick Strike",1.15,"Strike with reduced recovery.",{recovery:1}),
+ Oracle:basicUtility("basic_restore","Restore","ally_heal","Heal one injured ally, including yourself.",{amount:.18,range:3}),
+ Assassin:basicStrike("basic_ambush","Ambush",1.20,"A stronger strike that briefly opens the enemy guard.",{effect:"open"}),
+ Raider:basicStrike("basic_heavy_blow","Heavy Blow",1.35,"A heavy attack with longer recovery.",{recovery:3}),
+ Monk:basicStrike("basic_rapid_fist","Rapid Fist",1.20,"A fast close-range strike.",{recovery:1}),
+ Shaman:basicUtility("basic_war_blessing","War Blessing","support_buff","Strengthen or protect one nearby ally depending on stance.",{amount:.16,range:3,duration:3,maxTargets:1,mode:"stance"}),
+ Scavenger:basicStrike("basic_crushing_blow","Crushing Blow",1.20,"Strike and briefly open the enemy guard.",{effect:"open"}),
+ Artisan:basicUtility("basic_reinforce","Reinforce","ward","Protect yourself when injured.",{amount:.18,threshold:.80})
+}).map(([id,ability])=>[id,Object.freeze(ability)])));
+export const mainClassSkill=a=>kitActor(a)&&a.novice&&Number.isInteger(a.recruitLevel)&&a.recruitLevel>=20&&a.recruitLevel<30?MAIN_CLASS_SKILLS[GROUP_CLASSES[a.classId]?.mainClass]??null:null;
+if(Object.values(GROUP_CLASSES).some(c=>!MAIN_CLASS_SKILLS[c.mainClass]))throw Error("Incomplete main class skill registry");
 export const pilotKit=a=>kitActor(a)&&!a.novice?([7,8,9,10].includes(a.groupCombatRules)?CONTROL_CLASS_KITS:CLASS_KITS)[a.classId]??null:null;
 export const classMasteryStrength=level=>.5+.5*(level-1)/49;
 export const kitStrength=a=>[9,10].includes(a.groupCombatRules)?classMasteryStrength(a.classLevel):.75+.25*(a.classLevel-1)/49;

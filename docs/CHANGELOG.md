@@ -1061,3 +1061,6 @@ SPECIALIZATION-LOCK-UI-001: baseline #229 (09a38a4) merged after seven passing w
 
 
 STAGED-RECRUITMENT-001 — Owner approved 2026-11-28: race only at character 1–19; main class at 20; specialization at 30. Same gates for arena and tower rivals, matched per frozen character level; prior frozen snapshots retain old behavior. Fixed racial starter adapters: Human Knight, Elf Knight, Dark Elf Knight, Orc Raider, Dwarf Scavenger; no specialist kit below 30. Keep all previously earned class records, normalize active selection when needed, no new reset. Max-level combat formulas untouched; CI and numerical balance pending.
+
+
+MAIN-CLASS-SKILLS-001 — Owner approved 2026-11-28: each main class has one automatic basic skill at individual levels 20–29, replaced by full specialization kit at 30. 13 immutable skill definitions, shared cooldown scheduler/action budget, no separate skill points or new endgame mechanics. Basic strikes use fixed modest attack multipliers; support/guard/heal use existing scaled effects. Initial names, coefficients and five-round cooldown provisional, not numerical balance acceptance. UI displays name/description; symmetric arena/tower snapshots and raid players, no skill on earlier frozen legacy snapshots. Added registry/stage and real combat trace tests. CI pending.

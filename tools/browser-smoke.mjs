@@ -358,7 +358,7 @@ try{
     await send("Page.navigate",{url:mainUrl});await until(()=>evaluate('document.getElementById("saveStatus")?.getAttribute("data-game-ready")==="true"'),"level 20 main class loaded");
     await send("Page.removeScriptToEvaluateOnNewDocument",{identifier:mainInject.identifier});
     await evaluate('document.getElementById("battleGroupPanel").open=true');
-    assert.equal(await evaluate('(()=>[...document.querySelectorAll("#mainClassChoice [data-choice]")].every(b=>!b.disabled)&&[...document.querySelectorAll("#specialClassChoice [data-choice]")].every(b=>b.disabled&&b.textContent.includes("Unlock Lv 30")))()'),true);
+    assert.equal(await evaluate('(()=>[...document.querySelectorAll("#mainClassChoice [data-choice]")].every(b=>!b.disabled&&b.title.includes("Cooldown: 5 rounds"))&&document.getElementById("classChoiceStatus").textContent.includes("Active class skill:")&&[...document.querySelectorAll("#specialClassChoice [data-choice]")].every(b=>b.disabled&&b.textContent.includes("Unlock Lv 30")))()'),true);
     const unlockSave=await evaluate(`(()=>{const s=JSON.parse(localStorage.getItem(${JSON.stringify(managerKey)}));s.battleGroup.member1.recruitment={active:true,level:30,xp:0};return JSON.stringify(s)})()`);
     const unlockUrl=origin+"/play/?specialization-unlock="+width;
     const unlockInject=await send("Page.addScriptToEvaluateOnNewDocument",{source:`if(location.href===${JSON.stringify(unlockUrl)}){localStorage.setItem(${JSON.stringify(managerKey)},${JSON.stringify(unlockSave)});Date.now=()=>${fixedNow};}`});

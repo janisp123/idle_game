@@ -1,5 +1,5 @@
 // Pure bounded class effect state; all values belong to a single bout.
-import {kitActor,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
+import {kitActor,mainClassSkill,kitStrength,KIT_BALANCE as B} from "./class-kits.mjs";
 export function prepareKitActor(a){
  if(!kitActor(a))return a;
  return {...a,kitReady:{primary:1,secondary:1},kitStationary:0,kitFocusUntil:0,kitSlowUntil:0,kitDisruptUntil:0,kitBraceUntil:0,kitTotemUntil:0,kitTotemMode:null,kitPactUntil:0,kitPactFraction:0,kitTempoUntil:0,kitSealUntil:0,kitSiege:null};
@@ -25,7 +25,7 @@ export function kitStatus(a,key,until,value,round,duration=3){
 }
 export function kitHeal(a,b,fraction,round){
  if(b.hp<=0||round<(b.nextHealRound??0))return 0;
- const amount=Math.min(b.maxHP-b.hp,Math.max(1,Math.round((b.encounterHealMaxHP??b.maxHP)*fraction*kitStrength(a)*(1+(a.clanBonus?.healing??0)/100)*healingFactor(b)*(a.classId==="lifekeeper"?B.mercyHealing:a.classId==="spiritcaller"?B.spiritHealing:1))));
+ const amount=Math.min(b.maxHP-b.hp,Math.max(1,Math.round((b.encounterHealMaxHP??b.maxHP)*fraction*kitStrength(a)*(1+(a.clanBonus?.healing??0)/100)*healingFactor(b)*(mainClassSkill(a)?1:a.classId==="lifekeeper"?B.mercyHealing:a.classId==="spiritcaller"?B.spiritHealing:1))));
  if(amount<=0)return 0;b.hp+=amount;b.nextHealRound=round+2;return amount;
 }
 export function kitStrikeModifiers(a,b,attack,distance){

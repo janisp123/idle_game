@@ -3,6 +3,7 @@
 import {GROUP_IDS,RECRUIT_LEVELS,MAIN_CLASS_LEVEL,SPECIALIZATION_LEVEL,mainClassUnlocked,specializationUnlocked,basicRace,basicClass} from "./battle-group.mjs?v=individual-stats-001";
 import {GROUP_CLASSES,GROUP_RACES,RACE_LABELS,groupMainClasses,groupSpecializations} from "./battle-group-classes.mjs?v=group-001";
 import {ROLE_ICONS,renderGroupProgress} from "./battle-group-progress-view.mjs?v=individual-stats-001";
+import {MAIN_CLASS_SKILLS} from "./class-kits.mjs";
 import {classTacticalInfo} from "./class-tactical-info.mjs?v=class-info-002";
 import {CHARACTER_CLASS_PROFILES,CHARACTER_ATTRIBUTE_IDS} from "./character-attributes.mjs";
 const RACE_ICONS=Object.freeze({"human":"●","elf":"❋","dark_elf":"☾","orc":"◆","dwarf":"⬢"});
@@ -74,16 +75,16 @@ export function createGroupEditor(onClass,onStance){
   choices(race,GROUP_RACES.map(id=>[id,RACE_ICONS[id]+" "+RACE_LABELS[id]]),r,id=>{
    if(id!==r){if(novice){const next=basicRace(id);draft=null;onClass(selected,next);return;}draft={race:id,main:groupMainClasses(id)[0]};render(current);}
   });
-  choices(main,groupMainClasses(r).map(id=>[id,raceOnly?"🔒 "+id+" · Unlock Lv "+MAIN_CLASS_LEVEL:id]),raceOnly?null:k,id=>{if(raceOnly)return;if(novice){const next=basicClass(r,id);draft=null;if(next.id!==m.selected)onClass(selected,next);else render(current);return;}draft={race:r,main:id};render(current);});
+  choices(main,groupMainClasses(r).map(id=>[id,raceOnly?"🔒 "+id+" · Unlock Lv "+MAIN_CLASS_LEVEL:novice?id+" · "+MAIN_CLASS_SKILLS[id].name:id]),raceOnly?null:k,id=>{if(raceOnly)return;if(novice){const next=basicClass(r,id);draft=null;if(next.id!==m.selected)onClass(selected,next);else render(current);return;}draft={race:r,main:id};render(current);});
   main.dataset.locked=String(raceOnly);
-  for(const b of main.querySelectorAll("[data-choice]")){b.disabled=raceOnly;b.dataset.locked=String(raceOnly);}
+  for(const b of main.querySelectorAll("[data-choice]")){b.disabled=raceOnly;b.dataset.locked=String(raceOnly);const ability=MAIN_CLASS_SKILLS[b.dataset.choice];b.title=ability.name+" — "+ability.description+" Cooldown: "+ability.cooldown+" rounds."; }
   specializationChoices(special,(raceOnly?groupMainClasses(r).flatMap(id=>groupSpecializations(r,id)):groupSpecializations(r,k)).map(x=>[x.id,novice?"🔒 "+x.name+" · Unlock Lv "+SPECIALIZATION_LEVEL:ROLE_ICONS[x.role]+" "+x.name+" · Lv "+(m.classes[x.id]?.mastery.level??1)]),!novice&&c.race===r&&c.mainClass===k?c.id:null,id=>{
    if(novice)return;
    const next=GROUP_CLASSES[id];draft=null;if(id===m.selected){render(current);return;}onClass(selected,next);
   });
   special.dataset.locked=String(novice);
   for(const b of special.querySelectorAll("[data-choice]")){b.disabled=novice;b.dataset.locked=String(novice);b.title=novice?"Unlocks at character level "+SPECIALIZATION_LEVEL:"";}
-  const status=raceOnly?"Character level "+m.recruitment.level+" · Choose a race. Main class unlocks at "+MAIN_CLASS_LEVEL+". Specialization unlocks at "+SPECIALIZATION_LEVEL+".":novice?"Character level "+m.recruitment.level+" · Specializations unlock at level "+SPECIALIZATION_LEVEL+". Choose a basic profession.":draft&&(c.race!==r||c.mainClass!==k)?"Choose a specialization to change class. Active: "+c.name:"Active: "+c.name;
+  const status=raceOnly?"Character level "+m.recruitment.level+" · Choose a race. Main class unlocks at "+MAIN_CLASS_LEVEL+". Specialization unlocks at "+SPECIALIZATION_LEVEL+".":novice?"Character level "+m.recruitment.level+" · Specializations unlock at level "+SPECIALIZATION_LEVEL+". Active class skill: "+MAIN_CLASS_SKILLS[c.mainClass].name+" — "+MAIN_CLASS_SKILLS[c.mainClass].description:draft&&(c.race!==r||c.mainClass!==k)?"Choose a specialization to change class. Active: "+c.name:"Active: "+c.name;
   if($("classChoiceStatus").textContent!==status)$("classChoiceStatus").textContent=status;
   for(const b of $("tacticButtons").children)b.setAttribute("aria-pressed",String(b.dataset.choice===m.stance));
   const key=JSON.stringify([selected,m]);if(key!==lastProgress){renderGroupProgress($("selectedClassProgress"),group,selected);lastProgress=key;}

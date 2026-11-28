@@ -40,3 +40,32 @@ test("race stage normalizes old selections without deleting progress; frozen leg
  const s=startGroupSession(g,shared,1,123,{rules:10});const r=groupCombatAtTime(s);assert.equal(r.enemies[0].recruitLevel,19);assert.equal(r.enemies[0].classId,basicRace(r.enemies[0].race).id);
  const legacy=structuredClone(s);delete legacy.players.member1.recruitLevel;assert.equal(groupCombatAtTime(legacy).enemies[0].recruitLevel,undefined);
 });
+
+import {GROUP_CLASSES} from "../site/play/battle-group-classes.mjs";
+import {MAIN_CLASS_SKILLS,mainClassSkill,pilotKit} from "../site/play/class-kits.mjs";
+import {resolveTeamBattle} from "../site/play/team-combat.mjs";
+import {GROUP_ARENAS} from "../site/play/arenas.mjs";
+test("every main class has one distinct automatic skill, exclusively at character levels 20–29",()=>{
+ const classes=[...new Set(Object.values(GROUP_CLASSES).map(c=>c.mainClass))];
+ assert.equal(Object.keys(MAIN_CLASS_SKILLS).length,classes.length);
+ assert.equal(new Set(Object.values(MAIN_CLASS_SKILLS).map(a=>a.id)).size,classes.length);
+ for(const c of Object.values(GROUP_CLASSES))for(const level of [1,19,20,29,30,50]){
+  const a={classId:c.id,groupCombatRules:10,recruitLevel:level,novice:level<30};
+  assert.equal(mainClassSkill(a),level>=20&&level<30?MAIN_CLASS_SKILLS[c.mainClass]:null);
+  assert.equal(Boolean(pilotKit(a)),level>=30);
+ }
+ assert.equal(mainClassSkill({classId:"oathkeeper",groupCombatRules:10,novice:true}),null);
+});
+test("main-class strike is executed by both sides, obeys cooldown, and is replaced by specialist kit",()=>{
+ let g=initialRecruitGroup();g.member1.recruitment.level=20;g=selectGroupClass(g,"member1","human","Warrior","blademaster");
+ const a=groupSnapshots(g,shared,10).member1,terrain=GROUP_ARENAS.find(x=>x.id==="gatehouse_chamber"),levels={player:1,enemy:1,groupCombatRules:10};
+ const result=resolveTeamBattle([a],[a],123,terrain,levels);
+ const actions=result.events.filter(e=>e.type==="class_ability");
+ assert.ok(actions.some(e=>e.actor==="player:0"));assert.ok(actions.some(e=>e.actor==="enemy:0"));
+ assert.ok(actions.every(e=>e.ability==="basic_power_strike"));
+ for(const side of ["player:0","enemy:0"]){const events=actions.filter(e=>e.actor===side);for(let i=1;i<events.length;i++)assert.ok(events[i].round-events[i-1].round>=MAIN_CLASS_SKILLS.Warrior.cooldown);}
+ const novice={...a,recruitLevel:19},specialist={...a,recruitLevel:30};delete specialist.novice;
+ assert.ok(resolveTeamBattle([novice],[novice],123,terrain,levels).events.every(e=>e.type!=="class_ability"));
+ const specialistActions=resolveTeamBattle([specialist],[specialist],123,terrain,levels).events.filter(e=>e.type==="class_ability");
+ assert.ok(specialistActions.length);assert.ok(specialistActions.every(e=>!e.ability.startsWith("basic_")));
+});
