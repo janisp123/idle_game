@@ -11,9 +11,17 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## STABILIZATION-001 — Whole-game correctness, performance and repository audit
 
 - **Goal / acceptance:** Audit all public systems against current approved behavior, measure runtime and repo bloat, isolate obsolete code safely, fix verified defects in small tested PRs; no new feature scope or history rewrite. [Initial audit and test matrix](mechanics/STABILIZATION_AUDIT_20261128.md). [Sequential execution and non-overlap protocol](mechanics/STABILIZATION_EXECUTION_PLAN.md).
-- **Status:** PARTIAL — S00 baseline underway on audit/s00-baseline; dedicated test-only CI, no production edits; #232 merged 68e5918, #231 live deployment verified. S01 blocked until baseline reviewed.
+- **Status:** PARTIAL — S00 merged #233 (41f3af7); 14/14 structural saves and four browser scenarios passed. S01 save integrity underway; [baseline evidence](mechanics/STABILIZATION_BASELINE_RESULTS.md).
 - **Added by:** chat.
 - **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
+## S01-ATOMIC-CLOCK-001 — Atomic test clock and manager state
+
+- **Goal / acceptance:** Preserve old clock and save together on storage failure; no partial day jump; successful retry/reload exactly once; old v2 clock readable and explicit reset remains reset. No game-rule changes or new save wipe.
+- **Status:** IN_REVIEW — reproducible browser failure in run 46147925408; candidate fix in #234, final checks pending.
+- **Added by:** chat.
+- **Requested by:** Owner (STABILIZATION-001).
 - **Implemented by:** Not yet.
 
 ## ARENA-ROSTER-UI-001 — Seven visible arena positions per side

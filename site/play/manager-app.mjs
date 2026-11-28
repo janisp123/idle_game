@@ -108,15 +108,24 @@ function render(){
 }
 function lock(fn){return navigator.locks?.request?navigator.locks.request(MANAGER_SAVE_KEY,fn):Promise.resolve().then(fn);}
 function enqueue(fn){chain=chain.then(()=>lock(fn)).catch(err=>{text("saveStatus","Progress not saved");text("migrationNotice",String(err.message??err));$("migrationNotice").hidden=false;lastVisible=false;});return chain;}
+// A single localStorage value is the commit boundary for progress and test time.
+// Older v2 saves may have a separate clock; read it only when no embedded clock exists.
+function savedClock(raw){
+ if(raw===null)return null;
+ const value=JSON.parse(raw);
+ if(!Object.hasOwn(value,"managerClock"))return parseAlphaClock(localStorage.getItem(MANAGER_CLOCK_KEY));
+ if(value.managerClock===null)return null;
+ const c=parseAlphaClock(value.managerClock);if(!c)throw Error("Manager clock is unreadable; original save retained.");
+ return c;
+}
 function commit(out,entry=false,newClock=clock){
  if(blocked)throw Error("Save cannot be read. Original data retained.");
  const current=localStorage.getItem(MANAGER_SAVE_KEY);
- if(current!==stored){const newer=readArenaManager(current);if(!newer)throw Error("Save changed in another tab");state=newer;arenaView.reset();stored=current;clock=parseAlphaClock(localStorage.getItem(MANAGER_CLOCK_KEY));lastVisible=false;render();return false;}
- const serialized=JSON.stringify(out.state);
+ if(current!==stored){const newer=readArenaManager(current);if(!newer)throw Error("Save changed in another tab");const nextClock=savedClock(current);state=newer;arenaView.reset();stored=current;clock=nextClock;lastVisible=false;render();return false;}
+ const serialized=JSON.stringify({...out.state,managerClock:newClock});
  if(!out.state.arenaOnly||!readArenaManager(serialized))throw Error("Candidate save failed validation");
- // One atomic storage write for the state. Clock changes are explicit test
- // controls; normal play never modifies the companion clock.
- if(newClock!==clock){if(newClock)localStorage.setItem(MANAGER_CLOCK_KEY,JSON.stringify(newClock));else localStorage.removeItem(MANAGER_CLOCK_KEY);}
+ if(newClock!==null&&!parseAlphaClock(newClock))throw Error("Candidate clock failed validation");
+ // No separate clock write: quota failure leaves both old values intact.
  localStorage.setItem(MANAGER_SAVE_KEY,serialized);stored=serialized;
  const before=state,opening=state?.coins??0;state=out.state;clock=newClock;
  arenaView.committed(before,out,entry);publish(out,entry,opening);render();text("saveStatus","Saved locally");return true;
@@ -140,9 +149,9 @@ document.addEventListener("visibilitychange",()=>{lastVisible=false;if(document.
 window.addEventListener("pagehide",()=>{lastVisible=false;});
 window.addEventListener("storage",e=>{if(e.key===MANAGER_SAVE_KEY){lastVisible=false;}});
 enqueue(()=>{
- stored=localStorage.getItem(MANAGER_SAVE_KEY);clock=parseAlphaClock(localStorage.getItem(MANAGER_CLOCK_KEY));
- if(stored){state=readArenaManager(stored);if(!state){blocked=true;throw Error("Manager save is unreadable; no data has been overwritten.");}}
- else{clock=null;state=newArenaManager(Date.now(),true);localStorage.removeItem(MANAGER_CLOCK_KEY);}
+ stored=localStorage.getItem(MANAGER_SAVE_KEY);
+ if(stored){state=readArenaManager(stored);if(!state){blocked=true;throw Error("Manager save is unreadable; no data has been overwritten.");}try{clock=savedClock(stored);}catch(error){blocked=true;throw error;}}
+ else{clock=null;state=newArenaManager(Date.now(),true);}
  if(!stored||!state.alphaClan||state.settledAtMs<now()){if(!commit(enterArena(state,now()),true))return;}else render();
  // Only remove this game's retired keys after a valid new-epoch save exists.
  for(const key of RETIRED_MANAGER_KEYS)localStorage.removeItem(key);
