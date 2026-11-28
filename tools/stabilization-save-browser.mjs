@@ -75,7 +75,7 @@ async function connect(target){
 }
 const status=()=>evaluate("({status:document.getElementById('saveStatus')?.textContent,ready:document.getElementById('saveStatus')?.getAttribute('data-game-ready'),notice:document.getElementById('migrationNotice')?.textContent})");
 const read=()=>evaluate("localStorage.getItem("+JSON.stringify(key)+")");
-const readClock=()=>evaluate("localStorage.getItem("+JSON.stringify(clockKey)+")");
+const readClock=()=>evaluate("(()=>{const raw=JSON.parse(localStorage.getItem("+JSON.stringify(key)+"));return Object.hasOwn(raw,'managerClock')?JSON.stringify(raw.managerClock):JSON.stringify(JSON.parse(localStorage.getItem("+JSON.stringify(clockKey)+")));})()");
 const snapshot=async()=>{const raw=await read(),s=readArenaManager(raw);assert.ok(s,"invalid persisted save");return {raw,settledAtMs:s.settledAtMs,coins:s.coins,cursor:s.combatSession?.prizeCursor,analytics:s.groupAnalytics.all.outcomes.reduce((a,b)=>a+b,0)};};
 async function nav(label,fixture=fresh,resetClock=true,extra=""){
  const url=origin+"/play/?s01="+label;
@@ -111,7 +111,7 @@ try{
  });
  await test("alpha clock and state atomicity after second write fails",async()=>{
   await nav("partial-clock");await healthy("clock ready");const before=await snapshot(),oldClock=await readClock();
-  await evaluate("window.__origSet=Storage.prototype.setItem;window.__sawClock=false;Storage.prototype.setItem=function(k,v){if(k==="+JSON.stringify(clockKey)+"){const r=window.__origSet.call(this,k,v);window.__sawClock=true;return r;}if(k==="+JSON.stringify(key)+"&&window.__sawClock)throw new DOMException('S01 injected after clock','QuotaExceededError');return window.__origSet.call(this,k,v)};");
+  await evaluate("window.__origSet=Storage.prototype.setItem;window.__sawClock=false;Storage.prototype.setItem=function(k,v){if(k==="+JSON.stringify(clockKey)+"){const r=window.__origSet.call(this,k,v);window.__sawClock=true;return r;}if(k==="+JSON.stringify(key)+"&&(window.__sawClock||JSON.parse(v).managerClock?.gameAnchorMs>="+(now+day)+"))throw new DOMException('S01 injected clock transaction','QuotaExceededError');return window.__origSet.call(this,k,v)};");
   await evaluate("document.getElementById('alphaDay').click()");
   await until(async()=>(await status()).status==="Progress not saved","clock partial failure reported");
   const after=await snapshot(),nextClock=await readClock();
@@ -119,7 +119,27 @@ try{
   console.log("S01_CLOCK_PARTIAL "+JSON.stringify(evidence));
   assert.equal(after.settledAtMs,before.settledAtMs,"state unexpectedly committed");
   assert.equal(nextClock,oldClock,"clock persisted despite failed state commit");
-  return evidence;
+  await evaluate("Storage.prototype.setItem=window.__origSet;");
+  await nav("clock-reload",after.raw,false);await healthy("failed clock reload");
+  assert.equal((await snapshot()).settledAtMs,now);
+  await evaluate("document.getElementById('alphaDay').click()");
+  await until(async()=>{const s=await snapshot();return s.settledAtMs===now+day&&(await status()).status==="Saved locally";},"atomic day retry");
+  const committed=await snapshot(),committedClock=await readClock();
+  assert.equal(JSON.parse(committedClock).gameAnchorMs,now+day);
+  await nav("clock-success-reload",committed.raw,false);await healthy("successful clock reload");
+  const restored=await snapshot();assert.equal(restored.settledAtMs,committed.settledAtMs);assert.equal(restored.coins,committed.coins);assert.equal(restored.analytics,committed.analytics);
+  return {...evidence,reloadPreserved:true,retrySettledAt:committed.settledAtMs,successfulClock:committedClock};
+ });
+ await test("legacy companion clock and explicit reset",async()=>{
+  const legacy={version:1,realAnchorMs:now,gameAnchorMs:now+day,speed:1};
+  await nav("legacy-clock",fresh,true,"localStorage.setItem("+JSON.stringify(clockKey)+","+JSON.stringify(JSON.stringify(legacy))+");");
+  await healthy("legacy clock loaded");
+  const imported=await snapshot();assert.equal(imported.settledAtMs,now+day);assert.deepEqual(JSON.parse(imported.raw).managerClock,legacy);
+  await evaluate("window.confirm=()=>true;document.getElementById('alphaReset').click()");
+  await until(async()=>{const s=await snapshot();return s.settledAtMs===now&&JSON.parse(s.raw).managerClock===null;},"explicit clock reset");
+  const reset=await snapshot();await nav("reset-reload",reset.raw,false);await healthy("reset persisted");
+  assert.equal((await snapshot()).settledAtMs,now);assert.equal(await readClock(),"null");
+  return {legacyImported:true,resetPersisted:true};
  });
  await test("unreadable save retained on reload",async()=>{
   const bad="{not-json";const st=await nav("corrupt",bad);

@@ -16,6 +16,14 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
 
+## S01-ATOMIC-CLOCK-001 — Atomic test clock and manager state
+
+- **Goal / acceptance:** Preserve old clock and save together on storage failure; no partial day jump; successful retry/reload exactly once; old v2 clock readable and explicit reset remains reset. No game-rule changes or new save wipe.
+- **Status:** IN_REVIEW — reproducible browser failure in run 46147925408; candidate fix in #234, final checks pending.
+- **Added by:** chat.
+- **Requested by:** Owner (STABILIZATION-001).
+- **Implemented by:** Not yet.
+
 ## ARENA-ROSTER-UI-001 — Seven visible arena positions per side
 
 - **Goal / acceptance:** Always show seven arena slots on both sides, inactive positions neutral grey with Fighting Lv 5/10/15/20/25/30 unlock labels. Fresh 1v1 shows six locked each side; real combat remains matched active roster only. Canonical RECRUIT_LEVELS, no fake combatants, test every threshold, 7v7 and mobile/desktop overflow. Owner confirmed both sides.
