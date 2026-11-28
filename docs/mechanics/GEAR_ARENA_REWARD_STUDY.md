@@ -85,11 +85,11 @@ Extreme mismatch: 96/120 overlevelled builds prefer arena above equipment grade 
 
 ## Durable raw evidence
 
-- [GEAR_ARENA_REWARD_ORIGINAL.json](GEAR_ARENA_REWARD_ORIGINAL.json)
-- [GEAR_ARENA_REWARD_GENTLE.json](GEAR_ARENA_REWARD_GENTLE.json)
-- [GEAR_ARENA_REWARD_MEDIUM.json](GEAR_ARENA_REWARD_MEDIUM.json)
-- [GEAR_ARENA_REWARD_STRONG.json](GEAR_ARENA_REWARD_STRONG.json)
-- [GEAR_ARENA_REWARD_VALIDATION.json](GEAR_ARENA_REWARD_VALIDATION.json)
+- [GEAR_ARENA_REWARD_ORIGINAL.json](https://github.com/janisp123/idle_game/blob/ea49cec28939ba0dcd75e6a2b6f150f6801b79cc/docs/mechanics/GEAR_ARENA_REWARD_ORIGINAL.json)
+- [GEAR_ARENA_REWARD_GENTLE.json](https://github.com/janisp123/idle_game/blob/ea49cec28939ba0dcd75e6a2b6f150f6801b79cc/docs/mechanics/GEAR_ARENA_REWARD_GENTLE.json)
+- [GEAR_ARENA_REWARD_MEDIUM.json](https://github.com/janisp123/idle_game/blob/ea49cec28939ba0dcd75e6a2b6f150f6801b79cc/docs/mechanics/GEAR_ARENA_REWARD_MEDIUM.json)
+- [GEAR_ARENA_REWARD_STRONG.json](https://github.com/janisp123/idle_game/blob/ea49cec28939ba0dcd75e6a2b6f150f6801b79cc/docs/mechanics/GEAR_ARENA_REWARD_STRONG.json)
+- [GEAR_ARENA_REWARD_VALIDATION.json](https://github.com/janisp123/idle_game/blob/ea49cec28939ba0dcd75e6a2b6f150f6801b79cc/docs/mechanics/GEAR_ARENA_REWARD_VALIDATION.json)
 - [GEAR_ARENA_ECONOMY_BATCH_1.json](GEAR_ARENA_ECONOMY_BATCH_1.json)
 - [GEAR_ARENA_ECONOMY_TARGETED_1.json](GEAR_ARENA_ECONOMY_TARGETED_1.json)
 - [GEAR_ARENA_ECONOMY_TARGETED_2.json](GEAR_ARENA_ECONOMY_TARGETED_2.json)

@@ -2,7 +2,7 @@
 
 ## 2026-11-28 — REPO-CLEANUP-002 phase 05 STARTED
 
-Codex continues the approved simulation-evidence cleanup after [#248](https://github.com/janisp123/idle_game/pull/248) merged at `5866d844136a87d65a21e708a3c6a1bedf721205` with full release gate 46172780912 and standalone protocol passed. Branch `cleanup/repo-cleanup-002-evidence`. Scope is the 62 baseline mechanics JSON artifacts, the inventory and affected raw-evidence links, and the task journal. Next verify exact recovered blobs and executable consumers, then retain the aggregates and index the complete raw revisions.
+Codex continues the approved simulation-evidence cleanup after [#248](https://github.com/janisp123/idle_game/pull/248) merged at `5866d844136a87d65a21e708a3c6a1bedf721205` with full release gate 46172780912 and standalone protocol passed. Branch `cleanup/repo-cleanup-002-evidence`. Scope is the 62 baseline mechanics JSON artifacts, the inventory and affected raw-evidence links, and the task journal. [PR #249](https://github.com/janisp123/idle_game/pull/249) indexes all 62 exact raw blobs and their provenance in the [simulation evidence inventory](mechanics/SIMULATION_EVIDENCE_INDEX.md). Twenty-two executable inputs and 23 additional originals remain intact. Seventeen aggregate-bearing results were compacted after a byte-for-byte recovery test. Next trace public and fixture source dependencies after integration.
 
 ## 2026-11-28 — REPO-CLEANUP-002 phase 04 STARTED
 
