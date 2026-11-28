@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — REPO-CLEANUP-002 phase 01 STARTED
+
+Codex resumed the approved repository cleanup after #244 merged at `2a5d9e6c21d666933faf587f76b52b9b7372e7ae`. Both full release runs and standalone protocol passed. Branch `cleanup/repo-cleanup-002-git-hygiene`; scope is branch classification, verified recovery, guarded ref actions and the phase journal/checkpoint. The saved #243 audit identifies 19 exact heads already reachable from main and 194 exact merged heads that require durable retention. No ref actions have been taken. Next verify current tips, protected refs and open usage, then record the recovery and deletion manifest.
+
 ## 2026-11-28 — REPO-CLEANUP-002 #244 Codex handoff
 
 Owner requests executable TD to avoid wasting reset. #243 merged 153962ef; both full runs 46167213015 and 46167204809 28/28; protocol 46167204817 success. Ancestry and instruction audits in #243 comments 7242566717 and 7242585835. TD now specifies exact execution, retention, source/site/test scope, approvals and independent acceptance. Checkpoint identifies Codex as next implementation owner. No gameplay, governance, CI or ref deletions; full CI pending.
