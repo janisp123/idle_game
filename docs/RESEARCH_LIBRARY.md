@@ -14,14 +14,14 @@ Original, self-contained technical explanations of mechanics and implementation 
 
 **Optional, task-specific reference only.** Approved work lives in `docs/TD_LIST.md`; `AGENTS.md` and `docs/DECISIONS.md` govern implementation. Never treat a fit tag as authorization or require Codex to read the whole library.
 
-For technical design choices, start with the compact [Research map](RESEARCH_MAP.md); then open **only** a relevant guide. Skip library reading on unrelated tasks. For combat/offline tasks, first consult the [short project handoff](brainstorm/ARCHITECTURE_AND_BALANCING.md#combatoffline-handoff--concise-context-for-codex-2026-11-20). Cite inspectable public evidence in technical articles; private logs can track search queries and rejected leads.
+For technical design choices, start with the compact [Research map](RESEARCH_MAP.md); then open **only** a relevant guide. Skip library reading on unrelated tasks. For historical context, see the [original project handoff](brainstorm/ARCHITECTURE_AND_BALANCING.md#combatoffline-handoff--concise-context-for-codex-2026-11-20). Cite inspectable public evidence in technical articles; private logs can track search queries and rejected leads.
 
 ## Reading order
 
 - [Research map](RESEARCH_MAP.md): tiny topic overview for on-demand Codex discovery; not required on routine tasks.
 - [Bad examples](BAD_EXAMPLES.md): failure modes and avoidable project-specific conflicts; consult only when relevant, never as mandatory reading.
 - [Useful Examples](USEFUL_EXAMPLES.md): short, generic, independent implementation patterns and tradeoffs.
-- [Bulk random loot sampling](library/bulk-random-loot-sampling.md): independent and mutually exclusive reward counts, rare-event tails, RNG versioning and tests. `[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`.
+- [Bulk random loot sampling](library/bulk-random-loot-sampling.md): independent and mutually exclusive reward counts, rare-event tails, RNG versioning and tests. `[OUR-GAME: NOT-FIT]` for the current coin economy. `[EVIDENCE: DESIGN-NOTE]`.
 - [Time-safe offline simulation](library/offline-time-units-and-boundaries.md): consistent time units, exact resource-depletion boundaries, aggregate processing and proposed equivalence tests. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Idempotent reward settlement](library/idempotent-reward-settlement.md): atomic progress cursors, retry-safe grants, concurrency control and crash recovery. `[OUR-GAME: FIT]` `[EVIDENCE: DESIGN-NOTE]`.
 - [Crash-recoverable browser saves](library/crash-recoverable-browser-saves.md): two-generation atomic commits, cross-tab revision checks, corruption recovery and eviction limits. `[OUR-GAME: ADAPT]` `[EVIDENCE: DESIGN-NOTE]`.
@@ -104,7 +104,7 @@ Research never automatically authorizes gameplay code, licensing choices or a de
 
 ## Our game's separate design boundaries
 
-Our own game prioritizes mobile portrait play, static original grimdark illustrations, a very small initial mining/hunting loop, fully automatic offline progress without a cap, a simple task queue, server-efficient long-term simulation and asynchronous cooperative groups. The [brainstorm](BRAINSTORM.md) contains more detail.
+The public game is a mobile-first, browser-local combat manager using original art. It settles absences against frozen builds, applies the current-level reward cap and uses coins for purchases. The [current decisions](DECISIONS.md#current-gameplay-decisions) specify approved behavior. The [brainstorm](BRAINSTORM.md) preserves earlier mining, crafting, queue and multiplayer ideas.
 
 These constraints govern **our product**, not what the broader public library is allowed to teach.
 

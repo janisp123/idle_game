@@ -2,7 +2,7 @@
 
 **Category:** Combat / offline simulation / performance  
 **General-purpose benefit:** Compare accurate short-encounter modeling with low-cost, long-duration settlement without continuous simulation.  
-**Our-game fit:** `[OUR-GAME: ADAPT]` — evaluate models against the frozen-build, uncapped offline requirements.  
+**Our-game fit:** `[OUR-GAME: ADAPT]` — evaluate models against the frozen-build settlement and current-level reward cap.
 **Evidence:** `[EVIDENCE: DESIGN-NOTE]` — inspected ideas have not been independently tested or benchmarked here.  
 **Reviewed:** 2026-11-21
 
@@ -12,7 +12,7 @@ A combat-capable idle game must estimate victories, defeats, downtime and reward
 
 ## Compared approaches and implementation sketch
 
-**Reviewed:** 2026-11-20. **Evidence:** Publicly readable implementations and documentation in several browser/mobile idle RPGs and an open source MMORPG-style server. The code was **inspected**, not executed, benchmarked or validated in our repository. Under our publication rules, do not publish the outside project names, source paths or URLs in this public document. The owner keeps the separate source-location index for future research handoffs.
+**Reviewed:** 2026-11-20. **Evidence:** Publicly readable implementations and documentation in several browser/mobile idle RPGs and an open source MMORPG-style server. The code was **inspected**, not executed, benchmarked or validated in our repository. This historical comparison did not publish its source index. Follow the [current library sourcing rules](../RESEARCH_LIBRARY.md#what-belongs-here) when adding verifiable citations.
 
 ### Compared implementation patterns
 
@@ -60,7 +60,7 @@ expectedWins   = segmentSeconds * winRatePerSecond
 expectedDeaths = segmentSeconds * lossRatePerSecond
 # Draw plausible integer outcomes from a suitable, tested distribution.
 # Award base resources from sampled wins, not invented guaranteed rare drops.
-# OUR GAME: do not cross skill/XP thresholds during absence; the build is frozen.
+# OUR GAME: stop eligible rewards at the current-level cap; keep the build frozen.
 # Only apply legitimate activity, resource, group or time-varying rule boundaries.
 ```
 
@@ -73,7 +73,7 @@ Test these in an independently authored small prototype **before claiming correc
 1. Run at least thousands of seeded encounters per representative build/monster/environment; estimate uncertainty for very rare deaths instead of trusting three samples. Compare win chance, mean win/loss time, hit/damage distribution, interrupts and skill experience.
 2. Run a batched estimator over many shorter windows with the same starting build; compare distributions of victories, deaths, time wasted, XP and resources against sampled active fights. Check **online/offline statistical fairness**, not exact matching of every random roll.
 3. Test repeated graveyard → resurrection → return to the **same zone** (no automatic easier-zone switch). Recovering and packing/travel time count against farming time, including when survival chance is low.
-4. Test XP totals spanning many theoretical level thresholds after 1 hour, 1 week, 1 year and 20 years: **all offline fights must still use the same frozen logout levels and stats**. Check application of all earned levels on return, without retroactive gain changes. Also test non-advancement boundaries, historical rules and repeating task queues. Execution cost should grow with **actual activity/world boundaries**, not offline seconds, battle count or earned XP level crossings.
+4. Test absences of 1 hour, 1 week, 1 year and 20 years, including settlement below, exactly at and beyond the current-level reward cap. Verify frozen inputs, eligible advancement after return, no retroactive gains and historical rule replay. Games with queues or offline advancement need transition tests. Measure cost against meaningful boundaries.
 5. Test impossible damage, no kills, nearly certain death, mixed enemies, overlapping attack timers, skill interrupts and recovery. Do not silently switch activities or grant loot from a fight the character could never win.
 6. Test probabilistic rare rewards over a huge number of independent sessions; no `ceil(p*n)` or fixed expected counts that make rare drops guaranteed. Save/claim must be server-authoritative and idempotent.
 7. Any future **three-skull-dice return bonus**, if approved, is a separate claim/presentation mechanic, not a requirement to generate a dice event for each offline combat. Prevent frequent logins from multiplying lucky chances; the exact bonus formula remains **open**, not a solved design decision.

@@ -2,7 +2,7 @@
 
 **Category:** Probability / offline systems / performance  
 **General-purpose benefit:** Sample item counts for very long idle periods without iterating through every eligible encounter.  
-**Our-game fit:** `[OUR-GAME: ADAPT]` — promising for future uncapped offline loot, but random-reward rules and authority are not yet approved.  
+**Our-game fit:** `[OUR-GAME: NOT-FIT]` for the current coin-only design. The method remains useful in games with eligible random loot.
 **Evidence:** `[EVIDENCE: DESIGN-NOTE]` — source-informed comparison and independently written design; no sampler executed or benchmarked here.  
 **Reviewed:** 2026-11-21
 
@@ -93,7 +93,7 @@ A small local-only game can use browser-side sampling, whereas public multiplaye
 
 ## Our-game assessment
 
-`[OUR-GAME: ADAPT]` — a compact aggregate sampler is a strong candidate for decades-long hunting loot **once eligibility, drop exclusivity and RNG guarantees are specified**. It should integrate with time-safe offline boundaries and atomic reward settlement, not replace those systems. Do not infer that any bonus dice mechanic or rarity table has already been approved.
+`[OUR-GAME: NOT-FIT]` for the current coin-only design. A compact aggregate sampler can support a loot-based game after eligibility, exclusivity and RNG guarantees are specified. Preserve reward caps, time-safe boundaries and exactly-once settlement.
 
 ## Open questions
 

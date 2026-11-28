@@ -6,7 +6,7 @@ REPO-CLEANUP-002 keeps the feature freeze in effect through the independent fina
 
 - Phase 01 is on main at [`da8d4c7`](https://github.com/janisp123/idle_game/commit/da8d4c7a719a9c21cf0c17a9d0f7f12dd68e8a12). The [ref manifest](mechanics/REPO_CLEANUP_002_REF_MANIFEST.md) records 216 guarded removals, 194 verified archive tags and 22 retained exceptions.
 - The Owner approved Phase 02 and [PR #246](https://github.com/janisp123/idle_game/pull/246) merged at `8053f7890154e5fcf728f3a242b14355e9fb1132` after two 28/28 runs and standalone protocol.
-- [PR #247](https://github.com/janisp123/idle_game/pull/247) records Phase 03. After its verified merge, Phase 04 reviews the knowledge library and updates stale game-fit claims.
+- [PR #247](https://github.com/janisp123/idle_game/pull/247) merged at `5a8e11c4a66600cd1ef34df856b403621b4658ce` after the full gate and standalone protocol passed. [PR #248](https://github.com/janisp123/idle_game/pull/248) records the library-fit corrections. The simulation-evidence inventory follows its verified merge.
 
 ## Verified game and checks
 

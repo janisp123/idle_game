@@ -2,7 +2,7 @@
 
 **Category:** Server / persistence / offline / multiplayer  
 **General-purpose benefit:** Reliable rewards and state transitions despite duplicate requests, retries, competing sessions, server restarts and unknown commit outcomes.  
-**Our-game fit:** `[OUR-GAME: FIT]` — long-absent characters and eventual cooperative rewards require a single authoritative advancement.  
+**Our-game fit:** `[OUR-GAME: FIT]` for exactly-once browser-local settlement. Shared rewards would additionally require approved server authority.
 **Evidence:** `[EVIDENCE: DESIGN-NOTE]` — independently written synthesis and proposed tests; no game prototype or benchmark executed.  
 **Reviewed:** 2026-11-20
 
@@ -172,7 +172,7 @@ Suggested command for a future independent prototype: `run database-backed integ
 
 ## Our-game assessment
 
-`[OUR-GAME: FIT]` — our unlimited offline progression makes the saved progress cursor the core source of truth. Stone mining and bunny hunting should aggregate long intervals into a compact state transition; no server timer should run continuously for dormant accounts. Group encounters and claims should use durable event IDs and recipient uniqueness, with the planned offline group-expiry boundary handled by the simulator. An optional welcome-back report can summarize aggregate results without storing millions of log entries.
+`[OUR-GAME: FIT]` — keep the local progress cursor and save together so retries settle each eligible reward once. Arena rewards use a frozen build and the current-level cap. A future authoritative group system could use durable encounter IDs and recipient uniqueness. Compact return reports help when a full event log is unnecessary.
 
 **Not a coding authorization:** this is a candidate architecture, not an approved database, schema, authentication model or implementation task. The owner must approve those choices before gameplay code begins.
 

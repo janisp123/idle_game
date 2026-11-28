@@ -63,7 +63,7 @@ estimateOffline(segment, combatModel):
 
 ## Complexity and alternatives
 
-A single hit calculation uses constant work for fixed-size attributes; scheduling work grows with **actual attacks and state changes**, not the number of UI frames. A live encounter runner may use a short tick, an event queue or direct next-attack scheduling; an unlimited-offline estimator needs separate aggregation. Watch for tie-order ambiguity, impossible damage, RNG correlations and recovery time.
+A single hit calculation uses constant work for fixed-size attributes; scheduling work grows with **actual attacks and state changes**, not the number of UI frames. A live encounter runner may use a short tick, an event queue or direct next-attack scheduling; a long-absence estimator needs separate aggregation within applicable reward boundaries. Watch for tie-order ambiguity, impossible damage, RNG correlations and recovery time.
 
 ## Our-game assessment
 
