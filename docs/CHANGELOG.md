@@ -1,5 +1,13 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — MAIN-CLASS-GUIDE-001 STARTED
+
+Owner approved readable main class guides at all levels, exact race-specific specialization paths and direct existing specialization information. Base 0b74c56, isolated UI branch, no combat/save changes. CI pending.
+
+## 2026-11-28 — S01-ATOMIC-CLOCK-001 VERIFIED
+
+#234 merged 0b74c56; all eight checks, 223 regressions and 14 S01 tests passed. Live entry atomic-clock-20261128 verified. Single atomic state+clock value, old saves compatible. No reset.
+
 ## 2026-11-27 — COMING-SOON-001 STARTED
 
 Owner requested visible coming-soon tabs: Leaderboard, PvP, World bosses (Ant Queen, Spider Queen, Pirate Queen, Dragon Queen, Daemon Queen), Endless Tower; Clan Wars inside Clan. Static previews only, no gameplay, reward or persistence changes. Baseline a038846, clan #223 merged after seven successful workflows. Branch `feature/coming-soon-panels`; candidate markup, responsive styles and browser checks pushed. CI pending; no future feature logic added.

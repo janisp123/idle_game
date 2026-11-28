@@ -69,3 +69,6 @@ dialog::backdrop{background:#080605cc}dialog button{width:100%}footer{text-align
 /* Neutral forged iron instead of the active gold selection, even on hover. */
 #mainClassChoice button[data-choice][data-locked=true],#specialClassChoice button[data-choice][data-locked=true]{background:#272727;color:#b5b5b5;border:1px solid #555;opacity:1;cursor:not-allowed;font-weight:400;padding:8px 7px;filter:grayscale(1);box-shadow:none}
 #specialClassChoice[data-locked=true] .class-info-button{background:#272727;color:#b5b5b5;border-color:#555;filter:grayscale(1)}
+
+/* Main class guides are readable independently from locked selection buttons. */
+#mainInfoDialog{box-sizing:border-box;max-height:calc(100dvh - 24px);overflow:auto}#mainInfoDialog h2{margin:0 0 6px}#mainInfoPaths{display:grid;gap:8px;margin:8px 0 14px}.main-path{align-items:center;border:1px solid #74573d;border-radius:6px;padding:8px;overflow-wrap:anywhere}.main-path p{font-size:13px;line-height:1.4;margin:4px 0 0}.main-path button{min-height:44px}#mainClassChoice .specialization-option button[data-choice]{overflow-wrap:anywhere}#mainClassChoice[data-locked=true] .class-info-button{background:#272727;color:#b5b5b5;border-color:#555;filter:grayscale(1)}

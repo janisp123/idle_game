@@ -53,7 +53,56 @@ function specializationChoices(host,entries,value,onChoice){
  }
  for(const b of host.querySelectorAll("[data-choice]")){b.setAttribute("aria-pressed",String(b.dataset.choice===value));b.onclick=()=>onChoice(b.dataset.choice);}
 }
+// Basic-stage guidance describes the actual shared skill, not the future specialist kit.
+const MAIN_GUIDES=Object.freeze({
+ Warrior:["Frontline melee damage. Heavy weapon attacks reward reaching the target.","Strong direct weapon pressure at contact.","Distant enemies and intact defensive frontlines."],
+ Knight:["Defensive frontline. Guard provides personal protection when injured.","Surviving incoming attacks and holding close positions.","Limited offensive pressure and mobile ranged enemies."],
+ Rogue:["Light-armour weapon fighter. Feint briefly opens enemy guard.","Exploiting vulnerable targets at contact.","Heavy protection and crossing open terrain before reaching a target."],
+ Wizard:["Magical damage dealer. Arcane Bolt strengthens a single-target attack.","Magic damage against armoured targets.","Close melee pressure and exposed ranged fire."],
+ Cleric:["Healing support. Mend restores one wounded living ally, including yourself.","Sustaining a group through damage.","Focused burst and pressure that prevents healing."],
+ Scout:["Mobile light-armour fighter. Quick Strike has short recovery.","Frequent attacks and pressure on exposed targets.","Heavy armour and control."],
+ Oracle:["Healing support. Restore heals a wounded living ally, including yourself.","Sustaining allies in prolonged fights.","Focused burst and isolation."],
+ Assassin:["Light-armour attacker. Ambush opens the enemy guard on a stronger strike.","Pressure on exposed targets once in reach.","Heavy armour, shields and long approaches."],
+ Raider:["Heavy melee attacker. Heavy Blow trades recovery time for impact.","Strong strikes in close combat.","Distant enemies and slow recovery."],
+ Monk:["Close-range fighter. Rapid Fist delivers quick attacks.","Repeated pressure at contact.","Ranged opponents and heavy protection."],
+ Shaman:["Nearby ally support. War Blessing strengthens or protects depending on stance.","Supporting allied damage or survival within range.","Isolation and concentrated attacks."],
+ Scavenger:["Hammer fighter. Crushing Blow briefly opens an enemy guard.","Close-range pressure against defensive targets.","Distant mobile enemies."],
+ Artisan:["Durable hammer fighter. Reinforce provides personal protection when injured.","Close-range survival and sustained pressure.","Mobile enemies outside weapon reach."]
+});
+function openMainInfo(race,id){
+ const a=MAIN_CLASS_SKILLS[id],g=MAIN_GUIDES[id],dialog=$("mainInfoDialog"),paths=groupSpecializations(race,id);
+ $("mainInfoHeading").textContent=RACE_LABELS[race]+" "+id;
+ $("mainInfoRole").textContent=g[0];$("mainInfoStrong").textContent=g[1];$("mainInfoWeak").textContent=g[2];
+ $("mainInfoSkill").textContent=a.name;
+ $("mainInfoSkillEffect").textContent=a.description;
+ $("mainInfoCooldown").textContent=a.cooldown+" combat rounds";
+ $("mainInfoPaths").replaceChildren(...paths.map(c=>{
+  const row=node("div");row.className="specialization-option main-path";
+  const detail=node("div"),name=node("strong",c.name+" · "+c.role),summary=node("p",classTacticalInfo(c.id,8).summary);
+  detail.append(name,summary);
+  const info=node("button","ⓘ");info.type="button";info.className="class-info-button";info.dataset.pathInfo=c.id;info.setAttribute("aria-label","Information about "+c.name);info.onclick=()=>openClassInfo(c.id);
+  row.append(detail,info);return row;
+ }));
+ if(!dialog.open)dialog.showModal();
+}
+function mainChoices(host,race,entries,value,onChoice){
+ const key=JSON.stringify([race,entries]);
+ if(host.dataset.options!==key){
+  const active=document.activeElement,restore=host.contains(active),isInfo=!!active?.dataset?.mainInfo,focused=active?.dataset?.mainInfo??active?.dataset?.choice;
+  host.replaceChildren(...entries.map(([id,label])=>{
+   const wrap=node("div");wrap.className="specialization-option";
+   const select=node("button",label);select.type="button";select.dataset.choice=id;
+   const info=node("button","ⓘ");info.type="button";info.dataset.mainInfo=id;info.className="class-info-button";
+   info.setAttribute("aria-label","Information about "+RACE_LABELS[race]+" "+id);info.onclick=()=>openMainInfo(race,id);
+   wrap.append(select,info);return wrap;
+  }));
+  host.dataset.options=key;
+  if(restore)[...host.querySelectorAll(isInfo?"[data-main-info]":"[data-choice]")].find(b=>(isInfo?b.dataset.mainInfo:b.dataset.choice)===focused)?.focus();
+ }
+ for(const b of host.querySelectorAll("[data-choice]")){b.setAttribute("aria-pressed",String(b.dataset.choice===value));b.onclick=()=>onChoice(b.dataset.choice);}
+}
 export function createGroupEditor(onClass,onStance){
+ $("mainInfoClose").addEventListener("click",()=>$("mainInfoDialog").close());
  $("classInfoClose").addEventListener("click",()=>$("classInfoDialog").close());
  let current=null,selected=GROUP_IDS[0],draft=null,lastProgress="";
  const host=$("fighterButtons");
@@ -75,7 +124,7 @@ export function createGroupEditor(onClass,onStance){
   choices(race,GROUP_RACES.map(id=>[id,RACE_ICONS[id]+" "+RACE_LABELS[id]]),r,id=>{
    if(id!==r){if(novice){const next=basicRace(id);draft=null;onClass(selected,next);return;}draft={race:id,main:groupMainClasses(id)[0]};render(current);}
   });
-  choices(main,groupMainClasses(r).map(id=>[id,raceOnly?"🔒 "+id+" · Unlock Lv "+MAIN_CLASS_LEVEL:novice?id+" · "+MAIN_CLASS_SKILLS[id].name:id]),raceOnly?null:k,id=>{if(raceOnly)return;if(novice){const next=basicClass(r,id);draft=null;if(next.id!==m.selected)onClass(selected,next);else render(current);return;}draft={race:r,main:id};render(current);});
+  mainChoices(main,r,groupMainClasses(r).map(id=>[id,raceOnly?"🔒 "+id+" · Unlock Lv "+MAIN_CLASS_LEVEL:novice?id+" · "+MAIN_CLASS_SKILLS[id].name:id]),raceOnly?null:k,id=>{if(raceOnly)return;if(novice){const next=basicClass(r,id);draft=null;if(next.id!==m.selected)onClass(selected,next);else render(current);return;}draft={race:r,main:id};render(current);});
   main.dataset.locked=String(raceOnly);
   for(const b of main.querySelectorAll("[data-choice]")){b.disabled=raceOnly;b.dataset.locked=String(raceOnly);const ability=MAIN_CLASS_SKILLS[b.dataset.choice];b.title=ability.name+" — "+ability.description+" Cooldown: "+ability.cooldown+" rounds."; }
   specializationChoices(special,(raceOnly?groupMainClasses(r).flatMap(id=>groupSpecializations(r,id)):groupSpecializations(r,k)).map(x=>[x.id,novice?"🔒 "+x.name+" · Unlock Lv "+SPECIALIZATION_LEVEL:ROLE_ICONS[x.role]+" "+x.name+" · Lv "+(m.classes[x.id]?.mastery.level??1)]),!novice&&c.race===r&&c.mainClass===k?c.id:null,id=>{
