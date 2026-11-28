@@ -36,7 +36,7 @@ export function validGroupSession(s){
 export function startGroupSession(group,shared,teamworkLevel,seed,carry={}){
  const s={timelineVersion:GROUP_TIMELINE_VERSION,groupCombatRules:carry.rules??GROUP_COMBAT_RULES_VERSION,seed,elapsedMs:0,prizeCursor:0,teamworkLevel,
   coinRemainder:carry.coinRemainder??0,teamworkRemainder:carry.teamworkRemainder??0,
-  players:groupSnapshots(group,shared,carry.rules??GROUP_COMBAT_RULES_VERSION),...(carry.arenaFavorites!==undefined?{arenaFavorites:[...carry.arenaFavorites]}:{}),...(carry.bonus?{raidBonus:carry.bonus}:{}),...(carry.clanSnapshot?{clanSnapshot:carry.clanSnapshot}:{}),rank:carry.rank??initialGroupRank(cloneRewardGrade(shared.skill))};
+  players:groupSnapshots(group,shared,carry.rules??GROUP_COMBAT_RULES_VERSION,carry.staffEquipment!==false),...(carry.staffEquipment===false?{}:{staffEquipment:true}),...(carry.arenaFavorites!==undefined?{arenaFavorites:[...carry.arenaFavorites]}:{}),...(carry.bonus?{raidBonus:carry.bonus}:{}),...(carry.clanSnapshot?{clanSnapshot:carry.clanSnapshot}:{}),rank:carry.rank??initialGroupRank(cloneRewardGrade(shared.skill))};
  if(!validGroupSession(s))throw new RangeError("Invalid frozen group session");
  return structuredClone(s);
 }
@@ -44,7 +44,7 @@ export const groupPrizeGrade=s=>s.rank.grade;
 export const groupWinPrize=s=>Math.floor((groupRewardUnits(s)+s.coinRemainder)/groupCoinRatio(s));
 function bout(s,index){
  const scheduled=index%ARENA_SCHEDULE_BOUTS,seed=Math.imul(s.seed^scheduled,2654435761)>>>0;
- const bracket=rankProfile(s.rank.grade),players=GROUP_IDS.map(id=>s.players[id]),enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,s.groupCombatRules??1);
+ const bracket=rankProfile(s.rank.grade),players=GROUP_IDS.map(id=>s.players[id]),enemies=buildGroupCloneTeam(bracket.envelope,bracket.shared,seed,s.groupCombatRules??1,s.staffEquipment===true);
  const roll=seededCombatRandom((seed^0x749ae237)>>>0);
  const positioning=s.arenaFavorites===undefined?chooseArena(players[Math.floor(roll()*players.length)],enemies[Math.floor(roll()*enemies.length)],roll,groupArenaPool(s.groupCombatRules??1)):{arena:choosePreferredGroupArena(s.arenaFavorites,roll)};
  const terrain=positioning.arena;

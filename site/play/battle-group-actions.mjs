@@ -1,6 +1,6 @@
 // Shared cooldown-only class action policy. Same actions for both sides.
 // Candidate coefficients: deliberately central, awaiting max-only balance.
-import {GROUP_CLASSES,isGroupClass} from "./battle-group-classes.mjs?v=group-001";
+import {GROUP_CLASSES,isGroupClass,legacyClassLoadout,usesStaff} from "./battle-group-classes.mjs?v=group-001";
 import {WEAPONS,resolveStrike,wound,attackComponents,protection,intactArmourSum,flatGuard} from "./physical-actions.mjs?v=kits-001";
 import {COUNTERS,tacticalActor} from "./group-counter-rules.mjs";
 import {kitControlAllowed,kitControlDuration} from "./class-effects.mjs";
@@ -16,10 +16,11 @@ const profiles=Object.freeze({
  "Sword":spec("sword","slashing",0,8)
 });
 const magicRoles=["mage","healer","summoner","support"];
-export const validGroupSnapshot=s=>isGroupClass(s?.classId)&&s.race===GROUP_CLASSES[s.classId].race&&s.role===GROUP_CLASSES[s.classId].role&&s.loadout===GROUP_CLASSES[s.classId].loadout&&Number.isInteger(s.classLevel)&&s.classLevel>=1&&s.classLevel<=50;
+export const validGroupSnapshot=s=>isGroupClass(s?.classId)&&s.race===GROUP_CLASSES[s.classId].race&&s.role===GROUP_CLASSES[s.classId].role&&[GROUP_CLASSES[s.classId].loadout,legacyClassLoadout(s.classId)].includes(s.loadout)&&Number.isInteger(s.classLevel)&&s.classLevel>=1&&s.classLevel<=50;
 export function classWeapon(a){
  const c=GROUP_CLASSES[a.classId];
  if(!c)return null;
+ if(usesStaff(c.id))return profiles[c.role==="mage"?"Staff":c.role==="summoner"?"Wand":c.mainClass==="Shaman"?"Mace":"Scepter"];
  return profiles[c.weaponLabel]??WEAPONS[c.loadout];
 }
 export function prepareClassActor(a){

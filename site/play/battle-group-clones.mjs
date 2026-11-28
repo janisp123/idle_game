@@ -57,7 +57,7 @@ function allocate(c,budget,skill){
  }
  return equipment;
 }
-export function buildGroupCloneTeam(envelope,shared,seed,rules=3){
+export function buildGroupCloneTeam(envelope,shared,seed,rules=3,staffEquipment=true){
  if(!validGroupCloneEnvelope(envelope))throw new RangeError("Invalid group clone envelope");
  const choices=groupCloneChoices(shared.skill,seed);
  let group=initialBattleGroup();
@@ -70,6 +70,6 @@ export function buildGroupCloneTeam(envelope,shared,seed,rules=3){
   if([4,5,6,7,8,9,10].includes(rules)){p.attributeEffort=awardCharacterEffort(blankCharacterEffort(),c.id,Math.floor(b.weaponXP/4));p.attributeEffortActive={...p.attributeEffort};}
   m.stances[choice.stance]={level:b.tacticLevel,xp:0};
  }
- const snapshots=groupSnapshots(group,shared,rules);
+ const snapshots=groupSnapshots(group,shared,rules,staffEquipment);
  return GROUP_IDS.map((id,i)=>({...snapshots[id],name:"Rival "+(i+1)}));
 }

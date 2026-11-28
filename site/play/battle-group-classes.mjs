@@ -14,33 +14,35 @@ const rows=[
  ["grimwarden","Grimwarden","human","Knight","tank","sword_shield","plate","Sword and shield","counter",4],
  ["trickblade","Trickblade","human","Rogue","melee","sword_shield","leather","Dagger","feint",4],
  ["longshot","Longshot","human","Rogue","ranged","bow","leather","Bow","aimed",4],
- ["flameweaver","Flameweaver","human","Wizard","mage","bow","padded","Staff","blast",5],
- ["gravebinder","Gravebinder","human","Wizard","mage","bow","padded","Staff","curse",5],
- ["beastcaller","Beastcaller","human","Wizard","summoner","bow","padded","Wand","familiar",4],
- ["lifekeeper","Lifekeeper","human","Cleric","healer","bow","padded","Scepter","heal",4],
- ["runesage","Runesage","human","Cleric","support","bow","padded","Scepter","blessing",5],
+ ["flameweaver","Flameweaver","human","Wizard","mage","staff","padded","Two-handed staff","blast",5],
+ ["gravebinder","Gravebinder","human","Wizard","mage","staff","padded","Two-handed staff","curse",5],
+ ["beastcaller","Beastcaller","human","Wizard","summoner","staff","padded","Two-handed staff","familiar",4],
+ ["lifekeeper","Lifekeeper","human","Cleric","healer","staff","padded","Two-handed staff","heal",4],
+ ["runesage","Runesage","human","Cleric","support","staff","padded","Two-handed staff","blessing",5],
  ["grovewarden","Grovewarden","elf","Knight","tank","sword_shield","plate","Sword and shield","ward",4],
  ["wardchanter","Wardchanter","elf","Knight","support","sword_shield","plate","Sword","ward_song",5],
  ["swiftblade","Swiftblade","elf","Scout","melee","sword_shield","leather","Dagger","dash",3],
  ["windbow","Windbow","elf","Scout","ranged","bow","leather","Bow","mobile_shot",3],
- ["frostweaver","Frostweaver","elf","Wizard","mage","bow","padded","Staff","slow",4],
- ["spiritcaller","Spiritcaller","elf","Wizard","summoner","bow","padded","Wand","spirit",5],
- ["wellspring","Wellspring","elf","Oracle","healer","bow","padded","Scepter","cleanse_heal",4],
+ ["frostweaver","Frostweaver","elf","Wizard","mage","staff","padded","Two-handed staff","slow",4],
+ ["spiritcaller","Spiritcaller","elf","Wizard","summoner","staff","padded","Two-handed staff","spirit",5],
+ ["wellspring","Wellspring","elf","Oracle","healer","staff","padded","Two-handed staff","cleanse_heal",4],
  ["dreadguard","Dreadguard","dark_elf","Knight","tank","sword_shield","plate","Sword and shield","weaken",4],
  ["war_dancer","War Dancer","dark_elf","Knight","support","greatsword","plate","Twin swords","war_song",5],
  ["nightblade","Nightblade","dark_elf","Assassin","melee","sword_shield","leather","Dagger","flank",4],
  ["blackbow","Blackbow","dark_elf","Assassin","ranged","bow","leather","Bow","pierce",5],
- ["galescourge","Galescourge","dark_elf","Wizard","mage","bow","padded","Staff","gust",5],
- ["shadebinder","Shadebinder","dark_elf","Wizard","summoner","bow","padded","Wand","shade",4],
- ["bloodsage","Bloodsage","dark_elf","Oracle","healer","bow","padded","Scepter","battle_heal",4],
+ ["galescourge","Galescourge","dark_elf","Wizard","mage","staff","padded","Two-handed staff","gust",5],
+ ["shadebinder","Shadebinder","dark_elf","Wizard","summoner","staff","padded","Two-handed staff","shade",4],
+ ["bloodsage","Bloodsage","dark_elf","Oracle","healer","staff","padded","Two-handed staff","battle_heal",4],
  ["ragebreaker","Ragebreaker","orc","Raider","melee","hammer","plate","Great axe","rage_strike",5],
  ["ironfist","Ironfist","orc","Monk","melee","sword_shield","leather","Gauntlets","rush",3],
- ["hexchief","Hexchief","orc","Shaman","support","bow","padded","Mace","hex",5],
- ["warcaller","Warcaller","orc","Shaman","support","bow","padded","Mace","chant",5],
+ ["hexchief","Hexchief","orc","Shaman","support","staff","padded","Two-handed staff","hex",5],
+ ["warcaller","Warcaller","orc","Shaman","support","staff","padded","Two-handed staff","chant",5],
  ["scrapbreaker","Scrapbreaker","dwarf","Scavenger","melee","hammer","plate","Hammer","break_guard",4],
  ["forgecaller","Forgecaller","dwarf","Artisan","summoner","hammer","plate","Hammer","construct",5]
 ];
 export const GROUP_CLASSES=Object.freeze(Object.fromEntries(rows.map(([id,name,race,mainClass,role,loadout,armour,weaponLabel,effect,cooldown])=>[id,Object.freeze({id,name,race,mainClass,role,loadout,armour,weaponLabel,ability:Object.freeze({effect,cooldown})})])));
+export const usesStaff=id=>GROUP_CLASSES[id]?.loadout==="staff";
+export const legacyClassLoadout=id=>usesStaff(id)?"bow":GROUP_CLASSES[id]?.loadout;
 export const GROUP_CLASS_IDS=Object.freeze(Object.keys(GROUP_CLASSES));
 export const isGroupClass=id=>typeof id==="string"&&Object.hasOwn(GROUP_CLASSES,id);
 export function groupMainClasses(race){

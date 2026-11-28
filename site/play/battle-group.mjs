@@ -1,6 +1,6 @@
 // Pure seven-slot foundation. Not yet wired to public manager saves.
 // Retain sparse per-class progression; only the frozen used class gains practice.
-import {GROUP_CLASSES,DEFAULT_GROUP_CLASSES,isGroupClass,resolveGroupClass} from "./battle-group-classes.mjs?v=group-001";
+import {GROUP_CLASSES,DEFAULT_GROUP_CLASSES,isGroupClass,resolveGroupClass,usesStaff,legacyClassLoadout} from "./battle-group-classes.mjs?v=group-001";
 import {ARMOUR_SLOTS,armourStats} from "./armour.mjs?v=bal-002";
 import {blankExpertise,validExpertise,awardExpertise} from "./expertise.mjs?v=alpha-gear-a3";
 import {STARTER_ITEM,isEquipmentItem,trainingKit,trainingEffects,smithQuote,nextEquipmentUpgrade,itemPower,ITEM_GRADES,ITEM_QUALITIES} from "./smith.mjs?v=gear-a3";
@@ -16,14 +16,14 @@ const skill=()=>({level:1,xp:0});
 const armourIds=c=>ARMOUR_SLOTS.map(s=>s.id+":"+c.armour);
 function freshProgress(id){
  const c=GROUP_CLASSES[id];
- return {equipment:{[c.loadout]:{...STARTER_ITEM}},expertise:blankExpertise(),expertiseActive:blankExpertise(),mastery:skill(),attributeEffort:blankCharacterEffort(),attributeEffortActive:blankCharacterEffort()};
+ return {equipment:{[c.loadout]:{...STARTER_ITEM}},expertise:{...blankExpertise(),...(usesStaff(id)?{staff:0}:{})},expertiseActive:{...blankExpertise(),...(usesStaff(id)?{staff:0}:{})},mastery:skill(),attributeEffort:blankCharacterEffort(),attributeEffortActive:blankCharacterEffort()};
 }
 function validProgress(p,id){
  if(!record(p)||!isGroupClass(id)||!record(p.equipment)||!validExpertise(p.expertise)||!validExpertise(p.expertiseActive)||!levelValid(p.mastery))return false;
  if((p.attributeEffort!==undefined||p.attributeEffortActive!==undefined)&&(!validCharacterEffort(p.attributeEffort)||!validCharacterEffort(p.attributeEffortActive)||Object.keys(p.attributeEffort).some(k=>p.attributeEffortActive[k]>p.attributeEffort[k])))return false;
- const c=GROUP_CLASSES[id],keys=[c.loadout,...armourIds(c)],owned=Object.keys(p.equipment);
- return Object.hasOwn(p.equipment,c.loadout)&&owned.every(k=>keys.includes(k)&&isEquipmentItem(p.equipment[k]))&&
- Object.keys(p.expertise).every(k=>p.expertiseActive[k]<=p.expertise[k]&&([c.loadout,c.armour,"none"].includes(k)||p.expertise[k]===0));
+ const c=GROUP_CLASSES[id],loadout=usesStaff(id)&&!Object.hasOwn(p.equipment,"staff")?"bow":c.loadout,keys=[loadout,...armourIds(c)],owned=Object.keys(p.equipment);
+ return Object.hasOwn(p.equipment,loadout)&&(!usesStaff(id)||loadout==="bow"&&!Object.hasOwn(p.expertise,"staff")&&!Object.hasOwn(p.expertiseActive,"staff")||loadout==="staff"&&count(p.expertise.staff)&&count(p.expertiseActive.staff))&&owned.every(k=>keys.includes(k)&&isEquipmentItem(p.equipment[k]))&&
+ Object.keys(p.expertise).every(k=>p.expertiseActive[k]<=p.expertise[k]&&([loadout,c.armour,"none"].includes(k)||p.expertise[k]===0));
 }
 function validMember(m){
  return record(m)&&isGroupClass(m.selected)&&validTactic(m.stance)&&exact(m.stances,TACTIC_IDS)&&TACTIC_IDS.every(t=>levelValid(m.stances[t]))&&
@@ -34,13 +34,24 @@ function requireGroup(g){if(!validBattleGroup(g))throw new RangeError("Invalid B
 // Legacy records contain exact class-specific weapon practice in quarter-ms.
 // Recover it once; retain the old account ledger for historical combat only.
 // Never duplicate general account training into every newly selected class.
+function convertStaff(p,id){
+ if(!usesStaff(id)||Object.hasOwn(p.equipment,"staff"))return p;
+ const {bow,...equipment}=p.equipment;
+ return {...p,equipment:{...equipment,staff:bow},expertise:{...p.expertise,bow:0,staff:p.expertise.bow},expertiseActive:{...p.expertiseActive,bow:0,staff:p.expertiseActive.bow}};
+}
+export function migrateGroupWeapons(group){
+ requireGroup(group);
+ if(GROUP_IDS.every(id=>Object.entries(group[id].classes).every(([classId,p])=>!usesStaff(classId)||Object.hasOwn(p.equipment,"staff"))))return group;
+ return Object.fromEntries(GROUP_IDS.map(id=>{const m=group[id];return [id,{...m,classes:Object.fromEntries(Object.entries(m.classes).map(([classId,p])=>[classId,convertStaff(p,classId)]))}];}));
+}
 function migrateProgress(p,id){
+ p=convertStaff(p,id);
  if(p.attributeEffort!==undefined)return p;
  const c=GROUP_CLASSES[id];
  return {...p,attributeEffort:awardCharacterEffort(blankCharacterEffort(),id,Math.floor(p.expertise[c.loadout]/4)),attributeEffortActive:awardCharacterEffort(blankCharacterEffort(),id,Math.floor(p.expertiseActive[c.loadout]/4))};
 }
 export function migrateGroupAttributes(group){
- requireGroup(group);
+ group=migrateGroupWeapons(group);
  if(GROUP_IDS.every(id=>Object.values(group[id].classes).every(p=>p.attributeEffort!==undefined)))return group;
  return Object.fromEntries(GROUP_IDS.map(id=>{const m=group[id];return [id,{...m,classes:Object.fromEntries(Object.entries(m.classes).map(([classId,p])=>[classId,migrateProgress(p,classId)]))}];}));
 }
@@ -60,24 +71,24 @@ export function selectGroupStance(group,member,stance){
 function equippedArmour(c,p){
  return Object.fromEntries(ARMOUR_SLOTS.map(({id})=>[id,Object.hasOwn(p.equipment,id+":"+c.armour)?c.armour:"none"]));
 }
-export function groupSnapshots(group,shared,rules=3){
- requireGroup(group);
+export function groupSnapshots(group,shared,rules=3,staffEquipment=true){
+ group=migrateGroupWeapons(group);
  if(!record(shared)||!["str","dex","end","skill"].every(k=>Number.isFinite(shared[k])&&shared[k]>=0&&shared[k]<=1e6)||!count(shared.difficulty)||shared.difficulty>=ITEM_GRADES.length)throw new RangeError("Invalid shared combat inputs");
  return Object.fromEntries(GROUP_IDS.map((id,i)=>{
-  const m=group[id],c=GROUP_CLASSES[m.selected],p=m.classes[m.selected],armour=equippedArmour(c,p),kit=trainingKit(armour,c.loadout,p.equipment),effects=trainingEffects(kit,c.loadout,p.expertiseActive);
+  const m=group[id],c=GROUP_CLASSES[m.selected],p=m.classes[m.selected],armour=equippedArmour(c,p),loadout=staffEquipment?c.loadout:legacyClassLoadout(c.id),equipment=loadout!==c.loadout?{...p.equipment,bow:p.equipment.staff}:p.equipment,expertise=loadout!==c.loadout?{...p.expertiseActive,bow:p.expertiseActive.staff}:p.expertiseActive,kit=trainingKit(armour,loadout,equipment),effects=trainingEffects(kit,loadout,expertise);
   const attrs=[4,5,6,7,8,9,10].includes(rules)?characterAttributes(c.id,migrateProgress(p,c.id).attributeEffortActive):null;
   return [id,{name:"Member "+(i+1),classId:c.id,race:c.race,role:c.role,classLevel:p.mastery.level,tactic:m.stance,tacticLevel:m.stances[m.stance].level,
-   difficulty:shared.difficulty,...(attrs?{attributes:attrs,str:attrs.STR,dex:attrs.DEX,end:attrs.CON,skill:p.mastery.level}:{str:shared.str,dex:shared.dex,end:shared.end,skill:shared.skill}),loadout:c.loadout,trainingKit:kit,
-   gear:{...armourStats(armour,c.loadout),gearDefense:effects.gearDefense},gearAttack:effects.gearAttack,condition:effects.condition}];
+   difficulty:shared.difficulty,...(attrs?{attributes:attrs,str:attrs.STR,dex:attrs.DEX,end:attrs.CON,skill:p.mastery.level}:{str:shared.str,dex:shared.dex,end:shared.end,skill:shared.skill}),loadout,trainingKit:kit,
+   gear:{...armourStats(armour,loadout),gearDefense:effects.gearDefense},gearAttack:effects.gearAttack,condition:effects.condition}];
  }));
 }
 function awardSkill(s,ms){const limit=tacticRequiredXP(s.level);return {...s,xp:s.xp+Math.min(ms,limit-s.xp)};}
 function advanceSkill(s){return s.level<50&&s.xp===tacticRequiredXP(s.level)?{level:s.level+1,xp:0}:s;}
 export function awardGroupPractice(group,snapshots,productiveMs){
- requireGroup(group);if(!exact(snapshots,GROUP_IDS)||!exact(productiveMs,GROUP_IDS))throw new RangeError("Invalid frozen practice");
+ group=migrateGroupWeapons(group);if(!exact(snapshots,GROUP_IDS)||!exact(productiveMs,GROUP_IDS))throw new RangeError("Invalid frozen practice");
  return Object.fromEntries(GROUP_IDS.map(id=>{
   const m=group[id],s=snapshots[id],ms=productiveMs[id],c=GROUP_CLASSES[s?.classId],p=m.classes[s?.classId];
-  if(!c||!p||!count(ms)||!validTactic(s.tactic)||s.loadout!==c.loadout||!record(s.trainingKit?.armour)||!ARMOUR_SLOTS.every(({id})=>["none",c.armour].includes(s.trainingKit.armour[id])))throw new RangeError("Invalid frozen class");
+  if(!c||!p||!count(ms)||!validTactic(s.tactic)||s.loadout!==c.loadout&&s.loadout!==legacyClassLoadout(c.id)||!record(s.trainingKit?.armour)||!ARMOUR_SLOTS.every(({id})=>["none",c.armour].includes(s.trainingKit.armour[id])))throw new RangeError("Invalid frozen class");
   if(!ms)return [id,m];
   const trained=migrateProgress(p,c.id);
   return [id,{...m,stances:{...m.stances,[s.tactic]:awardSkill(m.stances[s.tactic],ms)},classes:{...m.classes,[c.id]:{...trained,mastery:awardSkill(p.mastery,ms),expertise:awardExpertise(p.expertise,c.loadout,s.trainingKit.armour,ms),attributeEffort:awardCharacterEffort(trained.attributeEffort,c.id,ms)}}}];

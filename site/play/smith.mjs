@@ -39,8 +39,8 @@ export const GEAR_BALANCE=Object.freeze({
   armourResistance:Object.freeze({padded:0.95,leather:1.00,plate:1.15}),
   armourMobility:Object.freeze({padded:1.0,leather:0.7,plate:0.2}),
   armourDodge:Object.freeze({padded:0.028,leather:0.018,plate:0.001}),
-  weaponAccuracy:Object.freeze({bow:0.012,spear:0.010,sword_shield:0.006,greatsword:0.006,hammer:0.004}),
-  weaponPenetration:Object.freeze({bow:0.012,spear:0.014,sword_shield:0.006,greatsword:0.008,hammer:0.016})
+  weaponAccuracy:Object.freeze({bow:0.012,staff:0.012,spear:0.010,sword_shield:0.006,greatsword:0.006,hammer:0.004}),
+  weaponPenetration:Object.freeze({bow:0.012,staff:0.012,spear:0.014,sword_shield:0.006,greatsword:0.008,hammer:0.016})
 });
 export function gearFactor(item) {
   if(!isEquipmentItem(item))throw new RangeError("Invalid equipment item");
@@ -129,7 +129,7 @@ export function equippedCondition(armour, loadout, equipment, expertise=fullExpe
     return [slot.id, { ...conditionProfile(id,item),...armourEffects(slot,family,item,expertise[family]) }];
   }));
   return {
-    weapon: {...conditionProfile(loadout, weapon),...weaponEffects(loadout,weapon,expertise[loadout])},
+    weapon: {...conditionProfile(loadout, weapon),...weaponEffects(loadout,weapon,expertise[loadout]??(loadout==="staff"?expertise.bow:0))},
     shield: loadout === "sword_shield" ? {...conditionProfile("shield",weapon),...weaponEffects(loadout,weapon,expertise[loadout])} : null,
     armour: pieces
   };

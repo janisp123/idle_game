@@ -8,11 +8,11 @@ export const EXPERTISE_BALANCE=Object.freeze({
   unitsPerHour:4*3600000,
   maximumPenalty:0.60
 });
-export const EXPERTISE_IDS=Object.freeze([...Object.keys(COMBAT_LOADOUTS),...ARMOUR_TIERS]);
+export const EXPERTISE_IDS=Object.freeze([...Object.keys(COMBAT_LOADOUTS).filter(id=>id!=="staff"),...ARMOUR_TIERS]);
 const count=n=>Number.isSafeInteger(n)&&n>=0;
 export const blankExpertise=()=>Object.fromEntries(EXPERTISE_IDS.map(id=>[id,0]));
 export const validExpertise=e=>Boolean(e&&typeof e==="object"&&!Array.isArray(e)&&
-  Object.keys(e).length===EXPERTISE_IDS.length&&EXPERTISE_IDS.every(id=>Object.hasOwn(e,id)&&count(e[id])));
+  (Object.keys(e).length===EXPERTISE_IDS.length||Object.keys(e).length===EXPERTISE_IDS.length+1&&count(e.staff))&&EXPERTISE_IDS.every(id=>Object.hasOwn(e,id)&&count(e[id])));
 export function expertiseHours(units){
   if(!count(units))throw new RangeError("Invalid expertise units");
   return units/EXPERTISE_BALANCE.unitsPerHour;
@@ -40,8 +40,8 @@ export function awardExpertise(current,loadout,armour,productiveMs){
     throw new RangeError("Invalid expertise training input");
   const next={...current};
   const add=(id,units)=>{
-    if(!count(units)||!count(next[id]+units))throw new RangeError("Expertise effort overflow");
-    next[id]+=units;
+    if(!count(units)||!count((next[id]??0)+units))throw new RangeError("Expertise effort overflow");
+    next[id]=(next[id]??0)+units;
   };
   add(loadout,4*productiveMs);
   for(const {id} of ARMOUR_SLOTS)add(armour[id],productiveMs);

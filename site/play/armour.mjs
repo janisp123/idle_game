@@ -25,6 +25,7 @@ const ARMOUR_BALANCE = {
 
 export const WEAPON_PIECES = Object.freeze({
   bow: [{name: "Bow", kg: 2}, {name: "Backup dagger", kg: 0.5}],
+  staff: [{name: "Two-handed staff", kg: 2.5}],
   spear: [{name: "Spear", kg: 3}],
   hammer: [{name: "War Hammer", kg: 6}],
   greatsword: [{name: "Greatsword", kg: 5}],

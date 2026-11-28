@@ -7,6 +7,7 @@ import {combatDamageFactor} from "./raid-rules.mjs";
 // Pure provisional arena rules. Distances, injuries and wear are game abstractions.
 export const PHYSICAL_RULES = Object.freeze({ turnLimit: 32, arrows: 5 });
 export const WEAPONS = Object.freeze({
+  staff: { move: "spell", ranged: true, type: "magic", range: 2, power: 12, recovery: 2 },
   bow: { move: "shot", ranged: true, type: "piercing", range: 2, power: 11, recovery: 2 },
   dagger: { move: "dagger", type: "piercing", range: 0, power: 4, recovery: 2, flatScale: .75, gradeScale: .80, strengthScale: .90 },
   spear: { move: "thrust", clearance: 1, type: "piercing", range: 1, power: 12, recovery: 2 },

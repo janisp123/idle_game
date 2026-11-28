@@ -8,7 +8,7 @@ import {blankCharacterEffort,awardCharacterEffort} from "./character-attributes.
 import {ARENAS} from "./arenas.mjs?v=bal-002";
 import {resolveTeamBattle} from "./team-combat.mjs?v=raid-002";
 const count=n=>Number.isSafeInteger(n)&&n>=0;
-export function raidMonsters(level){
+export function raidMonsters(level,staffEquipment=true){
  const d=raidDefinition(level),roster=[d.boss,...d.crew];
  let g=initialBattleGroup();
  for(const [i,id] of GROUP_IDS.entries()){
@@ -20,12 +20,12 @@ export function raidMonsters(level){
   p.expertise[c.loadout]=expertiseThreshold(grade);p.expertise[c.armour]=expertiseThreshold(grade);p.expertiseActive={...p.expertise};
   p.attributeEffort=awardCharacterEffort(blankCharacterEffort(),c.id,Math.floor(p.expertise[c.loadout]/4));p.attributeEffortActive={...p.attributeEffort};
  }
- const s=groupSnapshots(g,{difficulty:d.grade,str:1,dex:1,end:1,skill:level},4);
+ const s=groupSnapshots(g,{difficulty:d.grade,str:1,dex:1,end:1,skill:level},4,staffEquipment);
  return GROUP_IDS.map((id,i)=>({...s[id],name:roster[i].name}));
 }
-export function resolveRaid(players,level,seed,teamworkLevel,buff=null,startedAtMs=0,rules=4,clanBonus=null){
+export function resolveRaid(players,level,seed,teamworkLevel,buff=null,startedAtMs=0,rules=4,clanBonus=null,staffEquipment=true){
  if(!count(seed)||seed>0xffffffff||!count(startedAtMs)||!Number.isInteger(teamworkLevel)||teamworkLevel<1||teamworkLevel>50)throw new RangeError("Invalid raid encounter");
- const d=raidDefinition(level),enemies=raidMonsters(level),terrain=ARENAS.find(a=>a.id===d.arenaId),bonus=raidBonus(buff,startedAtMs);
+ const d=raidDefinition(level),enemies=raidMonsters(level,staffEquipment),terrain=ARENAS.find(a=>a.id===d.arenaId),bonus=raidBonus(buff,startedAtMs);
  const result=resolveTeamBattle(players,enemies,seed,terrain,{player:teamworkLevel,enemy:level,groupCombatRules:rules,raid:{version:RAID_RULES_VERSION,level},playerBonus:{damage:bonus.damage,defence:bonus.defence},...(clanBonus?{playerClanBonus:clanBonus}:{})});
  const durationMs=Math.max(RAID_ROUND_MS,result.rounds*RAID_ROUND_MS);
  return {...result,enemies,terrain,level,durationMs};

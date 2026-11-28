@@ -4,6 +4,7 @@
  * resolver. All values are provisional and deliberately in one place.
  */
 export const COMBAT_SKILLS = Object.freeze({
+  spell:{id:"spell",name:"Magic Bolt",role:"attack",windupMs:1200,attackBonus:2,damageMultiplier:1.1,blockDamagePct:8,parryDamagePct:12},
   arrow:{id:"arrow",name:"Aimed Shot",role:"attack",windupMs:1200,attackBonus:2,damageMultiplier:1.1,blockDamagePct:8,parryDamagePct:12},
   sidestep:{id:"sidestep",name:"Sidestep",role:"defense",defenseBonus:1,result:"dodge"},
   hammer_blow:Object.freeze({id:"hammer_blow",name:"Hammer Blow",role:"attack",
@@ -42,6 +43,7 @@ export const COMBAT_LOADOUTS = Object.freeze({
   }),
   hammer:Object.freeze({id:"hammer",name:"War Hammer",attackSkill:"hammer_blow",
     defenseSkill:"haft_guard",weapon:"hammer",initiativeBonus:-3}),
+  staff:Object.freeze({id:"staff",name:"Two-handed staff",weapon:"staff",attackSkill:"spell",defenseSkill:"sidestep",initiativeBonus:1}),
   bow:{id:"bow",name:"Bow",weapon:"bow",attackSkill:"arrow",defenseSkill:"sidestep",initiativeBonus:1},
   spear:{id:"spear",name:"Spear",weapon:"spear",attackSkill:"thrust",defenseSkill:"haft_guard",initiativeBonus:2}
 });

@@ -24,11 +24,11 @@ export function registerClanRaid(s,wallNow){
 }
 export function resolveClanRaid(r){
  if(!validClanRegistration(r))throw new RangeError("Invalid clan raid registration");
- const tier=Math.ceil(r.level/10)*10,enemies=raidMonsters(tier),terrain=GROUP_ARENAS[(r.level-1)%GROUP_ARENAS.length];
+ const tier=Math.ceil(r.level/10)*10,enemies=raidMonsters(tier,r.frozen.staffEquipment===true),terrain=GROUP_ARENAS[(r.level-1)%GROUP_ARENAS.length];
  const shared={difficulty:cloneRewardGrade(r.skill),str:1,dex:1,end:1,skill:r.skill},groups=clanRaidGroupCount(r.level);
  let hp=null,startHP=0,rounds=0,used=0;
  for(let i=0;i<groups;i++){
-  const seed=Math.imul(r.seed^(i+1),2654435761)>>>0,players=i===0?GROUP_IDS.map(id=>r.frozen.players[id]):buildGroupCloneTeam(r.envelope,shared,seed,10);
+  const seed=Math.imul(r.seed^(i+1),2654435761)>>>0,players=i===0?GROUP_IDS.map(id=>r.frozen.players[id]):buildGroupCloneTeam(r.envelope,shared,seed,10,r.frozen.staffEquipment===true);
   const result=resolveTeamBattle(players,enemies,seed,terrain,{player:r.frozen.teamworkLevel,enemy:tier,groupCombatRules:10,playerClanBonus:r.bonus,clanEncounter:{level:r.level,hp}});
   if(i===0)startHP=Object.entries(result.events[0].vitals).filter(([k])=>k.startsWith("enemy:")).reduce((n,[,v])=>n+v.maxHP,0);
   hp=Array.from({length:7},(_,j)=>result.survivors["enemy:"+j]);rounds+=result.rounds;used++;

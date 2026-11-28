@@ -11,7 +11,7 @@ let cachedKey="",cachedResult=null;
 export function raidResult(run){
  if(!validRaidRun(run)||!run)throw new RangeError("Invalid raid attempt");
  const key=JSON.stringify([run.version,run.level,run.startedAtMs,run.buff,run.frozen,run.clanBonus??null]);
- if(key!==cachedKey){cachedResult=resolveRaid(GROUP_IDS.map(id=>run.frozen.players[id]),run.level,run.frozen.seed,run.frozen.teamworkLevel,run.buff,run.startedAtMs,run.frozen.groupCombatRules,run.clanBonus??null);cachedKey=key;}
+ if(key!==cachedKey){cachedResult=resolveRaid(GROUP_IDS.map(id=>run.frozen.players[id]),run.level,run.frozen.seed,run.frozen.teamworkLevel,run.buff,run.startedAtMs,run.frozen.groupCombatRules,run.clanBonus??null,run.frozen.staffEquipment===true);cachedKey=key;}
  if(cachedResult.durationMs!==run.durationMs)throw new RangeError("Raid duration does not match frozen combat");
  return cachedResult;
 }
