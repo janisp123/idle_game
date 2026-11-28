@@ -1,5 +1,9 @@
 # Changelog and task handoffs
 
+## 2026-11-28 — RELEASE-NOTIFY-001 STARTED
+
+Owner renewed request for one completion notification after merge and deployment, no global Actions email spam. Fresh branch infra/release-completion-notice at 25f8e28 (#237 merged, all 28 final jobs passed). Supersede stale #208, retain current required gate. Next add restricted main-only post-deploy mention, dedupe tests and verify delivery; no mail credentials. Manual merge only.
+
 ## 2026-11-28 — STANCE-UNLOCK-001 STARTED
 
 Owner-approved S02 progression fix: Balanced only before individual character level 10. Base b08ec6d (#236 merged, all 28 CI jobs passed, Pages push success); main protection verified. Branch fix/stance-unlock-level10. Next apply one canonical level gate to selection, frozen player snapshots, arena/tower clone choices and grey UI. Preserve existing stance practice, no unnecessary alpha reset. Stale overlapping #215 remains excluded. Auto-merge integration test pending; manual checked merge only.

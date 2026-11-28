@@ -8,10 +8,18 @@ Only explicitly owner-approved tasks are included below. Discussion and brainsto
 
 For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PARTIAL/BLOCKED/IN_REVIEW/DONE), dependencies, **Added by: chat/cw/codex/Owner**, and **Implemented by: Not yet** until verified. Preserve task attribution when another agent edits it. Completed work belongs in `docs/CHANGELOG.md`, not indefinitely here.
 
+## RELEASE-NOTIFY-001 — Published game completion notice
+
+- **Goal / acceptance:** Exactly one event-driven GitHub owner mention per merged playable revision after successful Pages deployment. Include exact SHA, cache-busting play link and deployment run. No intermediate CI spam, direct push or ambiguous PR notices; deduplicate reruns. No external mail secrets or global notification changes. GitHub email/push delivery depends on owner mention settings and must be verified.
+- **Status:** PARTIAL — STARTED on infra/release-completion-notice; supersedes stale #208. Manual checked merge only.
+- **Added by:** chat.
+- **Requested by:** Owner.
+- **Implemented by:** Not yet.
+
 ## RELEASE-GATE-001 — Required complete test gate for native auto-merge
 
 - **Goal / acceptance:** One always-present, fail-closed required release check on each internal PR. Preserve existing tests and Pages publishing, require all existing functional and audit workflows for non-research PRs; narrow existing research-only allowlist may run protocol only. Missing, failed, cancelled or unexpected skipped checks block the gate. No write tokens or automatic merge action inside CI; never arm external, stale, overlapping or security-sensitive PRs. Owner must add the new required check and strict up-to-date policy in the existing ruleset before native auto-merge may be used. Test both full and research-only paths.
-- **Status:** PARTIAL — #236 merged b08ec6d after two complete 28/28 runs; Pages push 46156612904 passed. Owner activated protocol + release-gate, strict freshness and no bypass, verified via API. Negative end-to-end PR test and native auto-merge verification remain pending; do not arm unattended merges yet. Notifications deferred by Owner.
+- **Status:** PARTIAL — #236 merged b08ec6d after two complete 28/28 runs; Pages push 46156612904 passed. Owner activated protocol + release-gate, strict freshness and no bypass, verified via API. Negative end-to-end PR test and native auto-merge verification remain pending; do not arm unattended merges yet. Notification task renewed by Owner; separate manual checked PR.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
@@ -51,7 +59,7 @@ For each task, use a stable ID, clear goal, acceptance criteria, status (TODO/PA
 ## STANCE-UNLOCK-001 — Combat stance selection at character level 10
 
 - **Goal / acceptance:** Balanced is the sole active stance before individual character level 10; other stances are visibly locked. At 10 all combat stance choices unlock. Preserve earned stance records and frozen encounter correctness; test both sides at levels 9/10, reload and switching. Do not implement during S00/S01; separate isolated S02 fix.
-- **Status:** IN_REVIEW — #237 candidate implements canonical stance gate, symmetric arena/tower rivals, frozen-boundary preservation, grey Lv10 labels and Node/Chromium tests. CI pending.
+- **Status:** DONE — #237 merged 25f8e28; final 28/28 jobs and standalone protocol passed. Main source verified, Pages run 46159650057 pending at last check.
 - **Added by:** chat.
 - **Requested by:** Owner.
 - **Implemented by:** Not yet.
